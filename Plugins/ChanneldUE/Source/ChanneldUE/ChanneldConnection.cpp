@@ -18,10 +18,13 @@ UChanneldConnection::UChanneldConnection(const FObjectInitializer& ObjectInitial
 	RegisterMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, new channeldpb::ChannelDataUpdateMessage(), this, &UChanneldConnection::HandleChannelDataUpdate);
 }
 
+void UChanneldConnection::InitSocket(ISocketSubsystem* InSocketSubsystem)
+{
+	SocketSubsystem = InSocketSubsystem;
+}
+
 bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int Port, FString& Error)
 {
-    auto const NetDriver = static_cast<UChanneldNetDriver*>(GetWorld()->NetDriver);
-    ISocketSubsystem* SocketSubsystem = NetDriver->GetSocketSubsystem();
 	if (SocketSubsystem == NULL)
 	{
 		Error = TEXT("Unable to find socket subsystem");
@@ -70,8 +73,9 @@ void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 
 void UChanneldConnection::Receive()
 {
+	uint32 PendingDataSize;
 	int32 BytesRead;
-	if (Socket->Recv(ReceiveBuffer + ReceiveBufferOffset, ReceiveBufferSize, BytesRead, ESocketReceiveFlags::None))
+	if (Socket->HasPendingData(PendingDataSize) && Socket->Recv(ReceiveBuffer + ReceiveBufferOffset, ReceiveBufferSize, BytesRead, ESocketReceiveFlags::None))
 	{
 		ReceiveBufferOffset += BytesRead;
 		if (BytesRead < 5)
@@ -151,6 +155,19 @@ void UChanneldConnection::Receive()
 	ReceiveBufferOffset = 0;
 }
 
+uint32 UChanneldConnection::AddRpcCallback(const MessageHandlerFunc& HandlerFunc)
+{
+	uint32 StubId = 0;
+	while (RpcCallbacks.Contains(StubId))
+	{
+		StubId++;
+	}
+	RpcCallback Callback;
+	Callback.handler.AddLambda(HandlerFunc);
+	RpcCallbacks.Add(StubId, Callback);
+	return StubId;
+}
+
 void UChanneldConnection::TickIncoming()
 {
 	Receive();
@@ -207,8 +224,8 @@ void UChanneldConnection::TickOutgoing()
 
 	// Set the header
 	PacketData[0] = 67;
-	PacketData[1] = PacketSize > 0xffff ? (uint8)((PacketSize >> 16) & 0xff) : 72;
-	PacketData[2] = PacketSize > 0xff ? (uint8)((PacketSize >> 8) & 0xff) : 78;
+	PacketData[1] = PacketSize > 0xffff ? (0xff & (PacketSize >> 16)) : 72;
+	PacketData[2] = PacketSize > 0xff ? (0xff & (PacketSize >> 8)) : 78;
 	PacketData[3] = (uint8)(PacketSize & 0xff);
 	// TODO: support Snappy compression
 	PacketData[4] = 0;
@@ -223,7 +240,7 @@ void UChanneldConnection::TickOutgoing()
 	}
 }
 
-void UChanneldConnection::Send(ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast/* = channeldpb::NO_BROADCAST*/)
+void UChanneldConnection::Send(ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast/* = channeldpb::NO_BROADCAST*/, const MessageHandlerFunc& HandlerFunc/* = nullptr*/)
 {
 	// TODO: use a serialization buffer as the member variable
 	uint8* MessageData = new uint8[Msg.ByteSizeLong()];
@@ -234,18 +251,68 @@ void UChanneldConnection::Send(ChannelId ChId, uint32 MsgType, google::protobuf:
 		UE_LOG(LogChanneld, Error, TEXT("Failed to serialize message, type: %d"), MsgType);
 		return;
 	}
+
+	uint32 StubId = HandlerFunc != nullptr ? AddRpcCallback(HandlerFunc) : 0;
+
 	channeldpb::MessagePack MsgPack;
 	MsgPack.set_channelid(ChId);
 	MsgPack.set_broadcast(Broadcast);
-	// TODO: implement lambda-style callback
-	MsgPack.set_stubid(0);
+	MsgPack.set_stubid(StubId);
 	MsgPack.set_msgtype(MsgType);
 	MsgPack.set_msgbody(MessageData, Msg.GetCachedSize());
 
 	OutgoingQueue.Enqueue(MsgPack);
 }
 
+template <typename MsgClass>
+MessageHandlerFunc WrapMessageHandler(const TFunction<void(const MsgClass*)>& Callback)
+{
+	if (Callback == nullptr)
+		return nullptr;
+	return [Callback](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+	{
+		Callback(static_cast<const MsgClass*>(Msg));
+	};
+}
 
+void UChanneldConnection::Auth(const FString& PIT, const FString& LT, const TFunction<void(const channeldpb::AuthResultMessage*)>& Callback /*= nullptr*/)
+{
+	channeldpb::AuthMessage Msg;
+	Msg.set_playeridentifiertoken(std::string(TCHAR_TO_UTF8(*PIT)));
+	Msg.set_logintoken(std::string(TCHAR_TO_UTF8(*LT)));
+	
+	Send(GlobalChannelId, channeldpb::AUTH, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
+}
+
+void UChanneldConnection::CreateChannel(channeldpb::ChannelType ChannelType, const FString& Metadata, channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const google::protobuf::Message* Data /*= nullptr*/, channeldpb::ChannelDataMergeOptions* MergeOptions /*= nullptr*/, const TFunction<void(const channeldpb::CreateChannelResultMessage*)>& Callback /*= nullptr*/)
+{
+	channeldpb::CreateChannelMessage Msg;
+	Msg.set_channeltype(ChannelType);
+	Msg.set_metadata(TCHAR_TO_UTF8(*Metadata));
+	if (SubOptions != nullptr)
+		Msg.set_allocated_suboptions(SubOptions);
+	if (Data != nullptr)
+		Msg.mutable_data()->PackFrom(*Data);
+	if (MergeOptions != nullptr)
+		Msg.set_allocated_mergeoptions(MergeOptions);
+	
+	Send(GlobalChannelId, channeldpb::CREATE_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
+}
+
+void UChanneldConnection::SubToChannel(ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback /*= nullptr*/)
+{
+	SubConnectionToChannel(ConnId, ChId, SubOptions, Callback);
+}
+
+void UChanneldConnection::SubConnectionToChannel(ConnectionId TargetConnId, ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback /*= nullptr*/)
+{
+	channeldpb::SubscribedToChannelMessage Msg;
+	Msg.set_connid(TargetConnId);
+	if (SubOptions != nullptr)
+		Msg.set_allocated_suboptions(SubOptions);
+
+	Send(ChId, channeldpb::SUB_TO_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
+}
 
 void UChanneldConnection::HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 {

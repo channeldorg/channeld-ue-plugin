@@ -21,8 +21,6 @@ UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializ
 	TestChannelData = new testpb::TestChannelDataMessage();
 
 	Connection->AddMessageHandler((uint32)channeldpb::AUTH, this, &UChanneldNetDriver::HandleAuthResult);
-	Connection->AddMessageHandler((uint32)channeldpb::CREATE_CHANNEL, this, &UChanneldNetDriver::HandleCreateChannel);
-	Connection->AddMessageHandler((uint32)channeldpb::SUB_TO_CHANNEL, this, &UChanneldNetDriver::HandleSubToChannel);
 	Connection->AddMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, this, &UChanneldNetDriver::HandleChannelDataUpdate);
 }
 
@@ -46,12 +44,16 @@ bool UChanneldNetDriver::IsAvailable() const
 bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, const FURL& URL,
 	bool bReuseAddressAndPort, FString& Error)
 {
+	Connection->InitSocket(GetSocketSubsystem());
 	if (Connection->Connect(bInitAsClient, ChanneldIpForClient, ChanneldPortForClient, Error))
 	{
+		/*
 		channeldpb::AuthMessage AuthMsg;
 		AuthMsg.set_playeridentifiertoken("test_pit");
 		AuthMsg.set_logintoken("test_lt");
 		Connection->Send(0, channeldpb::AUTH, AuthMsg);
+		*/
+		Connection->Auth(TEXT("test_pit"), TEXT("test_lt"));
 	}
 	else
 	{
@@ -221,6 +223,7 @@ void UChanneldNetDriver::TickDispatch(float DeltaTime)
 	Super::TickDispatch(DeltaTime);
 
 	Connection->TickIncoming();
+	Connection->TickOutgoing();
 
 /*
 
@@ -253,27 +256,37 @@ void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 {
 	Super::TickFlush(DeltaSeconds);
 
-	Connection->TickOutgoing();
+	//Connection->TickOutgoing();
 }
 
-void UChanneldNetDriver::HandleAuthResult(UChanneldConnection* Conn, ChannelId ChannelId, const google::protobuf::Message* Msg)
+void UChanneldNetDriver::HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto AuthResultMsg = static_cast<const channeldpb::AuthResultMessage*>(Msg);
 	if (AuthResultMsg->result() == channeldpb::AuthResultMessage_AuthResult_SUCCESSFUL)
 	{
 		if (IsServer())
 		{
-			channeldpb::CreateChannelMessage CreateMsg;
-			CreateMsg.set_channeltype(channeldpb::GLOBAL);
-			CreateMsg.set_metadata("test123");
-			CreateMsg.mutable_data()->PackFrom(*TestChannelData);
-			Connection->Send(0, channeldpb::CREATE_CHANNEL, CreateMsg);
+			Connection->CreateChannel(channeldpb::GLOBAL, TEXT("test123"), nullptr, nullptr, nullptr,
+				[&,ChId](const channeldpb::CreateChannelResultMessage* ResultMsg)
+				{
+					UE_LOG(LogChanneld, Log, TEXT("[%s] Created channel: %d, type: %s, owner connId: %d"), *GetWorld()->GetDebugDisplayName(),
+						ChId, channeldpb::ChannelType_Name(ResultMsg->channeltype()).c_str(), ResultMsg->ownerconnid());
+
+					for (auto const Provider : ChannelDataProviders)
+					{
+						if (Provider->GetChannelType() == ResultMsg->channeltype())
+						{
+							Provider->SetChannelId(ChId);
+						}
+					}
+				});
 		}
 		else
 		{
-			channeldpb::SubscribedToChannelMessage SubMsg;
-			SubMsg.set_connid(Connection->GetConnId());
-			Connection->Send(0, channeldpb::SUB_TO_CHANNEL, SubMsg);
+			Connection->SubToChannel(GlobalChannelId, nullptr, [&, ChId](const channeldpb::SubscribedToChannelResultMessage* Msg)
+				{
+					UE_LOG(LogChanneld, Log, TEXT("[%s] Sub to channel: %d, connId: %d"), *GetWorld()->GetDebugDisplayName(), ChId, Msg->connid());
+				});
 		}
 
 		UE_LOG(LogChanneld, Log, TEXT("[%s] Successed to get authorization by channeld, connId: %d"), *GetWorld()->GetDebugDisplayName(), Connection->GetConnId());
@@ -282,28 +295,6 @@ void UChanneldNetDriver::HandleAuthResult(UChanneldConnection* Conn, ChannelId C
 	{
 		UE_LOG(LogChanneld, Error, TEXT("[%s] Failed to get authorization by channeld"), *GetWorld()->GetDebugDisplayName());
 	}
-}
-
-
-void UChanneldNetDriver::HandleCreateChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
-{
-	auto CreateResultMsg = static_cast<const channeldpb::CreateChannelResultMessage*>(Msg);
-	UE_LOG(LogChanneld, Log, TEXT("[%s] Created channel: %d, type: %s, owner connId: %d"), *GetWorld()->GetDebugDisplayName(),
-		ChId, channeldpb::ChannelType_Name(CreateResultMsg->channeltype()).c_str(), CreateResultMsg->ownerconnid());
-
-	for (auto const Provider : ChannelDataProviders)
-	{
-		if (Provider->GetChannelType() == CreateResultMsg->channeltype())
-		{
-			Provider->SetChannelId(ChId);
-		}
-	}
-}
-
-void UChanneldNetDriver::HandleSubToChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
-{
-	auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
-	UE_LOG(LogChanneld, Log, TEXT("[%s] Sub to channel: %d, connId: %d"), *GetWorld()->GetDebugDisplayName(), ChId, SubResultMsg->connid());
 }
 
 void UChanneldNetDriver::HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)

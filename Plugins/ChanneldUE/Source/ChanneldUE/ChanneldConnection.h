@@ -12,6 +12,16 @@ DECLARE_LOG_CATEGORY_EXTERN(LogChanneld, Log, All);
 
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FChanneldMessageDelegate, UChanneldConnection*, ChannelId, const google::protobuf::Message*)
 
+typedef TFunction<void(UChanneldConnection*, ChannelId, const google::protobuf::Message*)> MessageHandlerFunc;
+
+/*
+template<typename T>
+struct MessageHandlerFunc : TMemFunPtrType<false, T, void(UChanneldConnection*, uint32, const google::protobuf::Message*)>::Type
+{
+
+};
+*/
+
 UCLASS(transient, config=Engine)
 class CHANNELDUE_API UChanneldConnection : public UObject
 {
@@ -22,16 +32,18 @@ public:
 	// Constructors.
 	UChanneldConnection(const FObjectInitializer& ObjectInitializer);
 
-	template <typename UserClass, typename... VarTypes>
-	FORCEINLINE void RegisterMessageHandler(uint32 MsgType, google::protobuf::Message* MessageTemplate, UserClass* InUserObject, typename TMemFunPtrType<false, UserClass, void (UChanneldConnection*, uint32, const google::protobuf::Message*, VarTypes...)>::Type InFunc, VarTypes... Vars)
+	void InitSocket(ISocketSubsystem* InSocketSubsystem);
+
+	template <typename UserClass>
+	FORCEINLINE void RegisterMessageHandler(uint32 MsgType, google::protobuf::Message* MessageTemplate, UserClass* InUserObject, typename TMemFunPtrType<false, UserClass, void (UChanneldConnection*, ChannelId, const google::protobuf::Message*)>::Type InFunc)
 	{
 		MessageHandlerEntry& Entry = MessageHandlers.FindOrAdd(MsgType);
 		Entry.msg = MessageTemplate;
-		Entry.handler.AddUObject(InUserObject, InFunc, Vars...);
+		Entry.handler.AddUObject(InUserObject, InFunc);
 	}
     
-	template <typename UserClass, typename... VarTypes>
-	FORCEINLINE void AddMessageHandler(uint32 MsgType, UserClass* InUserObject, typename TMemFunPtrType<false, UserClass, void (UChanneldConnection*, uint32, const google::protobuf::Message*, VarTypes...)>::Type InFunc, VarTypes... Vars)//const FChanneldMessageDelegate::FDelegate& Handler)
+	template <typename UserClass>
+	FORCEINLINE void AddMessageHandler(uint32 MsgType, UserClass* InUserObject, typename TMemFunPtrType<false, UserClass, void (UChanneldConnection*, uint32, const google::protobuf::Message*)>::Type InFunc)
 	{
 		MessageHandlerEntry& Entry = MessageHandlers.FindOrAdd(MsgType);
 		if (Entry.msg == nullptr)
@@ -39,7 +51,7 @@ public:
 			UE_LOG(LogChanneld, Error, TEXT("No message template registered for msgType: %d"), MsgType);
 			return;
 		}
-		Entry.handler.AddUObject(InUserObject, InFunc, Vars...);
+		Entry.handler.AddUObject(InUserObject, InFunc);
 	}
 
 	//FORCEINLINE FSocket* GetSocket() { return Socket; }
@@ -48,7 +60,13 @@ public:
 
     bool Connect(bool bInitAsClient, const FString& Host, int Port, FString& Error);
     void Disconnect(bool bFlushAll = true);
-	void Send(ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST);
+	// Thread-safe
+	void Send(ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const MessageHandlerFunc& HandlerFunc = nullptr);
+
+	void Auth(const FString& PIT, const FString& LT, const TFunction<void(const channeldpb::AuthResultMessage*)>& Callback = nullptr);
+	void CreateChannel(channeldpb::ChannelType ChannelType, const FString& Metadata, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const google::protobuf::Message* Data = nullptr, channeldpb::ChannelDataMergeOptions* MergeOptions = nullptr, const TFunction<void(const channeldpb::CreateChannelResultMessage*)>& Callback = nullptr);
+	void SubToChannel(ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
+	void SubConnectionToChannel(ConnectionId ConnId, ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
 
 	void TickIncoming();
 	void TickOutgoing();
@@ -60,6 +78,7 @@ private:
     channeldpb::ConnectionType ConnectionType;
 	channeldpb::CompressionType CompressionType;
 	ConnectionId ConnId;
+	ISocketSubsystem* SocketSubsystem;
 	TSharedPtr<FInternetAddr> RemoteAddr;
 	FUniqueSocket Socket;
 	uint8* ReceiveBuffer;
@@ -93,6 +112,7 @@ private:
 	TMap<uint32, RpcCallback> RpcCallbacks;
 
 	void Receive();
+	uint32 AddRpcCallback(const MessageHandlerFunc& HandlerFunc);
 
 	void HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleCreateChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);

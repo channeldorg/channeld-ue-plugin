@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldTypes.h"
+#include "ChanneldConnection.h"
 #include "Engine/NetDriver.h"
 #include "IpNetDriver.h"
 #include "Sockets.h"
