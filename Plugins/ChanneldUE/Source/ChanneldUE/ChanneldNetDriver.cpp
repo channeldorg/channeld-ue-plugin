@@ -45,7 +45,20 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 	bool bReuseAddressAndPort, FString& Error)
 {
 	Connection->InitSocket(GetSocketSubsystem());
-	if (Connection->Connect(bInitAsClient, ChanneldIpForClient, ChanneldPortForClient, Error))
+	FString Host;
+	int Port;
+	if (bInitAsClient)
+	{
+		Host = ChanneldIpForClient;
+		Port = ChanneldPortForClient;
+	}
+	else
+	{
+		Host = ChanneldIpForServer;
+		Port = ChanneldPortForServer;
+	}
+
+	if (Connection->Connect(bInitAsClient, Host, Port, Error))
 	{
 		/*
 		channeldpb::AuthMessage AuthMsg;
@@ -66,11 +79,13 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 
 bool UChanneldNetDriver::InitConnect(FNetworkNotify* InNotify, const FURL& ConnectURL, FString& Error)
 {
+	//return true; 
 	return Super::InitConnect(InNotify, ConnectURL, Error);
 }
 
 bool UChanneldNetDriver::InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bool bReuseAddressAndPort, FString& Error)
 {
+	//return true; 
 	return Super::InitListen(InNotify, LocalURL, bReuseAddressAndPort, Error);
 }
 
@@ -222,8 +237,8 @@ void UChanneldNetDriver::TickDispatch(float DeltaTime)
 {
 	Super::TickDispatch(DeltaTime);
 
-	Connection->TickIncoming();
-	Connection->TickOutgoing();
+	if (Connection->IsConnected())
+		Connection->TickIncoming();
 
 /*
 
@@ -256,7 +271,8 @@ void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 {
 	Super::TickFlush(DeltaSeconds);
 
-	//Connection->TickOutgoing();
+	if (Connection->IsConnected())
+		Connection->TickOutgoing();
 }
 
 void UChanneldNetDriver::HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)

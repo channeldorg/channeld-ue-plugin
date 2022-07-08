@@ -6,16 +6,30 @@ DEFINE_LOG_CATEGORY(LogChanneld);
 UChanneldConnection::UChanneldConnection(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	ReceiveBufferSize = 0xffffff;
+	if (ReceiveBufferSize > MaxPacketSize)
+		ReceiveBufferSize = MaxPacketSize;
 	ReceiveBuffer = new uint8[ReceiveBufferSize];
 
 	// StubId=0 is reserved.
-	RpcCallbacks.Add(0, RpcCallback());
+	RpcCallbacks.Add(0, nullptr);
 
-	RegisterMessageHandler((uint32)channeldpb::AUTH, new channeldpb::AuthResultMessage(), this, &UChanneldConnection::HandleAuthResult);
-	RegisterMessageHandler((uint32)channeldpb::CREATE_CHANNEL, new channeldpb::CreateChannelMessage(), this, &UChanneldConnection::HandleCreateChannel);
-	RegisterMessageHandler((uint32)channeldpb::SUB_TO_CHANNEL, new channeldpb::SubscribedToChannelResultMessage(), this, &UChanneldConnection::HandleSubToChannel);
-	RegisterMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, new channeldpb::ChannelDataUpdateMessage(), this, &UChanneldConnection::HandleChannelDataUpdate);
+	// The connection's internal handlers should always be called first, so we should not use the delegate as the order of its broadcast is not guaranteed.
+	RegisterMessageHandler((uint32)channeldpb::AUTH, new channeldpb::AuthResultMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+		{
+			HandleAuthResult(Conn, ChId, Msg);
+		});
+	RegisterMessageHandler((uint32)channeldpb::CREATE_CHANNEL, new channeldpb::CreateChannelMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+		{
+			HandleCreateChannel(Conn, ChId, Msg);
+		});
+	RegisterMessageHandler((uint32)channeldpb::SUB_TO_CHANNEL, new channeldpb::SubscribedToChannelResultMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+		{
+			HandleSubToChannel(Conn, ChId, Msg);
+		});
+	RegisterMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, new channeldpb::ChannelDataUpdateMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+		{
+			HandleChannelDataUpdate(Conn, ChId, Msg);
+		});
 }
 
 void UChanneldConnection::InitSocket(ISocketSubsystem* InSocketSubsystem)
@@ -50,7 +64,7 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int P
     RemoteAddr->SetPort(Port);
 
 	// Create TCP socket to channeld
-	Socket = SocketSubsystem->CreateUniqueSocket(NAME_Stream, TEXT("Connection to channeld"), RemoteAddr->GetProtocolType());
+	Socket = SocketSubsystem->CreateSocket(NAME_Stream, TEXT("Connection to channeld"), RemoteAddr->GetProtocolType());
 	UE_LOG(LogChanneld, Log, TEXT("Connecting to channeld with addr: %s"), *RemoteAddr->ToString(true));
 	
     return Socket->Connect(*RemoteAddr);
@@ -74,8 +88,11 @@ void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 void UChanneldConnection::Receive()
 {
 	uint32 PendingDataSize;
+	if (!Socket->HasPendingData(PendingDataSize))
+		return;
+
 	int32 BytesRead;
-	if (Socket->HasPendingData(PendingDataSize) && Socket->Recv(ReceiveBuffer + ReceiveBufferOffset, ReceiveBufferSize, BytesRead, ESocketReceiveFlags::None))
+	if (Socket->Recv(ReceiveBuffer + ReceiveBufferOffset, ReceiveBufferSize, BytesRead, ESocketReceiveFlags::None))
 	{
 		ReceiveBufferOffset += BytesRead;
 		if (BytesRead < 5)
@@ -123,25 +140,23 @@ void UChanneldConnection::Receive()
 				continue;
 			}
 			auto Entry = MessageHandlers[MsgType];
-			if (Entry.msg == nullptr)
+			if (Entry.Msg == nullptr)
 			{
 				UE_LOG(LogChanneld, Error, TEXT("No message template registered for type: %d"), MessagePack.msgtype());
 				continue;
 			}
 
 			// Always make a clone!
-			google::protobuf::Message* Msg = Entry.msg->New();
-			Msg->CopyFrom(*Entry.msg);
+			google::protobuf::Message* Msg = Entry.Msg->New();
+			Msg->CopyFrom(*Entry.Msg);
 			if (!Msg->ParseFromString(MessagePack.msgbody()))
 			{
 				UE_LOG(LogChanneld, Error, TEXT("Failed to parse message %s"), Msg->GetTypeName().c_str());
 				continue;
 			}
 
-			MessageQueueEntry QueueEntry = { Msg, MessagePack.channelid(), MessagePack.stubid(), Entry.handler };
+			MessageQueueEntry QueueEntry = { Msg, MessagePack.channelid(), MessagePack.stubid(), Entry.Handlers, Entry.Delegate };
 			IncomingQueue.Enqueue(QueueEntry);
-
-			//Entry.handler.Broadcast(nullptr, MessagePack.channelid(), msg);
 		}
 
 	}
@@ -162,9 +177,8 @@ uint32 UChanneldConnection::AddRpcCallback(const MessageHandlerFunc& HandlerFunc
 	{
 		StubId++;
 	}
-	RpcCallback Callback;
-	Callback.handler.AddLambda(HandlerFunc);
-	RpcCallbacks.Add(StubId, Callback);
+
+	RpcCallbacks.Add(StubId, HandlerFunc);
 	return StubId;
 }
 
@@ -175,18 +189,21 @@ void UChanneldConnection::TickIncoming()
 	MessageQueueEntry Entry;
 	while (IncomingQueue.Dequeue(Entry))
 	{
-		//if (Entry.handler != nullptr)
-			Entry.handler.Broadcast(nullptr, Entry.channelId, Entry.msg);
-
-		if (Entry.stubId > 0)
+		// Handler functions are called before the delegate.Broadcast()
+		for (const auto Func : Entry.Handlers)
 		{
-			auto Callback = RpcCallbacks.Find(Entry.stubId);
-			if (Callback != nullptr)
+			Func(this, Entry.ChId, Entry.Msg);
+		}
+		Entry.Delegate.Broadcast(this, Entry.ChId, Entry.Msg);
+
+		if (Entry.StubId > 0)
+		{
+			auto Func = RpcCallbacks.Find(Entry.StubId);
+			if (Func != nullptr)
 			{
-				UE_LOG(LogChanneld, Verbose, TEXT("Handling RPC callback of %s, stubId: %d"), Entry.msg->GetTypeName().c_str(), Entry.stubId);
-				//if (Callback->handler != nullptr)
-					Callback->handler.Broadcast(nullptr, Entry.channelId, Entry.msg);
-				RpcCallbacks.Remove(Entry.stubId);
+				UE_LOG(LogChanneld, Verbose, TEXT("Handling RPC callback of %s, stubId: %d"), Entry.Msg->GetTypeName().c_str(), Entry.StubId);
+				(*Func)(this, Entry.ChId, Entry.Msg);
+				RpcCallbacks.Remove(Entry.StubId);
 			}
 		}
 	}
@@ -200,19 +217,20 @@ void UChanneldConnection::TickOutgoing()
 	if (OutgoingQueue.IsEmpty())
 		return;
 
+	const uint32 HeaderSize = 5;
 	channeldpb::Packet Packet;
-	uint32 Size = 0;
+	uint32 Size = HeaderSize;
 	channeldpb::MessagePack MessagePack;
 	while (OutgoingQueue.Dequeue(MessagePack))
 	{
 		Size += MessagePack.ByteSizeLong();
-		if (Size >= 0xfffff0)
+		if (Size >= MaxPacketSize)
 			break;
 		Packet.add_messages()->CopyFrom(MessagePack);
 	}
 
 	int PacketSize = Packet.ByteSizeLong();
-	Size = PacketSize + 5;
+	Size = PacketSize + HeaderSize;
 	// TODO: Use a send buffer for all transmissions instead of temp buffer for each transmission
 	uint8* PacketData = new uint8[Size];
 	if (!Packet.SerializeToArray(PacketData + 5, Size))
@@ -301,7 +319,7 @@ void UChanneldConnection::CreateChannel(channeldpb::ChannelType ChannelType, con
 
 void UChanneldConnection::SubToChannel(ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback /*= nullptr*/)
 {
-	SubConnectionToChannel(ConnId, ChId, SubOptions, Callback);
+	SubConnectionToChannel(GetConnId(), ChId, SubOptions, Callback);
 }
 
 void UChanneldConnection::SubConnectionToChannel(ConnectionId TargetConnId, ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback /*= nullptr*/)

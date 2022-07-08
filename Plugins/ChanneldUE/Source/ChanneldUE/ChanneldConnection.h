@@ -14,14 +14,6 @@ DECLARE_MULTICAST_DELEGATE_ThreeParams(FChanneldMessageDelegate, UChanneldConnec
 
 typedef TFunction<void(UChanneldConnection*, ChannelId, const google::protobuf::Message*)> MessageHandlerFunc;
 
-/*
-template<typename T>
-struct MessageHandlerFunc : TMemFunPtrType<false, T, void(UChanneldConnection*, uint32, const google::protobuf::Message*)>::Type
-{
-
-};
-*/
-
 UCLASS(transient, config=Engine)
 class CHANNELDUE_API UChanneldConnection : public UObject
 {
@@ -34,29 +26,51 @@ public:
 
 	void InitSocket(ISocketSubsystem* InSocketSubsystem);
 
+	FORCEINLINE void RegisterMessageHandler(uint32 MsgType, google::protobuf::Message* MessageTemplate, const MessageHandlerFunc& Handler)
+	{
+		MessageHandlerEntry& Entry = MessageHandlers.FindOrAdd(MsgType);
+		Entry.Msg = MessageTemplate;
+		Entry.Handlers.Add(Handler);
+	}
+
 	template <typename UserClass>
 	FORCEINLINE void RegisterMessageHandler(uint32 MsgType, google::protobuf::Message* MessageTemplate, UserClass* InUserObject, typename TMemFunPtrType<false, UserClass, void (UChanneldConnection*, ChannelId, const google::protobuf::Message*)>::Type InFunc)
 	{
 		MessageHandlerEntry& Entry = MessageHandlers.FindOrAdd(MsgType);
-		Entry.msg = MessageTemplate;
-		Entry.handler.AddUObject(InUserObject, InFunc);
+		Entry.Msg = MessageTemplate;
+		Entry.Delegate.AddUObject(InUserObject, InFunc);
+	}
+
+	FORCEINLINE void AddMessageHandler(uint32 MsgType, const MessageHandlerFunc& Handler)
+	{
+		MessageHandlerEntry& Entry = MessageHandlers.FindOrAdd(MsgType);
+		if (Entry.Msg == nullptr)
+		{
+			UE_LOG(LogChanneld, Error, TEXT("No message template registered for msgType: %d"), MsgType);
+			return;
+		}
+		Entry.Handlers.Add(Handler);
 	}
     
 	template <typename UserClass>
 	FORCEINLINE void AddMessageHandler(uint32 MsgType, UserClass* InUserObject, typename TMemFunPtrType<false, UserClass, void (UChanneldConnection*, uint32, const google::protobuf::Message*)>::Type InFunc)
 	{
 		MessageHandlerEntry& Entry = MessageHandlers.FindOrAdd(MsgType);
-		if (Entry.msg == nullptr)
+		if (Entry.Msg == nullptr)
 		{
 			UE_LOG(LogChanneld, Error, TEXT("No message template registered for msgType: %d"), MsgType);
 			return;
 		}
-		Entry.handler.AddUObject(InUserObject, InFunc);
+		Entry.Delegate.AddUObject(InUserObject, InFunc);
 	}
 
 	//FORCEINLINE FSocket* GetSocket() { return Socket; }
-	FORCEINLINE ConnectionId GetConnId() { return ConnId; }
-	FORCEINLINE bool IsConnected() { return Socket->GetConnectionState() == SCS_Connected; }
+	FORCEINLINE ConnectionId GetConnId()
+	{
+		ensureMsgf(ConnId != 0, TEXT("ConnId is 0 which means the connection is not authorized yet"));
+		return ConnId;
+	}
+	FORCEINLINE bool IsConnected() { return Socket != nullptr && Socket->GetConnectionState() == SCS_Connected; }
 
     bool Connect(bool bInitAsClient, const FString& Host, int Port, FString& Error);
     void Disconnect(bool bFlushAll = true);
@@ -72,7 +86,7 @@ public:
 	void TickOutgoing();
 
 	UPROPERTY(Config)
-	int32 ReceiveBufferSize;
+	int32 ReceiveBufferSize = MaxPacketSize;
 
 private:
     channeldpb::ConnectionType ConnectionType;
@@ -80,27 +94,24 @@ private:
 	ConnectionId ConnId;
 	ISocketSubsystem* SocketSubsystem;
 	TSharedPtr<FInternetAddr> RemoteAddr;
-	FUniqueSocket Socket;
+	FSocket* Socket;
 	uint8* ReceiveBuffer;
 	int ReceiveBufferOffset;
 
 	struct MessageHandlerEntry
 	{
-		google::protobuf::Message* msg;
-		FChanneldMessageDelegate handler;
+		google::protobuf::Message* Msg;
+		TArray<MessageHandlerFunc> Handlers;
+		FChanneldMessageDelegate Delegate;
 	};
 
 	struct MessageQueueEntry
 	{
-		google::protobuf::Message* msg;
-		ChannelId channelId;
-		uint32 stubId;
-		FChanneldMessageDelegate handler;
-	};
-
-	struct RpcCallback
-	{
-		FChanneldMessageDelegate handler;
+		google::protobuf::Message* Msg;
+		ChannelId ChId;
+		uint32 StubId;
+		TArray<MessageHandlerFunc> Handlers;
+		FChanneldMessageDelegate Delegate;
 	};
 
 	TMap<uint32, MessageHandlerEntry> MessageHandlers;
@@ -109,7 +120,7 @@ private:
 
 	TQueue<channeldpb::MessagePack> OutgoingQueue;
 	
-	TMap<uint32, RpcCallback> RpcCallbacks;
+	TMap<uint32, MessageHandlerFunc> RpcCallbacks;
 
 	void Receive();
 	uint32 AddRpcCallback(const MessageHandlerFunc& HandlerFunc);

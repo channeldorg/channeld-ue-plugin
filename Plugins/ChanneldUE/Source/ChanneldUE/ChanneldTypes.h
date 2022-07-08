@@ -14,3 +14,5 @@ enum class EChannelId : ChannelId
 };
 */
 const ChannelId GlobalChannelId = 0;
+
+const uint32 MaxPacketSize = 0x0fffff;
