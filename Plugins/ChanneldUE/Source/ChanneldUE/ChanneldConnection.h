@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "Sockets.h"
-#include "SocketSubsystem.h"
 #include "google/protobuf/message.h"
 #include "ChanneldTypes.h"
 #include "Channeld.pb.h"
@@ -23,8 +22,6 @@ public:
 
 	// Constructors.
 	UChanneldConnection(const FObjectInitializer& ObjectInitializer);
-
-	void InitSocket(ISocketSubsystem* InSocketSubsystem);
 
 	FORCEINLINE void RegisterMessageHandler(uint32 MsgType, google::protobuf::Message* MessageTemplate, const MessageHandlerFunc& Handler)
 	{
@@ -70,7 +67,9 @@ public:
 		ensureMsgf(ConnId != 0, TEXT("ConnId is 0 which means the connection is not authorized yet"));
 		return ConnId;
 	}
-	FORCEINLINE bool IsConnected() { return Socket != nullptr && Socket->GetConnectionState() == SCS_Connected; }
+	FORCEINLINE bool IsConnected() { return !IsPendingKill() && Socket != nullptr && Socket->GetConnectionState() == SCS_Connected; }
+
+	virtual void BeginDestroy() override;
 
     bool Connect(bool bInitAsClient, const FString& Host, int Port, FString& Error);
     void Disconnect(bool bFlushAll = true);
@@ -92,7 +91,6 @@ private:
     channeldpb::ConnectionType ConnectionType;
 	channeldpb::CompressionType CompressionType;
 	ConnectionId ConnId;
-	ISocketSubsystem* SocketSubsystem;
 	TSharedPtr<FInternetAddr> RemoteAddr;
 	FSocket* Socket;
 	uint8* ReceiveBuffer;

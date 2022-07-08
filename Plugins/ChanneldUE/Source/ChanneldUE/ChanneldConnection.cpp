@@ -1,5 +1,7 @@
 #include "ChanneldConnection.h"
+
 #include "ChanneldNetDriver.h"
+#include "SocketSubsystem.h"
 
 DEFINE_LOG_CATEGORY(LogChanneld);
 
@@ -32,13 +34,15 @@ UChanneldConnection::UChanneldConnection(const FObjectInitializer& ObjectInitial
 		});
 }
 
-void UChanneldConnection::InitSocket(ISocketSubsystem* InSocketSubsystem)
+void UChanneldConnection::BeginDestroy()
 {
-	SocketSubsystem = InSocketSubsystem;
+	Super::BeginDestroy();
+	Disconnect(false);
 }
 
 bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int Port, FString& Error)
 {
+	auto SocketSubsystem = ISocketSubsystem::Get();
 	if (SocketSubsystem == NULL)
 	{
 		Error = TEXT("Unable to find socket subsystem");

@@ -44,7 +44,8 @@ bool UChanneldNetDriver::IsAvailable() const
 bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, const FURL& URL,
 	bool bReuseAddressAndPort, FString& Error)
 {
-	Connection->InitSocket(GetSocketSubsystem());
+	/*
+	*/
 	FString Host;
 	int Port;
 	if (bInitAsClient)
@@ -60,12 +61,6 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 
 	if (Connection->Connect(bInitAsClient, Host, Port, Error))
 	{
-		/*
-		channeldpb::AuthMessage AuthMsg;
-		AuthMsg.set_playeridentifiertoken("test_pit");
-		AuthMsg.set_logintoken("test_lt");
-		Connection->Send(0, channeldpb::AUTH, AuthMsg);
-		*/
 		Connection->Auth(TEXT("test_pit"), TEXT("test_lt"));
 	}
 	else
@@ -237,7 +232,8 @@ void UChanneldNetDriver::TickDispatch(float DeltaTime)
 {
 	Super::TickDispatch(DeltaTime);
 
-	if (Connection->IsConnected())
+	
+	if (IsValid(Connection) && Connection->IsConnected())
 		Connection->TickIncoming();
 
 /*

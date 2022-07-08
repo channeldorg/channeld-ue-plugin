@@ -79,6 +79,9 @@ public:
 	testpb::TestChannelDataMessage* TestChannelData;
 
 private:
+
+	// Prevent the engine from GC the connection
+	UPROPERTY()
 	UChanneldConnection* Connection;
 
 	void HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
