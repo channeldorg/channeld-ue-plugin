@@ -18,13 +18,25 @@ UChanneldConnection::UChanneldConnection(const FObjectInitializer& ObjectInitial
 	// The connection's internal handlers should always be called first, so we should not use the delegate as the order of its broadcast is not guaranteed.
 	RegisterMessageHandler((uint32)channeldpb::AUTH, new channeldpb::AuthResultMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 		{
-			HandleAuthResult(Conn, ChId, Msg);
+			HandleAuth(Conn, ChId, Msg);
 		});
 	RegisterMessageHandler((uint32)channeldpb::CREATE_CHANNEL, new channeldpb::CreateChannelMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleCreateChannel(Conn, ChId, Msg);
 		});
+	RegisterMessageHandler((uint32)channeldpb::REMOVE_CHANNEL, new channeldpb::RemoveChannelMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+		{
+			HandleRemoveChannel(Conn, ChId, Msg);
+		});
+	RegisterMessageHandler((uint32)channeldpb::LIST_CHANNEL, new channeldpb::ListChannelResultMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+		{
+			HandleListChannel(Conn, ChId, Msg);
+		});
 	RegisterMessageHandler((uint32)channeldpb::SUB_TO_CHANNEL, new channeldpb::SubscribedToChannelResultMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+		{
+			HandleSubToChannel(Conn, ChId, Msg);
+		});
+	RegisterMessageHandler((uint32)channeldpb::UNSUB_FROM_CHANNEL, new channeldpb::UnsubscribedFromChannelMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleSubToChannel(Conn, ChId, Msg);
 		});
@@ -336,7 +348,7 @@ void UChanneldConnection::SubConnectionToChannel(ConnectionId TargetConnId, Chan
 	Send(ChId, channeldpb::SUB_TO_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
-void UChanneldConnection::HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+void UChanneldConnection::HandleAuth(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto ResultMsg = static_cast<const channeldpb::AuthResultMessage*>(Msg);
 	if (ResultMsg->result() == channeldpb::AuthResultMessage_AuthResult_SUCCESSFUL)
@@ -351,12 +363,56 @@ void UChanneldConnection::HandleAuthResult(UChanneldConnection* Conn, ChannelId 
 
 void UChanneldConnection::HandleCreateChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 {
+	auto ResultMsg = static_cast<const channeldpb::CreateChannelResultMessage*>(Msg);
+	if (ResultMsg->ownerconnid() == GetConnId())
+	{
+		OwnedChannels.Add(ChId, ResultMsg);
+	}
+}
 
+void UChanneldConnection::HandleRemoveChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	auto RemoveMsg = static_cast<const channeldpb::RemoveChannelMessage*>(Msg);
+	SubscribedChannels.Remove(RemoveMsg->channelid());
+	OwnedChannels.Remove(RemoveMsg->channelid());
+	ListedChannels.Remove(RemoveMsg->channelid());
+}
+
+void UChanneldConnection::HandleListChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	auto ResultMsg = static_cast<const channeldpb::ListChannelResultMessage*>(Msg);
+	for (auto ChannelInfo : ResultMsg->channels())
+	{
+		ListedChannels.Add(ChannelInfo.channelid(), &ChannelInfo);
+	}
 }
 
 void UChanneldConnection::HandleSubToChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 {
+	auto SubMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
+	if (SubMsg->connid() == Conn->GetConnId())
+	{
+		auto ExistingSub = SubscribedChannels.FindRef(ChId);
+		if (ExistingSub != nullptr)
+		{
+			// Merge the SubOptions if the subscription already exists
+			ExistingSub->mutable_suboptions()->MergeFrom(SubMsg->suboptions());
+		}
+		else
+		{
+			channeldpb::SubscribedToChannelResultMessage ClonedSubMsg(*SubMsg);
+			SubscribedChannels.Add(ChId, &ClonedSubMsg);
+		}
+	}
+}
 
+void UChanneldConnection::HandleUnsubFromChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	auto UnsubMsg = static_cast<const channeldpb::UnsubscribedFromChannelResultMessage*>(Msg);
+	if (UnsubMsg->connid() == Conn->GetConnId())
+	{
+		SubscribedChannels.Remove(ChId);
+	}
 }
 
 void UChanneldConnection::HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)

@@ -61,13 +61,27 @@ public:
 		Entry.Delegate.AddUObject(InUserObject, InFunc);
 	}
 
+	FORCEINLINE void RemoveMessageHandler(uint32 MsgType, const void* InUserObject)
+	{
+		auto Entry = MessageHandlers.Find(MsgType);
+		if (Entry == nullptr)
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to remove message handler as the msgType is not found: %d"), MsgType);
+			return;
+		}
+		Entry->Delegate.RemoveAll(InUserObject);
+	}
+
 	//FORCEINLINE FSocket* GetSocket() { return Socket; }
 	FORCEINLINE ConnectionId GetConnId()
 	{
 		ensureMsgf(ConnId != 0, TEXT("ConnId is 0 which means the connection is not authorized yet"));
 		return ConnId;
 	}
+	
 	FORCEINLINE bool IsConnected() { return !IsPendingKill() && Socket != nullptr && Socket->GetConnectionState() == SCS_Connected; }
+
+	FORCEINLINE channeldpb::ConnectionType GetConnectionType() { return ConnectionType; }
 
 	virtual void BeginDestroy() override;
 
@@ -87,10 +101,14 @@ public:
 	UPROPERTY(Config)
 	int32 ReceiveBufferSize = MaxPacketSize;
 
+	TMap<ChannelId, channeldpb::SubscribedToChannelResultMessage*> SubscribedChannels;
+	TMap<ChannelId, const channeldpb::CreateChannelResultMessage*> OwnedChannels;
+	TMap<ChannelId, const channeldpb::ListChannelResultMessage_ChannelInfo*> ListedChannels;
+
 private:
-    channeldpb::ConnectionType ConnectionType;
-	channeldpb::CompressionType CompressionType;
-	ConnectionId ConnId;
+    channeldpb::ConnectionType ConnectionType = channeldpb::NO_CONNECTION;
+	channeldpb::CompressionType CompressionType = channeldpb::NO_COMPRESSION;
+	ConnectionId ConnId = 0;
 	TSharedPtr<FInternetAddr> RemoteAddr;
 	FSocket* Socket;
 	uint8* ReceiveBuffer;
@@ -113,19 +131,19 @@ private:
 	};
 
 	TMap<uint32, MessageHandlerEntry> MessageHandlers;
-
 	TQueue<MessageQueueEntry> IncomingQueue;
-
 	TQueue<channeldpb::MessagePack> OutgoingQueue;
-	
 	TMap<uint32, MessageHandlerFunc> RpcCallbacks;
 
 	void Receive();
 	uint32 AddRpcCallback(const MessageHandlerFunc& HandlerFunc);
 
-	void HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleAuth(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleCreateChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleRemoveChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleListChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleSubToChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleUnsubFromChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 
 };
