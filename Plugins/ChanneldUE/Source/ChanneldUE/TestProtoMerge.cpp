@@ -53,11 +53,10 @@ bool UTestProtoMerge::UpdateChannelData(google::protobuf::Message* ChannelData)
 	return Result;
 }
 
-void UTestProtoMerge::OnChannelDataUpdated(const channeldpb::ChannelDataUpdateMessage* UpdateMsg)
+void UTestProtoMerge::OnChannelDataUpdated(const google::protobuf::Message* ChannelData)
 {
-	testpb::TestChannelDataMessage UpdateData;
-	UpdateMsg->data().UnpackTo(&UpdateData);
-	TestChannelData.MergeFrom(UpdateData);
+	auto UpdateData = static_cast<const testpb::TestChannelDataMessage*>(ChannelData);
+	TestChannelData.MergeFrom(*UpdateData);
 }
 
 //void UTestProtoMerge::Serialize(FArchive& Ar)
@@ -68,3 +67,4 @@ void UTestProtoMerge::OnChannelDataUpdated(const channeldpb::ChannelDataUpdateMe
 //	UE_LOG(LogTemp, Log, TEXT("Serialized TestChannelData: %s"), ByteString.c_str());
 //	TestChannelData.Clear();
 //}
+

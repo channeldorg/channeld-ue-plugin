@@ -5,25 +5,14 @@
 #include "CoreMinimal.h"
 #include "ChanneldTypes.h"
 #include "ChanneldConnection.h"
+#include "ChannelDataProvider.h"
 #include "Engine/NetDriver.h"
 #include "IpNetDriver.h"
 #include "Sockets.h"
 #include "SocketSubsystem.h"
 #include "google/protobuf/message.h"
-#include "Channeld.pb.h"
 #include "Test.pb.h"
 #include "ChanneldNetDriver.generated.h"
-
-class IChannelDataProvider
-{
-public:
-	virtual channeldpb::ChannelType GetChannelType() = 0;
-	virtual ChannelId GetChannelId() = 0;
-	virtual void SetChannelId(ChannelId ChId) = 0;
-	virtual bool UpdateChannelData(google::protobuf::Message* ChannelData) = 0;
-	virtual void OnChannelDataUpdated(const channeldpb::ChannelDataUpdateMessage* UpdateMsg) = 0;
-	virtual ~IChannelDataProvider() {}
-};
 
 /**
  * 
@@ -86,4 +75,5 @@ private:
 
 	void HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+
 };

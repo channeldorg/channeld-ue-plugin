@@ -26,5 +26,7 @@ public class ChanneldUE : ModuleRules
             //"SteamSockets",
 			}
         );
+
+        bUseRTTI = true;
     }
 }

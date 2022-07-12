@@ -44,8 +44,6 @@ bool UChanneldNetDriver::IsAvailable() const
 bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, const FURL& URL,
 	bool bReuseAddressAndPort, FString& Error)
 {
-	/*
-	*/
 	FString Host;
 	int Port;
 	if (bInitAsClient)
@@ -121,7 +119,7 @@ FUniqueSocket UChanneldNetDriver::CreateAndBindSocket(TSharedRef<FInternetAddr> 
 		return nullptr;
 	}
 
-	/* Make sure to cleanly destroy any sockets we do not mean to use. */
+	// Make sure to cleanly destroy any sockets we do not mean to use.
 	ON_SCOPE_EXIT
 	{
 		if (Error.IsEmpty() == false)
@@ -236,31 +234,6 @@ void UChanneldNetDriver::TickDispatch(float DeltaTime)
 	if (IsValid(Connection) && Connection->IsConnected())
 		Connection->TickIncoming();
 
-/*
-
-	for (const auto ObjRep : AllOwnedReplicators)
-	{
-		ObjRep->RepState->GetSendingRepState()->RepChangedPropertyTracker->Parents;
-	}
-
-	for (const auto& Pair : ReplicationChangeListMap)
-	{
-		const auto RepLayout = GetObjectClassRepLayout(Pair.Key->GetClass());
-		const auto State = Pair.Value->GetRepChangelistState();
-		const auto History = State->ChangeHistory[State->HistoryEnd];
-		for (const auto CmdIndex : History.Changed)
-		{
-			const auto Property = RepLayout->Cmds[CmdIndex].Property;
-			
-		}
-
-		const auto Properties = Pair.Value->GetRepChangelistState()->SharedSerialization.SharedPropertyInfo;
-		for (const auto& Property : Properties)
-		{
-			Property.PropertyKey.ToDebugString();
-		}
-	}
-*/
 }
 
 void UChanneldNetDriver::TickFlush(float DeltaSeconds)
