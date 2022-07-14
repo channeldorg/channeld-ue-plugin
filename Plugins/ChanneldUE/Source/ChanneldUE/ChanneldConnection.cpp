@@ -259,8 +259,6 @@ uint32 UChanneldConnection::AddRpcCallback(const MessageHandlerFunc& HandlerFunc
 
 void UChanneldConnection::TickIncoming()
 {
-	Receive();
-
 	MessageQueueEntry Entry;
 	while (IncomingQueue.Dequeue(Entry))
 	{
