@@ -20,7 +20,7 @@ UChanneldConnection::UChanneldConnection(const FObjectInitializer& ObjectInitial
 		{
 			HandleAuth(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::CREATE_CHANNEL, new channeldpb::CreateChannelMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler((uint32)channeldpb::CREATE_CHANNEL, new channeldpb::CreateChannelResultMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleCreateChannel(Conn, ChId, Msg);
 		});
@@ -423,7 +423,7 @@ void UChanneldConnection::HandleCreateChannel(UChanneldConnection* Conn, Channel
 	auto ResultMsg = static_cast<const channeldpb::CreateChannelResultMessage*>(Msg);
 	if (ResultMsg->ownerconnid() == GetConnId())
 	{
-		OwnedChannels.Add(ChId, ResultMsg);
+		OwnedChannels.Add(ResultMsg->channelid(), ResultMsg);
 	}
 }
 

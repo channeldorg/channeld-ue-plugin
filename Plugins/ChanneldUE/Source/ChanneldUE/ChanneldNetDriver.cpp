@@ -252,16 +252,16 @@ void UChanneldNetDriver::HandleAuthResult(UChanneldConnection* Conn, ChannelId C
 		if (IsServer())
 		{
 			Connection->CreateChannel(channeldpb::GLOBAL, TEXT("test123"), nullptr, nullptr, nullptr,
-				[&,ChId](const channeldpb::CreateChannelResultMessage* ResultMsg)
+				[&](const channeldpb::CreateChannelResultMessage* ResultMsg)
 				{
-					UE_LOG(LogChanneld, Log, TEXT("[%s] Created channel: %d, type: %s, owner connId: %d"), *GetWorld()->GetDebugDisplayName(),
-						ChId, channeldpb::ChannelType_Name(ResultMsg->channeltype()).c_str(), ResultMsg->ownerconnid());
+					UE_LOG(LogChanneld, Log, TEXT("[%s] Created channel: %d, type: %s, owner connId: %d, metadata: %s"), *GetWorld()->GetDebugDisplayName(),
+						ResultMsg->channelid(), channeldpb::ChannelType_Name(ResultMsg->channeltype()).c_str(), ResultMsg->ownerconnid(), ResultMsg->metadata().c_str());
 
 					for (auto const Provider : ChannelDataProviders)
 					{
 						if (Provider->GetChannelType() == ResultMsg->channeltype())
 						{
-							Provider->SetChannelId(ChId);
+							Provider->SetChannelId(ResultMsg->channelid());
 						}
 					}
 				});
