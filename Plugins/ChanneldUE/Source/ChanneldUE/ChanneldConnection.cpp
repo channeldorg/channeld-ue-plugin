@@ -65,25 +65,34 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int P
 	bool IsIpValid;
 	if (bInitAsClient)
 	{
-        ConnectionType = channeldpb::CLIENT;
+		ConnectionType = channeldpb::CLIENT;
 	}
 	else
 	{
-        ConnectionType = channeldpb::SERVER;
+		ConnectionType = channeldpb::SERVER;
 	}
-    RemoteAddr->SetIp(*Host, IsIpValid);
-    if (!IsIpValid)
-    {
-        Error = FString::Printf(TEXT("Invalid IP for client: %s"), *Host);
-        return false;
-    }
-    RemoteAddr->SetPort(Port);
+	RemoteAddr->SetIp(*Host, IsIpValid);
+	if (!IsIpValid)
+	{
+		Error = FString::Printf(TEXT("Invalid IP for client: %s"), *Host);
+		return false;
+	}
+	RemoteAddr->SetPort(Port);
 
 	// Create TCP socket to channeld
 	Socket = SocketSubsystem->CreateSocket(NAME_Stream, TEXT("Connection to channeld"), RemoteAddr->GetProtocolType());
 	UE_LOG(LogChanneld, Log, TEXT("Connecting to channeld with addr: %s"), *RemoteAddr->ToString(true));
+	bool bSocketConnected = Socket->Connect(*RemoteAddr);
+	if(!ensure(bSocketConnected))
+	{
+		return false;
+	}
 	
-    return Socket->Connect(*RemoteAddr);
+	if(ensure(StartReceiveThread()))
+	{
+		return true;
+	}
+	return false;
 }
 
 void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
@@ -98,6 +107,7 @@ void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 	}
 
 	Socket->Close();
+	StopReceiveThread();
 }
 
 
@@ -186,6 +196,55 @@ void UChanneldConnection::Receive()
 	ReceiveBufferOffset = 0;
 }
 
+bool UChanneldConnection::StartReceiveThread()
+{
+	if (bReceiveThreadRunning)
+	{
+		return false;
+	}
+	if (ReceiveThread == nullptr)
+	{
+		ReceiveThread = FRunnableThread::Create(this, TEXT("Tpri_Channeld_Connection_Receive"));
+	}
+	return ReceiveThread != nullptr;
+}
+
+void UChanneldConnection::StopReceiveThread()
+{
+	Stop();
+	if (ReceiveThread)
+	{
+		delete ReceiveThread;
+		ReceiveThread = nullptr;
+	}
+}
+
+bool UChanneldConnection::Init()
+{
+	bReceiveThreadRunning = true;
+	return true;
+}
+
+uint32 UChanneldConnection::Run()
+{
+	while (bReceiveThreadRunning)
+	{
+		Receive();
+	}
+	return 0;
+}
+
+void UChanneldConnection::Stop()
+{
+	bReceiveThreadRunning = false;
+}
+
+void UChanneldConnection::Exit()
+{
+	if (bReceiveThreadRunning != false)
+		bReceiveThreadRunning = true;
+}
+
 uint32 UChanneldConnection::AddRpcCallback(const MessageHandlerFunc& HandlerFunc)
 {
 	uint32 StubId = 0;
@@ -200,8 +259,6 @@ uint32 UChanneldConnection::AddRpcCallback(const MessageHandlerFunc& HandlerFunc
 
 void UChanneldConnection::TickIncoming()
 {
-	Receive();
-
 	MessageQueueEntry Entry;
 	while (IncomingQueue.Dequeue(Entry))
 	{
@@ -314,7 +371,7 @@ void UChanneldConnection::Auth(const FString& PIT, const FString& LT, const TFun
 	channeldpb::AuthMessage Msg;
 	Msg.set_playeridentifiertoken(std::string(TCHAR_TO_UTF8(*PIT)));
 	Msg.set_logintoken(std::string(TCHAR_TO_UTF8(*LT)));
-	
+
 	Send(GlobalChannelId, channeldpb::AUTH, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
@@ -329,7 +386,7 @@ void UChanneldConnection::CreateChannel(channeldpb::ChannelType ChannelType, con
 		Msg.mutable_data()->PackFrom(*Data);
 	if (MergeOptions != nullptr)
 		Msg.set_allocated_mergeoptions(MergeOptions);
-	
+
 	Send(GlobalChannelId, channeldpb::CREATE_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
