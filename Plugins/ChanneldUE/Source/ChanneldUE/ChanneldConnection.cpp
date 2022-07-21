@@ -85,14 +85,16 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int P
 	bool bSocketConnected = Socket->Connect(*RemoteAddr);
 	if(!ensure(bSocketConnected))
 	{
+		Error = FString::Printf(TEXT("SocketConnected Faild"));
 		return false;
 	}
 	
-	if(ensure(StartReceiveThread()))
+	if(!ensure(StartReceiveThread()))
 	{
-		return true;
+		Error = FString::Printf(TEXT("Start receive thread Faild"));
+		return false;
 	}
-	return false;
+	return true;
 }
 
 void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
