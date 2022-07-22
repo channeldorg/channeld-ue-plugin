@@ -85,14 +85,16 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int P
 	bool bSocketConnected = Socket->Connect(*RemoteAddr);
 	if(!ensure(bSocketConnected))
 	{
+		Error = FString::Printf(TEXT("SocketConnected failed"));
 		return false;
 	}
 	
-	if(ensure(StartReceiveThread()))
+	if(!ensure(StartReceiveThread()))
 	{
-		return true;
+		Error = FString::Printf(TEXT("Start receive thread failed"));
+		return false;
 	}
-	return false;
+	return true;
 }
 
 void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
@@ -457,8 +459,9 @@ void UChanneldConnection::HandleSubToChannel(UChanneldConnection* Conn, ChannelI
 		}
 		else
 		{
-			channeldpb::SubscribedToChannelResultMessage ClonedSubMsg(*SubMsg);
-			SubscribedChannels.Add(ChId, &ClonedSubMsg);
+			channeldpb::SubscribedToChannelResultMessage* ClonedSubMsg = SubMsg->New();
+			ClonedSubMsg->CopyFrom(*SubMsg);
+			SubscribedChannels.Add(ChId, ClonedSubMsg);
 		}
 	}
 }

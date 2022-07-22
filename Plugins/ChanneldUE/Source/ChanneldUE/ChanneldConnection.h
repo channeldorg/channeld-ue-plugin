@@ -81,7 +81,7 @@ public:
 		return ConnId;
 	}
 
-	FORCEINLINE bool IsConnected() { return !IsPendingKill() && Socket != nullptr && Socket->GetConnectionState() == SCS_Connected; }
+	FORCEINLINE bool IsConnected() { return !IsPendingKill() && Socket != nullptr && Socket->GetConnectionState() == SCS_Connected && bReceiveThreadRunning; }
 
 	FORCEINLINE channeldpb::ConnectionType GetConnectionType() { return ConnectionType; }
 
