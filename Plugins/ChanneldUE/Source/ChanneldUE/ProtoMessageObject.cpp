@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "MessageWrapper.h"
+#include "ProtoMessageObject.h"
 #include "ChanneldConnection.h"
 #include "google/protobuf/any.pb.h"
 
-UMessageWrapper::~UMessageWrapper()
+UProtoMessageObject::~UProtoMessageObject()
 {
 	if (bMessageLifeTogether)
 	{
@@ -14,19 +14,19 @@ UMessageWrapper::~UMessageWrapper()
 	}
 }
 
-google::protobuf::Message* UMessageWrapper::GetMessage()
+google::protobuf::Message* UProtoMessageObject::GetMessage()
 {
 	return Message;
 }
 
-void UMessageWrapper::SetMessage(const google::protobuf::Message* Msg)
+void UProtoMessageObject::SetMessage(const google::protobuf::Message* Msg)
 {
 	bMessageLifeTogether = true;
 	Message = Msg->New();
 	Message->CopyFrom(*Msg);
 }
 
-void UMessageWrapper::SetMessagePtr(const google::protobuf::Message* Msg, bool bLifeTogether = false)
+void UProtoMessageObject::SetMessagePtr(const google::protobuf::Message* Msg, bool bLifeTogether = false)
 {
 	if (bLifeTogether)
 	{
@@ -35,31 +35,36 @@ void UMessageWrapper::SetMessagePtr(const google::protobuf::Message* Msg, bool b
 	Message = const_cast<google::protobuf::Message*>(Msg);
 }
 
-FString UMessageWrapper::GetMessageDebugInfo()
+FString UProtoMessageObject::GetMessageDebugInfo()
 {
 	return FString(Message->DebugString().c_str());
 }
 
-UMessageWrapper* UMessageWrapper::SpawnCopiedMessage()
+void UProtoMessageObject::Clear()
 {
-	UMessageWrapper* NewMessageWrapper = NewObject<UMessageWrapper>();
-	NewMessageWrapper->SetMessage(Message);
-	return NewMessageWrapper;
+	Message->Clear();
 }
 
-UMessageWrapper* UMessageWrapper::SpawnEmptyMessage()
+UProtoMessageObject* UProtoMessageObject::Clone()
 {
-	UMessageWrapper* NewMessageWrapper = NewObject<UMessageWrapper>();
-	NewMessageWrapper->SetMessagePtr(Message->New(), true);
-	return NewMessageWrapper;
+	UProtoMessageObject* NewProtoMessageObject = NewObject<UProtoMessageObject>();
+	NewProtoMessageObject->SetMessage(Message);
+	return NewProtoMessageObject;
 }
 
-UMessageWrapper* UMessageWrapper::SpawnEmptyMessageByName(bool& bSuccess, FString FieldName)
+UProtoMessageObject* UProtoMessageObject::CloneEmpty()
 {
-	return GetMessageByName(bSuccess, FieldName)->SpawnEmptyMessage();
+	UProtoMessageObject* NewProtoMessageObject = NewObject<UProtoMessageObject>();
+	NewProtoMessageObject->SetMessagePtr(Message->New(), true);
+	return NewProtoMessageObject;
 }
 
-int32 UMessageWrapper::GetInt32ValueByName(bool& bSuccess, FString FieldName)
+UProtoMessageObject* UProtoMessageObject::CloneEmptyFieldMessage(bool& bSuccess, FString FieldName)
+{
+	return GetMessageByName(bSuccess, FieldName)->CloneEmpty();
+}
+
+int32 UProtoMessageObject::GetInt32ByName(bool& bSuccess, FString FieldName)
 {
 	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
 	if (FD != NULL)
@@ -74,7 +79,7 @@ int32 UMessageWrapper::GetInt32ValueByName(bool& bSuccess, FString FieldName)
 	}
 }
 
-int64 UMessageWrapper::GetInt64ValueByName(bool& bSuccess, FString FieldName)
+int64 UProtoMessageObject::GetInt64ByName(bool& bSuccess, FString FieldName)
 {
 	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
 	if (FD != NULL)
@@ -89,7 +94,7 @@ int64 UMessageWrapper::GetInt64ValueByName(bool& bSuccess, FString FieldName)
 	}
 }
 
-float UMessageWrapper::GetIntFloatValueByName(bool& bSuccess, FString FieldName)
+float UProtoMessageObject::GetFloatByName(bool& bSuccess, FString FieldName)
 {
 	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
 	if (FD != NULL)
@@ -104,7 +109,7 @@ float UMessageWrapper::GetIntFloatValueByName(bool& bSuccess, FString FieldName)
 	}
 }
 
-FString UMessageWrapper::GetStringValueByName(bool& bSuccess, FString FieldName)
+FString UProtoMessageObject::GetStringByName(bool& bSuccess, FString FieldName)
 {
 	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
 	if (FD != NULL)
@@ -119,10 +124,10 @@ FString UMessageWrapper::GetStringValueByName(bool& bSuccess, FString FieldName)
 	}
 }
 
-UMessageWrapper* UMessageWrapper::GetMessageByName(bool& bSuccess, FString FieldName)
+UProtoMessageObject* UProtoMessageObject::GetMessageByName(bool& bSuccess, FString FieldName)
 {
 	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
-	UMessageWrapper* ChildMessage = NewObject<UMessageWrapper>();
+	UProtoMessageObject* ChildMessage = NewObject<UProtoMessageObject>();
 	if (FD != NULL)
 	{
 		const google::protobuf::Message& ChildMessageRef = Message->GetReflection()->GetMessage(*Message, FD);
@@ -137,9 +142,9 @@ UMessageWrapper* UMessageWrapper::GetMessageByName(bool& bSuccess, FString Field
 
 }
 
-void UMessageWrapper::UnpackMessageByProtoName(bool& bSuccess, UMessageWrapper*& UnpackedMsg, 	FString ProtoName)
+void UProtoMessageObject::UnpackMessageByFullProtoName(bool& bSuccess, UProtoMessageObject*& UnpackedMsg, 	FString ProtoName)
 {
-	UnpackedMsg = NewObject<UMessageWrapper>();
+	UnpackedMsg = NewObject<UProtoMessageObject>();
 	bSuccess = false;
 
 	const google::protobuf::Any* TargetMsgAny = dynamic_cast<const google::protobuf::Any*>(Message);
@@ -169,7 +174,7 @@ void UMessageWrapper::UnpackMessageByProtoName(bool& bSuccess, UMessageWrapper*&
 	bSuccess = true;
 }
 
-void UMessageWrapper::GetMessagesRepeatedByName(bool& bSuccess, TArray<UMessageWrapper*>& MessageRepeated, FString FieldName)
+void UProtoMessageObject::GetMessagesRepeatedByName(bool& bSuccess, TArray<UProtoMessageObject*>& MessageRepeated, FString FieldName)
 {
 	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
 	if (FD != NULL)
@@ -178,7 +183,7 @@ void UMessageWrapper::GetMessagesRepeatedByName(bool& bSuccess, TArray<UMessageW
 		for (int i = 0; i < Size; i++)
 		{
 			const google::protobuf::Message& ChildMessageRef = Message->GetReflection()->GetRepeatedMessage(*Message, FD, i);
-			UMessageWrapper* Msg = NewObject<UMessageWrapper>();
+			UProtoMessageObject* Msg = NewObject<UProtoMessageObject>();
 			Msg->SetMessagePtr(&ChildMessageRef);
 			MessageRepeated.Add(Msg);
 		}
@@ -190,7 +195,7 @@ void UMessageWrapper::GetMessagesRepeatedByName(bool& bSuccess, TArray<UMessageW
 	}
 }
 
-UMessageWrapper* UMessageWrapper::SetInt32ValueByName(bool& bSuccess, FString FieldName, int32 Value)
+UProtoMessageObject* UProtoMessageObject::SetInt32ByName(bool& bSuccess, FString FieldName, int32 Value)
 {
 	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
 	if (FD != NULL)
@@ -205,7 +210,7 @@ UMessageWrapper* UMessageWrapper::SetInt32ValueByName(bool& bSuccess, FString Fi
 	return this;
 }
 
-UMessageWrapper* UMessageWrapper::SetInt64ValueByName(bool& bSuccess, FString FieldName, int64 Value)
+UProtoMessageObject* UProtoMessageObject::SetInt64ByName(bool& bSuccess, FString FieldName, int64 Value)
 {
 	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
 	if (FD != NULL)
@@ -220,7 +225,7 @@ UMessageWrapper* UMessageWrapper::SetInt64ValueByName(bool& bSuccess, FString Fi
 	return this;
 }
 
-UMessageWrapper* UMessageWrapper::SetIntFloatValueByName(bool& bSuccess, FString FieldName, float Value)
+UProtoMessageObject* UProtoMessageObject::SetFloatByName(bool& bSuccess, FString FieldName, float Value)
 {
 	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
 	if (FD != NULL)
@@ -235,7 +240,7 @@ UMessageWrapper* UMessageWrapper::SetIntFloatValueByName(bool& bSuccess, FString
 	return this;
 }
 
-UMessageWrapper* UMessageWrapper::SetStringValueByName(bool& bSuccess, FString FieldName, FString Value)
+UProtoMessageObject* UProtoMessageObject::SetStringByName(bool& bSuccess, FString FieldName, FString Value)
 {
 	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
 	if (FD != NULL)
@@ -250,7 +255,7 @@ UMessageWrapper* UMessageWrapper::SetStringValueByName(bool& bSuccess, FString F
 	return this;
 }
 
-UMessageWrapper* UMessageWrapper::AddMessageToRepeatedField(bool& bSuccess, FString FieldName, UMessageWrapper* ChildMessage)
+UProtoMessageObject* UProtoMessageObject::AddMessageToRepeatedField(bool& bSuccess, FString FieldName, UProtoMessageObject* ChildMessage)
 {
 	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
 	if (FD != NULL)

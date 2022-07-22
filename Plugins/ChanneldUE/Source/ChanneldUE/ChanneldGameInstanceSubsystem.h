@@ -3,24 +3,25 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Channeld.pb.h"
 #include "ChanneldTypes.h"
 #include "Tickable.h"
 #include "google/protobuf/message.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "ChanneldGameInstanceSubsystem.generated.h"
 
-class UMessageWrapper;
+class UProtoMessageObject;
 class UCustomProtoType;
 class UChanneldConnection;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAuth, int32, AuthResult, int32, ConnId);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnCreateChannel, int32, ChId, int32, ChannelType, FString, Metadata, int32, OwnerConnId);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnSubToChannel, int32, Chld, int32, ConnType, int32, ChannelType, int32, ConnId);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnDataUpdate, int32, Chld, UMessageWrapper*, MsgWrapper, int32, contextConnId);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnCreateChannel, int32, ChId, ECDChannelType, ChannelType, FString, Metadata, int32, OwnerConnId);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnSubToChannel, int32, Chld, ECDChannelType, ChannelType, int32, ConnId, int32, ConnType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnDataUpdate, int32, Chld, ECDChannelType, ChannelType, UProtoMessageObject*, MessageObject, int32, contextConnId);
 
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnceOnAuth, int32, AuthResult, int32, ConnId);
-DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnCreateChannel, int32, ChId, int32, ChannelType, FString, Metadata, int32, OwnerConnId);
-DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnSubToChannel, int32, Chld, int32, ConnType, int32, ChannelType, int32, ConnId);
+DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnCreateChannel, int32, ChId, ECDChannelType, ChannelType, FString, Metadata, int32, OwnerConnId);
+DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnSubToChannel, int32, Chld, ECDChannelType, ChannelType, int32, ConnId, int32, ConnType);
 
 UCLASS()
 class CHANNELDUE_API UChanneldGameInstanceSubsystem : public UGameInstanceSubsystem, public FTickableGameObject
@@ -50,19 +51,26 @@ public:
 	 * Is connected to server
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
-		void IsConnected(bool& bConnected);
+		bool IsConnected();
 
 	/*
 	 * Get own ConnId from ConnectionInstance
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
-		void GetConnId(int32& ConnId);
+		int32 GetConnId();
+
+
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
+		ECDChannelType GetChannelTypeByChId(int32 ChId);
+
+	FORCEINLINE channeldpb::ChannelType  GetProtoChannelTypeByChId(int32 ChId);
 
 	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "AuthCallback"), Category = "Channeld|Net")
-		void ConnectServer(bool& Success, FString& Error, FString Host, int32 Port, const FOnceOnAuth& AuthCallback);
+		void ConnectToChanneld(bool& Success, FString& Error, FString Host, int32 Port, const FOnceOnAuth& AuthCallback);
 
 	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld|Net")
-		void CreateChannel(int32 ChannelType, FString Metadata, UMessageWrapper* InitData, const FOnceOnCreateChannel& Callback);
+		void CreateChannel(ECDChannelType ChannelType, FString Metadata, UProtoMessageObject* InitData, const FOnceOnCreateChannel& Callback);
 
 	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld|Net")
 		void SubToChannel(int32 ChId, const FOnceOnSubToChannel& Callback);
@@ -71,23 +79,22 @@ public:
 		void SubConnectionToChannel(int32 TargetConnId, int32 ChId, const FOnceOnSubToChannel& Callback);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Net")
-		void SendDataUpdate(int32 ChId, UMessageWrapper* MsgWrapper);
+		void SendDataUpdate(int32 ChId, UProtoMessageObject* MessageObject);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
-		void SpawnMessageByProtoType(UMessageWrapper*& MsgWrapper, bool& bSuccess, FString ProtoName);
+		bool RegisterChannelTypeByFullName(ECDChannelType ChannelType, FString ProtobufFullName);
 
-	/*
-	 * Time utils
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Time")
-		void GetNowTimestamp(int64& Now);
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
+		void CreateMessageObjectByChannelType(UProtoMessageObject*& MessageObject, bool& bSuccess, ECDChannelType ChannelType);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Time")
-		void TimestampToDateTime(FDateTime& DateTime, int64 Timestamp);
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
+		void CreateMessageObjectByFullName(UProtoMessageObject*& MessageObject, bool& bSuccess, FString ProtobufFullName);
 
 protected:
 	UPROPERTY()
 		UChanneldConnection* ConnectionInstance = nullptr;
+
+	TMap<channeldpb::ChannelType, const google::protobuf::Message*> ChannelTypeToMsgPrototypeMapping;
 
 	void HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleCreateChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
