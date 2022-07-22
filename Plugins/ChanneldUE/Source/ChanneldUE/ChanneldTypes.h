@@ -19,7 +19,7 @@ const uint32 MaxPacketSize = 0x0fffff;
 
 
 UENUM(BlueprintType)
-enum class ECDChannelType : uint8
+enum class EChanneldChannelType : uint8
 {
 	ECT_Unknown = 0 UMETA(DisplayName = "Unknown"),
 	ECT_Global = 1 UMETA(DisplayName = "Global"),

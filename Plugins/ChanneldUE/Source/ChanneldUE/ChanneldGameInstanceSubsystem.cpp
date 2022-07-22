@@ -39,9 +39,9 @@ int32 UChanneldGameInstanceSubsystem::GetConnId()
 	return ConnectionInstance->GetConnId();
 }
 
-ECDChannelType UChanneldGameInstanceSubsystem::GetChannelTypeByChId(int32 ChId)
+EChanneldChannelType UChanneldGameInstanceSubsystem::GetChannelTypeByChId(int32 ChId)
 {
-	return static_cast<ECDChannelType>(GetProtoChannelTypeByChId(ChId));
+	return static_cast<EChanneldChannelType>(GetProtoChannelTypeByChId(ChId));
 }
 
 channeldpb::ChannelType UChanneldGameInstanceSubsystem::GetProtoChannelTypeByChId(int32 ChId)
@@ -72,7 +72,7 @@ void UChanneldGameInstanceSubsystem::ConnectToChanneld(bool& Success, FString& E
 	}
 }
 
-void UChanneldGameInstanceSubsystem::CreateChannel(ECDChannelType ChannelType, FString Metadata, UProtoMessageObject* InitData,
+void UChanneldGameInstanceSubsystem::CreateChannel(EChanneldChannelType ChannelType, FString Metadata, UProtoMessageObject* InitData,
 	const FOnceOnCreateChannel& Callback)
 {
 	ConnectionInstance->CreateChannel(
@@ -84,7 +84,7 @@ void UChanneldGameInstanceSubsystem::CreateChannel(ECDChannelType ChannelType, F
 		[=](const channeldpb::CreateChannelResultMessage* Message)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("channelid: %d   channeltype: %d   metadata: %s   ownerconnid: %d "), Message->channelid(), Message->channeltype(), Message->metadata().c_str(), Message->ownerconnid());
-			Callback.ExecuteIfBound(Message->channelid(), static_cast<ECDChannelType>(Message->channeltype()), FString(Message->metadata().c_str()), Message->ownerconnid());
+			Callback.ExecuteIfBound(Message->channelid(), static_cast<EChanneldChannelType>(Message->channeltype()), FString(Message->metadata().c_str()), Message->ownerconnid());
 		}
 	);
 }
@@ -99,7 +99,7 @@ void UChanneldGameInstanceSubsystem::SubConnectionToChannel(int32 TargetConnId, 
 	ConnectionInstance->SubConnectionToChannel(TargetConnId, ChId, nullptr,
 		[=](const channeldpb::SubscribedToChannelResultMessage* Message)
 		{
-			Callback.ExecuteIfBound(ChId, static_cast<ECDChannelType>(Message->channeltype()), Message->connid(), Message->conntype());
+			Callback.ExecuteIfBound(ChId, static_cast<EChanneldChannelType>(Message->channeltype()), Message->connid(), Message->conntype());
 		}
 	);
 }
@@ -111,7 +111,7 @@ void UChanneldGameInstanceSubsystem::SendDataUpdate(int32 ChId, UProtoMessageObj
 	ConnectionInstance->Send(ChId, channeldpb::CHANNEL_DATA_UPDATE, UpdateMsg);
 }
 
-bool UChanneldGameInstanceSubsystem::RegisterChannelTypeByFullName(ECDChannelType ChannelType, FString ProtobufFullName)
+bool UChanneldGameInstanceSubsystem::RegisterChannelTypeByFullName(EChanneldChannelType ChannelType, FString ProtobufFullName)
 {
 	const google::protobuf::Descriptor* Desc = google::protobuf::DescriptorPool::generated_pool()
 		->FindMessageTypeByName(TCHAR_TO_UTF8(*ProtobufFullName));
@@ -128,7 +128,7 @@ bool UChanneldGameInstanceSubsystem::RegisterChannelTypeByFullName(ECDChannelTyp
 }
 
 void UChanneldGameInstanceSubsystem::CreateMessageObjectByChannelType(UProtoMessageObject*& MessageObject,
-	bool& bSuccess, ECDChannelType ChannelType)
+	bool& bSuccess, EChanneldChannelType ChannelType)
 {
 	const google::protobuf::Message* MsgPrototype = ChannelTypeToMsgPrototypeMapping.FindRef(static_cast<channeldpb::ChannelType>(ChannelType));
 	MessageObject = NewObject<UProtoMessageObject>();
@@ -174,14 +174,14 @@ void UChanneldGameInstanceSubsystem::HandleCreateChannel(UChanneldConnection* Co
 	const google::protobuf::Message* Msg)
 {
 	auto CreateResultMsg = static_cast<const channeldpb::CreateChannelResultMessage*>(Msg);
-	OnCreateChannel.Broadcast(ChId, static_cast<ECDChannelType>(CreateResultMsg->channeltype()), FString(CreateResultMsg->metadata().c_str()), CreateResultMsg->ownerconnid());
+	OnCreateChannel.Broadcast(ChId, static_cast<EChanneldChannelType>(CreateResultMsg->channeltype()), FString(CreateResultMsg->metadata().c_str()), CreateResultMsg->ownerconnid());
 }
 
 void UChanneldGameInstanceSubsystem::HandleSubToChannel(UChanneldConnection* Conn, ChannelId ChId,
 	const google::protobuf::Message* Msg)
 {
 	auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
-	OnSubToChannel.Broadcast(ChId, static_cast<ECDChannelType>(SubResultMsg->channeltype()), SubResultMsg->connid(), SubResultMsg->conntype());
+	OnSubToChannel.Broadcast(ChId, static_cast<EChanneldChannelType>(SubResultMsg->channeltype()), SubResultMsg->connid(), SubResultMsg->conntype());
 }
 
 void UChanneldGameInstanceSubsystem::HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId,

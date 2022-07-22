@@ -457,8 +457,9 @@ void UChanneldConnection::HandleSubToChannel(UChanneldConnection* Conn, ChannelI
 		}
 		else
 		{
-			channeldpb::SubscribedToChannelResultMessage ClonedSubMsg(*SubMsg);
-			SubscribedChannels.Add(ChId, &ClonedSubMsg);
+			channeldpb::SubscribedToChannelResultMessage* ClonedSubMsg = SubMsg->New();
+			ClonedSubMsg->CopyFrom(*SubMsg);
+			SubscribedChannels.Add(ChId, ClonedSubMsg);
 		}
 	}
 }

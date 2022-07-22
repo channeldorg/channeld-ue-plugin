@@ -15,13 +15,13 @@ class UCustomProtoType;
 class UChanneldConnection;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAuth, int32, AuthResult, int32, ConnId);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnCreateChannel, int32, ChId, ECDChannelType, ChannelType, FString, Metadata, int32, OwnerConnId);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnSubToChannel, int32, Chld, ECDChannelType, ChannelType, int32, ConnId, int32, ConnType);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnDataUpdate, int32, Chld, ECDChannelType, ChannelType, UProtoMessageObject*, MessageObject, int32, contextConnId);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnCreateChannel, int32, ChId, EChanneldChannelType, ChannelType, FString, Metadata, int32, OwnerConnId);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnSubToChannel, int32, Chld, EChanneldChannelType, ChannelType, int32, ConnId, int32, ConnType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnDataUpdate, int32, Chld, EChanneldChannelType, ChannelType, UProtoMessageObject*, MessageObject, int32, contextConnId);
 
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnceOnAuth, int32, AuthResult, int32, ConnId);
-DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnCreateChannel, int32, ChId, ECDChannelType, ChannelType, FString, Metadata, int32, OwnerConnId);
-DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnSubToChannel, int32, Chld, ECDChannelType, ChannelType, int32, ConnId, int32, ConnType);
+DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnCreateChannel, int32, ChId, EChanneldChannelType, ChannelType, FString, Metadata, int32, OwnerConnId);
+DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnSubToChannel, int32, Chld, EChanneldChannelType, ChannelType, int32, ConnId, int32, ConnType);
 
 UCLASS()
 class CHANNELDUE_API UChanneldGameInstanceSubsystem : public UGameInstanceSubsystem, public FTickableGameObject
@@ -62,7 +62,7 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
-		ECDChannelType GetChannelTypeByChId(int32 ChId);
+		EChanneldChannelType GetChannelTypeByChId(int32 ChId);
 
 	FORCEINLINE channeldpb::ChannelType  GetProtoChannelTypeByChId(int32 ChId);
 
@@ -70,7 +70,7 @@ public:
 		void ConnectToChanneld(bool& Success, FString& Error, FString Host, int32 Port, const FOnceOnAuth& AuthCallback);
 
 	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld|Net")
-		void CreateChannel(ECDChannelType ChannelType, FString Metadata, UProtoMessageObject* InitData, const FOnceOnCreateChannel& Callback);
+		void CreateChannel(EChanneldChannelType ChannelType, FString Metadata, UProtoMessageObject* InitData, const FOnceOnCreateChannel& Callback);
 
 	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld|Net")
 		void SubToChannel(int32 ChId, const FOnceOnSubToChannel& Callback);
@@ -82,10 +82,10 @@ public:
 		void SendDataUpdate(int32 ChId, UProtoMessageObject* MessageObject);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
-		bool RegisterChannelTypeByFullName(ECDChannelType ChannelType, FString ProtobufFullName);
+		bool RegisterChannelTypeByFullName(EChanneldChannelType ChannelType, FString ProtobufFullName);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
-		void CreateMessageObjectByChannelType(UProtoMessageObject*& MessageObject, bool& bSuccess, ECDChannelType ChannelType);
+		void CreateMessageObjectByChannelType(UProtoMessageObject*& MessageObject, bool& bSuccess, EChanneldChannelType ChannelType);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
 		void CreateMessageObjectByFullName(UProtoMessageObject*& MessageObject, bool& bSuccess, FString ProtobufFullName);
