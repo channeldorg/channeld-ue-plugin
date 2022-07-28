@@ -15,6 +15,13 @@ UChanneldConnection::UChanneldConnection(const FObjectInitializer& ObjectInitial
 	// StubId=0 is reserved.
 	RpcCallbacks.Add(0, nullptr);
 
+	UserSpaceMessageHandlerEntry = MessageHandlerEntry();
+	UserSpaceMessageHandlerEntry.Msg = new channeldpb::ServerForwardMessage;
+	UserSpaceMessageHandlerEntry.Handlers.Add([&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+		{
+			HandleServerForwardMessage(Conn, ChId, Msg);
+		});
+
 	// The connection's internal handlers should always be called first, so we should not use the delegate as the order of its broadcast is not guaranteed.
 	RegisterMessageHandler((uint32)channeldpb::AUTH, new channeldpb::AuthResultMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 		{
@@ -108,6 +115,8 @@ void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 		// TODO: Flush?
 	}
 
+	OnDisconnected();
+
 	Socket->Close();
 	StopReceiveThread();
 }
@@ -162,12 +171,24 @@ void UChanneldConnection::Receive()
 		{
 			uint32 MsgType = MessagePack.msgtype();
 
+			MessageHandlerEntry Entry;
 			if (!MessageHandlers.Contains(MsgType))
 			{
-				UE_LOG(LogChanneld, Warning, TEXT("No message handler registered for type: %d"), MessagePack.msgtype());
-				continue;
+				if (MsgType >= channeldpb::USER_SPACE_START)
+				{
+					Entry = UserSpaceMessageHandlerEntry;
+				}
+				else
+				{
+					UE_LOG(LogChanneld, Warning, TEXT("No message handler registered for type: %d"), MessagePack.msgtype());
+					continue;
+				}
 			}
-			auto Entry = MessageHandlers[MsgType];
+			else
+			{
+				Entry = MessageHandlers[MsgType];
+			}
+
 			if (Entry.Msg == nullptr)
 			{
 				UE_LOG(LogChanneld, Error, TEXT("No message template registered for type: %d"), MessagePack.msgtype());
@@ -190,12 +211,18 @@ void UChanneldConnection::Receive()
 	}
 	else
 	{
+		OnDisconnected();
 		// Handle disconnection or exception
 		UE_LOG(LogChanneld, Warning, TEXT("Failed to receive data from channeld"));
 	}
 
 	// Reset read position
 	ReceiveBufferOffset = 0;
+}
+
+void UChanneldConnection::OnDisconnected()
+{
+	ConnId = 0;
 }
 
 bool UChanneldConnection::StartReceiveThread()
@@ -247,7 +274,7 @@ void UChanneldConnection::Exit()
 		bReceiveThreadRunning = true;
 }
 
-uint32 UChanneldConnection::AddRpcCallback(const MessageHandlerFunc& HandlerFunc)
+uint32 UChanneldConnection::AddRpcCallback(const FChanneldMessageHandlerFunc& HandlerFunc)
 {
 	uint32 StubId = 0;
 	while (RpcCallbacks.Contains(StubId))
@@ -335,7 +362,7 @@ void UChanneldConnection::TickOutgoing()
 	}
 }
 
-void UChanneldConnection::Send(ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast/* = channeldpb::NO_BROADCAST*/, const MessageHandlerFunc& HandlerFunc/* = nullptr*/)
+void UChanneldConnection::Send(ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast/* = channeldpb::NO_BROADCAST*/, const FChanneldMessageHandlerFunc& HandlerFunc/* = nullptr*/)
 {
 	// TODO: use a serialization buffer as the member variable
 	uint8* MessageData = new uint8[Msg.ByteSizeLong()];
@@ -347,6 +374,14 @@ void UChanneldConnection::Send(ChannelId ChId, uint32 MsgType, google::protobuf:
 		return;
 	}
 
+	SendRaw(ChId, MsgType, MessageData, Msg.GetCachedSize(), Broadcast, HandlerFunc);
+
+	if (MsgType < channeldpb::USER_SPACE_START)
+		UE_LOG(LogChanneld, Verbose, TEXT("Send message %s to channel %d"), channeldpb::MessageType_Name((channeldpb::MessageType)MsgType).c_str(), ChId);
+}
+
+void UChanneldConnection::SendRaw(ChannelId ChId, uint32 MsgType, const uint8* MsgBody, const int32 BodySize, channeldpb::BroadcastType Broadcast /*= channeldpb::NO_BROADCAST*/, const FChanneldMessageHandlerFunc& HandlerFunc /*= nullptr*/)
+{
 	uint32 StubId = HandlerFunc != nullptr ? AddRpcCallback(HandlerFunc) : 0;
 
 	channeldpb::MessagePack MsgPack;
@@ -354,13 +389,27 @@ void UChanneldConnection::Send(ChannelId ChId, uint32 MsgType, google::protobuf:
 	MsgPack.set_broadcast(Broadcast);
 	MsgPack.set_stubid(StubId);
 	MsgPack.set_msgtype(MsgType);
-	MsgPack.set_msgbody(MessageData, Msg.GetCachedSize());
+	MsgPack.set_msgbody(MsgBody, BodySize);
 
 	OutgoingQueue.Enqueue(MsgPack);
+
+	if (MsgType >= channeldpb::USER_SPACE_START && bShowUserSpaceMessageLog)
+		UE_LOG(LogChanneld, Verbose, TEXT("Send user-space message to channel %d, stubId=%d, type=%d, bodySize=%d)"), ChId, StubId, MsgType, BodySize);
+}
+
+void UChanneldConnection::HandleServerForwardMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	auto UserSpaceMsg = static_cast<const channeldpb::ServerForwardMessage*>(Msg);
+	if (UserSpaceMessageHandlerFunc == nullptr)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("No handler for user-space message, channelId=%d, client connId=%d"), ChId, UserSpaceMsg->clientconnid());
+		return;
+	}
+	UserSpaceMessageHandlerFunc(ChId, UserSpaceMsg->clientconnid(), UserSpaceMsg->payload());
 }
 
 template <typename MsgClass>
-MessageHandlerFunc WrapMessageHandler(const TFunction<void(const MsgClass*)>& Callback)
+FChanneldMessageHandlerFunc WrapMessageHandler(const TFunction<void(const MsgClass*)>& Callback)
 {
 	if (Callback == nullptr)
 		return nullptr;
@@ -421,11 +470,21 @@ void UChanneldConnection::HandleAuth(UChanneldConnection* Conn, ChannelId ChId, 
 	auto ResultMsg = static_cast<const channeldpb::AuthResultMessage*>(Msg);
 	if (ResultMsg->result() == channeldpb::AuthResultMessage_AuthResult_SUCCESSFUL)
 	{
+		// Unauthorized yet
 		if (ConnId == 0)
 		{
 			ConnId = ResultMsg->connid();
 			CompressionType = ResultMsg->compressiontype();
+			OnAuthenticated.Broadcast(this);
 		}
+		else
+		{
+			// The master server receives other connection's AuthResultMessage
+		}
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to get authorized by channeld"));
 	}
 }
 
