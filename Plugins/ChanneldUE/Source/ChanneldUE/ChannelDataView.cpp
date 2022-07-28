@@ -74,7 +74,7 @@ void UChannelDataView::RemoveProviderFromAllChannels(IChannelDataProvider* Provi
 
 	for (auto& Pair : Connection->SubscribedChannels)
 	{
-		if (Pair.Value->channeltype() == Provider->GetChannelType())
+		if (static_cast<channeldpb::ChannelType>(Pair.Value.ChannelType) ==Provider->GetChannelType())
 		{
 			RemoveProvider(Pair.Key, Provider, bSendRemoved);
 			return;
@@ -103,14 +103,14 @@ void UChannelDataView::SendAllChannelUpdates()
 
 	for (auto& Pair : Connection->SubscribedChannels)
 	{
-		if (Pair.Value->suboptions().dataaccess() == channeldpb::WRITE_ACCESS)
+		if (static_cast<channeldpb::ChannelDataAccess>(Pair.Value.SubOptions.DataAccess) == channeldpb::WRITE_ACCESS)
 		{
 			ChannelId ChId = Pair.Key;
 			auto Providers = ChannelDataProviders.Find(ChId);
 			if (Providers == nullptr)
 				continue;
 
-			auto MsgTemplate = ChannelDataTemplates.FindRef(Pair.Value->channeltype());
+			auto MsgTemplate = ChannelDataTemplates.FindRef(static_cast<channeldpb::ChannelType>(Pair.Value.ChannelType));
 			if (MsgTemplate == nullptr)
 				continue;
 

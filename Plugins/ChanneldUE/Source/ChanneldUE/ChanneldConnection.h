@@ -94,6 +94,7 @@ public:
 
 	void Auth(const FString& PIT, const FString& LT, const TFunction<void(const channeldpb::AuthResultMessage*)>& Callback = nullptr);
 	void CreateChannel(channeldpb::ChannelType ChannelType, const FString& Metadata, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const google::protobuf::Message* Data = nullptr, channeldpb::ChannelDataMergeOptions* MergeOptions = nullptr, const TFunction<void(const channeldpb::CreateChannelResultMessage*)>& Callback = nullptr);
+	void RemoveChannel(uint32 ChId);
 	void SubToChannel(ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
 	void SubConnectionToChannel(ConnectionId ConnId, ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
 
@@ -103,9 +104,9 @@ public:
 	UPROPERTY(Config)
 		int32 ReceiveBufferSize = MaxPacketSize;
 
-	TMap<ChannelId, channeldpb::SubscribedToChannelResultMessage*> SubscribedChannels;
-	TMap<ChannelId, const channeldpb::CreateChannelResultMessage*> OwnedChannels;
-	TMap<ChannelId, const channeldpb::ListChannelResultMessage_ChannelInfo*> ListedChannels;
+	TMap<ChannelId, FSubscribedChannelInfo> SubscribedChannels;
+	TMap<ChannelId, FOwnedChannelInfo> OwnedChannels;
+	TMap<ChannelId, FListedChannelInfo> ListedChannels;
 
 private:
 	channeldpb::ConnectionType ConnectionType = channeldpb::NO_CONNECTION;

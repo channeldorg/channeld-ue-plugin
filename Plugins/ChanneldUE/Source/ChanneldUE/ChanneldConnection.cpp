@@ -36,9 +36,9 @@ UChanneldConnection::UChanneldConnection(const FObjectInitializer& ObjectInitial
 		{
 			HandleSubToChannel(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::UNSUB_FROM_CHANNEL, new channeldpb::UnsubscribedFromChannelMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler((uint32)channeldpb::UNSUB_FROM_CHANNEL, new channeldpb::UnsubscribedFromChannelResultMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 		{
-			HandleSubToChannel(Conn, ChId, Msg);
+			HandleUnsubFromChannel(Conn, ChId, Msg);
 		});
 	RegisterMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, new channeldpb::ChannelDataUpdateMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 		{
@@ -83,7 +83,7 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int P
 	Socket = SocketSubsystem->CreateSocket(NAME_Stream, TEXT("Connection to channeld"), RemoteAddr->GetProtocolType());
 	UE_LOG(LogChanneld, Log, TEXT("Connecting to channeld with addr: %s"), *RemoteAddr->ToString(true));
 	bool bSocketConnected = Socket->Connect(*RemoteAddr);
-	if(!ensure(bSocketConnected))
+	if (!ensure(bSocketConnected))
 	{
 		Error = FString::Printf(TEXT("SocketConnected failed"));
 		return false;
@@ -281,6 +281,8 @@ void UChanneldConnection::TickIncoming()
 				RpcCallbacks.Remove(Entry.StubId);
 			}
 		}
+		delete Entry.Msg;
+		Entry.Msg = nullptr;
 	}
 }
 
@@ -392,6 +394,13 @@ void UChanneldConnection::CreateChannel(channeldpb::ChannelType ChannelType, con
 	Send(GlobalChannelId, channeldpb::CREATE_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
+void UChanneldConnection::RemoveChannel(uint32 ChId)
+{
+	channeldpb::RemoveChannelMessage Msg;
+	Msg.set_channelid(ChId);
+	Send(ChId, channeldpb::REMOVE_CHANNEL, Msg, channeldpb::NO_BROADCAST);
+}
+
 void UChanneldConnection::SubToChannel(ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback /*= nullptr*/)
 {
 	SubConnectionToChannel(GetConnId(), ChId, SubOptions, Callback);
@@ -425,7 +434,12 @@ void UChanneldConnection::HandleCreateChannel(UChanneldConnection* Conn, Channel
 	auto ResultMsg = static_cast<const channeldpb::CreateChannelResultMessage*>(Msg);
 	if (ResultMsg->ownerconnid() == GetConnId())
 	{
-		OwnedChannels.Add(ResultMsg->channelid(), ResultMsg);
+		FOwnedChannelInfo ChannelInfo;
+		ChannelInfo.ChannelType = static_cast<EChanneldChannelType>(ResultMsg->channeltype());
+		ChannelInfo.ChannelId = ResultMsg->channelid();
+		ChannelInfo.Metadata = FString(UTF8_TO_TCHAR(ResultMsg->metadata().c_str()));
+		ChannelInfo.OwnerConnId = ResultMsg->ownerconnid();
+		OwnedChannels.Add(ResultMsg->channelid(), ChannelInfo);
 	}
 }
 
@@ -442,7 +456,11 @@ void UChanneldConnection::HandleListChannel(UChanneldConnection* Conn, ChannelId
 	auto ResultMsg = static_cast<const channeldpb::ListChannelResultMessage*>(Msg);
 	for (auto ChannelInfo : ResultMsg->channels())
 	{
-		ListedChannels.Add(ChannelInfo.channelid(), &ChannelInfo);
+		FListedChannelInfo ListedChannelInfo;
+		ListedChannelInfo.ChannelId = ChannelInfo.channelid();
+		ListedChannelInfo.ChannelType = static_cast<EChanneldChannelType>(ChannelInfo.channeltype());
+		ListedChannelInfo.Metadata = FString(UTF8_TO_TCHAR(ChannelInfo.metadata().c_str()));
+		ListedChannels.Add(ChannelInfo.channelid(), ListedChannelInfo);
 	}
 }
 
@@ -451,17 +469,28 @@ void UChanneldConnection::HandleSubToChannel(UChanneldConnection* Conn, ChannelI
 	auto SubMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
 	if (SubMsg->connid() == Conn->GetConnId())
 	{
-		auto ExistingSub = SubscribedChannels.FindRef(ChId);
+		FSubscribedChannelInfo* ExistingSub = SubscribedChannels.Find(ChId);
 		if (ExistingSub != nullptr)
 		{
 			// Merge the SubOptions if the subscription already exists
-			ExistingSub->mutable_suboptions()->MergeFrom(SubMsg->suboptions());
+			ExistingSub->Merge(*SubMsg);
 		}
 		else
 		{
-			channeldpb::SubscribedToChannelResultMessage* ClonedSubMsg = SubMsg->New();
-			ClonedSubMsg->CopyFrom(*SubMsg);
-			SubscribedChannels.Add(ChId, ClonedSubMsg);
+			FSubscribedChannelInfo SubscribedInfo;
+			SubscribedInfo.Merge(*SubMsg);
+			SubscribedChannels.Add(ChId, SubscribedInfo);
+		}
+	}
+	else
+	{
+		// All connections without owner sub to the owned channel
+		FOwnedChannelInfo* ExistingOwnedChannel = OwnedChannels.Find(ChId);
+		if (ensure(ExistingOwnedChannel != nullptr))
+		{
+			FSubscribedChannelInfo SubscribedInfo;
+			SubscribedInfo.Merge(*SubMsg);
+			ExistingOwnedChannel->Subscribeds.Add(SubMsg->connid(), SubscribedInfo);
 		}
 	}
 }
@@ -472,6 +501,15 @@ void UChanneldConnection::HandleUnsubFromChannel(UChanneldConnection* Conn, Chan
 	if (UnsubMsg->connid() == Conn->GetConnId())
 	{
 		SubscribedChannels.Remove(ChId);
+	}
+	else
+	{
+		// All connections without owner sub to the owned channel
+		FOwnedChannelInfo* ExistingOwnedChannel = OwnedChannels.Find(ChId);
+		if (ensure(ExistingOwnedChannel != nullptr))
+		{
+			ExistingOwnedChannel->Subscribeds.Remove(UnsubMsg->connid());
+		}
 	}
 }
 
