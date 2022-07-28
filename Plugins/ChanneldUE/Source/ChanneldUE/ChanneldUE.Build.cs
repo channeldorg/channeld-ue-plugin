@@ -21,6 +21,7 @@ public class ChanneldUE : ModuleRules
             //"OnlineSubsystemSteam",
             "OnlineSubsystemUtils",
             "Sockets",
+            "PacketHandler",
             "Protobuf",
             //"SteamShared",
             //"SteamSockets",

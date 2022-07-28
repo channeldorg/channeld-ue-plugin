@@ -6,6 +6,7 @@
 #include "ChanneldTypes.h"
 #include "ChanneldConnection.h"
 #include "ChannelDataProvider.h"
+#include "ChanneldNetConnection.h"
 #include "Engine/NetDriver.h"
 #include "IpNetDriver.h"
 #include "Sockets.h"
@@ -17,7 +18,7 @@
 /**
  * 
  */
-UCLASS(transient, config=Engine)
+UCLASS(transient, config=ChanneldUE)
 class CHANNELDUE_API UChanneldNetDriver : public UIpNetDriver
 {
 	GENERATED_BODY()
@@ -34,6 +35,7 @@ public:
 	//~ Begin UNetDriver Interface.
 	virtual void Shutdown() override;
 	virtual bool IsAvailable() const override;
+	virtual bool InitConnectionClass() override;
 	virtual bool InitBase(bool bInitAsClient, FNetworkNotify* InNotify, const FURL& URL, bool bReuseAddressAndPort, FString& Error) override;
 	virtual bool InitConnect(FNetworkNotify* InNotify, const FURL& ConnectURL, FString& Error) override;
 	virtual bool InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bool bReuseAddressAndPort, FString& Error) override;
@@ -50,16 +52,22 @@ public:
 	//~ End UNetDriver Interface
 
 	virtual int32 ServerReplicateActors(float DeltaSeconds) override;
+
 	void RegisterChannelDataProvider(IChannelDataProvider* Provider);
 
+	UChanneldConnection* GetConnection() { return ConnToChanneld; }
+
+	ConnectionId AddrToConnId(const FInternetAddr& Addr);
+	FInternetAddr& ConnIdToAddr(ConnectionId ConnId);
+
 	UPROPERTY(Config)
-	FString ChanneldIpForClient;
+	FString ChanneldIpForClient = "127.0.0.1";
 	UPROPERTY(Config)
-	uint32 ChanneldPortForClient;
+	uint32 ChanneldPortForClient = 12108;
 	UPROPERTY(Config)
-	FString ChanneldIpForServer;
+	FString ChanneldIpForServer = "127.0.0.1";
 	UPROPERTY(Config)
-	uint32 ChanneldPortForServer;
+	uint32 ChanneldPortForServer = 11288;
 
 	//TMap<ChannelId, TSubclassOf<google::protobuf::Message>> ChannelDataClasses;
 
@@ -67,13 +75,21 @@ public:
 
 	testpb::TestChannelDataMessage* TestChannelData;
 
+	ChannelId LowLevelSendToChannelId = GlobalChannelId;
+
 private:
 
 	// Prevent the engine from GC the connection
 	UPROPERTY()
-	UChanneldConnection* Connection;
+	UChanneldConnection* ConnToChanneld;
 
-	void HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	FURL InitBaseURL;
+	TQueue<TTuple<TSharedPtr<const FInternetAddr>, std::string*, FOutPacketTraits*>> LowLevelSendDataBeforeAuth;
+	TMap<ConnectionId, TSharedRef<FInternetAddr>> CachedAddr;
+
+	TMap<ConnectionId, UChanneldNetConnection*> ClientConnectionMap;
+
+	void OnChanneldAuthenticated(UChanneldConnection* Conn);
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 
 };

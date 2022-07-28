@@ -12,10 +12,13 @@ class UChanneldConnection;
 DECLARE_LOG_CATEGORY_EXTERN(LogChanneld, Log, All);
 
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FChanneldMessageDelegate, UChanneldConnection*, ChannelId, const google::protobuf::Message*)
+//DECLARE_MULTICAST_DELEGATE_ThreeParams(FUserSpaceMessageDelegate, ChannelId, ConnectionId, const std::string&)
+DECLARE_MULTICAST_DELEGATE_OneParam(FChanneldAuthenticatedDelegate, UChanneldConnection*);
 
-typedef TFunction<void(UChanneldConnection*, ChannelId, const google::protobuf::Message*)> MessageHandlerFunc;
+typedef TFunction<void(UChanneldConnection*, ChannelId, const google::protobuf::Message*)> FChanneldMessageHandlerFunc;
+typedef TFunction<void(ChannelId, ConnectionId, const std::string&)> FUserSpaceMessageHandlerFunc;
 
-UCLASS(transient, config = Engine)
+UCLASS(transient, config=ChanneldUE)
 class CHANNELDUE_API UChanneldConnection : public UObject, public FRunnable
 {
 	GENERATED_BODY()
@@ -25,7 +28,7 @@ public:
 	// Constructors.
 	UChanneldConnection(const FObjectInitializer& ObjectInitializer);
 
-	FORCEINLINE void RegisterMessageHandler(uint32 MsgType, google::protobuf::Message* MessageTemplate, const MessageHandlerFunc& Handler)
+	FORCEINLINE void RegisterMessageHandler(uint32 MsgType, google::protobuf::Message* MessageTemplate, const FChanneldMessageHandlerFunc& Handler)
 	{
 		MessageHandlerEntry& Entry = MessageHandlers.FindOrAdd(MsgType);
 		Entry.Msg = MessageTemplate;
@@ -40,7 +43,7 @@ public:
 		Entry.Delegate.AddUObject(InUserObject, InFunc);
 	}
 
-	FORCEINLINE void AddMessageHandler(uint32 MsgType, const MessageHandlerFunc& Handler)
+	FORCEINLINE void AddMessageHandler(uint32 MsgType, const FChanneldMessageHandlerFunc& Handler)
 	{
 		MessageHandlerEntry& Entry = MessageHandlers.FindOrAdd(MsgType);
 		if (Entry.Msg == nullptr)
@@ -83,14 +86,21 @@ public:
 
 	FORCEINLINE bool IsConnected() { return !IsPendingKill() && Socket != nullptr && Socket->GetConnectionState() == SCS_Connected && bReceiveThreadRunning; }
 
+	FORCEINLINE bool IsAuthenticated() { return ConnId > 0; }
+
 	FORCEINLINE channeldpb::ConnectionType GetConnectionType() { return ConnectionType; }
+	FORCEINLINE bool IsServer() { return ConnectionType == channeldpb::SERVER; }
+	FORCEINLINE bool IsClient() { return ConnectionType == channeldpb::CLIENT; }
+
+	FORCEINLINE FInternetAddr& GetRemoteAddr() const { return *RemoteAddr; }
 
 	virtual void BeginDestroy() override;
 
 	bool Connect(bool bInitAsClient, const FString& Host, int Port, FString& Error);
 	void Disconnect(bool bFlushAll = true);
 	// Thread-safe
-	void Send(ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const MessageHandlerFunc& HandlerFunc = nullptr);
+	void Send(ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const FChanneldMessageHandlerFunc& HandlerFunc = nullptr);
+	void SendRaw(ChannelId ChId, uint32 MsgType, const uint8* MsgBody, const int32 BodySize, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const FChanneldMessageHandlerFunc& HandlerFunc = nullptr);
 
 	void Auth(const FString& PIT, const FString& LT, const TFunction<void(const channeldpb::AuthResultMessage*)>& Callback = nullptr);
 	void CreateChannel(channeldpb::ChannelType ChannelType, const FString& Metadata, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const google::protobuf::Message* Data = nullptr, channeldpb::ChannelDataMergeOptions* MergeOptions = nullptr, const TFunction<void(const channeldpb::CreateChannelResultMessage*)>& Callback = nullptr);
@@ -101,7 +111,14 @@ public:
 	void TickOutgoing();
 
 	UPROPERTY(Config)
-		int32 ReceiveBufferSize = MaxPacketSize;
+	int32 ReceiveBufferSize = MaxPacketSize;
+
+	UPROPERTY(Config)
+	bool bShowUserSpaceMessageLog = false;
+
+	FChanneldAuthenticatedDelegate OnAuthenticated;
+
+	FUserSpaceMessageHandlerFunc UserSpaceMessageHandlerFunc = nullptr;
 
 	TMap<ChannelId, channeldpb::SubscribedToChannelResultMessage*> SubscribedChannels;
 	TMap<ChannelId, const channeldpb::CreateChannelResultMessage*> OwnedChannels;
@@ -122,7 +139,7 @@ private:
 	struct MessageHandlerEntry
 	{
 		google::protobuf::Message* Msg;
-		TArray<MessageHandlerFunc> Handlers;
+		TArray<FChanneldMessageHandlerFunc> Handlers;
 		FChanneldMessageDelegate Delegate;
 	};
 
@@ -131,16 +148,18 @@ private:
 		google::protobuf::Message* Msg;
 		ChannelId ChId;
 		uint32 StubId;
-		TArray<MessageHandlerFunc> Handlers;
+		TArray<FChanneldMessageHandlerFunc> Handlers;
 		FChanneldMessageDelegate Delegate;
 	};
 
+	MessageHandlerEntry UserSpaceMessageHandlerEntry;
 	TMap<uint32, MessageHandlerEntry> MessageHandlers;
 	TQueue<MessageQueueEntry> IncomingQueue;
 	TQueue<channeldpb::MessagePack> OutgoingQueue;
-	TMap<uint32, MessageHandlerFunc> RpcCallbacks;
+	TMap<uint32, FChanneldMessageHandlerFunc> RpcCallbacks;
 
 	void Receive();
+	void OnDisconnected();
 
 	bool StartReceiveThread();
 	void StopReceiveThread();
@@ -149,8 +168,9 @@ private:
 	virtual void Stop() override;
 	virtual void Exit() override;
 
-	uint32 AddRpcCallback(const MessageHandlerFunc& HandlerFunc);
+	uint32 AddRpcCallback(const FChanneldMessageHandlerFunc& HandlerFunc);
 
+	void HandleServerForwardMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleAuth(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleCreateChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleRemoveChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
