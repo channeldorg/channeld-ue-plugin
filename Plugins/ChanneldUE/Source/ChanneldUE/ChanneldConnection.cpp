@@ -95,8 +95,8 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int P
 		Error = FString::Printf(TEXT("SocketConnected failed"));
 		return false;
 	}
-	
-	if(!ensure(StartReceiveThread()))
+
+	if (!ensure(StartReceiveThread()))
 	{
 		Error = FString::Printf(TEXT("Start receive thread failed"));
 		return false;
@@ -443,11 +443,11 @@ void UChanneldConnection::CreateChannel(channeldpb::ChannelType ChannelType, con
 	Send(GlobalChannelId, channeldpb::CREATE_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
-void UChanneldConnection::RemoveChannel(uint32 ChId)
+void UChanneldConnection::RemoveChannel(uint32 ChannelToRemove, const TFunction<void(const channeldpb::RemoveChannelMessage*)>& Callback)
 {
 	channeldpb::RemoveChannelMessage Msg;
-	Msg.set_channelid(ChId);
-	Send(ChId, channeldpb::REMOVE_CHANNEL, Msg, channeldpb::NO_BROADCAST);
+	Msg.set_channelid(ChannelToRemove);
+	Send(0, channeldpb::REMOVE_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
 void UChanneldConnection::SubToChannel(ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback /*= nullptr*/)
@@ -545,7 +545,7 @@ void UChanneldConnection::HandleSubToChannel(UChanneldConnection* Conn, ChannelI
 	{
 		// All connections without owner sub to the owned channel
 		FOwnedChannelInfo* ExistingOwnedChannel = OwnedChannels.Find(ChId);
-		if (ensure(ExistingOwnedChannel != nullptr))
+		if (ensureMsgf(ExistingOwnedChannel != nullptr, TEXT("Dont own the channel: %d, SubscribedToChannelResultMessage will only be sent to channel owners or subscribers"), ChId))
 		{
 			FSubscribedChannelInfo SubscribedInfo;
 			SubscribedInfo.Merge(*SubMsg);
@@ -565,7 +565,7 @@ void UChanneldConnection::HandleUnsubFromChannel(UChanneldConnection* Conn, Chan
 	{
 		// All connections without owner sub to the owned channel
 		FOwnedChannelInfo* ExistingOwnedChannel = OwnedChannels.Find(ChId);
-		if (ensure(ExistingOwnedChannel != nullptr))
+		if (ensureMsgf(ExistingOwnedChannel != nullptr, TEXT("Dont own the channel: %d, SubscribedToChannelResultMessage will only be sent to channel owners or subscribers"), ChId))
 		{
 			ExistingOwnedChannel->Subscribeds.Remove(UnsubMsg->connid());
 		}

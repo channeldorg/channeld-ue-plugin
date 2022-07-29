@@ -6,22 +6,23 @@
 #include "Channeld.pb.h"
 #include "ChanneldTypes.h"
 #include "Tickable.h"
-#include "google/protobuf/message.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "ChanneldGameInstanceSubsystem.generated.h"
 
 class UProtoMessageObject;
-class UCustomProtoType;
 class UChanneldConnection;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAuth, int32, AuthResult, int32, ConnId);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnCreateChannel, int32, ChId, EChanneldChannelType, ChannelType, FString, Metadata, int32, OwnerConnId);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRemoveChannel, int32, Chld, int32, RemovedChannelId);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnSubToChannel, int32, Chld, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnUnsubFromChannel, int32, Chld, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnDataUpdate, int32, Chld, EChanneldChannelType, ChannelType, UProtoMessageObject*, MessageObject, int32, contextConnId);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnUserSpaceMessage, int32, Chld, int32, ConnId, UProtoMessageObject*, MessageObject);
 
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnceOnAuth, int32, AuthResult, int32, ConnId);
 DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnCreateChannel, int32, ChId, EChanneldChannelType, ChannelType, FString, Metadata, int32, OwnerConnId);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnceOnRemoveChannel, int32, ChId, int32, RemovedChannelId);
 DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnSubToChannel, int32, Chld, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
 DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnUnsubFromChannel, int32, Chld, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
 
@@ -45,6 +46,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 		FOnDataUpdate OnDataUpdate;
+
+	UPROPERTY(BlueprintAssignable)
+		FOnUserSpaceMessage OnUserSpaceMessage;
+
+	UPROPERTY(BlueprintAssignable)
+		FOnRemoveChannel OnRemoveChannel;
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
@@ -70,7 +77,7 @@ public:
 		EChanneldChannelType GetChannelTypeByChId(int32 ChId);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
-		TMap<int32, FSubscribedChannelInfo> GetSubscribedsOnOwnedChannel(bool& bSuccess, int32 ChId);
+		const TMap<int32, FSubscribedChannelInfo> GetSubscribedsOnOwnedChannel(bool& bSuccess, int32 ChId);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
 		FSubscribedChannelInfo GetSubscribedOnOwnedChannelByConnId(bool& bSuccess, int32 ChId, int32 ConnId);
@@ -85,7 +92,7 @@ public:
 		void CreateChannel(EChanneldChannelType ChannelType, FString Metadata, UProtoMessageObject* InitData, const FOnceOnCreateChannel& Callback);
 
 	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld|Net")
-		void RemoveChannel(int32 ChId);
+		void RemoveChannel(int32 ChannelToRemove, const FOnceOnRemoveChannel& Callback);
 
 	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld|Net")
 		void SubToChannel(int32 ChId, const FOnceOnSubToChannel& Callback);
@@ -96,11 +103,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Net")
 		void SendDataUpdate(int32 ChId, UProtoMessageObject* MessageObject);
 
-	UFUNCTION(BlueprintCallable, Category = "Channeld|Net")
-		void Broadcast(int32 ChId, int32 ClientConnId, UProtoMessageObject* MessageObject, EChanneldBroadcastType BroadcastType);
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Net", Meta = (ToolTip = "Only run on server"))
+		void ServerBroadcast(int32 ChId, int32 ClientConnId, UProtoMessageObject* MessageObject, EChanneldBroadcastType BroadcastType);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
-		bool RegisterChannelTypeByFullName(EChanneldChannelType ChannelType, FString ProtobufFullName);
+		void RegisterChannelTypeByFullName(EChanneldChannelType ChannelType, FString ProtobufFullName);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
 		void CreateMessageObjectByChannelType(UProtoMessageObject*& MessageObject, bool& bSuccess, EChanneldChannelType ChannelType);
@@ -112,11 +119,16 @@ protected:
 	UPROPERTY()
 		UChanneldConnection* ConnectionInstance = nullptr;
 
-	TMap<EChanneldChannelType, const google::protobuf::Message*> ChannelTypeToMsgPrototypeMapping;
+	TMap<EChanneldChannelType, FString> ChannelTypeToProtoFullNameMapping;
+
+	google::protobuf::Message* CreateProtoMessageByFullName(const std::string ProtobufFullName);
 
 	void HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleCreateChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleRemoveChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleSubToChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleUnsubFromChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 };
+
+

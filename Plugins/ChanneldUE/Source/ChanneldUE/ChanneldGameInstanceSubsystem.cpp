@@ -11,9 +11,27 @@ void UChanneldGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collec
 
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::AUTH, this, &UChanneldGameInstanceSubsystem::HandleAuthResult);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::CREATE_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleCreateChannel);
+	ConnectionInstance->AddMessageHandler((uint32)channeldpb::REMOVE_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleRemoveChannel);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::SUB_TO_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleSubToChannel);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::UNSUB_FROM_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleUnsubFromChannel);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, this, &UChanneldGameInstanceSubsystem::HandleChannelDataUpdate);
+
+	ConnectionInstance->UserSpaceMessageHandlerFunc = [&](ChannelId ChId, ConnectionId ConnId, const std::string& Payload)
+	{
+		google::protobuf::Any AnyMsg;
+		AnyMsg.ParseFromString(Payload);
+		std::string ProtoFullName = AnyMsg.type_url();
+		// Erase "type.googleapis.com/"
+		ProtoFullName.erase(0, 20);
+		auto PayloadMsg = CreateProtoMessageByFullName(ProtoFullName);
+		if (PayloadMsg != nullptr)
+		{
+			AnyMsg.UnpackTo(PayloadMsg);
+			UProtoMessageObject* MsgObject = NewObject<UProtoMessageObject>();
+			MsgObject->SetMessagePtr(PayloadMsg, true);
+			OnUserSpaceMessage.Broadcast(ChId, ConnId, MsgObject);
+		}
+	};
 }
 
 void UChanneldGameInstanceSubsystem::Deinitialize()
@@ -46,7 +64,7 @@ EChanneldChannelType UChanneldGameInstanceSubsystem::GetChannelTypeByChId(int32 
 	return SubscribedChannelInfo != nullptr ? SubscribedChannelInfo->ChannelType : EChanneldChannelType::ECT_Unknown;
 }
 
-TMap<int32, FSubscribedChannelInfo> UChanneldGameInstanceSubsystem::GetSubscribedsOnOwnedChannel(bool& bSuccess, int32 ChId)
+const TMap<int32, FSubscribedChannelInfo> UChanneldGameInstanceSubsystem::GetSubscribedsOnOwnedChannel(bool& bSuccess, int32 ChId)
 {
 	bSuccess = false;
 	FOwnedChannelInfo* OwnedChannel = ConnectionInstance->OwnedChannels.Find(ChId);
@@ -55,7 +73,8 @@ TMap<int32, FSubscribedChannelInfo> UChanneldGameInstanceSubsystem::GetSubscribe
 		bSuccess = true;
 		return OwnedChannel->Subscribeds;
 	}
-	return TMap<int32, FSubscribedChannelInfo>();
+	const auto EmptyMap = TMap<int32, FSubscribedChannelInfo>();
+	return EmptyMap;
 }
 
 FSubscribedChannelInfo UChanneldGameInstanceSubsystem::GetSubscribedOnOwnedChannelByConnId(bool& bSuccess, int32 ChId, int32 ConnId)
@@ -113,9 +132,14 @@ void UChanneldGameInstanceSubsystem::CreateChannel(EChanneldChannelType ChannelT
 	);
 }
 
-void UChanneldGameInstanceSubsystem::RemoveChannel(int32 ChId)
+void UChanneldGameInstanceSubsystem::RemoveChannel(int32 ChannelToRemove, const FOnceOnRemoveChannel& Callback)
 {
-	ConnectionInstance->RemoveChannel(ChId);
+	ConnectionInstance->RemoveChannel(ChannelToRemove,
+		[=](const channeldpb::RemoveChannelMessage* Message)
+		{
+			Callback.ExecuteIfBound(0, Message->channelid());
+		}
+	);
 }
 
 void UChanneldGameInstanceSubsystem::SubToChannel(int32 ChId, const FOnceOnSubToChannel& Callback)
@@ -140,12 +164,18 @@ void UChanneldGameInstanceSubsystem::SendDataUpdate(int32 ChId, UProtoMessageObj
 	ConnectionInstance->Send(ChId, channeldpb::CHANNEL_DATA_UPDATE, UpdateMsg);
 }
 
-void UChanneldGameInstanceSubsystem::Broadcast(int32 ChId, int32 ClientConnId, UProtoMessageObject* MessageObject,
+void UChanneldGameInstanceSubsystem::ServerBroadcast(int32 ChId, int32 ClientConnId, UProtoMessageObject* MessageObject,
 	EChanneldBroadcastType BroadcastType)
 {
+	if (GetWorld()->GetNetMode() == NM_Client)
+	{
+		return;
+	}
 	google::protobuf::Message* PayloadMessage = MessageObject->GetMessage();
-	uint8* MessageData = new uint8[PayloadMessage->ByteSizeLong()];
-	bool Serialized = PayloadMessage->SerializeToArray(MessageData, PayloadMessage->GetCachedSize());
+	google::protobuf::Any AnyData;
+	AnyData.PackFrom(*PayloadMessage);
+	uint8* MessageData = new uint8[AnyData.ByteSizeLong()];
+	bool Serialized = AnyData.SerializeToArray(MessageData, AnyData.GetCachedSize());
 	if (!Serialized)
 	{
 		delete[] MessageData;
@@ -154,46 +184,44 @@ void UChanneldGameInstanceSubsystem::Broadcast(int32 ChId, int32 ClientConnId, U
 	}
 	channeldpb::ServerForwardMessage MessageWrapper;
 	MessageWrapper.set_clientconnid(ClientConnId);
-	MessageWrapper.set_payload(MessageData, PayloadMessage->GetCachedSize());
+	MessageWrapper.set_payload(MessageData, AnyData.GetCachedSize());
 	ConnectionInstance->Send(ChId, 101, MessageWrapper, static_cast<channeldpb::BroadcastType>(BroadcastType));
 }
 
-bool UChanneldGameInstanceSubsystem::RegisterChannelTypeByFullName(EChanneldChannelType ChannelType, FString ProtobufFullName)
+void UChanneldGameInstanceSubsystem::RegisterChannelTypeByFullName(EChanneldChannelType ChannelType, FString ProtobufFullName)
 {
-	const google::protobuf::Descriptor* Desc = google::protobuf::DescriptorPool::generated_pool()
-		->FindMessageTypeByName(TCHAR_TO_UTF8(*ProtobufFullName));
-	if (Desc)
-	{
-		google::protobuf::MessageFactory::generated_factory()->GetPrototype(Desc);
-		ChannelTypeToMsgPrototypeMapping.Add(
-			ChannelType,
-			google::protobuf::MessageFactory::generated_factory()->GetPrototype(Desc)
-		);
-		return true;
-	}
-	return false;
+	ChannelTypeToProtoFullNameMapping.Add(ChannelType, ProtobufFullName);
 }
 
 void UChanneldGameInstanceSubsystem::CreateMessageObjectByChannelType(UProtoMessageObject*& MessageObject,
 	bool& bSuccess, EChanneldChannelType ChannelType)
 {
-	const google::protobuf::Message* MsgPrototype = ChannelTypeToMsgPrototypeMapping.FindRef(ChannelType);
+	FString ProtoFullName = ChannelTypeToProtoFullNameMapping.FindRef(ChannelType);
 	MessageObject = NewObject<UProtoMessageObject>();
-	bSuccess = false;
-	if (MsgPrototype != nullptr)
-	{
-		MessageObject->SetMessage(MsgPrototype);
-	}
-	bSuccess = false;
+	CreateMessageObjectByFullName(MessageObject, bSuccess, ProtoFullName);
 }
 
 void UChanneldGameInstanceSubsystem::CreateMessageObjectByFullName(UProtoMessageObject*& MessageObject, bool& bSuccess, FString ProtobufFullName)
 {
-	const google::protobuf::Descriptor* Desc = google::protobuf::DescriptorPool::generated_pool()
-		->FindMessageTypeByName(TCHAR_TO_UTF8(*ProtobufFullName));
-	google::protobuf::Message* Message = nullptr;
+	google::protobuf::Message* Message = CreateProtoMessageByFullName(TCHAR_TO_UTF8(*ProtobufFullName));
 	MessageObject = NewObject<UProtoMessageObject>();
-	bSuccess = false;
+
+	if (Message != nullptr)
+	{
+		MessageObject->SetMessagePtr(Message, true);
+		bSuccess = true;
+	}
+	else
+	{
+		bSuccess = false;
+	}
+}
+
+google::protobuf::Message* UChanneldGameInstanceSubsystem::CreateProtoMessageByFullName(const std::string ProtobufFullName)
+{
+	const google::protobuf::Descriptor* Desc = google::protobuf::DescriptorPool::generated_pool()
+		->FindMessageTypeByName(ProtobufFullName);
+	google::protobuf::Message* Message = nullptr;
 	if (ensure(Desc != nullptr))
 	{
 		Message = google::protobuf::MessageFactory::generated_factory()
@@ -201,13 +229,9 @@ void UChanneldGameInstanceSubsystem::CreateMessageObjectByFullName(UProtoMessage
 	}
 	else
 	{
-		UE_LOG(LogChanneld, Error, TEXT("No protoType in DescriptorPool: %s. May not include xxx.pb.h file or override MakeSureCompilePB"), *ProtobufFullName);
+		UE_LOG(LogChanneld, Error, TEXT("Non-existent protoType: %s"), ProtobufFullName.c_str());
 	}
-	if (ensure(Message != nullptr))
-	{
-		MessageObject->SetMessagePtr(Message, true);
-		bSuccess = true;
-	}
+	return Message;
 }
 
 void UChanneldGameInstanceSubsystem::HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId,
@@ -222,6 +246,13 @@ void UChanneldGameInstanceSubsystem::HandleCreateChannel(UChanneldConnection* Co
 {
 	auto CreateResultMsg = static_cast<const channeldpb::CreateChannelResultMessage*>(Msg);
 	OnCreateChannel.Broadcast(ChId, static_cast<EChanneldChannelType>(CreateResultMsg->channeltype()), FString(CreateResultMsg->metadata().c_str()), CreateResultMsg->ownerconnid());
+}
+
+void UChanneldGameInstanceSubsystem::HandleRemoveChannel(UChanneldConnection* Conn, ChannelId ChId,
+	const google::protobuf::Message* Msg)
+{
+	auto RemoveResultMsg = static_cast<const channeldpb::RemoveChannelMessage*>(Msg);
+	OnRemoveChannel.Broadcast(ChId, RemoveResultMsg->channelid());
 }
 
 void UChanneldGameInstanceSubsystem::HandleSubToChannel(UChanneldConnection* Conn, ChannelId ChId,
@@ -244,15 +275,12 @@ void UChanneldGameInstanceSubsystem::HandleChannelDataUpdate(UChanneldConnection
 	auto UpdateResultMsg = static_cast<const channeldpb::ChannelDataUpdateMessage*>(Msg);
 	const google::protobuf::Any& AnyData = UpdateResultMsg->data();
 
-	const google::protobuf::Message* DataMsgPrototype = ChannelTypeToMsgPrototypeMapping.FindRef(GetChannelTypeByChId(ChId));
-	if (ensureMsgf(DataMsgPrototype != nullptr, TEXT("ChannelType: %d has no corresponding prototype. Please register message prototype befor recive data update by function: RegisterChannelTypeByFullName"), GetChannelTypeByChId(ChId)))
+	UProtoMessageObject* MessageObject = NewObject<UProtoMessageObject>();
+	bool Success;
+	CreateMessageObjectByChannelType(MessageObject, Success, GetChannelTypeByChId(ChId));
+	if (ensureMsgf((Success && MessageObject->GetMessage() != nullptr), TEXT("ChannelType: %d is not registered. Please register ChannelType befor recive data update by function: RegisterChannelTypeByFullName"), GetChannelTypeByChId(ChId)))
 	{
-		google::protobuf::Message* DataMsg = DataMsgPrototype->New();
-		AnyData.UnpackTo(DataMsg);
-
-		UProtoMessageObject* MessageObject = NewObject<UProtoMessageObject>();
-		MessageObject->SetMessagePtr(DataMsg, true);
-
+		AnyData.UnpackTo(MessageObject->GetMessage());
 		OnDataUpdate.Broadcast(ChId, GetChannelTypeByChId(ChId), MessageObject, UpdateResultMsg->contextconnid());
 	}
 }
