@@ -18,7 +18,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FChanneldAuthenticatedDelegate, UChanneldCon
 typedef TFunction<void(UChanneldConnection*, ChannelId, const google::protobuf::Message*)> FChanneldMessageHandlerFunc;
 typedef TFunction<void(ChannelId, ConnectionId, const std::string&)> FUserSpaceMessageHandlerFunc;
 
-UCLASS(transient, config=ChanneldUE)
+UCLASS(transient, config = ChanneldUE)
 class CHANNELDUE_API UChanneldConnection : public UObject, public FRunnable
 {
 	GENERATED_BODY()
@@ -104,6 +104,14 @@ public:
 
 	void Auth(const FString& PIT, const FString& LT, const TFunction<void(const channeldpb::AuthResultMessage*)>& Callback = nullptr);
 	void CreateChannel(channeldpb::ChannelType ChannelType, const FString& Metadata, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const google::protobuf::Message* Data = nullptr, channeldpb::ChannelDataMergeOptions* MergeOptions = nullptr, const TFunction<void(const channeldpb::CreateChannelResultMessage*)>& Callback = nullptr);
+
+	/**
+	 * Remove Channel by channel Id
+	 *
+	 * @param ChannelToRemove   The channel to remove, make sure the invoker is the owner of the channel or owner of global
+	 */
+	void RemoveChannel(uint32 ChannelToRemove, const TFunction<void(const channeldpb::RemoveChannelMessage*)>& Callback = nullptr);
+
 	void SubToChannel(ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
 	void SubConnectionToChannel(ConnectionId ConnId, ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
 
@@ -111,18 +119,18 @@ public:
 	void TickOutgoing();
 
 	UPROPERTY(Config)
-	int32 ReceiveBufferSize = MaxPacketSize;
+		int32 ReceiveBufferSize = MaxPacketSize;
 
 	UPROPERTY(Config)
-	bool bShowUserSpaceMessageLog = false;
+		bool bShowUserSpaceMessageLog = false;
 
 	FChanneldAuthenticatedDelegate OnAuthenticated;
 
 	FUserSpaceMessageHandlerFunc UserSpaceMessageHandlerFunc = nullptr;
 
-	TMap<ChannelId, channeldpb::SubscribedToChannelResultMessage*> SubscribedChannels;
-	TMap<ChannelId, const channeldpb::CreateChannelResultMessage*> OwnedChannels;
-	TMap<ChannelId, const channeldpb::ListChannelResultMessage_ChannelInfo*> ListedChannels;
+	TMap<ChannelId, FSubscribedChannelInfo> SubscribedChannels;
+	TMap<ChannelId, FOwnedChannelInfo> OwnedChannels;
+	TMap<ChannelId, FListedChannelInfo> ListedChannels;
 
 private:
 	channeldpb::ConnectionType ConnectionType = channeldpb::NO_CONNECTION;
