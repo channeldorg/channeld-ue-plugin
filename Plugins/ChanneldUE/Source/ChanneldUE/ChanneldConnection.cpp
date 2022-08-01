@@ -543,9 +543,9 @@ void UChanneldConnection::HandleSubToChannel(UChanneldConnection* Conn, ChannelI
 	}
 	else
 	{
-		// All connections without owner sub to the owned channel
+		// Other than channel owner
 		FOwnedChannelInfo* ExistingOwnedChannel = OwnedChannels.Find(ChId);
-		if (ensureMsgf(ExistingOwnedChannel != nullptr, TEXT("Dont own the channel: %d, SubscribedToChannelResultMessage will only be sent to channel owners or subscribers"), ChId))
+		if (ensureMsgf(ExistingOwnedChannel != nullptr, TEXT("Received other connnection's SubscribedToChannelResultMessage while not owning the channel, Channel ID: %d"), ChId))
 		{
 			FSubscribedChannelInfo SubscribedInfo;
 			SubscribedInfo.Merge(*SubMsg);
@@ -563,9 +563,9 @@ void UChanneldConnection::HandleUnsubFromChannel(UChanneldConnection* Conn, Chan
 	}
 	else
 	{
-		// All connections without owner sub to the owned channel
+		// Other than channel owner
 		FOwnedChannelInfo* ExistingOwnedChannel = OwnedChannels.Find(ChId);
-		if (ensureMsgf(ExistingOwnedChannel != nullptr, TEXT("Dont own the channel: %d, SubscribedToChannelResultMessage will only be sent to channel owners or subscribers"), ChId))
+		if (ensureMsgf(ExistingOwnedChannel != nullptr, TEXT("Received other connnection's SubscribedToChannelResultMessage while not owning the channel, Channel ID: %d"), ChId))
 		{
 			ExistingOwnedChannel->Subscribeds.Remove(UnsubMsg->connid());
 		}

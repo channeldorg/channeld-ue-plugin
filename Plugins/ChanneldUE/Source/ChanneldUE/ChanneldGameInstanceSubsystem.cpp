@@ -167,7 +167,7 @@ void UChanneldGameInstanceSubsystem::SendDataUpdate(int32 ChId, UProtoMessageObj
 void UChanneldGameInstanceSubsystem::ServerBroadcast(int32 ChId, int32 ClientConnId, UProtoMessageObject* MessageObject,
 	EChanneldBroadcastType BroadcastType)
 {
-	if (GetWorld()->GetNetMode() == NM_Client)
+	if (ConnectionInstance->IsClient())
 	{
 		return;
 	}
