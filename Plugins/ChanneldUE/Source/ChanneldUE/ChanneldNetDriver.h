@@ -35,17 +35,25 @@ public:
 	//~ Begin UNetDriver Interface.
 	virtual void Shutdown() override;
 	virtual bool IsAvailable() const override;
+	// Always use UChanneldNetConnection
 	virtual bool InitConnectionClass() override;
+	// Connect to channeld
 	virtual bool InitBase(bool bInitAsClient, FNetworkNotify* InNotify, const FURL& URL, bool bReuseAddressAndPort, FString& Error) override;
+	// Create NetConnection for client (ServerConnection)
 	virtual bool InitConnect(FNetworkNotify* InNotify, const FURL& ConnectURL, FString& Error) override;
+	// Connect to channeld. Do nothing else.
 	virtual bool InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bool bReuseAddressAndPort, FString& Error) override;
+	// Receive packets from channeld by calling ChanneldConnection.TickIncoming()
 	virtual void TickDispatch(float DeltaTime) override;
+	// Send packets to channeld by calling ChanneldConnection.TickOutgoing()
 	virtual void TickFlush(float DeltaSeconds) override;
 
 	virtual class ISocketSubsystem* GetSocketSubsystem() override;
 	virtual FUniqueSocket CreateSocketForProtocol(const FName& ProtocolType) override;
 	virtual FUniqueSocket CreateAndBindSocket(TSharedRef<FInternetAddr> BindAddr, int32 Port, bool bReuseAddressAndPort, int32 DesiredRecvSize, int32 DesiredSendSize, FString& Error) override;
 	virtual FSocket* GetSocket() override;
+	// Client: send raw packet to server via channeld
+	// Server: send or broadcast ServerForwardMessage to client via channeld
 	virtual void LowLevelSend(TSharedPtr<const FInternetAddr> Address, void* Data, int32 CountBits, FOutPacketTraits& Traits) override;
 	virtual void LowLevelDestroy() override;
 	virtual bool IsNetResourceValid(void) override;
@@ -84,7 +92,11 @@ private:
 	UChanneldConnection* ConnToChanneld;
 
 	FURL InitBaseURL;
+	// Queue the data from LowLevelSend() when the connection and authentication to channeld is not finished yet,
+	// and send them after the authentication is done.
 	TQueue<TTuple<TSharedPtr<const FInternetAddr>, std::string*, FOutPacketTraits*>> LowLevelSendDataBeforeAuth;
+
+	// Cache the FInternetAddr so it won't be created again every time when mapping from ConnectionId.
 	TMap<ConnectionId, TSharedRef<FInternetAddr>> CachedAddr;
 
 	TMap<ConnectionId, UChanneldNetConnection*> ClientConnectionMap;

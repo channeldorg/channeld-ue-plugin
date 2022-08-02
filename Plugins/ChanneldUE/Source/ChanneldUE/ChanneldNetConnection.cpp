@@ -10,7 +10,7 @@ UChanneldNetConnection::UChanneldNetConnection(const FObjectInitializer& ObjectI
 void UChanneldNetConnection::InitBase(UNetDriver* InDriver, class FSocket* InSocket, const FURL& InURL, EConnectionState InState, int32 InMaxPacket /*= 0*/, int32 InPacketOverhead /*= 0*/)
 {
 	Super::InitBase(InDriver, InSocket, InURL, EConnectionState::USOCK_Open, InMaxPacket, InPacketOverhead);
-	// Reset the PacketHandler to remove the StatelessConnectHandler and bypass the handshake.
+	// Reset the PacketHandler to remove the StatelessConnectHandler and bypass the handshake process.
 	Handler.Reset(NULL);
 }
 

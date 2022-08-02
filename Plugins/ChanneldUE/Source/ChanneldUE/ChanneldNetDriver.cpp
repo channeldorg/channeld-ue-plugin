@@ -13,12 +13,7 @@
 
 UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
-{
-	//ChanneldIpForServer = "127.0.0.1";
-	//ChanneldPortForServer = 11288;
-	//ChanneldIpForClient = "127.0.0.1";
-	//ChanneldPortForClient = 12108;
-	
+{	
 	ConnToChanneld = NewObject<UChanneldConnection>();
 
 	TestChannelData = new testpb::TestChannelDataMessage();
@@ -62,6 +57,7 @@ UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializ
 				
 				ClientConnectionMap.Add(ClientConnId, ClientConnection);
 			}
+
 			ClientConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
 		}
 	};
@@ -142,17 +138,47 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 		return false;
 	}
 
-	return Super::InitBase(bInitAsClient, InNotify, URL, bReuseAddressAndPort, Error);
+	return UNetDriver::InitBase(bInitAsClient, InNotify, URL, bReuseAddressAndPort, Error);
 }
 
 bool UChanneldNetDriver::InitConnect(FNetworkNotify* InNotify, const FURL& ConnectURL, FString& Error)
 {
-	//return true; 
+	ISocketSubsystem* SocketSubsystem = GetSocketSubsystem();
+	if (SocketSubsystem == nullptr)
+	{
+		UE_LOG(LogNet, Warning, TEXT("Unable to find socket subsystem"));
+		return false;
+	}
+
+	if (!InitBase(true, InNotify, ConnectURL, false, Error))
+	{
+		UE_LOG(LogNet, Warning, TEXT("Failed to init net driver ConnectURL: %s: %s"), *ConnectURL.ToString(), *Error);
+		return false;
+	}
+
+	// Create new connection.
+	ServerConnection = NewObject<UNetConnection>(GetTransientPackage(), NetConnectionClass);
+	UIpConnection* IPConnection = CastChecked<UIpConnection>(ServerConnection);
+
+	if (IPConnection == nullptr)
+	{
+		Error = TEXT("Could not cast the ServerConnection into the base connection class for this netdriver!");
+		return false;
+	}
+
+	ServerConnection->InitLocalConnection(this, GetSocket(), ConnectURL, USOCK_Open);
+
+	UE_LOG(LogNet, Log, TEXT("Game client on port %i, rate %i"), ConnectURL.Port, ServerConnection->CurrentNetSpeed);
+	CreateInitialClientChannels();
+
+	/* IpNetDriver::InitConnect causes exception by using unset Socket 
 	bool bResult = Super::InitConnect(InNotify, ConnectURL, Error);
-	//auto NetConn = CastChecked<UChanneldNetConnection>(ServerConnection);
-	//NetConn->ResolutionState = EResolutionState::Connected;
-	
-	ServerConnection->State = USOCK_Open;
+
+	if (bResult && ServerConnection)
+	{
+		ServerConnection->State = USOCK_Open;
+	}
+	*/
 
 	/* Copied from SteamSocketNetDriver.cpp
 	// Attempt to start the PacketHandler handshakes (we do not support stateless connect)
@@ -163,7 +189,7 @@ bool UChanneldNetDriver::InitConnect(FNetworkNotify* InNotify, const FURL& Conne
 	}
 	*/
 
-	return bResult;
+	return true;
 }
 
 bool UChanneldNetDriver::InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bool bReuseAddressAndPort, FString& Error)
@@ -181,8 +207,7 @@ ISocketSubsystem* UChanneldNetDriver::GetSocketSubsystem()
 FUniqueSocket UChanneldNetDriver::CreateSocketForProtocol(const FName& ProtocolType)
 {
 	ISocketSubsystem* SocketSubsystem = GetSocketSubsystem();
-
-	if (SocketSubsystem == NULL)
+	if (SocketSubsystem == nullptr)
 	{
 		UE_LOG(LogNet, Warning, TEXT("UChanneldNetDriver::CreateSocket: Unable to find socket subsystem"));
 		return NULL;
@@ -264,10 +289,11 @@ FUniqueSocket UChanneldNetDriver::CreateAndBindSocket(TSharedRef<FInternetAddr> 
 
 FSocket* UChanneldNetDriver::GetSocket()
 {
-	return Super::GetSocket();
-	// TODO: return the Socket to channeld
+	//return Super::GetSocket();
+	// Return the Socket to channeld
+	return ConnToChanneld->GetSocket();
 
-	// SetSocket can't be overriden
+	// SetSocket can't be overridden
 }
 
 void UChanneldNetDriver::LowLevelSend(TSharedPtr<const FInternetAddr> Address, void* Data, int32 CountBits,
@@ -312,6 +338,7 @@ void UChanneldNetDriver::LowLevelSend(TSharedPtr<const FInternetAddr> Address, v
 
 void UChanneldNetDriver::LowLevelDestroy()
 {
+	ConnToChanneld->Disconnect(true);
 	Super::LowLevelDestroy();
 }
 
@@ -354,17 +381,16 @@ void UChanneldNetDriver::TickDispatch(float DeltaTime)
 {
 	//Super::TickDispatch(DeltaTime);
 
-	
 	if (IsValid(ConnToChanneld) && ConnToChanneld->IsConnected())
 		ConnToChanneld->TickIncoming();
-
 }
 
 void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 {
+	// Trigger the callings of LowLevelSend()
 	Super::TickFlush(DeltaSeconds);
 
-	if (ConnToChanneld->IsConnected())
+	if (IsValid(ConnToChanneld) && ConnToChanneld->IsConnected())
 		ConnToChanneld->TickOutgoing();
 }
 
@@ -379,7 +405,7 @@ void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 		delete data;
 	}
 
-	if (IsServer())
+	if (ConnToChanneld->IsServer())
 	{
 		ConnToChanneld->CreateChannel(channeldpb::GLOBAL, TEXT("test123"), nullptr, nullptr, nullptr,
 			[&](const channeldpb::CreateChannelResultMessage* ResultMsg)

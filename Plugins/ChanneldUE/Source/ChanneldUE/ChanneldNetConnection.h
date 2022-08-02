@@ -15,7 +15,12 @@ public:
 	// Constructors.
 	UChanneldNetConnection(const FObjectInitializer& ObjectInitializer);
 
-	//FORCEINLINE uint32 GetConnId() { return ConnId; }
+	FORCEINLINE uint32 GetConnId() 
+	{
+		uint32 ConnId;
+		RemoteAddr->GetIp(ConnId);
+		return ConnId;
+	}
 
 	virtual void InitBase(UNetDriver* InDriver, class FSocket* InSocket, const FURL& InURL, EConnectionState InState, int32 InMaxPacket = 0, int32 InPacketOverhead = 0) override;
 	virtual void LowLevelSend(void* Data, int32 CountBits, FOutPacketTraits& Traits) override;

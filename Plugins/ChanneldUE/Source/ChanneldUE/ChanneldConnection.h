@@ -77,7 +77,8 @@ public:
 		Entry->Delegate.RemoveAll(InUserObject);
 	}
 
-	//FORCEINLINE FSocket* GetSocket() { return Socket; }
+	FORCEINLINE FSocket* GetSocket() { return Socket; }
+	
 	FORCEINLINE ConnectionId GetConnId()
 	{
 		ensureMsgf(ConnId != 0, TEXT("ConnId is 0 which means the connection is not authorized yet"));
