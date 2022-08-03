@@ -10,19 +10,18 @@
 #include "IpConnection.h"
 #include "Engine/NetConnection.h"
 #include "PacketHandler.h"
+#include "Net/Core/Misc/PacketAudit.h"
 
 UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {	
 	ConnToChanneld = NewObject<UChanneldConnection>();
 
-	TestChannelData = new testpb::TestChannelDataMessage();
-
 	ConnToChanneld->UserSpaceMessageHandlerFunc = [&](ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload)
 	{
 		if (ConnToChanneld->IsClient())
 		{
-			const auto MyServerConnection = GetServerConnection();
+			const auto MyServerConnection = CastChecked<UChanneldNetConnection>(GetServerConnection());
 			if (MyServerConnection)
 			{
 				MyServerConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
@@ -35,29 +34,12 @@ UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializ
 		else
 		{
 			auto ClientConnection = ClientConnectionMap.FindRef(ClientConnId);
+			// Server's ClientConnection is created when the first packet from client arrives.
 			if (ClientConnection == nullptr)
 			{
-				ClientConnection = NewObject<UChanneldNetConnection>(GetTransientPackage(), NetConnectionClass);
-				ClientConnection->InitRemoteConnection(this, GetSocket(), InitBaseURL, ConnIdToAddr(ClientConnId), EConnectionState::USOCK_Open);
-
-				/* Copied from SteamSocketNetDriver.cpp
-				// Set up the sequence numbers. Valve uses their own, but so do we so to prevent
-				// reinventing the wheel, we'll set up our sequence numbers to be some random garbage
-				ClientConnection->InitSequence(4, 4);
-
-				// Attempt to start the PacketHandler handshakes (we do not support stateless connect)
-				if (ClientConnection->Handler.IsValid())
-				{
-					ClientConnection->Handler->BeginHandshaking();
-				}
-				*/
-
-				Notify->NotifyAcceptedConnection(ClientConnection);
-				AddClientConnection(ClientConnection);
-				
-				ClientConnectionMap.Add(ClientConnId, ClientConnection);
+				ClientConnection = OnClientConnected(ConnToChanneld->GetConnId());
+				ClientConnection->RemoteAddr = ConnIdToAddr(ConnToChanneld->GetConnId());
 			}
-
 			ClientConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
 		}
 	};
@@ -67,6 +49,23 @@ UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializ
 	ConnToChanneld->AddMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, this, &UChanneldNetDriver::HandleChannelDataUpdate);
 }
 
+UChanneldNetConnection* UChanneldNetDriver::OnClientConnected(ConnectionId ClientConnId)
+{
+	auto ClientConnection = NewObject<UChanneldNetConnection>(GetTransientPackage(), NetConnectionClass);
+	ClientConnection->bDisableHandshaking = bDisableHandshaking;
+	ClientConnection->InitRemoteConnection(this, GetSocket(), InitBaseURL, ConnIdToAddr(ClientConnId).Get(), EConnectionState::USOCK_Open);
+
+	Notify->NotifyAcceptedConnection(ClientConnection);
+	AddClientConnection(ClientConnection);
+
+	ClientConnectionMap.Add(ClientConnId, ClientConnection);
+
+	if (ConnectionlessHandler.IsValid() && StatelessConnectComponent.IsValid())
+	{
+		ClientConnection->bInConnectionlessHandshake = true;
+	}
+	return ClientConnection;
+}
 
 ConnectionId UChanneldNetDriver::AddrToConnId(const FInternetAddr& Addr)
 {
@@ -75,7 +74,7 @@ ConnectionId UChanneldNetDriver::AddrToConnId(const FInternetAddr& Addr)
 	return ConnId;
 }
 
-FInternetAddr& UChanneldNetDriver::ConnIdToAddr(ConnectionId ConnId)
+TSharedRef<FInternetAddr> UChanneldNetDriver::ConnIdToAddr(ConnectionId ConnId)
 {
 	auto AddrPtr = CachedAddr.Find(ConnId);
 	if (AddrPtr == nullptr)
@@ -85,7 +84,7 @@ FInternetAddr& UChanneldNetDriver::ConnIdToAddr(ConnectionId ConnId)
 		CachedAddr.Add(ConnId, Addr);
 		AddrPtr = &Addr;
 	}
-	return AddrPtr->Get();
+	return *AddrPtr;
 }
 
 void UChanneldNetDriver::PostInitProperties()
@@ -156,17 +155,26 @@ bool UChanneldNetDriver::InitConnect(FNetworkNotify* InNotify, const FURL& Conne
 		return false;
 	}
 
+	/* Driver->ConnectionlessHandler is only used in server
+	if (!bDisableHandshaking)
+	{
+		InitConnectionlessHandler();
+	}
+	*/
+
 	// Create new connection.
 	ServerConnection = NewObject<UNetConnection>(GetTransientPackage(), NetConnectionClass);
-	UIpConnection* IPConnection = CastChecked<UIpConnection>(ServerConnection);
+	UChanneldNetConnection* NetConnection = CastChecked<UChanneldNetConnection>(ServerConnection);
 
-	if (IPConnection == nullptr)
+	if (NetConnection == nullptr)
 	{
 		Error = TEXT("Could not cast the ServerConnection into the base connection class for this netdriver!");
 		return false;
 	}
 
 	ServerConnection->InitLocalConnection(this, GetSocket(), ConnectURL, USOCK_Open);
+	NetConnection->bDisableHandshaking = bDisableHandshaking;
+	NetConnection->bInConnectionlessHandshake = true;
 
 	UE_LOG(LogNet, Log, TEXT("Game client on port %i, rate %i"), ConnectURL.Port, ServerConnection->CurrentNetSpeed);
 	CreateInitialClientChannels();
@@ -194,7 +202,19 @@ bool UChanneldNetDriver::InitConnect(FNetworkNotify* InNotify, const FURL& Conne
 
 bool UChanneldNetDriver::InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bool bReuseAddressAndPort, FString& Error)
 {
-	return InitBase(false, InNotify, LocalURL, bReuseAddressAndPort, Error);
+
+	if (!InitBase(false, InNotify, LocalURL, bReuseAddressAndPort, Error))
+	{
+		UE_LOG(LogNet, Warning, TEXT("Failed to init net driver ListenURL: %s: %s"), *LocalURL.ToString(), *Error);
+		return false;
+	}
+
+	if (!bDisableHandshaking)
+	{
+		InitConnectionlessHandler();
+	}
+	return true;
+
 	//return Super::InitListen(InNotify, LocalURL, bReuseAddressAndPort, Error);
 }
 
@@ -301,26 +321,59 @@ void UChanneldNetDriver::LowLevelSend(TSharedPtr<const FInternetAddr> Address, v
 {
 	//Super::LowLevelSend(Address, Data, CountBits, Traits);
 
+	// The packet sent to channeld before the authentication is finished (e.g. Handshake, Join) should be queued
 	if (!ConnToChanneld->IsAuthenticated())
 	{
-		
 		LowLevelSendDataBeforeAuth.Enqueue(MakeTuple(Address, new std::string(reinterpret_cast<const char*>(Data), FMath::DivideAndRoundUp(CountBits, 8)), &Traits));
 	}
 	else
 	{
 		// Copied from UIpNetDriver::LowLevelSend
-		const uint8* DataToSend = reinterpret_cast<uint8*>(Data);
+		uint8* DataToSend = reinterpret_cast<uint8*>(Data);
 		int32 DataSize = FMath::DivideAndRoundUp(CountBits, 8);
 
 		//int32 BytesSent = 0;
 		if (CountBits > 0 && ConnToChanneld->IsConnected())
 		{
+			FPacketAudit::NotifyLowLevelReceive(DataToSend, DataSize);
+
+			if (!bDisableHandshaking)
+			{
+				ProcessedPacket ProcessedData;
+				bool bProcessed = false;
+				
+				if (ConnToChanneld->IsServer() && ConnectionlessHandler.IsValid())
+				{
+					ProcessedData = ConnectionlessHandler->OutgoingConnectionless(Address, DataToSend, CountBits, Traits);
+					bProcessed = true;
+				}
+				else if (ConnToChanneld->IsClient() && ServerConnection->Handler.IsValid() && ServerConnection->Handler->GetRawSend())
+				{
+					ProcessedData = ServerConnection->Handler->OutgoingConnectionless(Address, DataToSend, CountBits, Traits);
+					bProcessed = true;
+				}
+
+				if (bProcessed)
+				{
+					if (!ProcessedData.bError)
+					{
+						DataToSend = ProcessedData.Data;
+						DataSize = FMath::DivideAndRoundUp(ProcessedData.CountBits, 8);
+					}
+					else
+					{
+						return;
+					}
+				}
+			}
+
+
 			if (ConnToChanneld->IsServer())
 			{
 				ConnectionId ClientConnId = AddrToConnId(*Address);
 				channeldpb::ServerForwardMessage ServerForwardMessage;
 				ServerForwardMessage.set_clientconnid(ClientConnId);
-				ServerForwardMessage.set_payload(Data, DataSize);
+				ServerForwardMessage.set_payload(DataToSend, DataSize);
 				CLOCK_CYCLES(SendCycles);
 				ConnToChanneld->Send(LowLevelSendToChannelId, channeldpb::USER_SPACE_START, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
 				UNCLOCK_CYCLES(SendCycles);
@@ -355,24 +408,6 @@ void UChanneldNetDriver::RegisterChannelDataProvider(IChannelDataProvider* Provi
 int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 {
 	auto const Result = Super::ServerReplicateActors(DeltaSeconds);
-
-	int32 Updated = 0;
-	for (auto const Provider : ChannelDataProviders)
-	{
-		Updated += Provider->UpdateChannelData(TestChannelData);
-	}
-
-	if (Updated > 0)
-	{
-		const auto ByteString = TestChannelData->SerializeAsString();
-		UE_LOG(LogTemp, Log, TEXT("TestChannelData has %d update(s). Serialized: %s"), Updated, ByteString.c_str());
-
-		// Send to channeld
-		channeldpb::ChannelDataUpdateMessage UpdateMsg;
-		UpdateMsg.mutable_data()->PackFrom(*TestChannelData);
-		ConnToChanneld->Send(0, channeldpb::CHANNEL_DATA_UPDATE, UpdateMsg);
-	}
-
 	return Result;
 }
 
@@ -380,6 +415,7 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 void UChanneldNetDriver::TickDispatch(float DeltaTime)
 {
 	//Super::TickDispatch(DeltaTime);
+	UNetDriver::TickDispatch(DeltaTime);
 
 	if (IsValid(ConnToChanneld) && ConnToChanneld->IsConnected())
 		ConnToChanneld->TickIncoming();
@@ -394,17 +430,20 @@ void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 		ConnToChanneld->TickOutgoing();
 }
 
-void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
+void UChanneldNetDriver::FlushUnauthData()
 {
 	while (!LowLevelSendDataBeforeAuth.IsEmpty())
 	{
 		TTuple<TSharedPtr<const FInternetAddr>, std::string*, FOutPacketTraits*> Params;
 		LowLevelSendDataBeforeAuth.Dequeue(Params);
 		std::string* data = Params.Get<1>();
-		LowLevelSend(Params.Get<0>(), (uint8*)data->data(), data->size()*8, *Params.Get<2>());
+		LowLevelSend(Params.Get<0>(), (uint8*)data->data(), data->size() * 8, *Params.Get<2>());
 		delete data;
 	}
+}
 
+void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
+{
 	if (ConnToChanneld->IsServer())
 	{
 		ConnToChanneld->CreateChannel(channeldpb::GLOBAL, TEXT("test123"), nullptr, nullptr, nullptr,
@@ -420,14 +459,19 @@ void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 						Provider->SetChannelId(ResultMsg->channelid());
 					}
 				}
+
+				FlushUnauthData();
 			});
 	}
 	else
 	{
+		ServerConnection->RemoteAddr = ConnIdToAddr(ConnToChanneld->GetConnId());
+
 		ChannelId ChIdToSub = GlobalChannelId;
 		ConnToChanneld->SubToChannel(ChIdToSub, nullptr, [&, ChIdToSub](const channeldpb::SubscribedToChannelResultMessage* Msg)
 			{
 				UE_LOG(LogChanneld, Log, TEXT("[%s] Sub to channel: %d, connId: %d"), *GetWorld()->GetDebugDisplayName(), ChIdToSub, Msg->connid());
+				FlushUnauthData();
 			});
 	}
 

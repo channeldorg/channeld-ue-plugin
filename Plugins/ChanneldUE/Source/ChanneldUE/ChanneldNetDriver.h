@@ -59,6 +59,8 @@ public:
 	virtual bool IsNetResourceValid(void) override;
 	//~ End UNetDriver Interface
 
+	void FlushUnauthData();
+
 	virtual int32 ServerReplicateActors(float DeltaSeconds) override;
 
 	void RegisterChannelDataProvider(IChannelDataProvider* Provider);
@@ -66,7 +68,7 @@ public:
 	UChanneldConnection* GetConnection() { return ConnToChanneld; }
 
 	ConnectionId AddrToConnId(const FInternetAddr& Addr);
-	FInternetAddr& ConnIdToAddr(ConnectionId ConnId);
+	TSharedRef<FInternetAddr> ConnIdToAddr(ConnectionId ConnId);
 
 	UPROPERTY(Config)
 	FString ChanneldIpForClient = "127.0.0.1";
@@ -77,11 +79,13 @@ public:
 	UPROPERTY(Config)
 	uint32 ChanneldPortForServer = 11288;
 
+	UPROPERTY(Config)
+	bool bDisableHandshaking = true;
+
+
 	//TMap<ChannelId, TSubclassOf<google::protobuf::Message>> ChannelDataClasses;
 
 	TSet<IChannelDataProvider*> ChannelDataProviders;
-
-	testpb::TestChannelDataMessage* TestChannelData;
 
 	ChannelId LowLevelSendToChannelId = GlobalChannelId;
 
@@ -102,6 +106,7 @@ private:
 	TMap<ConnectionId, UChanneldNetConnection*> ClientConnectionMap;
 
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
+	UChanneldNetConnection* OnClientConnected(ConnectionId ClientConnId);
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 
 };
