@@ -7,7 +7,6 @@
 #include "Net/RepLayout.h"
 #include "Misc/ScopeExit.h"
 #include "google/protobuf/message_lite.h"
-#include "IpConnection.h"
 #include "Engine/NetConnection.h"
 #include "PacketHandler.h"
 #include "Net/Core/Misc/PacketAudit.h"
@@ -21,7 +20,7 @@ UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializ
 	{
 		if (ConnToChanneld->IsClient())
 		{
-			const auto MyServerConnection = CastChecked<UChanneldNetConnection>(GetServerConnection());
+			const auto MyServerConnection = GetServerConnection();
 			if (MyServerConnection)
 			{
 				MyServerConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
@@ -320,70 +319,46 @@ void UChanneldNetDriver::LowLevelSend(TSharedPtr<const FInternetAddr> Address, v
 	FOutPacketTraits& Traits)
 {
 	//Super::LowLevelSend(Address, Data, CountBits, Traits);
-
-	// The packet sent to channeld before the authentication is finished (e.g. Handshake, Join) should be queued
-	if (!ConnToChanneld->IsAuthenticated())
-	{
-		LowLevelSendDataBeforeAuth.Enqueue(MakeTuple(Address, new std::string(reinterpret_cast<const char*>(Data), FMath::DivideAndRoundUp(CountBits, 8)), &Traits));
-	}
-	else
+	
+	if (ConnToChanneld->IsConnected() && Address.IsValid() && Address->IsValid())
 	{
 		// Copied from UIpNetDriver::LowLevelSend
 		uint8* DataToSend = reinterpret_cast<uint8*>(Data);
 		int32 DataSize = FMath::DivideAndRoundUp(CountBits, 8);
 
-		//int32 BytesSent = 0;
-		if (CountBits > 0 && ConnToChanneld->IsConnected())
+		FPacketAudit::NotifyLowLevelReceive(DataToSend, DataSize);
+
+		if (!bDisableHandshaking && ConnectionlessHandler.IsValid())
 		{
-			FPacketAudit::NotifyLowLevelReceive(DataToSend, DataSize);
+			const ProcessedPacket ProcessedData =
+				ConnectionlessHandler->OutgoingConnectionless(Address, (uint8*)DataToSend, CountBits, Traits);
 
-			if (!bDisableHandshaking)
+			if (!ProcessedData.bError)
 			{
-				ProcessedPacket ProcessedData;
-				bool bProcessed = false;
-				
-				if (ConnToChanneld->IsServer() && ConnectionlessHandler.IsValid())
-				{
-					ProcessedData = ConnectionlessHandler->OutgoingConnectionless(Address, DataToSend, CountBits, Traits);
-					bProcessed = true;
-				}
-				else if (ConnToChanneld->IsClient() && ServerConnection->Handler.IsValid() && ServerConnection->Handler->GetRawSend())
-				{
-					ProcessedData = ServerConnection->Handler->OutgoingConnectionless(Address, DataToSend, CountBits, Traits);
-					bProcessed = true;
-				}
-
-				if (bProcessed)
-				{
-					if (!ProcessedData.bError)
-					{
-						DataToSend = ProcessedData.Data;
-						DataSize = FMath::DivideAndRoundUp(ProcessedData.CountBits, 8);
-					}
-					else
-					{
-						return;
-					}
-				}
-			}
-
-
-			if (ConnToChanneld->IsServer())
-			{
-				ConnectionId ClientConnId = AddrToConnId(*Address);
-				channeldpb::ServerForwardMessage ServerForwardMessage;
-				ServerForwardMessage.set_clientconnid(ClientConnId);
-				ServerForwardMessage.set_payload(DataToSend, DataSize);
-				CLOCK_CYCLES(SendCycles);
-				ConnToChanneld->Send(LowLevelSendToChannelId, channeldpb::USER_SPACE_START, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
-				UNCLOCK_CYCLES(SendCycles);
+				DataToSend = ProcessedData.Data;
+				DataSize = FMath::DivideAndRoundUp(ProcessedData.CountBits, 8);
 			}
 			else
 			{
-				CLOCK_CYCLES(SendCycles);
-				ConnToChanneld->SendRaw(LowLevelSendToChannelId, channeldpb::USER_SPACE_START, DataToSend, DataSize);
-				UNCLOCK_CYCLES(SendCycles);
+				return;
 			}
+		}
+
+		if (ConnToChanneld->IsServer())
+		{
+			ConnectionId ClientConnId = AddrToConnId(*Address);
+			channeldpb::ServerForwardMessage ServerForwardMessage;
+			ServerForwardMessage.set_clientconnid(ClientConnId);
+			ServerForwardMessage.set_payload(DataToSend, DataSize);
+			CLOCK_CYCLES(SendCycles);
+			ConnToChanneld->Send(LowLevelSendToChannelId, channeldpb::USER_SPACE_START, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
+			UNCLOCK_CYCLES(SendCycles);
+		}
+		else
+		{
+			CLOCK_CYCLES(SendCycles);
+			ConnToChanneld->SendRaw(LowLevelSendToChannelId, channeldpb::USER_SPACE_START, DataToSend, DataSize);
+			UNCLOCK_CYCLES(SendCycles);
 		}
 	}
 	
@@ -430,17 +405,6 @@ void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 		ConnToChanneld->TickOutgoing();
 }
 
-void UChanneldNetDriver::FlushUnauthData()
-{
-	while (!LowLevelSendDataBeforeAuth.IsEmpty())
-	{
-		TTuple<TSharedPtr<const FInternetAddr>, std::string*, FOutPacketTraits*> Params;
-		LowLevelSendDataBeforeAuth.Dequeue(Params);
-		std::string* data = Params.Get<1>();
-		LowLevelSend(Params.Get<0>(), (uint8*)data->data(), data->size() * 8, *Params.Get<2>());
-		delete data;
-	}
-}
 
 void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 {
@@ -460,18 +424,20 @@ void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 					}
 				}
 
-				FlushUnauthData();
+				//FlushUnauthData();
 			});
 	}
 	else
 	{
-		ServerConnection->RemoteAddr = ConnIdToAddr(ConnToChanneld->GetConnId());
+		auto MyServerConnection = GetServerConnection();
+		MyServerConnection->RemoteAddr = ConnIdToAddr(ConnToChanneld->GetConnId());
 
 		ChannelId ChIdToSub = GlobalChannelId;
-		ConnToChanneld->SubToChannel(ChIdToSub, nullptr, [&, ChIdToSub](const channeldpb::SubscribedToChannelResultMessage* Msg)
+		ConnToChanneld->SubToChannel(ChIdToSub, nullptr, [&, ChIdToSub, MyServerConnection](const channeldpb::SubscribedToChannelResultMessage* Msg)
 			{
 				UE_LOG(LogChanneld, Log, TEXT("[%s] Sub to channel: %d, connId: %d"), *GetWorld()->GetDebugDisplayName(), ChIdToSub, Msg->connid());
-				FlushUnauthData();
+				MyServerConnection->bChanneldAuthenticated = true;
+				MyServerConnection->FlushUnauthData();
 			});
 	}
 

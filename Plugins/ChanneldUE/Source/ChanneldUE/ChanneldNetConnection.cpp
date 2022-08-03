@@ -54,8 +54,66 @@ void UChanneldNetConnection::LowLevelSend(void* Data, int32 CountBits, FOutPacke
 {
 	//Super::LowLevelSend(Data, CountBits, Traits);
 
-	auto ChanneldDriver = CastChecked<UChanneldNetDriver>(Driver);
-	ChanneldDriver->LowLevelSend(RemoteAddr, Data, CountBits, Traits);
+	int32 DataSize = FMath::DivideAndRoundUp(CountBits, 8);
+	// The packet sent to channeld before the authentication is finished (e.g. Handshake, Join) should be queued
+	if (!bChanneldAuthenticated)
+	{
+		LowLevelSendDataBeforeAuth.Enqueue(MakeTuple(new std::string(reinterpret_cast<const char*>(Data), DataSize), &Traits));
+	}
+	else
+	{
+		const uint8* DataToSend = reinterpret_cast<uint8*>(Data);
+		if (Handler.IsValid() && !Handler->GetRawSend())
+		{
+			const ProcessedPacket ProcessedData = Handler->Outgoing(reinterpret_cast<uint8*>(Data), CountBits, Traits);
+
+			if (!ProcessedData.bError)
+			{
+				DataToSend = ProcessedData.Data;
+				CountBits = ProcessedData.CountBits;
+				DataSize = FMath::DivideAndRoundUp(CountBits, 8);
+			}
+			else
+			{
+				return;
+			}
+		}
+
+		bool bBlockSend = false;
+		LowLevelSendDel.ExecuteIfBound((void*)DataToSend, DataSize, bBlockSend);
+
+		if (!bBlockSend && DataSize > 0)
+		{
+			auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
+			auto ConnToChanneld = NetDriver->GetConnToChanneld();
+			if (ConnToChanneld->IsServer())
+			{
+				channeldpb::ServerForwardMessage ServerForwardMessage;
+				ServerForwardMessage.set_clientconnid(GetConnId());
+				ServerForwardMessage.set_payload(DataToSend, DataSize);
+				ConnToChanneld->Send(LowLevelSendToChannelId, channeldpb::USER_SPACE_START, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
+			}
+			else
+			{
+				ConnToChanneld->SendRaw(LowLevelSendToChannelId, channeldpb::USER_SPACE_START, DataToSend, DataSize);
+			}
+
+		}
+	}
+	//auto ChanneldDriver = CastChecked<UChanneldNetDriver>(Driver);
+	//ChanneldDriver->LowLevelSend(RemoteAddr, Data, CountBits, Traits);
+}
+
+void UChanneldNetConnection::FlushUnauthData()
+{
+	while (!LowLevelSendDataBeforeAuth.IsEmpty())
+	{
+		TTuple<std::string*, FOutPacketTraits*> Params;
+		LowLevelSendDataBeforeAuth.Dequeue(Params);
+		std::string* data = Params.Get<0>();
+		LowLevelSend((uint8*)data->data(), data->size() * 8, *Params.Get<1>());
+		delete data;
+	}
 }
 
 void UChanneldNetConnection::ReceivedRawPacket(void* Data, int32 Count)

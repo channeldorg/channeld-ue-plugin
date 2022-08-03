@@ -12,7 +12,6 @@
 #include "Sockets.h"
 #include "SocketSubsystem.h"
 #include "google/protobuf/message.h"
-#include "Test.pb.h"
 #include "ChanneldNetDriver.generated.h"
 
 /**
@@ -59,16 +58,19 @@ public:
 	virtual bool IsNetResourceValid(void) override;
 	//~ End UNetDriver Interface
 
-	void FlushUnauthData();
-
 	virtual int32 ServerReplicateActors(float DeltaSeconds) override;
 
 	void RegisterChannelDataProvider(IChannelDataProvider* Provider);
 
-	UChanneldConnection* GetConnection() { return ConnToChanneld; }
+	UChanneldConnection* GetConnToChanneld() { return ConnToChanneld; }
 
 	ConnectionId AddrToConnId(const FInternetAddr& Addr);
 	TSharedRef<FInternetAddr> ConnIdToAddr(ConnectionId ConnId);
+
+	UChanneldNetConnection* GetServerConnection()
+	{
+		return CastChecked<UChanneldNetConnection>(ServerConnection);
+	}
 
 	UPROPERTY(Config)
 	FString ChanneldIpForClient = "127.0.0.1";
@@ -96,9 +98,6 @@ private:
 	UChanneldConnection* ConnToChanneld;
 
 	FURL InitBaseURL;
-	// Queue the data from LowLevelSend() when the connection and authentication to channeld is not finished yet,
-	// and send them after the authentication is done.
-	TQueue<TTuple<TSharedPtr<const FInternetAddr>, std::string*, FOutPacketTraits*>> LowLevelSendDataBeforeAuth;
 
 	// Cache the FInternetAddr so it won't be created again every time when mapping from ConnectionId.
 	TMap<ConnectionId, TSharedRef<FInternetAddr>> CachedAddr;
