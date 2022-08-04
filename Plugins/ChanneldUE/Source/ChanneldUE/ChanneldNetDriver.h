@@ -8,7 +8,6 @@
 #include "ChannelDataProvider.h"
 #include "ChanneldNetConnection.h"
 #include "Engine/NetDriver.h"
-#include "IpNetDriver.h"
 #include "Sockets.h"
 #include "SocketSubsystem.h"
 #include "google/protobuf/message.h"
@@ -18,7 +17,7 @@
  * 
  */
 UCLASS(transient, config=ChanneldUE)
-class CHANNELDUE_API UChanneldNetDriver : public UIpNetDriver
+class CHANNELDUE_API UChanneldNetDriver : public UNetDriver
 {
 	GENERATED_BODY()
 
@@ -48,9 +47,7 @@ public:
 	virtual void TickFlush(float DeltaSeconds) override;
 
 	virtual class ISocketSubsystem* GetSocketSubsystem() override;
-	virtual FUniqueSocket CreateSocketForProtocol(const FName& ProtocolType) override;
-	virtual FUniqueSocket CreateAndBindSocket(TSharedRef<FInternetAddr> BindAddr, int32 Port, bool bReuseAddressAndPort, int32 DesiredRecvSize, int32 DesiredSendSize, FString& Error) override;
-	virtual FSocket* GetSocket() override;
+	virtual FSocket* GetSocket();
 	// Client: send raw packet to server via channeld
 	// Server: send or broadcast ServerForwardMessage to client via channeld
 	virtual void LowLevelSend(TSharedPtr<const FInternetAddr> Address, void* Data, int32 CountBits, FOutPacketTraits& Traits) override;

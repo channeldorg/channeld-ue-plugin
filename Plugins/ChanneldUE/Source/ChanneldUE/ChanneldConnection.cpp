@@ -57,6 +57,11 @@ void UChanneldConnection::BeginDestroy()
 {
 	Super::BeginDestroy();
 	Disconnect(false);
+	if (Socket)
+	{
+		Socket->Shutdown(ESocketShutdownMode::ReadWrite);
+		delete Socket;
+	}
 }
 
 bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int Port, FString& Error)

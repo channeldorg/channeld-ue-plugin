@@ -14,12 +14,12 @@ void UChanneldNetConnection::InitBase(UNetDriver* InDriver, class FSocket* InSoc
 	// Pass the call up the chain
 	Super::InitBase(InDriver, InSocket, InURL, InState,
 		// Use the default packet size/overhead unless overridden by a child class
-		InMaxPacket == 0 ? MaxPacketSize : InMaxPacket,
+		InMaxPacket == 0 ? MAX_PACKET_SIZE : InMaxPacket,
 		InPacketOverhead == 0 ? MinPacketSize : InPacketOverhead);
 
 	if (bDisableHandshaking)
 	{
-		DisableAddressResolution();
+		//DisableAddressResolution();
 		// Reset the PacketHandler to remove the StatelessConnectHandler and bypass the handshake process.
 		Handler.Reset(NULL);
 	}
@@ -27,22 +27,27 @@ void UChanneldNetConnection::InitBase(UNetDriver* InDriver, class FSocket* InSoc
 
 void UChanneldNetConnection::InitLocalConnection(UNetDriver* InDriver, class FSocket* InSocket, const FURL& InURL, EConnectionState InState, int32 InMaxPacket /*= 0*/, int32 InPacketOverhead /*= 0*/)
 {
-	InitBase(InDriver, InSocket, InURL, InState,
-		// Use the default packet size/overhead unless overridden by a child class
-		InMaxPacket == 0 ? MaxPacketSize : InMaxPacket,
-		InPacketOverhead == 0 ? MinPacketSize : InPacketOverhead);
+	InitBase(InDriver, InSocket, InURL, InState, InMaxPacket, InPacketOverhead);
 
+	MaxPacket = MaxPacketSize;
+	PacketOverhead = 5;
 	InitSendBuffer();
-
 }
 
 void UChanneldNetConnection::InitRemoteConnection(UNetDriver* InDriver, class FSocket* InSocket, const FURL& InURL, const class FInternetAddr& InRemoteAddr, EConnectionState InState, int32 InMaxPacket /*= 0*/, int32 InPacketOverhead /*= 0*/)
 {
-	InitBase(InDriver, InSocket, InURL, InState,
-		// Use the default packet size/overhead unless overridden by a child class
-		InMaxPacket == 0 ? MaxPacketSize : InMaxPacket,
-		InPacketOverhead == 0 ? MinPacketSize : InPacketOverhead);
+	InitBase(InDriver, InSocket, InURL, InState, InMaxPacket, InPacketOverhead);
 
+	RemoteAddr = InDriver->GetSocketSubsystem()->CreateInternetAddr();
+	uint32 Ip;
+	int32 Port;
+	InRemoteAddr.GetIp(Ip);
+	InRemoteAddr.GetPort(Port);
+	RemoteAddr->SetIp(Ip);
+	RemoteAddr->SetPort(Port);
+
+	MaxPacket = MaxPacketSize;
+	PacketOverhead = 10;
 	InitSendBuffer();
 
 	// This is for a client that needs to log in, setup ClientLoginState and ExpectedClientLoginMsgType to reflect that
@@ -59,11 +64,12 @@ void UChanneldNetConnection::LowLevelSend(void* Data, int32 CountBits, FOutPacke
 	if (!bChanneldAuthenticated)
 	{
 		LowLevelSendDataBeforeAuth.Enqueue(MakeTuple(new std::string(reinterpret_cast<const char*>(Data), DataSize), &Traits));
+		UE_LOG(LogChanneld, Log, TEXT("NetConnection queued unauthenticated LowLevelSendData, size: %dB"), DataSize);
 	}
 	else
 	{
 		const uint8* DataToSend = reinterpret_cast<uint8*>(Data);
-		if (Handler.IsValid() && !Handler->GetRawSend())
+		if (!bDisableHandshaking && Handler.IsValid() && !Handler->GetRawSend())
 		{
 			const ProcessedPacket ProcessedData = Handler->Outgoing(reinterpret_cast<uint8*>(Data), CountBits, Traits);
 
@@ -104,6 +110,36 @@ void UChanneldNetConnection::LowLevelSend(void* Data, int32 CountBits, FOutPacke
 	//ChanneldDriver->LowLevelSend(RemoteAddr, Data, CountBits, Traits);
 }
 
+FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= false*/)
+{
+	if (RemoteAddr)
+	{
+		return RemoteAddr->ToString(bAppendPort);
+	}
+	else
+	{
+		return FString::Printf(TEXT("0.0.0.0%s"), bAppendPort ? ":0" : "");
+	}
+}
+
+FString UChanneldNetConnection::LowLevelDescribe()
+{
+	return FString::Printf
+	(
+		TEXT("connId: %d, state: %s"),
+		GetConnId(),
+		State == USOCK_Pending ? TEXT("Pending")
+		: State == USOCK_Open ? TEXT("Open")
+		: State == USOCK_Closed ? TEXT("Closed")
+		: TEXT("Invalid")
+	);
+}
+
+void UChanneldNetConnection::Tick(float DeltaSeconds)
+{
+	UNetConnection::Tick(DeltaSeconds);
+}
+
 void UChanneldNetConnection::FlushUnauthData()
 {
 	while (!LowLevelSendDataBeforeAuth.IsEmpty())
@@ -112,14 +148,14 @@ void UChanneldNetConnection::FlushUnauthData()
 		LowLevelSendDataBeforeAuth.Dequeue(Params);
 		std::string* data = Params.Get<0>();
 		LowLevelSend((uint8*)data->data(), data->size() * 8, *Params.Get<1>());
+		UE_LOG(LogChanneld, Log, TEXT("NetConnection %d flushed unauthenticated LowLevelSendData to channeld, size: %dB"), GetConnId(), data->size());
 		delete data;
 	}
 }
 
 void UChanneldNetConnection::ReceivedRawPacket(void* Data, int32 Count)
 {
-	if (Count == 0 ||   // nothing to process
-		Driver == NULL) // connection closing
+	if (Count == 0 || Driver == NULL)
 	{
 		return;
 	}
@@ -159,7 +195,7 @@ void UChanneldNetConnection::ReceivedRawPacket(void* Data, int32 Count)
 				}
 
 				bInConnectionlessHandshake = false; // i.e. bPassedChallenge
-				UE_LOG(LogNet, Warning, TEXT("UWebSocketConnection::bChallengeHandshake: %s"), *LowLevelDescribe());
+				//UE_LOG(LogNet, Warning, TEXT("UChanneldNetConnection::bChallengeHandshake: %s"), *LowLevelDescribe());
 				Count = FMath::DivideAndRoundUp(UnProcessedPacket.CountBits, 8);
 				if (Count > 0)
 				{
@@ -180,73 +216,3 @@ void UChanneldNetConnection::ReceivedRawPacket(void* Data, int32 Count)
 
 	UNetConnection::ReceivedRawPacket(DataRef, Count);
 }
-
-void UChanneldNetConnection::ServerReceivedRawPacket(void* Data, int32 Count)
-{
-	if (!bDisableHandshaking && bInConnectionlessHandshake)
-	{
-		const ProcessedPacket RawPacket =
-			this->Driver->ConnectionlessHandler->IncomingConnectionless(RemoteAddr, (uint8*)Data, Count);
-		auto StatelessConnect = this->Driver->StatelessConnectComponent.Pin();
-		bool bRestartedHandshake = false;
-		if (!RawPacket.bError && StatelessConnect->HasPassedChallenge(RemoteAddr, bRestartedHandshake) &&
-			!bRestartedHandshake)
-		{
-			if (this->StatelessConnectComponent.IsValid())
-			{
-				int32 ServerSequence = 0;
-				int32 ClientSequence = 0;
-				StatelessConnect->GetChallengeSequence(ServerSequence, ClientSequence);
-				this->InitSequence(ClientSequence, ServerSequence);
-			}
-
-			if (this->Handler.IsValid())
-			{
-				this->Handler->BeginHandshaking();
-			}
-
-			this->bInConnectionlessHandshake = false;
-
-			// Reset the challenge data for the future
-			if (StatelessConnect.IsValid())
-			{
-				StatelessConnect->ResetChallengeData();
-			}
-
-			int32 RawPacketSize = FMath::DivideAndRoundUp(RawPacket.CountBits, 8);
-			if (RawPacketSize == 0)
-			{
-				// No actual data to receive.
-				return;
-			}
-
-			// Forward the data from the processed packet.
-			ReceivedRawPacket(RawPacket.Data, RawPacketSize);
-			return;
-		}
-
-	}
-
-	ReceivedRawPacket(Data, Count);
-}
-
-void UChanneldNetConnection::ClientReceivedRawPacket(void* Data, int32 Count)
-{
-	if (!bDisableHandshaking && bInConnectionlessHandshake)
-	{
-		const ProcessedPacket RawPacket = Handler->Incoming((uint8*)Data, Count);
-		int32 RawPacketSize = FMath::DivideAndRoundUp(RawPacket.CountBits, 8);
-		if (RawPacketSize == 0)
-		{
-			// No actual data to receive.
-			return;
-		}
-
-		// Forward the data from the processed packet.
-		ReceivedRawPacket(RawPacket.Data, RawPacketSize);
-		return;
-	}
-
-	ReceivedRawPacket(Data, Count);
-}
-

@@ -27,14 +27,6 @@
 	],
 	"Plugins": [
 		{
-			"Name": "OnlineSubsystem",
-			"Enabled": true
-		},
-		{
-			"Name": "OnlineSubsystemUtils",
-			"Enabled": true
-		},
-		{
 			"Name": "Protobuf",
 			"Enabled": true
 		},

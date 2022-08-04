@@ -2,11 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldTypes.h"
-#include "IpConnection.h"
 #include "ChanneldNetConnection.generated.h"
 
 UCLASS(transient, config=ChanneldUE)
-class CHANNELDUE_API UChanneldNetConnection : public UIpConnection
+class CHANNELDUE_API UChanneldNetConnection : public UNetConnection
 {
 	GENERATED_BODY()
 
@@ -19,9 +18,10 @@ public:
 	virtual void InitLocalConnection(UNetDriver* InDriver, class FSocket* InSocket, const FURL& InURL, EConnectionState InState, int32 InMaxPacket = 0, int32 InPacketOverhead = 0) override;
 	virtual void InitRemoteConnection(UNetDriver* InDriver, class FSocket* InSocket, const FURL& InURL, const class FInternetAddr& InRemoteAddr, EConnectionState InState, int32 InMaxPacket = 0, int32 InPacketOverhead = 0) override;
 	virtual void LowLevelSend(void* Data, int32 CountBits, FOutPacketTraits& Traits) override;
+	FString LowLevelGetRemoteAddress(bool bAppendPort = false) override;
+	FString LowLevelDescribe() override;
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void ReceivedRawPacket(void* Data, int32 Count) override;
-	void ServerReceivedRawPacket(void* Data, int32 Count);
-	void ClientReceivedRawPacket(void* Data, int32 Count);
 
 	FORCEINLINE uint32 GetConnId()
 	{

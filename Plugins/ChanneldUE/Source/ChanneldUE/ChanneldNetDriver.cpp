@@ -36,8 +36,7 @@ UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializ
 			// Server's ClientConnection is created when the first packet from client arrives.
 			if (ClientConnection == nullptr)
 			{
-				ClientConnection = OnClientConnected(ConnToChanneld->GetConnId());
-				ClientConnection->RemoteAddr = ConnIdToAddr(ConnToChanneld->GetConnId());
+				ClientConnection = OnClientConnected(ClientConnId);
 			}
 			ClientConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
 		}
@@ -52,6 +51,8 @@ UChanneldNetConnection* UChanneldNetDriver::OnClientConnected(ConnectionId Clien
 {
 	auto ClientConnection = NewObject<UChanneldNetConnection>(GetTransientPackage(), NetConnectionClass);
 	ClientConnection->bDisableHandshaking = bDisableHandshaking;
+	// Server always sees a connected client (forwarded from channeld) as authenticated.
+	ClientConnection->bChanneldAuthenticated = true;
 	ClientConnection->InitRemoteConnection(this, GetSocket(), InitBaseURL, ConnIdToAddr(ClientConnId).Get(), EConnectionState::USOCK_Open);
 
 	Notify->NotifyAcceptedConnection(ClientConnection);
@@ -59,7 +60,7 @@ UChanneldNetConnection* UChanneldNetDriver::OnClientConnected(ConnectionId Clien
 
 	ClientConnectionMap.Add(ClientConnId, ClientConnection);
 
-	if (ConnectionlessHandler.IsValid() && StatelessConnectComponent.IsValid())
+	if (!bDisableHandshaking && ConnectionlessHandler.IsValid() && StatelessConnectComponent.IsValid())
 	{
 		ClientConnection->bInConnectionlessHandshake = true;
 	}
@@ -100,7 +101,7 @@ void UChanneldNetDriver::Shutdown()
 
 bool UChanneldNetDriver::IsAvailable() const
 {
-	return Super::IsAvailable();
+	return true;
 }
 
 bool UChanneldNetDriver::InitConnectionClass()
@@ -171,9 +172,9 @@ bool UChanneldNetDriver::InitConnect(FNetworkNotify* InNotify, const FURL& Conne
 		return false;
 	}
 
-	ServerConnection->InitLocalConnection(this, GetSocket(), ConnectURL, USOCK_Open);
 	NetConnection->bDisableHandshaking = bDisableHandshaking;
-	NetConnection->bInConnectionlessHandshake = true;
+	ServerConnection->InitLocalConnection(this, GetSocket(), ConnectURL, USOCK_Open);
+	//NetConnection->bInConnectionlessHandshake = true;
 
 	UE_LOG(LogNet, Log, TEXT("Game client on port %i, rate %i"), ConnectURL.Port, ServerConnection->CurrentNetSpeed);
 	CreateInitialClientChannels();
@@ -219,91 +220,7 @@ bool UChanneldNetDriver::InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bo
 
 ISocketSubsystem* UChanneldNetDriver::GetSocketSubsystem()
 {
-	return Super::GetSocketSubsystem();
-}
-
-
-FUniqueSocket UChanneldNetDriver::CreateSocketForProtocol(const FName& ProtocolType)
-{
-	ISocketSubsystem* SocketSubsystem = GetSocketSubsystem();
-	if (SocketSubsystem == nullptr)
-	{
-		UE_LOG(LogNet, Warning, TEXT("UChanneldNetDriver::CreateSocket: Unable to find socket subsystem"));
-		return NULL;
-	}
-
-	return SocketSubsystem->CreateUniqueSocket(NAME_DGram, TEXT("Connection to channeld"), ProtocolType);
-}
-
-FUniqueSocket UChanneldNetDriver::CreateAndBindSocket(TSharedRef<FInternetAddr> BindAddr, int32 Port, bool bReuseAddressAndPort, int32 DesiredRecvSize, int32 DesiredSendSize, FString& Error)
-{
-	ISocketSubsystem* SocketSubsystem = GetSocketSubsystem();
-	if (SocketSubsystem == nullptr)
-	{
-		Error = TEXT("Unable to find socket subsystem");
-		return nullptr;
-	}
-
-	// Create the socket that we will use to communicate with
-	FUniqueSocket NewSocket = CreateSocketForProtocol(BindAddr->GetProtocolType());
-
-	if (!NewSocket.IsValid())
-	{
-		Error = FString::Printf(TEXT("%s: socket failed (%i)"), SocketSubsystem->GetSocketAPIName(), (int32)SocketSubsystem->GetLastErrorCode());
-		return nullptr;
-	}
-
-	// Make sure to cleanly destroy any sockets we do not mean to use.
-	ON_SCOPE_EXIT
-	{
-		if (Error.IsEmpty() == false)
-		{
-			NewSocket.Reset();
-		}
-	};
-
-	//if (SocketSubsystem->RequiresChatDataBeSeparate() == false && NewSocket->SetBroadcast() == false)
-	//{
-	//	Error = FString::Printf(TEXT("%s: setsockopt SO_BROADCAST failed (%i)"), SocketSubsystem->GetSocketAPIName(), (int32)SocketSubsystem->GetLastErrorCode());
-	//	return nullptr;
-	//}
-
-	if (NewSocket->SetReuseAddr(bReuseAddressAndPort) == false)
-	{
-		UE_LOG(LogNet, Log, TEXT("setsockopt with SO_REUSEADDR failed"));
-	}
-
-	if (NewSocket->SetRecvErr() == false)
-	{
-		UE_LOG(LogNet, Log, TEXT("setsockopt with IP_RECVERR failed"));
-	}
-
-	int32 ActualRecvSize(0);
-	int32 ActualSendSize(0);
-	NewSocket->SetReceiveBufferSize(DesiredRecvSize, ActualRecvSize);
-	NewSocket->SetSendBufferSize(DesiredSendSize, ActualSendSize);
-	UE_LOG(LogInit, Log, TEXT("%s: Socket queue. Rx: %i (config %i) Tx: %i (config %i)"), SocketSubsystem->GetSocketAPIName(),
-		ActualRecvSize, DesiredRecvSize, ActualSendSize, DesiredSendSize);
-
-	// Bind socket to our port.
-	BindAddr->SetPort(Port);
-
-	int32 AttemptPort = BindAddr->GetPort();
-	int32 BoundPort = SocketSubsystem->BindNextPort(NewSocket.Get(), *BindAddr, MaxPortCountToTry + 1, 1);
-	if (BoundPort == 0)
-	{
-		Error = FString::Printf(TEXT("%s: binding to port %i failed (%i)"), SocketSubsystem->GetSocketAPIName(), AttemptPort,
-			(int32)SocketSubsystem->GetLastErrorCode());
-		return nullptr;
-	}
-	if (NewSocket->SetNonBlocking() == false)
-	{
-		Error = FString::Printf(TEXT("%s: SetNonBlocking failed (%i)"), SocketSubsystem->GetSocketAPIName(),
-			(int32)SocketSubsystem->GetLastErrorCode());
-		return nullptr;
-	}
-
-	return NewSocket;
+	return ISocketSubsystem::Get();
 }
 
 FSocket* UChanneldNetDriver::GetSocket()
@@ -366,13 +283,28 @@ void UChanneldNetDriver::LowLevelSend(TSharedPtr<const FInternetAddr> Address, v
 
 void UChanneldNetDriver::LowLevelDestroy()
 {
-	ConnToChanneld->Disconnect(true);
+	if (ConnToChanneld)
+	{
+		ConnToChanneld->Disconnect(true);
+	}
+	
+	ClientConnectionMap.Reset();
+	
 	Super::LowLevelDestroy();
+	
+	ConnToChanneld = NULL;
 }
 
 bool UChanneldNetDriver::IsNetResourceValid()
 {
-	return Super::IsNetResourceValid();
+	if ((ConnToChanneld->IsServer() && !ServerConnection)//  Server
+		|| (ConnToChanneld->IsClient() && ServerConnection) // client
+		)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 void UChanneldNetDriver::RegisterChannelDataProvider(IChannelDataProvider* Provider)
@@ -399,7 +331,7 @@ void UChanneldNetDriver::TickDispatch(float DeltaTime)
 void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 {
 	// Trigger the callings of LowLevelSend()
-	Super::TickFlush(DeltaSeconds);
+	UNetDriver::TickFlush(DeltaSeconds);
 
 	if (IsValid(ConnToChanneld) && ConnToChanneld->IsConnected())
 		ConnToChanneld->TickOutgoing();
@@ -413,8 +345,12 @@ void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 		ConnToChanneld->CreateChannel(channeldpb::GLOBAL, TEXT("test123"), nullptr, nullptr, nullptr,
 			[&](const channeldpb::CreateChannelResultMessage* ResultMsg)
 			{
-				UE_LOG(LogChanneld, Log, TEXT("[%s] Created channel: %d, type: %s, owner connId: %d, metadata: %s"), *GetWorld()->GetDebugDisplayName(),
-					ResultMsg->channelid(), channeldpb::ChannelType_Name(ResultMsg->channeltype()).c_str(), ResultMsg->ownerconnid(), ResultMsg->metadata().c_str());
+				UE_LOG(LogChanneld, Log, TEXT("[%s] Created channel: %d, type: %s, owner connId: %d, metadata: %s"), 
+					*GetWorld()->GetDebugDisplayName(),
+					ResultMsg->channelid(), 
+					UTF8_TO_TCHAR(channeldpb::ChannelType_Name(ResultMsg->channeltype()).c_str()), 
+					ResultMsg->ownerconnid(), 
+					UTF8_TO_TCHAR(ResultMsg->metadata().c_str()));
 
 				for (auto const Provider : ChannelDataProviders)
 				{
