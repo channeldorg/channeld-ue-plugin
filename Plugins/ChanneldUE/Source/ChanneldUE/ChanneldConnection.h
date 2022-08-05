@@ -12,11 +12,11 @@ class UChanneldConnection;
 DECLARE_LOG_CATEGORY_EXTERN(LogChanneld, Log, All);
 
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FChanneldMessageDelegate, UChanneldConnection*, ChannelId, const google::protobuf::Message*)
-//DECLARE_MULTICAST_DELEGATE_ThreeParams(FUserSpaceMessageDelegate, ChannelId, ConnectionId, const std::string&)
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FUserSpaceMessageDelegate, ChannelId, ConnectionId, const std::string&)
 DECLARE_MULTICAST_DELEGATE_OneParam(FChanneldAuthenticatedDelegate, UChanneldConnection*);
 
 typedef TFunction<void(UChanneldConnection*, ChannelId, const google::protobuf::Message*)> FChanneldMessageHandlerFunc;
-typedef TFunction<void(ChannelId, ConnectionId, const std::string&)> FUserSpaceMessageHandlerFunc;
+//typedef TFunction<void(ChannelId, ConnectionId, const std::string&)> FUserSpaceMessageHandlerFunc;
 
 UCLASS(transient, config = ChanneldUE)
 class CHANNELDUE_API UChanneldConnection : public UObject, public FRunnable
@@ -127,7 +127,8 @@ public:
 
 	FChanneldAuthenticatedDelegate OnAuthenticated;
 
-	FUserSpaceMessageHandlerFunc UserSpaceMessageHandlerFunc = nullptr;
+	//FUserSpaceMessageHandlerFunc UserSpaceMessageHandlerFunc = nullptr;
+	FUserSpaceMessageDelegate OnUserSpaceMessageReceived;
 
 	TMap<ChannelId, FSubscribedChannelInfo> SubscribedChannels;
 	TMap<ChannelId, FOwnedChannelInfo> OwnedChannels;

@@ -57,15 +57,13 @@ void UChanneldConnection::BeginDestroy()
 {
 	Super::BeginDestroy();
 	Disconnect(false);
-	if (Socket)
-	{
-		Socket->Shutdown(ESocketShutdownMode::ReadWrite);
-		delete Socket;
-	}
 }
 
 bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int Port, FString& Error)
 {
+	if (IsConnected())
+		return false;
+
 	auto SocketSubsystem = ISocketSubsystem::Get();
 	if (SocketSubsystem == NULL)
 	{
@@ -124,6 +122,13 @@ void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 
 	Socket->Close();
 	StopReceiveThread();
+
+	auto SocketSubsystem = ISocketSubsystem::Get();
+	if (SocketSubsystem)
+	{
+		SocketSubsystem->DestroySocket(Socket);
+	}
+	Socket = NULL;
 }
 
 
@@ -405,12 +410,12 @@ void UChanneldConnection::SendRaw(ChannelId ChId, uint32 MsgType, const uint8* M
 void UChanneldConnection::HandleServerForwardMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto UserSpaceMsg = static_cast<const channeldpb::ServerForwardMessage*>(Msg);
-	if (UserSpaceMessageHandlerFunc == nullptr)
+	if (!OnUserSpaceMessageReceived.IsBound())
 	{
 		UE_LOG(LogChanneld, Warning, TEXT("No handler for user-space message, channelId=%d, client connId=%d"), ChId, UserSpaceMsg->clientconnid());
 		return;
 	}
-	UserSpaceMessageHandlerFunc(ChId, UserSpaceMsg->clientconnid(), UserSpaceMsg->payload());
+	OnUserSpaceMessageReceived.Broadcast(ChId, UserSpaceMsg->clientconnid(), UserSpaceMsg->payload());
 }
 
 template <typename MsgClass>

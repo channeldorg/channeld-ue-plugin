@@ -59,6 +59,10 @@ public:
 	virtual bool IsTickable() const override { return !IsTemplate(); };
 	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UMyScoreSubsystem, STATGROUP_Tickables); }
 
+	void InitConnection();
+
+	UChanneldConnection* GetConnection() { return ConnectionInstance; }
+
 	/*
 	 * Is connected to server
 	 */
@@ -71,7 +75,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
 		int32 GetConnId();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
+		bool IsServerConnection();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
+		bool IsClientConnection();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
 		EChanneldChannelType GetChannelTypeByChId(int32 ChId);

@@ -1,5 +1,6 @@
 #include "ChannelDataView.h"
 #include "ChanneldUtils.h"
+#include "ChanneldGameInstanceSubsystem.h"
 
 //DEFINE_LOG_CATEGORY(LogChanneld);
 
@@ -21,19 +22,21 @@ void UChannelDataView::Initialize(UChanneldConnection* InConn)
 		Connection->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this, &UChannelDataView::HandleUnsub);
 	}
 
-	InitChannels();
+	//InitChannels();
+	ReceiveBeginPlay();
 	
 	UE_LOG(LogChanneld, Log, TEXT("%s initialized channels."), *this->GetClass()->GetName());
 }
 
-void UChannelDataView::Unitialize()
+void UChannelDataView::Unintialize()
 {
 	if (Connection != nullptr)
 	{
 		Connection->RemoveMessageHandler(channeldpb::CHANNEL_DATA_UPDATE, this);
 	}
 
-	UninitChannels();
+	//UninitChannels();
+	ReceiveEndPlay();
 
 	UE_LOG(LogChanneld, Log, TEXT("%s uninitialized channels."), *this->GetClass()->GetName());
 }
@@ -143,6 +146,20 @@ void UChannelDataView::SendAllChannelUpdates()
 		}
 	}
 
+}
+
+UChanneldGameInstanceSubsystem* UChannelDataView::GetSubsystem()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		UGameInstance* GameInstance = World->GetGameInstance();
+		if (GameInstance)
+		{
+			return GameInstance->GetSubsystem<UChanneldGameInstanceSubsystem>();
+		}
+	}
+	return nullptr;
 }
 
 void UChannelDataView::HandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)

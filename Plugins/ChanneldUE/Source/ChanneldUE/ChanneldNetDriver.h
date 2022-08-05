@@ -11,6 +11,7 @@
 #include "Sockets.h"
 #include "SocketSubsystem.h"
 #include "google/protobuf/message.h"
+#include "View/ChannelDataView.h"
 #include "ChanneldNetDriver.generated.h"
 
 /**
@@ -31,7 +32,6 @@ public:
 	//~ End UObject Interface
 
 	//~ Begin UNetDriver Interface.
-	virtual void Shutdown() override;
 	virtual bool IsAvailable() const override;
 	// Always use UChanneldNetConnection
 	virtual bool InitConnectionClass() override;
@@ -57,8 +57,6 @@ public:
 
 	virtual int32 ServerReplicateActors(float DeltaSeconds) override;
 
-	void RegisterChannelDataProvider(IChannelDataProvider* Provider);
-
 	UChanneldConnection* GetConnToChanneld() { return ConnToChanneld; }
 
 	ConnectionId AddrToConnId(const FInternetAddr& Addr);
@@ -81,10 +79,8 @@ public:
 	UPROPERTY(Config)
 	bool bDisableHandshaking = true;
 
-
-	//TMap<ChannelId, TSubclassOf<google::protobuf::Message>> ChannelDataClasses;
-
-	TSet<IChannelDataProvider*> ChannelDataProviders;
+	UPROPERTY(Config)
+	FString ChannelDataViewClassName;
 
 	ChannelId LowLevelSendToChannelId = GlobalChannelId;
 
@@ -101,8 +97,10 @@ private:
 
 	TMap<ConnectionId, UChanneldNetConnection*> ClientConnectionMap;
 
+	UPROPERTY()
+	UChannelDataView* ChannelDataView;
+
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
 	UChanneldNetConnection* OnClientConnected(ConnectionId ClientConnId);
-	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 
 };
