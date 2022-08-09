@@ -1,5 +1,6 @@
 
 using UnrealBuildTool;
+using System.IO;
 
 public class ChanneldUE : ModuleRules
 {
@@ -16,17 +17,24 @@ public class ChanneldUE : ModuleRules
             "Engine",
             "InputCore",
             "NetCore",
-            "OnlineSubsystem",
-            //"OnlineSubsystemNull",
-            //"OnlineSubsystemSteam",
-            "OnlineSubsystemUtils",
+            //"OnlineSubsystem",
+            //"OnlineSubsystemUtils",
             "Sockets",
             "PacketHandler",
             "Protobuf",
-            //"SteamShared",
-            //"SteamSockets",
 			}
         );
+
+        PublicSystemIncludePaths.AddRange(
+            new string[]
+            {
+                ModuleDirectory
+                //Path.Combine(ModuleDirectory, "Channeldpb.h"),
+                //Path.Combine(ModuleDirectory, "Testpb.h"),
+            }
+            );
+
+        PublicIncludePaths.Add(ModuleDirectory);
 
         bUseRTTI = true;
     }

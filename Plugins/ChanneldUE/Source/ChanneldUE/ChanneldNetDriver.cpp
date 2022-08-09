@@ -14,37 +14,6 @@
 UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {	
-	ConnToChanneld = NewObject<UChanneldConnection>();
-
-	ConnToChanneld->UserSpaceMessageHandlerFunc = [&](ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload)
-	{
-		if (ConnToChanneld->IsClient())
-		{
-			const auto MyServerConnection = GetServerConnection();
-			if (MyServerConnection)
-			{
-				MyServerConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
-			}
-			else
-			{
-				UE_LOG(LogChanneld, Error, TEXT("ServerConnection doesn't exist"));
-			}
-		}
-		else
-		{
-			auto ClientConnection = ClientConnectionMap.FindRef(ClientConnId);
-			// Server's ClientConnection is created when the first packet from client arrives.
-			if (ClientConnection == nullptr)
-			{
-				ClientConnection = OnClientConnected(ClientConnId);
-			}
-			ClientConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
-		}
-	};
-
-	ConnToChanneld->OnAuthenticated.AddUObject(this, &UChanneldNetDriver::OnChanneldAuthenticated);
-	//ConnToChanneld->AddMessageHandler((uint32)channeldpb::AUTH, this, &UChanneldNetDriver::HandleAuthResult);
-	ConnToChanneld->AddMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, this, &UChanneldNetDriver::HandleChannelDataUpdate);
 }
 
 UChanneldNetConnection* UChanneldNetDriver::OnClientConnected(ConnectionId ClientConnId)
@@ -92,13 +61,6 @@ void UChanneldNetDriver::PostInitProperties()
 	Super::PostInitProperties();
 }
 
-void UChanneldNetDriver::Shutdown()
-{
-	Super::Shutdown();
-
-	ConnToChanneld->Disconnect();
-}
-
 bool UChanneldNetDriver::IsAvailable() const
 {
 	return true;
@@ -113,6 +75,68 @@ bool UChanneldNetDriver::InitConnectionClass()
 bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, const FURL& URL,
 	bool bReuseAddressAndPort, FString& Error)
 {
+	//if (World)
+	//{
+	//	auto GameInstance = World->GetGameInstance();
+	//	if (GameInstance)
+	//	{
+	//		auto Subsystem = GameInstance->GetSubsystem<UChanneldGameInstanceSubsystem>();
+	//		if (Subsystem)
+	//		{
+	//			ConnToChanneld = Subsystem->GetConnection();
+	//		}
+	//	}
+	//}
+	//if (ConnToChanneld == nullptr)
+	{
+		ConnToChanneld = NewObject<UChanneldConnection>();
+	}
+
+	// Initialize channel data view
+	if (ChannelDataViewClassName != TEXT(""))
+	{
+		auto ChannelDataViewClass = LoadClass<UChannelDataView>(this, *ChannelDataViewClassName, NULL, LOAD_None, NULL);
+		if (ChannelDataViewClass == NULL)
+		{
+			UE_LOG(LogChanneld, Error, TEXT("Failed to load class '%s'"), *ChannelDataViewClassName);
+		}
+		else
+		{
+			ChannelDataView = NewObject<UChannelDataView>(this, ChannelDataViewClass);
+			ConnToChanneld->OnAuthenticated.AddUObject(ChannelDataView, &UChannelDataView::Initialize);
+		}
+	}
+
+	ConnToChanneld->OnUserSpaceMessageReceived.AddLambda([&](ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload)
+		{
+			if (ConnToChanneld->IsClient())
+			{
+				const auto MyServerConnection = GetServerConnection();
+				if (MyServerConnection)
+				{
+					MyServerConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
+				}
+				else
+				{
+					UE_LOG(LogChanneld, Error, TEXT("ServerConnection doesn't exist"));
+				}
+			}
+			else
+			{
+				auto ClientConnection = ClientConnectionMap.FindRef(ClientConnId);
+				// Server's ClientConnection is created when the first packet from client arrives.
+				if (ClientConnection == nullptr)
+				{
+					ClientConnection = OnClientConnected(ClientConnId);
+				}
+				ClientConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
+			}
+		});
+
+	ConnToChanneld->OnAuthenticated.AddUObject(this, &UChanneldNetDriver::OnChanneldAuthenticated);
+
+
+
 	InitBaseURL = URL;
 	FString Host;
 	int Port;
@@ -283,14 +307,20 @@ void UChanneldNetDriver::LowLevelSend(TSharedPtr<const FInternetAddr> Address, v
 
 void UChanneldNetDriver::LowLevelDestroy()
 {
+	if (ChannelDataView)
+	{
+		ChannelDataView->Unintialize();
+		ChannelDataView = NULL;
+	}
+
+	Super::LowLevelDestroy();
+
 	if (ConnToChanneld)
 	{
 		ConnToChanneld->Disconnect(true);
 	}
 	
 	ClientConnectionMap.Reset();
-	
-	Super::LowLevelDestroy();
 	
 	ConnToChanneld = NULL;
 }
@@ -305,11 +335,6 @@ bool UChanneldNetDriver::IsNetResourceValid()
 	}
 
 	return false;
-}
-
-void UChanneldNetDriver::RegisterChannelDataProvider(IChannelDataProvider* Provider)
-{
-	ChannelDataProviders.Add(Provider);
 }
 
 int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
@@ -334,14 +359,20 @@ void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 	UNetDriver::TickFlush(DeltaSeconds);
 
 	if (IsValid(ConnToChanneld) && ConnToChanneld->IsConnected())
+	{
+		if (ChannelDataView)
+		{
+			ChannelDataView->SendAllChannelUpdates();
+		}
 		ConnToChanneld->TickOutgoing();
+	}
 }
-
 
 void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 {
 	if (ConnToChanneld->IsServer())
 	{
+		/* Moved to ChannelDataView
 		ConnToChanneld->CreateChannel(channeldpb::GLOBAL, TEXT("test123"), nullptr, nullptr, nullptr,
 			[&](const channeldpb::CreateChannelResultMessage* ResultMsg)
 			{
@@ -362,12 +393,16 @@ void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 
 				//FlushUnauthData();
 			});
+		*/
 	}
 	else
 	{
 		auto MyServerConnection = GetServerConnection();
 		MyServerConnection->RemoteAddr = ConnIdToAddr(ConnToChanneld->GetConnId());
+		MyServerConnection->bChanneldAuthenticated = true;
+		MyServerConnection->FlushUnauthData();
 
+		/* Moved to ChannelDataView
 		ChannelId ChIdToSub = GlobalChannelId;
 		ConnToChanneld->SubToChannel(ChIdToSub, nullptr, [&, ChIdToSub, MyServerConnection](const channeldpb::SubscribedToChannelResultMessage* Msg)
 			{
@@ -375,20 +410,10 @@ void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 				MyServerConnection->bChanneldAuthenticated = true;
 				MyServerConnection->FlushUnauthData();
 			});
+		*/
 	}
 
 }
 
-void UChanneldNetDriver::HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
-{
-	auto UpdateMsg = static_cast<const channeldpb::ChannelDataUpdateMessage*>(Msg);
-	for (auto const Provider : ChannelDataProviders)
-	{
-		if (Provider->GetChannelId() == ChId)
-		{
-			Provider->OnChannelDataUpdated(UpdateMsg);
-		}
-	}
-}
 
 

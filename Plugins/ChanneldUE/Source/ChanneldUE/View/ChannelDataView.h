@@ -8,13 +8,13 @@
 #include "google/protobuf/message.h"
 #include "ChannelDataView.generated.h"
 
-UCLASS(Abstract, Transient, Config=Engine)
+UCLASS(Blueprintable, Abstract, Config=ChanneldUE)
 class CHANNELDUE_API UChannelDataView : public UObject
 {
 	GENERATED_BODY()
 
-	UChannelDataView(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 public:
+	UChannelDataView(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	FORCEINLINE void RegisterChannelDataTemplate(channeldpb::ChannelType ChannelType, const google::protobuf::Message* MsgTemplate)
 	{
@@ -26,7 +26,7 @@ public:
 	}
 
 	virtual void Initialize(UChanneldConnection* InConn);
-	virtual void Unitialize();
+	virtual void Unintialize();
 
 	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider);
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
@@ -41,9 +41,18 @@ protected:
 
 	virtual void LoadCmdLineArgs() {}
 
-	virtual void InitChannels() PURE_VIRTUAL(UChannelDataView::InitChannels, )
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(/*CallableWithoutWorldContext, */DisplayName = "channeld"))
+	UChanneldGameInstanceSubsystem* GetSubsystem();
 
-	virtual void UninitChannels() PURE_VIRTUAL(UChannelDataView::UninitChannels,)
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BeginPlay"))
+	void ReceiveBeginPlay();
+
+	//virtual void InitChannels() PURE_VIRTUAL(UChannelDataView::InitChannels, )
+
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "EndPlay"))
+	void ReceiveEndPlay();
+
+	//virtual void UninitChannels() PURE_VIRTUAL(UChannelDataView::UninitChannels, )
 
 	virtual void OnUnsubFromChannel(ChannelId ChId, const TSet<IChannelDataProvider*>& RemovedProviders) {}
 

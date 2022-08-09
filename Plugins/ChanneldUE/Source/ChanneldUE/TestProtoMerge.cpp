@@ -36,9 +36,9 @@ void UTestProtoMerge::SetTestNum(const int& NewValue)
 void UTestProtoMerge::PostLoad()
 {
 	UObject::PostLoad();
-	auto const NetDriver = static_cast<UChanneldNetDriver*>(GetWorld()->NetDriver);
-	if (NetDriver != nullptr)
-		NetDriver->RegisterChannelDataProvider(this);
+	//auto const NetDriver = static_cast<UChanneldNetDriver*>(GetWorld()->NetDriver);
+	//if (NetDriver != nullptr)
+	//	NetDriver->RegisterChannelDataProvider(this);
 }
 
 bool UTestProtoMerge::UpdateChannelData(google::protobuf::Message* ChannelData)
