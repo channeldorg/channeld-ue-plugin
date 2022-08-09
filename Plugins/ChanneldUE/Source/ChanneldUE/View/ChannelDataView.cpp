@@ -1,5 +1,7 @@
 #include "ChannelDataView.h"
 #include "ChanneldUtils.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/GameEngine.h"
 #include "ChanneldGameInstanceSubsystem.h"
 
 //DEFINE_LOG_CATEGORY(LogChanneld);
@@ -23,7 +25,7 @@ void UChannelDataView::Initialize(UChanneldConnection* InConn)
 	}
 
 	//InitChannels();
-	ReceiveBeginPlay();
+	ReceiveInitChannels();
 	
 	UE_LOG(LogChanneld, Log, TEXT("%s initialized channels."), *this->GetClass()->GetName());
 }
@@ -36,7 +38,7 @@ void UChannelDataView::Unintialize()
 	}
 
 	//UninitChannels();
-	ReceiveEndPlay();
+	ReceiveUninitChannels();
 
 	UE_LOG(LogChanneld, Log, TEXT("%s uninitialized channels."), *this->GetClass()->GetName());
 }
@@ -148,15 +150,25 @@ void UChannelDataView::SendAllChannelUpdates()
 
 }
 
-UChanneldGameInstanceSubsystem* UChannelDataView::GetSubsystem()
+/* Client don't have World when authenticated, so we should set the subsystem when creating the view.
+*/
+UChanneldGameInstanceSubsystem* UChannelDataView::GetChanneldSubsystem()
 {
 	UWorld* World = GetWorld();
+	// The client may still be in pending net game
+	if (World == nullptr)
+	{
+		auto WorldContext = GEngine->GetWorldContextFromPendingNetGameNetDriver(Cast<UNetDriver>(GetOuter()));
+		World = WorldContext->World();
+	}
 	if (World)
 	{
-		UGameInstance* GameInstance = World->GetGameInstance();
+		UGameInstance* GameInstance = World->GetGameInstance();// UGameplayStatics::GetGameInstance(this);// 
 		if (GameInstance)
 		{
-			return GameInstance->GetSubsystem<UChanneldGameInstanceSubsystem>();
+			auto Result = GameInstance->GetSubsystem<UChanneldGameInstanceSubsystem>();
+			//UE_LOG(LogChanneld, Log, TEXT("Found ChanneldGameInstanceSubsystem: %d"), Result == nullptr ? 0 : 1);
+			return Result;
 		}
 	}
 	return nullptr;

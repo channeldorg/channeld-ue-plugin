@@ -95,7 +95,17 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 	// Initialize channel data view
 	if (ChannelDataViewClassName != TEXT(""))
 	{
-		auto ChannelDataViewClass = LoadClass<UChannelDataView>(this, *ChannelDataViewClassName, NULL, LOAD_None, NULL);
+		UClass* ChannelDataViewClass;
+		if (ChannelDataViewClassName.StartsWith("Blueprint'"))
+		{
+			auto BpClass = TSoftClassPtr<UChannelDataView>(FSoftObjectPath(ChannelDataViewClassName));
+			ChannelDataViewClass = BpClass.LoadSynchronous();
+		}
+		else
+		{
+			ChannelDataViewClass = LoadClass<UChannelDataView>(this, *ChannelDataViewClassName, NULL, LOAD_None, NULL);
+		}
+
 		if (ChannelDataViewClass == NULL)
 		{
 			UE_LOG(LogChanneld, Error, TEXT("Failed to load class '%s'"), *ChannelDataViewClassName);

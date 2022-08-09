@@ -8,6 +8,7 @@
 #include "google/protobuf/message.h"
 #include "ChannelDataView.generated.h"
 
+// Owned by UChanneldNetDriver.
 UCLASS(Blueprintable, Abstract, Config=ChanneldUE)
 class CHANNELDUE_API UChannelDataView : public UObject
 {
@@ -41,20 +42,21 @@ protected:
 
 	virtual void LoadCmdLineArgs() {}
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(/*CallableWithoutWorldContext, */DisplayName = "channeld"))
-	UChanneldGameInstanceSubsystem* GetSubsystem();
+	UFUNCTION(BlueprintCallable, BlueprintPure/*, meta=(CallableWithoutWorldContext)*/)
+	UChanneldGameInstanceSubsystem* GetChanneldSubsystem();
 
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BeginPlay"))
-	void ReceiveBeginPlay();
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "InitChannels"))
+	void ReceiveInitChannels();
 
 	//virtual void InitChannels() PURE_VIRTUAL(UChannelDataView::InitChannels, )
 
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "EndPlay"))
-	void ReceiveEndPlay();
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "UnitChannels"))
+	void ReceiveUninitChannels();
 
 	//virtual void UninitChannels() PURE_VIRTUAL(UChannelDataView::UninitChannels, )
 
 	virtual void OnUnsubFromChannel(ChannelId ChId, const TSet<IChannelDataProvider*>& RemovedProviders) {}
+
 
 private:
 
