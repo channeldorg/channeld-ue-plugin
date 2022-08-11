@@ -14,17 +14,19 @@ class UChanneldConnection;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAuth, int32, AuthResult, int32, ConnId);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnCreateChannel, int32, ChId, EChanneldChannelType, ChannelType, FString, Metadata, int32, OwnerConnId);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRemoveChannel, int32, Chld, int32, RemovedChannelId);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnSubToChannel, int32, Chld, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnUnsubFromChannel, int32, Chld, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnDataUpdate, int32, Chld, EChanneldChannelType, ChannelType, UProtoMessageObject*, MessageObject, int32, contextConnId);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnUserSpaceMessage, int32, Chld, int32, ConnId, UProtoMessageObject*, MessageObject);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRemoveChannel, int32, ChId, int32, RemovedChannelId);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnListChannel, const TArray<FListedChannelInfo>&, Channels);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnSubToChannel, int32, ChId, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnUnsubFromChannel, int32, ChId, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnDataUpdate, int32, ChId, EChanneldChannelType, ChannelType, UProtoMessageObject*, MessageObject, int32, ContextConnId);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnUserSpaceMessage, int32, ChId, int32, ConnId, UProtoMessageObject*, MessageObject);
 
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnceOnAuth, int32, AuthResult, int32, ConnId);
 DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnCreateChannel, int32, ChId, EChanneldChannelType, ChannelType, FString, Metadata, int32, OwnerConnId);
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnceOnRemoveChannel, int32, ChId, int32, RemovedChannelId);
-DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnSubToChannel, int32, Chld, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
-DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnUnsubFromChannel, int32, Chld, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnceOnListChannel, const TArray<FListedChannelInfo>&, Channels);
+DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnSubToChannel, int32, ChId, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
+DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnUnsubFromChannel, int32, ChId, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
 
 UCLASS(Meta = (DisplayName = "Channeld"))
 class CHANNELDUE_API UChanneldGameInstanceSubsystem : public UGameInstanceSubsystem, public FTickableGameObject
@@ -32,6 +34,9 @@ class CHANNELDUE_API UChanneldGameInstanceSubsystem : public UGameInstanceSubsys
 	GENERATED_BODY()
 
 public:
+
+	TSharedRef<ChannelId> LowLevelSendToChannelId = MakeShared<ChannelId>(GlobalChannelId);
+
 	UPROPERTY(BlueprintAssignable)
 		FOnAuth OnAuth;
 
@@ -53,11 +58,14 @@ public:
 	UPROPERTY(BlueprintAssignable)
 		FOnRemoveChannel OnRemoveChannel;
 
+	UPROPERTY(BlueprintAssignable)
+		FOnListChannel OnListChannel;
+
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override { return !IsTemplate(); };
-	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UMyScoreSubsystem, STATGROUP_Tickables); }
+	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UChanneldGameInstanceSubsystem, STATGROUP_Tickables); }
 
 	void InitConnection();
 
@@ -85,6 +93,12 @@ public:
 		EChanneldChannelType GetChannelTypeByChId(int32 ChId);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
+		TArray<FSubscribedChannelInfo> GetSubscribedChannels();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
+		TArray<FListedChannelInfo> GetListedChannels();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
 		const TMap<int32, FSubscribedChannelInfo> GetSubscribedsOnOwnedChannel(bool& bSuccess, int32 ChId);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
@@ -101,6 +115,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld|Net")
 		void RemoveChannel(int32 ChannelToRemove, const FOnceOnRemoveChannel& Callback);
+
+	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "MetadataFilters, Callback"), Category = "Channeld|Net")
+		void ListChannel(EChanneldChannelType ChannelTypeFilter, const TArray<FString>& MetadataFilters, const FOnceOnListChannel& Callback);
 
 	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld|Net")
 		void SubToChannel(int32 ChId, const FOnceOnSubToChannel& Callback);
@@ -123,6 +140,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
 		void CreateMessageObjectByFullName(UProtoMessageObject*& MessageObject, bool& bSuccess, FString ProtobufFullName);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|View")
+		UChannelDataView* GetChannelDataView();
+
+	UFUNCTION(BlueprintCallable, Category = "Channeld|View")
+	void SetLowLevelSendToChannelId(int32 ChId);
+
 protected:
 	UPROPERTY()
 		UChanneldConnection* ConnectionInstance = nullptr;
@@ -134,9 +157,12 @@ protected:
 	void HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleCreateChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleRemoveChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleListChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleSubToChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleUnsubFromChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+
+	class UChanneldNetDriver* GetNetDriver();
 };
 
 

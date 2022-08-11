@@ -20,13 +20,15 @@ void UChanneldGameInstanceSubsystem::Deinitialize()
 
 void UChanneldGameInstanceSubsystem::Tick(float DeltaTime)
 {
-	if (ConnectionInstance && ConnectionInstance->IsConnected())
+	// Don't tick the connection if the net driver exists - the tick will be handled in the net driver.
+	if (GetNetDriver() == nullptr && ConnectionInstance && ConnectionInstance->IsConnected())
 	{
 		ConnectionInstance->TickIncoming();
 		ConnectionInstance->TickOutgoing();
 	}
 }
 
+#pragma optimize("", off)
 void UChanneldGameInstanceSubsystem::InitConnection()
 {
 	if (ConnectionInstance)
@@ -34,11 +36,12 @@ void UChanneldGameInstanceSubsystem::InitConnection()
 		return;
 	}
 
-	auto NetDriver = Cast<UChanneldNetDriver>(GetGameInstance()->GetWorld()->GetNetDriver());
-	if (NetDriver)
+	auto ChanneldNetDriver = GetNetDriver();
+	if (ChanneldNetDriver)
 	{
 		// Share the same ChanneldConnection with the net driver if it exists.
-		ConnectionInstance = NetDriver->GetConnToChanneld();
+		// In the Play as Client net game, NetDriver::InitBase is called before the creation of PendingNetGame.
+		ConnectionInstance = ChanneldNetDriver->GetConnToChanneld();
 	}
 	else
 	{
@@ -48,6 +51,7 @@ void UChanneldGameInstanceSubsystem::InitConnection()
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::AUTH, this, &UChanneldGameInstanceSubsystem::HandleAuthResult);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::CREATE_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleCreateChannel);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::REMOVE_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleRemoveChannel);
+	ConnectionInstance->AddMessageHandler((uint32)channeldpb::LIST_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleListChannel);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::SUB_TO_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleSubToChannel);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::UNSUB_FROM_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleUnsubFromChannel);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, this, &UChanneldGameInstanceSubsystem::HandleChannelDataUpdate);
@@ -74,6 +78,7 @@ void UChanneldGameInstanceSubsystem::InitConnection()
 			}
 		});
 }
+#pragma optimize("", on)
 
 bool UChanneldGameInstanceSubsystem::IsConnected()
 {
@@ -108,6 +113,30 @@ EChanneldChannelType UChanneldGameInstanceSubsystem::GetChannelTypeByChId(int32 
 
 	FSubscribedChannelInfo* SubscribedChannelInfo = ConnectionInstance->SubscribedChannels.Find(ChId);
 	return SubscribedChannelInfo != nullptr ? SubscribedChannelInfo->ChannelType : EChanneldChannelType::ECT_Unknown;
+}
+
+TArray<FSubscribedChannelInfo> UChanneldGameInstanceSubsystem::GetSubscribedChannels()
+{
+	if (ensureMsgf(ConnectionInstance, TEXT("Need to call ConnectToChanneld first!")))
+	{
+		TArray<FSubscribedChannelInfo> Result;
+		ConnectionInstance->SubscribedChannels.GenerateValueArray(Result);
+		return Result;
+	}
+	const auto EmptyResult = TArray<FSubscribedChannelInfo>();
+	return EmptyResult;
+}
+
+TArray<FListedChannelInfo> UChanneldGameInstanceSubsystem::GetListedChannels()
+{
+	if (ensureMsgf(ConnectionInstance, TEXT("Need to call ConnectToChanneld first!")))
+	{
+		TArray<FListedChannelInfo> Result;
+		ConnectionInstance->ListedChannels.GenerateValueArray(Result);
+		return Result;
+	}
+	const auto EmptyResult = TArray<FListedChannelInfo>();
+	return EmptyResult;
 }
 
 const TMap<int32, FSubscribedChannelInfo> UChanneldGameInstanceSubsystem::GetSubscribedsOnOwnedChannel(bool& bSuccess, int32 ChId)
@@ -160,7 +189,7 @@ void UChanneldGameInstanceSubsystem::ConnectToChanneld(bool& Success, FString& E
 	if (ConnectionInstance->Connect(bInitAsClient, Host, Port, Error))
 	{
 		ConnectionInstance->Auth(TEXT("test_pit"), TEXT("test_lt"),
-			[=](const channeldpb::AuthResultMessage* Message)
+			[AuthCallback](const channeldpb::AuthResultMessage* Message)
 			{
 				AuthCallback.ExecuteIfBound(Message->result(), Message->connid());
 			});
@@ -174,14 +203,17 @@ void UChanneldGameInstanceSubsystem::ConnectToChanneld(bool& Success, FString& E
 
 void UChanneldGameInstanceSubsystem::DisconnectFromChanneld(bool bFlushAll/* = true*/)
 {
-	// TODO: check ConnectionInstance
-	ConnectionInstance->Disconnect(bFlushAll);
+	if (ConnectionInstance)
+	{
+		ConnectionInstance->Disconnect(bFlushAll);
+	}
 }
 
 void UChanneldGameInstanceSubsystem::CreateChannel(EChanneldChannelType ChannelType, FString Metadata, UProtoMessageObject* InitData,
 	const FOnceOnCreateChannel& Callback)
 {
-	// TODO: check ConnectionInstance
+	InitConnection();
+
 	ConnectionInstance->CreateChannel(
 		static_cast<channeldpb::ChannelType>(ChannelType),
 		Metadata,
@@ -197,7 +229,8 @@ void UChanneldGameInstanceSubsystem::CreateChannel(EChanneldChannelType ChannelT
 
 void UChanneldGameInstanceSubsystem::RemoveChannel(int32 ChannelToRemove, const FOnceOnRemoveChannel& Callback)
 {
-	// TODO: check ConnectionInstance
+	InitConnection();
+
 	ConnectionInstance->RemoveChannel(ChannelToRemove,
 		[=](const channeldpb::RemoveChannelMessage* Message)
 		{
@@ -206,15 +239,31 @@ void UChanneldGameInstanceSubsystem::RemoveChannel(int32 ChannelToRemove, const 
 	);
 }
 
+void UChanneldGameInstanceSubsystem::ListChannel(EChanneldChannelType ChannelTypeFilter, const TArray<FString>& MetadataFilters, const FOnceOnListChannel& Callback)
+{
+	InitConnection();
+
+	ConnectionInstance->ListChannel(static_cast<channeldpb::ChannelType>(ChannelTypeFilter),
+		&MetadataFilters, [=](const channeldpb::ListChannelResultMessage* Message)
+		{
+			TArray<FListedChannelInfo> Channels;
+			ConnectionInstance->ListedChannels.GenerateValueArray(Channels);
+			Callback.ExecuteIfBound(Channels);
+		}
+	);
+}
+
 void UChanneldGameInstanceSubsystem::SubToChannel(int32 ChId, const FOnceOnSubToChannel& Callback)
 {
-	// TODO: check ConnectionInstance
+	InitConnection();
+
 	SubConnectionToChannel(ConnectionInstance->GetConnId(), ChId, Callback);
 }
 
 void UChanneldGameInstanceSubsystem::SubConnectionToChannel(int32 TargetConnId, int32 ChId, const FOnceOnSubToChannel& Callback)
 {
-	// TODO: check ConnectionInstance
+	InitConnection();
+
 	ConnectionInstance->SubConnectionToChannel(TargetConnId, ChId, nullptr,
 		[=](const channeldpb::SubscribedToChannelResultMessage* Message)
 		{
@@ -225,7 +274,8 @@ void UChanneldGameInstanceSubsystem::SubConnectionToChannel(int32 TargetConnId, 
 
 void UChanneldGameInstanceSubsystem::SendDataUpdate(int32 ChId, UProtoMessageObject* MessageObject)
 {
-	// TODO: check ConnectionInstance
+	InitConnection();
+
 	channeldpb::ChannelDataUpdateMessage UpdateMsg;
 	UpdateMsg.mutable_data()->PackFrom(*MessageObject->GetMessage());
 	ConnectionInstance->Send(ChId, channeldpb::CHANNEL_DATA_UPDATE, UpdateMsg);
@@ -234,7 +284,8 @@ void UChanneldGameInstanceSubsystem::SendDataUpdate(int32 ChId, UProtoMessageObj
 void UChanneldGameInstanceSubsystem::ServerBroadcast(int32 ChId, int32 ClientConnId, UProtoMessageObject* MessageObject,
 	EChanneldBroadcastType BroadcastType)
 {
-	// TODO: check ConnectionInstance
+	InitConnection();
+
 	if (ConnectionInstance->IsClient())
 	{
 		return;
@@ -285,6 +336,20 @@ void UChanneldGameInstanceSubsystem::CreateMessageObjectByFullName(UProtoMessage
 	}
 }
 
+UChannelDataView* UChanneldGameInstanceSubsystem::GetChannelDataView()
+{
+	if (auto ChanneldNetDriver = GetNetDriver())
+	{
+		return ChanneldNetDriver->GetView();
+	}
+	return nullptr;
+}
+
+void UChanneldGameInstanceSubsystem::SetLowLevelSendToChannelId(int32 ChId)
+{
+	*LowLevelSendToChannelId = ChId;
+}
+
 google::protobuf::Message* UChanneldGameInstanceSubsystem::CreateProtoMessageByFullName(const std::string ProtobufFullName)
 {
 	const google::protobuf::Descriptor* Desc = google::protobuf::DescriptorPool::generated_pool()
@@ -323,6 +388,13 @@ void UChanneldGameInstanceSubsystem::HandleRemoveChannel(UChanneldConnection* Co
 	OnRemoveChannel.Broadcast(ChId, RemoveResultMsg->channelid());
 }
 
+void UChanneldGameInstanceSubsystem::HandleListChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	TArray<FListedChannelInfo> Channels;
+	Conn->ListedChannels.GenerateValueArray(Channels);
+	OnListChannel.Broadcast(Channels);
+}
+
 void UChanneldGameInstanceSubsystem::HandleSubToChannel(UChanneldConnection* Conn, ChannelId ChId,
 	const google::protobuf::Message* Msg)
 {
@@ -351,4 +423,10 @@ void UChanneldGameInstanceSubsystem::HandleChannelDataUpdate(UChanneldConnection
 		AnyData.UnpackTo(MessageObject->GetMessage());
 		OnDataUpdate.Broadcast(ChId, GetChannelTypeByChId(ChId), MessageObject, UpdateResultMsg->contextconnid());
 	}
+}
+
+UChanneldNetDriver* UChanneldGameInstanceSubsystem::GetNetDriver()
+{
+	//auto NetDriver = GetGameInstance()->GetWorld()->GetNetDriver();
+	return Cast<UChanneldNetDriver>(GetGameInstance()->GetWorld()->GetNetDriver());
 }

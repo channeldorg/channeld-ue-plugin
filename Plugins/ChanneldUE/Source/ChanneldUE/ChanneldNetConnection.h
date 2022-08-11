@@ -36,7 +36,7 @@ public:
 	bool bInConnectionlessHandshake = false;
 	bool bChanneldAuthenticated = false;
 
-	ChannelId LowLevelSendToChannelId = GlobalChannelId;
+	//ChannelId LowLevelSendToChannelId = GlobalChannelId;
 
 private:
 

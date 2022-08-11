@@ -42,30 +42,38 @@ protected:
 
 	virtual void LoadCmdLineArgs() {}
 
+	UFUNCTION(BlueprintCallable)
+	void SetLowLevelSendToChannelId(int32 ChId);
+
 	UFUNCTION(BlueprintCallable, BlueprintPure/*, meta=(CallableWithoutWorldContext)*/)
 	UChanneldGameInstanceSubsystem* GetChanneldSubsystem();
 
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "InitChannels"))
-	void ReceiveInitChannels();
+	virtual void InitServer();
+	virtual void InitClient();
 
-	//virtual void InitChannels() PURE_VIRTUAL(UChannelDataView::InitChannels, )
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BeginInitServer"))
+	void ReceiveInitServer();
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BeginInitClient"))
+	void ReceiveInitClient();
 
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "UnitChannels"))
-	void ReceiveUninitChannels();
+	virtual void UninitServer();
+	virtual void UninitClient();
 
-	//virtual void UninitChannels() PURE_VIRTUAL(UChannelDataView::UninitChannels, )
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BeginUninitServer"))
+	void ReceiveUninitServer();
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BeginUninitClient"))
+	void ReceiveUninitClient();
 
 	virtual void OnUnsubFromChannel(ChannelId ChId, const TSet<IChannelDataProvider*>& RemovedProviders) {}
 
+	UPROPERTY()
+	UChanneldConnection* Connection;
 
 private:
 
 	TMap<channeldpb::ChannelType, const google::protobuf::Message*> ChannelDataTemplates;
 	google::protobuf::Any* AnyForTypeUrl;
 	TMap<FString, const google::protobuf::Message*> ChannelDataTemplatesByTypeUrl;
-
-	UPROPERTY()
-	UChanneldConnection* Connection;
 
 	TMap<ChannelId, TSet<IChannelDataProvider*>> ChannelDataProviders;
 

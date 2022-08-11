@@ -112,7 +112,7 @@ public:
 	 * @param ChannelToRemove   The channel to remove, make sure the invoker is the owner of the channel or owner of global
 	 */
 	void RemoveChannel(uint32 ChannelToRemove, const TFunction<void(const channeldpb::RemoveChannelMessage*)>& Callback = nullptr);
-
+	void ListChannel(channeldpb::ChannelType TypeFilter = channeldpb::UNKNOWN, const TArray<FString>* MetadataFilters = nullptr, const TFunction<void(const channeldpb::ListChannelResultMessage*)>& Callback = nullptr);
 	void SubToChannel(ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
 	void SubConnectionToChannel(ConnectionId ConnId, ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
 

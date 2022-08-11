@@ -19,5 +19,8 @@ class CHANNELDUE_API USingleChannelDataView : public UChannelDataView
 public:
 	USingleChannelDataView(const FObjectInitializer& ObjectInitializer);
 
-	virtual void Initialize(UChanneldConnection* InConn) override;
+	virtual void InitServer() override;
+	virtual void InitClient() override;
+
+	FString ChannelMetadata = TEXT("");
 };

@@ -1,8 +1,7 @@
 #include "ChannelDataView.h"
 #include "ChanneldUtils.h"
-#include "Kismet/GameplayStatics.h"
-#include "Engine/GameEngine.h"
 #include "ChanneldGameInstanceSubsystem.h"
+#include "ChanneldNetDriver.h"
 
 //DEFINE_LOG_CATEGORY(LogChanneld);
 
@@ -24,10 +23,42 @@ void UChannelDataView::Initialize(UChanneldConnection* InConn)
 		Connection->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this, &UChannelDataView::HandleUnsub);
 	}
 
-	//InitChannels();
-	ReceiveInitChannels();
+	if (Connection->IsServer())
+	{
+		InitServer();
+	}
+	else if (Connection->IsClient())
+	{
+		InitClient();
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Invalid connection type: %s"), 
+			UTF8_TO_TCHAR(channeldpb::ConnectionType_Name(Connection->GetConnectionType()).c_str()));
+		return;
+	}
 	
 	UE_LOG(LogChanneld, Log, TEXT("%s initialized channels."), *this->GetClass()->GetName());
+}
+
+void UChannelDataView::InitServer()
+{
+	ReceiveInitServer();
+}
+
+void UChannelDataView::InitClient()
+{
+	ReceiveInitClient();
+}
+
+void UChannelDataView::UninitServer()
+{
+	ReceiveUninitServer();
+}
+
+void UChannelDataView::UninitClient()
+{
+	ReceiveUninitClient();
 }
 
 void UChannelDataView::Unintialize()
@@ -36,9 +67,25 @@ void UChannelDataView::Unintialize()
 	{
 		Connection->RemoveMessageHandler(channeldpb::CHANNEL_DATA_UPDATE, this);
 	}
+	else
+	{
+		return;
+	}
 
-	//UninitChannels();
-	ReceiveUninitChannels();
+	if (Connection->IsServer())
+	{
+		UninitServer();
+	}
+	else if (Connection->IsClient())
+	{
+		UninitClient();
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Invalid connection type: %s"),
+			UTF8_TO_TCHAR(channeldpb::ConnectionType_Name(Connection->GetConnectionType()).c_str()));
+		return;
+	}
 
 	UE_LOG(LogChanneld, Log, TEXT("%s uninitialized channels."), *this->GetClass()->GetName());
 }
@@ -148,6 +195,12 @@ void UChannelDataView::SendAllChannelUpdates()
 		}
 	}
 
+}
+
+void UChannelDataView::SetLowLevelSendToChannelId(int32 ChId)
+{
+	auto NetDriver = Cast<UChanneldNetDriver>(GetOuter());
+	*NetDriver->LowLevelSendToChannelId = ChId;
 }
 
 /* Client don't have World when authenticated, so we should set the subsystem when creating the view.

@@ -67,6 +67,8 @@ public:
 		return CastChecked<UChanneldNetConnection>(ServerConnection);
 	}
 
+	UChannelDataView* GetView() { return ChannelDataView; }
+
 	UPROPERTY(Config)
 	FString ChanneldIpForClient = "127.0.0.1";
 	UPROPERTY(Config)
@@ -82,7 +84,7 @@ public:
 	UPROPERTY(Config)
 	FString ChannelDataViewClassName;
 
-	ChannelId LowLevelSendToChannelId = GlobalChannelId;
+	TSharedRef<ChannelId> LowLevelSendToChannelId = MakeShared<ChannelId>(GlobalChannelId);
 
 private:
 
@@ -101,6 +103,7 @@ private:
 	UChannelDataView* ChannelDataView;
 
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
+	void InitChannelDataView();
 	UChanneldNetConnection* OnClientConnected(ConnectionId ClientConnId);
 
 };

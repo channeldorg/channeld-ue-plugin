@@ -460,6 +460,20 @@ void UChanneldConnection::RemoveChannel(uint32 ChannelToRemove, const TFunction<
 	Send(0, channeldpb::REMOVE_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
+void UChanneldConnection::ListChannel(channeldpb::ChannelType TypeFilter /*= channeldpb::UNKNOWN*/, const TArray<FString>* MetadataFilters /*= null*/, const TFunction<void(const channeldpb::ListChannelResultMessage*)>& Callback /*= null*/)
+{
+	channeldpb::ListChannelMessage ListMsg;
+	ListMsg.set_typefilter(TypeFilter);
+	if (MetadataFilters != nullptr)
+	{
+		for (const FString& MetadataFilter : *MetadataFilters)
+		{
+			ListMsg.add_metadatafilters(TCHAR_TO_ANSI(*MetadataFilter));
+		}
+	}
+	Send(GlobalChannelId, channeldpb::LIST_CHANNEL, ListMsg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
+}
+
 void UChanneldConnection::SubToChannel(ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback /*= nullptr*/)
 {
 	SubConnectionToChannel(GetConnId(), ChId, SubOptions, Callback);
