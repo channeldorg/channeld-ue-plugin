@@ -25,7 +25,6 @@ public class ChanneldEditor : ModuleRules
             new string[]
             {
                 "Core",
-                "Protobuf",
                 "ChanneldUE",
 				// ... add other public dependencies that you statically link with here ...
 			}
@@ -43,6 +42,7 @@ public class ChanneldEditor : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
+                "EditorStyle",
 				// ... add private dependencies that you statically link with here ...	
 			}
             );
