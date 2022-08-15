@@ -64,6 +64,39 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(ChannelId ChId, ConnectionId
 	}
 }
 
+void UChanneldNetDriver::ServerHandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	auto ResultMsg = static_cast<const channeldpb::UnsubscribedFromChannelResultMessage*>(Msg);
+	UE_LOG(LogChanneld, Log, TEXT("Server received unsub of conn(%d), connType=%s, channelType=%s, channelId=%d"),
+		ResultMsg->connid(),
+		UTF8_TO_TCHAR(channeldpb::ConnectionType_Name(ResultMsg->conntype()).c_str()),
+		UTF8_TO_TCHAR(channeldpb::ChannelType_Name(ResultMsg->channeltype()).c_str()),
+		ChId);
+
+	if (ResultMsg->conntype() == channeldpb::CLIENT && Conn->OwnedChannels.Contains(ChId))
+	{
+		auto ClientConnection = ClientConnectionMap.FindRef(ResultMsg->connid());
+		if (ClientConnection)
+		{
+			ClientConnectionMap.Remove(ResultMsg->connid());
+
+			/* Start ~ copied from UNetDriver::Shutdown() */
+			if (ClientConnection->PlayerController)
+			{
+				APawn* Pawn = ClientConnection->PlayerController->GetPawn();
+				if (Pawn)
+				{
+					Pawn->Destroy(true);
+				}
+			}
+
+			// Calls Close() internally and removes from ClientConnections
+			ClientConnection->CleanUp();
+			/* End ~ copy */
+		}
+	}
+}
+
 ConnectionId UChanneldNetDriver::AddrToConnId(const FInternetAddr& Addr)
 {
 	uint32 ConnId;
@@ -211,7 +244,6 @@ bool UChanneldNetDriver::InitConnect(FNetworkNotify* InNotify, const FURL& Conne
 
 bool UChanneldNetDriver::InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bool bReuseAddressAndPort, FString& Error)
 {
-
 	if (!InitBase(false, InNotify, LocalURL, bReuseAddressAndPort, Error))
 	{
 		UE_LOG(LogNet, Warning, TEXT("Failed to init net driver ListenURL: %s: %s"), *LocalURL.ToString(), *Error);
@@ -222,6 +254,9 @@ bool UChanneldNetDriver::InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bo
 	{
 		InitConnectionlessHandler();
 	}
+
+	ConnToChanneld->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this, &UChanneldNetDriver::ServerHandleUnsub);
+
 	return true;
 
 	//return Super::InitListen(InNotify, LocalURL, bReuseAddressAndPort, Error);
@@ -304,6 +339,7 @@ void UChanneldNetDriver::LowLevelDestroy()
 	{
 		ConnToChanneld->OnAuthenticated.RemoveAll(this);
 		ConnToChanneld->OnUserSpaceMessageReceived.RemoveAll(this);
+		ConnToChanneld->RemoveMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this);
 		ConnToChanneld->Disconnect(true);
 	}
 	

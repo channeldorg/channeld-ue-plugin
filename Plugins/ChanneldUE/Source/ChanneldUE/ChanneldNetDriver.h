@@ -102,8 +102,9 @@ private:
 	UPROPERTY()
 	UChannelDataView* ChannelDataView;
 
-	void OnChanneldAuthenticated(UChanneldConnection* Conn);
 	void InitChannelDataView();
 	UChanneldNetConnection* OnClientConnected(ConnectionId ClientConnId);
+	void OnChanneldAuthenticated(UChanneldConnection* Conn);
 	void OnUserSpaceMessageReceived(ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload);
+	void ServerHandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 };
