@@ -105,5 +105,5 @@ private:
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
 	void InitChannelDataView();
 	UChanneldNetConnection* OnClientConnected(ConnectionId ClientConnId);
-
+	void OnUserSpaceMessageReceived(ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload);
 };

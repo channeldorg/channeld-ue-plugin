@@ -12,10 +12,20 @@ void UChanneldGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collec
 
 void UChanneldGameInstanceSubsystem::Deinitialize()
 {
-	if (ConnectionInstance)
+	if (!ConnectionInstance)
 	{
-		ConnectionInstance->Disconnect();
+		return;
 	}
+
+	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::AUTH, this);
+	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::CREATE_CHANNEL, this);
+	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::REMOVE_CHANNEL, this);
+	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::LIST_CHANNEL, this);
+	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::SUB_TO_CHANNEL, this);
+	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::UNSUB_FROM_CHANNEL, this);
+	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, this);
+	ConnectionInstance->OnUserSpaceMessageReceived.RemoveAll(this);
+	ConnectionInstance->Disconnect();
 }
 
 void UChanneldGameInstanceSubsystem::Tick(float DeltaTime)
@@ -28,7 +38,6 @@ void UChanneldGameInstanceSubsystem::Tick(float DeltaTime)
 	}
 }
 
-#pragma optimize("", off)
 void UChanneldGameInstanceSubsystem::InitConnection()
 {
 	if (ConnectionInstance)
@@ -56,29 +65,8 @@ void UChanneldGameInstanceSubsystem::InitConnection()
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::UNSUB_FROM_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleUnsubFromChannel);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, this, &UChanneldGameInstanceSubsystem::HandleChannelDataUpdate);
 
-	ConnectionInstance->OnUserSpaceMessageReceived.AddLambda([&](ChannelId ChId, ConnectionId ConnId, const std::string& Payload)
-		{
-			google::protobuf::Any AnyMsg;
-			if (!AnyMsg.ParseFromString(Payload))
-				return;
-
-			std::string ProtoFullName = AnyMsg.type_url();
-			if (ProtoFullName.length() < 20)
-				return;
-
-			// Erase "type.googleapis.com/"
-			ProtoFullName.erase(0, 20);
-			auto PayloadMsg = CreateProtoMessageByFullName(ProtoFullName);
-			if (PayloadMsg != nullptr)
-			{
-				AnyMsg.UnpackTo(PayloadMsg);
-				UProtoMessageObject* MsgObject = NewObject<UProtoMessageObject>();
-				MsgObject->SetMessagePtr(PayloadMsg, true);
-				OnUserSpaceMessage.Broadcast(ChId, ConnId, MsgObject);
-			}
-		});
+	ConnectionInstance->OnUserSpaceMessageReceived.AddUObject(this, &UChanneldGameInstanceSubsystem::OnUserSpaceMessageReceived);
 }
-#pragma optimize("", on)
 
 bool UChanneldGameInstanceSubsystem::IsConnected()
 {
@@ -422,6 +410,28 @@ void UChanneldGameInstanceSubsystem::HandleChannelDataUpdate(UChanneldConnection
 	{
 		AnyData.UnpackTo(MessageObject->GetMessage());
 		OnDataUpdate.Broadcast(ChId, GetChannelTypeByChId(ChId), MessageObject, UpdateResultMsg->contextconnid());
+	}
+}
+
+void UChanneldGameInstanceSubsystem::OnUserSpaceMessageReceived(ChannelId ChId, ConnectionId ConnId, const std::string& Payload)
+{
+	google::protobuf::Any AnyMsg;
+	if (!AnyMsg.ParseFromString(Payload))
+		return;
+
+	std::string ProtoFullName = AnyMsg.type_url();
+	if (ProtoFullName.length() < 20)
+		return;
+
+	// Erase "type.googleapis.com/"
+	ProtoFullName.erase(0, 20);
+	auto PayloadMsg = CreateProtoMessageByFullName(ProtoFullName);
+	if (PayloadMsg != nullptr)
+	{
+		AnyMsg.UnpackTo(PayloadMsg);
+		UProtoMessageObject* MsgObject = NewObject<UProtoMessageObject>();
+		MsgObject->SetMessagePtr(PayloadMsg, true);
+		OnUserSpaceMessage.Broadcast(ChId, ConnId, MsgObject);
 	}
 }
 

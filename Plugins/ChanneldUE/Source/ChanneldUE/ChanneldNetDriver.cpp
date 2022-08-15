@@ -38,6 +38,32 @@ UChanneldNetConnection* UChanneldNetDriver::OnClientConnected(ConnectionId Clien
 	return ClientConnection;
 }
 
+void UChanneldNetDriver::OnUserSpaceMessageReceived(ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload)
+{
+	if (ConnToChanneld->IsClient())
+	{
+		const auto MyServerConnection = GetServerConnection();
+		if (MyServerConnection)
+		{
+			MyServerConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Error, TEXT("ServerConnection doesn't exist"));
+		}
+	}
+	else
+	{
+		auto ClientConnection = ClientConnectionMap.FindRef(ClientConnId);
+		// Server's ClientConnection is created when the first packet from client arrives.
+		if (ClientConnection == nullptr)
+		{
+			ClientConnection = OnClientConnected(ClientConnId);
+		}
+		ClientConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
+	}
+}
+
 ConnectionId UChanneldNetDriver::AddrToConnId(const FInternetAddr& Addr)
 {
 	uint32 ConnId;
@@ -100,31 +126,7 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 		ConnToChanneld = NewObject<UChanneldConnection>();
 	}
 
-	ConnToChanneld->OnUserSpaceMessageReceived.AddLambda([&](ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload)
-		{
-			if (ConnToChanneld->IsClient())
-			{
-				const auto MyServerConnection = GetServerConnection();
-				if (MyServerConnection)
-				{
-					MyServerConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
-				}
-				else
-				{
-					UE_LOG(LogChanneld, Error, TEXT("ServerConnection doesn't exist"));
-				}
-			}
-			else
-			{
-				auto ClientConnection = ClientConnectionMap.FindRef(ClientConnId);
-				// Server's ClientConnection is created when the first packet from client arrives.
-				if (ClientConnection == nullptr)
-				{
-					ClientConnection = OnClientConnected(ClientConnId);
-				}
-				ClientConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
-			}
-		});
+	ConnToChanneld->OnUserSpaceMessageReceived.AddUObject(this, &UChanneldNetDriver::OnUserSpaceMessageReceived);
 
 	InitBaseURL = URL;
 
@@ -300,6 +302,8 @@ void UChanneldNetDriver::LowLevelDestroy()
 
 	if (ConnToChanneld)
 	{
+		ConnToChanneld->OnAuthenticated.RemoveAll(this);
+		ConnToChanneld->OnUserSpaceMessageReceived.RemoveAll(this);
 		ConnToChanneld->Disconnect(true);
 	}
 	

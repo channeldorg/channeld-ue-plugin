@@ -162,6 +162,8 @@ protected:
 	void HandleUnsubFromChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 
+	void OnUserSpaceMessageReceived(ChannelId ChId, ConnectionId ConnId, const std::string& Payload);
+
 	class UChanneldNetDriver* GetNetDriver();
 };
 
