@@ -82,8 +82,6 @@ void UChanneldNetDriver::ServerHandleUnsub(UChanneldConnection* Conn, ChannelId 
 		{
 			ClientConnectionMap.Remove(ResultMsg->connid());
 
-			/* Different from Unity - we should let the client trigger the disconnection process by calling OpenLevel()
-			*/
 			// Start ~ Copied from UNetDriver::Shutdown()
 			if (ClientConnection->PlayerController)
 			{
@@ -121,6 +119,21 @@ TSharedRef<FInternetAddr> UChanneldNetDriver::ConnIdToAddr(ConnectionId ConnId)
 	return *AddrPtr;
 }
 
+UChanneldGameInstanceSubsystem* UChanneldNetDriver::GetSubsystem()
+{
+	UWorld* TheWorld = GetWorld();
+	if (!TheWorld)
+	{
+		TheWorld = GEngine->GetWorldContextFromPendingNetGameNetDriver(this)->World();
+	}
+	auto GameInstance = TheWorld->GetGameInstance();
+	if (GameInstance)
+	{
+		return GameInstance->GetSubsystem<UChanneldGameInstanceSubsystem>();
+	}
+	return nullptr;
+}
+
 void UChanneldNetDriver::PostInitProperties()
 {
 	Super::PostInitProperties();
@@ -140,15 +153,8 @@ bool UChanneldNetDriver::InitConnectionClass()
 bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, const FURL& URL,
 	bool bReuseAddressAndPort, FString& Error)
 {
-	UWorld* TheWorld = GetWorld();
-	if (!TheWorld)
 	{
-		TheWorld = GEngine->GetWorldContextFromPendingNetGameNetDriver(this)->World();
-	}
-	auto GameInstance = TheWorld->GetGameInstance();
-	if (GameInstance)
-	{
-		auto Subsystem = GameInstance->GetSubsystem<UChanneldGameInstanceSubsystem>();
+		auto Subsystem = GetSubsystem();
 		if (Subsystem)
 		{
 			LowLevelSendToChannelId = Subsystem->LowLevelSendToChannelId;
@@ -336,12 +342,6 @@ void UChanneldNetDriver::LowLevelSend(TSharedPtr<const FInternetAddr> Address, v
 
 void UChanneldNetDriver::LowLevelDestroy()
 {
-	if (ChannelDataView)
-	{
-		ChannelDataView->Unintialize();
-		ChannelDataView = NULL;
-	}
-
 	Super::LowLevelDestroy();
 
 	if (ConnToChanneld)
@@ -401,9 +401,10 @@ void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 
 	if (IsValid(ConnToChanneld) && ConnToChanneld->IsConnected())
 	{
-		if (ChannelDataView)
+		auto Subsystem = GetSubsystem();
+		if (Subsystem && Subsystem->GetChannelDataView())
 		{
-			ChannelDataView->SendAllChannelUpdates();
+			Subsystem->GetChannelDataView()->SendAllChannelUpdates();
 		}
 		ConnToChanneld->TickOutgoing();
 	}
@@ -411,97 +412,14 @@ void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 
 void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 {
-	if (ConnToChanneld->IsServer())
-	{
-		/* Moved to ChannelDataView
-		ConnToChanneld->CreateChannel(channeldpb::GLOBAL, TEXT("test123"), nullptr, nullptr, nullptr,
-			[&](const channeldpb::CreateChannelResultMessage* ResultMsg)
-			{
-				UE_LOG(LogChanneld, Log, TEXT("[%s] Created channel: %d, type: %s, owner connId: %d, metadata: %s"), 
-					*GetWorld()->GetDebugDisplayName(),
-					ResultMsg->channelid(), 
-					UTF8_TO_TCHAR(channeldpb::ChannelType_Name(ResultMsg->channeltype()).c_str()), 
-					ResultMsg->ownerconnid(), 
-					UTF8_TO_TCHAR(ResultMsg->metadata().c_str()));
-
-				for (auto const Provider : ChannelDataProviders)
-				{
-					if (Provider->GetChannelType() == ResultMsg->channeltype())
-					{
-						Provider->SetChannelId(ResultMsg->channelid());
-					}
-				}
-
-				//FlushUnauthData();
-			});
-		*/
-	}
-	else
+	if (ConnToChanneld->IsClient())
 	{
 		auto MyServerConnection = GetServerConnection();
 		MyServerConnection->RemoteAddr = ConnIdToAddr(ConnToChanneld->GetConnId());
 		MyServerConnection->bChanneldAuthenticated = true;
 		MyServerConnection->FlushUnauthData();
-
-		/* Moved to ChannelDataView
-		ChannelId ChIdToSub = GlobalChannelId;
-		ConnToChanneld->SubToChannel(ChIdToSub, nullptr, [&, ChIdToSub, MyServerConnection](const channeldpb::SubscribedToChannelResultMessage* Msg)
-			{
-				UE_LOG(LogChanneld, Log, TEXT("[%s] Sub to channel: %d, connId: %d"), *GetWorld()->GetDebugDisplayName(), ChIdToSub, Msg->connid());
-				MyServerConnection->bChanneldAuthenticated = true;
-				MyServerConnection->FlushUnauthData();
-			});
-		*/
-	}
-
-	InitChannelDataView();
-}
-
-void UChanneldNetDriver::InitChannelDataView()
-{
-	UClass* ChannelDataViewClass = nullptr;
-
-	UWorld* TheWorld = GetWorld();
-	if (!TheWorld)
-	{
-		TheWorld = GEngine->GetWorldContextFromPendingNetGameNetDriver(this)->World();
-	}
-	// Use the class in the WorldSettings first
-	auto WorldSettings = Cast<AChanneldWorldSettings>(TheWorld->GetWorldSettings());
-	if (WorldSettings)
-	{
-		ChannelDataViewClass = WorldSettings->ChannelDataViewClass;
-	}
-
-	// If not exist, use the class name in ChanneldUE.ini
-	if (!ChannelDataViewClass && ChannelDataViewClassName != TEXT(""))
-	{
-		if (ChannelDataViewClassName.StartsWith("Blueprint'"))
-		{
-			auto BpClass = TSoftClassPtr<UChannelDataView>(FSoftObjectPath(ChannelDataViewClassName));
-			ChannelDataViewClass = BpClass.LoadSynchronous();
-		}
-		else
-		{
-			ChannelDataViewClass = LoadClass<UChannelDataView>(this, *ChannelDataViewClassName, NULL, LOAD_None, NULL);
-		}
-
-		if (ChannelDataViewClass == NULL)
-		{
-			UE_LOG(LogChanneld, Error, TEXT("Failed to load class '%s'"), *ChannelDataViewClassName);
-		}
-	}
-
-	if (ChannelDataViewClass)
-	{
-		ChannelDataView = NewObject<UChannelDataView>(this, ChannelDataViewClass);
-		//ConnToChanneld->OnAuthenticated.AddUObject(ChannelDataView, &UChannelDataView::Initialize);
-		ChannelDataView->Initialize(ConnToChanneld);
-	}
-	else
-	{
-		UE_LOG(LogChanneld, Warning, TEXT("Failed to load any ChannelDataView"));
 	}
 }
+
 
 

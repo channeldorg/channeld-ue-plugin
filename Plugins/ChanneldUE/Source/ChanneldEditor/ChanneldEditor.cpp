@@ -16,6 +16,9 @@ void FChanneldEditorModule::StartupModule()
 
 	PluginCommands = MakeShareable(new FUICommandList);
 	PluginCommands->MapAction(
+		FChanneldEditorCommands::Get().PluginCommand,
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::LaunchServersAction));
+	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().LaunchChanneldCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::LaunchChanneldAction));
 	PluginCommands->MapAction(

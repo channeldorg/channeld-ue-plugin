@@ -67,8 +67,6 @@ public:
 		return CastChecked<UChanneldNetConnection>(ServerConnection);
 	}
 
-	UChannelDataView* GetView() { return ChannelDataView; }
-
 	UPROPERTY(Config)
 	FString ChanneldIpForClient = "127.0.0.1";
 	UPROPERTY(Config)
@@ -80,9 +78,6 @@ public:
 
 	UPROPERTY(Config)
 	bool bDisableHandshaking = true;
-
-	UPROPERTY(Config)
-	FString ChannelDataViewClassName;
 
 	TSharedRef<ChannelId> LowLevelSendToChannelId = MakeShared<ChannelId>(GlobalChannelId);
 
@@ -99,12 +94,10 @@ private:
 
 	TMap<ConnectionId, UChanneldNetConnection*> ClientConnectionMap;
 
-	UPROPERTY()
-	UChannelDataView* ChannelDataView;
-
-	void InitChannelDataView();
 	UChanneldNetConnection* OnClientConnected(ConnectionId ClientConnId);
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
 	void OnUserSpaceMessageReceived(ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload);
 	void ServerHandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+
+	UChanneldGameInstanceSubsystem* GetSubsystem();
 };

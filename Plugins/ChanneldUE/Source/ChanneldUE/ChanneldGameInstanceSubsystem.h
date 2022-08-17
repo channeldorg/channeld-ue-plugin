@@ -28,7 +28,7 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FOnceOnListChannel, const TArray<FListedChanne
 DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnSubToChannel, int32, ChId, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
 DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnUnsubFromChannel, int32, ChId, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
 
-UCLASS(Meta = (DisplayName = "Channeld"))
+UCLASS(Meta = (DisplayName = "Channeld"), config = ChanneldUE)
 class CHANNELDUE_API UChanneldGameInstanceSubsystem : public UGameInstanceSubsystem, public FTickableGameObject
 {
 	GENERATED_BODY()
@@ -161,12 +161,25 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Channeld|View")
 		void SetLowLevelSendToChannelId(int32 ChId);
 
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Utility")
+		void OpenLevel(FName LevelName, bool bAbsolute = true, FString Options = FString(TEXT("")));
+
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Utility")
+		void OpenLevelByObjPtr(const TSoftObjectPtr<UWorld> Level, bool bAbsolute = true, FString Options = FString(TEXT("")));
+
 	UFUNCTION(BlueprintCallable, Category = "Channeld")
 		void SeamlessTravelToChannel(APlayerController* PlayerController, int32 ChId);
+
+
+	UPROPERTY(Config)
+		FString ChannelDataViewClassName;
 
 protected:
 	UPROPERTY()
 		UChanneldConnection* ConnectionInstance = nullptr;
+
+	UPROPERTY()
+		UChannelDataView* ChannelDataView;
 
 	TMap<EChanneldChannelType, FString> ChannelTypeToProtoFullNameMapping;
 
@@ -183,6 +196,8 @@ protected:
 	void OnUserSpaceMessageReceived(ChannelId ChId, ConnectionId ConnId, const std::string& Payload);
 
 	class UChanneldNetDriver* GetNetDriver();
+
+	void InitChannelDataView();
 };
 
 

@@ -5,6 +5,8 @@
 #include "ChanneldConnection.h"
 #include "ProtoMessageObject.h"
 #include "ChanneldNetDriver.h"
+#include "Kismet/GameplayStatics.h"
+#include "ChanneldWorldSettings.h"
 
 void UChanneldGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -16,6 +18,12 @@ void UChanneldGameInstanceSubsystem::Deinitialize()
 	if (!ConnectionInstance)
 	{
 		return;
+	}
+
+	if (ChannelDataView)
+	{
+		ChannelDataView->Unintialize();
+		ChannelDataView = NULL;
 	}
 
 	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::AUTH, this);
@@ -372,16 +380,22 @@ void UChanneldGameInstanceSubsystem::CreateMessageObjectByFullName(UProtoMessage
 
 UChannelDataView* UChanneldGameInstanceSubsystem::GetChannelDataView()
 {
-	if (auto ChanneldNetDriver = GetNetDriver())
-	{
-		return ChanneldNetDriver->GetView();
-	}
-	return nullptr;
+	return ChannelDataView;
 }
 
 void UChanneldGameInstanceSubsystem::SetLowLevelSendToChannelId(int32 ChId)
 {
 	*LowLevelSendToChannelId = ChId;
+}
+
+void UChanneldGameInstanceSubsystem::OpenLevel(FName LevelName, bool bAbsolute /*= true*/, FString Options /*= FString(TEXT(""))*/)
+{
+	UGameplayStatics::OpenLevel(this, LevelName, bAbsolute, Options);
+}
+
+void UChanneldGameInstanceSubsystem::OpenLevelByObjPtr(const TSoftObjectPtr<UWorld> Level, bool bAbsolute /*= true*/, FString Options /*= FString(TEXT(""))*/)
+{
+	UGameplayStatics::OpenLevelBySoftObjectPtr(this, Level, bAbsolute, Options);
 }
 
 void UChanneldGameInstanceSubsystem::SeamlessTravelToChannel(APlayerController* PlayerController, int32 ChId)
@@ -421,6 +435,12 @@ void UChanneldGameInstanceSubsystem::HandleAuthResult(UChanneldConnection* Conn,
 	const google::protobuf::Message* Msg)
 {
 	auto AuthResultMsg = static_cast<const channeldpb::AuthResultMessage*>(Msg);
+
+	if (AuthResultMsg->result() == channeldpb::AuthResultMessage_AuthResult_SUCCESSFUL && AuthResultMsg->connid() == Conn->GetConnId())
+	{
+		InitChannelDataView();
+	}
+	
 	OnAuth.Broadcast(AuthResultMsg->result(), AuthResultMsg->connid());
 }
 
@@ -501,4 +521,47 @@ UChanneldNetDriver* UChanneldGameInstanceSubsystem::GetNetDriver()
 {
 	//auto NetDriver = GetGameInstance()->GetWorld()->GetNetDriver();
 	return Cast<UChanneldNetDriver>(GetGameInstance()->GetWorld()->GetNetDriver());
+}
+
+void UChanneldGameInstanceSubsystem::InitChannelDataView()
+{
+	UClass* ChannelDataViewClass = nullptr;
+
+	UWorld* TheWorld = GetWorld();
+	// Use the class in the WorldSettings first
+	auto WorldSettings = Cast<AChanneldWorldSettings>(TheWorld->GetWorldSettings());
+	if (WorldSettings)
+	{
+		ChannelDataViewClass = WorldSettings->ChannelDataViewClass;
+	}
+
+	// If not exist, use the class name in ChanneldUE.ini
+	if (!ChannelDataViewClass && ChannelDataViewClassName != TEXT(""))
+	{
+		if (ChannelDataViewClassName.StartsWith("Blueprint'"))
+		{
+			auto BpClass = TSoftClassPtr<UChannelDataView>(FSoftObjectPath(ChannelDataViewClassName));
+			ChannelDataViewClass = BpClass.LoadSynchronous();
+		}
+		else
+		{
+			ChannelDataViewClass = LoadClass<UChannelDataView>(this, *ChannelDataViewClassName, NULL, LOAD_None, NULL);
+		}
+
+		if (ChannelDataViewClass == NULL)
+		{
+			UE_LOG(LogChanneld, Error, TEXT("Failed to load class '%s'"), *ChannelDataViewClassName);
+		}
+	}
+
+	if (ChannelDataViewClass)
+	{
+		ChannelDataView = NewObject<UChannelDataView>(this, ChannelDataViewClass);
+		//ConnToChanneld->OnAuthenticated.AddUObject(ChannelDataView, &UChannelDataView::Initialize);
+		ChannelDataView->Initialize(ConnectionInstance);
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Failed to load any ChannelDataView"));
+	}
 }
