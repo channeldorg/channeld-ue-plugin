@@ -83,6 +83,7 @@ void UChanneldNetDriver::ServerHandleUnsub(UChanneldConnection* Conn, ChannelId 
 			ClientConnectionMap.Remove(ResultMsg->connid());
 
 			/* Different from Unity - we should let the client trigger the disconnection process by calling OpenLevel()
+			*/
 			// Start ~ Copied from UNetDriver::Shutdown()
 			if (ClientConnection->PlayerController)
 			{
@@ -96,7 +97,6 @@ void UChanneldNetDriver::ServerHandleUnsub(UChanneldConnection* Conn, ChannelId 
 			// Calls Close() internally and removes from ClientConnections
 			ClientConnection->CleanUp();
 			// End ~ Copy
-			*/
 		}
 	}
 }
@@ -151,17 +151,21 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 		auto Subsystem = GameInstance->GetSubsystem<UChanneldGameInstanceSubsystem>();
 		if (Subsystem)
 		{
+			LowLevelSendToChannelId = Subsystem->LowLevelSendToChannelId;
+			/*
 			// Share the same ChanneldConnection with the subsystem if it exists.
 			// In the standalone net game, NetDriver::InitBase is called when starting client travel, so the connection in the subsystem should be already created.
 			ConnToChanneld = Subsystem->GetConnection();
-
-			LowLevelSendToChannelId = Subsystem->LowLevelSendToChannelId;
+			*/
 		}
 	}
+	/*
 	if (ConnToChanneld == nullptr)
 	{
 		ConnToChanneld = NewObject<UChanneldConnection>(this);
 	}
+	*/
+	ConnToChanneld = GEngine->GetEngineSubsystem<UChanneldConnection>();
 
 	ConnToChanneld->OnUserSpaceMessageReceived.AddUObject(this, &UChanneldNetDriver::OnUserSpaceMessageReceived);
 
@@ -346,6 +350,7 @@ void UChanneldNetDriver::LowLevelDestroy()
 		ConnToChanneld->OnUserSpaceMessageReceived.RemoveAll(this);
 		ConnToChanneld->RemoveMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this);
 
+		/*
 		// Only disconnect when the connection is owned by the net driver.
 		// Otherwise the connection is owned by the subsystem, and it will be used across sessions, 
 		// while the net driver will be created and destroyed for every client travel.
@@ -353,6 +358,7 @@ void UChanneldNetDriver::LowLevelDestroy()
 		{
 			ConnToChanneld->Disconnect(true);
 		}
+		*/
 	}
 	
 	ClientConnectionMap.Reset();

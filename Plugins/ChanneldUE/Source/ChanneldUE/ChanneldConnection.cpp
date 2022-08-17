@@ -5,9 +5,14 @@
 
 DEFINE_LOG_CATEGORY(LogChanneld);
 
-UChanneldConnection::UChanneldConnection(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 {
+
+//}
+//
+//UChanneldConnection::UChanneldConnection(const FObjectInitializer& ObjectInitializer)
+//	: Super(ObjectInitializer)
+//{
 	if (ReceiveBufferSize > MaxPacketSize)
 		ReceiveBufferSize = MaxPacketSize;
 	ReceiveBuffer = new uint8[ReceiveBufferSize];
@@ -53,9 +58,16 @@ UChanneldConnection::UChanneldConnection(const FObjectInitializer& ObjectInitial
 		});
 }
 
-void UChanneldConnection::BeginDestroy()
+void UChanneldConnection::Deinitialize()
 {
-	Super::BeginDestroy();
+	UserSpaceMessageHandlerEntry.Handlers.Reset();
+	MessageHandlers.Reset();
+
+//}
+//
+//void UChanneldConnection::BeginDestroy()
+//{
+//	Super::BeginDestroy();
 	Disconnect(false);
 }
 
@@ -105,6 +117,24 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int P
 		return false;
 	}
 	return true;
+}
+
+void UChanneldConnection::OnDisconnected()
+{
+	ConnId = 0;
+	ConnectionType = channeldpb::NO_CONNECTION;
+	RemoteAddr = nullptr;
+
+	IncomingQueue.Empty();
+	OutgoingQueue.Empty();
+	RpcCallbacks.Empty();
+
+	OnAuthenticated.Clear();
+	OnUserSpaceMessageReceived.Clear();
+
+	SubscribedChannels.Empty();
+	OwnedChannels.Empty();
+	ListedChannels.Empty();
 }
 
 void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
@@ -228,11 +258,6 @@ void UChanneldConnection::Receive()
 
 	// Reset read position
 	ReceiveBufferOffset = 0;
-}
-
-void UChanneldConnection::OnDisconnected()
-{
-	ConnId = 0;
 }
 
 bool UChanneldConnection::StartReceiveThread()

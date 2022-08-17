@@ -8,6 +8,7 @@
 
 void UChanneldGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
+	InitConnection();
 }
 
 void UChanneldGameInstanceSubsystem::Deinitialize()
@@ -45,6 +46,7 @@ void UChanneldGameInstanceSubsystem::InitConnection()
 		return;
 	}
 
+	/*
 	auto ChanneldNetDriver = GetNetDriver();
 	if (ChanneldNetDriver)
 	{
@@ -56,6 +58,8 @@ void UChanneldGameInstanceSubsystem::InitConnection()
 	{
 		ConnectionInstance = NewObject<UChanneldConnection>(this);
 	}
+	*/
+	ConnectionInstance = GEngine->GetEngineSubsystem<UChanneldConnection>();
 
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::AUTH, this, &UChanneldGameInstanceSubsystem::HandleAuthResult);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::CREATE_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleCreateChannel);

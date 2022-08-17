@@ -19,14 +19,15 @@ typedef TFunction<void(UChanneldConnection*, ChannelId, const google::protobuf::
 //typedef TFunction<void(ChannelId, ConnectionId, const std::string&)> FUserSpaceMessageHandlerFunc;
 
 UCLASS(transient, config = ChanneldUE)
-class CHANNELDUE_API UChanneldConnection : public UObject, public FRunnable
+class CHANNELDUE_API UChanneldConnection : public UEngineSubsystem, public FRunnable
 {
 	GENERATED_BODY()
 
 public:
 
-	// Constructors.
-	UChanneldConnection(const FObjectInitializer& ObjectInitializer);
+	//UChanneldConnection(const FObjectInitializer& ObjectInitializer);
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
 
 	FORCEINLINE void RegisterMessageHandler(uint32 MsgType, google::protobuf::Message* MessageTemplate, const FChanneldMessageHandlerFunc& Handler)
 	{
@@ -95,7 +96,7 @@ public:
 
 	FORCEINLINE FInternetAddr& GetRemoteAddr() const { return *RemoteAddr; }
 
-	virtual void BeginDestroy() override;
+	//virtual void BeginDestroy() override;
 
 	bool Connect(bool bInitAsClient, const FString& Host, int Port, FString& Error);
 	void Disconnect(bool bFlushAll = true);
