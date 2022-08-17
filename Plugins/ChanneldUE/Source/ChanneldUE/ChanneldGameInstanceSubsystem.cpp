@@ -54,7 +54,7 @@ void UChanneldGameInstanceSubsystem::InitConnection()
 	}
 	else
 	{
-		ConnectionInstance = NewObject<UChanneldConnection>();
+		ConnectionInstance = NewObject<UChanneldConnection>(this);
 	}
 
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::AUTH, this, &UChanneldGameInstanceSubsystem::HandleAuthResult);
@@ -92,6 +92,11 @@ bool UChanneldGameInstanceSubsystem::IsClientConnection()
 	return ConnectionInstance && ConnectionInstance->IsClient();
 }
 
+bool UChanneldGameInstanceSubsystem::IsAuthenticated()
+{
+	return ConnectionInstance && ConnectionInstance->IsAuthenticated();
+}
+
 EChanneldChannelType UChanneldGameInstanceSubsystem::GetChannelTypeByChId(int32 ChId)
 {
 	if (!ensureMsgf(ConnectionInstance, TEXT("Need to call ConnectToChanneld first!")))
@@ -113,6 +118,24 @@ TArray<FSubscribedChannelInfo> UChanneldGameInstanceSubsystem::GetSubscribedChan
 	}
 	const auto EmptyResult = TArray<FSubscribedChannelInfo>();
 	return EmptyResult;
+}
+
+bool UChanneldGameInstanceSubsystem::HasSubscribedToChannel(int32 ChId)
+{
+	if (ConnectionInstance)
+	{
+		return ConnectionInstance->SubscribedChannels.Contains(ChId);
+	}
+	return false;
+}
+
+bool UChanneldGameInstanceSubsystem::HasOwnedChannel(int32 ChId)
+{
+	if (ConnectionInstance)
+	{
+		return ConnectionInstance->OwnedChannels.Contains(ChId);
+	}
+	return false;
 }
 
 TArray<FListedChannelInfo> UChanneldGameInstanceSubsystem::GetListedChannels()
@@ -260,6 +283,25 @@ void UChanneldGameInstanceSubsystem::SubConnectionToChannel(int32 TargetConnId, 
 	);
 }
 
+void UChanneldGameInstanceSubsystem::UnsubFromChannel(int32 ChId, const FOnceOnUnsubFromChannel& Callback)
+{
+	InitConnection();
+
+	UnsubConnectionFromChannel(ConnectionInstance->GetConnId(), ChId, Callback);
+}
+
+void UChanneldGameInstanceSubsystem::UnsubConnectionFromChannel(int32 TargetConnId, int32 ChId, const FOnceOnUnsubFromChannel& Callback)
+{
+	InitConnection();
+
+	ConnectionInstance->UnsubConnectionFromChannel(TargetConnId, ChId,
+		[=](const channeldpb::UnsubscribedFromChannelResultMessage* Message)
+		{
+			Callback.ExecuteIfBound(ChId, static_cast<EChanneldChannelType>(Message->channeltype()), Message->connid(), static_cast<EChanneldConnectionType>(Message->conntype()));
+		}
+	);
+}
+
 void UChanneldGameInstanceSubsystem::SendDataUpdate(int32 ChId, UProtoMessageObject* MessageObject)
 {
 	InitConnection();
@@ -336,6 +378,22 @@ UChannelDataView* UChanneldGameInstanceSubsystem::GetChannelDataView()
 void UChanneldGameInstanceSubsystem::SetLowLevelSendToChannelId(int32 ChId)
 {
 	*LowLevelSendToChannelId = ChId;
+}
+
+void UChanneldGameInstanceSubsystem::SeamlessTravelToChannel(APlayerController* PlayerController, int32 ChId)
+{
+	InitConnection();
+
+	if (!HasSubscribedToChannel(ChId))
+	{
+		ConnectionInstance->SubToChannel(ChId);
+	}
+	SetLowLevelSendToChannelId(ChId);
+
+	UWorld* World = GetWorld();
+	// Map name starts with '/Game/Maps'
+	FString MapName = World->RemovePIEPrefix(World->URL.Map); //World->GetMapName());// 
+	PlayerController->ClientTravel(FString::Printf(TEXT("127.0.0.1%s"), *MapName), ETravelType::TRAVEL_Relative, true);
 }
 
 google::protobuf::Message* UChanneldGameInstanceSubsystem::CreateProtoMessageByFullName(const std::string ProtobufFullName)

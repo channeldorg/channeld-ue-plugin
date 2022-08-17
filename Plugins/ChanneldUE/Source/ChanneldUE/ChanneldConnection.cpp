@@ -489,6 +489,19 @@ void UChanneldConnection::SubConnectionToChannel(ConnectionId TargetConnId, Chan
 	Send(ChId, channeldpb::SUB_TO_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
+void UChanneldConnection::UnsubFromChannel(ChannelId ChId, const TFunction<void(const channeldpb::UnsubscribedFromChannelResultMessage*)>& Callback /*= nullptr*/)
+{
+	UnsubConnectionFromChannel(GetConnId(), ChId, Callback);
+}
+
+void UChanneldConnection::UnsubConnectionFromChannel(ConnectionId TargetConnId, ChannelId ChId, const TFunction<void(const channeldpb::UnsubscribedFromChannelResultMessage*)>& Callback /*= nullptr*/)
+{
+	channeldpb::UnsubscribedFromChannelMessage Msg;
+	Msg.set_connid(TargetConnId);
+
+	Send(ChId, channeldpb::UNSUB_FROM_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
+}
+
 void UChanneldConnection::HandleAuth(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto ResultMsg = static_cast<const channeldpb::AuthResultMessage*>(Msg);

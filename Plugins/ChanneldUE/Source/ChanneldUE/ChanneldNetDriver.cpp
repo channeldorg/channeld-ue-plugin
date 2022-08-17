@@ -31,6 +31,8 @@ UChanneldNetConnection* UChanneldNetDriver::OnClientConnected(ConnectionId Clien
 
 	ClientConnectionMap.Add(ClientConnId, ClientConnection);
 
+	UE_LOG(LogChanneld, Log, TEXT("Server added client connection %d, total connections: %d (%d)"), ClientConnId, ClientConnections.Num(), ClientConnectionMap.Num());
+
 	if (!bDisableHandshaking && ConnectionlessHandler.IsValid() && StatelessConnectComponent.IsValid())
 	{
 		ClientConnection->bInConnectionlessHandshake = true;
@@ -80,7 +82,8 @@ void UChanneldNetDriver::ServerHandleUnsub(UChanneldConnection* Conn, ChannelId 
 		{
 			ClientConnectionMap.Remove(ResultMsg->connid());
 
-			/* Start ~ copied from UNetDriver::Shutdown() */
+			/* Different from Unity - we should let the client trigger the disconnection process by calling OpenLevel()
+			// Start ~ Copied from UNetDriver::Shutdown()
 			if (ClientConnection->PlayerController)
 			{
 				APawn* Pawn = ClientConnection->PlayerController->GetPawn();
@@ -92,7 +95,8 @@ void UChanneldNetDriver::ServerHandleUnsub(UChanneldConnection* Conn, ChannelId 
 
 			// Calls Close() internally and removes from ClientConnections
 			ClientConnection->CleanUp();
-			/* End ~ copy */
+			// End ~ Copy
+			*/
 		}
 	}
 }
@@ -156,7 +160,7 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 	}
 	if (ConnToChanneld == nullptr)
 	{
-		ConnToChanneld = NewObject<UChanneldConnection>();
+		ConnToChanneld = NewObject<UChanneldConnection>(this);
 	}
 
 	ConnToChanneld->OnUserSpaceMessageReceived.AddUObject(this, &UChanneldNetDriver::OnUserSpaceMessageReceived);
@@ -165,8 +169,6 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 
 	if (!ConnToChanneld->IsConnected())
 	{
-		ConnToChanneld->OnAuthenticated.AddUObject(this, &UChanneldNetDriver::OnChanneldAuthenticated);
-
 		FString Host;
 		int Port;
 		if (bInitAsClient)
@@ -180,15 +182,18 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 			Port = ChanneldPortForServer;
 		}
 
-		if (ConnToChanneld->Connect(bInitAsClient, Host, Port, Error))
-		{
-			ConnToChanneld->Auth(TEXT("test_pit"), TEXT("test_lt"));
-		}
-		else
+		if (!ConnToChanneld->Connect(bInitAsClient, Host, Port, Error))
 		{
 			Error = TEXT("Failed to connect to channeld");
 			return false;
 		}
+	}
+
+	if (!ConnToChanneld->IsAuthenticated())
+	{
+		ConnToChanneld->OnAuthenticated.AddUObject(this, &UChanneldNetDriver::OnChanneldAuthenticated);
+
+		ConnToChanneld->Auth(TEXT("test_pit"), TEXT("test_lt"));
 	}
 
 	return UNetDriver::InitBase(bInitAsClient, InNotify, URL, bReuseAddressAndPort, Error);
@@ -340,7 +345,14 @@ void UChanneldNetDriver::LowLevelDestroy()
 		ConnToChanneld->OnAuthenticated.RemoveAll(this);
 		ConnToChanneld->OnUserSpaceMessageReceived.RemoveAll(this);
 		ConnToChanneld->RemoveMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this);
-		ConnToChanneld->Disconnect(true);
+
+		// Only disconnect when the connection is owned by the net driver.
+		// Otherwise the connection is owned by the subsystem, and it will be used across sessions, 
+		// while the net driver will be created and destroyed for every client travel.
+		if (ConnToChanneld->GetOuter() == this)
+		{
+			ConnToChanneld->Disconnect(true);
+		}
 	}
 	
 	ClientConnectionMap.Reset();

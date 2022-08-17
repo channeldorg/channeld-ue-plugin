@@ -89,43 +89,58 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
 		bool IsClientConnection();
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld")
+		bool IsAuthenticated();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld")
 		EChanneldChannelType GetChannelTypeByChId(int32 ChId);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld")
 		TArray<FSubscribedChannelInfo> GetSubscribedChannels();
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
+	UFUNCTION(BlueprintCallable, Category = "Channeld")
+		bool HasSubscribedToChannel(int32 ChId);
+
+	UFUNCTION(BlueprintCallable, Category = "Channeld")
+		bool HasOwnedChannel(int32 ChId);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld")
 		TArray<FListedChannelInfo> GetListedChannels();
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld")
 		const TMap<int32, FSubscribedChannelInfo> GetSubscribedsOnOwnedChannel(bool& bSuccess, int32 ChId);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|Net")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld")
 		FSubscribedChannelInfo GetSubscribedOnOwnedChannelByConnId(bool& bSuccess, int32 ChId, int32 ConnId);
 
-	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "AuthCallback"), Category = "Channeld|Net")
+	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "AuthCallback"), Category = "Channeld")
 		void ConnectToChanneld(bool& Success, FString& Error, FString Host, int32 Port, const FOnceOnAuth& AuthCallback, bool bInitAsClient = true);
 
-	UFUNCTION(BlueprintCallable, Category = "Channeld|Net")
+	UFUNCTION(BlueprintCallable, Category = "Channeld")
 		void DisconnectFromChanneld(bool bFlushAll = true);
 
-	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld|Net")
+	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld")
 		void CreateChannel(EChanneldChannelType ChannelType, FString Metadata, UProtoMessageObject* InitData, const FOnceOnCreateChannel& Callback);
 
-	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld|Net")
+	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld")
 		void RemoveChannel(int32 ChannelToRemove, const FOnceOnRemoveChannel& Callback);
 
-	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "MetadataFilters, Callback"), Category = "Channeld|Net")
+	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "MetadataFilters, Callback"), Category = "Channeld")
 		void ListChannel(EChanneldChannelType ChannelTypeFilter, const TArray<FString>& MetadataFilters, const FOnceOnListChannel& Callback);
 
-	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld|Net")
+	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld")
 		void SubToChannel(int32 ChId, const FOnceOnSubToChannel& Callback);
 
-	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld|Net")
+	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld")
 		void SubConnectionToChannel(int32 TargetConnId, int32 ChId, const FOnceOnSubToChannel& Callback);
 
-	UFUNCTION(BlueprintCallable, Category = "Channeld|Net")
+	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld")
+		void UnsubFromChannel(int32 ChId, const FOnceOnUnsubFromChannel& Callback);
+
+	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld")
+		void UnsubConnectionFromChannel(int32 TargetConnId, int32 ChId, const FOnceOnUnsubFromChannel& Callback);
+
+	UFUNCTION(BlueprintCallable, Category = "Channeld")
 		void SendDataUpdate(int32 ChId, UProtoMessageObject* MessageObject);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Net", Meta = (ToolTip = "Only run on server"))
@@ -144,7 +159,10 @@ public:
 		UChannelDataView* GetChannelDataView();
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|View")
-	void SetLowLevelSendToChannelId(int32 ChId);
+		void SetLowLevelSendToChannelId(int32 ChId);
+
+	UFUNCTION(BlueprintCallable, Category = "Channeld")
+		void SeamlessTravelToChannel(APlayerController* PlayerController, int32 ChId);
 
 protected:
 	UPROPERTY()
