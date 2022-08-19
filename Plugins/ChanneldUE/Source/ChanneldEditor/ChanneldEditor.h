@@ -22,6 +22,7 @@ private:
 	void FillSubmenu(FMenuBuilder& Builder);
 
 	void LaunchChanneldAction();
+	void StopChanneldAction();
 	void LaunchServersAction();
 	void StopServersAction();
 

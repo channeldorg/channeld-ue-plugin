@@ -1,5 +1,4 @@
 #include "ChannelDataView.h"
-#include "ChanneldUtils.h"
 #include "ChanneldGameInstanceSubsystem.h"
 #include "ChanneldNetDriver.h"
 
@@ -95,7 +94,7 @@ void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provide
 	TSet<IChannelDataProvider*> Providers = ChannelDataProviders.FindOrAdd(ChId);
 	Providers.Add(Provider);
 
-	UE_LOG(LogChanneld, Log, TEXT("Added channel data provider %s to channel %d"), *ChanneldUtils::GetProviderName(Provider), ChId);
+	UE_LOG(LogChanneld, Log, TEXT("Added channel data provider %s to channel %d"), *IChannelDataProvider::GetName(Provider), ChId);
 }
 
 void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved)
@@ -103,7 +102,7 @@ void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Prov
 	auto Providers = ChannelDataProviders.Find(ChId);
 	if (Providers != nullptr)
 	{
-		UE_LOG(LogChanneld, Log, TEXT("Removing channel data provider %s from channel %d"), *ChanneldUtils::GetProviderName(Provider), ChId);
+		UE_LOG(LogChanneld, Log, TEXT("Removing channel data provider %s from channel %d"), *IChannelDataProvider::GetName(Provider), ChId);
 		
 		if (bSendRemoved)
 		{
@@ -197,22 +196,14 @@ void UChannelDataView::SendAllChannelUpdates()
 
 }
 
-void UChannelDataView::SetLowLevelSendToChannelId(int32 ChId)
-{
-	auto NetDriver = Cast<UChanneldNetDriver>(GetOuter());
-	*NetDriver->LowLevelSendToChannelId = ChId;
-}
-
-/* Client don't have World when authenticated, so we should set the subsystem when creating the view.
-*/
 UChanneldGameInstanceSubsystem* UChannelDataView::GetChanneldSubsystem()
 {
 	UWorld* World = GetWorld();
 	// The client may still be in pending net game
 	if (World == nullptr)
 	{
-		auto WorldContext = GEngine->GetWorldContextFromPendingNetGameNetDriver(Cast<UNetDriver>(GetOuter()));
-		World = WorldContext->World();
+		// The subsystem owns the view.
+		return Cast<UChanneldGameInstanceSubsystem>(GetOuter());
 	}
 	if (World)
 	{

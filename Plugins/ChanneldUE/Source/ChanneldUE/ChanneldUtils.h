@@ -1,12 +1,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ChannelDataProvider.h"
 
 namespace ChanneldUtils
 {
-    FString GetProviderName(const IChannelDataProvider* Provider)
+    FVector GetVector(const channeldpb::FVector& InVec)
     {
-        return dynamic_cast<const UObjectBase*>(Provider)->GetClass()->GetName();
+        return FVector(InVec.x(), InVec.y(), InVec.z());
     }
+
+	FRotator GetRotator(const channeldpb::FVector& InVec)
+	{
+		return FRotator(InVec.x(), InVec.y(), InVec.z());
+	}
 }

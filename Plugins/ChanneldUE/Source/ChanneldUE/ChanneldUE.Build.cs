@@ -22,7 +22,8 @@ public class ChanneldUE : ModuleRules
             "Sockets",
             "PacketHandler",
             "Protobuf",
-			}
+            "ReplicationGraph",
+            }
         );
 
         PublicSystemIncludePaths.AddRange(

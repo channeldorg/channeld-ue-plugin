@@ -8,7 +8,7 @@
 #include "google/protobuf/message.h"
 #include "ChannelDataView.generated.h"
 
-// Owned by UChanneldNetDriver.
+// Owned by UChanneldGameInstanceSubsystem.
 UCLASS(Blueprintable, Abstract, Config=ChanneldUE)
 class CHANNELDUE_API UChannelDataView : public UObject
 {
@@ -41,9 +41,6 @@ public:
 protected:
 
 	virtual void LoadCmdLineArgs() {}
-
-	UFUNCTION(BlueprintCallable)
-	void SetLowLevelSendToChannelId(int32 ChId);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure/*, meta=(CallableWithoutWorldContext)*/)
 	UChanneldGameInstanceSubsystem* GetChanneldSubsystem();

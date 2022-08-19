@@ -22,6 +22,9 @@ void FChanneldEditorModule::StartupModule()
 		FChanneldEditorCommands::Get().LaunchChanneldCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::LaunchChanneldAction));
 	PluginCommands->MapAction(
+		FChanneldEditorCommands::Get().LaunchChanneldCommand,
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::StopChanneldAction));
+	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().LaunchServersCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::LaunchServersAction));
 	PluginCommands->MapAction(
@@ -39,6 +42,13 @@ void FChanneldEditorModule::StartupModule()
 	//MenuExtender->AddMenuExtension("LevelEditor", EExtensionHook::After, PluginCommands,
 	//	FMenuExtensionDelegate::CreateRaw(this, &FChanneldEditorModule::AddMenuEntry));
 	//LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(MenuExtender);
+
+	// Stop all services launched during the session 
+	FEditorDelegates::EditorModeIDExit.AddLambda([&](const FEditorModeID&) 
+		{
+			StopChanneldAction();
+			StopServersAction();
+		});
 }
 
 void FChanneldEditorModule::ShutdownModule()
@@ -78,6 +88,7 @@ void FChanneldEditorModule::AddMenuEntry(FMenuBuilder& Builder)
 void FChanneldEditorModule::FillSubmenu(FMenuBuilder& Builder)
 {
 	Builder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchChanneldCommand);
+	Builder.AddMenuEntry(FChanneldEditorCommands::Get().StopChanneldCommand);
 	Builder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchServersCommand);
 	Builder.AddMenuEntry(FChanneldEditorCommands::Get().StopServersCommand);
 }
@@ -87,6 +98,7 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 	FMenuBuilder MenuBuilder(true, Commands);
 
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchChanneldCommand);
+	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().StopChanneldCommand);
 
 	MenuBuilder.AddSeparator();
 
@@ -118,6 +130,11 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 }
 
 void FChanneldEditorModule::LaunchChanneldAction()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Not implemented yet"));
+}
+
+void FChanneldEditorModule::StopChanneldAction()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Not implemented yet"));
 }

@@ -82,7 +82,7 @@ void UChanneldNetDriver::ServerHandleUnsub(UChanneldConnection* Conn, ChannelId 
 		{
 			ClientConnectionMap.Remove(ResultMsg->connid());
 
-			// Start ~ Copied from UNetDriver::Shutdown()
+			//~ Start copy from UNetDriver::Shutdown()
 			if (ClientConnection->PlayerController)
 			{
 				APawn* Pawn = ClientConnection->PlayerController->GetPawn();
@@ -94,7 +94,7 @@ void UChanneldNetDriver::ServerHandleUnsub(UChanneldConnection* Conn, ChannelId 
 
 			// Calls Close() internally and removes from ClientConnections
 			ClientConnection->CleanUp();
-			// End ~ Copy
+			//~ End copy
 		}
 	}
 }
@@ -378,13 +378,6 @@ bool UChanneldNetDriver::IsNetResourceValid()
 	return false;
 }
 
-int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
-{
-	auto const Result = Super::ServerReplicateActors(DeltaSeconds);
-	return Result;
-}
-
-
 void UChanneldNetDriver::TickDispatch(float DeltaTime)
 {
 	//Super::TickDispatch(DeltaTime);
@@ -394,18 +387,26 @@ void UChanneldNetDriver::TickDispatch(float DeltaTime)
 		ConnToChanneld->TickIncoming();
 }
 
+int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
+{
+	auto const Result = Super::ServerReplicateActors(DeltaSeconds);
+
+	auto Subsystem = GetSubsystem();
+	if (Subsystem && Subsystem->GetChannelDataView())
+	{
+		Subsystem->GetChannelDataView()->SendAllChannelUpdates();
+	}
+	
+	return Result;
+}
+
 void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 {
 	// Trigger the callings of LowLevelSend()
 	UNetDriver::TickFlush(DeltaSeconds);
 
-	if (IsValid(ConnToChanneld) && ConnToChanneld->IsConnected())
+	if (ConnToChanneld && ConnToChanneld->IsConnected())
 	{
-		auto Subsystem = GetSubsystem();
-		if (Subsystem && Subsystem->GetChannelDataView())
-		{
-			Subsystem->GetChannelDataView()->SendAllChannelUpdates();
-		}
 		ConnToChanneld->TickOutgoing();
 	}
 }
