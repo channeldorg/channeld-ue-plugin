@@ -35,11 +35,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
 		UProtoMessageObject* CloneEmptyFieldMessage(bool& bSuccess, FString FieldName);
 
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf", BlueprintPure)
+		bool GetBoolByName(bool& bSuccess, FString FieldName);
+
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf", DisplayName = "Get Int32 By Name", BlueprintPure)
 		int32 GetInt32ByName(bool& bSuccess, FString FieldName);
 
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf", DisplayName = "Get Uint32 By Name", BlueprintPure)
+		int64 GetUint32ByName(bool& bSuccess, FString FieldName);
+
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf", DisplayName = "Get Int64 By Name", BlueprintPure)
 		int64 GetInt64ByName(bool& bSuccess, FString FieldName);
+
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf", DisplayName = "Get Uint64 By Name", BlueprintPure)
+		int64 GetUInt64ByName(bool& bSuccess, FString FieldName);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf", BlueprintPure)
 		float GetFloatByName(bool& bSuccess, FString FieldName);
@@ -56,17 +65,29 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf", BlueprintPure)
 		void  GetMessagesRepeatedByName(bool& bSuccess, TArray<UProtoMessageObject*>& Messages, FString FieldName);
 
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
+		UProtoMessageObject* SetBoolByName(bool& bSuccess, FString FieldName, bool Value);
+
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf", DisplayName = "Set Int32 By Name")
 		UProtoMessageObject* SetInt32ByName(bool& bSuccess, FString FieldName, int32 Value);
 
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf", DisplayName = "Set Uint32 By Name")
+		UProtoMessageObject* SetUint32ByName(bool& bSuccess, FString FieldName, int32 Value);
+
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf", DisplayName = "Set Int64 By Name")
 		UProtoMessageObject* SetInt64ByName(bool& bSuccess, FString FieldName, int64 Value);
+
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf", DisplayName = "Set Uint64 By Name")
+		UProtoMessageObject* SetUint64ByName(bool& bSuccess, FString FieldName, int64 Value);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
 		UProtoMessageObject* SetFloatByName(bool& bSuccess, FString FieldName, float Value);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
 		UProtoMessageObject* SetStringByName(bool& bSuccess, FString FieldName, FString Value);
+
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
+		void SetMessageByName(bool& bSuccess, FString FieldName, UProtoMessageObject* Value);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
 		UProtoMessageObject* AddMessageToRepeatedField(bool& bSuccess, FString FieldName, UProtoMessageObject* ChildMessage);

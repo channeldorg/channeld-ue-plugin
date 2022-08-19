@@ -64,6 +64,21 @@ UProtoMessageObject* UProtoMessageObject::CloneEmptyFieldMessage(bool& bSuccess,
 	return GetMessageByName(bSuccess, FieldName)->CloneEmpty();
 }
 
+bool UProtoMessageObject::GetBoolByName(bool& bSuccess, FString FieldName)
+{
+	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
+	if (FD != NULL)
+	{
+		bSuccess = true;
+		return Message->GetReflection()->GetBool(*Message, FD);
+	}
+	else
+	{
+		bSuccess = false;
+		return false;
+	}
+}
+
 int32 UProtoMessageObject::GetInt32ByName(bool& bSuccess, FString FieldName)
 {
 	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
@@ -71,6 +86,21 @@ int32 UProtoMessageObject::GetInt32ByName(bool& bSuccess, FString FieldName)
 	{
 		bSuccess = true;
 		return Message->GetReflection()->GetInt32(*Message, FD);
+	}
+	else
+	{
+		bSuccess = false;
+		return 0;
+	}
+}
+
+int64 UProtoMessageObject::GetUint32ByName(bool& bSuccess, FString FieldName)
+{
+	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
+	if (FD != NULL)
+	{
+		bSuccess = true;
+		return Message->GetReflection()->GetUInt32(*Message, FD);
 	}
 	else
 	{
@@ -92,6 +122,12 @@ int64 UProtoMessageObject::GetInt64ByName(bool& bSuccess, FString FieldName)
 		bSuccess = false;
 		return 0;
 	}
+}
+
+int64 UProtoMessageObject::GetUInt64ByName(bool& bSuccess, FString FieldName)
+{
+	ensureMsgf(false, TEXT("Not safe!!! But blueprint cannot use Uint64"));
+	return GetInt64ByName(bSuccess, FieldName);
 }
 
 float UProtoMessageObject::GetFloatByName(bool& bSuccess, FString FieldName)
@@ -142,12 +178,12 @@ UProtoMessageObject* UProtoMessageObject::GetMessageByName(bool& bSuccess, FStri
 
 }
 
-void UProtoMessageObject::UnpackMessageByFullProtoName(bool& bSuccess, UProtoMessageObject*& UnpackedMsg, 	FString ProtoName)
+void UProtoMessageObject::UnpackMessageByFullProtoName(bool& bSuccess, UProtoMessageObject*& UnpackedMsg, FString ProtoName)
 {
 	UnpackedMsg = NewObject<UProtoMessageObject>();
 	bSuccess = false;
 
-	const google::protobuf::Any* TargetMsgAny = dynamic_cast<const google::protobuf::Any*>(Message);
+	const google::protobuf::Any* TargetMsgAny = static_cast<const google::protobuf::Any*>(Message);
 	if (TargetMsgAny == nullptr)
 	{
 		UE_LOG(LogChanneld, Error, TEXT("The class of TargetMsg->Message does not inherit from Any "));
@@ -195,6 +231,21 @@ void UProtoMessageObject::GetMessagesRepeatedByName(bool& bSuccess, TArray<UProt
 	}
 }
 
+UProtoMessageObject* UProtoMessageObject::SetBoolByName(bool& bSuccess, FString FieldName, bool Value)
+{
+	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
+	if (FD != NULL)
+	{
+		bSuccess = true;
+		Message->GetReflection()->SetBool(Message, FD, Value);
+	}
+	else
+	{
+		bSuccess = false;
+	}
+	return this;
+}
+
 UProtoMessageObject* UProtoMessageObject::SetInt32ByName(bool& bSuccess, FString FieldName, int32 Value)
 {
 	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
@@ -210,6 +261,21 @@ UProtoMessageObject* UProtoMessageObject::SetInt32ByName(bool& bSuccess, FString
 	return this;
 }
 
+UProtoMessageObject* UProtoMessageObject::SetUint32ByName(bool& bSuccess, FString FieldName, int32 Value)
+{
+	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
+	if (FD != NULL)
+	{
+		bSuccess = true;
+		Message->GetReflection()->SetUInt32(Message, FD, Value);
+	}
+	else
+	{
+		bSuccess = false;
+	}
+	return this;
+}
+
 UProtoMessageObject* UProtoMessageObject::SetInt64ByName(bool& bSuccess, FString FieldName, int64 Value)
 {
 	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
@@ -217,6 +283,21 @@ UProtoMessageObject* UProtoMessageObject::SetInt64ByName(bool& bSuccess, FString
 	{
 		bSuccess = true;
 		Message->GetReflection()->SetInt64(Message, FD, Value);
+	}
+	else
+	{
+		bSuccess = false;
+	}
+	return this;
+}
+
+UProtoMessageObject* UProtoMessageObject::SetUint64ByName(bool& bSuccess, FString FieldName, int64 Value)
+{
+	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
+	if (FD != NULL)
+	{
+		bSuccess = true;
+		Message->GetReflection()->SetUInt64(Message, FD, Value);
 	}
 	else
 	{
@@ -253,6 +334,23 @@ UProtoMessageObject* UProtoMessageObject::SetStringByName(bool& bSuccess, FStrin
 		bSuccess = false;
 	}
 	return this;
+}
+
+void UProtoMessageObject::SetMessageByName(bool& bSuccess, FString FieldName,
+	UProtoMessageObject* Value)
+{
+	const google::protobuf::FieldDescriptor* FD = Message->GetDescriptor()->FindFieldByName(TCHAR_TO_UTF8(*FieldName));
+	if (FD != NULL)
+	{
+		auto Copied = Value->GetMessage()->New();
+		Copied->CopyFrom(*Value->GetMessage());
+		Message->GetReflection()->SetAllocatedMessage(Message, Copied, FD);
+		bSuccess = true;
+	}
+	else
+	{
+		bSuccess = false;
+	}
 }
 
 UProtoMessageObject* UProtoMessageObject::AddMessageToRepeatedField(bool& bSuccess, FString FieldName, UProtoMessageObject* ChildMessage)
