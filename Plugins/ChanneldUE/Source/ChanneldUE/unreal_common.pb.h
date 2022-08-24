@@ -44,24 +44,24 @@ struct CHANNELDUE_API TableStruct_unreal_5fcommon_2eproto {
   static const uint32_t offsets[];
 };
 CHANNELDUE_API extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_unreal_5fcommon_2eproto;
-namespace channeldpb {
+namespace unrealpb {
 class FVector;
 struct FVectorDefaultTypeInternal;
 CHANNELDUE_API extern FVectorDefaultTypeInternal _FVector_default_instance_;
 class SceneComponentState;
 struct SceneComponentStateDefaultTypeInternal;
 CHANNELDUE_API extern SceneComponentStateDefaultTypeInternal _SceneComponentState_default_instance_;
-}  // namespace channeldpb
+}  // namespace unrealpb
 PROTOBUF_NAMESPACE_OPEN
-template<> CHANNELDUE_API ::channeldpb::FVector* Arena::CreateMaybeMessage<::channeldpb::FVector>(Arena*);
-template<> CHANNELDUE_API ::channeldpb::SceneComponentState* Arena::CreateMaybeMessage<::channeldpb::SceneComponentState>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::FVector* Arena::CreateMaybeMessage<::unrealpb::FVector>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::SceneComponentState* Arena::CreateMaybeMessage<::unrealpb::SceneComponentState>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
-namespace channeldpb {
+namespace unrealpb {
 
 // ===================================================================
 
 class CHANNELDUE_API FVector final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.FVector) */ {
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.FVector) */ {
  public:
   inline FVector() : FVector(nullptr) {}
   ~FVector() override;
@@ -164,7 +164,7 @@ class CHANNELDUE_API FVector final :
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "channeldpb.FVector";
+    return "unrealpb.FVector";
   }
   protected:
   explicit FVector(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -212,7 +212,7 @@ class CHANNELDUE_API FVector final :
   void _internal_set_z(float value);
   public:
 
-  // @@protoc_insertion_point(class_scope:channeldpb.FVector)
+  // @@protoc_insertion_point(class_scope:unrealpb.FVector)
  private:
   class _Internal;
 
@@ -231,7 +231,7 @@ class CHANNELDUE_API FVector final :
 // -------------------------------------------------------------------
 
 class CHANNELDUE_API SceneComponentState final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.SceneComponentState) */ {
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.SceneComponentState) */ {
  public:
   inline SceneComponentState() : SceneComponentState(nullptr) {}
   ~SceneComponentState() override;
@@ -334,7 +334,7 @@ class CHANNELDUE_API SceneComponentState final :
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "channeldpb.SceneComponentState";
+    return "unrealpb.SceneComponentState";
   }
   protected:
   explicit SceneComponentState(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -372,59 +372,59 @@ class CHANNELDUE_API SceneComponentState final :
   std::string* _internal_mutable_attachsocketname();
   public:
 
-  // .channeldpb.FVector relativeLocation = 2;
+  // .unrealpb.FVector relativeLocation = 2;
   bool has_relativelocation() const;
   private:
   bool _internal_has_relativelocation() const;
   public:
   void clear_relativelocation();
-  const ::channeldpb::FVector& relativelocation() const;
-  PROTOBUF_NODISCARD ::channeldpb::FVector* release_relativelocation();
-  ::channeldpb::FVector* mutable_relativelocation();
-  void set_allocated_relativelocation(::channeldpb::FVector* relativelocation);
+  const ::unrealpb::FVector& relativelocation() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_relativelocation();
+  ::unrealpb::FVector* mutable_relativelocation();
+  void set_allocated_relativelocation(::unrealpb::FVector* relativelocation);
   private:
-  const ::channeldpb::FVector& _internal_relativelocation() const;
-  ::channeldpb::FVector* _internal_mutable_relativelocation();
+  const ::unrealpb::FVector& _internal_relativelocation() const;
+  ::unrealpb::FVector* _internal_mutable_relativelocation();
   public:
   void unsafe_arena_set_allocated_relativelocation(
-      ::channeldpb::FVector* relativelocation);
-  ::channeldpb::FVector* unsafe_arena_release_relativelocation();
+      ::unrealpb::FVector* relativelocation);
+  ::unrealpb::FVector* unsafe_arena_release_relativelocation();
 
-  // .channeldpb.FVector relativeRotation = 3;
+  // .unrealpb.FVector relativeRotation = 3;
   bool has_relativerotation() const;
   private:
   bool _internal_has_relativerotation() const;
   public:
   void clear_relativerotation();
-  const ::channeldpb::FVector& relativerotation() const;
-  PROTOBUF_NODISCARD ::channeldpb::FVector* release_relativerotation();
-  ::channeldpb::FVector* mutable_relativerotation();
-  void set_allocated_relativerotation(::channeldpb::FVector* relativerotation);
+  const ::unrealpb::FVector& relativerotation() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_relativerotation();
+  ::unrealpb::FVector* mutable_relativerotation();
+  void set_allocated_relativerotation(::unrealpb::FVector* relativerotation);
   private:
-  const ::channeldpb::FVector& _internal_relativerotation() const;
-  ::channeldpb::FVector* _internal_mutable_relativerotation();
+  const ::unrealpb::FVector& _internal_relativerotation() const;
+  ::unrealpb::FVector* _internal_mutable_relativerotation();
   public:
   void unsafe_arena_set_allocated_relativerotation(
-      ::channeldpb::FVector* relativerotation);
-  ::channeldpb::FVector* unsafe_arena_release_relativerotation();
+      ::unrealpb::FVector* relativerotation);
+  ::unrealpb::FVector* unsafe_arena_release_relativerotation();
 
-  // .channeldpb.FVector relativeScale = 4;
+  // .unrealpb.FVector relativeScale = 4;
   bool has_relativescale() const;
   private:
   bool _internal_has_relativescale() const;
   public:
   void clear_relativescale();
-  const ::channeldpb::FVector& relativescale() const;
-  PROTOBUF_NODISCARD ::channeldpb::FVector* release_relativescale();
-  ::channeldpb::FVector* mutable_relativescale();
-  void set_allocated_relativescale(::channeldpb::FVector* relativescale);
+  const ::unrealpb::FVector& relativescale() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_relativescale();
+  ::unrealpb::FVector* mutable_relativescale();
+  void set_allocated_relativescale(::unrealpb::FVector* relativescale);
   private:
-  const ::channeldpb::FVector& _internal_relativescale() const;
-  ::channeldpb::FVector* _internal_mutable_relativescale();
+  const ::unrealpb::FVector& _internal_relativescale() const;
+  ::unrealpb::FVector* _internal_mutable_relativescale();
   public:
   void unsafe_arena_set_allocated_relativescale(
-      ::channeldpb::FVector* relativescale);
-  ::channeldpb::FVector* unsafe_arena_release_relativescale();
+      ::unrealpb::FVector* relativescale);
+  ::unrealpb::FVector* unsafe_arena_release_relativescale();
 
   // bool removed = 1;
   void clear_removed();
@@ -444,7 +444,7 @@ class CHANNELDUE_API SceneComponentState final :
   void _internal_set_isvisible(bool value);
   public:
 
-  // @@protoc_insertion_point(class_scope:channeldpb.SceneComponentState)
+  // @@protoc_insertion_point(class_scope:unrealpb.SceneComponentState)
  private:
   class _Internal;
 
@@ -453,9 +453,9 @@ class CHANNELDUE_API SceneComponentState final :
   typedef void DestructorSkippable_;
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr attachsocketname_;
-    ::channeldpb::FVector* relativelocation_;
-    ::channeldpb::FVector* relativerotation_;
-    ::channeldpb::FVector* relativescale_;
+    ::unrealpb::FVector* relativelocation_;
+    ::unrealpb::FVector* relativerotation_;
+    ::unrealpb::FVector* relativescale_;
     bool removed_;
     bool isvisible_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -482,7 +482,7 @@ inline float FVector::_internal_x() const {
   return _impl_.x_;
 }
 inline float FVector::x() const {
-  // @@protoc_insertion_point(field_get:channeldpb.FVector.x)
+  // @@protoc_insertion_point(field_get:unrealpb.FVector.x)
   return _internal_x();
 }
 inline void FVector::_internal_set_x(float value) {
@@ -491,7 +491,7 @@ inline void FVector::_internal_set_x(float value) {
 }
 inline void FVector::set_x(float value) {
   _internal_set_x(value);
-  // @@protoc_insertion_point(field_set:channeldpb.FVector.x)
+  // @@protoc_insertion_point(field_set:unrealpb.FVector.x)
 }
 
 // float y = 2;
@@ -502,7 +502,7 @@ inline float FVector::_internal_y() const {
   return _impl_.y_;
 }
 inline float FVector::y() const {
-  // @@protoc_insertion_point(field_get:channeldpb.FVector.y)
+  // @@protoc_insertion_point(field_get:unrealpb.FVector.y)
   return _internal_y();
 }
 inline void FVector::_internal_set_y(float value) {
@@ -511,7 +511,7 @@ inline void FVector::_internal_set_y(float value) {
 }
 inline void FVector::set_y(float value) {
   _internal_set_y(value);
-  // @@protoc_insertion_point(field_set:channeldpb.FVector.y)
+  // @@protoc_insertion_point(field_set:unrealpb.FVector.y)
 }
 
 // float z = 3;
@@ -522,7 +522,7 @@ inline float FVector::_internal_z() const {
   return _impl_.z_;
 }
 inline float FVector::z() const {
-  // @@protoc_insertion_point(field_get:channeldpb.FVector.z)
+  // @@protoc_insertion_point(field_get:unrealpb.FVector.z)
   return _internal_z();
 }
 inline void FVector::_internal_set_z(float value) {
@@ -531,7 +531,7 @@ inline void FVector::_internal_set_z(float value) {
 }
 inline void FVector::set_z(float value) {
   _internal_set_z(value);
-  // @@protoc_insertion_point(field_set:channeldpb.FVector.z)
+  // @@protoc_insertion_point(field_set:unrealpb.FVector.z)
 }
 
 // -------------------------------------------------------------------
@@ -546,7 +546,7 @@ inline bool SceneComponentState::_internal_removed() const {
   return _impl_.removed_;
 }
 inline bool SceneComponentState::removed() const {
-  // @@protoc_insertion_point(field_get:channeldpb.SceneComponentState.removed)
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.removed)
   return _internal_removed();
 }
 inline void SceneComponentState::_internal_set_removed(bool value) {
@@ -555,10 +555,10 @@ inline void SceneComponentState::_internal_set_removed(bool value) {
 }
 inline void SceneComponentState::set_removed(bool value) {
   _internal_set_removed(value);
-  // @@protoc_insertion_point(field_set:channeldpb.SceneComponentState.removed)
+  // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.removed)
 }
 
-// .channeldpb.FVector relativeLocation = 2;
+// .unrealpb.FVector relativeLocation = 2;
 inline bool SceneComponentState::_internal_has_relativelocation() const {
   return this != internal_default_instance() && _impl_.relativelocation_ != nullptr;
 }
@@ -571,17 +571,17 @@ inline void SceneComponentState::clear_relativelocation() {
   }
   _impl_.relativelocation_ = nullptr;
 }
-inline const ::channeldpb::FVector& SceneComponentState::_internal_relativelocation() const {
-  const ::channeldpb::FVector* p = _impl_.relativelocation_;
-  return p != nullptr ? *p : reinterpret_cast<const ::channeldpb::FVector&>(
-      ::channeldpb::_FVector_default_instance_);
+inline const ::unrealpb::FVector& SceneComponentState::_internal_relativelocation() const {
+  const ::unrealpb::FVector* p = _impl_.relativelocation_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
 }
-inline const ::channeldpb::FVector& SceneComponentState::relativelocation() const {
-  // @@protoc_insertion_point(field_get:channeldpb.SceneComponentState.relativeLocation)
+inline const ::unrealpb::FVector& SceneComponentState::relativelocation() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.relativeLocation)
   return _internal_relativelocation();
 }
 inline void SceneComponentState::unsafe_arena_set_allocated_relativelocation(
-    ::channeldpb::FVector* relativelocation) {
+    ::unrealpb::FVector* relativelocation) {
   if (GetArenaForAllocation() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.relativelocation_);
   }
@@ -591,11 +591,11 @@ inline void SceneComponentState::unsafe_arena_set_allocated_relativelocation(
   } else {
     
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:channeldpb.SceneComponentState.relativeLocation)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.SceneComponentState.relativeLocation)
 }
-inline ::channeldpb::FVector* SceneComponentState::release_relativelocation() {
+inline ::unrealpb::FVector* SceneComponentState::release_relativelocation() {
   
-  ::channeldpb::FVector* temp = _impl_.relativelocation_;
+  ::unrealpb::FVector* temp = _impl_.relativelocation_;
   _impl_.relativelocation_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
   auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
@@ -608,27 +608,27 @@ inline ::channeldpb::FVector* SceneComponentState::release_relativelocation() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::channeldpb::FVector* SceneComponentState::unsafe_arena_release_relativelocation() {
-  // @@protoc_insertion_point(field_release:channeldpb.SceneComponentState.relativeLocation)
+inline ::unrealpb::FVector* SceneComponentState::unsafe_arena_release_relativelocation() {
+  // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.relativeLocation)
   
-  ::channeldpb::FVector* temp = _impl_.relativelocation_;
+  ::unrealpb::FVector* temp = _impl_.relativelocation_;
   _impl_.relativelocation_ = nullptr;
   return temp;
 }
-inline ::channeldpb::FVector* SceneComponentState::_internal_mutable_relativelocation() {
+inline ::unrealpb::FVector* SceneComponentState::_internal_mutable_relativelocation() {
   
   if (_impl_.relativelocation_ == nullptr) {
-    auto* p = CreateMaybeMessage<::channeldpb::FVector>(GetArenaForAllocation());
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
     _impl_.relativelocation_ = p;
   }
   return _impl_.relativelocation_;
 }
-inline ::channeldpb::FVector* SceneComponentState::mutable_relativelocation() {
-  ::channeldpb::FVector* _msg = _internal_mutable_relativelocation();
-  // @@protoc_insertion_point(field_mutable:channeldpb.SceneComponentState.relativeLocation)
+inline ::unrealpb::FVector* SceneComponentState::mutable_relativelocation() {
+  ::unrealpb::FVector* _msg = _internal_mutable_relativelocation();
+  // @@protoc_insertion_point(field_mutable:unrealpb.SceneComponentState.relativeLocation)
   return _msg;
 }
-inline void SceneComponentState::set_allocated_relativelocation(::channeldpb::FVector* relativelocation) {
+inline void SceneComponentState::set_allocated_relativelocation(::unrealpb::FVector* relativelocation) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
     delete _impl_.relativelocation_;
@@ -645,10 +645,10 @@ inline void SceneComponentState::set_allocated_relativelocation(::channeldpb::FV
     
   }
   _impl_.relativelocation_ = relativelocation;
-  // @@protoc_insertion_point(field_set_allocated:channeldpb.SceneComponentState.relativeLocation)
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.relativeLocation)
 }
 
-// .channeldpb.FVector relativeRotation = 3;
+// .unrealpb.FVector relativeRotation = 3;
 inline bool SceneComponentState::_internal_has_relativerotation() const {
   return this != internal_default_instance() && _impl_.relativerotation_ != nullptr;
 }
@@ -661,17 +661,17 @@ inline void SceneComponentState::clear_relativerotation() {
   }
   _impl_.relativerotation_ = nullptr;
 }
-inline const ::channeldpb::FVector& SceneComponentState::_internal_relativerotation() const {
-  const ::channeldpb::FVector* p = _impl_.relativerotation_;
-  return p != nullptr ? *p : reinterpret_cast<const ::channeldpb::FVector&>(
-      ::channeldpb::_FVector_default_instance_);
+inline const ::unrealpb::FVector& SceneComponentState::_internal_relativerotation() const {
+  const ::unrealpb::FVector* p = _impl_.relativerotation_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
 }
-inline const ::channeldpb::FVector& SceneComponentState::relativerotation() const {
-  // @@protoc_insertion_point(field_get:channeldpb.SceneComponentState.relativeRotation)
+inline const ::unrealpb::FVector& SceneComponentState::relativerotation() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.relativeRotation)
   return _internal_relativerotation();
 }
 inline void SceneComponentState::unsafe_arena_set_allocated_relativerotation(
-    ::channeldpb::FVector* relativerotation) {
+    ::unrealpb::FVector* relativerotation) {
   if (GetArenaForAllocation() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.relativerotation_);
   }
@@ -681,11 +681,11 @@ inline void SceneComponentState::unsafe_arena_set_allocated_relativerotation(
   } else {
     
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:channeldpb.SceneComponentState.relativeRotation)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.SceneComponentState.relativeRotation)
 }
-inline ::channeldpb::FVector* SceneComponentState::release_relativerotation() {
+inline ::unrealpb::FVector* SceneComponentState::release_relativerotation() {
   
-  ::channeldpb::FVector* temp = _impl_.relativerotation_;
+  ::unrealpb::FVector* temp = _impl_.relativerotation_;
   _impl_.relativerotation_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
   auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
@@ -698,27 +698,27 @@ inline ::channeldpb::FVector* SceneComponentState::release_relativerotation() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::channeldpb::FVector* SceneComponentState::unsafe_arena_release_relativerotation() {
-  // @@protoc_insertion_point(field_release:channeldpb.SceneComponentState.relativeRotation)
+inline ::unrealpb::FVector* SceneComponentState::unsafe_arena_release_relativerotation() {
+  // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.relativeRotation)
   
-  ::channeldpb::FVector* temp = _impl_.relativerotation_;
+  ::unrealpb::FVector* temp = _impl_.relativerotation_;
   _impl_.relativerotation_ = nullptr;
   return temp;
 }
-inline ::channeldpb::FVector* SceneComponentState::_internal_mutable_relativerotation() {
+inline ::unrealpb::FVector* SceneComponentState::_internal_mutable_relativerotation() {
   
   if (_impl_.relativerotation_ == nullptr) {
-    auto* p = CreateMaybeMessage<::channeldpb::FVector>(GetArenaForAllocation());
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
     _impl_.relativerotation_ = p;
   }
   return _impl_.relativerotation_;
 }
-inline ::channeldpb::FVector* SceneComponentState::mutable_relativerotation() {
-  ::channeldpb::FVector* _msg = _internal_mutable_relativerotation();
-  // @@protoc_insertion_point(field_mutable:channeldpb.SceneComponentState.relativeRotation)
+inline ::unrealpb::FVector* SceneComponentState::mutable_relativerotation() {
+  ::unrealpb::FVector* _msg = _internal_mutable_relativerotation();
+  // @@protoc_insertion_point(field_mutable:unrealpb.SceneComponentState.relativeRotation)
   return _msg;
 }
-inline void SceneComponentState::set_allocated_relativerotation(::channeldpb::FVector* relativerotation) {
+inline void SceneComponentState::set_allocated_relativerotation(::unrealpb::FVector* relativerotation) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
     delete _impl_.relativerotation_;
@@ -735,10 +735,10 @@ inline void SceneComponentState::set_allocated_relativerotation(::channeldpb::FV
     
   }
   _impl_.relativerotation_ = relativerotation;
-  // @@protoc_insertion_point(field_set_allocated:channeldpb.SceneComponentState.relativeRotation)
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.relativeRotation)
 }
 
-// .channeldpb.FVector relativeScale = 4;
+// .unrealpb.FVector relativeScale = 4;
 inline bool SceneComponentState::_internal_has_relativescale() const {
   return this != internal_default_instance() && _impl_.relativescale_ != nullptr;
 }
@@ -751,17 +751,17 @@ inline void SceneComponentState::clear_relativescale() {
   }
   _impl_.relativescale_ = nullptr;
 }
-inline const ::channeldpb::FVector& SceneComponentState::_internal_relativescale() const {
-  const ::channeldpb::FVector* p = _impl_.relativescale_;
-  return p != nullptr ? *p : reinterpret_cast<const ::channeldpb::FVector&>(
-      ::channeldpb::_FVector_default_instance_);
+inline const ::unrealpb::FVector& SceneComponentState::_internal_relativescale() const {
+  const ::unrealpb::FVector* p = _impl_.relativescale_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
 }
-inline const ::channeldpb::FVector& SceneComponentState::relativescale() const {
-  // @@protoc_insertion_point(field_get:channeldpb.SceneComponentState.relativeScale)
+inline const ::unrealpb::FVector& SceneComponentState::relativescale() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.relativeScale)
   return _internal_relativescale();
 }
 inline void SceneComponentState::unsafe_arena_set_allocated_relativescale(
-    ::channeldpb::FVector* relativescale) {
+    ::unrealpb::FVector* relativescale) {
   if (GetArenaForAllocation() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.relativescale_);
   }
@@ -771,11 +771,11 @@ inline void SceneComponentState::unsafe_arena_set_allocated_relativescale(
   } else {
     
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:channeldpb.SceneComponentState.relativeScale)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.SceneComponentState.relativeScale)
 }
-inline ::channeldpb::FVector* SceneComponentState::release_relativescale() {
+inline ::unrealpb::FVector* SceneComponentState::release_relativescale() {
   
-  ::channeldpb::FVector* temp = _impl_.relativescale_;
+  ::unrealpb::FVector* temp = _impl_.relativescale_;
   _impl_.relativescale_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
   auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
@@ -788,27 +788,27 @@ inline ::channeldpb::FVector* SceneComponentState::release_relativescale() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::channeldpb::FVector* SceneComponentState::unsafe_arena_release_relativescale() {
-  // @@protoc_insertion_point(field_release:channeldpb.SceneComponentState.relativeScale)
+inline ::unrealpb::FVector* SceneComponentState::unsafe_arena_release_relativescale() {
+  // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.relativeScale)
   
-  ::channeldpb::FVector* temp = _impl_.relativescale_;
+  ::unrealpb::FVector* temp = _impl_.relativescale_;
   _impl_.relativescale_ = nullptr;
   return temp;
 }
-inline ::channeldpb::FVector* SceneComponentState::_internal_mutable_relativescale() {
+inline ::unrealpb::FVector* SceneComponentState::_internal_mutable_relativescale() {
   
   if (_impl_.relativescale_ == nullptr) {
-    auto* p = CreateMaybeMessage<::channeldpb::FVector>(GetArenaForAllocation());
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
     _impl_.relativescale_ = p;
   }
   return _impl_.relativescale_;
 }
-inline ::channeldpb::FVector* SceneComponentState::mutable_relativescale() {
-  ::channeldpb::FVector* _msg = _internal_mutable_relativescale();
-  // @@protoc_insertion_point(field_mutable:channeldpb.SceneComponentState.relativeScale)
+inline ::unrealpb::FVector* SceneComponentState::mutable_relativescale() {
+  ::unrealpb::FVector* _msg = _internal_mutable_relativescale();
+  // @@protoc_insertion_point(field_mutable:unrealpb.SceneComponentState.relativeScale)
   return _msg;
 }
-inline void SceneComponentState::set_allocated_relativescale(::channeldpb::FVector* relativescale) {
+inline void SceneComponentState::set_allocated_relativescale(::unrealpb::FVector* relativescale) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
     delete _impl_.relativescale_;
@@ -825,7 +825,7 @@ inline void SceneComponentState::set_allocated_relativescale(::channeldpb::FVect
     
   }
   _impl_.relativescale_ = relativescale;
-  // @@protoc_insertion_point(field_set_allocated:channeldpb.SceneComponentState.relativeScale)
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.relativeScale)
 }
 
 // bool isVisible = 5;
@@ -836,7 +836,7 @@ inline bool SceneComponentState::_internal_isvisible() const {
   return _impl_.isvisible_;
 }
 inline bool SceneComponentState::isvisible() const {
-  // @@protoc_insertion_point(field_get:channeldpb.SceneComponentState.isVisible)
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.isVisible)
   return _internal_isvisible();
 }
 inline void SceneComponentState::_internal_set_isvisible(bool value) {
@@ -845,7 +845,7 @@ inline void SceneComponentState::_internal_set_isvisible(bool value) {
 }
 inline void SceneComponentState::set_isvisible(bool value) {
   _internal_set_isvisible(value);
-  // @@protoc_insertion_point(field_set:channeldpb.SceneComponentState.isVisible)
+  // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.isVisible)
 }
 
 // string attachSocketName = 6;
@@ -853,7 +853,7 @@ inline void SceneComponentState::clear_attachsocketname() {
   _impl_.attachsocketname_.ClearToEmpty();
 }
 inline const std::string& SceneComponentState::attachsocketname() const {
-  // @@protoc_insertion_point(field_get:channeldpb.SceneComponentState.attachSocketName)
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.attachSocketName)
   return _internal_attachsocketname();
 }
 template <typename ArgT0, typename... ArgT>
@@ -861,11 +861,11 @@ inline PROTOBUF_ALWAYS_INLINE
 void SceneComponentState::set_attachsocketname(ArgT0&& arg0, ArgT... args) {
  
  _impl_.attachsocketname_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:channeldpb.SceneComponentState.attachSocketName)
+  // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.attachSocketName)
 }
 inline std::string* SceneComponentState::mutable_attachsocketname() {
   std::string* _s = _internal_mutable_attachsocketname();
-  // @@protoc_insertion_point(field_mutable:channeldpb.SceneComponentState.attachSocketName)
+  // @@protoc_insertion_point(field_mutable:unrealpb.SceneComponentState.attachSocketName)
   return _s;
 }
 inline const std::string& SceneComponentState::_internal_attachsocketname() const {
@@ -880,7 +880,7 @@ inline std::string* SceneComponentState::_internal_mutable_attachsocketname() {
   return _impl_.attachsocketname_.Mutable(GetArenaForAllocation());
 }
 inline std::string* SceneComponentState::release_attachsocketname() {
-  // @@protoc_insertion_point(field_release:channeldpb.SceneComponentState.attachSocketName)
+  // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.attachSocketName)
   return _impl_.attachsocketname_.Release();
 }
 inline void SceneComponentState::set_allocated_attachsocketname(std::string* attachsocketname) {
@@ -895,7 +895,7 @@ inline void SceneComponentState::set_allocated_attachsocketname(std::string* att
     _impl_.attachsocketname_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:channeldpb.SceneComponentState.attachSocketName)
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.attachSocketName)
 }
 
 #ifdef __GNUC__
@@ -906,7 +906,7 @@ inline void SceneComponentState::set_allocated_attachsocketname(std::string* att
 
 // @@protoc_insertion_point(namespace_scope)
 
-}  // namespace channeldpb
+}  // namespace unrealpb
 
 // @@protoc_insertion_point(global_scope)
 

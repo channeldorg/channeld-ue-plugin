@@ -4,6 +4,8 @@
 //#include "Engine/EngineBaseTypes.h"
 #include "ChanneldTypes.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogChanneld, Log, All);
+
 typedef uint32 ConnectionId;
 
 typedef uint32 ChannelId;

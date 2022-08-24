@@ -183,8 +183,6 @@ protected:
 
 	TMap<EChanneldChannelType, FString> ChannelTypeToProtoFullNameMapping;
 
-	google::protobuf::Message* CreateProtoMessageByFullName(const std::string ProtobufFullName);
-
 	void HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleCreateChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleRemoveChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);

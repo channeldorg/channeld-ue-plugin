@@ -9,8 +9,6 @@
 
 class UChanneldConnection;
 
-DECLARE_LOG_CATEGORY_EXTERN(LogChanneld, Log, All);
-
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FChanneldMessageDelegate, UChanneldConnection*, ChannelId, const google::protobuf::Message*)
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FUserSpaceMessageDelegate, ChannelId, ConnectionId, const std::string&)
 DECLARE_MULTICAST_DELEGATE_OneParam(FChanneldAuthenticatedDelegate, UChanneldConnection*);
@@ -168,7 +166,7 @@ private:
 	MessageHandlerEntry UserSpaceMessageHandlerEntry;
 	TMap<uint32, MessageHandlerEntry> MessageHandlers;
 	TQueue<MessageQueueEntry> IncomingQueue;
-	TQueue<channeldpb::MessagePack> OutgoingQueue;
+	TQueue<TSharedPtr<channeldpb::MessagePack>> OutgoingQueue;
 	TMap<uint32, FChanneldMessageHandlerFunc> RpcCallbacks;
 
 	void Receive();

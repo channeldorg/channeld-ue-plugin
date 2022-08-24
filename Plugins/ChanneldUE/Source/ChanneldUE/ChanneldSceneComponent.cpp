@@ -3,6 +3,7 @@
 
 #include "ChanneldSceneComponent.h"
 #include "ChanneldUtils.h"
+#include "ChanneldTypes.h"
 //#include "ChanneldConnection.h"
 //
 //DEFINE_LOG_CATEGORY(LogChanneld);
@@ -16,10 +17,20 @@ UChanneldSceneComponent::UChanneldSceneComponent()
 
 	TransformUpdated.AddUObject(this, &UChanneldSceneComponent::OnTransformUpdated);
 
-	State = new channeldpb::SceneComponentState;
-	RelativeLocationState = State->mutable_relativelocation();
-	RelativeRotationState = State->mutable_relativerotation();
-	RelativeScaleState = State->mutable_relativescale();
+	State = new unrealpb::SceneComponentState;
+	RelativeLocationState = new unrealpb::FVector;
+	RelativeRotationState = new unrealpb::FVector;
+	RelativeScaleState = new unrealpb::FVector;
+}
+
+void UChanneldSceneComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
+{
+	Super::OnComponentDestroyed(bDestroyingHierarchy);
+
+	delete State;
+	delete RelativeLocationState;
+	delete RelativeRotationState;
+	delete RelativeScaleState;
 }
 
 void UChanneldSceneComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -33,14 +44,23 @@ void UChanneldSceneComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	StateProvider = Cast<ISceneComponentStateProvider>(GetOwner()->GetComponentByClass(USceneComponentStateProvider::StaticClass()));
+	StateProvider = Cast<ISceneComponentStateProvider>(GetOwner());
+	if (!StateProvider)
+	{
+		auto Interfaces = GetOwner()->GetComponentsByInterface(USceneComponentStateProvider::StaticClass());
+		if (Interfaces.Num() > 0)
+		{
+			StateProvider = Cast<ISceneComponentStateProvider>(Interfaces[0]);
+		}
+	}
+
 	if (StateProvider)
 	{
 		StateProvider->OnSceneComponentUpdated.AddUObject(this, &UChanneldSceneComponent::OnStateChanged);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Can't find ISceneComponentStateProvider for the ChanneldSceneComponent, actor: %s"), *GetOwner()->GetName());
+		UE_LOG(LogChanneld, Warning, TEXT("Can't find ISceneComponentStateProvider for the ChanneldSceneComponent, actor: %s"), *GetOwner()->GetName());
 	}
 }
 
@@ -54,7 +74,7 @@ void UChanneldSceneComponent::EndPlay(EEndPlayReason::Type Reason)
 	}
 }
 
-bool SetIfNotSame(channeldpb::FVector* VectorToSet, const FVector& VectorToCheck)
+bool SetIfNotSame(unrealpb::FVector* VectorToSet, const FVector& VectorToCheck)
 {
 	bool bNotSame = false;
 	if (VectorToSet->x() != VectorToCheck.X)
@@ -111,7 +131,7 @@ void UChanneldSceneComponent::OnTransformUpdated(USceneComponent* UpdatedCompone
 	}
 }
 
-void UChanneldSceneComponent::OnStateChanged(channeldpb::SceneComponentState* NewState)
+void UChanneldSceneComponent::OnStateChanged(const unrealpb::SceneComponentState* NewState)
 {
 	State->CopyFrom(*NewState);
 	bStateChanged = false;
@@ -136,6 +156,9 @@ void UChanneldSceneComponent::TickComponent(float DeltaTime, ELevelTick TickType
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (!StateProvider)
+		return;
+
 	if (State->isvisible() != IsVisible())
 	{
 		State->set_isvisible(IsVisible());
@@ -159,7 +182,7 @@ channeldpb::ChannelType UChanneldSceneComponent::GetChannelType()
 
 google::protobuf::Message* UChanneldSceneComponent::GetChannelDataTemplate() const
 {
-	return new channeldpb::SceneComponentState;
+	return new unrealpb::SceneComponentState;
 }
 
 ChannelId UChanneldSceneComponent::GetChannelId()

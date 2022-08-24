@@ -1,13 +1,25 @@
 #include "ChannelDataView.h"
 #include "ChanneldGameInstanceSubsystem.h"
 #include "ChanneldNetDriver.h"
-
-//DEFINE_LOG_CATEGORY(LogChanneld);
+#include "ChanneldUtils.h"
 
 UChannelDataView::UChannelDataView(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 
+}
+
+void UChannelDataView::RegisterChannelDataType(EChanneldChannelType ChannelType, const FString& MessageFullName)
+{
+	auto Msg = ChanneldUtils::CreateProtobufMessage(TCHAR_TO_UTF8(*MessageFullName));
+	if (Msg)
+	{
+		RegisterChannelDataTemplate(static_cast<channeldpb::ChannelType>(ChannelType), Msg);
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to register channel data type by name: %s"), *MessageFullName);
+	}
 }
 
 void UChannelDataView::Initialize(UChanneldConnection* InConn)

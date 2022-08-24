@@ -131,12 +131,12 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 
 void FChanneldEditorModule::LaunchChanneldAction()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Not implemented yet"));
+	UE_LOG(LogTemp, Warning, TEXT("LaunchChanneldAction is not implemented yet"));
 }
 
 void FChanneldEditorModule::StopChanneldAction()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Not implemented yet"));
+	UE_LOG(LogTemp, Warning, TEXT("LaunchChanneldAction is not implemented yet"));
 }
 
 void FChanneldEditorModule::LaunchServersAction()

@@ -17,6 +17,7 @@ class CHANNELDUE_API UChanneldSceneComponent : public USceneComponent//, public 
 public:	
 	// Sets default values for this component's properties
 	UChanneldSceneComponent();
+	void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 
 protected:
 	// Called when the game starts
@@ -33,16 +34,16 @@ protected:
 	ISceneComponentStateProvider* StateProvider = nullptr;
 
 	bool bStateChanged = false;
-	channeldpb::SceneComponentState* State = nullptr;
-	channeldpb::FVector* RelativeLocationState = nullptr;
-	channeldpb::FVector* RelativeRotationState = nullptr;
-	channeldpb::FVector* RelativeScaleState = nullptr;
+	unrealpb::SceneComponentState* State = nullptr;
+	unrealpb::FVector* RelativeLocationState = nullptr;
+	unrealpb::FVector* RelativeRotationState = nullptr;
+	unrealpb::FVector* RelativeScaleState = nullptr;
 
 	// Local -> channeld
 	void OnTransformUpdated(USceneComponent* UpdatedComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
 
 	// channeld -> local
-	void OnStateChanged(channeldpb::SceneComponentState* NewState);
+	void OnStateChanged(const unrealpb::SceneComponentState* NewState);
 
 public:	
 

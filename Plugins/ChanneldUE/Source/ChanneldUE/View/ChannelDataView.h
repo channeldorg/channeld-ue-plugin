@@ -26,6 +26,9 @@ public:
 		ChannelDataTemplatesByTypeUrl.Add(FString(AnyForTypeUrl->type_url().c_str()), MsgTemplate);
 	}
 
+	UFUNCTION(BlueprintCallable)
+	void RegisterChannelDataType(EChanneldChannelType ChannelType, const FString& MessageFullName);
+
 	virtual void Initialize(UChanneldConnection* InConn);
 	virtual void Unintialize();
 

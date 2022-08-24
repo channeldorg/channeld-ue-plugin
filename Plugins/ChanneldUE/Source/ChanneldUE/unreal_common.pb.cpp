@@ -28,7 +28,7 @@ PROTOBUF_PRAGMA_INIT_SEG
 namespace _pb = ::PROTOBUF_NAMESPACE_ID;
 namespace _pbi = _pb::internal;
 
-namespace channeldpb {
+namespace unrealpb {
 PROTOBUF_CONSTEXPR FVector::FVector(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.x_)*/0
@@ -62,58 +62,58 @@ struct SceneComponentStateDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SceneComponentStateDefaultTypeInternal _SceneComponentState_default_instance_;
-}  // namespace channeldpb
+}  // namespace unrealpb
 static ::_pb::Metadata file_level_metadata_unreal_5fcommon_2eproto[2];
 static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_unreal_5fcommon_2eproto = nullptr;
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_unreal_5fcommon_2eproto = nullptr;
 
 const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::channeldpb::FVector, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FVector, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::channeldpb::FVector, _impl_.x_),
-  PROTOBUF_FIELD_OFFSET(::channeldpb::FVector, _impl_.y_),
-  PROTOBUF_FIELD_OFFSET(::channeldpb::FVector, _impl_.z_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FVector, _impl_.x_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FVector, _impl_.y_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FVector, _impl_.z_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::channeldpb::SceneComponentState, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::SceneComponentState, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::channeldpb::SceneComponentState, _impl_.removed_),
-  PROTOBUF_FIELD_OFFSET(::channeldpb::SceneComponentState, _impl_.relativelocation_),
-  PROTOBUF_FIELD_OFFSET(::channeldpb::SceneComponentState, _impl_.relativerotation_),
-  PROTOBUF_FIELD_OFFSET(::channeldpb::SceneComponentState, _impl_.relativescale_),
-  PROTOBUF_FIELD_OFFSET(::channeldpb::SceneComponentState, _impl_.isvisible_),
-  PROTOBUF_FIELD_OFFSET(::channeldpb::SceneComponentState, _impl_.attachsocketname_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::SceneComponentState, _impl_.removed_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::SceneComponentState, _impl_.relativelocation_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::SceneComponentState, _impl_.relativerotation_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::SceneComponentState, _impl_.relativescale_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::SceneComponentState, _impl_.isvisible_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::SceneComponentState, _impl_.attachsocketname_),
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::channeldpb::FVector)},
-  { 9, -1, -1, sizeof(::channeldpb::SceneComponentState)},
+  { 0, -1, -1, sizeof(::unrealpb::FVector)},
+  { 9, -1, -1, sizeof(::unrealpb::SceneComponentState)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
-  &::channeldpb::_FVector_default_instance_._instance,
-  &::channeldpb::_SceneComponentState_default_instance_._instance,
+  &::unrealpb::_FVector_default_instance_._instance,
+  &::unrealpb::_SceneComponentState_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\023unreal_common.proto\022\nchanneldpb\"*\n\007FVe"
-  "ctor\022\t\n\001x\030\001 \001(\002\022\t\n\001y\030\002 \001(\002\022\t\n\001z\030\003 \001(\002\"\335\001"
-  "\n\023SceneComponentState\022\017\n\007removed\030\001 \001(\010\022-"
-  "\n\020relativeLocation\030\002 \001(\0132\023.channeldpb.FV"
-  "ector\022-\n\020relativeRotation\030\003 \001(\0132\023.channe"
-  "ldpb.FVector\022*\n\rrelativeScale\030\004 \001(\0132\023.ch"
-  "anneldpb.FVector\022\021\n\tisVisible\030\005 \001(\010\022\030\n\020a"
-  "ttachSocketName\030\006 \001(\tB.Z,channeld.clewca"
-  "t.com/channeld/pkg/channeldpbb\006proto3"
+  "\n\023unreal_common.proto\022\010unrealpb\"*\n\007FVect"
+  "or\022\t\n\001x\030\001 \001(\002\022\t\n\001y\030\002 \001(\002\022\t\n\001z\030\003 \001(\002\"\327\001\n\023"
+  "SceneComponentState\022\017\n\007removed\030\001 \001(\010\022+\n\020"
+  "relativeLocation\030\002 \001(\0132\021.unrealpb.FVecto"
+  "r\022+\n\020relativeRotation\030\003 \001(\0132\021.unrealpb.F"
+  "Vector\022(\n\rrelativeScale\030\004 \001(\0132\021.unrealpb"
+  ".FVector\022\021\n\tisVisible\030\005 \001(\010\022\030\n\020attachSoc"
+  "ketName\030\006 \001(\tB,Z*channeld.clewcat.com/ch"
+  "anneld/pkg/unrealpbb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_unreal_5fcommon_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_unreal_5fcommon_2eproto = {
-    false, false, 357, descriptor_table_protodef_unreal_5fcommon_2eproto,
+    false, false, 347, descriptor_table_protodef_unreal_5fcommon_2eproto,
     "unreal_common.proto",
     &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 2,
     schemas, file_default_instances, TableStruct_unreal_5fcommon_2eproto::offsets,
@@ -126,7 +126,7 @@ PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_unreal_5
 
 // Force running AddDescriptors() at dynamic initialization time.
 PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_unreal_5fcommon_2eproto(&descriptor_table_unreal_5fcommon_2eproto);
-namespace channeldpb {
+namespace unrealpb {
 
 // ===================================================================
 
@@ -138,7 +138,7 @@ FVector::FVector(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:channeldpb.FVector)
+  // @@protoc_insertion_point(arena_constructor:unrealpb.FVector)
 }
 FVector::FVector(const FVector& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
@@ -153,7 +153,7 @@ FVector::FVector(const FVector& from)
   ::memcpy(&_impl_.x_, &from._impl_.x_,
     static_cast<size_t>(reinterpret_cast<char*>(&_impl_.z_) -
     reinterpret_cast<char*>(&_impl_.x_)) + sizeof(_impl_.z_));
-  // @@protoc_insertion_point(copy_constructor:channeldpb.FVector)
+  // @@protoc_insertion_point(copy_constructor:unrealpb.FVector)
 }
 
 inline void FVector::SharedCtor(
@@ -169,7 +169,7 @@ inline void FVector::SharedCtor(
 }
 
 FVector::~FVector() {
-  // @@protoc_insertion_point(destructor:channeldpb.FVector)
+  // @@protoc_insertion_point(destructor:unrealpb.FVector)
   if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
   (void)arena;
     return;
@@ -186,7 +186,7 @@ void FVector::SetCachedSize(int size) const {
 }
 
 void FVector::Clear() {
-// @@protoc_insertion_point(message_clear_start:channeldpb.FVector)
+// @@protoc_insertion_point(message_clear_start:unrealpb.FVector)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -252,7 +252,7 @@ failure:
 
 uint8_t* FVector::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:channeldpb.FVector)
+  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.FVector)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -290,12 +290,12 @@ uint8_t* FVector::_InternalSerialize(
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:channeldpb.FVector)
+  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.FVector)
   return target;
 }
 
 size_t FVector::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:channeldpb.FVector)
+// @@protoc_insertion_point(message_byte_size_start:unrealpb.FVector)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -342,7 +342,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FVector::GetClassData() const 
 void FVector::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
   auto* const _this = static_cast<FVector*>(&to_msg);
   auto& from = static_cast<const FVector&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:channeldpb.FVector)
+  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.FVector)
   GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -372,7 +372,7 @@ void FVector::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOB
 }
 
 void FVector::CopyFrom(const FVector& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:channeldpb.FVector)
+// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.FVector)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -403,20 +403,20 @@ void FVector::InternalSwap(FVector* other) {
 
 class SceneComponentState::_Internal {
  public:
-  static const ::channeldpb::FVector& relativelocation(const SceneComponentState* msg);
-  static const ::channeldpb::FVector& relativerotation(const SceneComponentState* msg);
-  static const ::channeldpb::FVector& relativescale(const SceneComponentState* msg);
+  static const ::unrealpb::FVector& relativelocation(const SceneComponentState* msg);
+  static const ::unrealpb::FVector& relativerotation(const SceneComponentState* msg);
+  static const ::unrealpb::FVector& relativescale(const SceneComponentState* msg);
 };
 
-const ::channeldpb::FVector&
+const ::unrealpb::FVector&
 SceneComponentState::_Internal::relativelocation(const SceneComponentState* msg) {
   return *msg->_impl_.relativelocation_;
 }
-const ::channeldpb::FVector&
+const ::unrealpb::FVector&
 SceneComponentState::_Internal::relativerotation(const SceneComponentState* msg) {
   return *msg->_impl_.relativerotation_;
 }
-const ::channeldpb::FVector&
+const ::unrealpb::FVector&
 SceneComponentState::_Internal::relativescale(const SceneComponentState* msg) {
   return *msg->_impl_.relativescale_;
 }
@@ -424,7 +424,7 @@ SceneComponentState::SceneComponentState(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:channeldpb.SceneComponentState)
+  // @@protoc_insertion_point(arena_constructor:unrealpb.SceneComponentState)
 }
 SceneComponentState::SceneComponentState(const SceneComponentState& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
@@ -448,18 +448,18 @@ SceneComponentState::SceneComponentState(const SceneComponentState& from)
       _this->GetArenaForAllocation());
   }
   if (from._internal_has_relativelocation()) {
-    _this->_impl_.relativelocation_ = new ::channeldpb::FVector(*from._impl_.relativelocation_);
+    _this->_impl_.relativelocation_ = new ::unrealpb::FVector(*from._impl_.relativelocation_);
   }
   if (from._internal_has_relativerotation()) {
-    _this->_impl_.relativerotation_ = new ::channeldpb::FVector(*from._impl_.relativerotation_);
+    _this->_impl_.relativerotation_ = new ::unrealpb::FVector(*from._impl_.relativerotation_);
   }
   if (from._internal_has_relativescale()) {
-    _this->_impl_.relativescale_ = new ::channeldpb::FVector(*from._impl_.relativescale_);
+    _this->_impl_.relativescale_ = new ::unrealpb::FVector(*from._impl_.relativescale_);
   }
   ::memcpy(&_impl_.removed_, &from._impl_.removed_,
     static_cast<size_t>(reinterpret_cast<char*>(&_impl_.isvisible_) -
     reinterpret_cast<char*>(&_impl_.removed_)) + sizeof(_impl_.isvisible_));
-  // @@protoc_insertion_point(copy_constructor:channeldpb.SceneComponentState)
+  // @@protoc_insertion_point(copy_constructor:unrealpb.SceneComponentState)
 }
 
 inline void SceneComponentState::SharedCtor(
@@ -482,7 +482,7 @@ inline void SceneComponentState::SharedCtor(
 }
 
 SceneComponentState::~SceneComponentState() {
-  // @@protoc_insertion_point(destructor:channeldpb.SceneComponentState)
+  // @@protoc_insertion_point(destructor:unrealpb.SceneComponentState)
   if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
   (void)arena;
     return;
@@ -503,7 +503,7 @@ void SceneComponentState::SetCachedSize(int size) const {
 }
 
 void SceneComponentState::Clear() {
-// @@protoc_insertion_point(message_clear_start:channeldpb.SceneComponentState)
+// @@protoc_insertion_point(message_clear_start:unrealpb.SceneComponentState)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -541,7 +541,7 @@ const char* SceneComponentState::_InternalParse(const char* ptr, ::_pbi::ParseCo
         } else
           goto handle_unusual;
         continue;
-      // .channeldpb.FVector relativeLocation = 2;
+      // .unrealpb.FVector relativeLocation = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_relativelocation(), ptr);
@@ -549,7 +549,7 @@ const char* SceneComponentState::_InternalParse(const char* ptr, ::_pbi::ParseCo
         } else
           goto handle_unusual;
         continue;
-      // .channeldpb.FVector relativeRotation = 3;
+      // .unrealpb.FVector relativeRotation = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr = ctx->ParseMessage(_internal_mutable_relativerotation(), ptr);
@@ -557,7 +557,7 @@ const char* SceneComponentState::_InternalParse(const char* ptr, ::_pbi::ParseCo
         } else
           goto handle_unusual;
         continue;
-      // .channeldpb.FVector relativeScale = 4;
+      // .unrealpb.FVector relativeScale = 4;
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
           ptr = ctx->ParseMessage(_internal_mutable_relativescale(), ptr);
@@ -579,7 +579,7 @@ const char* SceneComponentState::_InternalParse(const char* ptr, ::_pbi::ParseCo
           auto str = _internal_mutable_attachsocketname();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "channeldpb.SceneComponentState.attachSocketName"));
+          CHK_(::_pbi::VerifyUTF8(str, "unrealpb.SceneComponentState.attachSocketName"));
         } else
           goto handle_unusual;
         continue;
@@ -608,7 +608,7 @@ failure:
 
 uint8_t* SceneComponentState::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:channeldpb.SceneComponentState)
+  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.SceneComponentState)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -618,21 +618,21 @@ uint8_t* SceneComponentState::_InternalSerialize(
     target = ::_pbi::WireFormatLite::WriteBoolToArray(1, this->_internal_removed(), target);
   }
 
-  // .channeldpb.FVector relativeLocation = 2;
+  // .unrealpb.FVector relativeLocation = 2;
   if (this->_internal_has_relativelocation()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(2, _Internal::relativelocation(this),
         _Internal::relativelocation(this).GetCachedSize(), target, stream);
   }
 
-  // .channeldpb.FVector relativeRotation = 3;
+  // .unrealpb.FVector relativeRotation = 3;
   if (this->_internal_has_relativerotation()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(3, _Internal::relativerotation(this),
         _Internal::relativerotation(this).GetCachedSize(), target, stream);
   }
 
-  // .channeldpb.FVector relativeScale = 4;
+  // .unrealpb.FVector relativeScale = 4;
   if (this->_internal_has_relativescale()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(4, _Internal::relativescale(this),
@@ -650,7 +650,7 @@ uint8_t* SceneComponentState::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_attachsocketname().data(), static_cast<int>(this->_internal_attachsocketname().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "channeldpb.SceneComponentState.attachSocketName");
+      "unrealpb.SceneComponentState.attachSocketName");
     target = stream->WriteStringMaybeAliased(
         6, this->_internal_attachsocketname(), target);
   }
@@ -659,12 +659,12 @@ uint8_t* SceneComponentState::_InternalSerialize(
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:channeldpb.SceneComponentState)
+  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.SceneComponentState)
   return target;
 }
 
 size_t SceneComponentState::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:channeldpb.SceneComponentState)
+// @@protoc_insertion_point(message_byte_size_start:unrealpb.SceneComponentState)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -678,21 +678,21 @@ size_t SceneComponentState::ByteSizeLong() const {
         this->_internal_attachsocketname());
   }
 
-  // .channeldpb.FVector relativeLocation = 2;
+  // .unrealpb.FVector relativeLocation = 2;
   if (this->_internal_has_relativelocation()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *_impl_.relativelocation_);
   }
 
-  // .channeldpb.FVector relativeRotation = 3;
+  // .unrealpb.FVector relativeRotation = 3;
   if (this->_internal_has_relativerotation()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *_impl_.relativerotation_);
   }
 
-  // .channeldpb.FVector relativeScale = 4;
+  // .unrealpb.FVector relativeScale = 4;
   if (this->_internal_has_relativescale()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -722,7 +722,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*SceneComponentState::GetClassD
 void SceneComponentState::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
   auto* const _this = static_cast<SceneComponentState*>(&to_msg);
   auto& from = static_cast<const SceneComponentState&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:channeldpb.SceneComponentState)
+  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.SceneComponentState)
   GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -731,15 +731,15 @@ void SceneComponentState::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, co
     _this->_internal_set_attachsocketname(from._internal_attachsocketname());
   }
   if (from._internal_has_relativelocation()) {
-    _this->_internal_mutable_relativelocation()->::channeldpb::FVector::MergeFrom(
+    _this->_internal_mutable_relativelocation()->::unrealpb::FVector::MergeFrom(
         from._internal_relativelocation());
   }
   if (from._internal_has_relativerotation()) {
-    _this->_internal_mutable_relativerotation()->::channeldpb::FVector::MergeFrom(
+    _this->_internal_mutable_relativerotation()->::unrealpb::FVector::MergeFrom(
         from._internal_relativerotation());
   }
   if (from._internal_has_relativescale()) {
-    _this->_internal_mutable_relativescale()->::channeldpb::FVector::MergeFrom(
+    _this->_internal_mutable_relativescale()->::unrealpb::FVector::MergeFrom(
         from._internal_relativescale());
   }
   if (from._internal_removed() != 0) {
@@ -752,7 +752,7 @@ void SceneComponentState::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, co
 }
 
 void SceneComponentState::CopyFrom(const SceneComponentState& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:channeldpb.SceneComponentState)
+// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.SceneComponentState)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -786,15 +786,15 @@ void SceneComponentState::InternalSwap(SceneComponentState* other) {
 }
 
 // @@protoc_insertion_point(namespace_scope)
-}  // namespace channeldpb
+}  // namespace unrealpb
 PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::channeldpb::FVector*
-Arena::CreateMaybeMessage< ::channeldpb::FVector >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::channeldpb::FVector >(arena);
+template<> PROTOBUF_NOINLINE ::unrealpb::FVector*
+Arena::CreateMaybeMessage< ::unrealpb::FVector >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::unrealpb::FVector >(arena);
 }
-template<> PROTOBUF_NOINLINE ::channeldpb::SceneComponentState*
-Arena::CreateMaybeMessage< ::channeldpb::SceneComponentState >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::channeldpb::SceneComponentState >(arena);
+template<> PROTOBUF_NOINLINE ::unrealpb::SceneComponentState*
+Arena::CreateMaybeMessage< ::unrealpb::SceneComponentState >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::unrealpb::SceneComponentState >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

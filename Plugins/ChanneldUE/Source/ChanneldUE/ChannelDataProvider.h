@@ -27,7 +27,7 @@ public:
 	
 	static FString GetName(const IChannelDataProvider* Provider)
 	{
-		return dynamic_cast<const UObjectBase*>(Provider)->GetClass()->GetName();
+		return Cast<UChannelDataProvider>(Provider)->GetClass()->GetName();
 	}
 
 };
@@ -42,8 +42,8 @@ class CHANNELDUE_API ISceneComponentStateProvider
 {
 	GENERATED_BODY()
 public:
-	virtual void UpdateSceneComponent(channeldpb::SceneComponentState* State) = 0;
+	virtual void UpdateSceneComponent(unrealpb::SceneComponentState* State) = 0;
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnSceneComponentUpdated, channeldpb::SceneComponentState*);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnSceneComponentUpdated, const unrealpb::SceneComponentState*);
 	FOnSceneComponentUpdated OnSceneComponentUpdated;
 };

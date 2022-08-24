@@ -359,13 +359,13 @@ void UChanneldConnection::TickOutgoing()
 	const uint32 HeaderSize = 5;
 	channeldpb::Packet Packet;
 	uint32 Size = HeaderSize;
-	channeldpb::MessagePack MessagePack;
+	TSharedPtr<channeldpb::MessagePack> MessagePack;
 	while (OutgoingQueue.Dequeue(MessagePack))
 	{
-		Size += MessagePack.ByteSizeLong();
+		Size += MessagePack->ByteSizeLong();
 		if (Size >= MaxPacketSize)
 			break;
-		Packet.add_messages()->CopyFrom(MessagePack);
+		Packet.add_messages()->CopyFrom(*MessagePack);
 	}
 
 	int PacketSize = Packet.ByteSizeLong();
@@ -374,6 +374,7 @@ void UChanneldConnection::TickOutgoing()
 	uint8* PacketData = new uint8[Size];
 	if (!Packet.SerializeToArray(PacketData + 5, Size))
 	{
+		Packet.Clear();
 		delete[] PacketData;
 		UE_LOG(LogChanneld, Error, TEXT("Failed to serialize Packet, size: %d"), Size);
 		return;
@@ -390,6 +391,7 @@ void UChanneldConnection::TickOutgoing()
 	int32 BytesSent;
 	bool IsSent = Socket->Send(PacketData, Size, BytesSent);
 	// Free send buffer
+	Packet.Clear();
 	delete[] PacketData;
 	if (!IsSent)
 	{
@@ -419,14 +421,23 @@ void UChanneldConnection::SendRaw(ChannelId ChId, uint32 MsgType, const uint8* M
 {
 	uint32 StubId = HandlerFunc != nullptr ? AddRpcCallback(HandlerFunc) : 0;
 
+	TSharedPtr<channeldpb::MessagePack> MsgPack(new channeldpb::MessagePack);
+	MsgPack->set_channelid(ChId);
+	MsgPack->set_broadcast(Broadcast);
+	MsgPack->set_stubid(StubId);
+	MsgPack->set_msgtype(MsgType);
+	MsgPack->set_msgbody(MsgBody, BodySize);
+	OutgoingQueue.Enqueue(MsgPack);
+
+	/*
 	channeldpb::MessagePack MsgPack;
 	MsgPack.set_channelid(ChId);
 	MsgPack.set_broadcast(Broadcast);
 	MsgPack.set_stubid(StubId);
 	MsgPack.set_msgtype(MsgType);
 	MsgPack.set_msgbody(MsgBody, BodySize);
-
 	OutgoingQueue.Enqueue(MsgPack);
+	*/
 
 	if (MsgType >= channeldpb::USER_SPACE_START && bShowUserSpaceMessageLog)
 		UE_LOG(LogChanneld, Verbose, TEXT("Send user-space message to channel %d, stubId=%d, type=%d, bodySize=%d)"), ChId, StubId, MsgType, BodySize);

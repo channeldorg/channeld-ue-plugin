@@ -5,9 +5,10 @@
 #include "ChanneldGameInstanceSubsystem.h"
 #include "ChannelDataProvider.h"
 #include "View/ChannelDataView.h"
+#include "Engine/ActorChannel.h"
 
 // Sets default values
-AChanneldActor::AChanneldActor()
+AChanneldActor::AChanneldActor(const FObjectInitializer& ObjectInitializer)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -19,15 +20,48 @@ void AChanneldActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//this->GetClass()->ImplementsInterface(IChannelDataProvider::StaticClass())
-	//if (auto Provider = Cast<IChannelDataProvider>(this))
+	UChannelDataView* View = GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
+	if (View)
+	{
+		View->AddProvider(OwningChannelId, this);
+	}
+}
+
+void AChanneldActor::EndPlay(EEndPlayReason::Type Reason)
+{
+	Super::EndPlay(Reason);
+
+	if (Reason == EEndPlayReason::Destroyed)
 	{
 		UChannelDataView* View = GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
 		if (View)
 		{
-			View->AddProvider(OwningChannelId, this);
+			View->RemoveProviderFromAllChannels(this, true);
 		}
 	}
+}
+
+uint32 AChanneldActor::GetNetGUID()
+{
+	auto NetConnection = this->GetNetConnection();
+	if (!NetConnection)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Actor '%s' is not owned by any net connection"), *GetFName().ToString());
+		return 0;
+	}
+	auto ActorChannel = NetConnection->FindActorChannelRef(this);
+	if (!ActorChannel)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Actor '%s' doesn't have any actor channel"), *GetFName().ToString());
+		return 0;
+	}
+
+	return ActorChannel->ActorNetGUID.Value;
+}
+
+void AChanneldActor::OnChannelDataRemoved()
+{
+	Destroy();
 }
 
 // Called every frame
@@ -44,7 +78,16 @@ channeldpb::ChannelType AChanneldActor::GetChannelType()
 
 google::protobuf::Message* AChanneldActor::GetChannelDataTemplate() const
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	auto MsgObj = ProvideChannelDataTemplate();
+	if (MsgObj)
+	{
+		return MsgObj->GetMessage();
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Error, TEXT("ChanneldActor '%s' failed to provider channel data template"), *GetFName().ToString());
+		return nullptr;
+	}
 }
 
 ChannelId AChanneldActor::GetChannelId()
@@ -69,11 +112,37 @@ void AChanneldActor::SetRemoved()
 
 bool AChanneldActor::UpdateChannelData(google::protobuf::Message* ChannelData)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	if (!HasAuthority())
+	{
+		return false;
+	}
+
+	bool bUpdated = false;
+	if (SceneComponentState)
+	{
+		SetSceneComponentStateToChannelData(SceneComponentState, ChannelData);
+		SceneComponentState = nullptr;
+		bUpdated = true;
+	}
+	return bUpdated;
 }
 
 void AChanneldActor::OnChannelDataUpdated(const google::protobuf::Message* ChannelData)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	auto State = GetSceneComponentStateFromChannelData(ChannelData);
+	if (State)
+	{
+		if (State->removed())
+		{
+			OnChannelDataRemoved();
+			return;
+		}
+		OnSceneComponentUpdated.Broadcast(State);
+	}
+}
+
+void AChanneldActor::UpdateSceneComponent(unrealpb::SceneComponentState* State)
+{
+	SceneComponentState = State;
 }
 

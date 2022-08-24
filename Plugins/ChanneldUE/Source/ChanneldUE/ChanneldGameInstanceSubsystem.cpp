@@ -7,6 +7,7 @@
 #include "ChanneldNetDriver.h"
 #include "Kismet/GameplayStatics.h"
 #include "ChanneldWorldSettings.h"
+#include "ChanneldUtils.h"
 
 void UChanneldGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -364,7 +365,7 @@ void UChanneldGameInstanceSubsystem::CreateMessageObjectByChannelType(UProtoMess
 
 void UChanneldGameInstanceSubsystem::CreateMessageObjectByFullName(UProtoMessageObject*& MessageObject, bool& bSuccess, FString ProtobufFullName)
 {
-	google::protobuf::Message* Message = CreateProtoMessageByFullName(TCHAR_TO_UTF8(*ProtobufFullName));
+	google::protobuf::Message* Message = ChanneldUtils::CreateProtobufMessage(TCHAR_TO_UTF8(*ProtobufFullName));
 	MessageObject = NewObject<UProtoMessageObject>();
 
 	if (Message != nullptr)
@@ -374,6 +375,7 @@ void UChanneldGameInstanceSubsystem::CreateMessageObjectByFullName(UProtoMessage
 	}
 	else
 	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to create Protobuf message by name: %s"), *ProtobufFullName);
 		bSuccess = false;
 	}
 }
@@ -412,23 +414,6 @@ void UChanneldGameInstanceSubsystem::SeamlessTravelToChannel(APlayerController* 
 	// Map name starts with '/Game/Maps'
 	FString MapName = World->RemovePIEPrefix(World->URL.Map); //World->GetMapName());// 
 	PlayerController->ClientTravel(FString::Printf(TEXT("127.0.0.1%s"), *MapName), ETravelType::TRAVEL_Relative, true);
-}
-
-google::protobuf::Message* UChanneldGameInstanceSubsystem::CreateProtoMessageByFullName(const std::string ProtobufFullName)
-{
-	const google::protobuf::Descriptor* Desc = google::protobuf::DescriptorPool::generated_pool()
-		->FindMessageTypeByName(ProtobufFullName);
-	google::protobuf::Message* Message = nullptr;
-	if (ensure(Desc != nullptr))
-	{
-		Message = google::protobuf::MessageFactory::generated_factory()
-			->GetPrototype(Desc)->New();
-	}
-	else
-	{
-		UE_LOG(LogChanneld, Error, TEXT("Non-existent protoType: %s"), ProtobufFullName.c_str());
-	}
-	return Message;
 }
 
 void UChanneldGameInstanceSubsystem::HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId,
@@ -507,13 +492,17 @@ void UChanneldGameInstanceSubsystem::OnUserSpaceMessageReceived(ChannelId ChId, 
 
 	// Erase "type.googleapis.com/"
 	ProtoFullName.erase(0, 20);
-	auto PayloadMsg = CreateProtoMessageByFullName(ProtoFullName);
+	auto PayloadMsg = ChanneldUtils::CreateProtobufMessage(ProtoFullName);
 	if (PayloadMsg != nullptr)
 	{
 		AnyMsg.UnpackTo(PayloadMsg);
 		UProtoMessageObject* MsgObject = NewObject<UProtoMessageObject>();
 		MsgObject->SetMessagePtr(PayloadMsg, true);
 		OnUserSpaceMessage.Broadcast(ChId, ConnId, MsgObject);
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Couldn't find Protobuf message type by name: %s"), ProtoFullName.c_str());
 	}
 }
 
