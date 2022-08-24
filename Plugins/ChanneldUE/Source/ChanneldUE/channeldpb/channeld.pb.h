@@ -35,7 +35,7 @@
 #include <google/protobuf/any.pb.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
-#define PROTOBUF_INTERNAL_EXPORT_channeld_2eproto
+#define PROTOBUF_INTERNAL_EXPORT_channeld_2eproto CHANNELDUE_API
 PROTOBUF_NAMESPACE_OPEN
 namespace internal {
 class AnyMetadata;
@@ -43,121 +43,121 @@ class AnyMetadata;
 PROTOBUF_NAMESPACE_CLOSE
 
 // Internal implementation detail -- do not use these members.
-struct TableStruct_channeld_2eproto {
+struct CHANNELDUE_API TableStruct_channeld_2eproto {
   static const uint32_t offsets[];
 };
-extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_channeld_2eproto;
+CHANNELDUE_API extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_channeld_2eproto;
 namespace channeldpb {
 class AuthMessage;
 struct AuthMessageDefaultTypeInternal;
-extern AuthMessageDefaultTypeInternal _AuthMessage_default_instance_;
+CHANNELDUE_API extern AuthMessageDefaultTypeInternal _AuthMessage_default_instance_;
 class AuthResultMessage;
 struct AuthResultMessageDefaultTypeInternal;
-extern AuthResultMessageDefaultTypeInternal _AuthResultMessage_default_instance_;
+CHANNELDUE_API extern AuthResultMessageDefaultTypeInternal _AuthResultMessage_default_instance_;
 class ChannelDataHandoverMessage;
 struct ChannelDataHandoverMessageDefaultTypeInternal;
-extern ChannelDataHandoverMessageDefaultTypeInternal _ChannelDataHandoverMessage_default_instance_;
+CHANNELDUE_API extern ChannelDataHandoverMessageDefaultTypeInternal _ChannelDataHandoverMessage_default_instance_;
 class ChannelDataMergeOptions;
 struct ChannelDataMergeOptionsDefaultTypeInternal;
-extern ChannelDataMergeOptionsDefaultTypeInternal _ChannelDataMergeOptions_default_instance_;
+CHANNELDUE_API extern ChannelDataMergeOptionsDefaultTypeInternal _ChannelDataMergeOptions_default_instance_;
 class ChannelDataUpdateMessage;
 struct ChannelDataUpdateMessageDefaultTypeInternal;
-extern ChannelDataUpdateMessageDefaultTypeInternal _ChannelDataUpdateMessage_default_instance_;
+CHANNELDUE_API extern ChannelDataUpdateMessageDefaultTypeInternal _ChannelDataUpdateMessage_default_instance_;
 class ChannelSubscriptionOptions;
 struct ChannelSubscriptionOptionsDefaultTypeInternal;
-extern ChannelSubscriptionOptionsDefaultTypeInternal _ChannelSubscriptionOptions_default_instance_;
+CHANNELDUE_API extern ChannelSubscriptionOptionsDefaultTypeInternal _ChannelSubscriptionOptions_default_instance_;
 class CreateChannelMessage;
 struct CreateChannelMessageDefaultTypeInternal;
-extern CreateChannelMessageDefaultTypeInternal _CreateChannelMessage_default_instance_;
+CHANNELDUE_API extern CreateChannelMessageDefaultTypeInternal _CreateChannelMessage_default_instance_;
 class CreateChannelResultMessage;
 struct CreateChannelResultMessageDefaultTypeInternal;
-extern CreateChannelResultMessageDefaultTypeInternal _CreateChannelResultMessage_default_instance_;
+CHANNELDUE_API extern CreateChannelResultMessageDefaultTypeInternal _CreateChannelResultMessage_default_instance_;
 class CreateSpatialChannelsResultMessage;
 struct CreateSpatialChannelsResultMessageDefaultTypeInternal;
-extern CreateSpatialChannelsResultMessageDefaultTypeInternal _CreateSpatialChannelsResultMessage_default_instance_;
+CHANNELDUE_API extern CreateSpatialChannelsResultMessageDefaultTypeInternal _CreateSpatialChannelsResultMessage_default_instance_;
 class DebugGetSpatialRegionsMessage;
 struct DebugGetSpatialRegionsMessageDefaultTypeInternal;
-extern DebugGetSpatialRegionsMessageDefaultTypeInternal _DebugGetSpatialRegionsMessage_default_instance_;
+CHANNELDUE_API extern DebugGetSpatialRegionsMessageDefaultTypeInternal _DebugGetSpatialRegionsMessage_default_instance_;
 class DisconnectMessage;
 struct DisconnectMessageDefaultTypeInternal;
-extern DisconnectMessageDefaultTypeInternal _DisconnectMessage_default_instance_;
+CHANNELDUE_API extern DisconnectMessageDefaultTypeInternal _DisconnectMessage_default_instance_;
 class ListChannelMessage;
 struct ListChannelMessageDefaultTypeInternal;
-extern ListChannelMessageDefaultTypeInternal _ListChannelMessage_default_instance_;
+CHANNELDUE_API extern ListChannelMessageDefaultTypeInternal _ListChannelMessage_default_instance_;
 class ListChannelResultMessage;
 struct ListChannelResultMessageDefaultTypeInternal;
-extern ListChannelResultMessageDefaultTypeInternal _ListChannelResultMessage_default_instance_;
+CHANNELDUE_API extern ListChannelResultMessageDefaultTypeInternal _ListChannelResultMessage_default_instance_;
 class ListChannelResultMessage_ChannelInfo;
 struct ListChannelResultMessage_ChannelInfoDefaultTypeInternal;
-extern ListChannelResultMessage_ChannelInfoDefaultTypeInternal _ListChannelResultMessage_ChannelInfo_default_instance_;
+CHANNELDUE_API extern ListChannelResultMessage_ChannelInfoDefaultTypeInternal _ListChannelResultMessage_ChannelInfo_default_instance_;
 class MessagePack;
 struct MessagePackDefaultTypeInternal;
-extern MessagePackDefaultTypeInternal _MessagePack_default_instance_;
+CHANNELDUE_API extern MessagePackDefaultTypeInternal _MessagePack_default_instance_;
 class Packet;
 struct PacketDefaultTypeInternal;
-extern PacketDefaultTypeInternal _Packet_default_instance_;
+CHANNELDUE_API extern PacketDefaultTypeInternal _Packet_default_instance_;
 class QuerySpatialChannelMessage;
 struct QuerySpatialChannelMessageDefaultTypeInternal;
-extern QuerySpatialChannelMessageDefaultTypeInternal _QuerySpatialChannelMessage_default_instance_;
+CHANNELDUE_API extern QuerySpatialChannelMessageDefaultTypeInternal _QuerySpatialChannelMessage_default_instance_;
 class QuerySpatialChannelResultMessage;
 struct QuerySpatialChannelResultMessageDefaultTypeInternal;
-extern QuerySpatialChannelResultMessageDefaultTypeInternal _QuerySpatialChannelResultMessage_default_instance_;
+CHANNELDUE_API extern QuerySpatialChannelResultMessageDefaultTypeInternal _QuerySpatialChannelResultMessage_default_instance_;
 class RemoveChannelMessage;
 struct RemoveChannelMessageDefaultTypeInternal;
-extern RemoveChannelMessageDefaultTypeInternal _RemoveChannelMessage_default_instance_;
+CHANNELDUE_API extern RemoveChannelMessageDefaultTypeInternal _RemoveChannelMessage_default_instance_;
 class ServerForwardMessage;
 struct ServerForwardMessageDefaultTypeInternal;
-extern ServerForwardMessageDefaultTypeInternal _ServerForwardMessage_default_instance_;
+CHANNELDUE_API extern ServerForwardMessageDefaultTypeInternal _ServerForwardMessage_default_instance_;
 class SpatialInfo;
 struct SpatialInfoDefaultTypeInternal;
-extern SpatialInfoDefaultTypeInternal _SpatialInfo_default_instance_;
+CHANNELDUE_API extern SpatialInfoDefaultTypeInternal _SpatialInfo_default_instance_;
 class SpatialRegion;
 struct SpatialRegionDefaultTypeInternal;
-extern SpatialRegionDefaultTypeInternal _SpatialRegion_default_instance_;
+CHANNELDUE_API extern SpatialRegionDefaultTypeInternal _SpatialRegion_default_instance_;
 class SpatialRegionsUpdateMessage;
 struct SpatialRegionsUpdateMessageDefaultTypeInternal;
-extern SpatialRegionsUpdateMessageDefaultTypeInternal _SpatialRegionsUpdateMessage_default_instance_;
+CHANNELDUE_API extern SpatialRegionsUpdateMessageDefaultTypeInternal _SpatialRegionsUpdateMessage_default_instance_;
 class SubscribedToChannelMessage;
 struct SubscribedToChannelMessageDefaultTypeInternal;
-extern SubscribedToChannelMessageDefaultTypeInternal _SubscribedToChannelMessage_default_instance_;
+CHANNELDUE_API extern SubscribedToChannelMessageDefaultTypeInternal _SubscribedToChannelMessage_default_instance_;
 class SubscribedToChannelResultMessage;
 struct SubscribedToChannelResultMessageDefaultTypeInternal;
-extern SubscribedToChannelResultMessageDefaultTypeInternal _SubscribedToChannelResultMessage_default_instance_;
+CHANNELDUE_API extern SubscribedToChannelResultMessageDefaultTypeInternal _SubscribedToChannelResultMessage_default_instance_;
 class UnsubscribedFromChannelMessage;
 struct UnsubscribedFromChannelMessageDefaultTypeInternal;
-extern UnsubscribedFromChannelMessageDefaultTypeInternal _UnsubscribedFromChannelMessage_default_instance_;
+CHANNELDUE_API extern UnsubscribedFromChannelMessageDefaultTypeInternal _UnsubscribedFromChannelMessage_default_instance_;
 class UnsubscribedFromChannelResultMessage;
 struct UnsubscribedFromChannelResultMessageDefaultTypeInternal;
-extern UnsubscribedFromChannelResultMessageDefaultTypeInternal _UnsubscribedFromChannelResultMessage_default_instance_;
+CHANNELDUE_API extern UnsubscribedFromChannelResultMessageDefaultTypeInternal _UnsubscribedFromChannelResultMessage_default_instance_;
 }  // namespace channeldpb
 PROTOBUF_NAMESPACE_OPEN
-template<> ::channeldpb::AuthMessage* Arena::CreateMaybeMessage<::channeldpb::AuthMessage>(Arena*);
-template<> ::channeldpb::AuthResultMessage* Arena::CreateMaybeMessage<::channeldpb::AuthResultMessage>(Arena*);
-template<> ::channeldpb::ChannelDataHandoverMessage* Arena::CreateMaybeMessage<::channeldpb::ChannelDataHandoverMessage>(Arena*);
-template<> ::channeldpb::ChannelDataMergeOptions* Arena::CreateMaybeMessage<::channeldpb::ChannelDataMergeOptions>(Arena*);
-template<> ::channeldpb::ChannelDataUpdateMessage* Arena::CreateMaybeMessage<::channeldpb::ChannelDataUpdateMessage>(Arena*);
-template<> ::channeldpb::ChannelSubscriptionOptions* Arena::CreateMaybeMessage<::channeldpb::ChannelSubscriptionOptions>(Arena*);
-template<> ::channeldpb::CreateChannelMessage* Arena::CreateMaybeMessage<::channeldpb::CreateChannelMessage>(Arena*);
-template<> ::channeldpb::CreateChannelResultMessage* Arena::CreateMaybeMessage<::channeldpb::CreateChannelResultMessage>(Arena*);
-template<> ::channeldpb::CreateSpatialChannelsResultMessage* Arena::CreateMaybeMessage<::channeldpb::CreateSpatialChannelsResultMessage>(Arena*);
-template<> ::channeldpb::DebugGetSpatialRegionsMessage* Arena::CreateMaybeMessage<::channeldpb::DebugGetSpatialRegionsMessage>(Arena*);
-template<> ::channeldpb::DisconnectMessage* Arena::CreateMaybeMessage<::channeldpb::DisconnectMessage>(Arena*);
-template<> ::channeldpb::ListChannelMessage* Arena::CreateMaybeMessage<::channeldpb::ListChannelMessage>(Arena*);
-template<> ::channeldpb::ListChannelResultMessage* Arena::CreateMaybeMessage<::channeldpb::ListChannelResultMessage>(Arena*);
-template<> ::channeldpb::ListChannelResultMessage_ChannelInfo* Arena::CreateMaybeMessage<::channeldpb::ListChannelResultMessage_ChannelInfo>(Arena*);
-template<> ::channeldpb::MessagePack* Arena::CreateMaybeMessage<::channeldpb::MessagePack>(Arena*);
-template<> ::channeldpb::Packet* Arena::CreateMaybeMessage<::channeldpb::Packet>(Arena*);
-template<> ::channeldpb::QuerySpatialChannelMessage* Arena::CreateMaybeMessage<::channeldpb::QuerySpatialChannelMessage>(Arena*);
-template<> ::channeldpb::QuerySpatialChannelResultMessage* Arena::CreateMaybeMessage<::channeldpb::QuerySpatialChannelResultMessage>(Arena*);
-template<> ::channeldpb::RemoveChannelMessage* Arena::CreateMaybeMessage<::channeldpb::RemoveChannelMessage>(Arena*);
-template<> ::channeldpb::ServerForwardMessage* Arena::CreateMaybeMessage<::channeldpb::ServerForwardMessage>(Arena*);
-template<> ::channeldpb::SpatialInfo* Arena::CreateMaybeMessage<::channeldpb::SpatialInfo>(Arena*);
-template<> ::channeldpb::SpatialRegion* Arena::CreateMaybeMessage<::channeldpb::SpatialRegion>(Arena*);
-template<> ::channeldpb::SpatialRegionsUpdateMessage* Arena::CreateMaybeMessage<::channeldpb::SpatialRegionsUpdateMessage>(Arena*);
-template<> ::channeldpb::SubscribedToChannelMessage* Arena::CreateMaybeMessage<::channeldpb::SubscribedToChannelMessage>(Arena*);
-template<> ::channeldpb::SubscribedToChannelResultMessage* Arena::CreateMaybeMessage<::channeldpb::SubscribedToChannelResultMessage>(Arena*);
-template<> ::channeldpb::UnsubscribedFromChannelMessage* Arena::CreateMaybeMessage<::channeldpb::UnsubscribedFromChannelMessage>(Arena*);
-template<> ::channeldpb::UnsubscribedFromChannelResultMessage* Arena::CreateMaybeMessage<::channeldpb::UnsubscribedFromChannelResultMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::AuthMessage* Arena::CreateMaybeMessage<::channeldpb::AuthMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::AuthResultMessage* Arena::CreateMaybeMessage<::channeldpb::AuthResultMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::ChannelDataHandoverMessage* Arena::CreateMaybeMessage<::channeldpb::ChannelDataHandoverMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::ChannelDataMergeOptions* Arena::CreateMaybeMessage<::channeldpb::ChannelDataMergeOptions>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::ChannelDataUpdateMessage* Arena::CreateMaybeMessage<::channeldpb::ChannelDataUpdateMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::ChannelSubscriptionOptions* Arena::CreateMaybeMessage<::channeldpb::ChannelSubscriptionOptions>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::CreateChannelMessage* Arena::CreateMaybeMessage<::channeldpb::CreateChannelMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::CreateChannelResultMessage* Arena::CreateMaybeMessage<::channeldpb::CreateChannelResultMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::CreateSpatialChannelsResultMessage* Arena::CreateMaybeMessage<::channeldpb::CreateSpatialChannelsResultMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::DebugGetSpatialRegionsMessage* Arena::CreateMaybeMessage<::channeldpb::DebugGetSpatialRegionsMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::DisconnectMessage* Arena::CreateMaybeMessage<::channeldpb::DisconnectMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::ListChannelMessage* Arena::CreateMaybeMessage<::channeldpb::ListChannelMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::ListChannelResultMessage* Arena::CreateMaybeMessage<::channeldpb::ListChannelResultMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::ListChannelResultMessage_ChannelInfo* Arena::CreateMaybeMessage<::channeldpb::ListChannelResultMessage_ChannelInfo>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::MessagePack* Arena::CreateMaybeMessage<::channeldpb::MessagePack>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::Packet* Arena::CreateMaybeMessage<::channeldpb::Packet>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::QuerySpatialChannelMessage* Arena::CreateMaybeMessage<::channeldpb::QuerySpatialChannelMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::QuerySpatialChannelResultMessage* Arena::CreateMaybeMessage<::channeldpb::QuerySpatialChannelResultMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::RemoveChannelMessage* Arena::CreateMaybeMessage<::channeldpb::RemoveChannelMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::ServerForwardMessage* Arena::CreateMaybeMessage<::channeldpb::ServerForwardMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::SpatialInfo* Arena::CreateMaybeMessage<::channeldpb::SpatialInfo>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::SpatialRegion* Arena::CreateMaybeMessage<::channeldpb::SpatialRegion>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::SpatialRegionsUpdateMessage* Arena::CreateMaybeMessage<::channeldpb::SpatialRegionsUpdateMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::SubscribedToChannelMessage* Arena::CreateMaybeMessage<::channeldpb::SubscribedToChannelMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::SubscribedToChannelResultMessage* Arena::CreateMaybeMessage<::channeldpb::SubscribedToChannelResultMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::UnsubscribedFromChannelMessage* Arena::CreateMaybeMessage<::channeldpb::UnsubscribedFromChannelMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::UnsubscribedFromChannelResultMessage* Arena::CreateMaybeMessage<::channeldpb::UnsubscribedFromChannelResultMessage>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace channeldpb {
 
@@ -168,12 +168,12 @@ enum AuthResultMessage_AuthResult : int {
   AuthResultMessage_AuthResult_AuthResultMessage_AuthResult_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   AuthResultMessage_AuthResult_AuthResultMessage_AuthResult_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
-bool AuthResultMessage_AuthResult_IsValid(int value);
+CHANNELDUE_API bool AuthResultMessage_AuthResult_IsValid(int value);
 constexpr AuthResultMessage_AuthResult AuthResultMessage_AuthResult_AuthResult_MIN = AuthResultMessage_AuthResult_SUCCESSFUL;
 constexpr AuthResultMessage_AuthResult AuthResultMessage_AuthResult_AuthResult_MAX = AuthResultMessage_AuthResult_INVALID_LT;
 constexpr int AuthResultMessage_AuthResult_AuthResult_ARRAYSIZE = AuthResultMessage_AuthResult_AuthResult_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* AuthResultMessage_AuthResult_descriptor();
+CHANNELDUE_API const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* AuthResultMessage_AuthResult_descriptor();
 template<typename T>
 inline const std::string& AuthResultMessage_AuthResult_Name(T enum_t_value) {
   static_assert(::std::is_same<T, AuthResultMessage_AuthResult>::value ||
@@ -197,12 +197,12 @@ enum BroadcastType : int {
   BroadcastType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   BroadcastType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
-bool BroadcastType_IsValid(int value);
+CHANNELDUE_API bool BroadcastType_IsValid(int value);
 constexpr BroadcastType BroadcastType_MIN = NO_BROADCAST;
 constexpr BroadcastType BroadcastType_MAX = ADJACENT_CHANNELS;
 constexpr int BroadcastType_ARRAYSIZE = BroadcastType_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* BroadcastType_descriptor();
+CHANNELDUE_API const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* BroadcastType_descriptor();
 template<typename T>
 inline const std::string& BroadcastType_Name(T enum_t_value) {
   static_assert(::std::is_same<T, BroadcastType>::value ||
@@ -223,12 +223,12 @@ enum ConnectionType : int {
   ConnectionType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   ConnectionType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
-bool ConnectionType_IsValid(int value);
+CHANNELDUE_API bool ConnectionType_IsValid(int value);
 constexpr ConnectionType ConnectionType_MIN = NO_CONNECTION;
 constexpr ConnectionType ConnectionType_MAX = CLIENT;
 constexpr int ConnectionType_ARRAYSIZE = ConnectionType_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ConnectionType_descriptor();
+CHANNELDUE_API const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ConnectionType_descriptor();
 template<typename T>
 inline const std::string& ConnectionType_Name(T enum_t_value) {
   static_assert(::std::is_same<T, ConnectionType>::value ||
@@ -256,12 +256,12 @@ enum ChannelType : int {
   ChannelType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   ChannelType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
-bool ChannelType_IsValid(int value);
+CHANNELDUE_API bool ChannelType_IsValid(int value);
 constexpr ChannelType ChannelType_MIN = UNKNOWN;
 constexpr ChannelType ChannelType_MAX = TEST4;
 constexpr int ChannelType_ARRAYSIZE = ChannelType_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ChannelType_descriptor();
+CHANNELDUE_API const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ChannelType_descriptor();
 template<typename T>
 inline const std::string& ChannelType_Name(T enum_t_value) {
   static_assert(::std::is_same<T, ChannelType>::value ||
@@ -294,12 +294,12 @@ enum MessageType : int {
   MessageType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   MessageType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
-bool MessageType_IsValid(int value);
+CHANNELDUE_API bool MessageType_IsValid(int value);
 constexpr MessageType MessageType_MIN = INVALID;
 constexpr MessageType MessageType_MAX = USER_SPACE_START;
 constexpr int MessageType_ARRAYSIZE = MessageType_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* MessageType_descriptor();
+CHANNELDUE_API const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* MessageType_descriptor();
 template<typename T>
 inline const std::string& MessageType_Name(T enum_t_value) {
   static_assert(::std::is_same<T, MessageType>::value ||
@@ -319,12 +319,12 @@ enum CompressionType : int {
   CompressionType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   CompressionType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
-bool CompressionType_IsValid(int value);
+CHANNELDUE_API bool CompressionType_IsValid(int value);
 constexpr CompressionType CompressionType_MIN = NO_COMPRESSION;
 constexpr CompressionType CompressionType_MAX = SNAPPY;
 constexpr int CompressionType_ARRAYSIZE = CompressionType_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* CompressionType_descriptor();
+CHANNELDUE_API const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* CompressionType_descriptor();
 template<typename T>
 inline const std::string& CompressionType_Name(T enum_t_value) {
   static_assert(::std::is_same<T, CompressionType>::value ||
@@ -345,12 +345,12 @@ enum ChannelDataAccess : int {
   ChannelDataAccess_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   ChannelDataAccess_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
-bool ChannelDataAccess_IsValid(int value);
+CHANNELDUE_API bool ChannelDataAccess_IsValid(int value);
 constexpr ChannelDataAccess ChannelDataAccess_MIN = NO_ACCESS;
 constexpr ChannelDataAccess ChannelDataAccess_MAX = WRITE_ACCESS;
 constexpr int ChannelDataAccess_ARRAYSIZE = ChannelDataAccess_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ChannelDataAccess_descriptor();
+CHANNELDUE_API const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ChannelDataAccess_descriptor();
 template<typename T>
 inline const std::string& ChannelDataAccess_Name(T enum_t_value) {
   static_assert(::std::is_same<T, ChannelDataAccess>::value ||
@@ -366,7 +366,7 @@ inline bool ChannelDataAccess_Parse(
 }
 // ===================================================================
 
-class Packet final :
+class CHANNELDUE_API Packet final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.Packet) */ {
  public:
   inline Packet() : Packet(nullptr) {}
@@ -523,7 +523,7 @@ class Packet final :
 };
 // -------------------------------------------------------------------
 
-class MessagePack final :
+class CHANNELDUE_API MessagePack final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.MessagePack) */ {
  public:
   inline MessagePack() : MessagePack(nullptr) {}
@@ -720,7 +720,7 @@ class MessagePack final :
 };
 // -------------------------------------------------------------------
 
-class ServerForwardMessage final :
+class CHANNELDUE_API ServerForwardMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.ServerForwardMessage) */ {
  public:
   inline ServerForwardMessage() : ServerForwardMessage(nullptr) {}
@@ -884,7 +884,7 @@ class ServerForwardMessage final :
 };
 // -------------------------------------------------------------------
 
-class AuthMessage final :
+class CHANNELDUE_API AuthMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.AuthMessage) */ {
  public:
   inline AuthMessage() : AuthMessage(nullptr) {}
@@ -1053,7 +1053,7 @@ class AuthMessage final :
 };
 // -------------------------------------------------------------------
 
-class AuthResultMessage final :
+class CHANNELDUE_API AuthResultMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.AuthResultMessage) */ {
  public:
   inline AuthResultMessage() : AuthResultMessage(nullptr) {}
@@ -1255,7 +1255,7 @@ class AuthResultMessage final :
 };
 // -------------------------------------------------------------------
 
-class ChannelSubscriptionOptions final :
+class CHANNELDUE_API ChannelSubscriptionOptions final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.ChannelSubscriptionOptions) */ {
  public:
   inline ChannelSubscriptionOptions() : ChannelSubscriptionOptions(nullptr) {}
@@ -1451,7 +1451,7 @@ class ChannelSubscriptionOptions final :
 };
 // -------------------------------------------------------------------
 
-class ChannelDataMergeOptions final :
+class CHANNELDUE_API ChannelDataMergeOptions final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.ChannelDataMergeOptions) */ {
  public:
   inline ChannelDataMergeOptions() : ChannelDataMergeOptions(nullptr) {}
@@ -1632,7 +1632,7 @@ class ChannelDataMergeOptions final :
 };
 // -------------------------------------------------------------------
 
-class CreateChannelMessage final :
+class CHANNELDUE_API CreateChannelMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.CreateChannelMessage) */ {
  public:
   inline CreateChannelMessage() : CreateChannelMessage(nullptr) {}
@@ -1856,7 +1856,7 @@ class CreateChannelMessage final :
 };
 // -------------------------------------------------------------------
 
-class CreateChannelResultMessage final :
+class CHANNELDUE_API CreateChannelResultMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.CreateChannelResultMessage) */ {
  public:
   inline CreateChannelResultMessage() : CreateChannelResultMessage(nullptr) {}
@@ -2042,7 +2042,7 @@ class CreateChannelResultMessage final :
 };
 // -------------------------------------------------------------------
 
-class RemoveChannelMessage final :
+class CHANNELDUE_API RemoveChannelMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.RemoveChannelMessage) */ {
  public:
   inline RemoveChannelMessage() : RemoveChannelMessage(nullptr) {}
@@ -2190,7 +2190,7 @@ class RemoveChannelMessage final :
 };
 // -------------------------------------------------------------------
 
-class ListChannelMessage final :
+class CHANNELDUE_API ListChannelMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.ListChannelMessage) */ {
  public:
   inline ListChannelMessage() : ListChannelMessage(nullptr) {}
@@ -2364,7 +2364,7 @@ class ListChannelMessage final :
 };
 // -------------------------------------------------------------------
 
-class ListChannelResultMessage_ChannelInfo final :
+class CHANNELDUE_API ListChannelResultMessage_ChannelInfo final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.ListChannelResultMessage.ChannelInfo) */ {
  public:
   inline ListChannelResultMessage_ChannelInfo() : ListChannelResultMessage_ChannelInfo(nullptr) {}
@@ -2539,7 +2539,7 @@ class ListChannelResultMessage_ChannelInfo final :
 };
 // -------------------------------------------------------------------
 
-class ListChannelResultMessage final :
+class CHANNELDUE_API ListChannelResultMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.ListChannelResultMessage) */ {
  public:
   inline ListChannelResultMessage() : ListChannelResultMessage(nullptr) {}
@@ -2698,7 +2698,7 @@ class ListChannelResultMessage final :
 };
 // -------------------------------------------------------------------
 
-class SubscribedToChannelMessage final :
+class CHANNELDUE_API SubscribedToChannelMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.SubscribedToChannelMessage) */ {
  public:
   inline SubscribedToChannelMessage() : SubscribedToChannelMessage(nullptr) {}
@@ -2866,7 +2866,7 @@ class SubscribedToChannelMessage final :
 };
 // -------------------------------------------------------------------
 
-class SubscribedToChannelResultMessage final :
+class CHANNELDUE_API SubscribedToChannelResultMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.SubscribedToChannelResultMessage) */ {
  public:
   inline SubscribedToChannelResultMessage() : SubscribedToChannelResultMessage(nullptr) {}
@@ -3056,7 +3056,7 @@ class SubscribedToChannelResultMessage final :
 };
 // -------------------------------------------------------------------
 
-class UnsubscribedFromChannelMessage final :
+class CHANNELDUE_API UnsubscribedFromChannelMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.UnsubscribedFromChannelMessage) */ {
  public:
   inline UnsubscribedFromChannelMessage() : UnsubscribedFromChannelMessage(nullptr) {}
@@ -3204,7 +3204,7 @@ class UnsubscribedFromChannelMessage final :
 };
 // -------------------------------------------------------------------
 
-class UnsubscribedFromChannelResultMessage final :
+class CHANNELDUE_API UnsubscribedFromChannelResultMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.UnsubscribedFromChannelResultMessage) */ {
  public:
   inline UnsubscribedFromChannelResultMessage() : UnsubscribedFromChannelResultMessage(nullptr) {}
@@ -3374,7 +3374,7 @@ class UnsubscribedFromChannelResultMessage final :
 };
 // -------------------------------------------------------------------
 
-class ChannelDataUpdateMessage final :
+class CHANNELDUE_API ChannelDataUpdateMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.ChannelDataUpdateMessage) */ {
  public:
   inline ChannelDataUpdateMessage() : ChannelDataUpdateMessage(nullptr) {}
@@ -3542,7 +3542,7 @@ class ChannelDataUpdateMessage final :
 };
 // -------------------------------------------------------------------
 
-class DisconnectMessage final :
+class CHANNELDUE_API DisconnectMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.DisconnectMessage) */ {
  public:
   inline DisconnectMessage() : DisconnectMessage(nullptr) {}
@@ -3690,7 +3690,7 @@ class DisconnectMessage final :
 };
 // -------------------------------------------------------------------
 
-class SpatialInfo final :
+class CHANNELDUE_API SpatialInfo final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.SpatialInfo) */ {
  public:
   inline SpatialInfo() : SpatialInfo(nullptr) {}
@@ -3860,7 +3860,7 @@ class SpatialInfo final :
 };
 // -------------------------------------------------------------------
 
-class CreateSpatialChannelsResultMessage final :
+class CHANNELDUE_API CreateSpatialChannelsResultMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.CreateSpatialChannelsResultMessage) */ {
  public:
   inline CreateSpatialChannelsResultMessage() : CreateSpatialChannelsResultMessage(nullptr) {}
@@ -4049,7 +4049,7 @@ class CreateSpatialChannelsResultMessage final :
 };
 // -------------------------------------------------------------------
 
-class QuerySpatialChannelMessage final :
+class CHANNELDUE_API QuerySpatialChannelMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.QuerySpatialChannelMessage) */ {
  public:
   inline QuerySpatialChannelMessage() : QuerySpatialChannelMessage(nullptr) {}
@@ -4206,7 +4206,7 @@ class QuerySpatialChannelMessage final :
 };
 // -------------------------------------------------------------------
 
-class QuerySpatialChannelResultMessage final :
+class CHANNELDUE_API QuerySpatialChannelResultMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.QuerySpatialChannelResultMessage) */ {
  public:
   inline QuerySpatialChannelResultMessage() : QuerySpatialChannelResultMessage(nullptr) {}
@@ -4368,7 +4368,7 @@ class QuerySpatialChannelResultMessage final :
 };
 // -------------------------------------------------------------------
 
-class ChannelDataHandoverMessage final :
+class CHANNELDUE_API ChannelDataHandoverMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.ChannelDataHandoverMessage) */ {
  public:
   inline ChannelDataHandoverMessage() : ChannelDataHandoverMessage(nullptr) {}
@@ -4558,7 +4558,7 @@ class ChannelDataHandoverMessage final :
 };
 // -------------------------------------------------------------------
 
-class SpatialRegion final :
+class CHANNELDUE_API SpatialRegion final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.SpatialRegion) */ {
  public:
   inline SpatialRegion() : SpatialRegion(nullptr) {}
@@ -4757,7 +4757,7 @@ class SpatialRegion final :
 };
 // -------------------------------------------------------------------
 
-class SpatialRegionsUpdateMessage final :
+class CHANNELDUE_API SpatialRegionsUpdateMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.SpatialRegionsUpdateMessage) */ {
  public:
   inline SpatialRegionsUpdateMessage() : SpatialRegionsUpdateMessage(nullptr) {}
@@ -4914,7 +4914,7 @@ class SpatialRegionsUpdateMessage final :
 };
 // -------------------------------------------------------------------
 
-class DebugGetSpatialRegionsMessage final :
+class CHANNELDUE_API DebugGetSpatialRegionsMessage final :
     public ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase /* @@protoc_insertion_point(class_definition:channeldpb.DebugGetSpatialRegionsMessage) */ {
  public:
   inline DebugGetSpatialRegionsMessage() : DebugGetSpatialRegionsMessage(nullptr) {}

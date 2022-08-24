@@ -32,7 +32,7 @@
 #include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
-#define PROTOBUF_INTERNAL_EXPORT_unreal_5fcommon_2eproto
+#define PROTOBUF_INTERNAL_EXPORT_unreal_5fcommon_2eproto CHANNELDUE_API
 PROTOBUF_NAMESPACE_OPEN
 namespace internal {
 class AnyMetadata;
@@ -40,27 +40,27 @@ class AnyMetadata;
 PROTOBUF_NAMESPACE_CLOSE
 
 // Internal implementation detail -- do not use these members.
-struct TableStruct_unreal_5fcommon_2eproto {
+struct CHANNELDUE_API TableStruct_unreal_5fcommon_2eproto {
   static const uint32_t offsets[];
 };
-extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_unreal_5fcommon_2eproto;
+CHANNELDUE_API extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_unreal_5fcommon_2eproto;
 namespace channeldpb {
 class FVector;
 struct FVectorDefaultTypeInternal;
-extern FVectorDefaultTypeInternal _FVector_default_instance_;
+CHANNELDUE_API extern FVectorDefaultTypeInternal _FVector_default_instance_;
 class SceneComponentState;
 struct SceneComponentStateDefaultTypeInternal;
-extern SceneComponentStateDefaultTypeInternal _SceneComponentState_default_instance_;
+CHANNELDUE_API extern SceneComponentStateDefaultTypeInternal _SceneComponentState_default_instance_;
 }  // namespace channeldpb
 PROTOBUF_NAMESPACE_OPEN
-template<> ::channeldpb::FVector* Arena::CreateMaybeMessage<::channeldpb::FVector>(Arena*);
-template<> ::channeldpb::SceneComponentState* Arena::CreateMaybeMessage<::channeldpb::SceneComponentState>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::FVector* Arena::CreateMaybeMessage<::channeldpb::FVector>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::SceneComponentState* Arena::CreateMaybeMessage<::channeldpb::SceneComponentState>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace channeldpb {
 
 // ===================================================================
 
-class FVector final :
+class CHANNELDUE_API FVector final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.FVector) */ {
  public:
   inline FVector() : FVector(nullptr) {}
@@ -230,7 +230,7 @@ class FVector final :
 };
 // -------------------------------------------------------------------
 
-class SceneComponentState final :
+class CHANNELDUE_API SceneComponentState final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.SceneComponentState) */ {
  public:
   inline SceneComponentState() : SceneComponentState(nullptr) {}

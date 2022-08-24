@@ -29,8 +29,8 @@ public class ChanneldUE : ModuleRules
         PublicSystemIncludePaths.AddRange(
             new string[]
             {
-                ModuleDirectory
-                //Path.Combine(ModuleDirectory, "Channeldpb.h"),
+                ModuleDirectory,
+                Path.Combine(ModuleDirectory, "channeldpb"),
                 //Path.Combine(ModuleDirectory, "Testpb.h"),
             }
             );
