@@ -207,9 +207,9 @@ void UChanneldConnection::Receive()
 			return;
 		}
 
-		for (auto const MessagePack : Packet.messages())
+		for (auto const& MessagePackData : Packet.messages())
 		{
-			uint32 MsgType = MessagePack.msgtype();
+			uint32 MsgType = MessagePackData.msgtype();
 
 			MessageHandlerEntry Entry;
 			if (!MessageHandlers.Contains(MsgType))
@@ -220,7 +220,7 @@ void UChanneldConnection::Receive()
 				}
 				else
 				{
-					UE_LOG(LogChanneld, Warning, TEXT("No message handler registered for type: %d"), MessagePack.msgtype());
+					UE_LOG(LogChanneld, Warning, TEXT("No message handler registered for type: %d"), MessagePackData.msgtype());
 					continue;
 				}
 			}
@@ -231,20 +231,20 @@ void UChanneldConnection::Receive()
 
 			if (Entry.Msg == nullptr)
 			{
-				UE_LOG(LogChanneld, Error, TEXT("No message template registered for type: %d"), MessagePack.msgtype());
+				UE_LOG(LogChanneld, Error, TEXT("No message template registered for type: %d"), MessagePackData.msgtype());
 				continue;
 			}
 
 			// Always make a clone!
 			google::protobuf::Message* Msg = Entry.Msg->New();
 			Msg->CopyFrom(*Entry.Msg);
-			if (!Msg->ParseFromString(MessagePack.msgbody()))
+			if (!Msg->ParseFromString(MessagePackData.msgbody()))
 			{
 				UE_LOG(LogChanneld, Error, TEXT("Failed to parse message %s"), Msg->GetTypeName().c_str());
 				continue;
 			}
 
-			MessageQueueEntry QueueEntry = { Msg, MessagePack.channelid(), MessagePack.stubid(), Entry.Handlers, Entry.Delegate };
+			MessageQueueEntry QueueEntry = { Msg, MessagePackData.channelid(), MessagePackData.stubid(), Entry.Handlers, Entry.Delegate };
 			IncomingQueue.Enqueue(QueueEntry);
 		}
 
@@ -327,7 +327,7 @@ void UChanneldConnection::TickIncoming()
 	while (IncomingQueue.Dequeue(Entry))
 	{
 		// Handler functions are called before the delegate.Broadcast()
-		for (const auto Func : Entry.Handlers)
+		for (const auto& Func : Entry.Handlers)
 		{
 			Func(this, Entry.ChId, Entry.Msg);
 		}
@@ -335,11 +335,11 @@ void UChanneldConnection::TickIncoming()
 
 		if (Entry.StubId > 0)
 		{
-			auto Func = RpcCallbacks.Find(Entry.StubId);
-			if (Func != nullptr)
+			auto CallbackFunc = RpcCallbacks.Find(Entry.StubId);
+			if (CallbackFunc != nullptr)
 			{
 				UE_LOG(LogChanneld, Verbose, TEXT("Handling RPC callback of %s, stubId: %d"), Entry.Msg->GetTypeName().c_str(), Entry.StubId);
-				(*Func)(this, Entry.ChId, Entry.Msg);
+				(*CallbackFunc)(this, Entry.ChId, Entry.Msg);
 				RpcCallbacks.Remove(Entry.StubId);
 			}
 		}
