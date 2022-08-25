@@ -246,7 +246,7 @@ void UChanneldGameInstanceSubsystem::CreateChannel(EChanneldChannelType ChannelT
 		nullptr,
 		[=](const channeldpb::CreateChannelResultMessage* Message)
 		{
-			Callback.ExecuteIfBound(Message->channelid(), static_cast<EChanneldChannelType>(Message->channeltype()), FString(Message->metadata().c_str()), Message->ownerconnid());
+			Callback.ExecuteIfBound(Message->channelid(), static_cast<EChanneldChannelType>(Message->channeltype()), FString(UTF8_TO_TCHAR(Message->metadata().c_str())), Message->ownerconnid());
 		}
 	);
 }
@@ -433,7 +433,7 @@ void UChanneldGameInstanceSubsystem::HandleCreateChannel(UChanneldConnection* Co
 	const google::protobuf::Message* Msg)
 {
 	auto CreateResultMsg = static_cast<const channeldpb::CreateChannelResultMessage*>(Msg);
-	OnCreateChannel.Broadcast(ChId, static_cast<EChanneldChannelType>(CreateResultMsg->channeltype()), FString(CreateResultMsg->metadata().c_str()), CreateResultMsg->ownerconnid());
+	OnCreateChannel.Broadcast(ChId, static_cast<EChanneldChannelType>(CreateResultMsg->channeltype()), FString(UTF8_TO_TCHAR(CreateResultMsg->metadata().c_str())), CreateResultMsg->ownerconnid());
 }
 
 void UChanneldGameInstanceSubsystem::HandleRemoveChannel(UChanneldConnection* Conn, ChannelId ChId,
@@ -502,7 +502,7 @@ void UChanneldGameInstanceSubsystem::OnUserSpaceMessageReceived(ChannelId ChId, 
 	}
 	else
 	{
-		UE_LOG(LogChanneld, Error, TEXT("Couldn't find Protobuf message type by name: %s"), ProtoFullName.c_str());
+		UE_LOG(LogChanneld, Error, TEXT("Couldn't find Protobuf message type by name: %s"), UTF8_TO_TCHAR(ProtoFullName.c_str()));
 	}
 }
 
@@ -514,11 +514,13 @@ UChanneldNetDriver* UChanneldGameInstanceSubsystem::GetNetDriver()
 
 void UChanneldGameInstanceSubsystem::InitChannelDataView()
 {
-	UClass* ChannelDataViewClass = nullptr;
+	TSubclassOf<UChannelDataView> ChannelDataViewClass = nullptr;
 
-	UWorld* TheWorld = GetWorld();
-	// Use the class in the WorldSettings first
-	auto WorldSettings = Cast<AChanneldWorldSettings>(TheWorld->GetWorldSettings());
+	auto WorldSettings = GetDefault<AChanneldWorldSettings>();
+	//UWorld* TheWorld = GetWorld();
+	//auto WorldSettings = Cast<AChanneldWorldSettings>(TheWorld->GetWorldSettings());
+	// Use the class in the WorldSettings for server. 
+	// Client won't be able to use it as the world may not be create yet.
 	if (WorldSettings)
 	{
 		ChannelDataViewClass = WorldSettings->ChannelDataViewClass;

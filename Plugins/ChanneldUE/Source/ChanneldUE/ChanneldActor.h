@@ -36,7 +36,7 @@ protected:
 	EChanneldChannelType ChannelType;
 	ChannelId OwningChannelId;
 	bool bRemoved = false;
-	unrealpb::SceneComponentState* SceneComponentState;
+	TSharedPtr<unrealpb::SceneComponentState> SceneComponentState;
 
 public:	
 	// Called every frame

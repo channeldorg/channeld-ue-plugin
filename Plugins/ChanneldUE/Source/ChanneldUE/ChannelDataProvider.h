@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CoreMinimal.h"
 #include "ChanneldTypes.h"
 #include "Channeld.pb.h"
 #include "google/protobuf/message.h"
@@ -27,7 +28,8 @@ public:
 	
 	static FString GetName(const IChannelDataProvider* Provider)
 	{
-		return Cast<UChannelDataProvider>(Provider)->GetClass()->GetName();
+		return Provider->_getUObject()->GetClass()->GetName();
+		//return Cast<UObjectBase>(Provider)->GetClass()->GetName();
 	}
 
 };

@@ -37,7 +37,7 @@ void UProtoMessageObject::SetMessagePtr(const google::protobuf::Message* Msg, bo
 
 FString UProtoMessageObject::GetMessageDebugInfo()
 {
-	return FString(Message->DebugString().c_str());
+	return FString(UTF8_TO_TCHAR(Message->DebugString().c_str()));
 }
 
 void UProtoMessageObject::Clear()

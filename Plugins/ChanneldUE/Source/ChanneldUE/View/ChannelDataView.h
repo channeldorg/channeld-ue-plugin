@@ -23,7 +23,7 @@ public:
 		if (AnyForTypeUrl == nullptr)
 			AnyForTypeUrl = new google::protobuf::Any;
 		AnyForTypeUrl->PackFrom(*MsgTemplate);
-		ChannelDataTemplatesByTypeUrl.Add(FString(AnyForTypeUrl->type_url().c_str()), MsgTemplate);
+		ChannelDataTemplatesByTypeUrl.Add(FString(UTF8_TO_TCHAR(AnyForTypeUrl->type_url().c_str())), MsgTemplate);
 	}
 
 	UFUNCTION(BlueprintCallable)

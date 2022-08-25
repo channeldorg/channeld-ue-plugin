@@ -4,9 +4,6 @@
 #include "ChanneldSceneComponent.h"
 #include "ChanneldUtils.h"
 #include "ChanneldTypes.h"
-//#include "ChanneldConnection.h"
-//
-//DEFINE_LOG_CATEGORY(LogChanneld);
 
 // Sets default values for this component's properties
 UChanneldSceneComponent::UChanneldSceneComponent()
@@ -77,17 +74,17 @@ void UChanneldSceneComponent::EndPlay(EEndPlayReason::Type Reason)
 bool SetIfNotSame(unrealpb::FVector* VectorToSet, const FVector& VectorToCheck)
 {
 	bool bNotSame = false;
-	if (VectorToSet->x() != VectorToCheck.X)
+	if (!FMath::IsNearlyEqual(VectorToSet->x(), VectorToCheck.X))
 	{
 		VectorToSet->set_x(VectorToCheck.X);
 		bNotSame = true;
 	}
-	if (VectorToSet->y() != VectorToCheck.Y)
+	if (!FMath::IsNearlyEqual(VectorToSet->y(), VectorToCheck.Y))
 	{
 		VectorToSet->set_y(VectorToCheck.Y);
 		bNotSame = true;
 	}
-	if (VectorToSet->z() != VectorToCheck.Z)
+	if (!FMath::IsNearlyEqual(VectorToSet->z(), VectorToCheck.Z))
 	{
 		VectorToSet->set_z(VectorToCheck.Z);
 		bNotSame = true;
@@ -97,38 +94,41 @@ bool SetIfNotSame(unrealpb::FVector* VectorToSet, const FVector& VectorToCheck)
 
 void UChanneldSceneComponent::OnTransformUpdated(USceneComponent* UpdatedComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport)
 {
+	if (!GetOwner()->HasAuthority())
+		return;
+
 	if (!StateProvider)
 		return;
 
 	if (SetIfNotSame(RelativeLocationState, GetRelativeLocation()))
 	{
 		bStateChanged = true;
-		State->set_allocated_relativelocation(RelativeLocationState);
+		State->mutable_relativelocation()->MergeFrom(*RelativeLocationState);
 	}
-	else
-	{
-		State->release_relativelocation();
-	}
+	//else
+	//{
+	//	State->release_relativelocation();
+	//}
 
 	if (SetIfNotSame(RelativeRotationState, GetRelativeRotation().Vector()))
 	{
 		bStateChanged = true;
-		State->set_allocated_relativerotation(RelativeRotationState);
+		State->mutable_relativerotation()->MergeFrom(*RelativeRotationState);
 	}
-	else
-	{
-		State->release_relativerotation();
-	}
+	//else
+	//{
+	//	State->release_relativerotation();
+	//}
 
 	if (SetIfNotSame(RelativeScaleState, GetRelativeScale3D()))
 	{
 		bStateChanged = true;
-		State->set_allocated_relativescale(RelativeScaleState);
+		State->mutable_relativescale()->MergeFrom(*RelativeScaleState);
 	}
-	else
-	{
-		State->release_relativescale();
-	}
+	//else
+	//{
+	//	State->release_relativescale();
+	//}
 }
 
 void UChanneldSceneComponent::OnStateChanged(const unrealpb::SceneComponentState* NewState)
@@ -136,19 +136,33 @@ void UChanneldSceneComponent::OnStateChanged(const unrealpb::SceneComponentState
 	State->CopyFrom(*NewState);
 	bStateChanged = false;
 
+	bool bTransformChanged = false;
+	FVector NewLocation = GetRelativeLocation();
+	FRotator NewRotation = GetRelativeRotation();
 	if (State->has_relativelocation())
 	{
-		SetRelativeLocation_Direct(ChanneldUtils::GetVector(State->relativelocation()));
+		NewLocation = ChanneldUtils::GetVector(State->relativelocation());
+		//SetRelativeLocation_Direct(NewLocation);
+		bTransformChanged = true;
 	}
 
 	if (State->has_relativerotation())
 	{
-		SetRelativeRotation_Direct(ChanneldUtils::GetRotator(State->relativerotation()));
+		NewRotation = ChanneldUtils::GetRotator(State->relativerotation());
+		//SetRelativeRotation_Direct(NewRotation);
+		bTransformChanged = true;
 	}
 
 	if (State->has_relativescale())
 	{
 		SetRelativeScale3D_Direct(ChanneldUtils::GetVector(State->relativescale()));
+		bTransformChanged = true;
+	}
+
+	if (bTransformChanged)
+	{
+		//ConditionalUpdateComponentToWorld();
+		SetRelativeLocationAndRotation(NewLocation, NewRotation);
 	}
 }
 
@@ -170,6 +184,7 @@ void UChanneldSceneComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	if (bStateChanged)
 	{
 		StateProvider->UpdateSceneComponent(State);
+		State->Clear();
 		bStateChanged = false;
 	}
 }

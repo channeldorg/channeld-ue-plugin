@@ -105,6 +105,7 @@ void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provide
 {
 	TSet<IChannelDataProvider*> Providers = ChannelDataProviders.FindOrAdd(ChId);
 	Providers.Add(Provider);
+	ChannelDataProviders[ChId] = Providers;
 
 	UE_LOG(LogChanneld, Log, TEXT("Added channel data provider %s to channel %d"), *IChannelDataProvider::GetName(Provider), ChId);
 }
@@ -201,8 +202,11 @@ void UChannelDataView::SendAllChannelUpdates()
 				UpdateMsg.mutable_data()->PackFrom(*NewState);
 				Connection->Send(ChId, channeldpb::CHANNEL_DATA_UPDATE, UpdateMsg);
 
-				UE_LOG(LogChanneld, Verbose, TEXT("Sent %s update: %s"), NewState->GetTypeName().c_str(), NewState->DebugString().c_str());
+				UE_LOG(LogChanneld, Verbose, TEXT("Sent %s update: %s"), UTF8_TO_TCHAR(NewState->GetTypeName().c_str()), UTF8_TO_TCHAR(NewState->DebugString().c_str()));
 			}
+
+			NewState->Clear();
+			delete NewState;
 		}
 	}
 
@@ -247,26 +251,27 @@ void UChannelDataView::HandleUnsub(UChanneldConnection* Conn, ChannelId ChId, co
 void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto UpdateMsg = static_cast<const channeldpb::ChannelDataUpdateMessage*>(Msg);
-	auto MsgTemplate = ChannelDataTemplatesByTypeUrl.FindRef(FString(UpdateMsg->data().type_url().c_str()));
+	FString TypeUrl(UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
+	auto MsgTemplate = ChannelDataTemplatesByTypeUrl.FindRef(TypeUrl);
 	if (MsgTemplate == nullptr)
 	{
-		UE_LOG(LogChanneld, Error, TEXT("Unable to find channel data parser by typeUrl: %s"), UpdateMsg->data().type_url().c_str());
+		UE_LOG(LogChanneld, Error, TEXT("Unable to find channel data parser by typeUrl: %s"), *TypeUrl);
 		return;
 	}
 
 	auto UpdateData = MsgTemplate->New();
 	if (!UpdateData->ParseFromString(UpdateMsg->data().value()))
 	{
-		UE_LOG(LogChanneld, Error, TEXT("Failed to parse channel data of type %s, typeUrl: %s"), UpdateMsg->GetTypeName().c_str(), UpdateMsg->data().type_url().c_str());
+		UE_LOG(LogChanneld, Error, TEXT("Failed to parse channel data of type %s, typeUrl: %s"), UTF8_TO_TCHAR(UpdateMsg->GetTypeName().c_str()), *TypeUrl);
 		return;
 	}
 
-	UE_LOG(LogChanneld, Verbose, TEXT("Receive %s update: %s"), UpdateMsg->GetTypeName().c_str(), UpdateMsg->DebugString().c_str());
+	UE_LOG(LogChanneld, Verbose, TEXT("Receive %s update: %s"), UTF8_TO_TCHAR(UpdateMsg->GetTypeName().c_str()), UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
 
 	auto Providers = ChannelDataProviders.Find(ChId);
 	if (Providers == nullptr)
 	{
-		UE_LOG(LogChanneld, Warning, TEXT("No provider registered for channel %d, typeUrl: %s"), ChId, UpdateMsg->data().type_url().c_str());
+		UE_LOG(LogChanneld, Warning, TEXT("No provider registered for channel %d, typeUrl: %s"), ChId, *TypeUrl);
 		return;
 	}
 

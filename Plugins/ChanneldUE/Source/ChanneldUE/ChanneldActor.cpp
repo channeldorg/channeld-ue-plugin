@@ -120,7 +120,7 @@ bool AChanneldActor::UpdateChannelData(google::protobuf::Message* ChannelData)
 	bool bUpdated = false;
 	if (SceneComponentState)
 	{
-		SetSceneComponentStateToChannelData(SceneComponentState, ChannelData);
+		SetSceneComponentStateToChannelData(SceneComponentState.Get(), ChannelData);
 		SceneComponentState = nullptr;
 		bUpdated = true;
 	}
@@ -143,6 +143,7 @@ void AChanneldActor::OnChannelDataUpdated(const google::protobuf::Message* Chann
 
 void AChanneldActor::UpdateSceneComponent(unrealpb::SceneComponentState* State)
 {
-	SceneComponentState = State;
+	SceneComponentState = MakeShared<unrealpb::SceneComponentState>();
+	SceneComponentState->MergeFrom(*State);
 }
 

@@ -240,7 +240,7 @@ void UChanneldConnection::Receive()
 			Msg->CopyFrom(*Entry.Msg);
 			if (!Msg->ParseFromString(MessagePackData.msgbody()))
 			{
-				UE_LOG(LogChanneld, Error, TEXT("Failed to parse message %s"), Msg->GetTypeName().c_str());
+				UE_LOG(LogChanneld, Error, TEXT("Failed to parse message %s"), UTF8_TO_TCHAR(Msg->GetTypeName().c_str()));
 				continue;
 			}
 
@@ -338,7 +338,7 @@ void UChanneldConnection::TickIncoming()
 			auto CallbackFunc = RpcCallbacks.Find(Entry.StubId);
 			if (CallbackFunc != nullptr)
 			{
-				UE_LOG(LogChanneld, Verbose, TEXT("Handling RPC callback of %s, stubId: %d"), Entry.Msg->GetTypeName().c_str(), Entry.StubId);
+				UE_LOG(LogChanneld, Verbose, TEXT("Handling RPC callback of %s, stubId: %d"), UTF8_TO_TCHAR(Entry.Msg->GetTypeName().c_str()), Entry.StubId);
 				(*CallbackFunc)(this, Entry.ChId, Entry.Msg);
 				RpcCallbacks.Remove(Entry.StubId);
 			}
@@ -414,7 +414,7 @@ void UChanneldConnection::Send(ChannelId ChId, uint32 MsgType, google::protobuf:
 	SendRaw(ChId, MsgType, MessageData, Msg.GetCachedSize(), Broadcast, HandlerFunc);
 
 	if (MsgType < channeldpb::USER_SPACE_START)
-		UE_LOG(LogChanneld, Verbose, TEXT("Send message %s to channel %d"), channeldpb::MessageType_Name((channeldpb::MessageType)MsgType).c_str(), ChId);
+		UE_LOG(LogChanneld, Verbose, TEXT("Send message %s to channel %d"), UTF8_TO_TCHAR(channeldpb::MessageType_Name((channeldpb::MessageType)MsgType).c_str()), ChId);
 }
 
 void UChanneldConnection::SendRaw(ChannelId ChId, uint32 MsgType, const uint8* MsgBody, const int32 BodySize, channeldpb::BroadcastType Broadcast /*= channeldpb::NO_BROADCAST*/, const FChanneldMessageHandlerFunc& HandlerFunc /*= nullptr*/)
@@ -474,17 +474,17 @@ void UChanneldConnection::Auth(const FString& PIT, const FString& LT, const TFun
 	Send(GlobalChannelId, channeldpb::AUTH, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
-void UChanneldConnection::CreateChannel(channeldpb::ChannelType ChannelType, const FString& Metadata, channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const google::protobuf::Message* Data /*= nullptr*/, channeldpb::ChannelDataMergeOptions* MergeOptions /*= nullptr*/, const TFunction<void(const channeldpb::CreateChannelResultMessage*)>& Callback /*= nullptr*/)
+void UChanneldConnection::CreateChannel(channeldpb::ChannelType ChannelType, const FString& Metadata, const channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const google::protobuf::Message* Data /*= nullptr*/, const channeldpb::ChannelDataMergeOptions* MergeOptions /*= nullptr*/, const TFunction<void(const channeldpb::CreateChannelResultMessage*)>& Callback /*= nullptr*/)
 {
 	channeldpb::CreateChannelMessage Msg;
 	Msg.set_channeltype(ChannelType);
 	Msg.set_metadata(TCHAR_TO_UTF8(*Metadata));
 	if (SubOptions != nullptr)
-		Msg.set_allocated_suboptions(SubOptions);
+		Msg.mutable_suboptions()->MergeFrom(*SubOptions);
 	if (Data != nullptr)
 		Msg.mutable_data()->PackFrom(*Data);
 	if (MergeOptions != nullptr)
-		Msg.set_allocated_mergeoptions(MergeOptions);
+		Msg.mutable_mergeoptions()->MergeFrom(*MergeOptions);
 
 	Send(GlobalChannelId, channeldpb::CREATE_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
