@@ -2,12 +2,12 @@
 // source: channeld.proto
 
 #ifdef _MSC_VER
-#pragma warning(disable: 4125)
-#pragma warning(disable: 4647)
-#pragma warning(disable: 4668)
-#pragma warning(disable: 4800)
-#pragma warning(disable: 4946)
-#endif //_MSC_VER
+#	pragma warning(disable: 4125)
+#	pragma warning(disable: 4647)
+#	pragma warning(disable: 4668)
+#	pragma warning(disable: 4800)
+#	pragma warning(disable: 4946)
+#endif
 
 #include "channeld.pb.h"
 
@@ -22,8 +22,6 @@
 #include <google/protobuf/wire_format.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
-
-PROTOBUF_PRAGMA_INIT_SEG
 
 namespace _pb = ::PROTOBUF_NAMESPACE_ID;
 namespace _pbi = _pb::internal;
@@ -657,7 +655,7 @@ const uint32_t TableStruct_channeld_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
 };
-static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+static const ::_pbi::MigrationSchema schemas_channeld_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::channeldpb::Packet)},
   { 7, -1, -1, sizeof(::channeldpb::MessagePack)},
   { 18, -1, -1, sizeof(::channeldpb::ServerForwardMessage)},
@@ -687,7 +685,7 @@ static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protode
   { 223, -1, -1, sizeof(::channeldpb::DebugGetSpatialRegionsMessage)},
 };
 
-static const ::_pb::Message* const file_default_instances[] = {
+static const ::_pb::Message* const file_default_instances_channeld_2eproto[] = {
   &::channeldpb::_Packet_default_instance_._instance,
   &::channeldpb::_MessagePack_default_instance_._instance,
   &::channeldpb::_ServerForwardMessage_default_instance_._instance,
@@ -820,7 +818,7 @@ const ::_pbi::DescriptorTable descriptor_table_channeld_2eproto = {
     false, false, 3694, descriptor_table_protodef_channeld_2eproto,
     "channeld.proto",
     &descriptor_table_channeld_2eproto_once, descriptor_table_channeld_2eproto_deps, 1, 27,
-    schemas, file_default_instances, TableStruct_channeld_2eproto::offsets,
+    schemas_channeld_2eproto, file_default_instances_channeld_2eproto, TableStruct_channeld_2eproto::offsets,
     file_level_metadata_channeld_2eproto, file_level_enum_descriptors_channeld_2eproto,
     file_level_service_descriptors_channeld_2eproto,
 };

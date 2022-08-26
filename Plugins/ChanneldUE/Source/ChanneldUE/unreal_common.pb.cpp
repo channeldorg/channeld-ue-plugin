@@ -2,12 +2,12 @@
 // source: unreal_common.proto
 
 #ifdef _MSC_VER
-#pragma warning(disable: 4125)
-#pragma warning(disable: 4647)
-#pragma warning(disable: 4668)
-#pragma warning(disable: 4800)
-#pragma warning(disable: 4946)
-#endif //_MSC_VER
+#	pragma warning(disable: 4125)
+#	pragma warning(disable: 4647)
+#	pragma warning(disable: 4668)
+#	pragma warning(disable: 4800)
+#	pragma warning(disable: 4946)
+#endif
 
 #include "unreal_common.pb.h"
 
@@ -22,8 +22,6 @@
 #include <google/protobuf/wire_format.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
-
-PROTOBUF_PRAGMA_INIT_SEG
 
 namespace _pb = ::PROTOBUF_NAMESPACE_ID;
 namespace _pbi = _pb::internal;
@@ -90,12 +88,12 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   PROTOBUF_FIELD_OFFSET(::unrealpb::SceneComponentState, _impl_.isvisible_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::SceneComponentState, _impl_.attachsocketname_),
 };
-static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+static const ::_pbi::MigrationSchema schemas_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::unrealpb::FVector)},
   { 9, -1, -1, sizeof(::unrealpb::SceneComponentState)},
 };
 
-static const ::_pb::Message* const file_default_instances[] = {
+static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eproto[] = {
   &::unrealpb::_FVector_default_instance_._instance,
   &::unrealpb::_SceneComponentState_default_instance_._instance,
 };
@@ -116,7 +114,7 @@ const ::_pbi::DescriptorTable descriptor_table_unreal_5fcommon_2eproto = {
     false, false, 347, descriptor_table_protodef_unreal_5fcommon_2eproto,
     "unreal_common.proto",
     &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 2,
-    schemas, file_default_instances, TableStruct_unreal_5fcommon_2eproto::offsets,
+    schemas_unreal_5fcommon_2eproto, file_default_instances_unreal_5fcommon_2eproto, TableStruct_unreal_5fcommon_2eproto::offsets,
     file_level_metadata_unreal_5fcommon_2eproto, file_level_enum_descriptors_unreal_5fcommon_2eproto,
     file_level_service_descriptors_unreal_5fcommon_2eproto,
 };
