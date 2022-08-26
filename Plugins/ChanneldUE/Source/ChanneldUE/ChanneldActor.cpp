@@ -19,6 +19,15 @@ AChanneldActor::AChanneldActor(const FObjectInitializer& ObjectInitializer)
 void AChanneldActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	for (auto RepComp : ReplicatedComponents)
+	{
+		if (RepComp->IsA<USceneComponent>())
+		{
+			USceneComponent* SceneComp = Cast<USceneComponent>(RepComp);
+			SceneComponentReplicators.Add(SceneComp, new FChanneldSceneComponentReplicator(SceneComp, this));
+		}
+	}
 	
 	UChannelDataView* View = GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
 	if (View)
@@ -31,7 +40,7 @@ void AChanneldActor::EndPlay(EEndPlayReason::Type Reason)
 {
 	Super::EndPlay(Reason);
 
-	if (Reason == EEndPlayReason::Destroyed)
+	//if (Reason != EEndPlayReason::LevelTransition)
 	{
 		UChannelDataView* View = GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
 		if (View)
@@ -69,6 +78,10 @@ void AChanneldActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	for (auto Pair : SceneComponentReplicators)
+	{
+		Pair.Value->Tick(DeltaTime);
+	}
 }
 
 channeldpb::ChannelType AChanneldActor::GetChannelType()
@@ -118,16 +131,28 @@ bool AChanneldActor::UpdateChannelData(google::protobuf::Message* ChannelData)
 	}
 
 	bool bUpdated = false;
+	/*
 	if (SceneComponentState)
 	{
 		SetSceneComponentStateToChannelData(SceneComponentState.Get(), ChannelData);
 		SceneComponentState = nullptr;
 		bUpdated = true;
 	}
+	*/
+	for (auto Pair : SceneComponentReplicators)
+	{
+		if (Pair.Value->IsStateChanged())
+		{
+			SetSceneComponentStateToChannelData(Pair.Value->GetState(), ChannelData);
+			Pair.Value->ClearState();
+			bUpdated = true;
+		}
+	}
+
 	return bUpdated;
 }
 
-void AChanneldActor::OnChannelDataUpdated(const google::protobuf::Message* ChannelData)
+void AChanneldActor::OnChannelDataUpdated(google::protobuf::Message* ChannelData)
 {
 	auto State = GetSceneComponentStateFromChannelData(ChannelData);
 	if (State)
@@ -143,7 +168,8 @@ void AChanneldActor::OnChannelDataUpdated(const google::protobuf::Message* Chann
 
 void AChanneldActor::UpdateSceneComponent(unrealpb::SceneComponentState* State)
 {
+/*
 	SceneComponentState = MakeShared<unrealpb::SceneComponentState>();
 	SceneComponentState->MergeFrom(*State);
+*/
 }
-

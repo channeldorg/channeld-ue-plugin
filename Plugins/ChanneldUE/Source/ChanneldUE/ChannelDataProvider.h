@@ -24,7 +24,7 @@ public:
 	virtual bool IsRemoved() = 0;
 	virtual void SetRemoved() = 0;
 	virtual bool UpdateChannelData(google::protobuf::Message* ChannelData) = 0;
-	virtual void OnChannelDataUpdated(const google::protobuf::Message* ChannelData) = 0;
+	virtual void OnChannelDataUpdated(google::protobuf::Message* ChannelData) = 0;
 	
 	static FString GetName(const IChannelDataProvider* Provider)
 	{

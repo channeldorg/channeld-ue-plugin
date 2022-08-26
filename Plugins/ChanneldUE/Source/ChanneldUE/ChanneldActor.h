@@ -7,6 +7,8 @@
 #include "ChanneldTypes.h"
 #include "ChannelDataProvider.h"
 #include "ProtoMessageObject.h"
+#include "Replication/ChanneldSceneComponentReplicator.h"
+#include "Components/ActorComponent.h"
 #include "ChanneldActor.generated.h"
 
 UCLASS(Blueprintable, Abstract)
@@ -27,7 +29,7 @@ protected:
 	UProtoMessageObject* ProvideChannelDataTemplate() const;
 
 	virtual uint32 GetNetGUID();
-	virtual const unrealpb::SceneComponentState* GetSceneComponentStateFromChannelData(const google::protobuf::Message* ChannelData) PURE_VIRTUAL(GetSceneComponentStateFromChannelData, return nullptr;);
+	virtual const unrealpb::SceneComponentState* GetSceneComponentStateFromChannelData(google::protobuf::Message* ChannelData) PURE_VIRTUAL(GetSceneComponentStateFromChannelData, return nullptr;);
 	virtual void SetSceneComponentStateToChannelData(unrealpb::SceneComponentState* State, google::protobuf::Message* ChannelData) PURE_VIRTUAL(SetSceneComponentStateToChannelData, );
 
 	virtual void OnChannelDataRemoved();
@@ -36,9 +38,12 @@ protected:
 	EChanneldChannelType ChannelType;
 	ChannelId OwningChannelId;
 	bool bRemoved = false;
-	TSharedPtr<unrealpb::SceneComponentState> SceneComponentState;
+
+	TMap< USceneComponent*, FChanneldSceneComponentReplicator* > SceneComponentReplicators;
+	//TSharedPtr<unrealpb::SceneComponentState> SceneComponentState;
 
 public:	
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -50,7 +55,7 @@ public:
 	bool IsRemoved() override;
 	void SetRemoved() override;
 	bool UpdateChannelData(google::protobuf::Message* ChannelData) override;
-	void OnChannelDataUpdated(const google::protobuf::Message* ChannelData) override;
+	void OnChannelDataUpdated(google::protobuf::Message* ChannelData) override;
 	//~ End IChannelDataProvider Interface.
 
 	//~ Begin ISceneComponentStateProvider Interface.

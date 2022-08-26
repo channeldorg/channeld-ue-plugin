@@ -105,30 +105,18 @@ void UChanneldSceneComponent::OnTransformUpdated(USceneComponent* UpdatedCompone
 		bStateChanged = true;
 		State->mutable_relativelocation()->MergeFrom(*RelativeLocationState);
 	}
-	//else
-	//{
-	//	State->release_relativelocation();
-	//}
 
 	if (SetIfNotSame(RelativeRotationState, GetRelativeRotation().Vector()))
 	{
 		bStateChanged = true;
 		State->mutable_relativerotation()->MergeFrom(*RelativeRotationState);
 	}
-	//else
-	//{
-	//	State->release_relativerotation();
-	//}
 
 	if (SetIfNotSame(RelativeScaleState, GetRelativeScale3D()))
 	{
 		bStateChanged = true;
 		State->mutable_relativescale()->MergeFrom(*RelativeScaleState);
 	}
-	//else
-	//{
-	//	State->release_relativescale();
-	//}
 }
 
 void UChanneldSceneComponent::OnStateChanged(const unrealpb::SceneComponentState* NewState)
@@ -142,14 +130,14 @@ void UChanneldSceneComponent::OnStateChanged(const unrealpb::SceneComponentState
 	if (State->has_relativelocation())
 	{
 		NewLocation = ChanneldUtils::GetVector(State->relativelocation());
-		//SetRelativeLocation_Direct(NewLocation);
+		SetRelativeLocation_Direct(NewLocation);
 		bTransformChanged = true;
 	}
 
 	if (State->has_relativerotation())
 	{
 		NewRotation = ChanneldUtils::GetRotator(State->relativerotation());
-		//SetRelativeRotation_Direct(NewRotation);
+		SetRelativeRotation_Direct(NewRotation);
 		bTransformChanged = true;
 	}
 
@@ -161,8 +149,8 @@ void UChanneldSceneComponent::OnStateChanged(const unrealpb::SceneComponentState
 
 	if (bTransformChanged)
 	{
-		//ConditionalUpdateComponentToWorld();
-		SetRelativeLocationAndRotation(NewLocation, NewRotation);
+		UpdateComponentToWorld();
+		//SetRelativeLocationAndRotation(NewLocation, NewRotation);
 	}
 }
 
