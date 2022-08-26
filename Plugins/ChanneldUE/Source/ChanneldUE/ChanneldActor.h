@@ -12,7 +12,7 @@
 #include "ChanneldActor.generated.h"
 
 UCLASS(Blueprintable, Abstract)
-class CHANNELDUE_API AChanneldActor : public AActor, public IChannelDataProvider, public ISceneComponentStateProvider
+class CHANNELDUE_API AChanneldActor : public AActor, public IChannelDataProvider//, public ISceneComponentStateProvider
 {
 	GENERATED_BODY()
 	
@@ -29,18 +29,15 @@ protected:
 	UProtoMessageObject* ProvideChannelDataTemplate() const;
 
 	virtual uint32 GetNetGUID();
-	virtual const unrealpb::SceneComponentState* GetSceneComponentStateFromChannelData(google::protobuf::Message* ChannelData) PURE_VIRTUAL(GetSceneComponentStateFromChannelData, return nullptr;);
-	virtual void SetSceneComponentStateToChannelData(unrealpb::SceneComponentState* State, google::protobuf::Message* ChannelData) PURE_VIRTUAL(SetSceneComponentStateToChannelData, );
-
-	virtual void OnChannelDataRemoved();
+	virtual const unrealpb::SceneComponentState* GetSceneComponentStateFromChannelData(google::protobuf::Message* ChannelData, uint32 NetGUID) PURE_VIRTUAL(GetSceneComponentStateFromChannelData, return nullptr;);
+	virtual void SetSceneComponentStateToChannelData(unrealpb::SceneComponentState* State, google::protobuf::Message* ChannelData, uint32 NetGUID) PURE_VIRTUAL(SetSceneComponentStateToChannelData, );
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EChanneldChannelType ChannelType;
 	ChannelId OwningChannelId;
 	bool bRemoved = false;
 
-	TMap< USceneComponent*, FChanneldSceneComponentReplicator* > SceneComponentReplicators;
-	//TSharedPtr<unrealpb::SceneComponentState> SceneComponentState;
+	TArray< FChanneldSceneComponentReplicator* > SceneComponentReplicators;
 
 public:	
 
@@ -57,9 +54,4 @@ public:
 	bool UpdateChannelData(google::protobuf::Message* ChannelData) override;
 	void OnChannelDataUpdated(google::protobuf::Message* ChannelData) override;
 	//~ End IChannelDataProvider Interface.
-
-	//~ Begin ISceneComponentStateProvider Interface.
-	void UpdateSceneComponent(unrealpb::SceneComponentState* State) override;
-	//~ End ISceneComponentStateProvider Interface.
-
 };

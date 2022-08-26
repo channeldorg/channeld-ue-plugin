@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "unreal_common.pb.h"
+#include "Engine/PackageMapClient.h"
 
 class ChanneldUtils
 {
@@ -25,5 +26,34 @@ public:
 	static FRotator GetRotator(const unrealpb::FVector& InVec)
 	{
 		return FRotator(InVec.x(), InVec.y(), InVec.z());
+	}
+
+	// TODO
+	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, const UWorld* World)
+	{
+		if (!Ref || !World)
+		{
+			return nullptr;
+		}
+		return World->GetNetDriver()->GuidCache->GetObjectFromNetGUID(FNetworkGUID(Ref->netguid()), false);
+	}
+
+	static const unrealpb::UnrealObjectRef GetRefOfObject(UObject* Obj)
+	{
+		const unrealpb::UnrealObjectRef DefaultValue;
+		if (!Obj)
+		{
+			return DefaultValue;
+		}
+		auto World = Obj->GetWorld();
+		if (!World)
+		{
+			return DefaultValue;
+		}
+
+		auto NetGUID = World->GetNetDriver()->GuidCache->GetOrAssignNetGUID(Obj);
+		unrealpb::UnrealObjectRef ObjRef;
+		ObjRef.set_netguid(NetGUID.Value);
+		return ObjRef;
 	}
 };

@@ -51,10 +51,14 @@ CHANNELDUE_API extern FVectorDefaultTypeInternal _FVector_default_instance_;
 class SceneComponentState;
 struct SceneComponentStateDefaultTypeInternal;
 CHANNELDUE_API extern SceneComponentStateDefaultTypeInternal _SceneComponentState_default_instance_;
+class UnrealObjectRef;
+struct UnrealObjectRefDefaultTypeInternal;
+CHANNELDUE_API extern UnrealObjectRefDefaultTypeInternal _UnrealObjectRef_default_instance_;
 }  // namespace unrealpb
 PROTOBUF_NAMESPACE_OPEN
 template<> CHANNELDUE_API ::unrealpb::FVector* Arena::CreateMaybeMessage<::unrealpb::FVector>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::SceneComponentState* Arena::CreateMaybeMessage<::unrealpb::SceneComponentState>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::UnrealObjectRef* Arena::CreateMaybeMessage<::unrealpb::UnrealObjectRef>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace unrealpb {
 
@@ -230,6 +234,154 @@ class CHANNELDUE_API FVector final :
 };
 // -------------------------------------------------------------------
 
+class CHANNELDUE_API UnrealObjectRef final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.UnrealObjectRef) */ {
+ public:
+  inline UnrealObjectRef() : UnrealObjectRef(nullptr) {}
+  ~UnrealObjectRef() override;
+  explicit PROTOBUF_CONSTEXPR UnrealObjectRef(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  UnrealObjectRef(const UnrealObjectRef& from);
+  UnrealObjectRef(UnrealObjectRef&& from) noexcept
+    : UnrealObjectRef() {
+    *this = ::std::move(from);
+  }
+
+  inline UnrealObjectRef& operator=(const UnrealObjectRef& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline UnrealObjectRef& operator=(UnrealObjectRef&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const UnrealObjectRef& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const UnrealObjectRef* internal_default_instance() {
+    return reinterpret_cast<const UnrealObjectRef*>(
+               &_UnrealObjectRef_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    1;
+
+  friend void swap(UnrealObjectRef& a, UnrealObjectRef& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(UnrealObjectRef* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(UnrealObjectRef* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  UnrealObjectRef* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<UnrealObjectRef>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const UnrealObjectRef& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const UnrealObjectRef& from) {
+    UnrealObjectRef::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(UnrealObjectRef* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.UnrealObjectRef";
+  }
+  protected:
+  explicit UnrealObjectRef(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kNetGUIDFieldNumber = 1,
+  };
+  // uint32 NetGUID = 1;
+  void clear_netguid();
+  uint32_t netguid() const;
+  void set_netguid(uint32_t value);
+  private:
+  uint32_t _internal_netguid() const;
+  void _internal_set_netguid(uint32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:unrealpb.UnrealObjectRef)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    uint32_t netguid_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
 class CHANNELDUE_API SceneComponentState final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.SceneComponentState) */ {
  public:
@@ -278,7 +430,7 @@ class CHANNELDUE_API SceneComponentState final :
                &_SceneComponentState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    1;
+    2;
 
   friend void swap(SceneComponentState& a, SceneComponentState& b) {
     a.Swap(&b);
@@ -351,14 +503,68 @@ class CHANNELDUE_API SceneComponentState final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kAttachSocketNameFieldNumber = 6,
-    kRelativeLocationFieldNumber = 2,
-    kRelativeRotationFieldNumber = 3,
-    kRelativeScaleFieldNumber = 4,
+    kAttachChildrenFieldNumber = 10,
+    kBShouldSnapLocationWhenAttachedFieldNumber = 7,
+    kBShouldSnapRotationWhenAttachedFieldNumber = 8,
+    kAttachSocketNameFieldNumber = 11,
+    kAttachParentFieldNumber = 9,
+    kRelativeLocationFieldNumber = 12,
+    kRelativeRotationFieldNumber = 13,
+    kRelativeScaleFieldNumber = 14,
     kRemovedFieldNumber = 1,
-    kIsVisibleFieldNumber = 5,
+    kBAbsoluteLocationFieldNumber = 2,
+    kBAbsoluteRotationFieldNumber = 3,
+    kBAbsoluteScaleFieldNumber = 4,
+    kBVisibleFieldNumber = 5,
+    kBShouldBeAttachedFieldNumber = 6,
   };
-  // string attachSocketName = 6;
+  // repeated .unrealpb.UnrealObjectRef attachChildren = 10;
+  int attachchildren_size() const;
+  private:
+  int _internal_attachchildren_size() const;
+  public:
+  void clear_attachchildren();
+  ::unrealpb::UnrealObjectRef* mutable_attachchildren(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef >*
+      mutable_attachchildren();
+  private:
+  const ::unrealpb::UnrealObjectRef& _internal_attachchildren(int index) const;
+  ::unrealpb::UnrealObjectRef* _internal_add_attachchildren();
+  public:
+  const ::unrealpb::UnrealObjectRef& attachchildren(int index) const;
+  ::unrealpb::UnrealObjectRef* add_attachchildren();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef >&
+      attachchildren() const;
+
+  // string bShouldSnapLocationWhenAttached = 7;
+  void clear_bshouldsnaplocationwhenattached();
+  const std::string& bshouldsnaplocationwhenattached() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_bshouldsnaplocationwhenattached(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_bshouldsnaplocationwhenattached();
+  PROTOBUF_NODISCARD std::string* release_bshouldsnaplocationwhenattached();
+  void set_allocated_bshouldsnaplocationwhenattached(std::string* bshouldsnaplocationwhenattached);
+  private:
+  const std::string& _internal_bshouldsnaplocationwhenattached() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_bshouldsnaplocationwhenattached(const std::string& value);
+  std::string* _internal_mutable_bshouldsnaplocationwhenattached();
+  public:
+
+  // string bShouldSnapRotationWhenAttached = 8;
+  void clear_bshouldsnaprotationwhenattached();
+  const std::string& bshouldsnaprotationwhenattached() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_bshouldsnaprotationwhenattached(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_bshouldsnaprotationwhenattached();
+  PROTOBUF_NODISCARD std::string* release_bshouldsnaprotationwhenattached();
+  void set_allocated_bshouldsnaprotationwhenattached(std::string* bshouldsnaprotationwhenattached);
+  private:
+  const std::string& _internal_bshouldsnaprotationwhenattached() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_bshouldsnaprotationwhenattached(const std::string& value);
+  std::string* _internal_mutable_bshouldsnaprotationwhenattached();
+  public:
+
+  // string attachSocketName = 11;
   void clear_attachsocketname();
   const std::string& attachsocketname() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -372,7 +578,25 @@ class CHANNELDUE_API SceneComponentState final :
   std::string* _internal_mutable_attachsocketname();
   public:
 
-  // .unrealpb.FVector relativeLocation = 2;
+  // .unrealpb.UnrealObjectRef attachParent = 9;
+  bool has_attachparent() const;
+  private:
+  bool _internal_has_attachparent() const;
+  public:
+  void clear_attachparent();
+  const ::unrealpb::UnrealObjectRef& attachparent() const;
+  PROTOBUF_NODISCARD ::unrealpb::UnrealObjectRef* release_attachparent();
+  ::unrealpb::UnrealObjectRef* mutable_attachparent();
+  void set_allocated_attachparent(::unrealpb::UnrealObjectRef* attachparent);
+  private:
+  const ::unrealpb::UnrealObjectRef& _internal_attachparent() const;
+  ::unrealpb::UnrealObjectRef* _internal_mutable_attachparent();
+  public:
+  void unsafe_arena_set_allocated_attachparent(
+      ::unrealpb::UnrealObjectRef* attachparent);
+  ::unrealpb::UnrealObjectRef* unsafe_arena_release_attachparent();
+
+  // .unrealpb.FVector relativeLocation = 12;
   bool has_relativelocation() const;
   private:
   bool _internal_has_relativelocation() const;
@@ -390,7 +614,7 @@ class CHANNELDUE_API SceneComponentState final :
       ::unrealpb::FVector* relativelocation);
   ::unrealpb::FVector* unsafe_arena_release_relativelocation();
 
-  // .unrealpb.FVector relativeRotation = 3;
+  // .unrealpb.FVector relativeRotation = 13;
   bool has_relativerotation() const;
   private:
   bool _internal_has_relativerotation() const;
@@ -408,7 +632,7 @@ class CHANNELDUE_API SceneComponentState final :
       ::unrealpb::FVector* relativerotation);
   ::unrealpb::FVector* unsafe_arena_release_relativerotation();
 
-  // .unrealpb.FVector relativeScale = 4;
+  // .unrealpb.FVector relativeScale = 14;
   bool has_relativescale() const;
   private:
   bool _internal_has_relativescale() const;
@@ -435,13 +659,49 @@ class CHANNELDUE_API SceneComponentState final :
   void _internal_set_removed(bool value);
   public:
 
-  // bool isVisible = 5;
-  void clear_isvisible();
-  bool isvisible() const;
-  void set_isvisible(bool value);
+  // bool bAbsoluteLocation = 2;
+  void clear_babsolutelocation();
+  bool babsolutelocation() const;
+  void set_babsolutelocation(bool value);
   private:
-  bool _internal_isvisible() const;
-  void _internal_set_isvisible(bool value);
+  bool _internal_babsolutelocation() const;
+  void _internal_set_babsolutelocation(bool value);
+  public:
+
+  // bool bAbsoluteRotation = 3;
+  void clear_babsoluterotation();
+  bool babsoluterotation() const;
+  void set_babsoluterotation(bool value);
+  private:
+  bool _internal_babsoluterotation() const;
+  void _internal_set_babsoluterotation(bool value);
+  public:
+
+  // bool bAbsoluteScale = 4;
+  void clear_babsolutescale();
+  bool babsolutescale() const;
+  void set_babsolutescale(bool value);
+  private:
+  bool _internal_babsolutescale() const;
+  void _internal_set_babsolutescale(bool value);
+  public:
+
+  // bool bVisible = 5;
+  void clear_bvisible();
+  bool bvisible() const;
+  void set_bvisible(bool value);
+  private:
+  bool _internal_bvisible() const;
+  void _internal_set_bvisible(bool value);
+  public:
+
+  // bool bShouldBeAttached = 6;
+  void clear_bshouldbeattached();
+  bool bshouldbeattached() const;
+  void set_bshouldbeattached(bool value);
+  private:
+  bool _internal_bshouldbeattached() const;
+  void _internal_set_bshouldbeattached(bool value);
   public:
 
   // @@protoc_insertion_point(class_scope:unrealpb.SceneComponentState)
@@ -452,12 +712,20 @@ class CHANNELDUE_API SceneComponentState final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef > attachchildren_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr bshouldsnaplocationwhenattached_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr bshouldsnaprotationwhenattached_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr attachsocketname_;
+    ::unrealpb::UnrealObjectRef* attachparent_;
     ::unrealpb::FVector* relativelocation_;
     ::unrealpb::FVector* relativerotation_;
     ::unrealpb::FVector* relativescale_;
     bool removed_;
-    bool isvisible_;
+    bool babsolutelocation_;
+    bool babsoluterotation_;
+    bool babsolutescale_;
+    bool bvisible_;
+    bool bshouldbeattached_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -536,6 +804,30 @@ inline void FVector::set_z(float value) {
 
 // -------------------------------------------------------------------
 
+// UnrealObjectRef
+
+// uint32 NetGUID = 1;
+inline void UnrealObjectRef::clear_netguid() {
+  _impl_.netguid_ = 0u;
+}
+inline uint32_t UnrealObjectRef::_internal_netguid() const {
+  return _impl_.netguid_;
+}
+inline uint32_t UnrealObjectRef::netguid() const {
+  // @@protoc_insertion_point(field_get:unrealpb.UnrealObjectRef.NetGUID)
+  return _internal_netguid();
+}
+inline void UnrealObjectRef::_internal_set_netguid(uint32_t value) {
+  
+  _impl_.netguid_ = value;
+}
+inline void UnrealObjectRef::set_netguid(uint32_t value) {
+  _internal_set_netguid(value);
+  // @@protoc_insertion_point(field_set:unrealpb.UnrealObjectRef.NetGUID)
+}
+
+// -------------------------------------------------------------------
+
 // SceneComponentState
 
 // bool removed = 1;
@@ -558,7 +850,387 @@ inline void SceneComponentState::set_removed(bool value) {
   // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.removed)
 }
 
-// .unrealpb.FVector relativeLocation = 2;
+// bool bAbsoluteLocation = 2;
+inline void SceneComponentState::clear_babsolutelocation() {
+  _impl_.babsolutelocation_ = false;
+}
+inline bool SceneComponentState::_internal_babsolutelocation() const {
+  return _impl_.babsolutelocation_;
+}
+inline bool SceneComponentState::babsolutelocation() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.bAbsoluteLocation)
+  return _internal_babsolutelocation();
+}
+inline void SceneComponentState::_internal_set_babsolutelocation(bool value) {
+  
+  _impl_.babsolutelocation_ = value;
+}
+inline void SceneComponentState::set_babsolutelocation(bool value) {
+  _internal_set_babsolutelocation(value);
+  // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bAbsoluteLocation)
+}
+
+// bool bAbsoluteRotation = 3;
+inline void SceneComponentState::clear_babsoluterotation() {
+  _impl_.babsoluterotation_ = false;
+}
+inline bool SceneComponentState::_internal_babsoluterotation() const {
+  return _impl_.babsoluterotation_;
+}
+inline bool SceneComponentState::babsoluterotation() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.bAbsoluteRotation)
+  return _internal_babsoluterotation();
+}
+inline void SceneComponentState::_internal_set_babsoluterotation(bool value) {
+  
+  _impl_.babsoluterotation_ = value;
+}
+inline void SceneComponentState::set_babsoluterotation(bool value) {
+  _internal_set_babsoluterotation(value);
+  // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bAbsoluteRotation)
+}
+
+// bool bAbsoluteScale = 4;
+inline void SceneComponentState::clear_babsolutescale() {
+  _impl_.babsolutescale_ = false;
+}
+inline bool SceneComponentState::_internal_babsolutescale() const {
+  return _impl_.babsolutescale_;
+}
+inline bool SceneComponentState::babsolutescale() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.bAbsoluteScale)
+  return _internal_babsolutescale();
+}
+inline void SceneComponentState::_internal_set_babsolutescale(bool value) {
+  
+  _impl_.babsolutescale_ = value;
+}
+inline void SceneComponentState::set_babsolutescale(bool value) {
+  _internal_set_babsolutescale(value);
+  // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bAbsoluteScale)
+}
+
+// bool bVisible = 5;
+inline void SceneComponentState::clear_bvisible() {
+  _impl_.bvisible_ = false;
+}
+inline bool SceneComponentState::_internal_bvisible() const {
+  return _impl_.bvisible_;
+}
+inline bool SceneComponentState::bvisible() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.bVisible)
+  return _internal_bvisible();
+}
+inline void SceneComponentState::_internal_set_bvisible(bool value) {
+  
+  _impl_.bvisible_ = value;
+}
+inline void SceneComponentState::set_bvisible(bool value) {
+  _internal_set_bvisible(value);
+  // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bVisible)
+}
+
+// bool bShouldBeAttached = 6;
+inline void SceneComponentState::clear_bshouldbeattached() {
+  _impl_.bshouldbeattached_ = false;
+}
+inline bool SceneComponentState::_internal_bshouldbeattached() const {
+  return _impl_.bshouldbeattached_;
+}
+inline bool SceneComponentState::bshouldbeattached() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.bShouldBeAttached)
+  return _internal_bshouldbeattached();
+}
+inline void SceneComponentState::_internal_set_bshouldbeattached(bool value) {
+  
+  _impl_.bshouldbeattached_ = value;
+}
+inline void SceneComponentState::set_bshouldbeattached(bool value) {
+  _internal_set_bshouldbeattached(value);
+  // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bShouldBeAttached)
+}
+
+// string bShouldSnapLocationWhenAttached = 7;
+inline void SceneComponentState::clear_bshouldsnaplocationwhenattached() {
+  _impl_.bshouldsnaplocationwhenattached_.ClearToEmpty();
+}
+inline const std::string& SceneComponentState::bshouldsnaplocationwhenattached() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.bShouldSnapLocationWhenAttached)
+  return _internal_bshouldsnaplocationwhenattached();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void SceneComponentState::set_bshouldsnaplocationwhenattached(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.bshouldsnaplocationwhenattached_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bShouldSnapLocationWhenAttached)
+}
+inline std::string* SceneComponentState::mutable_bshouldsnaplocationwhenattached() {
+  std::string* _s = _internal_mutable_bshouldsnaplocationwhenattached();
+  // @@protoc_insertion_point(field_mutable:unrealpb.SceneComponentState.bShouldSnapLocationWhenAttached)
+  return _s;
+}
+inline const std::string& SceneComponentState::_internal_bshouldsnaplocationwhenattached() const {
+  return _impl_.bshouldsnaplocationwhenattached_.Get();
+}
+inline void SceneComponentState::_internal_set_bshouldsnaplocationwhenattached(const std::string& value) {
+  
+  _impl_.bshouldsnaplocationwhenattached_.Set(value, GetArenaForAllocation());
+}
+inline std::string* SceneComponentState::_internal_mutable_bshouldsnaplocationwhenattached() {
+  
+  return _impl_.bshouldsnaplocationwhenattached_.Mutable(GetArenaForAllocation());
+}
+inline std::string* SceneComponentState::release_bshouldsnaplocationwhenattached() {
+  // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.bShouldSnapLocationWhenAttached)
+  return _impl_.bshouldsnaplocationwhenattached_.Release();
+}
+inline void SceneComponentState::set_allocated_bshouldsnaplocationwhenattached(std::string* bshouldsnaplocationwhenattached) {
+  if (bshouldsnaplocationwhenattached != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.bshouldsnaplocationwhenattached_.SetAllocated(bshouldsnaplocationwhenattached, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.bshouldsnaplocationwhenattached_.IsDefault()) {
+    _impl_.bshouldsnaplocationwhenattached_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.bShouldSnapLocationWhenAttached)
+}
+
+// string bShouldSnapRotationWhenAttached = 8;
+inline void SceneComponentState::clear_bshouldsnaprotationwhenattached() {
+  _impl_.bshouldsnaprotationwhenattached_.ClearToEmpty();
+}
+inline const std::string& SceneComponentState::bshouldsnaprotationwhenattached() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.bShouldSnapRotationWhenAttached)
+  return _internal_bshouldsnaprotationwhenattached();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void SceneComponentState::set_bshouldsnaprotationwhenattached(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.bshouldsnaprotationwhenattached_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bShouldSnapRotationWhenAttached)
+}
+inline std::string* SceneComponentState::mutable_bshouldsnaprotationwhenattached() {
+  std::string* _s = _internal_mutable_bshouldsnaprotationwhenattached();
+  // @@protoc_insertion_point(field_mutable:unrealpb.SceneComponentState.bShouldSnapRotationWhenAttached)
+  return _s;
+}
+inline const std::string& SceneComponentState::_internal_bshouldsnaprotationwhenattached() const {
+  return _impl_.bshouldsnaprotationwhenattached_.Get();
+}
+inline void SceneComponentState::_internal_set_bshouldsnaprotationwhenattached(const std::string& value) {
+  
+  _impl_.bshouldsnaprotationwhenattached_.Set(value, GetArenaForAllocation());
+}
+inline std::string* SceneComponentState::_internal_mutable_bshouldsnaprotationwhenattached() {
+  
+  return _impl_.bshouldsnaprotationwhenattached_.Mutable(GetArenaForAllocation());
+}
+inline std::string* SceneComponentState::release_bshouldsnaprotationwhenattached() {
+  // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.bShouldSnapRotationWhenAttached)
+  return _impl_.bshouldsnaprotationwhenattached_.Release();
+}
+inline void SceneComponentState::set_allocated_bshouldsnaprotationwhenattached(std::string* bshouldsnaprotationwhenattached) {
+  if (bshouldsnaprotationwhenattached != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.bshouldsnaprotationwhenattached_.SetAllocated(bshouldsnaprotationwhenattached, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.bshouldsnaprotationwhenattached_.IsDefault()) {
+    _impl_.bshouldsnaprotationwhenattached_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.bShouldSnapRotationWhenAttached)
+}
+
+// .unrealpb.UnrealObjectRef attachParent = 9;
+inline bool SceneComponentState::_internal_has_attachparent() const {
+  return this != internal_default_instance() && _impl_.attachparent_ != nullptr;
+}
+inline bool SceneComponentState::has_attachparent() const {
+  return _internal_has_attachparent();
+}
+inline void SceneComponentState::clear_attachparent() {
+  if (GetArenaForAllocation() == nullptr && _impl_.attachparent_ != nullptr) {
+    delete _impl_.attachparent_;
+  }
+  _impl_.attachparent_ = nullptr;
+}
+inline const ::unrealpb::UnrealObjectRef& SceneComponentState::_internal_attachparent() const {
+  const ::unrealpb::UnrealObjectRef* p = _impl_.attachparent_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::UnrealObjectRef&>(
+      ::unrealpb::_UnrealObjectRef_default_instance_);
+}
+inline const ::unrealpb::UnrealObjectRef& SceneComponentState::attachparent() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.attachParent)
+  return _internal_attachparent();
+}
+inline void SceneComponentState::unsafe_arena_set_allocated_attachparent(
+    ::unrealpb::UnrealObjectRef* attachparent) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.attachparent_);
+  }
+  _impl_.attachparent_ = attachparent;
+  if (attachparent) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.SceneComponentState.attachParent)
+}
+inline ::unrealpb::UnrealObjectRef* SceneComponentState::release_attachparent() {
+  
+  ::unrealpb::UnrealObjectRef* temp = _impl_.attachparent_;
+  _impl_.attachparent_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* SceneComponentState::unsafe_arena_release_attachparent() {
+  // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.attachParent)
+  
+  ::unrealpb::UnrealObjectRef* temp = _impl_.attachparent_;
+  _impl_.attachparent_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* SceneComponentState::_internal_mutable_attachparent() {
+  
+  if (_impl_.attachparent_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::UnrealObjectRef>(GetArenaForAllocation());
+    _impl_.attachparent_ = p;
+  }
+  return _impl_.attachparent_;
+}
+inline ::unrealpb::UnrealObjectRef* SceneComponentState::mutable_attachparent() {
+  ::unrealpb::UnrealObjectRef* _msg = _internal_mutable_attachparent();
+  // @@protoc_insertion_point(field_mutable:unrealpb.SceneComponentState.attachParent)
+  return _msg;
+}
+inline void SceneComponentState::set_allocated_attachparent(::unrealpb::UnrealObjectRef* attachparent) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.attachparent_;
+  }
+  if (attachparent) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(attachparent);
+    if (message_arena != submessage_arena) {
+      attachparent = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, attachparent, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.attachparent_ = attachparent;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.attachParent)
+}
+
+// repeated .unrealpb.UnrealObjectRef attachChildren = 10;
+inline int SceneComponentState::_internal_attachchildren_size() const {
+  return _impl_.attachchildren_.size();
+}
+inline int SceneComponentState::attachchildren_size() const {
+  return _internal_attachchildren_size();
+}
+inline void SceneComponentState::clear_attachchildren() {
+  _impl_.attachchildren_.Clear();
+}
+inline ::unrealpb::UnrealObjectRef* SceneComponentState::mutable_attachchildren(int index) {
+  // @@protoc_insertion_point(field_mutable:unrealpb.SceneComponentState.attachChildren)
+  return _impl_.attachchildren_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef >*
+SceneComponentState::mutable_attachchildren() {
+  // @@protoc_insertion_point(field_mutable_list:unrealpb.SceneComponentState.attachChildren)
+  return &_impl_.attachchildren_;
+}
+inline const ::unrealpb::UnrealObjectRef& SceneComponentState::_internal_attachchildren(int index) const {
+  return _impl_.attachchildren_.Get(index);
+}
+inline const ::unrealpb::UnrealObjectRef& SceneComponentState::attachchildren(int index) const {
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.attachChildren)
+  return _internal_attachchildren(index);
+}
+inline ::unrealpb::UnrealObjectRef* SceneComponentState::_internal_add_attachchildren() {
+  return _impl_.attachchildren_.Add();
+}
+inline ::unrealpb::UnrealObjectRef* SceneComponentState::add_attachchildren() {
+  ::unrealpb::UnrealObjectRef* _add = _internal_add_attachchildren();
+  // @@protoc_insertion_point(field_add:unrealpb.SceneComponentState.attachChildren)
+  return _add;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef >&
+SceneComponentState::attachchildren() const {
+  // @@protoc_insertion_point(field_list:unrealpb.SceneComponentState.attachChildren)
+  return _impl_.attachchildren_;
+}
+
+// string attachSocketName = 11;
+inline void SceneComponentState::clear_attachsocketname() {
+  _impl_.attachsocketname_.ClearToEmpty();
+}
+inline const std::string& SceneComponentState::attachsocketname() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.attachSocketName)
+  return _internal_attachsocketname();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void SceneComponentState::set_attachsocketname(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.attachsocketname_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.attachSocketName)
+}
+inline std::string* SceneComponentState::mutable_attachsocketname() {
+  std::string* _s = _internal_mutable_attachsocketname();
+  // @@protoc_insertion_point(field_mutable:unrealpb.SceneComponentState.attachSocketName)
+  return _s;
+}
+inline const std::string& SceneComponentState::_internal_attachsocketname() const {
+  return _impl_.attachsocketname_.Get();
+}
+inline void SceneComponentState::_internal_set_attachsocketname(const std::string& value) {
+  
+  _impl_.attachsocketname_.Set(value, GetArenaForAllocation());
+}
+inline std::string* SceneComponentState::_internal_mutable_attachsocketname() {
+  
+  return _impl_.attachsocketname_.Mutable(GetArenaForAllocation());
+}
+inline std::string* SceneComponentState::release_attachsocketname() {
+  // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.attachSocketName)
+  return _impl_.attachsocketname_.Release();
+}
+inline void SceneComponentState::set_allocated_attachsocketname(std::string* attachsocketname) {
+  if (attachsocketname != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.attachsocketname_.SetAllocated(attachsocketname, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.attachsocketname_.IsDefault()) {
+    _impl_.attachsocketname_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.attachSocketName)
+}
+
+// .unrealpb.FVector relativeLocation = 12;
 inline bool SceneComponentState::_internal_has_relativelocation() const {
   return this != internal_default_instance() && _impl_.relativelocation_ != nullptr;
 }
@@ -648,7 +1320,7 @@ inline void SceneComponentState::set_allocated_relativelocation(::unrealpb::FVec
   // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.relativeLocation)
 }
 
-// .unrealpb.FVector relativeRotation = 3;
+// .unrealpb.FVector relativeRotation = 13;
 inline bool SceneComponentState::_internal_has_relativerotation() const {
   return this != internal_default_instance() && _impl_.relativerotation_ != nullptr;
 }
@@ -738,7 +1410,7 @@ inline void SceneComponentState::set_allocated_relativerotation(::unrealpb::FVec
   // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.relativeRotation)
 }
 
-// .unrealpb.FVector relativeScale = 4;
+// .unrealpb.FVector relativeScale = 14;
 inline bool SceneComponentState::_internal_has_relativescale() const {
   return this != internal_default_instance() && _impl_.relativescale_ != nullptr;
 }
@@ -828,79 +1500,11 @@ inline void SceneComponentState::set_allocated_relativescale(::unrealpb::FVector
   // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.relativeScale)
 }
 
-// bool isVisible = 5;
-inline void SceneComponentState::clear_isvisible() {
-  _impl_.isvisible_ = false;
-}
-inline bool SceneComponentState::_internal_isvisible() const {
-  return _impl_.isvisible_;
-}
-inline bool SceneComponentState::isvisible() const {
-  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.isVisible)
-  return _internal_isvisible();
-}
-inline void SceneComponentState::_internal_set_isvisible(bool value) {
-  
-  _impl_.isvisible_ = value;
-}
-inline void SceneComponentState::set_isvisible(bool value) {
-  _internal_set_isvisible(value);
-  // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.isVisible)
-}
-
-// string attachSocketName = 6;
-inline void SceneComponentState::clear_attachsocketname() {
-  _impl_.attachsocketname_.ClearToEmpty();
-}
-inline const std::string& SceneComponentState::attachsocketname() const {
-  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.attachSocketName)
-  return _internal_attachsocketname();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void SceneComponentState::set_attachsocketname(ArgT0&& arg0, ArgT... args) {
- 
- _impl_.attachsocketname_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.attachSocketName)
-}
-inline std::string* SceneComponentState::mutable_attachsocketname() {
-  std::string* _s = _internal_mutable_attachsocketname();
-  // @@protoc_insertion_point(field_mutable:unrealpb.SceneComponentState.attachSocketName)
-  return _s;
-}
-inline const std::string& SceneComponentState::_internal_attachsocketname() const {
-  return _impl_.attachsocketname_.Get();
-}
-inline void SceneComponentState::_internal_set_attachsocketname(const std::string& value) {
-  
-  _impl_.attachsocketname_.Set(value, GetArenaForAllocation());
-}
-inline std::string* SceneComponentState::_internal_mutable_attachsocketname() {
-  
-  return _impl_.attachsocketname_.Mutable(GetArenaForAllocation());
-}
-inline std::string* SceneComponentState::release_attachsocketname() {
-  // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.attachSocketName)
-  return _impl_.attachsocketname_.Release();
-}
-inline void SceneComponentState::set_allocated_attachsocketname(std::string* attachsocketname) {
-  if (attachsocketname != nullptr) {
-    
-  } else {
-    
-  }
-  _impl_.attachsocketname_.SetAllocated(attachsocketname, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.attachsocketname_.IsDefault()) {
-    _impl_.attachsocketname_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.attachSocketName)
-}
-
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 

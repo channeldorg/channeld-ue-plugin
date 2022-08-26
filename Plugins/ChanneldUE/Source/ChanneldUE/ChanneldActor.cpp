@@ -6,6 +6,8 @@
 #include "ChannelDataProvider.h"
 #include "View/ChannelDataView.h"
 #include "Engine/ActorChannel.h"
+#include "Engine/PackageMapClient.h"
+#include "Misc/NetworkGuid.h"
 
 // Sets default values
 AChanneldActor::AChanneldActor(const FObjectInitializer& ObjectInitializer)
@@ -25,7 +27,7 @@ void AChanneldActor::BeginPlay()
 		if (RepComp->IsA<USceneComponent>())
 		{
 			USceneComponent* SceneComp = Cast<USceneComponent>(RepComp);
-			SceneComponentReplicators.Add(SceneComp, new FChanneldSceneComponentReplicator(SceneComp, this));
+			SceneComponentReplicators.Add(new FChanneldSceneComponentReplicator(SceneComp, this));
 		}
 	}
 	
@@ -58,6 +60,8 @@ uint32 AChanneldActor::GetNetGUID()
 		UE_LOG(LogTemp, Warning, TEXT("Actor '%s' is not owned by any net connection"), *GetFName().ToString());
 		return 0;
 	}
+	return NetConnection->Driver->GuidCache->GetNetGUID(this).Value;
+	/*
 	auto ActorChannel = NetConnection->FindActorChannelRef(this);
 	if (!ActorChannel)
 	{
@@ -66,11 +70,7 @@ uint32 AChanneldActor::GetNetGUID()
 	}
 
 	return ActorChannel->ActorNetGUID.Value;
-}
-
-void AChanneldActor::OnChannelDataRemoved()
-{
-	Destroy();
+	*/
 }
 
 // Called every frame
@@ -78,10 +78,14 @@ void AChanneldActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// TODO: update the replicators with the dynamically added/removed components
+
+	/*
 	for (auto Pair : SceneComponentReplicators)
 	{
 		Pair.Value->Tick(DeltaTime);
 	}
+	*/
 }
 
 channeldpb::ChannelType AChanneldActor::GetChannelType()
@@ -131,20 +135,13 @@ bool AChanneldActor::UpdateChannelData(google::protobuf::Message* ChannelData)
 	}
 
 	bool bUpdated = false;
-	/*
-	if (SceneComponentState)
+	for (auto Replicator : SceneComponentReplicators)
 	{
-		SetSceneComponentStateToChannelData(SceneComponentState.Get(), ChannelData);
-		SceneComponentState = nullptr;
-		bUpdated = true;
-	}
-	*/
-	for (auto Pair : SceneComponentReplicators)
-	{
-		if (Pair.Value->IsStateChanged())
+		Replicator->Tick(0);
+		if (Replicator->IsStateChanged())
 		{
-			SetSceneComponentStateToChannelData(Pair.Value->GetState(), ChannelData);
-			Pair.Value->ClearState();
+			SetSceneComponentStateToChannelData(Replicator->GetState(), ChannelData, Replicator->GetNetGUID());
+			Replicator->ClearState();
 			bUpdated = true;
 		}
 	}
@@ -154,22 +151,21 @@ bool AChanneldActor::UpdateChannelData(google::protobuf::Message* ChannelData)
 
 void AChanneldActor::OnChannelDataUpdated(google::protobuf::Message* ChannelData)
 {
-	auto State = GetSceneComponentStateFromChannelData(ChannelData);
-	if (State)
+	for (auto Replicator : SceneComponentReplicators)
 	{
-		if (State->removed())
+		auto State = GetSceneComponentStateFromChannelData(ChannelData, Replicator->GetNetGUID());
+		if (State)
 		{
-			OnChannelDataRemoved();
-			return;
+			if (State->removed())
+			{
+				auto SceneComp = Replicator->GetSceneComponent();
+				if (SceneComp)
+				{
+					RemoveOwnedComponent(SceneComp);
+				}
+				continue;
+			}
+			Replicator->OnStateChanged(State);
 		}
-		OnSceneComponentUpdated.Broadcast(State);
 	}
-}
-
-void AChanneldActor::UpdateSceneComponent(unrealpb::SceneComponentState* State)
-{
-/*
-	SceneComponentState = MakeShared<unrealpb::SceneComponentState>();
-	SceneComponentState->MergeFrom(*State);
-*/
 }

@@ -12,19 +12,20 @@ public:
 	FChanneldSceneComponentReplicator(USceneComponent* InSceneComp, AChanneldActor* InActor);
 	virtual ~FChanneldSceneComponentReplicator();
 
+	FORCEINLINE USceneComponent* GetSceneComponent() { return SceneComp.Get(); }
+	FORCEINLINE uint32 GetNetGUID() { return NetGUID; }
+
 	FORCEINLINE bool IsStateChanged() { return bStateChanged; }
 	FORCEINLINE unrealpb::SceneComponentState* GetState() { return State; }
-	FORCEINLINE void ClearState()
-	{
-		State->Clear();
-		bStateChanged = false;
-	}
+	FORCEINLINE void ClearState();
 
 	virtual void Tick(float DeltaTime);
 
 protected:
 	TWeakObjectPtr<USceneComponent> SceneComp;
 	AChanneldActor* Actor;
+
+	uint32 NetGUID;
 
 	bool bStateChanged;
 	unrealpb::SceneComponentState* State;
@@ -37,6 +38,7 @@ protected:
 	// Local -> channeld
 	virtual void OnTransformUpdated(USceneComponent* UpdatedComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
 
+public:
 	// channeld -> local
 	virtual void OnStateChanged(const unrealpb::SceneComponentState* NewState);
 

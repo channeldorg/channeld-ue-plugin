@@ -13,8 +13,9 @@ FChanneldSceneComponentReplicator::FChanneldSceneComponentReplicator(USceneCompo
 	TArray<FLifetimeProperty> RepProps;
 	DisableAllReplicatedPropertiesOfClass(InSceneComp->GetClass(), USceneComponent::StaticClass(), EFieldIteratorFlags::ExcludeSuper, RepProps);
 
+	NetGUID = Actor->GetWorld()->GetNetDriver()->GuidCache->GetOrAssignNetGUID(InSceneComp).Value;
+
 	SceneComp->TransformUpdated.AddRaw(this, &FChanneldSceneComponentReplicator::OnTransformUpdated);
-	Actor->OnSceneComponentUpdated.AddRaw(this, &FChanneldSceneComponentReplicator::OnStateChanged);
 
 	bStateChanged = false;
 	State = new unrealpb::SceneComponentState;
@@ -25,8 +26,6 @@ FChanneldSceneComponentReplicator::FChanneldSceneComponentReplicator(USceneCompo
 
 FChanneldSceneComponentReplicator::~FChanneldSceneComponentReplicator()
 {
-	Actor->OnSceneComponentUpdated.RemoveAll(this);
-	
 	if (SceneComp.IsValid())
 	{
 		SceneComp->TransformUpdated.RemoveAll(this);
@@ -45,15 +44,82 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 		return;
 	}
 
-	if (State->isvisible() != SceneComp->IsVisible())
+	if (State->babsolutelocation() != SceneComp->IsUsingAbsoluteLocation())
 	{
-		State->set_isvisible(SceneComp->IsVisible());
+		State->set_babsolutelocation(SceneComp->IsUsingAbsoluteLocation());
 		bStateChanged = true;
 	}
 
-	// TODO: AttachSocketName and other properties...
+	if (State->babsoluterotation() != SceneComp->IsUsingAbsoluteRotation())
+	{
+		State->set_babsoluterotation(SceneComp->IsUsingAbsoluteRotation());
+		bStateChanged = true;
+	}
 
-	/*
+	if (State->babsolutescale() != SceneComp->IsUsingAbsoluteScale())
+	{
+		State->set_babsolutescale(SceneComp->IsUsingAbsoluteScale());
+		bStateChanged = true;
+	}
+
+	if (State->bvisible() != SceneComp->IsVisible())
+	{
+		State->set_bvisible(SceneComp->IsVisible());
+		bStateChanged = true;
+	}
+
+	/* TODO: members are inaccessible, try use reflection? 
+	if (State->bshouldbeattached() != SceneComp->bShouldSnapLocationWhenAttached)
+	{
+		State->set_bshouldbeattached(SceneComp->bShouldSnapLocationWhenAttached);
+		bStateChanged = true;
+	}
+
+	if (State->bshouldsnaplocationwhenattached() != SceneComp->bShouldSnapLocationWhenAttached)
+	{
+		State->set_bshouldsnaplocationwhenattached(SceneComp->bShouldSnapLocationWhenAttached);
+		bStateChanged = true;
+	}
+
+	if (State->bshouldsnaprotationwhenattached() != SceneComp->bShouldSnapRotationWhenAttached)
+	{
+		State->set_bshouldsnaprotationwhenattached(SceneComp->bShouldSnapRotationWhenAttached);
+		bStateChanged = true;
+	}
+	*/
+
+	UObject* AttachParent = ChanneldUtils::GetObjectByRef(State->mutable_attachparent(), Actor->GetWorld());
+	if (AttachParent != SceneComp->GetAttachParent())
+	{
+		if (SceneComp->GetAttachParent() == nullptr)
+		{
+			State->release_attachparent();
+		}
+		else
+		{
+			State->mutable_attachparent()->MergeFrom(ChanneldUtils::GetRefOfObject(SceneComp->GetAttachParent()));
+		}
+		bStateChanged = true;
+	}
+
+	if (State->mutable_attachchildren()->size() != SceneComp->GetAttachChildren().Num())
+	{
+		State->clear_attachchildren();
+		for (auto Child : SceneComp->GetAttachChildren())
+		{
+			*State->mutable_attachchildren()->Add() = ChanneldUtils::GetRefOfObject(Child);
+		}
+		bStateChanged = true;
+	}
+
+	FName AttachSocketName(State->mutable_attachsocketname()->c_str());
+	if (AttachSocketName != SceneComp->GetAttachSocketName())
+	{
+		*State->mutable_attachsocketname() = TCHAR_TO_UTF8(*SceneComp->GetAttachSocketName().ToString());
+		bStateChanged = true;
+	}
+
+	/* Moved to ClearState()
 	if (bStateChanged)
 	{
 		Actor->UpdateSceneComponent(State);
@@ -61,6 +127,14 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 		bStateChanged = false;
 	}
 	*/
+}
+
+FORCEINLINE void FChanneldSceneComponentReplicator::ClearState()
+{
+	State->release_relativelocation();
+	State->release_relativerotation();
+	State->release_relativescale();
+	bStateChanged = false;
 }
 
 bool FChanneldSceneComponentReplicator::SetIfNotSame(unrealpb::FVector* VectorToSet, const FVector& VectorToCheck)
@@ -148,9 +222,48 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const unrealpb::SceneComp
 		bTransformChanged = true;
 	}
 
+	if (State->babsolutelocation() != SceneComp->IsUsingAbsoluteLocation())
+	{
+		SceneComp->SetUsingAbsoluteLocation(State->babsolutelocation());
+		bTransformChanged = true;
+	}
+
+	if (State->babsoluterotation() != SceneComp->IsUsingAbsoluteRotation())
+	{
+		SceneComp->SetUsingAbsoluteRotation(State->babsoluterotation());
+		bTransformChanged = true;
+	}
+
+	if (State->babsolutescale() != SceneComp->IsUsingAbsoluteScale())
+	{
+		SceneComp->SetUsingAbsoluteScale(State->babsolutescale());
+		bTransformChanged = true;
+	}
+
 	if (bTransformChanged)
 	{
 		SceneComp->UpdateComponentToWorld();
 		//SceneComp->SetRelativeLocationAndRotation(NewLocation, NewRotation);
 	}
+
+	if (State->has_attachparent())
+	{
+		auto AttachParent = Cast<USceneComponent>(ChanneldUtils::GetObjectByRef(&State->attachparent(), Actor->GetWorld()));
+		if (AttachParent && AttachParent != SceneComp->GetAttachParent())
+		{
+			FName AttachSocketName; 
+			if (State->attachsocketname().length() > 0)
+			{
+				AttachSocketName = State->mutable_attachsocketname()->c_str();
+			}
+			else
+			{
+				AttachSocketName = SceneComp->GetAttachSocketName();
+			}
+			SceneComp->AttachTo(AttachParent, AttachSocketName);
+		}
+	}
+
+
+	// TODO: bVisible, bShouldBeAttached, bShouldSnapLocationWhenAttached, bShouldSnapRotationWhenAttached, attachChildren
 }

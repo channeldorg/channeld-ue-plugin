@@ -33,19 +33,3 @@ public:
 	}
 
 };
-
-UINTERFACE(MinimalAPI, Blueprintable)
-class USceneComponentStateProvider : public UInterface
-{
-	GENERATED_BODY()
-};
-
-class CHANNELDUE_API ISceneComponentStateProvider
-{
-	GENERATED_BODY()
-public:
-	virtual void UpdateSceneComponent(unrealpb::SceneComponentState* State) = 0;
-
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnSceneComponentUpdated, const unrealpb::SceneComponentState*);
-	FOnSceneComponentUpdated OnSceneComponentUpdated;
-};
