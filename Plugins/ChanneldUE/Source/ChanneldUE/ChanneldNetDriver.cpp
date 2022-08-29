@@ -11,7 +11,6 @@
 #include "PacketHandler.h"
 #include "Net/Core/Misc/PacketAudit.h"
 #include "ChanneldGameInstanceSubsystem.h"
-#include "ChanneldWorldSettings.h"
 
 UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

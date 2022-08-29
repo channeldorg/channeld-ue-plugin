@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -9,27 +7,24 @@
 #include "ProtoMessageObject.h"
 #include "Replication/ChanneldSceneComponentReplicator.h"
 #include "Components/ActorComponent.h"
-#include "ChanneldActor.generated.h"
+#include "ChanneldReplicationComponent.generated.h"
 
-UCLASS(Blueprintable, Abstract)
-class CHANNELDUE_API AChanneldActor : public AActor, public IChannelDataProvider//, public ISceneComponentStateProvider
+// Responsible for replicating the owning Actor and its replicated component via ChannelDataUpdate
+UCLASS(Abstract, ClassGroup = "Channeld")
+class CHANNELDUE_API UChanneldReplicationComponent : public UActorComponent, public IChannelDataProvider
 {
 	GENERATED_BODY()
-	
+
 public:	
-	// Sets default values for this actor's properties
-	AChanneldActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	UChanneldReplicationComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	virtual void EndPlay(EEndPlayReason::Type Reason) override;
 
 	UFUNCTION(BlueprintImplementableEvent)
 	UProtoMessageObject* ProvideChannelDataTemplate() const;
 
 	virtual const unrealpb::SceneComponentState* GetSceneComponentStateFromChannelData(google::protobuf::Message* ChannelData, uint32 NetGUID) PURE_VIRTUAL(GetSceneComponentStateFromChannelData, return nullptr;);
-	virtual void SetSceneComponentStateToChannelData(unrealpb::SceneComponentState* State, google::protobuf::Message* ChannelData, uint32 NetGUID) PURE_VIRTUAL(SetSceneComponentStateToChannelData, );
+	virtual void SetSceneComponentStateToChannelData(unrealpb::SceneComponentState * State, google::protobuf::Message * ChannelData, uint32 NetGUID) PURE_VIRTUAL(SetSceneComponentStateToChannelData, );
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EChanneldChannelType ChannelType;
@@ -38,10 +33,11 @@ protected:
 
 	TArray< FChanneldSceneComponentReplicator* > SceneComponentReplicators;
 
-public:	
+public:
 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	virtual void BeginPlay() override;
+	virtual void EndPlay(EEndPlayReason::Type Reason) override;
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	//~ Begin IChannelDataProvider Interface.
 	channeldpb::ChannelType GetChannelType() override;
@@ -53,4 +49,5 @@ public:
 	bool UpdateChannelData(google::protobuf::Message* ChannelData) override;
 	void OnChannelDataUpdated(google::protobuf::Message* ChannelData) override;
 	//~ End IChannelDataProvider Interface.
+
 };

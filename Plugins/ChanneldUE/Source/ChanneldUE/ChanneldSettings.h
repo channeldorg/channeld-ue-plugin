@@ -3,20 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/WorldSettings.h"
-#include "ChanneldWorldSettings.generated.h"
+#include "ChanneldSettings.generated.h"
 
 /**
  * 
  */
-UCLASS()
-class CHANNELDUE_API AChanneldWorldSettings : public AWorldSettings
+UCLASS(config = ChanneldUE)
+class CHANNELDUE_API UChanneldSettings : public UObject
 {
 	GENERATED_BODY()
 	
 public:
+	UChanneldSettings(const FObjectInitializer& obj);
 
-	UPROPERTY(EditAnywhere, Category="Channeld")
+	UPROPERTY(EditAnywhere, Category="View")
 	TSubclassOf<class UChannelDataView> ChannelDataViewClass;
 	
 };

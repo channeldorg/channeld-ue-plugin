@@ -4,12 +4,10 @@
 #include "ChannelDataProvider.h"
 #include "Components/SceneComponent.h"
 
-class AChanneldActor;
-
 class CHANNELDUE_API FChanneldSceneComponentReplicator
 {
 public:
-	FChanneldSceneComponentReplicator(USceneComponent* InSceneComp, AChanneldActor* InActor);
+	FChanneldSceneComponentReplicator(USceneComponent* InSceneComp, AActor* InActor);
 	virtual ~FChanneldSceneComponentReplicator();
 
 	FORCEINLINE USceneComponent* GetSceneComponent() { return SceneComp.Get(); }
@@ -23,7 +21,7 @@ public:
 
 protected:
 	TWeakObjectPtr<USceneComponent> SceneComp;
-	AChanneldActor* Actor;
+	TWeakObjectPtr<AActor> Actor;
 
 	uint32 NetGUID;
 
@@ -34,6 +32,7 @@ protected:
 	unrealpb::FVector* RelativeScaleState;
 
 	static bool SetIfNotSame(unrealpb::FVector* VectorToSet, const FVector& VectorToCheck);
+	static EAttachmentRule GetAttachmentRule(bool bShouldSnapWhenAttached, bool bAbsolute);
 	
 	// Local -> channeld
 	virtual void OnTransformUpdated(USceneComponent* UpdatedComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);

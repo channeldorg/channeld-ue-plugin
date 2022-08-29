@@ -1,16 +1,26 @@
 #include "ChanneldUE.h"
+#include "ISettingsModule.h"
+#include "ChanneldSettings.h"
 
 #define LOCTEXT_NAMESPACE "FChanneldUEModule"
 
 void FChanneldUEModule::StartupModule()
 {
-	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		SettingsModule->RegisterSettings("Project", "Plugins", "ChanneldSettings",
+			LOCTEXT("RuntimeSettingsName", "Channeld Settings"), 
+			LOCTEXT("RuntimeSettingsDesc", ""),
+			GetMutableDefault<UChanneldSettings>());
+	}
 }
 
 void FChanneldUEModule::ShutdownModule()
 {
-	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
-	// we call this function before unloading the module.
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		SettingsModule->UnregisterSettings("Project", "Plugins", "ChanneldSettings");
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

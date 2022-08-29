@@ -6,8 +6,8 @@
 #include "ProtoMessageObject.h"
 #include "ChanneldNetDriver.h"
 #include "Kismet/GameplayStatics.h"
-#include "ChanneldWorldSettings.h"
 #include "ChanneldUtils.h"
+#include "ChanneldSettings.h"
 
 void UChanneldGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -516,15 +516,7 @@ void UChanneldGameInstanceSubsystem::InitChannelDataView()
 {
 	TSubclassOf<UChannelDataView> ChannelDataViewClass = nullptr;
 
-	auto WorldSettings = GetDefault<AChanneldWorldSettings>();
-	//UWorld* TheWorld = GetWorld();
-	//auto WorldSettings = Cast<AChanneldWorldSettings>(TheWorld->GetWorldSettings());
-	// Use the class in the WorldSettings for server. 
-	// Client won't be able to use it as the world may not be create yet.
-	if (WorldSettings)
-	{
-		ChannelDataViewClass = WorldSettings->ChannelDataViewClass;
-	}
+	ChannelDataViewClass = GetMutableDefault<UChanneldSettings>()->ChannelDataViewClass;
 
 	// If not exist, use the class name in ChanneldUE.ini
 	if (!ChannelDataViewClass && ChannelDataViewClassName != TEXT(""))

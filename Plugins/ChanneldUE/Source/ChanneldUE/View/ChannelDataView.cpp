@@ -103,6 +103,11 @@ void UChannelDataView::Unintialize()
 
 void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provider)
 {
+	if (!ChannelDataTemplates.Contains(Provider->GetChannelType()))
+	{
+		RegisterChannelDataTemplate(Provider->GetChannelType(), Provider->GetChannelDataTemplate());
+	}
+
 	TSet<IChannelDataProvider*> Providers = ChannelDataProviders.FindOrAdd(ChId);
 	Providers.Add(Provider);
 	ChannelDataProviders[ChId] = Providers;

@@ -1,7 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "ChanneldActor.h"
+#include "ChanneldReplicationComponent.h"
 #include "ChanneldGameInstanceSubsystem.h"
 #include "ChannelDataProvider.h"
 #include "View/ChannelDataView.h"
@@ -9,42 +6,39 @@
 #include "Engine/PackageMapClient.h"
 #include "Misc/NetworkGuid.h"
 
-// Sets default values
-AChanneldActor::AChanneldActor(const FObjectInitializer& ObjectInitializer)
+UChanneldReplicationComponent::UChanneldReplicationComponent(const FObjectInitializer& ObjectInitializer)
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+	PrimaryComponentTick.bCanEverTick = true;
 }
 
 // Called when the game starts or when spawned
-void AChanneldActor::BeginPlay()
+void UChanneldReplicationComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	for (auto RepComp : ReplicatedComponents)
+	for (auto RepComp : GetOwner()->GetReplicatedComponents())
 	{
 		if (RepComp->IsA<USceneComponent>())
 		{
 			USceneComponent* SceneComp = Cast<USceneComponent>(RepComp);
-			SceneComponentReplicators.Add(new FChanneldSceneComponentReplicator(SceneComp, this));
+			SceneComponentReplicators.Add(new FChanneldSceneComponentReplicator(SceneComp, GetOwner()));
 		}
 	}
-	
-	UChannelDataView* View = GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
+
+	UChannelDataView* View = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
 	if (View)
 	{
 		View->AddProvider(OwningChannelId, this);
 	}
 }
 
-void AChanneldActor::EndPlay(EEndPlayReason::Type Reason)
+void UChanneldReplicationComponent::EndPlay(EEndPlayReason::Type Reason)
 {
 	Super::EndPlay(Reason);
 
 	//if (Reason != EEndPlayReason::LevelTransition)
 	{
-		UChannelDataView* View = GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
+		UChannelDataView* View = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
 		if (View)
 		{
 			View->RemoveProviderFromAllChannels(this, true);
@@ -53,9 +47,9 @@ void AChanneldActor::EndPlay(EEndPlayReason::Type Reason)
 }
 
 // Called every frame
-void AChanneldActor::Tick(float DeltaTime)
+void UChanneldReplicationComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	Super::Tick(DeltaTime);
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// TODO: update the replicators with the dynamically added/removed components
 
@@ -67,12 +61,12 @@ void AChanneldActor::Tick(float DeltaTime)
 	*/
 }
 
-channeldpb::ChannelType AChanneldActor::GetChannelType()
+channeldpb::ChannelType UChanneldReplicationComponent::GetChannelType()
 {
 	return static_cast<channeldpb::ChannelType>(ChannelType);
 }
 
-google::protobuf::Message* AChanneldActor::GetChannelDataTemplate() const
+google::protobuf::Message* UChanneldReplicationComponent::GetChannelDataTemplate() const
 {
 	auto MsgObj = ProvideChannelDataTemplate();
 	if (MsgObj)
@@ -86,29 +80,29 @@ google::protobuf::Message* AChanneldActor::GetChannelDataTemplate() const
 	}
 }
 
-ChannelId AChanneldActor::GetChannelId()
+ChannelId UChanneldReplicationComponent::GetChannelId()
 {
 	return OwningChannelId;
 }
 
-void AChanneldActor::SetChannelId(ChannelId ChId)
+void UChanneldReplicationComponent::SetChannelId(ChannelId ChId)
 {
 	OwningChannelId = ChId;
 }
 
-bool AChanneldActor::IsRemoved()
+bool UChanneldReplicationComponent::IsRemoved()
 {
 	return bRemoved;
 }
 
-void AChanneldActor::SetRemoved()
+void UChanneldReplicationComponent::SetRemoved()
 {
 	bRemoved = true;
 }
 
-bool AChanneldActor::UpdateChannelData(google::protobuf::Message* ChannelData)
+bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message* ChannelData)
 {
-	if (!HasAuthority())
+	if (!GetOwner()->HasAuthority())
 	{
 		return false;
 	}
@@ -128,7 +122,7 @@ bool AChanneldActor::UpdateChannelData(google::protobuf::Message* ChannelData)
 	return bUpdated;
 }
 
-void AChanneldActor::OnChannelDataUpdated(google::protobuf::Message* ChannelData)
+void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Message* ChannelData)
 {
 	// FIXME: don't update if the source (the connection that updated the channel data) is self.
 
@@ -142,7 +136,7 @@ void AChanneldActor::OnChannelDataUpdated(google::protobuf::Message* ChannelData
 				auto SceneComp = Replicator->GetSceneComponent();
 				if (SceneComp)
 				{
-					RemoveOwnedComponent(SceneComp);
+					GetOwner()->RemoveOwnedComponent(SceneComp);
 				}
 				continue;
 			}

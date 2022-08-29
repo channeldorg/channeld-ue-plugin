@@ -4,7 +4,7 @@
 #include "ChanneldUtils.h"
 #include "Net/UnrealNetwork.h"
 
-FChanneldSceneComponentReplicator::FChanneldSceneComponentReplicator(USceneComponent* InSceneComp, AChanneldActor* InActor)
+FChanneldSceneComponentReplicator::FChanneldSceneComponentReplicator(USceneComponent* InSceneComp, AActor* InActor)
 {
 	SceneComp = InSceneComp;
 	Actor = InActor;
@@ -39,6 +39,11 @@ FChanneldSceneComponentReplicator::~FChanneldSceneComponentReplicator()
 
 void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 {
+	if (!Actor.IsValid())
+	{
+		return;
+	}
+
 	if (!SceneComp.IsValid())
 	{
 		return;
@@ -160,7 +165,7 @@ bool FChanneldSceneComponentReplicator::SetIfNotSame(unrealpb::FVector* VectorTo
 
 void FChanneldSceneComponentReplicator::OnTransformUpdated(USceneComponent* UpdatedComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport)
 {
-	if (!Actor->HasAuthority())
+	if (!Actor.IsValid() || !Actor->HasAuthority())
 	{
 		return;
 	}
@@ -191,6 +196,11 @@ void FChanneldSceneComponentReplicator::OnTransformUpdated(USceneComponent* Upda
 
 void FChanneldSceneComponentReplicator::OnStateChanged(const unrealpb::SceneComponentState* NewState)
 {
+	if (!Actor.IsValid())
+	{
+		return;
+	}
+
 	if (!SceneComp.IsValid())
 	{
 		return;
@@ -260,10 +270,35 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const unrealpb::SceneComp
 			{
 				AttachSocketName = SceneComp->GetAttachSocketName();
 			}
-			SceneComp->AttachTo(AttachParent, AttachSocketName);
+
+			SceneComp->AttachToComponent(AttachParent, FAttachmentTransformRules(
+				GetAttachmentRule(State->bshouldsnaplocationwhenattached(), SceneComp->IsUsingAbsoluteLocation()),
+				GetAttachmentRule(State->bshouldsnaprotationwhenattached(), SceneComp->IsUsingAbsoluteRotation()),
+				GetAttachmentRule(false, SceneComp->IsUsingAbsoluteScale()),
+				false));
 		}
 	}
 
+	if (State->bvisible() != SceneComp->IsVisible())
+	{
+		SceneComp->SetVisibility(State->bvisible());
+	}
 
-	// TODO: bVisible, bShouldBeAttached, bShouldSnapLocationWhenAttached, bShouldSnapRotationWhenAttached, attachChildren
+	// TODO: bShouldBeAttached, attachChildren
+}
+
+EAttachmentRule FChanneldSceneComponentReplicator::GetAttachmentRule(bool bShouldSnapWhenAttached, bool bAbsolute)
+{
+	if (bShouldSnapWhenAttached)
+	{
+		return EAttachmentRule::SnapToTarget;
+	}
+	else if (bAbsolute)
+	{
+		return EAttachmentRule::KeepWorld;
+	}
+	else
+	{
+		return EAttachmentRule::KeepRelative;
+	}
 }

@@ -58,8 +58,6 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 PROTOBUF_CONSTEXPR SceneComponentState::SceneComponentState(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.attachchildren_)*/{}
-  , /*decltype(_impl_.bshouldsnaplocationwhenattached_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.bshouldsnaprotationwhenattached_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.attachsocketname_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.attachparent_)*/nullptr
   , /*decltype(_impl_.relativelocation_)*/nullptr
@@ -71,6 +69,8 @@ PROTOBUF_CONSTEXPR SceneComponentState::SceneComponentState(
   , /*decltype(_impl_.babsolutescale_)*/false
   , /*decltype(_impl_.bvisible_)*/false
   , /*decltype(_impl_.bshouldbeattached_)*/false
+  , /*decltype(_impl_.bshouldsnaplocationwhenattached_)*/false
+  , /*decltype(_impl_.bshouldsnaprotationwhenattached_)*/false
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct SceneComponentStateDefaultTypeInternal {
   PROTOBUF_CONSTEXPR SceneComponentStateDefaultTypeInternal()
@@ -144,8 +144,8 @@ const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_
   "oluteLocation\030\002 \001(\010\022\031\n\021bAbsoluteRotation"
   "\030\003 \001(\010\022\026\n\016bAbsoluteScale\030\004 \001(\010\022\020\n\010bVisib"
   "le\030\005 \001(\010\022\031\n\021bShouldBeAttached\030\006 \001(\010\022\'\n\037b"
-  "ShouldSnapLocationWhenAttached\030\007 \001(\t\022\'\n\037"
-  "bShouldSnapRotationWhenAttached\030\010 \001(\t\022/\n"
+  "ShouldSnapLocationWhenAttached\030\007 \001(\010\022\'\n\037"
+  "bShouldSnapRotationWhenAttached\030\010 \001(\010\022/\n"
   "\014attachParent\030\t \001(\0132\031.unrealpb.UnrealObj"
   "ectRef\0221\n\016attachChildren\030\n \003(\0132\031.unrealp"
   "b.UnrealObjectRef\022\030\n\020attachSocketName\030\013 "
@@ -658,8 +658,6 @@ SceneComponentState::SceneComponentState(const SceneComponentState& from)
   SceneComponentState* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_.attachchildren_){from._impl_.attachchildren_}
-    , decltype(_impl_.bshouldsnaplocationwhenattached_){}
-    , decltype(_impl_.bshouldsnaprotationwhenattached_){}
     , decltype(_impl_.attachsocketname_){}
     , decltype(_impl_.attachparent_){nullptr}
     , decltype(_impl_.relativelocation_){nullptr}
@@ -671,25 +669,11 @@ SceneComponentState::SceneComponentState(const SceneComponentState& from)
     , decltype(_impl_.babsolutescale_){}
     , decltype(_impl_.bvisible_){}
     , decltype(_impl_.bshouldbeattached_){}
+    , decltype(_impl_.bshouldsnaplocationwhenattached_){}
+    , decltype(_impl_.bshouldsnaprotationwhenattached_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.bshouldsnaplocationwhenattached_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.bshouldsnaplocationwhenattached_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_bshouldsnaplocationwhenattached().empty()) {
-    _this->_impl_.bshouldsnaplocationwhenattached_.Set(from._internal_bshouldsnaplocationwhenattached(), 
-      _this->GetArenaForAllocation());
-  }
-  _impl_.bshouldsnaprotationwhenattached_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.bshouldsnaprotationwhenattached_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_bshouldsnaprotationwhenattached().empty()) {
-    _this->_impl_.bshouldsnaprotationwhenattached_.Set(from._internal_bshouldsnaprotationwhenattached(), 
-      _this->GetArenaForAllocation());
-  }
   _impl_.attachsocketname_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
     _impl_.attachsocketname_.Set("", GetArenaForAllocation());
@@ -711,8 +695,8 @@ SceneComponentState::SceneComponentState(const SceneComponentState& from)
     _this->_impl_.relativescale_ = new ::unrealpb::FVector(*from._impl_.relativescale_);
   }
   ::memcpy(&_impl_.removed_, &from._impl_.removed_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.bshouldbeattached_) -
-    reinterpret_cast<char*>(&_impl_.removed_)) + sizeof(_impl_.bshouldbeattached_));
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.bshouldsnaprotationwhenattached_) -
+    reinterpret_cast<char*>(&_impl_.removed_)) + sizeof(_impl_.bshouldsnaprotationwhenattached_));
   // @@protoc_insertion_point(copy_constructor:unrealpb.SceneComponentState)
 }
 
@@ -722,8 +706,6 @@ inline void SceneComponentState::SharedCtor(
   (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.attachchildren_){arena}
-    , decltype(_impl_.bshouldsnaplocationwhenattached_){}
-    , decltype(_impl_.bshouldsnaprotationwhenattached_){}
     , decltype(_impl_.attachsocketname_){}
     , decltype(_impl_.attachparent_){nullptr}
     , decltype(_impl_.relativelocation_){nullptr}
@@ -735,16 +717,10 @@ inline void SceneComponentState::SharedCtor(
     , decltype(_impl_.babsolutescale_){false}
     , decltype(_impl_.bvisible_){false}
     , decltype(_impl_.bshouldbeattached_){false}
+    , decltype(_impl_.bshouldsnaplocationwhenattached_){false}
+    , decltype(_impl_.bshouldsnaprotationwhenattached_){false}
     , /*decltype(_impl_._cached_size_)*/{}
   };
-  _impl_.bshouldsnaplocationwhenattached_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.bshouldsnaplocationwhenattached_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  _impl_.bshouldsnaprotationwhenattached_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.bshouldsnaprotationwhenattached_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   _impl_.attachsocketname_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
     _impl_.attachsocketname_.Set("", GetArenaForAllocation());
@@ -763,8 +739,6 @@ SceneComponentState::~SceneComponentState() {
 inline void SceneComponentState::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.attachchildren_.~RepeatedPtrField();
-  _impl_.bshouldsnaplocationwhenattached_.Destroy();
-  _impl_.bshouldsnaprotationwhenattached_.Destroy();
   _impl_.attachsocketname_.Destroy();
   if (this != internal_default_instance()) delete _impl_.attachparent_;
   if (this != internal_default_instance()) delete _impl_.relativelocation_;
@@ -783,8 +757,6 @@ void SceneComponentState::Clear() {
   (void) cached_has_bits;
 
   _impl_.attachchildren_.Clear();
-  _impl_.bshouldsnaplocationwhenattached_.ClearToEmpty();
-  _impl_.bshouldsnaprotationwhenattached_.ClearToEmpty();
   _impl_.attachsocketname_.ClearToEmpty();
   if (GetArenaForAllocation() == nullptr && _impl_.attachparent_ != nullptr) {
     delete _impl_.attachparent_;
@@ -803,8 +775,8 @@ void SceneComponentState::Clear() {
   }
   _impl_.relativescale_ = nullptr;
   ::memset(&_impl_.removed_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&_impl_.bshouldbeattached_) -
-      reinterpret_cast<char*>(&_impl_.removed_)) + sizeof(_impl_.bshouldbeattached_));
+      reinterpret_cast<char*>(&_impl_.bshouldsnaprotationwhenattached_) -
+      reinterpret_cast<char*>(&_impl_.removed_)) + sizeof(_impl_.bshouldsnaprotationwhenattached_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -862,23 +834,19 @@ const char* SceneComponentState::_InternalParse(const char* ptr, ::_pbi::ParseCo
         } else
           goto handle_unusual;
         continue;
-      // string bShouldSnapLocationWhenAttached = 7;
+      // bool bShouldSnapLocationWhenAttached = 7;
       case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
-          auto str = _internal_mutable_bshouldsnaplocationwhenattached();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 56)) {
+          _impl_.bshouldsnaplocationwhenattached_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "unrealpb.SceneComponentState.bShouldSnapLocationWhenAttached"));
         } else
           goto handle_unusual;
         continue;
-      // string bShouldSnapRotationWhenAttached = 8;
+      // bool bShouldSnapRotationWhenAttached = 8;
       case 8:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 66)) {
-          auto str = _internal_mutable_bshouldsnaprotationwhenattached();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 64)) {
+          _impl_.bshouldsnaprotationwhenattached_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "unrealpb.SceneComponentState.bShouldSnapRotationWhenAttached"));
         } else
           goto handle_unusual;
         continue;
@@ -1002,24 +970,16 @@ uint8_t* SceneComponentState::_InternalSerialize(
     target = ::_pbi::WireFormatLite::WriteBoolToArray(6, this->_internal_bshouldbeattached(), target);
   }
 
-  // string bShouldSnapLocationWhenAttached = 7;
-  if (!this->_internal_bshouldsnaplocationwhenattached().empty()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_bshouldsnaplocationwhenattached().data(), static_cast<int>(this->_internal_bshouldsnaplocationwhenattached().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "unrealpb.SceneComponentState.bShouldSnapLocationWhenAttached");
-    target = stream->WriteStringMaybeAliased(
-        7, this->_internal_bshouldsnaplocationwhenattached(), target);
+  // bool bShouldSnapLocationWhenAttached = 7;
+  if (this->_internal_bshouldsnaplocationwhenattached() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(7, this->_internal_bshouldsnaplocationwhenattached(), target);
   }
 
-  // string bShouldSnapRotationWhenAttached = 8;
-  if (!this->_internal_bshouldsnaprotationwhenattached().empty()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_bshouldsnaprotationwhenattached().data(), static_cast<int>(this->_internal_bshouldsnaprotationwhenattached().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "unrealpb.SceneComponentState.bShouldSnapRotationWhenAttached");
-    target = stream->WriteStringMaybeAliased(
-        8, this->_internal_bshouldsnaprotationwhenattached(), target);
+  // bool bShouldSnapRotationWhenAttached = 8;
+  if (this->_internal_bshouldsnaprotationwhenattached() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(8, this->_internal_bshouldsnaprotationwhenattached(), target);
   }
 
   // .unrealpb.UnrealObjectRef attachParent = 9;
@@ -1091,20 +1051,6 @@ size_t SceneComponentState::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  // string bShouldSnapLocationWhenAttached = 7;
-  if (!this->_internal_bshouldsnaplocationwhenattached().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_bshouldsnaplocationwhenattached());
-  }
-
-  // string bShouldSnapRotationWhenAttached = 8;
-  if (!this->_internal_bshouldsnaprotationwhenattached().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_bshouldsnaprotationwhenattached());
-  }
-
   // string attachSocketName = 11;
   if (!this->_internal_attachsocketname().empty()) {
     total_size += 1 +
@@ -1170,6 +1116,16 @@ size_t SceneComponentState::ByteSizeLong() const {
     total_size += 1 + 1;
   }
 
+  // bool bShouldSnapLocationWhenAttached = 7;
+  if (this->_internal_bshouldsnaplocationwhenattached() != 0) {
+    total_size += 1 + 1;
+  }
+
+  // bool bShouldSnapRotationWhenAttached = 8;
+  if (this->_internal_bshouldsnaprotationwhenattached() != 0) {
+    total_size += 1 + 1;
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
@@ -1189,12 +1145,6 @@ void SceneComponentState::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, co
   (void) cached_has_bits;
 
   _this->_impl_.attachchildren_.MergeFrom(from._impl_.attachchildren_);
-  if (!from._internal_bshouldsnaplocationwhenattached().empty()) {
-    _this->_internal_set_bshouldsnaplocationwhenattached(from._internal_bshouldsnaplocationwhenattached());
-  }
-  if (!from._internal_bshouldsnaprotationwhenattached().empty()) {
-    _this->_internal_set_bshouldsnaprotationwhenattached(from._internal_bshouldsnaprotationwhenattached());
-  }
   if (!from._internal_attachsocketname().empty()) {
     _this->_internal_set_attachsocketname(from._internal_attachsocketname());
   }
@@ -1232,6 +1182,12 @@ void SceneComponentState::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, co
   if (from._internal_bshouldbeattached() != 0) {
     _this->_internal_set_bshouldbeattached(from._internal_bshouldbeattached());
   }
+  if (from._internal_bshouldsnaplocationwhenattached() != 0) {
+    _this->_internal_set_bshouldsnaplocationwhenattached(from._internal_bshouldsnaplocationwhenattached());
+  }
+  if (from._internal_bshouldsnaprotationwhenattached() != 0) {
+    _this->_internal_set_bshouldsnaprotationwhenattached(from._internal_bshouldsnaprotationwhenattached());
+  }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -1253,20 +1209,12 @@ void SceneComponentState::InternalSwap(SceneComponentState* other) {
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   _impl_.attachchildren_.InternalSwap(&other->_impl_.attachchildren_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.bshouldsnaplocationwhenattached_, lhs_arena,
-      &other->_impl_.bshouldsnaplocationwhenattached_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.bshouldsnaprotationwhenattached_, lhs_arena,
-      &other->_impl_.bshouldsnaprotationwhenattached_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &_impl_.attachsocketname_, lhs_arena,
       &other->_impl_.attachsocketname_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(SceneComponentState, _impl_.bshouldbeattached_)
-      + sizeof(SceneComponentState::_impl_.bshouldbeattached_)
+      PROTOBUF_FIELD_OFFSET(SceneComponentState, _impl_.bshouldsnaprotationwhenattached_)
+      + sizeof(SceneComponentState::_impl_.bshouldsnaprotationwhenattached_)
       - PROTOBUF_FIELD_OFFSET(SceneComponentState, _impl_.attachparent_)>(
           reinterpret_cast<char*>(&_impl_.attachparent_),
           reinterpret_cast<char*>(&other->_impl_.attachparent_));

@@ -504,8 +504,6 @@ class CHANNELDUE_API SceneComponentState final :
 
   enum : int {
     kAttachChildrenFieldNumber = 10,
-    kBShouldSnapLocationWhenAttachedFieldNumber = 7,
-    kBShouldSnapRotationWhenAttachedFieldNumber = 8,
     kAttachSocketNameFieldNumber = 11,
     kAttachParentFieldNumber = 9,
     kRelativeLocationFieldNumber = 12,
@@ -517,6 +515,8 @@ class CHANNELDUE_API SceneComponentState final :
     kBAbsoluteScaleFieldNumber = 4,
     kBVisibleFieldNumber = 5,
     kBShouldBeAttachedFieldNumber = 6,
+    kBShouldSnapLocationWhenAttachedFieldNumber = 7,
+    kBShouldSnapRotationWhenAttachedFieldNumber = 8,
   };
   // repeated .unrealpb.UnrealObjectRef attachChildren = 10;
   int attachchildren_size() const;
@@ -535,34 +535,6 @@ class CHANNELDUE_API SceneComponentState final :
   ::unrealpb::UnrealObjectRef* add_attachchildren();
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef >&
       attachchildren() const;
-
-  // string bShouldSnapLocationWhenAttached = 7;
-  void clear_bshouldsnaplocationwhenattached();
-  const std::string& bshouldsnaplocationwhenattached() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_bshouldsnaplocationwhenattached(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_bshouldsnaplocationwhenattached();
-  PROTOBUF_NODISCARD std::string* release_bshouldsnaplocationwhenattached();
-  void set_allocated_bshouldsnaplocationwhenattached(std::string* bshouldsnaplocationwhenattached);
-  private:
-  const std::string& _internal_bshouldsnaplocationwhenattached() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_bshouldsnaplocationwhenattached(const std::string& value);
-  std::string* _internal_mutable_bshouldsnaplocationwhenattached();
-  public:
-
-  // string bShouldSnapRotationWhenAttached = 8;
-  void clear_bshouldsnaprotationwhenattached();
-  const std::string& bshouldsnaprotationwhenattached() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_bshouldsnaprotationwhenattached(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_bshouldsnaprotationwhenattached();
-  PROTOBUF_NODISCARD std::string* release_bshouldsnaprotationwhenattached();
-  void set_allocated_bshouldsnaprotationwhenattached(std::string* bshouldsnaprotationwhenattached);
-  private:
-  const std::string& _internal_bshouldsnaprotationwhenattached() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_bshouldsnaprotationwhenattached(const std::string& value);
-  std::string* _internal_mutable_bshouldsnaprotationwhenattached();
-  public:
 
   // string attachSocketName = 11;
   void clear_attachsocketname();
@@ -704,6 +676,24 @@ class CHANNELDUE_API SceneComponentState final :
   void _internal_set_bshouldbeattached(bool value);
   public:
 
+  // bool bShouldSnapLocationWhenAttached = 7;
+  void clear_bshouldsnaplocationwhenattached();
+  bool bshouldsnaplocationwhenattached() const;
+  void set_bshouldsnaplocationwhenattached(bool value);
+  private:
+  bool _internal_bshouldsnaplocationwhenattached() const;
+  void _internal_set_bshouldsnaplocationwhenattached(bool value);
+  public:
+
+  // bool bShouldSnapRotationWhenAttached = 8;
+  void clear_bshouldsnaprotationwhenattached();
+  bool bshouldsnaprotationwhenattached() const;
+  void set_bshouldsnaprotationwhenattached(bool value);
+  private:
+  bool _internal_bshouldsnaprotationwhenattached() const;
+  void _internal_set_bshouldsnaprotationwhenattached(bool value);
+  public:
+
   // @@protoc_insertion_point(class_scope:unrealpb.SceneComponentState)
  private:
   class _Internal;
@@ -713,8 +703,6 @@ class CHANNELDUE_API SceneComponentState final :
   typedef void DestructorSkippable_;
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef > attachchildren_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr bshouldsnaplocationwhenattached_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr bshouldsnaprotationwhenattached_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr attachsocketname_;
     ::unrealpb::UnrealObjectRef* attachparent_;
     ::unrealpb::FVector* relativelocation_;
@@ -726,6 +714,8 @@ class CHANNELDUE_API SceneComponentState final :
     bool babsolutescale_;
     bool bvisible_;
     bool bshouldbeattached_;
+    bool bshouldsnaplocationwhenattached_;
+    bool bshouldsnaprotationwhenattached_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -950,104 +940,44 @@ inline void SceneComponentState::set_bshouldbeattached(bool value) {
   // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bShouldBeAttached)
 }
 
-// string bShouldSnapLocationWhenAttached = 7;
+// bool bShouldSnapLocationWhenAttached = 7;
 inline void SceneComponentState::clear_bshouldsnaplocationwhenattached() {
-  _impl_.bshouldsnaplocationwhenattached_.ClearToEmpty();
+  _impl_.bshouldsnaplocationwhenattached_ = false;
 }
-inline const std::string& SceneComponentState::bshouldsnaplocationwhenattached() const {
+inline bool SceneComponentState::_internal_bshouldsnaplocationwhenattached() const {
+  return _impl_.bshouldsnaplocationwhenattached_;
+}
+inline bool SceneComponentState::bshouldsnaplocationwhenattached() const {
   // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.bShouldSnapLocationWhenAttached)
   return _internal_bshouldsnaplocationwhenattached();
 }
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void SceneComponentState::set_bshouldsnaplocationwhenattached(ArgT0&& arg0, ArgT... args) {
- 
- _impl_.bshouldsnaplocationwhenattached_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+inline void SceneComponentState::_internal_set_bshouldsnaplocationwhenattached(bool value) {
+  
+  _impl_.bshouldsnaplocationwhenattached_ = value;
+}
+inline void SceneComponentState::set_bshouldsnaplocationwhenattached(bool value) {
+  _internal_set_bshouldsnaplocationwhenattached(value);
   // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bShouldSnapLocationWhenAttached)
 }
-inline std::string* SceneComponentState::mutable_bshouldsnaplocationwhenattached() {
-  std::string* _s = _internal_mutable_bshouldsnaplocationwhenattached();
-  // @@protoc_insertion_point(field_mutable:unrealpb.SceneComponentState.bShouldSnapLocationWhenAttached)
-  return _s;
-}
-inline const std::string& SceneComponentState::_internal_bshouldsnaplocationwhenattached() const {
-  return _impl_.bshouldsnaplocationwhenattached_.Get();
-}
-inline void SceneComponentState::_internal_set_bshouldsnaplocationwhenattached(const std::string& value) {
-  
-  _impl_.bshouldsnaplocationwhenattached_.Set(value, GetArenaForAllocation());
-}
-inline std::string* SceneComponentState::_internal_mutable_bshouldsnaplocationwhenattached() {
-  
-  return _impl_.bshouldsnaplocationwhenattached_.Mutable(GetArenaForAllocation());
-}
-inline std::string* SceneComponentState::release_bshouldsnaplocationwhenattached() {
-  // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.bShouldSnapLocationWhenAttached)
-  return _impl_.bshouldsnaplocationwhenattached_.Release();
-}
-inline void SceneComponentState::set_allocated_bshouldsnaplocationwhenattached(std::string* bshouldsnaplocationwhenattached) {
-  if (bshouldsnaplocationwhenattached != nullptr) {
-    
-  } else {
-    
-  }
-  _impl_.bshouldsnaplocationwhenattached_.SetAllocated(bshouldsnaplocationwhenattached, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.bshouldsnaplocationwhenattached_.IsDefault()) {
-    _impl_.bshouldsnaplocationwhenattached_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.bShouldSnapLocationWhenAttached)
-}
 
-// string bShouldSnapRotationWhenAttached = 8;
+// bool bShouldSnapRotationWhenAttached = 8;
 inline void SceneComponentState::clear_bshouldsnaprotationwhenattached() {
-  _impl_.bshouldsnaprotationwhenattached_.ClearToEmpty();
+  _impl_.bshouldsnaprotationwhenattached_ = false;
 }
-inline const std::string& SceneComponentState::bshouldsnaprotationwhenattached() const {
+inline bool SceneComponentState::_internal_bshouldsnaprotationwhenattached() const {
+  return _impl_.bshouldsnaprotationwhenattached_;
+}
+inline bool SceneComponentState::bshouldsnaprotationwhenattached() const {
   // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.bShouldSnapRotationWhenAttached)
   return _internal_bshouldsnaprotationwhenattached();
 }
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void SceneComponentState::set_bshouldsnaprotationwhenattached(ArgT0&& arg0, ArgT... args) {
- 
- _impl_.bshouldsnaprotationwhenattached_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+inline void SceneComponentState::_internal_set_bshouldsnaprotationwhenattached(bool value) {
+  
+  _impl_.bshouldsnaprotationwhenattached_ = value;
+}
+inline void SceneComponentState::set_bshouldsnaprotationwhenattached(bool value) {
+  _internal_set_bshouldsnaprotationwhenattached(value);
   // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bShouldSnapRotationWhenAttached)
-}
-inline std::string* SceneComponentState::mutable_bshouldsnaprotationwhenattached() {
-  std::string* _s = _internal_mutable_bshouldsnaprotationwhenattached();
-  // @@protoc_insertion_point(field_mutable:unrealpb.SceneComponentState.bShouldSnapRotationWhenAttached)
-  return _s;
-}
-inline const std::string& SceneComponentState::_internal_bshouldsnaprotationwhenattached() const {
-  return _impl_.bshouldsnaprotationwhenattached_.Get();
-}
-inline void SceneComponentState::_internal_set_bshouldsnaprotationwhenattached(const std::string& value) {
-  
-  _impl_.bshouldsnaprotationwhenattached_.Set(value, GetArenaForAllocation());
-}
-inline std::string* SceneComponentState::_internal_mutable_bshouldsnaprotationwhenattached() {
-  
-  return _impl_.bshouldsnaprotationwhenattached_.Mutable(GetArenaForAllocation());
-}
-inline std::string* SceneComponentState::release_bshouldsnaprotationwhenattached() {
-  // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.bShouldSnapRotationWhenAttached)
-  return _impl_.bshouldsnaprotationwhenattached_.Release();
-}
-inline void SceneComponentState::set_allocated_bshouldsnaprotationwhenattached(std::string* bshouldsnaprotationwhenattached) {
-  if (bshouldsnaprotationwhenattached != nullptr) {
-    
-  } else {
-    
-  }
-  _impl_.bshouldsnaprotationwhenattached_.SetAllocated(bshouldsnaprotationwhenattached, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.bshouldsnaprotationwhenattached_.IsDefault()) {
-    _impl_.bshouldsnaprotationwhenattached_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.bShouldSnapRotationWhenAttached)
 }
 
 // .unrealpb.UnrealObjectRef attachParent = 9;
