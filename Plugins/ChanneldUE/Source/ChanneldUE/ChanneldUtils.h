@@ -28,14 +28,39 @@ public:
 		return FRotator(InVec.x(), InVec.y(), InVec.z());
 	}
 
-	// TODO
+	static bool SetIfNotSame(unrealpb::FVector* VectorToSet, const FVector& VectorToCheck)
+	{
+		bool bNotSame = false;
+		if (!FMath::IsNearlyEqual(VectorToSet->x(), VectorToCheck.X))
+		{
+			VectorToSet->set_x(VectorToCheck.X);
+			bNotSame = true;
+		}
+		if (!FMath::IsNearlyEqual(VectorToSet->y(), VectorToCheck.Y))
+		{
+			VectorToSet->set_y(VectorToCheck.Y);
+			bNotSame = true;
+		}
+		if (!FMath::IsNearlyEqual(VectorToSet->z(), VectorToCheck.Z))
+		{
+			VectorToSet->set_z(VectorToCheck.Z);
+			bNotSame = true;
+		}
+		return bNotSame;
+	}
+
 	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, const UWorld* World)
 	{
 		if (!Ref || !World)
 		{
 			return nullptr;
 		}
-		return World->GetNetDriver()->GuidCache->GetObjectFromNetGUID(FNetworkGUID(Ref->netguid()), false);
+		FNetworkGUID NetGUID(Ref->netguid());
+		if (!NetGUID.IsValid())
+		{
+			return nullptr;
+		}
+		return World->GetNetDriver()->GuidCache->GetObjectFromNetGUID(NetGUID, false);
 	}
 
 	static const unrealpb::UnrealObjectRef GetRefOfObject(UObject* Obj)

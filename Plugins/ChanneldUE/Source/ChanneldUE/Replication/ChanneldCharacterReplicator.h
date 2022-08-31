@@ -20,6 +20,16 @@ public:
 
 protected:
 	TWeakObjectPtr<ACharacter> Character;
+
+	// [Client] State is the accumulated channel data of the target object
+	// [Server] State is the accumulated delta change before next send
 	unrealpb::CharacterState* State;
-	unrealpb::BaseMovementInfo* MovementInfo;
+	// [Server] Accumulated delta change.
+	unrealpb::BasedMovementInfo* MovementInfo;
+
+	// [Client] Reflection pointer to set the value back to Character
+	FBasedMovementInfo* BasedMovementValuePtr;
+	float* ServerLastTransformUpdateTimeStampValuePtr;
+	uint8* MovementModeValuePtr;
+	float* AnimRootMotionTranslationScaleValuePtr;
 };

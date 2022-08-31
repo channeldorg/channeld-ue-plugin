@@ -6,16 +6,11 @@ class FChanneldReplicatorBase;
 
 typedef TFunction<FChanneldReplicatorBase* (UObject*)> FReplicatorCreateFunc;
 
-//class CHANNELDUE_API ChanneldReplication
 namespace ChanneldReplication
 {
-	//namespace
-	//{
 	extern TMap<const UClass*, const FReplicatorCreateFunc> ReplicatorRegistry;
-	//}
 
 	extern void RegisterReplicator(const UClass* TargetClass, const FReplicatorCreateFunc& Func);
-
 	extern FChanneldReplicatorBase* FindAndCreateReplicator(UObject* ReplicatedObj);
 }
 

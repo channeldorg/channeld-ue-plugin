@@ -126,31 +126,10 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 
 void FChanneldSceneComponentReplicator::ClearState()
 {
-	FChanneldReplicatorBase::ClearState();
+	bStateChanged = false;
 	State->release_relativelocation();
 	State->release_relativerotation();
 	State->release_relativescale();
-}
-
-bool FChanneldSceneComponentReplicator::SetIfNotSame(unrealpb::FVector* VectorToSet, const FVector& VectorToCheck)
-{
-	bool bNotSame = false;
-	if (!FMath::IsNearlyEqual(VectorToSet->x(), VectorToCheck.X))
-	{
-		VectorToSet->set_x(VectorToCheck.X);
-		bNotSame = true;
-	}
-	if (!FMath::IsNearlyEqual(VectorToSet->y(), VectorToCheck.Y))
-	{
-		VectorToSet->set_y(VectorToCheck.Y);
-		bNotSame = true;
-	}
-	if (!FMath::IsNearlyEqual(VectorToSet->z(), VectorToCheck.Z))
-	{
-		VectorToSet->set_z(VectorToCheck.Z);
-		bNotSame = true;
-	}
-	return bNotSame;
 }
 
 void FChanneldSceneComponentReplicator::OnTransformUpdated(USceneComponent* UpdatedComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport)
@@ -165,19 +144,19 @@ void FChanneldSceneComponentReplicator::OnTransformUpdated(USceneComponent* Upda
 		return;
 	}
 
-	if (SetIfNotSame(RelativeLocationState, SceneComp->GetRelativeLocation()))
+	if (ChanneldUtils::SetIfNotSame(RelativeLocationState, SceneComp->GetRelativeLocation()))
 	{
 		bStateChanged = true;
 		State->mutable_relativelocation()->MergeFrom(*RelativeLocationState);
 	}
 
-	if (SetIfNotSame(RelativeRotationState, SceneComp->GetRelativeRotation().Vector()))
+	if (ChanneldUtils::SetIfNotSame(RelativeRotationState, SceneComp->GetRelativeRotation().Vector()))
 	{
 		bStateChanged = true;
 		State->mutable_relativerotation()->MergeFrom(*RelativeRotationState);
 	}
 
-	if (SetIfNotSame(RelativeScaleState, SceneComp->GetRelativeScale3D()))
+	if (ChanneldUtils::SetIfNotSame(RelativeScaleState, SceneComp->GetRelativeScale3D()))
 	{
 		bStateChanged = true;
 		State->mutable_relativescale()->MergeFrom(*RelativeScaleState);

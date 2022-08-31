@@ -18,12 +18,16 @@ public:
     FORCEINLINE UObject* GetTargetObject() { return TargetObject.Get(); }
     FORCEINLINE uint32 GetNetGUID() { return NetGUID; }
 
+    // [Server] Is the state changed since last send?
     FORCEINLINE bool IsStateChanged() { return bStateChanged; }
+    // [Client] State is the accumulated channel data of the target object
+    // [Server] State is the accumulated delta change before next send
     virtual google::protobuf::Message* GetState() = 0;
+    // [Server] Reset the state change (after send)
 	virtual void ClearState() { bStateChanged = true; }
-	// Collect State change for sending ChannelDataUpdate to channeld
+	// [Server] Collect State change for sending ChannelDataUpdate to channeld
     virtual void Tick(float DeltaTime) = 0;
-	// Apply ChannelDataUpdate received from channeld
+	// [Client] Apply ChannelDataUpdate received from channeld
     virtual void OnStateChanged(const google::protobuf::Message* NewState) = 0;
 
 protected:

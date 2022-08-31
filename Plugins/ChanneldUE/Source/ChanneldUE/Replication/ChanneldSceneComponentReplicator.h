@@ -25,7 +25,6 @@ protected:
 	unrealpb::FVector* RelativeRotationState;
 	unrealpb::FVector* RelativeScaleState;
 
-	static bool SetIfNotSame(unrealpb::FVector* VectorToSet, const FVector& VectorToCheck);
 	static EAttachmentRule GetAttachmentRule(bool bShouldSnapWhenAttached, bool bAbsolute);
 	
 	// Local -> channeld
