@@ -5,10 +5,22 @@
 #include "Engine/ActorChannel.h"
 #include "Engine/PackageMapClient.h"
 #include "Misc/NetworkGuid.h"
+#include "ChanneldReplication.h"
 
 UChanneldReplicationComponent::UChanneldReplicationComponent(const FObjectInitializer& ObjectInitializer)
 {
 	PrimaryComponentTick.bCanEverTick = true;
+}
+
+const google::protobuf::Message* UChanneldReplicationComponent::GetStateFromChannelData(google::protobuf::Message* ChannelData, UObject* TargetObject, uint32 NetGUID, bool& bIsRemoved)
+{
+	bIsRemoved = false;
+	return nullptr;
+}
+
+void UChanneldReplicationComponent::SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UObject* TargetObject, uint32 NetGUID)
+{
+
 }
 
 // Called when the game starts or when spawned
@@ -16,12 +28,28 @@ void UChanneldReplicationComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (GetOwner()->GetIsReplicated())
+	{
+		auto Replicator = ChanneldReplication::FindAndCreateReplicator(GetOwner());
+		if (Replicator)
+		{
+			Replicators.Add(Replicator);
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Unable to add replicator for owner actor: %s"), *GetOwner()->GetFullName());
+		}
+	}
 	for (auto RepComp : GetOwner()->GetReplicatedComponents())
 	{
-		if (RepComp->IsA<USceneComponent>())
+		auto Replicator = ChanneldReplication::FindAndCreateReplicator(RepComp);
+		if (Replicator)
 		{
-			USceneComponent* SceneComp = Cast<USceneComponent>(RepComp);
-			SceneComponentReplicators.Add(new FChanneldSceneComponentReplicator(SceneComp, GetOwner()));
+			Replicators.Add(Replicator);
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Unable to add replicator for component '%s' of actor: %s"), *RepComp->GetFullName(), *GetOwner()->GetFullName());
 		}
 	}
 
@@ -108,12 +136,12 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 	}
 
 	bool bUpdated = false;
-	for (auto Replicator : SceneComponentReplicators)
+	for (auto Replicator : Replicators)
 	{
-		Replicator->Tick(0);
+		Replicator->Tick(FApp::GetDeltaTime());
 		if (Replicator->IsStateChanged())
 		{
-			SetSceneComponentStateToChannelData(Replicator->GetState(), ChannelData, Replicator->GetNetGUID());
+			SetStateToChannelData(Replicator->GetState(), ChannelData, Replicator->GetTargetObject(), Replicator->GetNetGUID());
 			Replicator->ClearState();
 			bUpdated = true;
 		}
@@ -126,17 +154,22 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 {
 	// FIXME: don't update if the source (the connection that updated the channel data) is self.
 
-	for (auto Replicator : SceneComponentReplicators)
+	for (auto Replicator : Replicators)
 	{
-		auto State = GetSceneComponentStateFromChannelData(ChannelData, Replicator->GetNetGUID());
+		bool bIsRemoved = false;
+		auto State = GetStateFromChannelData(ChannelData, Replicator->GetTargetObject(), Replicator->GetNetGUID(), bIsRemoved);
 		if (State)
 		{
-			if (State->removed())
+			if (bIsRemoved)
 			{
-				auto SceneComp = Replicator->GetSceneComponent();
-				if (SceneComp)
+				auto TargetObj = Replicator->GetTargetObject();
+				if (TargetObj == GetOwner())
 				{
-					GetOwner()->RemoveOwnedComponent(SceneComp);
+					GetOwner()->Destroy(true);
+				}
+				else if (TargetObj->IsA<UActorComponent>())
+				{
+					GetOwner()->RemoveOwnedComponent(Cast<UActorComponent>(TargetObj));
 				}
 				continue;
 			}

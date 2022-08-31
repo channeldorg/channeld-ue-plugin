@@ -1,6 +1,12 @@
 #include "ChanneldUE.h"
 #include "ISettingsModule.h"
 #include "ChanneldSettings.h"
+#include "Components/SceneComponent.h"
+#include "GameFramework/Character.h"
+#include "Replication/ChanneldReplicatorBase.h"
+#include "Replication/ChanneldCharacterReplicator.h"
+#include "Replication/ChanneldSceneComponentReplicator.h"
+#include "Replication/ChanneldReplication.h"
 
 #define LOCTEXT_NAMESPACE "FChanneldUEModule"
 
@@ -13,6 +19,9 @@ void FChanneldUEModule::StartupModule()
 			LOCTEXT("RuntimeSettingsDesc", ""),
 			GetMutableDefault<UChanneldSettings>());
 	}
+
+	REGISTER_REPLICATOR(FChanneldSceneComponentReplicator, USceneComponent);
+	REGISTER_REPLICATOR(FChanneldCharacterReplicator, ACharacter);
 }
 
 void FChanneldUEModule::ShutdownModule()

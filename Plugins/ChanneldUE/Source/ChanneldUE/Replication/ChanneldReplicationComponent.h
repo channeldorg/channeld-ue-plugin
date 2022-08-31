@@ -5,11 +5,13 @@
 #include "ChanneldTypes.h"
 #include "ChannelDataProvider.h"
 #include "ProtoMessageObject.h"
+#include "Replication/ChanneldReplicatorBase.h"
 #include "Replication/ChanneldSceneComponentReplicator.h"
 #include "Components/ActorComponent.h"
+#include "google/protobuf/message.h"
 #include "ChanneldReplicationComponent.generated.h"
 
-// Responsible for replicating the owning Actor and its replicated component via ChannelDataUpdate
+// Responsible for replicating the owning Actor and its replicated components via ChannelDataUpdate
 UCLASS(Abstract, ClassGroup = "Channeld")
 class CHANNELDUE_API UChanneldReplicationComponent : public UActorComponent, public IChannelDataProvider
 {
@@ -19,19 +21,18 @@ public:
 	UChanneldReplicationComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 protected:
-
 	UFUNCTION(BlueprintImplementableEvent)
 	UProtoMessageObject* ProvideChannelDataTemplate() const;
 
-	virtual const unrealpb::SceneComponentState* GetSceneComponentStateFromChannelData(google::protobuf::Message* ChannelData, uint32 NetGUID) PURE_VIRTUAL(GetSceneComponentStateFromChannelData, return nullptr;);
-	virtual void SetSceneComponentStateToChannelData(unrealpb::SceneComponentState * State, google::protobuf::Message * ChannelData, uint32 NetGUID) PURE_VIRTUAL(SetSceneComponentStateToChannelData, );
+	virtual const google::protobuf::Message* GetStateFromChannelData(google::protobuf::Message* ChannelData, UObject* TargetObject, uint32 NetGUID, bool& bIsRemoved);
+	virtual void SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UObject* TargetObject, uint32 NetGUID);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EChanneldChannelType ChannelType;
 	ChannelId OwningChannelId;
 	bool bRemoved = false;
 
-	TArray< FChanneldSceneComponentReplicator* > SceneComponentReplicators;
+	TArray< FChanneldReplicatorBase* > Replicators;
 
 public:
 

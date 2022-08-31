@@ -3,29 +3,23 @@
 #include "CoreMinimal.h"
 #include "ChannelDataProvider.h"
 #include "Components/SceneComponent.h"
+#include "ChanneldReplicatorBase.h"
 
-class CHANNELDUE_API FChanneldSceneComponentReplicator
+class CHANNELDUE_API FChanneldSceneComponentReplicator : public FChanneldReplicatorBase
 {
 public:
-	FChanneldSceneComponentReplicator(USceneComponent* InSceneComp, AActor* InActor);
+	FChanneldSceneComponentReplicator(USceneComponent* InSceneComp);
 	virtual ~FChanneldSceneComponentReplicator();
 
-	FORCEINLINE USceneComponent* GetSceneComponent() { return SceneComp.Get(); }
-	FORCEINLINE uint32 GetNetGUID() { return NetGUID; }
-
-	FORCEINLINE bool IsStateChanged() { return bStateChanged; }
-	FORCEINLINE unrealpb::SceneComponentState* GetState() { return State; }
-	FORCEINLINE void ClearState();
-
-	virtual void Tick(float DeltaTime);
+	//~Begin FChanneldReplicatorBase Interface
+	virtual google::protobuf::Message* GetState() override { return State; }
+	virtual void ClearState() override;
+	virtual void Tick(float DeltaTime) override;
+	virtual void OnStateChanged(const google::protobuf::Message* NewState) override;
+	//~End FChanneldReplicatorBase Interface
 
 protected:
 	TWeakObjectPtr<USceneComponent> SceneComp;
-	TWeakObjectPtr<AActor> Actor;
-
-	uint32 NetGUID;
-
-	bool bStateChanged;
 	unrealpb::SceneComponentState* State;
 	unrealpb::FVector* RelativeLocationState;
 	unrealpb::FVector* RelativeRotationState;
@@ -37,8 +31,8 @@ protected:
 	// Local -> channeld
 	virtual void OnTransformUpdated(USceneComponent* UpdatedComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
 
-public:
-	// channeld -> local
-	virtual void OnStateChanged(const unrealpb::SceneComponentState* NewState);
+//public:
+//	// channeld -> local
+//	virtual void OnStateChanged(const unrealpb::SceneComponentState* NewState);
 
 };

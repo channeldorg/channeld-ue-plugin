@@ -81,8 +81,59 @@ struct SceneComponentStateDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SceneComponentStateDefaultTypeInternal _SceneComponentState_default_instance_;
+PROTOBUF_CONSTEXPR RootMotionMontage::RootMotionMontage(
+    ::_pbi::ConstantInitialized) {}
+struct RootMotionMontageDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR RootMotionMontageDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~RootMotionMontageDefaultTypeInternal() {}
+  union {
+    RootMotionMontage _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RootMotionMontageDefaultTypeInternal _RootMotionMontage_default_instance_;
+PROTOBUF_CONSTEXPR BaseMovementInfo::BaseMovementInfo(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.bonename_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.movementbase_)*/nullptr
+  , /*decltype(_impl_.location_)*/nullptr
+  , /*decltype(_impl_.rotation_)*/nullptr
+  , /*decltype(_impl_.bserverhasbasecomponent_)*/false
+  , /*decltype(_impl_.brelativerotation_)*/false
+  , /*decltype(_impl_.bserverhasvelocity_)*/false
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct BaseMovementInfoDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR BaseMovementInfoDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~BaseMovementInfoDefaultTypeInternal() {}
+  union {
+    BaseMovementInfo _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BaseMovementInfoDefaultTypeInternal _BaseMovementInfo_default_instance_;
+PROTOBUF_CONSTEXPR CharacterState::CharacterState(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.rootmotion_)*/nullptr
+  , /*decltype(_impl_.basemovement_)*/nullptr
+  , /*decltype(_impl_.serverlasttransformupdatetimestamp_)*/0
+  , /*decltype(_impl_.removed_)*/false
+  , /*decltype(_impl_.biscrouched_)*/false
+  , /*decltype(_impl_.bproxyisjumpforceapplied_)*/false
+  , /*decltype(_impl_.movementmode_)*/0u
+  , /*decltype(_impl_.animrootmotiontranslationscale_)*/0
+  , /*decltype(_impl_.replaylasttransformupdatetimestamp_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct CharacterStateDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR CharacterStateDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~CharacterStateDefaultTypeInternal() {}
+  union {
+    CharacterState _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 CharacterStateDefaultTypeInternal _CharacterState_default_instance_;
 }  // namespace unrealpb
-static ::_pb::Metadata file_level_metadata_unreal_5fcommon_2eproto[3];
+static ::_pb::Metadata file_level_metadata_unreal_5fcommon_2eproto[6];
 static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_unreal_5fcommon_2eproto = nullptr;
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_unreal_5fcommon_2eproto = nullptr;
 
@@ -123,17 +174,57 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   PROTOBUF_FIELD_OFFSET(::unrealpb::SceneComponentState, _impl_.relativelocation_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::SceneComponentState, _impl_.relativerotation_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::SceneComponentState, _impl_.relativescale_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::RootMotionMontage, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::BaseMovementInfo, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::BaseMovementInfo, _impl_.movementbase_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::BaseMovementInfo, _impl_.bonename_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::BaseMovementInfo, _impl_.location_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::BaseMovementInfo, _impl_.rotation_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::BaseMovementInfo, _impl_.bserverhasbasecomponent_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::BaseMovementInfo, _impl_.brelativerotation_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::BaseMovementInfo, _impl_.bserverhasvelocity_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::CharacterState, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::CharacterState, _impl_.removed_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::CharacterState, _impl_.rootmotion_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::CharacterState, _impl_.basemovement_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::CharacterState, _impl_.serverlasttransformupdatetimestamp_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::CharacterState, _impl_.movementmode_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::CharacterState, _impl_.biscrouched_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::CharacterState, _impl_.bproxyisjumpforceapplied_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::CharacterState, _impl_.animrootmotiontranslationscale_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::CharacterState, _impl_.replaylasttransformupdatetimestamp_),
 };
 static const ::_pbi::MigrationSchema schemas_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::unrealpb::FVector)},
   { 9, -1, -1, sizeof(::unrealpb::UnrealObjectRef)},
   { 16, -1, -1, sizeof(::unrealpb::SceneComponentState)},
+  { 36, -1, -1, sizeof(::unrealpb::RootMotionMontage)},
+  { 42, -1, -1, sizeof(::unrealpb::BaseMovementInfo)},
+  { 55, -1, -1, sizeof(::unrealpb::CharacterState)},
 };
 
 static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eproto[] = {
   &::unrealpb::_FVector_default_instance_._instance,
   &::unrealpb::_UnrealObjectRef_default_instance_._instance,
   &::unrealpb::_SceneComponentState_default_instance_._instance,
+  &::unrealpb::_RootMotionMontage_default_instance_._instance,
+  &::unrealpb::_BaseMovementInfo_default_instance_._instance,
+  &::unrealpb::_CharacterState_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -152,14 +243,29 @@ const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_
   "\001(\t\022+\n\020relativeLocation\030\014 \001(\0132\021.unrealpb"
   ".FVector\022+\n\020relativeRotation\030\r \001(\0132\021.unr"
   "ealpb.FVector\022(\n\rrelativeScale\030\016 \001(\0132\021.u"
-  "nrealpb.FVectorB,Z*channeld.clewcat.com/"
-  "channeld/pkg/unrealpbb\006proto3"
+  "nrealpb.FVector\"\023\n\021RootMotionMontage\"\367\001\n"
+  "\020BaseMovementInfo\022/\n\014movementBase\030\001 \001(\0132"
+  "\031.unrealpb.UnrealObjectRef\022\020\n\010boneName\030\002"
+  " \001(\t\022#\n\010location\030\003 \001(\0132\021.unrealpb.FVecto"
+  "r\022#\n\010rotation\030\004 \001(\0132\021.unrealpb.FVector\022\037"
+  "\n\027bServerHasBaseComponent\030\005 \001(\010\022\031\n\021bRela"
+  "tiveRotation\030\006 \001(\010\022\032\n\022bServerHasVelocity"
+  "\030\007 \001(\010\"\321\002\n\016CharacterState\022\017\n\007removed\030\001 \001"
+  "(\010\022/\n\nrootMotion\030\002 \001(\0132\033.unrealpb.RootMo"
+  "tionMontage\0220\n\014baseMovement\030\003 \001(\0132\032.unre"
+  "alpb.BaseMovementInfo\022*\n\"serverLastTrans"
+  "formUpdateTimeStamp\030\004 \001(\002\022\024\n\014movementMod"
+  "e\030\005 \001(\r\022\023\n\013bIsCrouched\030\006 \001(\010\022 \n\030bProxyIs"
+  "JumpForceApplied\030\007 \001(\010\022&\n\036animRootMotion"
+  "TranslationScale\030\010 \001(\002\022*\n\"replayLastTran"
+  "sformUpdateTimeStamp\030\t \001(\002B,Z*channeld.c"
+  "lewcat.com/channeld/pkg/unrealpbb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_unreal_5fcommon_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_unreal_5fcommon_2eproto = {
-    false, false, 669, descriptor_table_protodef_unreal_5fcommon_2eproto,
+    false, false, 1280, descriptor_table_protodef_unreal_5fcommon_2eproto,
     "unreal_common.proto",
-    &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 3,
+    &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 6,
     schemas_unreal_5fcommon_2eproto, file_default_instances_unreal_5fcommon_2eproto, TableStruct_unreal_5fcommon_2eproto::offsets,
     file_level_metadata_unreal_5fcommon_2eproto, file_level_enum_descriptors_unreal_5fcommon_2eproto,
     file_level_service_descriptors_unreal_5fcommon_2eproto,
@@ -1226,6 +1332,905 @@ void SceneComponentState::InternalSwap(SceneComponentState* other) {
       file_level_metadata_unreal_5fcommon_2eproto[2]);
 }
 
+// ===================================================================
+
+class RootMotionMontage::_Internal {
+ public:
+};
+
+RootMotionMontage::RootMotionMontage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena, is_message_owned) {
+  // @@protoc_insertion_point(arena_constructor:unrealpb.RootMotionMontage)
+}
+RootMotionMontage::RootMotionMontage(const RootMotionMontage& from)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  RootMotionMontage* const _this = this; (void)_this;
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  // @@protoc_insertion_point(copy_constructor:unrealpb.RootMotionMontage)
+}
+
+
+
+
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData RootMotionMontage::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl,
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl,
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RootMotionMontage::GetClassData() const { return &_class_data_; }
+
+
+
+
+
+
+
+::PROTOBUF_NAMESPACE_ID::Metadata RootMotionMontage::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
+      file_level_metadata_unreal_5fcommon_2eproto[3]);
+}
+
+// ===================================================================
+
+class BaseMovementInfo::_Internal {
+ public:
+  static const ::unrealpb::UnrealObjectRef& movementbase(const BaseMovementInfo* msg);
+  static const ::unrealpb::FVector& location(const BaseMovementInfo* msg);
+  static const ::unrealpb::FVector& rotation(const BaseMovementInfo* msg);
+};
+
+const ::unrealpb::UnrealObjectRef&
+BaseMovementInfo::_Internal::movementbase(const BaseMovementInfo* msg) {
+  return *msg->_impl_.movementbase_;
+}
+const ::unrealpb::FVector&
+BaseMovementInfo::_Internal::location(const BaseMovementInfo* msg) {
+  return *msg->_impl_.location_;
+}
+const ::unrealpb::FVector&
+BaseMovementInfo::_Internal::rotation(const BaseMovementInfo* msg) {
+  return *msg->_impl_.rotation_;
+}
+BaseMovementInfo::BaseMovementInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:unrealpb.BaseMovementInfo)
+}
+BaseMovementInfo::BaseMovementInfo(const BaseMovementInfo& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  BaseMovementInfo* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.bonename_){}
+    , decltype(_impl_.movementbase_){nullptr}
+    , decltype(_impl_.location_){nullptr}
+    , decltype(_impl_.rotation_){nullptr}
+    , decltype(_impl_.bserverhasbasecomponent_){}
+    , decltype(_impl_.brelativerotation_){}
+    , decltype(_impl_.bserverhasvelocity_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _impl_.bonename_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.bonename_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_bonename().empty()) {
+    _this->_impl_.bonename_.Set(from._internal_bonename(), 
+      _this->GetArenaForAllocation());
+  }
+  if (from._internal_has_movementbase()) {
+    _this->_impl_.movementbase_ = new ::unrealpb::UnrealObjectRef(*from._impl_.movementbase_);
+  }
+  if (from._internal_has_location()) {
+    _this->_impl_.location_ = new ::unrealpb::FVector(*from._impl_.location_);
+  }
+  if (from._internal_has_rotation()) {
+    _this->_impl_.rotation_ = new ::unrealpb::FVector(*from._impl_.rotation_);
+  }
+  ::memcpy(&_impl_.bserverhasbasecomponent_, &from._impl_.bserverhasbasecomponent_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.bserverhasvelocity_) -
+    reinterpret_cast<char*>(&_impl_.bserverhasbasecomponent_)) + sizeof(_impl_.bserverhasvelocity_));
+  // @@protoc_insertion_point(copy_constructor:unrealpb.BaseMovementInfo)
+}
+
+inline void BaseMovementInfo::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.bonename_){}
+    , decltype(_impl_.movementbase_){nullptr}
+    , decltype(_impl_.location_){nullptr}
+    , decltype(_impl_.rotation_){nullptr}
+    , decltype(_impl_.bserverhasbasecomponent_){false}
+    , decltype(_impl_.brelativerotation_){false}
+    , decltype(_impl_.bserverhasvelocity_){false}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.bonename_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.bonename_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+}
+
+BaseMovementInfo::~BaseMovementInfo() {
+  // @@protoc_insertion_point(destructor:unrealpb.BaseMovementInfo)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void BaseMovementInfo::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.bonename_.Destroy();
+  if (this != internal_default_instance()) delete _impl_.movementbase_;
+  if (this != internal_default_instance()) delete _impl_.location_;
+  if (this != internal_default_instance()) delete _impl_.rotation_;
+}
+
+void BaseMovementInfo::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void BaseMovementInfo::Clear() {
+// @@protoc_insertion_point(message_clear_start:unrealpb.BaseMovementInfo)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.bonename_.ClearToEmpty();
+  if (GetArenaForAllocation() == nullptr && _impl_.movementbase_ != nullptr) {
+    delete _impl_.movementbase_;
+  }
+  _impl_.movementbase_ = nullptr;
+  if (GetArenaForAllocation() == nullptr && _impl_.location_ != nullptr) {
+    delete _impl_.location_;
+  }
+  _impl_.location_ = nullptr;
+  if (GetArenaForAllocation() == nullptr && _impl_.rotation_ != nullptr) {
+    delete _impl_.rotation_;
+  }
+  _impl_.rotation_ = nullptr;
+  ::memset(&_impl_.bserverhasbasecomponent_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.bserverhasvelocity_) -
+      reinterpret_cast<char*>(&_impl_.bserverhasbasecomponent_)) + sizeof(_impl_.bserverhasvelocity_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* BaseMovementInfo::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // .unrealpb.UnrealObjectRef movementBase = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_movementbase(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string boneName = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          auto str = _internal_mutable_bonename();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "unrealpb.BaseMovementInfo.boneName"));
+        } else
+          goto handle_unusual;
+        continue;
+      // .unrealpb.FVector location = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_location(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .unrealpb.FVector rotation = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+          ptr = ctx->ParseMessage(_internal_mutable_rotation(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // bool bServerHasBaseComponent = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
+          _impl_.bserverhasbasecomponent_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // bool bRelativeRotation = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 48)) {
+          _impl_.brelativerotation_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // bool bServerHasVelocity = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 56)) {
+          _impl_.bserverhasvelocity_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* BaseMovementInfo::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.BaseMovementInfo)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .unrealpb.UnrealObjectRef movementBase = 1;
+  if (this->_internal_has_movementbase()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(1, _Internal::movementbase(this),
+        _Internal::movementbase(this).GetCachedSize(), target, stream);
+  }
+
+  // string boneName = 2;
+  if (!this->_internal_bonename().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_bonename().data(), static_cast<int>(this->_internal_bonename().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "unrealpb.BaseMovementInfo.boneName");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_bonename(), target);
+  }
+
+  // .unrealpb.FVector location = 3;
+  if (this->_internal_has_location()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(3, _Internal::location(this),
+        _Internal::location(this).GetCachedSize(), target, stream);
+  }
+
+  // .unrealpb.FVector rotation = 4;
+  if (this->_internal_has_rotation()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(4, _Internal::rotation(this),
+        _Internal::rotation(this).GetCachedSize(), target, stream);
+  }
+
+  // bool bServerHasBaseComponent = 5;
+  if (this->_internal_bserverhasbasecomponent() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(5, this->_internal_bserverhasbasecomponent(), target);
+  }
+
+  // bool bRelativeRotation = 6;
+  if (this->_internal_brelativerotation() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(6, this->_internal_brelativerotation(), target);
+  }
+
+  // bool bServerHasVelocity = 7;
+  if (this->_internal_bserverhasvelocity() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(7, this->_internal_bserverhasvelocity(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.BaseMovementInfo)
+  return target;
+}
+
+size_t BaseMovementInfo::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:unrealpb.BaseMovementInfo)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string boneName = 2;
+  if (!this->_internal_bonename().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_bonename());
+  }
+
+  // .unrealpb.UnrealObjectRef movementBase = 1;
+  if (this->_internal_has_movementbase()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.movementbase_);
+  }
+
+  // .unrealpb.FVector location = 3;
+  if (this->_internal_has_location()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.location_);
+  }
+
+  // .unrealpb.FVector rotation = 4;
+  if (this->_internal_has_rotation()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.rotation_);
+  }
+
+  // bool bServerHasBaseComponent = 5;
+  if (this->_internal_bserverhasbasecomponent() != 0) {
+    total_size += 1 + 1;
+  }
+
+  // bool bRelativeRotation = 6;
+  if (this->_internal_brelativerotation() != 0) {
+    total_size += 1 + 1;
+  }
+
+  // bool bServerHasVelocity = 7;
+  if (this->_internal_bserverhasvelocity() != 0) {
+    total_size += 1 + 1;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData BaseMovementInfo::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    BaseMovementInfo::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*BaseMovementInfo::GetClassData() const { return &_class_data_; }
+
+
+void BaseMovementInfo::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<BaseMovementInfo*>(&to_msg);
+  auto& from = static_cast<const BaseMovementInfo&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.BaseMovementInfo)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_bonename().empty()) {
+    _this->_internal_set_bonename(from._internal_bonename());
+  }
+  if (from._internal_has_movementbase()) {
+    _this->_internal_mutable_movementbase()->::unrealpb::UnrealObjectRef::MergeFrom(
+        from._internal_movementbase());
+  }
+  if (from._internal_has_location()) {
+    _this->_internal_mutable_location()->::unrealpb::FVector::MergeFrom(
+        from._internal_location());
+  }
+  if (from._internal_has_rotation()) {
+    _this->_internal_mutable_rotation()->::unrealpb::FVector::MergeFrom(
+        from._internal_rotation());
+  }
+  if (from._internal_bserverhasbasecomponent() != 0) {
+    _this->_internal_set_bserverhasbasecomponent(from._internal_bserverhasbasecomponent());
+  }
+  if (from._internal_brelativerotation() != 0) {
+    _this->_internal_set_brelativerotation(from._internal_brelativerotation());
+  }
+  if (from._internal_bserverhasvelocity() != 0) {
+    _this->_internal_set_bserverhasvelocity(from._internal_bserverhasvelocity());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void BaseMovementInfo::CopyFrom(const BaseMovementInfo& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.BaseMovementInfo)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool BaseMovementInfo::IsInitialized() const {
+  return true;
+}
+
+void BaseMovementInfo::InternalSwap(BaseMovementInfo* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.bonename_, lhs_arena,
+      &other->_impl_.bonename_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(BaseMovementInfo, _impl_.bserverhasvelocity_)
+      + sizeof(BaseMovementInfo::_impl_.bserverhasvelocity_)
+      - PROTOBUF_FIELD_OFFSET(BaseMovementInfo, _impl_.movementbase_)>(
+          reinterpret_cast<char*>(&_impl_.movementbase_),
+          reinterpret_cast<char*>(&other->_impl_.movementbase_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata BaseMovementInfo::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
+      file_level_metadata_unreal_5fcommon_2eproto[4]);
+}
+
+// ===================================================================
+
+class CharacterState::_Internal {
+ public:
+  static const ::unrealpb::RootMotionMontage& rootmotion(const CharacterState* msg);
+  static const ::unrealpb::BaseMovementInfo& basemovement(const CharacterState* msg);
+};
+
+const ::unrealpb::RootMotionMontage&
+CharacterState::_Internal::rootmotion(const CharacterState* msg) {
+  return *msg->_impl_.rootmotion_;
+}
+const ::unrealpb::BaseMovementInfo&
+CharacterState::_Internal::basemovement(const CharacterState* msg) {
+  return *msg->_impl_.basemovement_;
+}
+CharacterState::CharacterState(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:unrealpb.CharacterState)
+}
+CharacterState::CharacterState(const CharacterState& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  CharacterState* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.rootmotion_){nullptr}
+    , decltype(_impl_.basemovement_){nullptr}
+    , decltype(_impl_.serverlasttransformupdatetimestamp_){}
+    , decltype(_impl_.removed_){}
+    , decltype(_impl_.biscrouched_){}
+    , decltype(_impl_.bproxyisjumpforceapplied_){}
+    , decltype(_impl_.movementmode_){}
+    , decltype(_impl_.animrootmotiontranslationscale_){}
+    , decltype(_impl_.replaylasttransformupdatetimestamp_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_rootmotion()) {
+    _this->_impl_.rootmotion_ = new ::unrealpb::RootMotionMontage(*from._impl_.rootmotion_);
+  }
+  if (from._internal_has_basemovement()) {
+    _this->_impl_.basemovement_ = new ::unrealpb::BaseMovementInfo(*from._impl_.basemovement_);
+  }
+  ::memcpy(&_impl_.serverlasttransformupdatetimestamp_, &from._impl_.serverlasttransformupdatetimestamp_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.replaylasttransformupdatetimestamp_) -
+    reinterpret_cast<char*>(&_impl_.serverlasttransformupdatetimestamp_)) + sizeof(_impl_.replaylasttransformupdatetimestamp_));
+  // @@protoc_insertion_point(copy_constructor:unrealpb.CharacterState)
+}
+
+inline void CharacterState::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.rootmotion_){nullptr}
+    , decltype(_impl_.basemovement_){nullptr}
+    , decltype(_impl_.serverlasttransformupdatetimestamp_){0}
+    , decltype(_impl_.removed_){false}
+    , decltype(_impl_.biscrouched_){false}
+    , decltype(_impl_.bproxyisjumpforceapplied_){false}
+    , decltype(_impl_.movementmode_){0u}
+    , decltype(_impl_.animrootmotiontranslationscale_){0}
+    , decltype(_impl_.replaylasttransformupdatetimestamp_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+}
+
+CharacterState::~CharacterState() {
+  // @@protoc_insertion_point(destructor:unrealpb.CharacterState)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void CharacterState::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (this != internal_default_instance()) delete _impl_.rootmotion_;
+  if (this != internal_default_instance()) delete _impl_.basemovement_;
+}
+
+void CharacterState::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void CharacterState::Clear() {
+// @@protoc_insertion_point(message_clear_start:unrealpb.CharacterState)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (GetArenaForAllocation() == nullptr && _impl_.rootmotion_ != nullptr) {
+    delete _impl_.rootmotion_;
+  }
+  _impl_.rootmotion_ = nullptr;
+  if (GetArenaForAllocation() == nullptr && _impl_.basemovement_ != nullptr) {
+    delete _impl_.basemovement_;
+  }
+  _impl_.basemovement_ = nullptr;
+  ::memset(&_impl_.serverlasttransformupdatetimestamp_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.replaylasttransformupdatetimestamp_) -
+      reinterpret_cast<char*>(&_impl_.serverlasttransformupdatetimestamp_)) + sizeof(_impl_.replaylasttransformupdatetimestamp_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* CharacterState::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // bool removed = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.removed_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .unrealpb.RootMotionMontage rootMotion = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          ptr = ctx->ParseMessage(_internal_mutable_rootmotion(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .unrealpb.BaseMovementInfo baseMovement = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_basemovement(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // float serverLastTransformUpdateTimeStamp = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 37)) {
+          _impl_.serverlasttransformupdatetimestamp_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+          ptr += sizeof(float);
+        } else
+          goto handle_unusual;
+        continue;
+      // uint32 movementMode = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
+          _impl_.movementmode_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // bool bIsCrouched = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 48)) {
+          _impl_.biscrouched_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // bool bProxyIsJumpForceApplied = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 56)) {
+          _impl_.bproxyisjumpforceapplied_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // float animRootMotionTranslationScale = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 69)) {
+          _impl_.animrootmotiontranslationscale_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+          ptr += sizeof(float);
+        } else
+          goto handle_unusual;
+        continue;
+      // float replayLastTransformUpdateTimeStamp = 9;
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 77)) {
+          _impl_.replaylasttransformupdatetimestamp_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+          ptr += sizeof(float);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* CharacterState::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.CharacterState)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // bool removed = 1;
+  if (this->_internal_removed() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(1, this->_internal_removed(), target);
+  }
+
+  // .unrealpb.RootMotionMontage rootMotion = 2;
+  if (this->_internal_has_rootmotion()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(2, _Internal::rootmotion(this),
+        _Internal::rootmotion(this).GetCachedSize(), target, stream);
+  }
+
+  // .unrealpb.BaseMovementInfo baseMovement = 3;
+  if (this->_internal_has_basemovement()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(3, _Internal::basemovement(this),
+        _Internal::basemovement(this).GetCachedSize(), target, stream);
+  }
+
+  // float serverLastTransformUpdateTimeStamp = 4;
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_serverlasttransformupdatetimestamp = this->_internal_serverlasttransformupdatetimestamp();
+  uint32_t raw_serverlasttransformupdatetimestamp;
+  memcpy(&raw_serverlasttransformupdatetimestamp, &tmp_serverlasttransformupdatetimestamp, sizeof(tmp_serverlasttransformupdatetimestamp));
+  if (raw_serverlasttransformupdatetimestamp != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(4, this->_internal_serverlasttransformupdatetimestamp(), target);
+  }
+
+  // uint32 movementMode = 5;
+  if (this->_internal_movementmode() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(5, this->_internal_movementmode(), target);
+  }
+
+  // bool bIsCrouched = 6;
+  if (this->_internal_biscrouched() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(6, this->_internal_biscrouched(), target);
+  }
+
+  // bool bProxyIsJumpForceApplied = 7;
+  if (this->_internal_bproxyisjumpforceapplied() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(7, this->_internal_bproxyisjumpforceapplied(), target);
+  }
+
+  // float animRootMotionTranslationScale = 8;
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_animrootmotiontranslationscale = this->_internal_animrootmotiontranslationscale();
+  uint32_t raw_animrootmotiontranslationscale;
+  memcpy(&raw_animrootmotiontranslationscale, &tmp_animrootmotiontranslationscale, sizeof(tmp_animrootmotiontranslationscale));
+  if (raw_animrootmotiontranslationscale != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(8, this->_internal_animrootmotiontranslationscale(), target);
+  }
+
+  // float replayLastTransformUpdateTimeStamp = 9;
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_replaylasttransformupdatetimestamp = this->_internal_replaylasttransformupdatetimestamp();
+  uint32_t raw_replaylasttransformupdatetimestamp;
+  memcpy(&raw_replaylasttransformupdatetimestamp, &tmp_replaylasttransformupdatetimestamp, sizeof(tmp_replaylasttransformupdatetimestamp));
+  if (raw_replaylasttransformupdatetimestamp != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(9, this->_internal_replaylasttransformupdatetimestamp(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.CharacterState)
+  return target;
+}
+
+size_t CharacterState::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:unrealpb.CharacterState)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .unrealpb.RootMotionMontage rootMotion = 2;
+  if (this->_internal_has_rootmotion()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.rootmotion_);
+  }
+
+  // .unrealpb.BaseMovementInfo baseMovement = 3;
+  if (this->_internal_has_basemovement()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.basemovement_);
+  }
+
+  // float serverLastTransformUpdateTimeStamp = 4;
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_serverlasttransformupdatetimestamp = this->_internal_serverlasttransformupdatetimestamp();
+  uint32_t raw_serverlasttransformupdatetimestamp;
+  memcpy(&raw_serverlasttransformupdatetimestamp, &tmp_serverlasttransformupdatetimestamp, sizeof(tmp_serverlasttransformupdatetimestamp));
+  if (raw_serverlasttransformupdatetimestamp != 0) {
+    total_size += 1 + 4;
+  }
+
+  // bool removed = 1;
+  if (this->_internal_removed() != 0) {
+    total_size += 1 + 1;
+  }
+
+  // bool bIsCrouched = 6;
+  if (this->_internal_biscrouched() != 0) {
+    total_size += 1 + 1;
+  }
+
+  // bool bProxyIsJumpForceApplied = 7;
+  if (this->_internal_bproxyisjumpforceapplied() != 0) {
+    total_size += 1 + 1;
+  }
+
+  // uint32 movementMode = 5;
+  if (this->_internal_movementmode() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_movementmode());
+  }
+
+  // float animRootMotionTranslationScale = 8;
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_animrootmotiontranslationscale = this->_internal_animrootmotiontranslationscale();
+  uint32_t raw_animrootmotiontranslationscale;
+  memcpy(&raw_animrootmotiontranslationscale, &tmp_animrootmotiontranslationscale, sizeof(tmp_animrootmotiontranslationscale));
+  if (raw_animrootmotiontranslationscale != 0) {
+    total_size += 1 + 4;
+  }
+
+  // float replayLastTransformUpdateTimeStamp = 9;
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_replaylasttransformupdatetimestamp = this->_internal_replaylasttransformupdatetimestamp();
+  uint32_t raw_replaylasttransformupdatetimestamp;
+  memcpy(&raw_replaylasttransformupdatetimestamp, &tmp_replaylasttransformupdatetimestamp, sizeof(tmp_replaylasttransformupdatetimestamp));
+  if (raw_replaylasttransformupdatetimestamp != 0) {
+    total_size += 1 + 4;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData CharacterState::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    CharacterState::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*CharacterState::GetClassData() const { return &_class_data_; }
+
+
+void CharacterState::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<CharacterState*>(&to_msg);
+  auto& from = static_cast<const CharacterState&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.CharacterState)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_has_rootmotion()) {
+    _this->_internal_mutable_rootmotion()->::unrealpb::RootMotionMontage::MergeFrom(
+        from._internal_rootmotion());
+  }
+  if (from._internal_has_basemovement()) {
+    _this->_internal_mutable_basemovement()->::unrealpb::BaseMovementInfo::MergeFrom(
+        from._internal_basemovement());
+  }
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_serverlasttransformupdatetimestamp = from._internal_serverlasttransformupdatetimestamp();
+  uint32_t raw_serverlasttransformupdatetimestamp;
+  memcpy(&raw_serverlasttransformupdatetimestamp, &tmp_serverlasttransformupdatetimestamp, sizeof(tmp_serverlasttransformupdatetimestamp));
+  if (raw_serverlasttransformupdatetimestamp != 0) {
+    _this->_internal_set_serverlasttransformupdatetimestamp(from._internal_serverlasttransformupdatetimestamp());
+  }
+  if (from._internal_removed() != 0) {
+    _this->_internal_set_removed(from._internal_removed());
+  }
+  if (from._internal_biscrouched() != 0) {
+    _this->_internal_set_biscrouched(from._internal_biscrouched());
+  }
+  if (from._internal_bproxyisjumpforceapplied() != 0) {
+    _this->_internal_set_bproxyisjumpforceapplied(from._internal_bproxyisjumpforceapplied());
+  }
+  if (from._internal_movementmode() != 0) {
+    _this->_internal_set_movementmode(from._internal_movementmode());
+  }
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_animrootmotiontranslationscale = from._internal_animrootmotiontranslationscale();
+  uint32_t raw_animrootmotiontranslationscale;
+  memcpy(&raw_animrootmotiontranslationscale, &tmp_animrootmotiontranslationscale, sizeof(tmp_animrootmotiontranslationscale));
+  if (raw_animrootmotiontranslationscale != 0) {
+    _this->_internal_set_animrootmotiontranslationscale(from._internal_animrootmotiontranslationscale());
+  }
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_replaylasttransformupdatetimestamp = from._internal_replaylasttransformupdatetimestamp();
+  uint32_t raw_replaylasttransformupdatetimestamp;
+  memcpy(&raw_replaylasttransformupdatetimestamp, &tmp_replaylasttransformupdatetimestamp, sizeof(tmp_replaylasttransformupdatetimestamp));
+  if (raw_replaylasttransformupdatetimestamp != 0) {
+    _this->_internal_set_replaylasttransformupdatetimestamp(from._internal_replaylasttransformupdatetimestamp());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void CharacterState::CopyFrom(const CharacterState& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.CharacterState)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool CharacterState::IsInitialized() const {
+  return true;
+}
+
+void CharacterState::InternalSwap(CharacterState* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(CharacterState, _impl_.replaylasttransformupdatetimestamp_)
+      + sizeof(CharacterState::_impl_.replaylasttransformupdatetimestamp_)
+      - PROTOBUF_FIELD_OFFSET(CharacterState, _impl_.rootmotion_)>(
+          reinterpret_cast<char*>(&_impl_.rootmotion_),
+          reinterpret_cast<char*>(&other->_impl_.rootmotion_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata CharacterState::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
+      file_level_metadata_unreal_5fcommon_2eproto[5]);
+}
+
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace unrealpb
 PROTOBUF_NAMESPACE_OPEN
@@ -1240,6 +2245,18 @@ Arena::CreateMaybeMessage< ::unrealpb::UnrealObjectRef >(Arena* arena) {
 template<> PROTOBUF_NOINLINE ::unrealpb::SceneComponentState*
 Arena::CreateMaybeMessage< ::unrealpb::SceneComponentState >(Arena* arena) {
   return Arena::CreateMessageInternal< ::unrealpb::SceneComponentState >(arena);
+}
+template<> PROTOBUF_NOINLINE ::unrealpb::RootMotionMontage*
+Arena::CreateMaybeMessage< ::unrealpb::RootMotionMontage >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::unrealpb::RootMotionMontage >(arena);
+}
+template<> PROTOBUF_NOINLINE ::unrealpb::BaseMovementInfo*
+Arena::CreateMaybeMessage< ::unrealpb::BaseMovementInfo >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::unrealpb::BaseMovementInfo >(arena);
+}
+template<> PROTOBUF_NOINLINE ::unrealpb::CharacterState*
+Arena::CreateMaybeMessage< ::unrealpb::CharacterState >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::unrealpb::CharacterState >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

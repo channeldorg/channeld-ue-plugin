@@ -1,23 +1,18 @@
 #include "ChanneldSceneComponentReplicator.h"
 #include "unreal_common.pb.h"
-#include "ChanneldActor.h"
 #include "ChanneldUtils.h"
 #include "Net/UnrealNetwork.h"
 
-FChanneldSceneComponentReplicator::FChanneldSceneComponentReplicator(USceneComponent* InSceneComp, AActor* InActor)
+FChanneldSceneComponentReplicator::FChanneldSceneComponentReplicator(USceneComponent* InSceneComp) : FChanneldReplicatorBase(InSceneComp)
 {
 	SceneComp = InSceneComp;
-	Actor = InActor;
 
 	// Remove the registered DOREP() properties in the SceneComponent
 	TArray<FLifetimeProperty> RepProps;
 	DisableAllReplicatedPropertiesOfClass(InSceneComp->GetClass(), USceneComponent::StaticClass(), EFieldIteratorFlags::ExcludeSuper, RepProps);
 
-	NetGUID = Actor->GetWorld()->GetNetDriver()->GuidCache->GetOrAssignNetGUID(InSceneComp).Value;
-
 	SceneComp->TransformUpdated.AddRaw(this, &FChanneldSceneComponentReplicator::OnTransformUpdated);
 
-	bStateChanged = false;
 	State = new unrealpb::SceneComponentState;
 	RelativeLocationState = new unrealpb::FVector;
 	RelativeRotationState = new unrealpb::FVector;
@@ -39,12 +34,7 @@ FChanneldSceneComponentReplicator::~FChanneldSceneComponentReplicator()
 
 void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 {
-	if (!Actor.IsValid())
-	{
-		return;
-	}
-
-	if (!SceneComp.IsValid())
+	if (!SceneComp.IsValid() || !SceneComp->GetOwner())
 	{
 		return;
 	}
@@ -93,7 +83,7 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 	}
 	*/
 
-	UObject* AttachParent = ChanneldUtils::GetObjectByRef(State->mutable_attachparent(), Actor->GetWorld());
+	UObject* AttachParent = ChanneldUtils::GetObjectByRef(State->mutable_attachparent(), SceneComp->GetWorld());
 	if (AttachParent != SceneComp->GetAttachParent())
 	{
 		if (SceneComp->GetAttachParent() == nullptr)
@@ -134,12 +124,12 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 	*/
 }
 
-FORCEINLINE void FChanneldSceneComponentReplicator::ClearState()
+void FChanneldSceneComponentReplicator::ClearState()
 {
+	FChanneldReplicatorBase::ClearState();
 	State->release_relativelocation();
 	State->release_relativerotation();
 	State->release_relativescale();
-	bStateChanged = false;
 }
 
 bool FChanneldSceneComponentReplicator::SetIfNotSame(unrealpb::FVector* VectorToSet, const FVector& VectorToCheck)
@@ -165,12 +155,12 @@ bool FChanneldSceneComponentReplicator::SetIfNotSame(unrealpb::FVector* VectorTo
 
 void FChanneldSceneComponentReplicator::OnTransformUpdated(USceneComponent* UpdatedComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport)
 {
-	if (!Actor.IsValid() || !Actor->HasAuthority())
+	if (!SceneComp.IsValid() || !SceneComp->GetOwner())
 	{
 		return;
 	}
 
-	if (!SceneComp.IsValid())
+	if (!SceneComp->GetOwner()->HasAuthority())
 	{
 		return;
 	}
@@ -194,14 +184,9 @@ void FChanneldSceneComponentReplicator::OnTransformUpdated(USceneComponent* Upda
 	}
 }
 
-void FChanneldSceneComponentReplicator::OnStateChanged(const unrealpb::SceneComponentState* NewState)
+void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::Message* NewState)
 {
-	if (!Actor.IsValid())
-	{
-		return;
-	}
-
-	if (!SceneComp.IsValid())
+	if (!SceneComp.IsValid() || !SceneComp->GetOwner())
 	{
 		return;
 	}
@@ -258,7 +243,7 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const unrealpb::SceneComp
 
 	if (State->has_attachparent())
 	{
-		auto AttachParent = Cast<USceneComponent>(ChanneldUtils::GetObjectByRef(&State->attachparent(), Actor->GetWorld()));
+		auto AttachParent = Cast<USceneComponent>(ChanneldUtils::GetObjectByRef(&State->attachparent(), SceneComp->GetWorld()));
 		if (AttachParent && AttachParent != SceneComp->GetAttachParent())
 		{
 			FName AttachSocketName; 
