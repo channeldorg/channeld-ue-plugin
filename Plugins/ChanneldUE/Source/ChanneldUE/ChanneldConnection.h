@@ -10,7 +10,7 @@
 class UChanneldConnection;
 
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FChanneldMessageDelegate, UChanneldConnection*, ChannelId, const google::protobuf::Message*)
-DECLARE_MULTICAST_DELEGATE_ThreeParams(FUserSpaceMessageDelegate, ChannelId, ConnectionId, const std::string&)
+DECLARE_MULTICAST_DELEGATE_FourParams(FUserSpaceMessageDelegate, uint32, ChannelId, ConnectionId, const std::string&)
 DECLARE_MULTICAST_DELEGATE_OneParam(FChanneldAuthenticatedDelegate, UChanneldConnection*);
 
 typedef TFunction<void(UChanneldConnection*, ChannelId, const google::protobuf::Message*)> FChanneldMessageHandlerFunc;
@@ -156,6 +156,7 @@ private:
 
 	struct MessageQueueEntry
 	{
+		uint32 MsgType;
 		google::protobuf::Message* Msg;
 		ChannelId ChId;
 		uint32 StubId;
@@ -181,7 +182,7 @@ private:
 
 	uint32 AddRpcCallback(const FChanneldMessageHandlerFunc& HandlerFunc);
 
-	void HandleServerForwardMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleServerForwardMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg, uint32 MsgType);
 	void HandleAuth(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleCreateChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleRemoveChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);

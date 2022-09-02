@@ -10,6 +10,16 @@ typedef uint32 ConnectionId;
 
 typedef uint32 ChannelId;
 
+// User-space message types used in ChanneldUE
+enum MessageType : uint32 {
+	// Used by LowLevelSend in NetConnection/NetDriver.
+	MessageType_LOW_LEVEL = 100,
+	// Used by ChanneldGameInstanceSubsystem to broadcast the ProtoMessageObject from server side. The message is packed as google::protobuf::any to support anonymous types.
+	MessageType_ANY = 101,
+	// Used by ReplicationDriver to send/receive UE's native RPC.
+	MessageType_RPC = 123,
+};
+
 /*
 UENUM(BlueprintType)
 enum class EChannelId : ChannelId

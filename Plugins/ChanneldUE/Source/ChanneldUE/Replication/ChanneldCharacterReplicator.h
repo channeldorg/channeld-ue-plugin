@@ -18,6 +18,9 @@ public:
 	virtual void OnStateChanged(const google::protobuf::Message* NewState) override;
 	//~End FChanneldReplicatorBase Interface
 
+	virtual TSharedPtr<google::protobuf::Message> SerializeFunctionParams(UFunction* Func, void* Params) override;
+	virtual void* DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload) override;
+
 protected:
 	TWeakObjectPtr<ACharacter> Character;
 
@@ -32,4 +35,17 @@ protected:
 	float* ServerLastTransformUpdateTimeStampValuePtr;
 	uint8* MovementModeValuePtr;
 	float* AnimRootMotionTranslationScaleValuePtr;
+
+private:
+
+	struct ServerMovePackedParams
+	{
+		FCharacterServerMovePackedBits PackedBits;
+	};
+
+	struct ClientMoveResponsePackedParams
+	{
+		FCharacterMoveResponsePackedBits PackedBits;
+	};
+
 };

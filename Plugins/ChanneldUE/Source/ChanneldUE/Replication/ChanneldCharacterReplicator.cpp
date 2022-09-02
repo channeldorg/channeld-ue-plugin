@@ -244,3 +244,57 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 		*AnimRootMotionTranslationScaleValuePtr = State->animrootmotiontranslationscale();
 	}
 }
+
+TSharedPtr<google::protobuf::Message> FChanneldCharacterReplicator::SerializeFunctionParams(UFunction* Func, void* Params)
+{
+	if (Func->GetFName() == FName("ServerMovePacked"))
+	{
+		ServerMovePackedParams* TypedParams = (ServerMovePackedParams*)Params;
+		char* Data = (char*)TypedParams->PackedBits.DataBits.GetData();
+		auto Msg = MakeShared<unrealpb::Character_ServerMovePacked_Params>();
+		Msg->set_packedbits(Data, FMath::DivideAndRoundUp(TypedParams->PackedBits.DataBits.Num(), 8));
+		return Msg;
+	}
+	else if (Func->GetFName() == FName("ClientMoveResponsePacked"))
+	{
+		ClientMoveResponsePackedParams* TypedParams = (ClientMoveResponsePackedParams*)Params;
+		char* Data = (char*)TypedParams->PackedBits.DataBits.GetData();
+		auto Msg = MakeShared<unrealpb::Character_ClientMoveResponsePacked_Params>();
+		Msg->set_packedbits(Data, FMath::DivideAndRoundUp(TypedParams->PackedBits.DataBits.Num(), 8));
+		return Msg;
+	}
+	return nullptr;
+}
+
+void* FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload)
+{
+	if (Func->GetFName() == FName("ServerMovePacked"))
+	{
+		unrealpb::Character_ServerMovePacked_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		auto Params = MakeShared<ServerMovePackedParams>();
+
+		// ----------------------------------------------------
+		// UCharacterMovementComponent::CallServerMovePacked
+		// ----------------------------------------------------
+		Params->PackedBits.DataBits.SetNumUninitialized(Msg.packedbits().size()*8);
+		FMemory::Memcpy(Params->PackedBits.DataBits.GetData(), &Msg.packedbits(), Msg.packedbits().size());
+
+		return &Params.Get();
+	}
+	else if (Func->GetFName() == FName("ClientMoveResponsePacked"))
+	{
+		unrealpb::Character_ClientMoveResponsePacked_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		auto Params = MakeShared<ClientMoveResponsePackedParams>();
+
+		// ----------------------------------------------------
+		// UCharacterMovementComponent::ServerSendMoveResponse
+		// ----------------------------------------------------
+		Params->PackedBits.DataBits.SetNumUninitialized(Msg.packedbits().size() * 8);
+		FMemory::Memcpy(Params->PackedBits.DataBits.GetData(), &Msg.packedbits(), Msg.packedbits().size());
+
+		return &Params.Get();
+	}
+	return nullptr;
+}
