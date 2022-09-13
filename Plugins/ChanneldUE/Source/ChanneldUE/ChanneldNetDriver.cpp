@@ -71,7 +71,6 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 	}
 	else if (MsgType == MessageType_RPC)
 	{
-		auto RepDriver = CastChecked<UChanneldReplicationDriver>(GetReplicationDriver());
 		unrealpb::RemoteFunctionMessage Msg;
 		if (!Msg.ParseFromString(Payload))
 		{
@@ -351,21 +350,30 @@ void UChanneldNetDriver::LowLevelSend(TSharedPtr<const FInternetAddr> Address, v
 		if (ConnToChanneld->IsServer())
 		{
 			ConnectionId ClientConnId = AddrToConnId(*Address);
-			channeldpb::ServerForwardMessage ServerForwardMessage;
-			ServerForwardMessage.set_clientconnid(ClientConnId);
-			ServerForwardMessage.set_payload(DataToSend, DataSize);
-			CLOCK_CYCLES(SendCycles);
-			ConnToChanneld->Send(LowLevelSendToChannelId.Get(), channeldpb::USER_SPACE_START, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
-			UNCLOCK_CYCLES(SendCycles);
+			SendDataToClient(MessageType_LOW_LEVEL, ClientConnId, DataToSend, DataSize);
 		}
 		else
 		{
-			CLOCK_CYCLES(SendCycles);
-			ConnToChanneld->SendRaw(LowLevelSendToChannelId.Get(), channeldpb::USER_SPACE_START, DataToSend, DataSize);
-			UNCLOCK_CYCLES(SendCycles);
+			SendDataToServer(MessageType_LOW_LEVEL, DataToSend, DataSize);
 		}
 	}
-	
+}
+
+void UChanneldNetDriver::SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, uint8* DataToSend, int32 DataSize)
+{
+	channeldpb::ServerForwardMessage ServerForwardMessage;
+	ServerForwardMessage.set_clientconnid(ClientConnId);
+	ServerForwardMessage.set_payload(DataToSend, DataSize);
+	CLOCK_CYCLES(SendCycles);
+	ConnToChanneld->Send(LowLevelSendToChannelId.Get(), MsgType, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
+	UNCLOCK_CYCLES(SendCycles);
+}
+
+void UChanneldNetDriver::SendDataToServer(uint32 MsgType, uint8* DataToSend, int32 DataSize)
+{
+	CLOCK_CYCLES(SendCycles);
+	ConnToChanneld->SendRaw(LowLevelSendToChannelId.Get(), MsgType, DataToSend, DataSize);
+	UNCLOCK_CYCLES(SendCycles);
 }
 
 void UChanneldNetDriver::LowLevelDestroy()
@@ -377,8 +385,8 @@ void UChanneldNetDriver::LowLevelDestroy()
 		ConnToChanneld->OnAuthenticated.RemoveAll(this);
 		ConnToChanneld->OnUserSpaceMessageReceived.RemoveAll(this);
 		ConnToChanneld->RemoveMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this);
-		ConnToChanneld->RemoveMessageHandler(MessageType_LOW_LEVEL, this);
-		ConnToChanneld->RemoveMessageHandler(MessageType_RPC, this);
+		//ConnToChanneld->RemoveMessageHandler(MessageType_LOW_LEVEL, this);
+		//ConnToChanneld->RemoveMessageHandler(MessageType_RPC, this);
 
 		/*
 		// Only disconnect when the connection is owned by the net driver.
@@ -432,7 +440,7 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 
 void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject /*= nullptr*/)
 {
-	UE_LOG(LogChanneld, Verbose, TEXT("Process %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
+	UE_LOG(LogChanneld, Verbose, TEXT("Send RPC %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
 
 	auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
 	if (RepComp)
@@ -442,12 +450,37 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 		{
 			auto ChanneldConn = GEngine->GetEngineSubsystem<UChanneldConnection>();
 			unrealpb::RemoteFunctionMessage RpcMsg;
-			RpcMsg.mutable_targetobj()->MergeFrom(ChanneldUtils::GetRefOfObject(Actor));
+ 			RpcMsg.mutable_targetobj()->MergeFrom(ChanneldUtils::GetRefOfObject(Actor));
 			auto FuncName = Function->GetName();
 			RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
 			RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
-			ChanneldConn->Send(0, MessageType_RPC, RpcMsg);
-			return;
+			uint8* Data = new uint8[RpcMsg.ByteSizeLong()];
+			if (RpcMsg.SerializeToArray(Data, RpcMsg.GetCachedSize()))
+			{
+				if (ConnToChanneld->IsClient())
+				{
+					SendDataToServer(MessageType_RPC, Data, RpcMsg.GetCachedSize());
+					return;
+				}
+				else
+				{
+					auto NetConn = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
+					if (NetConn)
+					{
+						SendDataToClient(MessageType_RPC, NetConn->GetConnId(), Data, RpcMsg.GetCachedSize());
+						return;
+					}
+					else
+					{
+						UE_LOG(LogChanneld, Warning, TEXT("Failed to send RPC %s::%s as the actor doesn't have any client connection"), *Actor->GetName(), *Function->GetName());
+					}
+				}
+			}
+			else
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("Failed to serialize RPC message"));
+			}
+			// TODO: delete Data?
 		}
 	}
 	Super::ProcessRemoteFunction(Actor, Function, Parameters, OutParms, Stack, SubObject);
@@ -455,6 +488,8 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 
 void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, TSet<FNetworkGUID>& UnmappedGuids)
 {
+	UE_LOG(LogChanneld, Verbose, TEXT("Received RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
+
 	UFunction* Function = Actor->FindFunction(FunctionName);
 	check(Function);
 

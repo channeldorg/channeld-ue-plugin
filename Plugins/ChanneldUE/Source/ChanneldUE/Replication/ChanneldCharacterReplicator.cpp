@@ -273,6 +273,10 @@ void* FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, c
 		unrealpb::Character_ServerMovePacked_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ServerMovePackedParams>();
+		bool bIDC;
+		FArchive EmptyArchive;
+		// Hack the package map into to the PackedBits for further deserialization. IDC = I don't care.
+		Params->PackedBits.NetSerialize(EmptyArchive, Character->GetNetConnection()->PackageMap, bIDC);
 
 		// ----------------------------------------------------
 		// UCharacterMovementComponent::CallServerMovePacked
@@ -287,6 +291,10 @@ void* FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, c
 		unrealpb::Character_ClientMoveResponsePacked_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ClientMoveResponsePackedParams>();
+		bool bIDC;
+		FArchive EmptyArchive;
+		// Hack the package map into to the PackedBits for further deserialization. IDC = I don't care.
+		Params->PackedBits.NetSerialize(EmptyArchive, Character->GetNetConnection()->PackageMap, bIDC);
 
 		// ----------------------------------------------------
 		// UCharacterMovementComponent::ServerSendMoveResponse

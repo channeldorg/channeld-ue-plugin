@@ -65,7 +65,7 @@ public:
 		Entry.Delegate.AddUObject(InUserObject, InFunc);
 	}
 
-	FORCEINLINE void RemoveMessageHandler(uint32 MsgType, const void* InUserObject)
+	void RemoveMessageHandler(uint32 MsgType, const void* InUserObject)
 	{
 		auto Entry = MessageHandlers.Find(MsgType);
 		if (Entry == nullptr)

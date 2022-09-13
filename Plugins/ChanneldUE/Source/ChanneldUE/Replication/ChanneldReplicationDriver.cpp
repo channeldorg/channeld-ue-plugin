@@ -9,7 +9,7 @@ UChanneldReplicationDriver::UChanneldReplicationDriver()
 {
 
 }
-
+/*
 bool UChanneldReplicationDriver::ProcessRemoteFunction(class AActor* Actor, UFunction* Function, void* Parameters, FOutParmRec* OutParms, FFrame* Stack, UObject* SubObject)
 {
 	UE_LOG(LogChanneld, Verbose, TEXT("Process %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
@@ -120,6 +120,7 @@ bool UChanneldReplicationDriver::ProcessRemoteFunction(class AActor* Actor, UFun
 
 	return true;
 }
+*/
 
 UActorChannel* UChanneldReplicationDriver::FindOrCreateChannel(AActor* Actor, UNetConnection* Connection)
 {

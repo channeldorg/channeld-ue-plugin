@@ -104,5 +104,8 @@ private:
 	void HandleRemoteFunctionMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 
+	void SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, uint8* DataToSend, int32 DataSize);
+	void SendDataToServer(uint32 MsgType, uint8* DataToSend, int32 DataSize);
+
 	UChanneldGameInstanceSubsystem* GetSubsystem();
 };
