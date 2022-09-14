@@ -37,7 +37,11 @@ FChanneldCharacterReplicator::FChanneldCharacterReplicator(UObject* InTargetObj)
 		AnimRootMotionTranslationScaleValuePtr = Property->ContainerPtrToValuePtr<float>(Character.Get());
 		check(AnimRootMotionTranslationScaleValuePtr);
 	}
-	
+	{
+		auto Property = CastFieldChecked<const FFloatProperty>(Character->GetClass()->FindPropertyByName(FName("ReplayLastTransformUpdateTimeStamp")));
+		ReplayLastTransformUpdateTimeStampPtr = Property->ContainerPtrToValuePtr<float>(Character.Get());
+		check(ReplayLastTransformUpdateTimeStampPtr);
+	}
 }
 
 FChanneldCharacterReplicator::~FChanneldCharacterReplicator()
@@ -153,7 +157,11 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	// TODO: ReplayLastTransformUpdateTimeStamp
+	if (!FMath::IsNearlyEqual(State->replaylasttransformupdatetimestamp(), *ReplayLastTransformUpdateTimeStampPtr))
+	{
+		StateDelta.set_replaylasttransformupdatetimestamp(*ReplayLastTransformUpdateTimeStampPtr);
+		bStateChanged = true;
+	}
 
 	State->MergeFrom(StateDelta);
 }
@@ -218,7 +226,7 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 
 	State->MergeFrom(*NewState);
 
-	if (State->serverlasttransformupdatetimestamp() != Character->GetReplicatedServerLastTransformUpdateTimeStamp())
+	if (!FMath::IsNearlyEqual(State->serverlasttransformupdatetimestamp(), Character->GetReplicatedServerLastTransformUpdateTimeStamp()))
 	{
 		*ServerLastTransformUpdateTimeStampValuePtr = State->serverlasttransformupdatetimestamp();
 	}
@@ -239,9 +247,15 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 		Character->bProxyIsJumpForceApplied = State->bproxyisjumpforceapplied();
 	}
 
-	if (State->animrootmotiontranslationscale() != Character->GetAnimRootMotionTranslationScale())
+	if (!FMath::IsNearlyEqual(State->animrootmotiontranslationscale(), Character->GetAnimRootMotionTranslationScale()))
 	{
 		*AnimRootMotionTranslationScaleValuePtr = State->animrootmotiontranslationscale();
+	}
+
+	if (!FMath::IsNearlyEqual(State->replaylasttransformupdatetimestamp(), *ReplayLastTransformUpdateTimeStampPtr))
+	{
+		*ReplayLastTransformUpdateTimeStampPtr = State->replaylasttransformupdatetimestamp();
+		Character->OnRep_ReplayLastTransformUpdateTimeStamp();
 	}
 }
 

@@ -35,6 +35,7 @@ protected:
 	float* ServerLastTransformUpdateTimeStampValuePtr;
 	uint8* MovementModeValuePtr;
 	float* AnimRootMotionTranslationScaleValuePtr;
+	float* ReplayLastTransformUpdateTimeStampPtr;
 
 private:
 
