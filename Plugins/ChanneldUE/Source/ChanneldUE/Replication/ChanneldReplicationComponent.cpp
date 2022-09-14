@@ -28,7 +28,8 @@ void UChanneldReplicationComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (GetOwner()->GetIsReplicated())
+	// TODO: OwnerOnly replication uses private channels
+	if (GetOwner()->GetIsReplicated() || GetOwner()->bOnlyRelevantToOwner)
 	{
 		auto Replicator = ChanneldReplication::FindAndCreateReplicator(GetOwner());
 		if (Replicator)

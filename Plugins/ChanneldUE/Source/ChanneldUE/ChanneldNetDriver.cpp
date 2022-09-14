@@ -74,7 +74,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 		unrealpb::RemoteFunctionMessage Msg;
 		if (!Msg.ParseFromString(Payload))
 		{
-			UE_LOG(LogChanneld, Error, TEXT("Failed to parse RemoteFunctionCall message"));
+			UE_LOG(LogChanneld, Error, TEXT("Failed to parse RemoteFunction message"));
 			return;
 		}
 
@@ -427,12 +427,13 @@ void UChanneldNetDriver::TickDispatch(float DeltaTime)
 
 int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 {
-	auto const Result = Super::ServerReplicateActors(DeltaSeconds);
+	int32 Result = Super::ServerReplicateActors(DeltaSeconds);
+	//UE_LOG(LogChanneld, Verbose, TEXT("Super::ServerReplicateActors replicated %d actors"), Result);
 
 	auto Subsystem = GetSubsystem();
 	if (Subsystem && Subsystem->GetChannelDataView())
 	{
-		Subsystem->GetChannelDataView()->SendAllChannelUpdates();
+		Result += Subsystem->GetChannelDataView()->SendAllChannelUpdates();
 	}
 	
 	return Result;
@@ -440,6 +441,7 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 
 void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject /*= nullptr*/)
 {
+	/*
 	UE_LOG(LogChanneld, Verbose, TEXT("Send RPC %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
 
 	auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
@@ -483,6 +485,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 			// TODO: delete Data?
 		}
 	}
+	*/
 	Super::ProcessRemoteFunction(Actor, Function, Parameters, OutParms, Stack, SubObject);
 }
 
