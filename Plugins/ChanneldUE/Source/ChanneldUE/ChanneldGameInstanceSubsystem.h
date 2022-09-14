@@ -128,11 +128,11 @@ public:
 	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "MetadataFilters, Callback"), Category = "Channeld")
 		void ListChannel(EChanneldChannelType ChannelTypeFilter, const TArray<FString>& MetadataFilters, const FOnceOnListChannel& Callback);
 
-	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld")
-		void SubToChannel(int32 ChId, const FOnceOnSubToChannel& Callback);
+	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "SubOptions, Callback"), Category = "Channeld")
+		void SubToChannel(int32 ChId, bool bHasSubOptions, const FChannelSubscriptionOptions& SubOptions, const FOnceOnSubToChannel& Callback);
 
-	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld")
-		void SubConnectionToChannel(int32 TargetConnId, int32 ChId, const FOnceOnSubToChannel& Callback);
+	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "SubOptions, Callback"), Category = "Channeld")
+		void SubConnectionToChannel(int32 TargetConnId, int32 ChId, bool bHasSubOptions, const FChannelSubscriptionOptions& SubOptions, const FOnceOnSubToChannel& Callback);
 
 	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld")
 		void UnsubFromChannel(int32 ChId, const FOnceOnUnsubFromChannel& Callback);

@@ -112,8 +112,8 @@ public:
 	 */
 	void RemoveChannel(uint32 ChannelToRemove, const TFunction<void(const channeldpb::RemoveChannelMessage*)>& Callback = nullptr);
 	void ListChannel(channeldpb::ChannelType TypeFilter = channeldpb::UNKNOWN, const TArray<FString>* MetadataFilters = nullptr, const TFunction<void(const channeldpb::ListChannelResultMessage*)>& Callback = nullptr);
-	void SubToChannel(ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
-	void SubConnectionToChannel(ConnectionId ConnId, ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
+	void SubToChannel(ChannelId ChId, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
+	void SubConnectionToChannel(ConnectionId ConnId, ChannelId ChId, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
 	void UnsubFromChannel(ChannelId ChId, const TFunction<void(const channeldpb::UnsubscribedFromChannelResultMessage*)>& Callback = nullptr);
 	void UnsubConnectionFromChannel(ConnectionId ConnId, ChannelId ChId, const TFunction<void(const channeldpb::UnsubscribedFromChannelResultMessage*)>& Callback = nullptr);
 

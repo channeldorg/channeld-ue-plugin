@@ -517,17 +517,17 @@ void UChanneldConnection::ListChannel(channeldpb::ChannelType TypeFilter /*= cha
 	Send(GlobalChannelId, channeldpb::LIST_CHANNEL, ListMsg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
-void UChanneldConnection::SubToChannel(ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback /*= nullptr*/)
+void UChanneldConnection::SubToChannel(ChannelId ChId, const channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback /*= nullptr*/)
 {
 	SubConnectionToChannel(GetConnId(), ChId, SubOptions, Callback);
 }
 
-void UChanneldConnection::SubConnectionToChannel(ConnectionId TargetConnId, ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback /*= nullptr*/)
+void UChanneldConnection::SubConnectionToChannel(ConnectionId TargetConnId, ChannelId ChId, const channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback /*= nullptr*/)
 {
 	channeldpb::SubscribedToChannelMessage Msg;
 	Msg.set_connid(TargetConnId);
 	if (SubOptions != nullptr)
-		Msg.set_allocated_suboptions(SubOptions);
+		Msg.mutable_suboptions()->MergeFrom(*SubOptions);
 
 	Send(ChId, channeldpb::SUB_TO_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }

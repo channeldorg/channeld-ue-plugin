@@ -278,18 +278,18 @@ void UChanneldGameInstanceSubsystem::ListChannel(EChanneldChannelType ChannelTyp
 	);
 }
 
-void UChanneldGameInstanceSubsystem::SubToChannel(int32 ChId, const FOnceOnSubToChannel& Callback)
+void UChanneldGameInstanceSubsystem::SubToChannel(int32 ChId, bool bHasSubOptions, const FChannelSubscriptionOptions& SubOptions, const FOnceOnSubToChannel& Callback)
 {
 	InitConnection();
 
-	SubConnectionToChannel(ConnectionInstance->GetConnId(), ChId, Callback);
+	SubConnectionToChannel(ConnectionInstance->GetConnId(), ChId, bHasSubOptions, SubOptions, Callback);
 }
 
-void UChanneldGameInstanceSubsystem::SubConnectionToChannel(int32 TargetConnId, int32 ChId, const FOnceOnSubToChannel& Callback)
+void UChanneldGameInstanceSubsystem::SubConnectionToChannel(int32 TargetConnId, int32 ChId, bool bHasSubOptions, const FChannelSubscriptionOptions& SubOptions, const FOnceOnSubToChannel& Callback)
 {
 	InitConnection();
 
-	ConnectionInstance->SubConnectionToChannel(TargetConnId, ChId, nullptr,
+	ConnectionInstance->SubConnectionToChannel(TargetConnId, ChId, bHasSubOptions ? SubOptions.ToMessage().Get() : nullptr,
 		[=](const channeldpb::SubscribedToChannelResultMessage* Message)
 		{
 			Callback.ExecuteIfBound(ChId, static_cast<EChanneldChannelType>(Message->channeltype()), Message->connid(), static_cast<EChanneldConnectionType>(Message->conntype()));
