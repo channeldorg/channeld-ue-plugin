@@ -97,11 +97,11 @@ void UChanneldNetConnection::LowLevelSend(void* Data, int32 CountBits, FOutPacke
 				channeldpb::ServerForwardMessage ServerForwardMessage;
 				ServerForwardMessage.set_clientconnid(GetConnId());
 				ServerForwardMessage.set_payload(DataToSend, DataSize);
-				ConnToChanneld->Send(NetDriver->LowLevelSendToChannelId.Get(), channeldpb::USER_SPACE_START, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
+				ConnToChanneld->Send(NetDriver->LowLevelSendToChannelId.Get(), MessageType_LOW_LEVEL, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
 			}
 			else
 			{
-				ConnToChanneld->SendRaw(NetDriver->LowLevelSendToChannelId.Get(), channeldpb::USER_SPACE_START, DataToSend, DataSize);
+				ConnToChanneld->SendRaw(NetDriver->LowLevelSendToChannelId.Get(), MessageType_LOW_LEVEL, DataToSend, DataSize);
 			}
 
 		}

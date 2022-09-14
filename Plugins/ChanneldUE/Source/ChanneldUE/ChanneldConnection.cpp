@@ -22,10 +22,10 @@ void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 
 	UserSpaceMessageHandlerEntry = MessageHandlerEntry();
 	UserSpaceMessageHandlerEntry.Msg = new channeldpb::ServerForwardMessage;
-	UserSpaceMessageHandlerEntry.Handlers.Add([&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
-		{
-			HandleServerForwardMessage(Conn, ChId, Msg);
-		});
+	//UserSpaceMessageHandlerEntry.Handlers.Add([&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+	//	{
+	//		HandleServerForwardMessage(Conn, ChId, Msg);
+	//	});
 
 	// The connection's internal handlers should always be called first, so we should not use the delegate as the order of its broadcast is not guaranteed.
 	RegisterMessageHandler((uint32)channeldpb::AUTH, new channeldpb::AuthResultMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
@@ -244,7 +244,7 @@ void UChanneldConnection::Receive()
 				continue;
 			}
 
-			MessageQueueEntry QueueEntry = { Msg, MessagePackData.channelid(), MessagePackData.stubid(), Entry.Handlers, Entry.Delegate };
+			MessageQueueEntry QueueEntry = {MsgType, Msg, MessagePackData.channelid(), MessagePackData.stubid(), Entry.Handlers, Entry.Delegate };
 			IncomingQueue.Enqueue(QueueEntry);
 		}
 
@@ -326,12 +326,19 @@ void UChanneldConnection::TickIncoming()
 	MessageQueueEntry Entry;
 	while (IncomingQueue.Dequeue(Entry))
 	{
-		// Handler functions are called before the delegate.Broadcast()
-		for (const auto& Func : Entry.Handlers)
+		if (Entry.MsgType >= channeldpb::USER_SPACE_START && !MessageHandlers.Contains(Entry.MsgType))
 		{
-			Func(this, Entry.ChId, Entry.Msg);
+			HandleServerForwardMessage(this, Entry.ChId, Entry.Msg, Entry.MsgType);
 		}
-		Entry.Delegate.Broadcast(this, Entry.ChId, Entry.Msg);
+		else
+		{
+			// Handler functions are called before the delegate.Broadcast()
+			for (const auto& Func : Entry.Handlers)
+			{
+				Func(this, Entry.ChId, Entry.Msg);
+			}
+			Entry.Delegate.Broadcast(this, Entry.ChId, Entry.Msg);
+		}
 
 		if (Entry.StubId > 0)
 		{
@@ -443,7 +450,7 @@ void UChanneldConnection::SendRaw(ChannelId ChId, uint32 MsgType, const uint8* M
 		UE_LOG(LogChanneld, Verbose, TEXT("Send user-space message to channel %d, stubId=%d, type=%d, bodySize=%d)"), ChId, StubId, MsgType, BodySize);
 }
 
-void UChanneldConnection::HandleServerForwardMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+void UChanneldConnection::HandleServerForwardMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg, uint32 MsgType)
 {
 	auto UserSpaceMsg = static_cast<const channeldpb::ServerForwardMessage*>(Msg);
 	if (!OnUserSpaceMessageReceived.IsBound())
@@ -451,7 +458,7 @@ void UChanneldConnection::HandleServerForwardMessage(UChanneldConnection* Conn, 
 		UE_LOG(LogChanneld, Warning, TEXT("No handler for user-space message, channelId=%d, client connId=%d"), ChId, UserSpaceMsg->clientconnid());
 		return;
 	}
-	OnUserSpaceMessageReceived.Broadcast(ChId, UserSpaceMsg->clientconnid(), UserSpaceMsg->payload());
+	OnUserSpaceMessageReceived.Broadcast(MsgType, ChId, UserSpaceMsg->clientconnid(), UserSpaceMsg->payload());
 }
 
 template <typename MsgClass>
@@ -510,17 +517,17 @@ void UChanneldConnection::ListChannel(channeldpb::ChannelType TypeFilter /*= cha
 	Send(GlobalChannelId, channeldpb::LIST_CHANNEL, ListMsg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
-void UChanneldConnection::SubToChannel(ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback /*= nullptr*/)
+void UChanneldConnection::SubToChannel(ChannelId ChId, const channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback /*= nullptr*/)
 {
 	SubConnectionToChannel(GetConnId(), ChId, SubOptions, Callback);
 }
 
-void UChanneldConnection::SubConnectionToChannel(ConnectionId TargetConnId, ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback /*= nullptr*/)
+void UChanneldConnection::SubConnectionToChannel(ConnectionId TargetConnId, ChannelId ChId, const channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback /*= nullptr*/)
 {
 	channeldpb::SubscribedToChannelMessage Msg;
 	Msg.set_connid(TargetConnId);
 	if (SubOptions != nullptr)
-		Msg.set_allocated_suboptions(SubOptions);
+		Msg.mutable_suboptions()->MergeFrom(*SubOptions);
 
 	Send(ChId, channeldpb::SUB_TO_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }

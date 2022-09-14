@@ -39,7 +39,7 @@ public:
 
 	void OnDisconnect();
 
-	void SendAllChannelUpdates();
+	int32 SendAllChannelUpdates();
 
 protected:
 

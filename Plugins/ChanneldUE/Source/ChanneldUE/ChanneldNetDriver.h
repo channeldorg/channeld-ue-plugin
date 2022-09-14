@@ -57,6 +57,9 @@ public:
 
 	virtual int32 ServerReplicateActors(float DeltaSeconds) override;
 
+	virtual void ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject = nullptr) override;
+	void ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, TSet<FNetworkGUID>& UnmappedGuids);
+
 	UChanneldConnection* GetConnToChanneld() { return ConnToChanneld; }
 
 	ConnectionId AddrToConnId(const FInternetAddr& Addr);
@@ -96,8 +99,13 @@ private:
 
 	UChanneldNetConnection* OnClientConnected(ConnectionId ClientConnId);
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
-	void OnUserSpaceMessageReceived(ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload);
+	void OnUserSpaceMessageReceived(uint32 MsgType, ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload);
+	void HandleLowLevelMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleRemoteFunctionMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+
+	void SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, uint8* DataToSend, int32 DataSize);
+	void SendDataToServer(uint32 MsgType, uint8* DataToSend, int32 DataSize);
 
 	UChanneldGameInstanceSubsystem* GetSubsystem();
 };

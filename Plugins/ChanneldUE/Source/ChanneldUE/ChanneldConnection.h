@@ -10,7 +10,7 @@
 class UChanneldConnection;
 
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FChanneldMessageDelegate, UChanneldConnection*, ChannelId, const google::protobuf::Message*)
-DECLARE_MULTICAST_DELEGATE_ThreeParams(FUserSpaceMessageDelegate, ChannelId, ConnectionId, const std::string&)
+DECLARE_MULTICAST_DELEGATE_FourParams(FUserSpaceMessageDelegate, uint32, ChannelId, ConnectionId, const std::string&)
 DECLARE_MULTICAST_DELEGATE_OneParam(FChanneldAuthenticatedDelegate, UChanneldConnection*);
 
 typedef TFunction<void(UChanneldConnection*, ChannelId, const google::protobuf::Message*)> FChanneldMessageHandlerFunc;
@@ -65,7 +65,7 @@ public:
 		Entry.Delegate.AddUObject(InUserObject, InFunc);
 	}
 
-	FORCEINLINE void RemoveMessageHandler(uint32 MsgType, const void* InUserObject)
+	void RemoveMessageHandler(uint32 MsgType, const void* InUserObject)
 	{
 		auto Entry = MessageHandlers.Find(MsgType);
 		if (Entry == nullptr)
@@ -112,8 +112,8 @@ public:
 	 */
 	void RemoveChannel(uint32 ChannelToRemove, const TFunction<void(const channeldpb::RemoveChannelMessage*)>& Callback = nullptr);
 	void ListChannel(channeldpb::ChannelType TypeFilter = channeldpb::UNKNOWN, const TArray<FString>* MetadataFilters = nullptr, const TFunction<void(const channeldpb::ListChannelResultMessage*)>& Callback = nullptr);
-	void SubToChannel(ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
-	void SubConnectionToChannel(ConnectionId ConnId, ChannelId ChId, channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
+	void SubToChannel(ChannelId ChId, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
+	void SubConnectionToChannel(ConnectionId ConnId, ChannelId ChId, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
 	void UnsubFromChannel(ChannelId ChId, const TFunction<void(const channeldpb::UnsubscribedFromChannelResultMessage*)>& Callback = nullptr);
 	void UnsubConnectionFromChannel(ConnectionId ConnId, ChannelId ChId, const TFunction<void(const channeldpb::UnsubscribedFromChannelResultMessage*)>& Callback = nullptr);
 
@@ -156,6 +156,7 @@ private:
 
 	struct MessageQueueEntry
 	{
+		uint32 MsgType;
 		google::protobuf::Message* Msg;
 		ChannelId ChId;
 		uint32 StubId;
@@ -181,7 +182,7 @@ private:
 
 	uint32 AddRpcCallback(const FChanneldMessageHandlerFunc& HandlerFunc);
 
-	void HandleServerForwardMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleServerForwardMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg, uint32 MsgType);
 	void HandleAuth(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleCreateChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleRemoveChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);

@@ -78,7 +78,8 @@ void UChanneldGameInstanceSubsystem::InitConnection()
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::UNSUB_FROM_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleUnsubFromChannel);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, this, &UChanneldGameInstanceSubsystem::HandleChannelDataUpdate);
 
-	ConnectionInstance->OnUserSpaceMessageReceived.AddUObject(this, &UChanneldGameInstanceSubsystem::OnUserSpaceMessageReceived);
+	//ConnectionInstance->OnUserSpaceMessageReceived.AddUObject(this, &UChanneldGameInstanceSubsystem::OnUserSpaceMessageReceived);
+	ConnectionInstance->RegisterMessageHandler(MessageType_ANY, new google::protobuf::Any, this, &UChanneldGameInstanceSubsystem::HandleUserSpaceAnyMessage);
 }
 
 bool UChanneldGameInstanceSubsystem::IsConnected()
@@ -277,18 +278,18 @@ void UChanneldGameInstanceSubsystem::ListChannel(EChanneldChannelType ChannelTyp
 	);
 }
 
-void UChanneldGameInstanceSubsystem::SubToChannel(int32 ChId, const FOnceOnSubToChannel& Callback)
+void UChanneldGameInstanceSubsystem::SubToChannel(int32 ChId, bool bHasSubOptions, const FChannelSubscriptionOptions& SubOptions, const FOnceOnSubToChannel& Callback)
 {
 	InitConnection();
 
-	SubConnectionToChannel(ConnectionInstance->GetConnId(), ChId, Callback);
+	SubConnectionToChannel(ConnectionInstance->GetConnId(), ChId, bHasSubOptions, SubOptions, Callback);
 }
 
-void UChanneldGameInstanceSubsystem::SubConnectionToChannel(int32 TargetConnId, int32 ChId, const FOnceOnSubToChannel& Callback)
+void UChanneldGameInstanceSubsystem::SubConnectionToChannel(int32 TargetConnId, int32 ChId, bool bHasSubOptions, const FChannelSubscriptionOptions& SubOptions, const FOnceOnSubToChannel& Callback)
 {
 	InitConnection();
 
-	ConnectionInstance->SubConnectionToChannel(TargetConnId, ChId, nullptr,
+	ConnectionInstance->SubConnectionToChannel(TargetConnId, ChId, bHasSubOptions ? SubOptions.ToMessage().Get() : nullptr,
 		[=](const channeldpb::SubscribedToChannelResultMessage* Message)
 		{
 			Callback.ExecuteIfBound(ChId, static_cast<EChanneldChannelType>(Message->channeltype()), Message->connid(), static_cast<EChanneldConnectionType>(Message->conntype()));
@@ -347,7 +348,7 @@ void UChanneldGameInstanceSubsystem::ServerBroadcast(int32 ChId, int32 ClientCon
 	channeldpb::ServerForwardMessage MessageWrapper;
 	MessageWrapper.set_clientconnid(ClientConnId);
 	MessageWrapper.set_payload(MessageData, AnyData.GetCachedSize());
-	ConnectionInstance->Send(ChId, 101, MessageWrapper, static_cast<channeldpb::BroadcastType>(BroadcastType));
+	ConnectionInstance->Send(ChId, MessageType_ANY, MessageWrapper, static_cast<channeldpb::BroadcastType>(BroadcastType));
 }
 
 void UChanneldGameInstanceSubsystem::RegisterChannelTypeByFullName(EChanneldChannelType ChannelType, FString ProtobufFullName)
@@ -480,29 +481,29 @@ void UChanneldGameInstanceSubsystem::HandleChannelDataUpdate(UChanneldConnection
 	}
 }
 
-void UChanneldGameInstanceSubsystem::OnUserSpaceMessageReceived(ChannelId ChId, ConnectionId ConnId, const std::string& Payload)
+void UChanneldGameInstanceSubsystem::HandleUserSpaceAnyMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 {
-	google::protobuf::Any AnyMsg;
-	if (!AnyMsg.ParseFromString(Payload))
-		return;
-
-	std::string ProtoFullName = AnyMsg.type_url();
+	auto AnyMsg = static_cast<const google::protobuf::Any*>(Msg);
+	std::string ProtoFullName = AnyMsg->type_url();
 	if (ProtoFullName.length() < 20)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("The typeURL in the user-space Any message is too short: %s"), UTF8_TO_TCHAR(ProtoFullName.c_str()));
 		return;
+	}
 
 	// Erase "type.googleapis.com/"
 	ProtoFullName.erase(0, 20);
 	auto PayloadMsg = ChanneldUtils::CreateProtobufMessage(ProtoFullName);
 	if (PayloadMsg != nullptr)
 	{
-		AnyMsg.UnpackTo(PayloadMsg);
+		AnyMsg->UnpackTo(PayloadMsg);
 		UProtoMessageObject* MsgObject = NewObject<UProtoMessageObject>();
 		MsgObject->SetMessagePtr(PayloadMsg, true);
-		OnUserSpaceMessage.Broadcast(ChId, ConnId, MsgObject);
+		OnUserSpaceMessage.Broadcast(ChId, Conn->GetConnId(), MsgObject);
 	}
 	else
 	{
-		UE_LOG(LogChanneld, Error, TEXT("Couldn't find Protobuf message type by name: %s"), UTF8_TO_TCHAR(ProtoFullName.c_str()));
+		UE_LOG(LogChanneld, Warning, TEXT("Couldn't find Protobuf message type by name: %s"), UTF8_TO_TCHAR(ProtoFullName.c_str()));
 	}
 }
 

@@ -11,6 +11,9 @@
 #include "PacketHandler.h"
 #include "Net/Core/Misc/PacketAudit.h"
 #include "ChanneldGameInstanceSubsystem.h"
+#include "Replication/ChanneldReplicationDriver.h"
+#include "ChanneldUtils.h"
+#include "Replication/ChanneldReplicationComponent.h"
 
 UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -39,29 +42,52 @@ UChanneldNetConnection* UChanneldNetDriver::OnClientConnected(ConnectionId Clien
 	return ClientConnection;
 }
 
-void UChanneldNetDriver::OnUserSpaceMessageReceived(ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload)
+void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload)
 {
-	if (ConnToChanneld->IsClient())
+	if (MsgType == MessageType_LOW_LEVEL)
 	{
-		const auto MyServerConnection = GetServerConnection();
-		if (MyServerConnection)
+		if (ConnToChanneld->IsClient())
 		{
-			MyServerConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
+			const auto MyServerConnection = GetServerConnection();
+			if (MyServerConnection)
+			{
+				MyServerConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
+			}
+			else
+			{
+				UE_LOG(LogChanneld, Error, TEXT("ServerConnection doesn't exist"));
+			}
 		}
 		else
 		{
-			UE_LOG(LogChanneld, Error, TEXT("ServerConnection doesn't exist"));
+			auto ClientConnection = ClientConnectionMap.FindRef(ClientConnId);
+			// Server's ClientConnection is created when the first packet from client arrives.
+			if (ClientConnection == nullptr)
+			{
+				ClientConnection = OnClientConnected(ClientConnId);
+			}
+			ClientConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
 		}
 	}
-	else
+	else if (MsgType == MessageType_RPC)
 	{
-		auto ClientConnection = ClientConnectionMap.FindRef(ClientConnId);
-		// Server's ClientConnection is created when the first packet from client arrives.
-		if (ClientConnection == nullptr)
+		unrealpb::RemoteFunctionMessage Msg;
+		if (!Msg.ParseFromString(Payload))
 		{
-			ClientConnection = OnClientConnected(ClientConnId);
+			UE_LOG(LogChanneld, Error, TEXT("Failed to parse RemoteFunction message"));
+			return;
 		}
-		ClientConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
+
+		AActor* Actor = Cast<AActor>(ChanneldUtils::GetObjectByRef(&Msg.targetobj(), GetWorld()));
+		if (!Actor)
+		{
+			UE_LOG(LogChanneld, Error, TEXT("Cannot find actor to call remote function '%s', NetGUID: %d"), UTF8_TO_TCHAR(Msg.functionname().c_str()), Msg.targetobj().netguid());
+			return;
+		}
+
+		TSet<FNetworkGUID> UnmappedGUID;
+		ReceivedRPC(Actor, UTF8_TO_TCHAR(Msg.functionname().c_str()), Msg.paramspayload(), UnmappedGUID);
+		// TODO: Handle unmapped GUIDs?
 	}
 }
 
@@ -173,6 +199,8 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 	ConnToChanneld = GEngine->GetEngineSubsystem<UChanneldConnection>();
 
 	ConnToChanneld->OnUserSpaceMessageReceived.AddUObject(this, &UChanneldNetDriver::OnUserSpaceMessageReceived);
+	//ConnToChanneld->RegisterMessageHandler(MessageType_LOW_LEVEL, new channeldpb::ServerForwardMessage, this, &UChanneldNetDriver::HandleLowLevelMessage);
+	//ConnToChanneld->RegisterMessageHandler(MessageType_RPC, new unrealpb::RemoteFunctionMessage, this, &UChanneldNetDriver::HandleRemoteFunctionMessage);
 
 	InitBaseURL = URL;
 
@@ -322,21 +350,30 @@ void UChanneldNetDriver::LowLevelSend(TSharedPtr<const FInternetAddr> Address, v
 		if (ConnToChanneld->IsServer())
 		{
 			ConnectionId ClientConnId = AddrToConnId(*Address);
-			channeldpb::ServerForwardMessage ServerForwardMessage;
-			ServerForwardMessage.set_clientconnid(ClientConnId);
-			ServerForwardMessage.set_payload(DataToSend, DataSize);
-			CLOCK_CYCLES(SendCycles);
-			ConnToChanneld->Send(LowLevelSendToChannelId.Get(), channeldpb::USER_SPACE_START, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
-			UNCLOCK_CYCLES(SendCycles);
+			SendDataToClient(MessageType_LOW_LEVEL, ClientConnId, DataToSend, DataSize);
 		}
 		else
 		{
-			CLOCK_CYCLES(SendCycles);
-			ConnToChanneld->SendRaw(LowLevelSendToChannelId.Get(), channeldpb::USER_SPACE_START, DataToSend, DataSize);
-			UNCLOCK_CYCLES(SendCycles);
+			SendDataToServer(MessageType_LOW_LEVEL, DataToSend, DataSize);
 		}
 	}
-	
+}
+
+void UChanneldNetDriver::SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, uint8* DataToSend, int32 DataSize)
+{
+	channeldpb::ServerForwardMessage ServerForwardMessage;
+	ServerForwardMessage.set_clientconnid(ClientConnId);
+	ServerForwardMessage.set_payload(DataToSend, DataSize);
+	CLOCK_CYCLES(SendCycles);
+	ConnToChanneld->Send(LowLevelSendToChannelId.Get(), MsgType, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
+	UNCLOCK_CYCLES(SendCycles);
+}
+
+void UChanneldNetDriver::SendDataToServer(uint32 MsgType, uint8* DataToSend, int32 DataSize)
+{
+	CLOCK_CYCLES(SendCycles);
+	ConnToChanneld->SendRaw(LowLevelSendToChannelId.Get(), MsgType, DataToSend, DataSize);
+	UNCLOCK_CYCLES(SendCycles);
 }
 
 void UChanneldNetDriver::LowLevelDestroy()
@@ -348,6 +385,8 @@ void UChanneldNetDriver::LowLevelDestroy()
 		ConnToChanneld->OnAuthenticated.RemoveAll(this);
 		ConnToChanneld->OnUserSpaceMessageReceived.RemoveAll(this);
 		ConnToChanneld->RemoveMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this);
+		//ConnToChanneld->RemoveMessageHandler(MessageType_LOW_LEVEL, this);
+		//ConnToChanneld->RemoveMessageHandler(MessageType_RPC, this);
 
 		/*
 		// Only disconnect when the connection is owned by the net driver.
@@ -388,16 +427,126 @@ void UChanneldNetDriver::TickDispatch(float DeltaTime)
 
 int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 {
-	auto const Result = Super::ServerReplicateActors(DeltaSeconds);
+	int32 Result = Super::ServerReplicateActors(DeltaSeconds);
+	//UE_LOG(LogChanneld, Verbose, TEXT("Super::ServerReplicateActors replicated %d actors"), Result);
 
 	auto Subsystem = GetSubsystem();
 	if (Subsystem && Subsystem->GetChannelDataView())
 	{
-		Subsystem->GetChannelDataView()->SendAllChannelUpdates();
+		Result += Subsystem->GetChannelDataView()->SendAllChannelUpdates();
 	}
 	
 	return Result;
 }
+
+void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject /*= nullptr*/)
+{
+	/*
+	UE_LOG(LogChanneld, Verbose, TEXT("Send RPC %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
+
+	auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
+	if (RepComp)
+	{
+		auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters);
+		if (ParamsMsg)
+		{
+			auto ChanneldConn = GEngine->GetEngineSubsystem<UChanneldConnection>();
+			unrealpb::RemoteFunctionMessage RpcMsg;
+ 			RpcMsg.mutable_targetobj()->MergeFrom(ChanneldUtils::GetRefOfObject(Actor));
+			auto FuncName = Function->GetName();
+			RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
+			RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
+			uint8* Data = new uint8[RpcMsg.ByteSizeLong()];
+			if (RpcMsg.SerializeToArray(Data, RpcMsg.GetCachedSize()))
+			{
+				if (ConnToChanneld->IsClient())
+				{
+					SendDataToServer(MessageType_RPC, Data, RpcMsg.GetCachedSize());
+					return;
+				}
+				else
+				{
+					auto NetConn = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
+					if (NetConn)
+					{
+						SendDataToClient(MessageType_RPC, NetConn->GetConnId(), Data, RpcMsg.GetCachedSize());
+						return;
+					}
+					else
+					{
+						UE_LOG(LogChanneld, Warning, TEXT("Failed to send RPC %s::%s as the actor doesn't have any client connection"), *Actor->GetName(), *Function->GetName());
+					}
+				}
+			}
+			else
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("Failed to serialize RPC message"));
+			}
+			// TODO: delete Data?
+		}
+	}
+	*/
+	Super::ProcessRemoteFunction(Actor, Function, Parameters, OutParms, Stack, SubObject);
+}
+
+void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, TSet<FNetworkGUID>& UnmappedGuids)
+{
+	UE_LOG(LogChanneld, Verbose, TEXT("Received RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
+
+	UFunction* Function = Actor->FindFunction(FunctionName);
+	check(Function);
+
+	auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
+	if (RepComp)
+	{
+		void* Params = RepComp->DeserializeFunctionParams(Actor, Function, ParamsPayload);
+		Actor->ProcessEvent(Function, Params);
+	}
+}
+
+void UChanneldNetDriver::HandleRemoteFunctionMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	auto RpcMsg = static_cast<const unrealpb::RemoteFunctionMessage*>(Msg);
+
+	AActor* Actor = Cast<AActor>(ChanneldUtils::GetObjectByRef(&RpcMsg->targetobj(), GetWorld()));
+	if (!Actor)
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Cannot find actor to call remote function '%s', NetGUID: %d"), UTF8_TO_TCHAR(RpcMsg->functionname().c_str()), RpcMsg->targetobj().netguid());
+		return;
+	}
+
+	TSet<FNetworkGUID> UnmappedGUID;
+	ReceivedRPC(Actor, UTF8_TO_TCHAR(RpcMsg->functionname().c_str()), RpcMsg->paramspayload(), UnmappedGUID);
+	// TODO: Handle unmapped GUIDs?
+}
+
+void UChanneldNetDriver::HandleLowLevelMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	auto ServerForwardMsg = static_cast<const channeldpb::ServerForwardMessage*>(Msg);
+	if (ConnToChanneld->IsClient())
+	{
+		const auto MyServerConnection = GetServerConnection();
+		if (MyServerConnection)
+		{
+			MyServerConnection->ReceivedRawPacket((uint8*)ServerForwardMsg->payload().data(), ServerForwardMsg->payload().size());
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Error, TEXT("ServerConnection doesn't exist"));
+		}
+	}
+	else
+	{
+		auto ClientConnection = ClientConnectionMap.FindRef(ServerForwardMsg->clientconnid());
+		// Server's ClientConnection is created when the first packet from client arrives.
+		if (ClientConnection == nullptr)
+		{
+			ClientConnection = OnClientConnected(ServerForwardMsg->clientconnid());
+		}
+		ClientConnection->ReceivedRawPacket((uint8*)ServerForwardMsg->payload().data(), ServerForwardMsg->payload().size());
+	}
+}
+
 
 void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 {
@@ -420,6 +569,3 @@ void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 		MyServerConnection->FlushUnauthData();
 	}
 }
-
-
-

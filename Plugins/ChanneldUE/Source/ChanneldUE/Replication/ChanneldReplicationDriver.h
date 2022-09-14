@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 //#include "ReplicationGraph.h"
 #include "BasicReplicationGraph.h"
+#include <string>
+#include "Net/DataReplication.h"
 #include "ChanneldReplicationDriver.generated.h"
 
 UCLASS(config = ChanneldUE)
@@ -31,9 +33,17 @@ public:
 	virtual void NotifyActorDormancyChange(AActor* Actor, ENetDormancy OldDormancyState) override;
 	virtual void NotifyDestructionInfoCreated(AActor* Actor, FActorDestructionInfo& DestructionInfo) override;
 	virtual void SetRoleSwapOnReplicate(AActor* Actor, bool bSwapRoles) override;
-	virtual bool ProcessRemoteFunction(class AActor* Actor, UFunction* Function, void* Parameters, FOutParmRec* OutParms, FFrame* Stack, UObject* SubObject) { return false; }
 	virtual int32 ServerReplicateActors(float DeltaSeconds) override;
 	virtual void PostTickDispatch() { }
 	//~ End UReplicationDriver Interface
 	*/
+	//virtual bool ProcessRemoteFunction(class AActor* Actor, UFunction* Function, void* Parameters, FOutParmRec* OutParms, FFrame* Stack, UObject* SubObject) override;
+	bool ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, TSet<FNetworkGUID>& UnmappedGuids);
+
+private:
+	UActorChannel* FindOrCreateChannel(AActor* Actor, UNetConnection* Connection);
+
+	/** Information on RPCs that have been received but not yet executed */
+	TArray<FObjectReplicator::FRPCPendingLocalCall> PendingLocalRPCs;
+
 };

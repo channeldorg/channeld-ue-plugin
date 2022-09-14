@@ -165,11 +165,12 @@ void UChannelDataView::OnDisconnect()
 	SendAllChannelUpdates();
 }
 
-void UChannelDataView::SendAllChannelUpdates()
+int32 UChannelDataView::SendAllChannelUpdates()
 {
 	if (Connection == nullptr)
-		return;
+		return 0;
 
+	int32 TotalUpdateCount = 0;
 	for (auto& Pair : Connection->SubscribedChannels)
 	{
 		if (static_cast<channeldpb::ChannelDataAccess>(Pair.Value.SubOptions.DataAccess) == channeldpb::WRITE_ACCESS)
@@ -212,9 +213,11 @@ void UChannelDataView::SendAllChannelUpdates()
 
 			NewState->Clear();
 			delete NewState;
+
+			TotalUpdateCount += UpdateCount;
 		}
 	}
-
+	return TotalUpdateCount;
 }
 
 UChanneldGameInstanceSubsystem* UChannelDataView::GetChanneldSubsystem()

@@ -51,4 +51,6 @@ public:
 	void OnChannelDataUpdated(google::protobuf::Message* ChannelData) override;
 	//~ End IChannelDataProvider Interface.
 
+	TSharedPtr<google::protobuf::Message> SerializeFunctionParams(AActor* Actor, UFunction* Func, void* Params);
+	void* DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload);
 };

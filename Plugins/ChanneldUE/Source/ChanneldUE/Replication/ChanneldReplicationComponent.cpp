@@ -28,7 +28,8 @@ void UChanneldReplicationComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (GetOwner()->GetIsReplicated())
+	// TODO: OwnerOnly replication uses private channels
+	if (GetOwner()->GetIsReplicated() || GetOwner()->bOnlyRelevantToOwner)
 	{
 		auto Replicator = ChanneldReplication::FindAndCreateReplicator(GetOwner());
 		if (Replicator)
@@ -156,13 +157,17 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 
 	for (auto Replicator : Replicators)
 	{
+		auto TargetObj = Replicator->GetTargetObject();
+		if (!TargetObj)
+		{
+			continue;
+		}
 		bool bIsRemoved = false;
 		auto State = GetStateFromChannelData(ChannelData, Replicator->GetTargetObject(), Replicator->GetNetGUID(), bIsRemoved);
 		if (State)
 		{
 			if (bIsRemoved)
 			{
-				auto TargetObj = Replicator->GetTargetObject();
 				if (TargetObj == GetOwner())
 				{
 					GetOwner()->Destroy(true);
@@ -176,4 +181,28 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 			Replicator->OnStateChanged(State);
 		}
 	}
+}
+
+TSharedPtr<google::protobuf::Message> UChanneldReplicationComponent::SerializeFunctionParams(AActor* Actor, UFunction* Func, void* Params)
+{
+	for (auto Replicator : Replicators)
+	{
+		if (Replicator->GetTargetObject() == Actor)
+		{
+			return Replicator->SerializeFunctionParams(Func, Params);
+		}
+	}
+	return nullptr;
+}
+
+void* UChanneldReplicationComponent::DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload)
+{
+	for (auto Replicator : Replicators)
+	{
+		if (Replicator->GetTargetObject() == Actor)
+		{
+			return Replicator->DeserializeFunctionParams(Func, ParamsPayload);
+		}
+	}
+	return nullptr;
 }

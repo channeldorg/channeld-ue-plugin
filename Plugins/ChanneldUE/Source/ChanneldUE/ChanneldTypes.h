@@ -10,6 +10,16 @@ typedef uint32 ConnectionId;
 
 typedef uint32 ChannelId;
 
+// User-space message types used in ChanneldUE
+enum MessageType : uint32 {
+	// Used by LowLevelSend in NetConnection/NetDriver.
+	MessageType_LOW_LEVEL = 100,
+	// Used by ChanneldGameInstanceSubsystem to broadcast the ProtoMessageObject from server side. The message is packed as google::protobuf::any to support anonymous types.
+	MessageType_ANY = 101,
+	// Used by ReplicationDriver to send/receive UE's native RPC.
+	MessageType_RPC = 123,
+};
+
 /*
 UENUM(BlueprintType)
 enum class EChannelId : ChannelId
@@ -79,7 +89,7 @@ struct CHANNELDUE_API FChannelSubscriptionOptions
 {
 	GENERATED_BODY()
 
-		UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		EChannelDataAccess DataAccess;
 
 	UPROPERTY(BlueprintReadWrite)
@@ -91,7 +101,13 @@ struct CHANNELDUE_API FChannelSubscriptionOptions
 	UPROPERTY(BlueprintReadWrite)
 		int32 FanOutDelayMs;
 
-	void Merge(const  channeldpb::ChannelSubscriptionOptions& Target)
+	FChannelSubscriptionOptions() :
+		DataAccess(EChannelDataAccess::EDA_WRITE_ACCESS),
+		FanOutIntervalMs(20),
+		FanOutDelayMs(0)
+	{}
+
+	void MergeFromMessage(const channeldpb::ChannelSubscriptionOptions& Target)
 	{
 		const google::protobuf::Reflection* MsgReflection = Target.GetReflection();
 		const google::protobuf::Descriptor* MsgDescriptor = Target.GetDescriptor();
@@ -118,6 +134,19 @@ struct CHANNELDUE_API FChannelSubscriptionOptions
 		if (MsgReflection->HasField(Target, MsgDescriptor->FindFieldByNumber(Target.kFanOutDelayMsFieldNumber)))
 			FanOutDelayMs = Target.fanoutdelayms();
 	}
+
+	const TSharedPtr<channeldpb::ChannelSubscriptionOptions> ToMessage() const
+	{
+		auto SubOptionsMsg = MakeShared<channeldpb::ChannelSubscriptionOptions>();
+		SubOptionsMsg->set_dataaccess(static_cast<channeldpb::ChannelDataAccess>(DataAccess));
+		for (const FString& Mask : DataFieldMasks)
+		{
+			SubOptionsMsg->add_datafieldmasks(TCHAR_TO_UTF8(*Mask), Mask.Len());
+		}
+		SubOptionsMsg->set_fanoutintervalms(FanOutIntervalMs);
+		SubOptionsMsg->set_fanoutdelayms(FanOutDelayMs);
+		return SubOptionsMsg;
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -125,7 +154,7 @@ struct CHANNELDUE_API FSubscribedChannelInfo
 {
 	GENERATED_BODY()
 
-		UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 		int32 ConnId;
 
 	UPROPERTY(BlueprintReadWrite)
@@ -146,7 +175,9 @@ struct CHANNELDUE_API FSubscribedChannelInfo
 			ConnId = Target.connid();
 
 		if (Target.has_suboptions())
-			SubOptions.Merge(Target.suboptions());
+		{
+			SubOptions.MergeFromMessage(Target.suboptions());
+		}
 
 		if (MsgReflection->HasField(Target, MsgDescriptor->FindFieldByNumber(Target.kConnTypeFieldNumber)))
 			ConnType = static_cast<EChanneldConnectionType>(Target.conntype());

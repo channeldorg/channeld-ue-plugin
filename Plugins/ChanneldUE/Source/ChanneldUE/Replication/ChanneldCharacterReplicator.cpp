@@ -37,7 +37,11 @@ FChanneldCharacterReplicator::FChanneldCharacterReplicator(UObject* InTargetObj)
 		AnimRootMotionTranslationScaleValuePtr = Property->ContainerPtrToValuePtr<float>(Character.Get());
 		check(AnimRootMotionTranslationScaleValuePtr);
 	}
-	
+	{
+		auto Property = CastFieldChecked<const FFloatProperty>(Character->GetClass()->FindPropertyByName(FName("ReplayLastTransformUpdateTimeStamp")));
+		ReplayLastTransformUpdateTimeStampPtr = Property->ContainerPtrToValuePtr<float>(Character.Get());
+		check(ReplayLastTransformUpdateTimeStampPtr);
+	}
 }
 
 FChanneldCharacterReplicator::~FChanneldCharacterReplicator()
@@ -153,7 +157,11 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	// TODO: ReplayLastTransformUpdateTimeStamp
+	if (!FMath::IsNearlyEqual(State->replaylasttransformupdatetimestamp(), *ReplayLastTransformUpdateTimeStampPtr))
+	{
+		StateDelta.set_replaylasttransformupdatetimestamp(*ReplayLastTransformUpdateTimeStampPtr);
+		bStateChanged = true;
+	}
 
 	State->MergeFrom(StateDelta);
 }
@@ -218,7 +226,7 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 
 	State->MergeFrom(*NewState);
 
-	if (State->serverlasttransformupdatetimestamp() != Character->GetReplicatedServerLastTransformUpdateTimeStamp())
+	if (!FMath::IsNearlyEqual(State->serverlasttransformupdatetimestamp(), Character->GetReplicatedServerLastTransformUpdateTimeStamp()))
 	{
 		*ServerLastTransformUpdateTimeStampValuePtr = State->serverlasttransformupdatetimestamp();
 	}
@@ -239,8 +247,76 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 		Character->bProxyIsJumpForceApplied = State->bproxyisjumpforceapplied();
 	}
 
-	if (State->animrootmotiontranslationscale() != Character->GetAnimRootMotionTranslationScale())
+	if (!FMath::IsNearlyEqual(State->animrootmotiontranslationscale(), Character->GetAnimRootMotionTranslationScale()))
 	{
 		*AnimRootMotionTranslationScaleValuePtr = State->animrootmotiontranslationscale();
 	}
+
+	if (!FMath::IsNearlyEqual(State->replaylasttransformupdatetimestamp(), *ReplayLastTransformUpdateTimeStampPtr))
+	{
+		*ReplayLastTransformUpdateTimeStampPtr = State->replaylasttransformupdatetimestamp();
+		Character->OnRep_ReplayLastTransformUpdateTimeStamp();
+	}
+}
+
+TSharedPtr<google::protobuf::Message> FChanneldCharacterReplicator::SerializeFunctionParams(UFunction* Func, void* Params)
+{
+	if (Func->GetFName() == FName("ServerMovePacked"))
+	{
+		ServerMovePackedParams* TypedParams = (ServerMovePackedParams*)Params;
+		char* Data = (char*)TypedParams->PackedBits.DataBits.GetData();
+		auto Msg = MakeShared<unrealpb::Character_ServerMovePacked_Params>();
+		Msg->set_packedbits(Data, FMath::DivideAndRoundUp(TypedParams->PackedBits.DataBits.Num(), 8));
+		return Msg;
+	}
+	else if (Func->GetFName() == FName("ClientMoveResponsePacked"))
+	{
+		ClientMoveResponsePackedParams* TypedParams = (ClientMoveResponsePackedParams*)Params;
+		char* Data = (char*)TypedParams->PackedBits.DataBits.GetData();
+		auto Msg = MakeShared<unrealpb::Character_ClientMoveResponsePacked_Params>();
+		Msg->set_packedbits(Data, FMath::DivideAndRoundUp(TypedParams->PackedBits.DataBits.Num(), 8));
+		return Msg;
+	}
+	return nullptr;
+}
+
+void* FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload)
+{
+	if (Func->GetFName() == FName("ServerMovePacked"))
+	{
+		unrealpb::Character_ServerMovePacked_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		auto Params = MakeShared<ServerMovePackedParams>();
+		bool bIDC;
+		FArchive EmptyArchive;
+		// Hack the package map into to the PackedBits for further deserialization. IDC = I don't care.
+		Params->PackedBits.NetSerialize(EmptyArchive, Character->GetNetConnection()->PackageMap, bIDC);
+
+		// ----------------------------------------------------
+		// UCharacterMovementComponent::CallServerMovePacked
+		// ----------------------------------------------------
+		Params->PackedBits.DataBits.SetNumUninitialized(Msg.packedbits().size()*8);
+		FMemory::Memcpy(Params->PackedBits.DataBits.GetData(), &Msg.packedbits(), Msg.packedbits().size());
+
+		return &Params.Get();
+	}
+	else if (Func->GetFName() == FName("ClientMoveResponsePacked"))
+	{
+		unrealpb::Character_ClientMoveResponsePacked_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		auto Params = MakeShared<ClientMoveResponsePackedParams>();
+		bool bIDC;
+		FArchive EmptyArchive;
+		// Hack the package map into to the PackedBits for further deserialization. IDC = I don't care.
+		Params->PackedBits.NetSerialize(EmptyArchive, Character->GetNetConnection()->PackageMap, bIDC);
+
+		// ----------------------------------------------------
+		// UCharacterMovementComponent::ServerSendMoveResponse
+		// ----------------------------------------------------
+		Params->PackedBits.DataBits.SetNumUninitialized(Msg.packedbits().size() * 8);
+		FMemory::Memcpy(Params->PackedBits.DataBits.GetData(), &Msg.packedbits(), Msg.packedbits().size());
+
+		return &Params.Get();
+	}
+	return nullptr;
 }

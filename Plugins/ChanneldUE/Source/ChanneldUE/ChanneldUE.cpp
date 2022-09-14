@@ -7,6 +7,7 @@
 #include "Replication/ChanneldCharacterReplicator.h"
 #include "Replication/ChanneldSceneComponentReplicator.h"
 #include "Replication/ChanneldReplication.h"
+#include "Replication/ChanneldPlayerControllerReplicator.h"
 
 #define LOCTEXT_NAMESPACE "FChanneldUEModule"
 
@@ -22,6 +23,7 @@ void FChanneldUEModule::StartupModule()
 
 	REGISTER_REPLICATOR(FChanneldSceneComponentReplicator, USceneComponent);
 	REGISTER_REPLICATOR(FChanneldCharacterReplicator, ACharacter);
+	REGISTER_REPLICATOR(FChanneldPlayerControllerReplicator, APlayerController);
 }
 
 void FChanneldUEModule::ShutdownModule()

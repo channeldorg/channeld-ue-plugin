@@ -5,11 +5,11 @@
 #include "GameFramework\Character.h"
 #include "ChanneldReplicatorBase.h"
 
-class CHANNELDUE_API FChanneldCharacterReplicator : public FChanneldReplicatorBase
+class CHANNELDUE_API FChanneldPlayerControllerReplicator : public FChanneldReplicatorBase
 {
 public:
-	FChanneldCharacterReplicator(UObject* InTargetObj);
-	virtual ~FChanneldCharacterReplicator();
+	FChanneldPlayerControllerReplicator(UObject* InTargetObj);
+	virtual ~FChanneldPlayerControllerReplicator();
 
 	//~Begin FChanneldReplicatorBase Interface
 	virtual google::protobuf::Message* GetState() override;
@@ -22,31 +22,21 @@ public:
 	virtual void* DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload) override;
 
 protected:
-	TWeakObjectPtr<ACharacter> Character;
+	TWeakObjectPtr<APlayerController> PC;
 
 	// [Client] State is the accumulated channel data of the target object
 	// [Server] State is the accumulated delta change before next send
-	unrealpb::CharacterState* State;
-	// [Server] Accumulated delta change.
-	unrealpb::BasedMovementInfo* MovementInfo;
+	unrealpb::PlayerControllerState* State;
 
 	// [Client] Reflection pointer to set the value back to Character
-	FBasedMovementInfo* BasedMovementValuePtr;
-	float* ServerLastTransformUpdateTimeStampValuePtr;
-	uint8* MovementModeValuePtr;
-	float* AnimRootMotionTranslationScaleValuePtr;
-	float* ReplayLastTransformUpdateTimeStampPtr;
+	FVector* SpawnLocationPtr;
 
 private:
 
-	struct ServerMovePackedParams
+	struct ServerUpdateCameraParams
 	{
-		FCharacterServerMovePackedBits PackedBits;
-	};
-
-	struct ClientMoveResponsePackedParams
-	{
-		FCharacterMoveResponsePackedBits PackedBits;
+		FVector_NetQuantize CamLoc;
+		int32 CamPitchAndYaw;
 	};
 
 };
