@@ -12,7 +12,7 @@ public:
 	virtual ~FChanneldSceneComponentReplicator();
 
 	//~Begin FChanneldReplicatorBase Interface
-	virtual google::protobuf::Message* GetState() override { return State; }
+	virtual google::protobuf::Message* GetDeltaState() override { return DeltaState; }
 	virtual void ClearState() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnStateChanged(const google::protobuf::Message* NewState) override;
@@ -20,18 +20,14 @@ public:
 
 protected:
 	TWeakObjectPtr<USceneComponent> SceneComp;
-	unrealpb::SceneComponentState* State;
-	unrealpb::FVector* RelativeLocationState;
-	unrealpb::FVector* RelativeRotationState;
-	unrealpb::FVector* RelativeScaleState;
+	unrealpb::SceneComponentState* FullState;
+	unrealpb::SceneComponentState* DeltaState;
 
 	static EAttachmentRule GetAttachmentRule(bool bShouldSnapWhenAttached, bool bAbsolute);
-	
-	// Local -> channeld
-	virtual void OnTransformUpdated(USceneComponent* UpdatedComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
 
-//public:
-//	// channeld -> local
-//	virtual void OnStateChanged(const unrealpb::SceneComponentState* NewState);
-
+private:
+	// Pointers to the inaccessible Replicated properties 
+	uint8* bShouldBeAttachedPtr;
+	uint8* bShouldSnapLocationWhenAttachedPtr;
+	uint8* bShouldSnapRotationWhenAttachedPtr;
 };

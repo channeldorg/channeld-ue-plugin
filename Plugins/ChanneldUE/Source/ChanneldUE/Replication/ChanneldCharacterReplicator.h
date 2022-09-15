@@ -12,7 +12,7 @@ public:
 	virtual ~FChanneldCharacterReplicator();
 
 	//~Begin FChanneldReplicatorBase Interface
-	virtual google::protobuf::Message* GetState() override;
+	virtual google::protobuf::Message* GetDeltaState() override;
 	virtual void ClearState() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnStateChanged(const google::protobuf::Message* NewState) override;
@@ -24,11 +24,10 @@ public:
 protected:
 	TWeakObjectPtr<ACharacter> Character;
 
-	// [Client] State is the accumulated channel data of the target object
-	// [Server] State is the accumulated delta change before next send
-	unrealpb::CharacterState* State;
-	// [Server] Accumulated delta change.
-	unrealpb::BasedMovementInfo* MovementInfo;
+	// [Server+Client] The accumulated channel data of the target object
+	unrealpb::CharacterState* FullState;
+	// [Server] The accumulated delta change before next send
+	unrealpb::CharacterState* DeltaState;
 
 	// [Client] Reflection pointer to set the value back to Character
 	FBasedMovementInfo* BasedMovementValuePtr;

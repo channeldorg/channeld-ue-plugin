@@ -65,7 +65,7 @@ public:
 
 	static const unrealpb::UnrealObjectRef GetRefOfObject(UObject* Obj)
 	{
-		const unrealpb::UnrealObjectRef DefaultValue;
+		const unrealpb::UnrealObjectRef DefaultValue = unrealpb::UnrealObjectRef::default_instance();
 		if (!Obj)
 		{
 			return DefaultValue;

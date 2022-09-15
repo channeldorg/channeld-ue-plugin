@@ -430,10 +430,13 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 	int32 Result = Super::ServerReplicateActors(DeltaSeconds);
 	//UE_LOG(LogChanneld, Verbose, TEXT("Super::ServerReplicateActors replicated %d actors"), Result);
 
-	auto Subsystem = GetSubsystem();
-	if (Subsystem && Subsystem->GetChannelDataView())
+	if (!bSkipCustomReplication)
 	{
-		Result += Subsystem->GetChannelDataView()->SendAllChannelUpdates();
+		auto Subsystem = GetSubsystem();
+		if (Subsystem && Subsystem->GetChannelDataView())
+		{
+			Result += Subsystem->GetChannelDataView()->SendAllChannelUpdates();
+		}
 	}
 	
 	return Result;
@@ -441,51 +444,54 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 
 void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject /*= nullptr*/)
 {
-	/*
-	UE_LOG(LogChanneld, Verbose, TEXT("Send RPC %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
-
-	auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
-	if (RepComp)
+	if (!bSkipCustomRPC)
 	{
-		auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters);
-		if (ParamsMsg)
+		UE_LOG(LogChanneld, Verbose, TEXT("Send RPC %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
+
+		auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
+		if (RepComp)
 		{
-			auto ChanneldConn = GEngine->GetEngineSubsystem<UChanneldConnection>();
-			unrealpb::RemoteFunctionMessage RpcMsg;
- 			RpcMsg.mutable_targetobj()->MergeFrom(ChanneldUtils::GetRefOfObject(Actor));
-			auto FuncName = Function->GetName();
-			RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
-			RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
-			uint8* Data = new uint8[RpcMsg.ByteSizeLong()];
-			if (RpcMsg.SerializeToArray(Data, RpcMsg.GetCachedSize()))
+			auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters);
+			if (ParamsMsg)
 			{
-				if (ConnToChanneld->IsClient())
+				auto ChanneldConn = GEngine->GetEngineSubsystem<UChanneldConnection>();
+				unrealpb::RemoteFunctionMessage RpcMsg;
+				RpcMsg.mutable_targetobj()->MergeFrom(ChanneldUtils::GetRefOfObject(Actor));
+				auto FuncName = Function->GetName();
+				RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
+				RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
+				uint8* Data = new uint8[RpcMsg.ByteSizeLong()];
+				if (RpcMsg.SerializeToArray(Data, RpcMsg.GetCachedSize()))
 				{
-					SendDataToServer(MessageType_RPC, Data, RpcMsg.GetCachedSize());
-					return;
-				}
-				else
-				{
-					auto NetConn = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
-					if (NetConn)
+					if (ConnToChanneld->IsClient())
 					{
-						SendDataToClient(MessageType_RPC, NetConn->GetConnId(), Data, RpcMsg.GetCachedSize());
+						SendDataToServer(MessageType_RPC, Data, RpcMsg.GetCachedSize());
 						return;
 					}
 					else
 					{
-						UE_LOG(LogChanneld, Warning, TEXT("Failed to send RPC %s::%s as the actor doesn't have any client connection"), *Actor->GetName(), *Function->GetName());
+						auto NetConn = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
+						if (NetConn)
+						{
+							SendDataToClient(MessageType_RPC, NetConn->GetConnId(), Data, RpcMsg.GetCachedSize());
+							return;
+						}
+						else
+						{
+							UE_LOG(LogChanneld, Warning, TEXT("Failed to send RPC %s::%s as the actor doesn't have any client connection"), *Actor->GetName(), *Function->GetName());
+						}
 					}
 				}
+				else
+				{
+					UE_LOG(LogChanneld, Warning, TEXT("Failed to serialize RPC message"));
+				}
+				// TODO: delete Data?
 			}
-			else
-			{
-				UE_LOG(LogChanneld, Warning, TEXT("Failed to serialize RPC message"));
-			}
-			// TODO: delete Data?
 		}
 	}
-	*/
+
+	// Fallback to native RPC
 	Super::ProcessRemoteFunction(Actor, Function, Parameters, OutParms, Stack, SubObject);
 }
 

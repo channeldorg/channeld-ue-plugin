@@ -5,7 +5,7 @@ TMap<const UClass*, const FReplicatorCreateFunc> ChanneldReplication::Replicator
 void ChanneldReplication::RegisterReplicator(const UClass* TargetClass, const FReplicatorCreateFunc& Func)
 {
 	ReplicatorRegistry.Add(TargetClass, Func);
-	UE_LOG(LogChanneld, Log, TEXT("Registered replicator for %s, Registry Size: %d"), *TargetClass->GetFullName(), ReplicatorRegistry.Num());
+	UE_LOG(LogChanneld, Log, TEXT("Registered replicator for %s, registry Size: %d"), *TargetClass->GetFullName(), ReplicatorRegistry.Num());
 }
 
 FChanneldReplicatorBase* ChanneldReplication::FindAndCreateReplicator(UObject* ReplicatedObj)
@@ -22,6 +22,6 @@ FChanneldReplicatorBase* ChanneldReplication::FindAndCreateReplicator(UObject* R
 		}
 	}
 
-	UE_LOG(LogChanneld, Log, TEXT("Unable to find, Registry Size: %d"), ReplicatorRegistry.Num());
+	UE_LOG(LogChanneld, Log, TEXT("Unable to find replicator for %s, registry Size: %d"), *ReplicatedObj->GetFullName(), ReplicatorRegistry.Num());
 	return nullptr;
 }

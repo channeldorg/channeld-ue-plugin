@@ -16,13 +16,12 @@ public:
     FChanneldReplicatorBase(UObject* InTargetObj);
 
     FORCEINLINE UObject* GetTargetObject() { return TargetObject.Get(); }
-    FORCEINLINE uint32 GetNetGUID() { return NetGUID; }
+    uint32 GetNetGUID();
 
     // [Server] Is the state changed since last send?
     FORCEINLINE bool IsStateChanged() { return bStateChanged; }
-    // [Client] State is the accumulated channel data of the target object
-    // [Server] State is the accumulated delta change before next send
-    virtual google::protobuf::Message* GetState() = 0;
+    // [Server] The accumulated delta change before next send
+    virtual google::protobuf::Message* GetDeltaState() = 0;
     // [Server] Reset the state change (after send)
 	virtual void ClearState() { bStateChanged = true; }
 	// [Server] Collect State change for sending ChannelDataUpdate to channeld
@@ -36,7 +35,7 @@ public:
 protected:
     TWeakObjectPtr<UObject> TargetObject;
 
-    uint32 NetGUID;
+    FNetworkGUID NetGUID;
 
     bool bStateChanged;
 

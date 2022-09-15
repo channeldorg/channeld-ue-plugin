@@ -8,7 +8,7 @@ FChanneldReplicatorBase::FChanneldReplicatorBase(UObject* InTargetObj)
     TargetObject = InTargetObj;
 
     UWorld* World = TargetObject->GetWorld();
-    if (World)
+    if (World && World->GetNetDriver())
     {
         NetGUID = World->GetNetDriver()->GuidCache->GetOrAssignNetGUID(InTargetObj).Value;
     }
@@ -18,4 +18,14 @@ FChanneldReplicatorBase::FChanneldReplicatorBase(UObject* InTargetObj)
     }
 
 	bStateChanged = false;
+}
+
+uint32 FChanneldReplicatorBase::GetNetGUID()
+{
+    if (!NetGUID.IsValid())
+    {
+		UWorld* World = TargetObject->GetWorld();
+        NetGUID = World->GetNetDriver()->GuidCache->GetOrAssignNetGUID(TargetObject.Get());
+    }
+    return NetGUID.Value;
 }

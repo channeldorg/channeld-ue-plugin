@@ -12,7 +12,7 @@ public:
 	virtual ~FChanneldPlayerControllerReplicator();
 
 	//~Begin FChanneldReplicatorBase Interface
-	virtual google::protobuf::Message* GetState() override;
+	virtual google::protobuf::Message* GetDeltaState() override;
 	virtual void ClearState() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnStateChanged(const google::protobuf::Message* NewState) override;
@@ -24,12 +24,8 @@ public:
 protected:
 	TWeakObjectPtr<APlayerController> PC;
 
-	// [Client] State is the accumulated channel data of the target object
-	// [Server] State is the accumulated delta change before next send
-	unrealpb::PlayerControllerState* State;
-
-	// [Client] Reflection pointer to set the value back to Character
-	FVector* SpawnLocationPtr;
+	unrealpb::PlayerControllerState* FullState;
+	unrealpb::PlayerControllerState* DeltaState;
 
 private:
 
@@ -38,5 +34,8 @@ private:
 		FVector_NetQuantize CamLoc;
 		int32 CamPitchAndYaw;
 	};
+
+	// [Client] Reflection pointer to set the value back to Character
+	FVector* SpawnLocationPtr;
 
 };

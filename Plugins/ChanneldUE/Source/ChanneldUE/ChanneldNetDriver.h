@@ -81,6 +81,10 @@ public:
 
 	UPROPERTY(Config)
 	bool bDisableHandshaking = true;
+	UPROPERTY(Config)
+	bool bSkipCustomReplication = false;
+	UPROPERTY(Config)
+	bool bSkipCustomRPC = true;
 
 	TSharedRef<ChannelId> LowLevelSendToChannelId = MakeShared<ChannelId>(GlobalChannelId);
 

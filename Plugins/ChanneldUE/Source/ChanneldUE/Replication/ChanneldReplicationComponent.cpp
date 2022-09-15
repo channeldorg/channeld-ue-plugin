@@ -6,6 +6,7 @@
 #include "Engine/PackageMapClient.h"
 #include "Misc/NetworkGuid.h"
 #include "ChanneldReplication.h"
+#include "ChanneldNetDriver.h"
 
 UChanneldReplicationComponent::UChanneldReplicationComponent(const FObjectInitializer& ObjectInitializer)
 {
@@ -23,12 +24,18 @@ void UChanneldReplicationComponent::SetStateToChannelData(const google::protobuf
 
 }
 
-// Called when the game starts or when spawned
-void UChanneldReplicationComponent::BeginPlay()
+void UChanneldReplicationComponent::InitOnce()
 {
-	Super::BeginPlay();
+	if (bInitialized)
+		return;
 
-	// TODO: OwnerOnly replication uses private channels
+	auto NetDriver = Cast<UChanneldNetDriver>(GetWorld()->GetNetDriver());
+	if (!NetDriver || (NetDriver->bSkipCustomReplication && NetDriver->bSkipCustomRPC))
+	{
+		return;
+	}
+
+	// TODO: OwnerOnly replication should use private channels
 	if (GetOwner()->GetIsReplicated() || GetOwner()->bOnlyRelevantToOwner)
 	{
 		auto Replicator = ChanneldReplication::FindAndCreateReplicator(GetOwner());
@@ -59,6 +66,15 @@ void UChanneldReplicationComponent::BeginPlay()
 	{
 		View->AddProvider(OwningChannelId, this);
 	}
+
+	bInitialized = true;
+}
+
+void UChanneldReplicationComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	InitOnce();
 }
 
 void UChanneldReplicationComponent::EndPlay(EEndPlayReason::Type Reason)
@@ -142,7 +158,7 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 		Replicator->Tick(FApp::GetDeltaTime());
 		if (Replicator->IsStateChanged())
 		{
-			SetStateToChannelData(Replicator->GetState(), ChannelData, Replicator->GetTargetObject(), Replicator->GetNetGUID());
+			SetStateToChannelData(Replicator->GetDeltaState(), ChannelData, Replicator->GetTargetObject(), Replicator->GetNetGUID());
 			Replicator->ClearState();
 			bUpdated = true;
 		}

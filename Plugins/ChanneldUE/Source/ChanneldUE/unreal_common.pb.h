@@ -758,7 +758,11 @@ class CHANNELDUE_API SceneComponentState final :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef >&
       attachchildren() const;
 
-  // string attachSocketName = 11;
+  // optional string attachSocketName = 11;
+  bool has_attachsocketname() const;
+  private:
+  bool _internal_has_attachsocketname() const;
+  public:
   void clear_attachsocketname();
   const std::string& attachsocketname() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -772,7 +776,7 @@ class CHANNELDUE_API SceneComponentState final :
   std::string* _internal_mutable_attachsocketname();
   public:
 
-  // .unrealpb.UnrealObjectRef attachParent = 9;
+  // optional .unrealpb.UnrealObjectRef attachParent = 9;
   bool has_attachparent() const;
   private:
   bool _internal_has_attachparent() const;
@@ -790,7 +794,7 @@ class CHANNELDUE_API SceneComponentState final :
       ::unrealpb::UnrealObjectRef* attachparent);
   ::unrealpb::UnrealObjectRef* unsafe_arena_release_attachparent();
 
-  // .unrealpb.FVector relativeLocation = 12;
+  // optional .unrealpb.FVector relativeLocation = 12;
   bool has_relativelocation() const;
   private:
   bool _internal_has_relativelocation() const;
@@ -808,7 +812,7 @@ class CHANNELDUE_API SceneComponentState final :
       ::unrealpb::FVector* relativelocation);
   ::unrealpb::FVector* unsafe_arena_release_relativelocation();
 
-  // .unrealpb.FVector relativeRotation = 13;
+  // optional .unrealpb.FVector relativeRotation = 13;
   bool has_relativerotation() const;
   private:
   bool _internal_has_relativerotation() const;
@@ -826,7 +830,7 @@ class CHANNELDUE_API SceneComponentState final :
       ::unrealpb::FVector* relativerotation);
   ::unrealpb::FVector* unsafe_arena_release_relativerotation();
 
-  // .unrealpb.FVector relativeScale = 14;
+  // optional .unrealpb.FVector relativeScale = 14;
   bool has_relativescale() const;
   private:
   bool _internal_has_relativescale() const;
@@ -853,7 +857,11 @@ class CHANNELDUE_API SceneComponentState final :
   void _internal_set_removed(bool value);
   public:
 
-  // bool bAbsoluteLocation = 2;
+  // optional bool bAbsoluteLocation = 2;
+  bool has_babsolutelocation() const;
+  private:
+  bool _internal_has_babsolutelocation() const;
+  public:
   void clear_babsolutelocation();
   bool babsolutelocation() const;
   void set_babsolutelocation(bool value);
@@ -862,7 +870,11 @@ class CHANNELDUE_API SceneComponentState final :
   void _internal_set_babsolutelocation(bool value);
   public:
 
-  // bool bAbsoluteRotation = 3;
+  // optional bool bAbsoluteRotation = 3;
+  bool has_babsoluterotation() const;
+  private:
+  bool _internal_has_babsoluterotation() const;
+  public:
   void clear_babsoluterotation();
   bool babsoluterotation() const;
   void set_babsoluterotation(bool value);
@@ -871,7 +883,11 @@ class CHANNELDUE_API SceneComponentState final :
   void _internal_set_babsoluterotation(bool value);
   public:
 
-  // bool bAbsoluteScale = 4;
+  // optional bool bAbsoluteScale = 4;
+  bool has_babsolutescale() const;
+  private:
+  bool _internal_has_babsolutescale() const;
+  public:
   void clear_babsolutescale();
   bool babsolutescale() const;
   void set_babsolutescale(bool value);
@@ -880,7 +896,11 @@ class CHANNELDUE_API SceneComponentState final :
   void _internal_set_babsolutescale(bool value);
   public:
 
-  // bool bVisible = 5;
+  // optional bool bVisible = 5;
+  bool has_bvisible() const;
+  private:
+  bool _internal_has_bvisible() const;
+  public:
   void clear_bvisible();
   bool bvisible() const;
   void set_bvisible(bool value);
@@ -889,7 +909,11 @@ class CHANNELDUE_API SceneComponentState final :
   void _internal_set_bvisible(bool value);
   public:
 
-  // bool bShouldBeAttached = 6;
+  // optional bool bShouldBeAttached = 6;
+  bool has_bshouldbeattached() const;
+  private:
+  bool _internal_has_bshouldbeattached() const;
+  public:
   void clear_bshouldbeattached();
   bool bshouldbeattached() const;
   void set_bshouldbeattached(bool value);
@@ -898,7 +922,11 @@ class CHANNELDUE_API SceneComponentState final :
   void _internal_set_bshouldbeattached(bool value);
   public:
 
-  // bool bShouldSnapLocationWhenAttached = 7;
+  // optional bool bShouldSnapLocationWhenAttached = 7;
+  bool has_bshouldsnaplocationwhenattached() const;
+  private:
+  bool _internal_has_bshouldsnaplocationwhenattached() const;
+  public:
   void clear_bshouldsnaplocationwhenattached();
   bool bshouldsnaplocationwhenattached() const;
   void set_bshouldsnaplocationwhenattached(bool value);
@@ -907,7 +935,11 @@ class CHANNELDUE_API SceneComponentState final :
   void _internal_set_bshouldsnaplocationwhenattached(bool value);
   public:
 
-  // bool bShouldSnapRotationWhenAttached = 8;
+  // optional bool bShouldSnapRotationWhenAttached = 8;
+  bool has_bshouldsnaprotationwhenattached() const;
+  private:
+  bool _internal_has_bshouldsnaprotationwhenattached() const;
+  public:
   void clear_bshouldsnaprotationwhenattached();
   bool bshouldsnaprotationwhenattached() const;
   void set_bshouldsnaprotationwhenattached(bool value);
@@ -924,6 +956,8 @@ class CHANNELDUE_API SceneComponentState final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef > attachchildren_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr attachsocketname_;
     ::unrealpb::UnrealObjectRef* attachparent_;
@@ -938,7 +972,6 @@ class CHANNELDUE_API SceneComponentState final :
     bool bshouldbeattached_;
     bool bshouldsnaplocationwhenattached_;
     bool bshouldsnaprotationwhenattached_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -1192,7 +1225,11 @@ class CHANNELDUE_API BasedMovementInfo final :
     kBRelativeRotationFieldNumber = 6,
     kBServerHasVelocityFieldNumber = 7,
   };
-  // string boneName = 2;
+  // optional string boneName = 2;
+  bool has_bonename() const;
+  private:
+  bool _internal_has_bonename() const;
+  public:
   void clear_bonename();
   const std::string& bonename() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -1206,7 +1243,7 @@ class CHANNELDUE_API BasedMovementInfo final :
   std::string* _internal_mutable_bonename();
   public:
 
-  // .unrealpb.UnrealObjectRef movementBase = 1;
+  // optional .unrealpb.UnrealObjectRef movementBase = 1;
   bool has_movementbase() const;
   private:
   bool _internal_has_movementbase() const;
@@ -1224,7 +1261,7 @@ class CHANNELDUE_API BasedMovementInfo final :
       ::unrealpb::UnrealObjectRef* movementbase);
   ::unrealpb::UnrealObjectRef* unsafe_arena_release_movementbase();
 
-  // .unrealpb.FVector location = 3;
+  // optional .unrealpb.FVector location = 3;
   bool has_location() const;
   private:
   bool _internal_has_location() const;
@@ -1242,7 +1279,7 @@ class CHANNELDUE_API BasedMovementInfo final :
       ::unrealpb::FVector* location);
   ::unrealpb::FVector* unsafe_arena_release_location();
 
-  // .unrealpb.FVector rotation = 4;
+  // optional .unrealpb.FVector rotation = 4;
   bool has_rotation() const;
   private:
   bool _internal_has_rotation() const;
@@ -1260,7 +1297,11 @@ class CHANNELDUE_API BasedMovementInfo final :
       ::unrealpb::FVector* rotation);
   ::unrealpb::FVector* unsafe_arena_release_rotation();
 
-  // bool bServerHasBaseComponent = 5;
+  // optional bool bServerHasBaseComponent = 5;
+  bool has_bserverhasbasecomponent() const;
+  private:
+  bool _internal_has_bserverhasbasecomponent() const;
+  public:
   void clear_bserverhasbasecomponent();
   bool bserverhasbasecomponent() const;
   void set_bserverhasbasecomponent(bool value);
@@ -1269,7 +1310,11 @@ class CHANNELDUE_API BasedMovementInfo final :
   void _internal_set_bserverhasbasecomponent(bool value);
   public:
 
-  // bool bRelativeRotation = 6;
+  // optional bool bRelativeRotation = 6;
+  bool has_brelativerotation() const;
+  private:
+  bool _internal_has_brelativerotation() const;
+  public:
   void clear_brelativerotation();
   bool brelativerotation() const;
   void set_brelativerotation(bool value);
@@ -1278,7 +1323,11 @@ class CHANNELDUE_API BasedMovementInfo final :
   void _internal_set_brelativerotation(bool value);
   public:
 
-  // bool bServerHasVelocity = 7;
+  // optional bool bServerHasVelocity = 7;
+  bool has_bserverhasvelocity() const;
+  private:
+  bool _internal_has_bserverhasvelocity() const;
+  public:
   void clear_bserverhasvelocity();
   bool bserverhasvelocity() const;
   void set_bserverhasvelocity(bool value);
@@ -1295,6 +1344,8 @@ class CHANNELDUE_API BasedMovementInfo final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr bonename_;
     ::unrealpb::UnrealObjectRef* movementbase_;
     ::unrealpb::FVector* location_;
@@ -1302,7 +1353,6 @@ class CHANNELDUE_API BasedMovementInfo final :
     bool bserverhasbasecomponent_;
     bool brelativerotation_;
     bool bserverhasvelocity_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -1440,7 +1490,7 @@ class CHANNELDUE_API CharacterState final :
     kAnimRootMotionTranslationScaleFieldNumber = 8,
     kReplayLastTransformUpdateTimeStampFieldNumber = 9,
   };
-  // .unrealpb.RootMotionMontage rootMotion = 2;
+  // optional .unrealpb.RootMotionMontage rootMotion = 2;
   bool has_rootmotion() const;
   private:
   bool _internal_has_rootmotion() const;
@@ -1458,7 +1508,7 @@ class CHANNELDUE_API CharacterState final :
       ::unrealpb::RootMotionMontage* rootmotion);
   ::unrealpb::RootMotionMontage* unsafe_arena_release_rootmotion();
 
-  // .unrealpb.BasedMovementInfo basedMovement = 3;
+  // optional .unrealpb.BasedMovementInfo basedMovement = 3;
   bool has_basedmovement() const;
   private:
   bool _internal_has_basedmovement() const;
@@ -1476,7 +1526,11 @@ class CHANNELDUE_API CharacterState final :
       ::unrealpb::BasedMovementInfo* basedmovement);
   ::unrealpb::BasedMovementInfo* unsafe_arena_release_basedmovement();
 
-  // float serverLastTransformUpdateTimeStamp = 4;
+  // optional float serverLastTransformUpdateTimeStamp = 4;
+  bool has_serverlasttransformupdatetimestamp() const;
+  private:
+  bool _internal_has_serverlasttransformupdatetimestamp() const;
+  public:
   void clear_serverlasttransformupdatetimestamp();
   float serverlasttransformupdatetimestamp() const;
   void set_serverlasttransformupdatetimestamp(float value);
@@ -1494,7 +1548,11 @@ class CHANNELDUE_API CharacterState final :
   void _internal_set_removed(bool value);
   public:
 
-  // bool bIsCrouched = 6;
+  // optional bool bIsCrouched = 6;
+  bool has_biscrouched() const;
+  private:
+  bool _internal_has_biscrouched() const;
+  public:
   void clear_biscrouched();
   bool biscrouched() const;
   void set_biscrouched(bool value);
@@ -1503,7 +1561,11 @@ class CHANNELDUE_API CharacterState final :
   void _internal_set_biscrouched(bool value);
   public:
 
-  // bool bProxyIsJumpForceApplied = 7;
+  // optional bool bProxyIsJumpForceApplied = 7;
+  bool has_bproxyisjumpforceapplied() const;
+  private:
+  bool _internal_has_bproxyisjumpforceapplied() const;
+  public:
   void clear_bproxyisjumpforceapplied();
   bool bproxyisjumpforceapplied() const;
   void set_bproxyisjumpforceapplied(bool value);
@@ -1512,7 +1574,11 @@ class CHANNELDUE_API CharacterState final :
   void _internal_set_bproxyisjumpforceapplied(bool value);
   public:
 
-  // uint32 movementMode = 5;
+  // optional uint32 movementMode = 5;
+  bool has_movementmode() const;
+  private:
+  bool _internal_has_movementmode() const;
+  public:
   void clear_movementmode();
   uint32_t movementmode() const;
   void set_movementmode(uint32_t value);
@@ -1521,7 +1587,11 @@ class CHANNELDUE_API CharacterState final :
   void _internal_set_movementmode(uint32_t value);
   public:
 
-  // float animRootMotionTranslationScale = 8;
+  // optional float animRootMotionTranslationScale = 8;
+  bool has_animrootmotiontranslationscale() const;
+  private:
+  bool _internal_has_animrootmotiontranslationscale() const;
+  public:
   void clear_animrootmotiontranslationscale();
   float animrootmotiontranslationscale() const;
   void set_animrootmotiontranslationscale(float value);
@@ -1530,7 +1600,11 @@ class CHANNELDUE_API CharacterState final :
   void _internal_set_animrootmotiontranslationscale(float value);
   public:
 
-  // float replayLastTransformUpdateTimeStamp = 9;
+  // optional float replayLastTransformUpdateTimeStamp = 9;
+  bool has_replaylasttransformupdatetimestamp() const;
+  private:
+  bool _internal_has_replaylasttransformupdatetimestamp() const;
+  public:
   void clear_replaylasttransformupdatetimestamp();
   float replaylasttransformupdatetimestamp() const;
   void set_replaylasttransformupdatetimestamp(float value);
@@ -1547,6 +1621,8 @@ class CHANNELDUE_API CharacterState final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::unrealpb::RootMotionMontage* rootmotion_;
     ::unrealpb::BasedMovementInfo* basedmovement_;
     float serverlasttransformupdatetimestamp_;
@@ -1556,7 +1632,6 @@ class CHANNELDUE_API CharacterState final :
     uint32_t movementmode_;
     float animrootmotiontranslationscale_;
     float replaylasttransformupdatetimestamp_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -1993,7 +2068,7 @@ class CHANNELDUE_API PlayerControllerState final :
     kTargetViewRotationFieldNumber = 1,
     kSpawnLocationFieldNumber = 2,
   };
-  // .unrealpb.FVector targetViewRotation = 1;
+  // optional .unrealpb.FVector targetViewRotation = 1;
   bool has_targetviewrotation() const;
   private:
   bool _internal_has_targetviewrotation() const;
@@ -2011,7 +2086,7 @@ class CHANNELDUE_API PlayerControllerState final :
       ::unrealpb::FVector* targetviewrotation);
   ::unrealpb::FVector* unsafe_arena_release_targetviewrotation();
 
-  // .unrealpb.FVector spawnLocation = 2;
+  // optional .unrealpb.FVector spawnLocation = 2;
   bool has_spawnlocation() const;
   private:
   bool _internal_has_spawnlocation() const;
@@ -2037,9 +2112,10 @@ class CHANNELDUE_API PlayerControllerState final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::unrealpb::FVector* targetviewrotation_;
     ::unrealpb::FVector* spawnlocation_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -2525,9 +2601,17 @@ inline void SceneComponentState::set_removed(bool value) {
   // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.removed)
 }
 
-// bool bAbsoluteLocation = 2;
+// optional bool bAbsoluteLocation = 2;
+inline bool SceneComponentState::_internal_has_babsolutelocation() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool SceneComponentState::has_babsolutelocation() const {
+  return _internal_has_babsolutelocation();
+}
 inline void SceneComponentState::clear_babsolutelocation() {
   _impl_.babsolutelocation_ = false;
+  _impl_._has_bits_[0] &= ~0x00000020u;
 }
 inline bool SceneComponentState::_internal_babsolutelocation() const {
   return _impl_.babsolutelocation_;
@@ -2537,7 +2621,7 @@ inline bool SceneComponentState::babsolutelocation() const {
   return _internal_babsolutelocation();
 }
 inline void SceneComponentState::_internal_set_babsolutelocation(bool value) {
-  
+  _impl_._has_bits_[0] |= 0x00000020u;
   _impl_.babsolutelocation_ = value;
 }
 inline void SceneComponentState::set_babsolutelocation(bool value) {
@@ -2545,9 +2629,17 @@ inline void SceneComponentState::set_babsolutelocation(bool value) {
   // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bAbsoluteLocation)
 }
 
-// bool bAbsoluteRotation = 3;
+// optional bool bAbsoluteRotation = 3;
+inline bool SceneComponentState::_internal_has_babsoluterotation() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool SceneComponentState::has_babsoluterotation() const {
+  return _internal_has_babsoluterotation();
+}
 inline void SceneComponentState::clear_babsoluterotation() {
   _impl_.babsoluterotation_ = false;
+  _impl_._has_bits_[0] &= ~0x00000040u;
 }
 inline bool SceneComponentState::_internal_babsoluterotation() const {
   return _impl_.babsoluterotation_;
@@ -2557,7 +2649,7 @@ inline bool SceneComponentState::babsoluterotation() const {
   return _internal_babsoluterotation();
 }
 inline void SceneComponentState::_internal_set_babsoluterotation(bool value) {
-  
+  _impl_._has_bits_[0] |= 0x00000040u;
   _impl_.babsoluterotation_ = value;
 }
 inline void SceneComponentState::set_babsoluterotation(bool value) {
@@ -2565,9 +2657,17 @@ inline void SceneComponentState::set_babsoluterotation(bool value) {
   // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bAbsoluteRotation)
 }
 
-// bool bAbsoluteScale = 4;
+// optional bool bAbsoluteScale = 4;
+inline bool SceneComponentState::_internal_has_babsolutescale() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool SceneComponentState::has_babsolutescale() const {
+  return _internal_has_babsolutescale();
+}
 inline void SceneComponentState::clear_babsolutescale() {
   _impl_.babsolutescale_ = false;
+  _impl_._has_bits_[0] &= ~0x00000080u;
 }
 inline bool SceneComponentState::_internal_babsolutescale() const {
   return _impl_.babsolutescale_;
@@ -2577,7 +2677,7 @@ inline bool SceneComponentState::babsolutescale() const {
   return _internal_babsolutescale();
 }
 inline void SceneComponentState::_internal_set_babsolutescale(bool value) {
-  
+  _impl_._has_bits_[0] |= 0x00000080u;
   _impl_.babsolutescale_ = value;
 }
 inline void SceneComponentState::set_babsolutescale(bool value) {
@@ -2585,9 +2685,17 @@ inline void SceneComponentState::set_babsolutescale(bool value) {
   // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bAbsoluteScale)
 }
 
-// bool bVisible = 5;
+// optional bool bVisible = 5;
+inline bool SceneComponentState::_internal_has_bvisible() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool SceneComponentState::has_bvisible() const {
+  return _internal_has_bvisible();
+}
 inline void SceneComponentState::clear_bvisible() {
   _impl_.bvisible_ = false;
+  _impl_._has_bits_[0] &= ~0x00000100u;
 }
 inline bool SceneComponentState::_internal_bvisible() const {
   return _impl_.bvisible_;
@@ -2597,7 +2705,7 @@ inline bool SceneComponentState::bvisible() const {
   return _internal_bvisible();
 }
 inline void SceneComponentState::_internal_set_bvisible(bool value) {
-  
+  _impl_._has_bits_[0] |= 0x00000100u;
   _impl_.bvisible_ = value;
 }
 inline void SceneComponentState::set_bvisible(bool value) {
@@ -2605,9 +2713,17 @@ inline void SceneComponentState::set_bvisible(bool value) {
   // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bVisible)
 }
 
-// bool bShouldBeAttached = 6;
+// optional bool bShouldBeAttached = 6;
+inline bool SceneComponentState::_internal_has_bshouldbeattached() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000200u) != 0;
+  return value;
+}
+inline bool SceneComponentState::has_bshouldbeattached() const {
+  return _internal_has_bshouldbeattached();
+}
 inline void SceneComponentState::clear_bshouldbeattached() {
   _impl_.bshouldbeattached_ = false;
+  _impl_._has_bits_[0] &= ~0x00000200u;
 }
 inline bool SceneComponentState::_internal_bshouldbeattached() const {
   return _impl_.bshouldbeattached_;
@@ -2617,7 +2733,7 @@ inline bool SceneComponentState::bshouldbeattached() const {
   return _internal_bshouldbeattached();
 }
 inline void SceneComponentState::_internal_set_bshouldbeattached(bool value) {
-  
+  _impl_._has_bits_[0] |= 0x00000200u;
   _impl_.bshouldbeattached_ = value;
 }
 inline void SceneComponentState::set_bshouldbeattached(bool value) {
@@ -2625,9 +2741,17 @@ inline void SceneComponentState::set_bshouldbeattached(bool value) {
   // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bShouldBeAttached)
 }
 
-// bool bShouldSnapLocationWhenAttached = 7;
+// optional bool bShouldSnapLocationWhenAttached = 7;
+inline bool SceneComponentState::_internal_has_bshouldsnaplocationwhenattached() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000400u) != 0;
+  return value;
+}
+inline bool SceneComponentState::has_bshouldsnaplocationwhenattached() const {
+  return _internal_has_bshouldsnaplocationwhenattached();
+}
 inline void SceneComponentState::clear_bshouldsnaplocationwhenattached() {
   _impl_.bshouldsnaplocationwhenattached_ = false;
+  _impl_._has_bits_[0] &= ~0x00000400u;
 }
 inline bool SceneComponentState::_internal_bshouldsnaplocationwhenattached() const {
   return _impl_.bshouldsnaplocationwhenattached_;
@@ -2637,7 +2761,7 @@ inline bool SceneComponentState::bshouldsnaplocationwhenattached() const {
   return _internal_bshouldsnaplocationwhenattached();
 }
 inline void SceneComponentState::_internal_set_bshouldsnaplocationwhenattached(bool value) {
-  
+  _impl_._has_bits_[0] |= 0x00000400u;
   _impl_.bshouldsnaplocationwhenattached_ = value;
 }
 inline void SceneComponentState::set_bshouldsnaplocationwhenattached(bool value) {
@@ -2645,9 +2769,17 @@ inline void SceneComponentState::set_bshouldsnaplocationwhenattached(bool value)
   // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bShouldSnapLocationWhenAttached)
 }
 
-// bool bShouldSnapRotationWhenAttached = 8;
+// optional bool bShouldSnapRotationWhenAttached = 8;
+inline bool SceneComponentState::_internal_has_bshouldsnaprotationwhenattached() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000800u) != 0;
+  return value;
+}
+inline bool SceneComponentState::has_bshouldsnaprotationwhenattached() const {
+  return _internal_has_bshouldsnaprotationwhenattached();
+}
 inline void SceneComponentState::clear_bshouldsnaprotationwhenattached() {
   _impl_.bshouldsnaprotationwhenattached_ = false;
+  _impl_._has_bits_[0] &= ~0x00000800u;
 }
 inline bool SceneComponentState::_internal_bshouldsnaprotationwhenattached() const {
   return _impl_.bshouldsnaprotationwhenattached_;
@@ -2657,7 +2789,7 @@ inline bool SceneComponentState::bshouldsnaprotationwhenattached() const {
   return _internal_bshouldsnaprotationwhenattached();
 }
 inline void SceneComponentState::_internal_set_bshouldsnaprotationwhenattached(bool value) {
-  
+  _impl_._has_bits_[0] |= 0x00000800u;
   _impl_.bshouldsnaprotationwhenattached_ = value;
 }
 inline void SceneComponentState::set_bshouldsnaprotationwhenattached(bool value) {
@@ -2665,18 +2797,18 @@ inline void SceneComponentState::set_bshouldsnaprotationwhenattached(bool value)
   // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bShouldSnapRotationWhenAttached)
 }
 
-// .unrealpb.UnrealObjectRef attachParent = 9;
+// optional .unrealpb.UnrealObjectRef attachParent = 9;
 inline bool SceneComponentState::_internal_has_attachparent() const {
-  return this != internal_default_instance() && _impl_.attachparent_ != nullptr;
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.attachparent_ != nullptr);
+  return value;
 }
 inline bool SceneComponentState::has_attachparent() const {
   return _internal_has_attachparent();
 }
 inline void SceneComponentState::clear_attachparent() {
-  if (GetArenaForAllocation() == nullptr && _impl_.attachparent_ != nullptr) {
-    delete _impl_.attachparent_;
-  }
-  _impl_.attachparent_ = nullptr;
+  if (_impl_.attachparent_ != nullptr) _impl_.attachparent_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000002u;
 }
 inline const ::unrealpb::UnrealObjectRef& SceneComponentState::_internal_attachparent() const {
   const ::unrealpb::UnrealObjectRef* p = _impl_.attachparent_;
@@ -2694,14 +2826,14 @@ inline void SceneComponentState::unsafe_arena_set_allocated_attachparent(
   }
   _impl_.attachparent_ = attachparent;
   if (attachparent) {
-    
+    _impl_._has_bits_[0] |= 0x00000002u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000002u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.SceneComponentState.attachParent)
 }
 inline ::unrealpb::UnrealObjectRef* SceneComponentState::release_attachparent() {
-  
+  _impl_._has_bits_[0] &= ~0x00000002u;
   ::unrealpb::UnrealObjectRef* temp = _impl_.attachparent_;
   _impl_.attachparent_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
@@ -2717,13 +2849,13 @@ inline ::unrealpb::UnrealObjectRef* SceneComponentState::release_attachparent() 
 }
 inline ::unrealpb::UnrealObjectRef* SceneComponentState::unsafe_arena_release_attachparent() {
   // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.attachParent)
-  
+  _impl_._has_bits_[0] &= ~0x00000002u;
   ::unrealpb::UnrealObjectRef* temp = _impl_.attachparent_;
   _impl_.attachparent_ = nullptr;
   return temp;
 }
 inline ::unrealpb::UnrealObjectRef* SceneComponentState::_internal_mutable_attachparent() {
-  
+  _impl_._has_bits_[0] |= 0x00000002u;
   if (_impl_.attachparent_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::UnrealObjectRef>(GetArenaForAllocation());
     _impl_.attachparent_ = p;
@@ -2747,9 +2879,9 @@ inline void SceneComponentState::set_allocated_attachparent(::unrealpb::UnrealOb
       attachparent = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, attachparent, submessage_arena);
     }
-    
+    _impl_._has_bits_[0] |= 0x00000002u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000002u;
   }
   _impl_.attachparent_ = attachparent;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.attachParent)
@@ -2795,9 +2927,17 @@ SceneComponentState::attachchildren() const {
   return _impl_.attachchildren_;
 }
 
-// string attachSocketName = 11;
+// optional string attachSocketName = 11;
+inline bool SceneComponentState::_internal_has_attachsocketname() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool SceneComponentState::has_attachsocketname() const {
+  return _internal_has_attachsocketname();
+}
 inline void SceneComponentState::clear_attachsocketname() {
   _impl_.attachsocketname_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& SceneComponentState::attachsocketname() const {
   // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.attachSocketName)
@@ -2806,7 +2946,7 @@ inline const std::string& SceneComponentState::attachsocketname() const {
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
 void SceneComponentState::set_attachsocketname(ArgT0&& arg0, ArgT... args) {
- 
+ _impl_._has_bits_[0] |= 0x00000001u;
  _impl_.attachsocketname_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
   // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.attachSocketName)
 }
@@ -2819,22 +2959,32 @@ inline const std::string& SceneComponentState::_internal_attachsocketname() cons
   return _impl_.attachsocketname_.Get();
 }
 inline void SceneComponentState::_internal_set_attachsocketname(const std::string& value) {
-  
+  _impl_._has_bits_[0] |= 0x00000001u;
   _impl_.attachsocketname_.Set(value, GetArenaForAllocation());
 }
 inline std::string* SceneComponentState::_internal_mutable_attachsocketname() {
-  
+  _impl_._has_bits_[0] |= 0x00000001u;
   return _impl_.attachsocketname_.Mutable(GetArenaForAllocation());
 }
 inline std::string* SceneComponentState::release_attachsocketname() {
   // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.attachSocketName)
-  return _impl_.attachsocketname_.Release();
+  if (!_internal_has_attachsocketname()) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  auto* p = _impl_.attachsocketname_.Release();
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.attachsocketname_.IsDefault()) {
+    _impl_.attachsocketname_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return p;
 }
 inline void SceneComponentState::set_allocated_attachsocketname(std::string* attachsocketname) {
   if (attachsocketname != nullptr) {
-    
+    _impl_._has_bits_[0] |= 0x00000001u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000001u;
   }
   _impl_.attachsocketname_.SetAllocated(attachsocketname, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
@@ -2845,18 +2995,18 @@ inline void SceneComponentState::set_allocated_attachsocketname(std::string* att
   // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.attachSocketName)
 }
 
-// .unrealpb.FVector relativeLocation = 12;
+// optional .unrealpb.FVector relativeLocation = 12;
 inline bool SceneComponentState::_internal_has_relativelocation() const {
-  return this != internal_default_instance() && _impl_.relativelocation_ != nullptr;
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.relativelocation_ != nullptr);
+  return value;
 }
 inline bool SceneComponentState::has_relativelocation() const {
   return _internal_has_relativelocation();
 }
 inline void SceneComponentState::clear_relativelocation() {
-  if (GetArenaForAllocation() == nullptr && _impl_.relativelocation_ != nullptr) {
-    delete _impl_.relativelocation_;
-  }
-  _impl_.relativelocation_ = nullptr;
+  if (_impl_.relativelocation_ != nullptr) _impl_.relativelocation_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000004u;
 }
 inline const ::unrealpb::FVector& SceneComponentState::_internal_relativelocation() const {
   const ::unrealpb::FVector* p = _impl_.relativelocation_;
@@ -2874,14 +3024,14 @@ inline void SceneComponentState::unsafe_arena_set_allocated_relativelocation(
   }
   _impl_.relativelocation_ = relativelocation;
   if (relativelocation) {
-    
+    _impl_._has_bits_[0] |= 0x00000004u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000004u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.SceneComponentState.relativeLocation)
 }
 inline ::unrealpb::FVector* SceneComponentState::release_relativelocation() {
-  
+  _impl_._has_bits_[0] &= ~0x00000004u;
   ::unrealpb::FVector* temp = _impl_.relativelocation_;
   _impl_.relativelocation_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
@@ -2897,13 +3047,13 @@ inline ::unrealpb::FVector* SceneComponentState::release_relativelocation() {
 }
 inline ::unrealpb::FVector* SceneComponentState::unsafe_arena_release_relativelocation() {
   // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.relativeLocation)
-  
+  _impl_._has_bits_[0] &= ~0x00000004u;
   ::unrealpb::FVector* temp = _impl_.relativelocation_;
   _impl_.relativelocation_ = nullptr;
   return temp;
 }
 inline ::unrealpb::FVector* SceneComponentState::_internal_mutable_relativelocation() {
-  
+  _impl_._has_bits_[0] |= 0x00000004u;
   if (_impl_.relativelocation_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
     _impl_.relativelocation_ = p;
@@ -2927,26 +3077,26 @@ inline void SceneComponentState::set_allocated_relativelocation(::unrealpb::FVec
       relativelocation = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, relativelocation, submessage_arena);
     }
-    
+    _impl_._has_bits_[0] |= 0x00000004u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000004u;
   }
   _impl_.relativelocation_ = relativelocation;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.relativeLocation)
 }
 
-// .unrealpb.FVector relativeRotation = 13;
+// optional .unrealpb.FVector relativeRotation = 13;
 inline bool SceneComponentState::_internal_has_relativerotation() const {
-  return this != internal_default_instance() && _impl_.relativerotation_ != nullptr;
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.relativerotation_ != nullptr);
+  return value;
 }
 inline bool SceneComponentState::has_relativerotation() const {
   return _internal_has_relativerotation();
 }
 inline void SceneComponentState::clear_relativerotation() {
-  if (GetArenaForAllocation() == nullptr && _impl_.relativerotation_ != nullptr) {
-    delete _impl_.relativerotation_;
-  }
-  _impl_.relativerotation_ = nullptr;
+  if (_impl_.relativerotation_ != nullptr) _impl_.relativerotation_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000008u;
 }
 inline const ::unrealpb::FVector& SceneComponentState::_internal_relativerotation() const {
   const ::unrealpb::FVector* p = _impl_.relativerotation_;
@@ -2964,14 +3114,14 @@ inline void SceneComponentState::unsafe_arena_set_allocated_relativerotation(
   }
   _impl_.relativerotation_ = relativerotation;
   if (relativerotation) {
-    
+    _impl_._has_bits_[0] |= 0x00000008u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000008u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.SceneComponentState.relativeRotation)
 }
 inline ::unrealpb::FVector* SceneComponentState::release_relativerotation() {
-  
+  _impl_._has_bits_[0] &= ~0x00000008u;
   ::unrealpb::FVector* temp = _impl_.relativerotation_;
   _impl_.relativerotation_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
@@ -2987,13 +3137,13 @@ inline ::unrealpb::FVector* SceneComponentState::release_relativerotation() {
 }
 inline ::unrealpb::FVector* SceneComponentState::unsafe_arena_release_relativerotation() {
   // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.relativeRotation)
-  
+  _impl_._has_bits_[0] &= ~0x00000008u;
   ::unrealpb::FVector* temp = _impl_.relativerotation_;
   _impl_.relativerotation_ = nullptr;
   return temp;
 }
 inline ::unrealpb::FVector* SceneComponentState::_internal_mutable_relativerotation() {
-  
+  _impl_._has_bits_[0] |= 0x00000008u;
   if (_impl_.relativerotation_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
     _impl_.relativerotation_ = p;
@@ -3017,26 +3167,26 @@ inline void SceneComponentState::set_allocated_relativerotation(::unrealpb::FVec
       relativerotation = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, relativerotation, submessage_arena);
     }
-    
+    _impl_._has_bits_[0] |= 0x00000008u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000008u;
   }
   _impl_.relativerotation_ = relativerotation;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.relativeRotation)
 }
 
-// .unrealpb.FVector relativeScale = 14;
+// optional .unrealpb.FVector relativeScale = 14;
 inline bool SceneComponentState::_internal_has_relativescale() const {
-  return this != internal_default_instance() && _impl_.relativescale_ != nullptr;
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.relativescale_ != nullptr);
+  return value;
 }
 inline bool SceneComponentState::has_relativescale() const {
   return _internal_has_relativescale();
 }
 inline void SceneComponentState::clear_relativescale() {
-  if (GetArenaForAllocation() == nullptr && _impl_.relativescale_ != nullptr) {
-    delete _impl_.relativescale_;
-  }
-  _impl_.relativescale_ = nullptr;
+  if (_impl_.relativescale_ != nullptr) _impl_.relativescale_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000010u;
 }
 inline const ::unrealpb::FVector& SceneComponentState::_internal_relativescale() const {
   const ::unrealpb::FVector* p = _impl_.relativescale_;
@@ -3054,14 +3204,14 @@ inline void SceneComponentState::unsafe_arena_set_allocated_relativescale(
   }
   _impl_.relativescale_ = relativescale;
   if (relativescale) {
-    
+    _impl_._has_bits_[0] |= 0x00000010u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000010u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.SceneComponentState.relativeScale)
 }
 inline ::unrealpb::FVector* SceneComponentState::release_relativescale() {
-  
+  _impl_._has_bits_[0] &= ~0x00000010u;
   ::unrealpb::FVector* temp = _impl_.relativescale_;
   _impl_.relativescale_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
@@ -3077,13 +3227,13 @@ inline ::unrealpb::FVector* SceneComponentState::release_relativescale() {
 }
 inline ::unrealpb::FVector* SceneComponentState::unsafe_arena_release_relativescale() {
   // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.relativeScale)
-  
+  _impl_._has_bits_[0] &= ~0x00000010u;
   ::unrealpb::FVector* temp = _impl_.relativescale_;
   _impl_.relativescale_ = nullptr;
   return temp;
 }
 inline ::unrealpb::FVector* SceneComponentState::_internal_mutable_relativescale() {
-  
+  _impl_._has_bits_[0] |= 0x00000010u;
   if (_impl_.relativescale_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
     _impl_.relativescale_ = p;
@@ -3107,9 +3257,9 @@ inline void SceneComponentState::set_allocated_relativescale(::unrealpb::FVector
       relativescale = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, relativescale, submessage_arena);
     }
-    
+    _impl_._has_bits_[0] |= 0x00000010u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000010u;
   }
   _impl_.relativescale_ = relativescale;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.relativeScale)
@@ -3123,18 +3273,18 @@ inline void SceneComponentState::set_allocated_relativescale(::unrealpb::FVector
 
 // BasedMovementInfo
 
-// .unrealpb.UnrealObjectRef movementBase = 1;
+// optional .unrealpb.UnrealObjectRef movementBase = 1;
 inline bool BasedMovementInfo::_internal_has_movementbase() const {
-  return this != internal_default_instance() && _impl_.movementbase_ != nullptr;
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.movementbase_ != nullptr);
+  return value;
 }
 inline bool BasedMovementInfo::has_movementbase() const {
   return _internal_has_movementbase();
 }
 inline void BasedMovementInfo::clear_movementbase() {
-  if (GetArenaForAllocation() == nullptr && _impl_.movementbase_ != nullptr) {
-    delete _impl_.movementbase_;
-  }
-  _impl_.movementbase_ = nullptr;
+  if (_impl_.movementbase_ != nullptr) _impl_.movementbase_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000002u;
 }
 inline const ::unrealpb::UnrealObjectRef& BasedMovementInfo::_internal_movementbase() const {
   const ::unrealpb::UnrealObjectRef* p = _impl_.movementbase_;
@@ -3152,14 +3302,14 @@ inline void BasedMovementInfo::unsafe_arena_set_allocated_movementbase(
   }
   _impl_.movementbase_ = movementbase;
   if (movementbase) {
-    
+    _impl_._has_bits_[0] |= 0x00000002u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000002u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.BasedMovementInfo.movementBase)
 }
 inline ::unrealpb::UnrealObjectRef* BasedMovementInfo::release_movementbase() {
-  
+  _impl_._has_bits_[0] &= ~0x00000002u;
   ::unrealpb::UnrealObjectRef* temp = _impl_.movementbase_;
   _impl_.movementbase_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
@@ -3175,13 +3325,13 @@ inline ::unrealpb::UnrealObjectRef* BasedMovementInfo::release_movementbase() {
 }
 inline ::unrealpb::UnrealObjectRef* BasedMovementInfo::unsafe_arena_release_movementbase() {
   // @@protoc_insertion_point(field_release:unrealpb.BasedMovementInfo.movementBase)
-  
+  _impl_._has_bits_[0] &= ~0x00000002u;
   ::unrealpb::UnrealObjectRef* temp = _impl_.movementbase_;
   _impl_.movementbase_ = nullptr;
   return temp;
 }
 inline ::unrealpb::UnrealObjectRef* BasedMovementInfo::_internal_mutable_movementbase() {
-  
+  _impl_._has_bits_[0] |= 0x00000002u;
   if (_impl_.movementbase_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::UnrealObjectRef>(GetArenaForAllocation());
     _impl_.movementbase_ = p;
@@ -3205,17 +3355,25 @@ inline void BasedMovementInfo::set_allocated_movementbase(::unrealpb::UnrealObje
       movementbase = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, movementbase, submessage_arena);
     }
-    
+    _impl_._has_bits_[0] |= 0x00000002u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000002u;
   }
   _impl_.movementbase_ = movementbase;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.BasedMovementInfo.movementBase)
 }
 
-// string boneName = 2;
+// optional string boneName = 2;
+inline bool BasedMovementInfo::_internal_has_bonename() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool BasedMovementInfo::has_bonename() const {
+  return _internal_has_bonename();
+}
 inline void BasedMovementInfo::clear_bonename() {
   _impl_.bonename_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& BasedMovementInfo::bonename() const {
   // @@protoc_insertion_point(field_get:unrealpb.BasedMovementInfo.boneName)
@@ -3224,7 +3382,7 @@ inline const std::string& BasedMovementInfo::bonename() const {
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
 void BasedMovementInfo::set_bonename(ArgT0&& arg0, ArgT... args) {
- 
+ _impl_._has_bits_[0] |= 0x00000001u;
  _impl_.bonename_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
   // @@protoc_insertion_point(field_set:unrealpb.BasedMovementInfo.boneName)
 }
@@ -3237,22 +3395,32 @@ inline const std::string& BasedMovementInfo::_internal_bonename() const {
   return _impl_.bonename_.Get();
 }
 inline void BasedMovementInfo::_internal_set_bonename(const std::string& value) {
-  
+  _impl_._has_bits_[0] |= 0x00000001u;
   _impl_.bonename_.Set(value, GetArenaForAllocation());
 }
 inline std::string* BasedMovementInfo::_internal_mutable_bonename() {
-  
+  _impl_._has_bits_[0] |= 0x00000001u;
   return _impl_.bonename_.Mutable(GetArenaForAllocation());
 }
 inline std::string* BasedMovementInfo::release_bonename() {
   // @@protoc_insertion_point(field_release:unrealpb.BasedMovementInfo.boneName)
-  return _impl_.bonename_.Release();
+  if (!_internal_has_bonename()) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  auto* p = _impl_.bonename_.Release();
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.bonename_.IsDefault()) {
+    _impl_.bonename_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return p;
 }
 inline void BasedMovementInfo::set_allocated_bonename(std::string* bonename) {
   if (bonename != nullptr) {
-    
+    _impl_._has_bits_[0] |= 0x00000001u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000001u;
   }
   _impl_.bonename_.SetAllocated(bonename, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
@@ -3263,18 +3431,18 @@ inline void BasedMovementInfo::set_allocated_bonename(std::string* bonename) {
   // @@protoc_insertion_point(field_set_allocated:unrealpb.BasedMovementInfo.boneName)
 }
 
-// .unrealpb.FVector location = 3;
+// optional .unrealpb.FVector location = 3;
 inline bool BasedMovementInfo::_internal_has_location() const {
-  return this != internal_default_instance() && _impl_.location_ != nullptr;
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.location_ != nullptr);
+  return value;
 }
 inline bool BasedMovementInfo::has_location() const {
   return _internal_has_location();
 }
 inline void BasedMovementInfo::clear_location() {
-  if (GetArenaForAllocation() == nullptr && _impl_.location_ != nullptr) {
-    delete _impl_.location_;
-  }
-  _impl_.location_ = nullptr;
+  if (_impl_.location_ != nullptr) _impl_.location_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000004u;
 }
 inline const ::unrealpb::FVector& BasedMovementInfo::_internal_location() const {
   const ::unrealpb::FVector* p = _impl_.location_;
@@ -3292,14 +3460,14 @@ inline void BasedMovementInfo::unsafe_arena_set_allocated_location(
   }
   _impl_.location_ = location;
   if (location) {
-    
+    _impl_._has_bits_[0] |= 0x00000004u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000004u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.BasedMovementInfo.location)
 }
 inline ::unrealpb::FVector* BasedMovementInfo::release_location() {
-  
+  _impl_._has_bits_[0] &= ~0x00000004u;
   ::unrealpb::FVector* temp = _impl_.location_;
   _impl_.location_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
@@ -3315,13 +3483,13 @@ inline ::unrealpb::FVector* BasedMovementInfo::release_location() {
 }
 inline ::unrealpb::FVector* BasedMovementInfo::unsafe_arena_release_location() {
   // @@protoc_insertion_point(field_release:unrealpb.BasedMovementInfo.location)
-  
+  _impl_._has_bits_[0] &= ~0x00000004u;
   ::unrealpb::FVector* temp = _impl_.location_;
   _impl_.location_ = nullptr;
   return temp;
 }
 inline ::unrealpb::FVector* BasedMovementInfo::_internal_mutable_location() {
-  
+  _impl_._has_bits_[0] |= 0x00000004u;
   if (_impl_.location_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
     _impl_.location_ = p;
@@ -3345,26 +3513,26 @@ inline void BasedMovementInfo::set_allocated_location(::unrealpb::FVector* locat
       location = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, location, submessage_arena);
     }
-    
+    _impl_._has_bits_[0] |= 0x00000004u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000004u;
   }
   _impl_.location_ = location;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.BasedMovementInfo.location)
 }
 
-// .unrealpb.FVector rotation = 4;
+// optional .unrealpb.FVector rotation = 4;
 inline bool BasedMovementInfo::_internal_has_rotation() const {
-  return this != internal_default_instance() && _impl_.rotation_ != nullptr;
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.rotation_ != nullptr);
+  return value;
 }
 inline bool BasedMovementInfo::has_rotation() const {
   return _internal_has_rotation();
 }
 inline void BasedMovementInfo::clear_rotation() {
-  if (GetArenaForAllocation() == nullptr && _impl_.rotation_ != nullptr) {
-    delete _impl_.rotation_;
-  }
-  _impl_.rotation_ = nullptr;
+  if (_impl_.rotation_ != nullptr) _impl_.rotation_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000008u;
 }
 inline const ::unrealpb::FVector& BasedMovementInfo::_internal_rotation() const {
   const ::unrealpb::FVector* p = _impl_.rotation_;
@@ -3382,14 +3550,14 @@ inline void BasedMovementInfo::unsafe_arena_set_allocated_rotation(
   }
   _impl_.rotation_ = rotation;
   if (rotation) {
-    
+    _impl_._has_bits_[0] |= 0x00000008u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000008u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.BasedMovementInfo.rotation)
 }
 inline ::unrealpb::FVector* BasedMovementInfo::release_rotation() {
-  
+  _impl_._has_bits_[0] &= ~0x00000008u;
   ::unrealpb::FVector* temp = _impl_.rotation_;
   _impl_.rotation_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
@@ -3405,13 +3573,13 @@ inline ::unrealpb::FVector* BasedMovementInfo::release_rotation() {
 }
 inline ::unrealpb::FVector* BasedMovementInfo::unsafe_arena_release_rotation() {
   // @@protoc_insertion_point(field_release:unrealpb.BasedMovementInfo.rotation)
-  
+  _impl_._has_bits_[0] &= ~0x00000008u;
   ::unrealpb::FVector* temp = _impl_.rotation_;
   _impl_.rotation_ = nullptr;
   return temp;
 }
 inline ::unrealpb::FVector* BasedMovementInfo::_internal_mutable_rotation() {
-  
+  _impl_._has_bits_[0] |= 0x00000008u;
   if (_impl_.rotation_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
     _impl_.rotation_ = p;
@@ -3435,17 +3603,25 @@ inline void BasedMovementInfo::set_allocated_rotation(::unrealpb::FVector* rotat
       rotation = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, rotation, submessage_arena);
     }
-    
+    _impl_._has_bits_[0] |= 0x00000008u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000008u;
   }
   _impl_.rotation_ = rotation;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.BasedMovementInfo.rotation)
 }
 
-// bool bServerHasBaseComponent = 5;
+// optional bool bServerHasBaseComponent = 5;
+inline bool BasedMovementInfo::_internal_has_bserverhasbasecomponent() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool BasedMovementInfo::has_bserverhasbasecomponent() const {
+  return _internal_has_bserverhasbasecomponent();
+}
 inline void BasedMovementInfo::clear_bserverhasbasecomponent() {
   _impl_.bserverhasbasecomponent_ = false;
+  _impl_._has_bits_[0] &= ~0x00000010u;
 }
 inline bool BasedMovementInfo::_internal_bserverhasbasecomponent() const {
   return _impl_.bserverhasbasecomponent_;
@@ -3455,7 +3631,7 @@ inline bool BasedMovementInfo::bserverhasbasecomponent() const {
   return _internal_bserverhasbasecomponent();
 }
 inline void BasedMovementInfo::_internal_set_bserverhasbasecomponent(bool value) {
-  
+  _impl_._has_bits_[0] |= 0x00000010u;
   _impl_.bserverhasbasecomponent_ = value;
 }
 inline void BasedMovementInfo::set_bserverhasbasecomponent(bool value) {
@@ -3463,9 +3639,17 @@ inline void BasedMovementInfo::set_bserverhasbasecomponent(bool value) {
   // @@protoc_insertion_point(field_set:unrealpb.BasedMovementInfo.bServerHasBaseComponent)
 }
 
-// bool bRelativeRotation = 6;
+// optional bool bRelativeRotation = 6;
+inline bool BasedMovementInfo::_internal_has_brelativerotation() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool BasedMovementInfo::has_brelativerotation() const {
+  return _internal_has_brelativerotation();
+}
 inline void BasedMovementInfo::clear_brelativerotation() {
   _impl_.brelativerotation_ = false;
+  _impl_._has_bits_[0] &= ~0x00000020u;
 }
 inline bool BasedMovementInfo::_internal_brelativerotation() const {
   return _impl_.brelativerotation_;
@@ -3475,7 +3659,7 @@ inline bool BasedMovementInfo::brelativerotation() const {
   return _internal_brelativerotation();
 }
 inline void BasedMovementInfo::_internal_set_brelativerotation(bool value) {
-  
+  _impl_._has_bits_[0] |= 0x00000020u;
   _impl_.brelativerotation_ = value;
 }
 inline void BasedMovementInfo::set_brelativerotation(bool value) {
@@ -3483,9 +3667,17 @@ inline void BasedMovementInfo::set_brelativerotation(bool value) {
   // @@protoc_insertion_point(field_set:unrealpb.BasedMovementInfo.bRelativeRotation)
 }
 
-// bool bServerHasVelocity = 7;
+// optional bool bServerHasVelocity = 7;
+inline bool BasedMovementInfo::_internal_has_bserverhasvelocity() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool BasedMovementInfo::has_bserverhasvelocity() const {
+  return _internal_has_bserverhasvelocity();
+}
 inline void BasedMovementInfo::clear_bserverhasvelocity() {
   _impl_.bserverhasvelocity_ = false;
+  _impl_._has_bits_[0] &= ~0x00000040u;
 }
 inline bool BasedMovementInfo::_internal_bserverhasvelocity() const {
   return _impl_.bserverhasvelocity_;
@@ -3495,7 +3687,7 @@ inline bool BasedMovementInfo::bserverhasvelocity() const {
   return _internal_bserverhasvelocity();
 }
 inline void BasedMovementInfo::_internal_set_bserverhasvelocity(bool value) {
-  
+  _impl_._has_bits_[0] |= 0x00000040u;
   _impl_.bserverhasvelocity_ = value;
 }
 inline void BasedMovementInfo::set_bserverhasvelocity(bool value) {
@@ -3527,18 +3719,18 @@ inline void CharacterState::set_removed(bool value) {
   // @@protoc_insertion_point(field_set:unrealpb.CharacterState.removed)
 }
 
-// .unrealpb.RootMotionMontage rootMotion = 2;
+// optional .unrealpb.RootMotionMontage rootMotion = 2;
 inline bool CharacterState::_internal_has_rootmotion() const {
-  return this != internal_default_instance() && _impl_.rootmotion_ != nullptr;
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.rootmotion_ != nullptr);
+  return value;
 }
 inline bool CharacterState::has_rootmotion() const {
   return _internal_has_rootmotion();
 }
 inline void CharacterState::clear_rootmotion() {
-  if (GetArenaForAllocation() == nullptr && _impl_.rootmotion_ != nullptr) {
-    delete _impl_.rootmotion_;
-  }
-  _impl_.rootmotion_ = nullptr;
+  if (_impl_.rootmotion_ != nullptr) _impl_.rootmotion_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000001u;
 }
 inline const ::unrealpb::RootMotionMontage& CharacterState::_internal_rootmotion() const {
   const ::unrealpb::RootMotionMontage* p = _impl_.rootmotion_;
@@ -3556,14 +3748,14 @@ inline void CharacterState::unsafe_arena_set_allocated_rootmotion(
   }
   _impl_.rootmotion_ = rootmotion;
   if (rootmotion) {
-    
+    _impl_._has_bits_[0] |= 0x00000001u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000001u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.CharacterState.rootMotion)
 }
 inline ::unrealpb::RootMotionMontage* CharacterState::release_rootmotion() {
-  
+  _impl_._has_bits_[0] &= ~0x00000001u;
   ::unrealpb::RootMotionMontage* temp = _impl_.rootmotion_;
   _impl_.rootmotion_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
@@ -3579,13 +3771,13 @@ inline ::unrealpb::RootMotionMontage* CharacterState::release_rootmotion() {
 }
 inline ::unrealpb::RootMotionMontage* CharacterState::unsafe_arena_release_rootmotion() {
   // @@protoc_insertion_point(field_release:unrealpb.CharacterState.rootMotion)
-  
+  _impl_._has_bits_[0] &= ~0x00000001u;
   ::unrealpb::RootMotionMontage* temp = _impl_.rootmotion_;
   _impl_.rootmotion_ = nullptr;
   return temp;
 }
 inline ::unrealpb::RootMotionMontage* CharacterState::_internal_mutable_rootmotion() {
-  
+  _impl_._has_bits_[0] |= 0x00000001u;
   if (_impl_.rootmotion_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::RootMotionMontage>(GetArenaForAllocation());
     _impl_.rootmotion_ = p;
@@ -3609,26 +3801,26 @@ inline void CharacterState::set_allocated_rootmotion(::unrealpb::RootMotionMonta
       rootmotion = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, rootmotion, submessage_arena);
     }
-    
+    _impl_._has_bits_[0] |= 0x00000001u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000001u;
   }
   _impl_.rootmotion_ = rootmotion;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.CharacterState.rootMotion)
 }
 
-// .unrealpb.BasedMovementInfo basedMovement = 3;
+// optional .unrealpb.BasedMovementInfo basedMovement = 3;
 inline bool CharacterState::_internal_has_basedmovement() const {
-  return this != internal_default_instance() && _impl_.basedmovement_ != nullptr;
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.basedmovement_ != nullptr);
+  return value;
 }
 inline bool CharacterState::has_basedmovement() const {
   return _internal_has_basedmovement();
 }
 inline void CharacterState::clear_basedmovement() {
-  if (GetArenaForAllocation() == nullptr && _impl_.basedmovement_ != nullptr) {
-    delete _impl_.basedmovement_;
-  }
-  _impl_.basedmovement_ = nullptr;
+  if (_impl_.basedmovement_ != nullptr) _impl_.basedmovement_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000002u;
 }
 inline const ::unrealpb::BasedMovementInfo& CharacterState::_internal_basedmovement() const {
   const ::unrealpb::BasedMovementInfo* p = _impl_.basedmovement_;
@@ -3646,14 +3838,14 @@ inline void CharacterState::unsafe_arena_set_allocated_basedmovement(
   }
   _impl_.basedmovement_ = basedmovement;
   if (basedmovement) {
-    
+    _impl_._has_bits_[0] |= 0x00000002u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000002u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.CharacterState.basedMovement)
 }
 inline ::unrealpb::BasedMovementInfo* CharacterState::release_basedmovement() {
-  
+  _impl_._has_bits_[0] &= ~0x00000002u;
   ::unrealpb::BasedMovementInfo* temp = _impl_.basedmovement_;
   _impl_.basedmovement_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
@@ -3669,13 +3861,13 @@ inline ::unrealpb::BasedMovementInfo* CharacterState::release_basedmovement() {
 }
 inline ::unrealpb::BasedMovementInfo* CharacterState::unsafe_arena_release_basedmovement() {
   // @@protoc_insertion_point(field_release:unrealpb.CharacterState.basedMovement)
-  
+  _impl_._has_bits_[0] &= ~0x00000002u;
   ::unrealpb::BasedMovementInfo* temp = _impl_.basedmovement_;
   _impl_.basedmovement_ = nullptr;
   return temp;
 }
 inline ::unrealpb::BasedMovementInfo* CharacterState::_internal_mutable_basedmovement() {
-  
+  _impl_._has_bits_[0] |= 0x00000002u;
   if (_impl_.basedmovement_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::BasedMovementInfo>(GetArenaForAllocation());
     _impl_.basedmovement_ = p;
@@ -3699,17 +3891,25 @@ inline void CharacterState::set_allocated_basedmovement(::unrealpb::BasedMovemen
       basedmovement = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, basedmovement, submessage_arena);
     }
-    
+    _impl_._has_bits_[0] |= 0x00000002u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000002u;
   }
   _impl_.basedmovement_ = basedmovement;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.CharacterState.basedMovement)
 }
 
-// float serverLastTransformUpdateTimeStamp = 4;
+// optional float serverLastTransformUpdateTimeStamp = 4;
+inline bool CharacterState::_internal_has_serverlasttransformupdatetimestamp() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool CharacterState::has_serverlasttransformupdatetimestamp() const {
+  return _internal_has_serverlasttransformupdatetimestamp();
+}
 inline void CharacterState::clear_serverlasttransformupdatetimestamp() {
   _impl_.serverlasttransformupdatetimestamp_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000004u;
 }
 inline float CharacterState::_internal_serverlasttransformupdatetimestamp() const {
   return _impl_.serverlasttransformupdatetimestamp_;
@@ -3719,7 +3919,7 @@ inline float CharacterState::serverlasttransformupdatetimestamp() const {
   return _internal_serverlasttransformupdatetimestamp();
 }
 inline void CharacterState::_internal_set_serverlasttransformupdatetimestamp(float value) {
-  
+  _impl_._has_bits_[0] |= 0x00000004u;
   _impl_.serverlasttransformupdatetimestamp_ = value;
 }
 inline void CharacterState::set_serverlasttransformupdatetimestamp(float value) {
@@ -3727,9 +3927,17 @@ inline void CharacterState::set_serverlasttransformupdatetimestamp(float value) 
   // @@protoc_insertion_point(field_set:unrealpb.CharacterState.serverLastTransformUpdateTimeStamp)
 }
 
-// uint32 movementMode = 5;
+// optional uint32 movementMode = 5;
+inline bool CharacterState::_internal_has_movementmode() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool CharacterState::has_movementmode() const {
+  return _internal_has_movementmode();
+}
 inline void CharacterState::clear_movementmode() {
   _impl_.movementmode_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000020u;
 }
 inline uint32_t CharacterState::_internal_movementmode() const {
   return _impl_.movementmode_;
@@ -3739,7 +3947,7 @@ inline uint32_t CharacterState::movementmode() const {
   return _internal_movementmode();
 }
 inline void CharacterState::_internal_set_movementmode(uint32_t value) {
-  
+  _impl_._has_bits_[0] |= 0x00000020u;
   _impl_.movementmode_ = value;
 }
 inline void CharacterState::set_movementmode(uint32_t value) {
@@ -3747,9 +3955,17 @@ inline void CharacterState::set_movementmode(uint32_t value) {
   // @@protoc_insertion_point(field_set:unrealpb.CharacterState.movementMode)
 }
 
-// bool bIsCrouched = 6;
+// optional bool bIsCrouched = 6;
+inline bool CharacterState::_internal_has_biscrouched() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool CharacterState::has_biscrouched() const {
+  return _internal_has_biscrouched();
+}
 inline void CharacterState::clear_biscrouched() {
   _impl_.biscrouched_ = false;
+  _impl_._has_bits_[0] &= ~0x00000008u;
 }
 inline bool CharacterState::_internal_biscrouched() const {
   return _impl_.biscrouched_;
@@ -3759,7 +3975,7 @@ inline bool CharacterState::biscrouched() const {
   return _internal_biscrouched();
 }
 inline void CharacterState::_internal_set_biscrouched(bool value) {
-  
+  _impl_._has_bits_[0] |= 0x00000008u;
   _impl_.biscrouched_ = value;
 }
 inline void CharacterState::set_biscrouched(bool value) {
@@ -3767,9 +3983,17 @@ inline void CharacterState::set_biscrouched(bool value) {
   // @@protoc_insertion_point(field_set:unrealpb.CharacterState.bIsCrouched)
 }
 
-// bool bProxyIsJumpForceApplied = 7;
+// optional bool bProxyIsJumpForceApplied = 7;
+inline bool CharacterState::_internal_has_bproxyisjumpforceapplied() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool CharacterState::has_bproxyisjumpforceapplied() const {
+  return _internal_has_bproxyisjumpforceapplied();
+}
 inline void CharacterState::clear_bproxyisjumpforceapplied() {
   _impl_.bproxyisjumpforceapplied_ = false;
+  _impl_._has_bits_[0] &= ~0x00000010u;
 }
 inline bool CharacterState::_internal_bproxyisjumpforceapplied() const {
   return _impl_.bproxyisjumpforceapplied_;
@@ -3779,7 +4003,7 @@ inline bool CharacterState::bproxyisjumpforceapplied() const {
   return _internal_bproxyisjumpforceapplied();
 }
 inline void CharacterState::_internal_set_bproxyisjumpforceapplied(bool value) {
-  
+  _impl_._has_bits_[0] |= 0x00000010u;
   _impl_.bproxyisjumpforceapplied_ = value;
 }
 inline void CharacterState::set_bproxyisjumpforceapplied(bool value) {
@@ -3787,9 +4011,17 @@ inline void CharacterState::set_bproxyisjumpforceapplied(bool value) {
   // @@protoc_insertion_point(field_set:unrealpb.CharacterState.bProxyIsJumpForceApplied)
 }
 
-// float animRootMotionTranslationScale = 8;
+// optional float animRootMotionTranslationScale = 8;
+inline bool CharacterState::_internal_has_animrootmotiontranslationscale() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool CharacterState::has_animrootmotiontranslationscale() const {
+  return _internal_has_animrootmotiontranslationscale();
+}
 inline void CharacterState::clear_animrootmotiontranslationscale() {
   _impl_.animrootmotiontranslationscale_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000040u;
 }
 inline float CharacterState::_internal_animrootmotiontranslationscale() const {
   return _impl_.animrootmotiontranslationscale_;
@@ -3799,7 +4031,7 @@ inline float CharacterState::animrootmotiontranslationscale() const {
   return _internal_animrootmotiontranslationscale();
 }
 inline void CharacterState::_internal_set_animrootmotiontranslationscale(float value) {
-  
+  _impl_._has_bits_[0] |= 0x00000040u;
   _impl_.animrootmotiontranslationscale_ = value;
 }
 inline void CharacterState::set_animrootmotiontranslationscale(float value) {
@@ -3807,9 +4039,17 @@ inline void CharacterState::set_animrootmotiontranslationscale(float value) {
   // @@protoc_insertion_point(field_set:unrealpb.CharacterState.animRootMotionTranslationScale)
 }
 
-// float replayLastTransformUpdateTimeStamp = 9;
+// optional float replayLastTransformUpdateTimeStamp = 9;
+inline bool CharacterState::_internal_has_replaylasttransformupdatetimestamp() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool CharacterState::has_replaylasttransformupdatetimestamp() const {
+  return _internal_has_replaylasttransformupdatetimestamp();
+}
 inline void CharacterState::clear_replaylasttransformupdatetimestamp() {
   _impl_.replaylasttransformupdatetimestamp_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000080u;
 }
 inline float CharacterState::_internal_replaylasttransformupdatetimestamp() const {
   return _impl_.replaylasttransformupdatetimestamp_;
@@ -3819,7 +4059,7 @@ inline float CharacterState::replaylasttransformupdatetimestamp() const {
   return _internal_replaylasttransformupdatetimestamp();
 }
 inline void CharacterState::_internal_set_replaylasttransformupdatetimestamp(float value) {
-  
+  _impl_._has_bits_[0] |= 0x00000080u;
   _impl_.replaylasttransformupdatetimestamp_ = value;
 }
 inline void CharacterState::set_replaylasttransformupdatetimestamp(float value) {
@@ -3939,18 +4179,18 @@ inline void Character_ClientMoveResponsePacked_Params::set_allocated_packedbits(
 
 // PlayerControllerState
 
-// .unrealpb.FVector targetViewRotation = 1;
+// optional .unrealpb.FVector targetViewRotation = 1;
 inline bool PlayerControllerState::_internal_has_targetviewrotation() const {
-  return this != internal_default_instance() && _impl_.targetviewrotation_ != nullptr;
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.targetviewrotation_ != nullptr);
+  return value;
 }
 inline bool PlayerControllerState::has_targetviewrotation() const {
   return _internal_has_targetviewrotation();
 }
 inline void PlayerControllerState::clear_targetviewrotation() {
-  if (GetArenaForAllocation() == nullptr && _impl_.targetviewrotation_ != nullptr) {
-    delete _impl_.targetviewrotation_;
-  }
-  _impl_.targetviewrotation_ = nullptr;
+  if (_impl_.targetviewrotation_ != nullptr) _impl_.targetviewrotation_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000001u;
 }
 inline const ::unrealpb::FVector& PlayerControllerState::_internal_targetviewrotation() const {
   const ::unrealpb::FVector* p = _impl_.targetviewrotation_;
@@ -3968,14 +4208,14 @@ inline void PlayerControllerState::unsafe_arena_set_allocated_targetviewrotation
   }
   _impl_.targetviewrotation_ = targetviewrotation;
   if (targetviewrotation) {
-    
+    _impl_._has_bits_[0] |= 0x00000001u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000001u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.PlayerControllerState.targetViewRotation)
 }
 inline ::unrealpb::FVector* PlayerControllerState::release_targetviewrotation() {
-  
+  _impl_._has_bits_[0] &= ~0x00000001u;
   ::unrealpb::FVector* temp = _impl_.targetviewrotation_;
   _impl_.targetviewrotation_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
@@ -3991,13 +4231,13 @@ inline ::unrealpb::FVector* PlayerControllerState::release_targetviewrotation() 
 }
 inline ::unrealpb::FVector* PlayerControllerState::unsafe_arena_release_targetviewrotation() {
   // @@protoc_insertion_point(field_release:unrealpb.PlayerControllerState.targetViewRotation)
-  
+  _impl_._has_bits_[0] &= ~0x00000001u;
   ::unrealpb::FVector* temp = _impl_.targetviewrotation_;
   _impl_.targetviewrotation_ = nullptr;
   return temp;
 }
 inline ::unrealpb::FVector* PlayerControllerState::_internal_mutable_targetviewrotation() {
-  
+  _impl_._has_bits_[0] |= 0x00000001u;
   if (_impl_.targetviewrotation_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
     _impl_.targetviewrotation_ = p;
@@ -4021,26 +4261,26 @@ inline void PlayerControllerState::set_allocated_targetviewrotation(::unrealpb::
       targetviewrotation = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, targetviewrotation, submessage_arena);
     }
-    
+    _impl_._has_bits_[0] |= 0x00000001u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000001u;
   }
   _impl_.targetviewrotation_ = targetviewrotation;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.PlayerControllerState.targetViewRotation)
 }
 
-// .unrealpb.FVector spawnLocation = 2;
+// optional .unrealpb.FVector spawnLocation = 2;
 inline bool PlayerControllerState::_internal_has_spawnlocation() const {
-  return this != internal_default_instance() && _impl_.spawnlocation_ != nullptr;
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.spawnlocation_ != nullptr);
+  return value;
 }
 inline bool PlayerControllerState::has_spawnlocation() const {
   return _internal_has_spawnlocation();
 }
 inline void PlayerControllerState::clear_spawnlocation() {
-  if (GetArenaForAllocation() == nullptr && _impl_.spawnlocation_ != nullptr) {
-    delete _impl_.spawnlocation_;
-  }
-  _impl_.spawnlocation_ = nullptr;
+  if (_impl_.spawnlocation_ != nullptr) _impl_.spawnlocation_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000002u;
 }
 inline const ::unrealpb::FVector& PlayerControllerState::_internal_spawnlocation() const {
   const ::unrealpb::FVector* p = _impl_.spawnlocation_;
@@ -4058,14 +4298,14 @@ inline void PlayerControllerState::unsafe_arena_set_allocated_spawnlocation(
   }
   _impl_.spawnlocation_ = spawnlocation;
   if (spawnlocation) {
-    
+    _impl_._has_bits_[0] |= 0x00000002u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000002u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.PlayerControllerState.spawnLocation)
 }
 inline ::unrealpb::FVector* PlayerControllerState::release_spawnlocation() {
-  
+  _impl_._has_bits_[0] &= ~0x00000002u;
   ::unrealpb::FVector* temp = _impl_.spawnlocation_;
   _impl_.spawnlocation_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
@@ -4081,13 +4321,13 @@ inline ::unrealpb::FVector* PlayerControllerState::release_spawnlocation() {
 }
 inline ::unrealpb::FVector* PlayerControllerState::unsafe_arena_release_spawnlocation() {
   // @@protoc_insertion_point(field_release:unrealpb.PlayerControllerState.spawnLocation)
-  
+  _impl_._has_bits_[0] &= ~0x00000002u;
   ::unrealpb::FVector* temp = _impl_.spawnlocation_;
   _impl_.spawnlocation_ = nullptr;
   return temp;
 }
 inline ::unrealpb::FVector* PlayerControllerState::_internal_mutable_spawnlocation() {
-  
+  _impl_._has_bits_[0] |= 0x00000002u;
   if (_impl_.spawnlocation_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
     _impl_.spawnlocation_ = p;
@@ -4111,9 +4351,9 @@ inline void PlayerControllerState::set_allocated_spawnlocation(::unrealpb::FVect
       spawnlocation = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, spawnlocation, submessage_arena);
     }
-    
+    _impl_._has_bits_[0] |= 0x00000002u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000002u;
   }
   _impl_.spawnlocation_ = spawnlocation;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.PlayerControllerState.spawnLocation)

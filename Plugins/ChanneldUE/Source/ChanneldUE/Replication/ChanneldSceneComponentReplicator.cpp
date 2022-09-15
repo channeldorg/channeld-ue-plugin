@@ -11,12 +11,25 @@ FChanneldSceneComponentReplicator::FChanneldSceneComponentReplicator(USceneCompo
 	TArray<FLifetimeProperty> RepProps;
 	DisableAllReplicatedPropertiesOfClass(InSceneComp->GetClass(), USceneComponent::StaticClass(), EFieldIteratorFlags::ExcludeSuper, RepProps);
 
-	SceneComp->TransformUpdated.AddRaw(this, &FChanneldSceneComponentReplicator::OnTransformUpdated);
+	FullState = new unrealpb::SceneComponentState;
+	DeltaState = new unrealpb::SceneComponentState;
 
-	State = new unrealpb::SceneComponentState;
-	RelativeLocationState = new unrealpb::FVector;
-	RelativeRotationState = new unrealpb::FVector;
-	RelativeScaleState = new unrealpb::FVector;
+	// Prepare Reflection pointers
+	{
+		auto Property = CastFieldChecked<const FBoolProperty>(SceneComp->GetClass()->FindPropertyByName(FName("bShouldBeAttached")));
+		bShouldBeAttachedPtr = Property->ContainerPtrToValuePtr<uint8>(SceneComp.Get());
+		check(bShouldBeAttachedPtr);
+	}
+	{
+		auto Property = CastFieldChecked<const FBoolProperty>(SceneComp->GetClass()->FindPropertyByName(FName("bShouldSnapLocationWhenAttached")));
+		bShouldSnapLocationWhenAttachedPtr = Property->ContainerPtrToValuePtr<uint8>(SceneComp.Get());
+		check(bShouldSnapLocationWhenAttachedPtr);
+	}
+	{
+		auto Property = CastFieldChecked<const FBoolProperty>(SceneComp->GetClass()->FindPropertyByName(FName("bShouldSnapRotationWhenAttached")));
+		bShouldSnapRotationWhenAttachedPtr = Property->ContainerPtrToValuePtr<uint8>(SceneComp.Get());
+		check(bShouldSnapRotationWhenAttachedPtr);
+	}
 }
 
 FChanneldSceneComponentReplicator::~FChanneldSceneComponentReplicator()
@@ -26,10 +39,8 @@ FChanneldSceneComponentReplicator::~FChanneldSceneComponentReplicator()
 		SceneComp->TransformUpdated.RemoveAll(this);
 	}
 
-	delete State;
-	delete RelativeLocationState;
-	delete RelativeRotationState;
-	delete RelativeScaleState;
+	delete FullState;
+	delete DeltaState;
 }
 
 void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
@@ -39,178 +50,168 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 		return;
 	}
 
-	if (State->babsolutelocation() != SceneComp->IsUsingAbsoluteLocation())
-	{
-		State->set_babsolutelocation(SceneComp->IsUsingAbsoluteLocation());
-		bStateChanged = true;
-	}
-
-	if (State->babsoluterotation() != SceneComp->IsUsingAbsoluteRotation())
-	{
-		State->set_babsoluterotation(SceneComp->IsUsingAbsoluteRotation());
-		bStateChanged = true;
-	}
-
-	if (State->babsolutescale() != SceneComp->IsUsingAbsoluteScale())
-	{
-		State->set_babsolutescale(SceneComp->IsUsingAbsoluteScale());
-		bStateChanged = true;
-	}
-
-	if (State->bvisible() != SceneComp->IsVisible())
-	{
-		State->set_bvisible(SceneComp->IsVisible());
-		bStateChanged = true;
-	}
-
-	/* TODO: members are inaccessible, try use reflection? 
-	if (State->bshouldbeattached() != SceneComp->bShouldSnapLocationWhenAttached)
-	{
-		State->set_bshouldbeattached(SceneComp->bShouldSnapLocationWhenAttached);
-		bStateChanged = true;
-	}
-
-	if (State->bshouldsnaplocationwhenattached() != SceneComp->bShouldSnapLocationWhenAttached)
-	{
-		State->set_bshouldsnaplocationwhenattached(SceneComp->bShouldSnapLocationWhenAttached);
-		bStateChanged = true;
-	}
-
-	if (State->bshouldsnaprotationwhenattached() != SceneComp->bShouldSnapRotationWhenAttached)
-	{
-		State->set_bshouldsnaprotationwhenattached(SceneComp->bShouldSnapRotationWhenAttached);
-		bStateChanged = true;
-	}
-	*/
-
-	UObject* AttachParent = ChanneldUtils::GetObjectByRef(State->mutable_attachparent(), SceneComp->GetWorld());
-	if (AttachParent != SceneComp->GetAttachParent())
-	{
-		if (SceneComp->GetAttachParent() == nullptr)
-		{
-			State->release_attachparent();
-		}
-		else
-		{
-			State->mutable_attachparent()->MergeFrom(ChanneldUtils::GetRefOfObject(SceneComp->GetAttachParent()));
-		}
-		bStateChanged = true;
-	}
-
-	if (State->mutable_attachchildren()->size() != SceneComp->GetAttachChildren().Num())
-	{
-		State->clear_attachchildren();
-		for (auto Child : SceneComp->GetAttachChildren())
-		{
-			*State->mutable_attachchildren()->Add() = ChanneldUtils::GetRefOfObject(Child);
-		}
-		bStateChanged = true;
-	}
-
-	FName AttachSocketName(State->mutable_attachsocketname()->c_str());
-	if (AttachSocketName != SceneComp->GetAttachSocketName())
-	{
-		*State->mutable_attachsocketname() = TCHAR_TO_UTF8(*SceneComp->GetAttachSocketName().ToString());
-		bStateChanged = true;
-	}
-
-	/* Moved to ClearState()
-	if (bStateChanged)
-	{
-		Actor->UpdateSceneComponent(State);
-		State->Clear();
-		bStateChanged = false;
-	}
-	*/
-}
-
-void FChanneldSceneComponentReplicator::ClearState()
-{
-	bStateChanged = false;
-	State->release_relativelocation();
-	State->release_relativerotation();
-	State->release_relativescale();
-}
-
-void FChanneldSceneComponentReplicator::OnTransformUpdated(USceneComponent* UpdatedComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport)
-{
-	if (!SceneComp.IsValid() || !SceneComp->GetOwner())
-	{
-		return;
-	}
-
+	// Only server can update channel data
 	if (!SceneComp->GetOwner()->HasAuthority())
 	{
 		return;
 	}
 
-	if (ChanneldUtils::SetIfNotSame(RelativeLocationState, SceneComp->GetRelativeLocation()))
+	if (FullState->babsolutelocation() != SceneComp->IsUsingAbsoluteLocation())
 	{
+		DeltaState->set_babsolutelocation(SceneComp->IsUsingAbsoluteLocation());
 		bStateChanged = true;
-		State->mutable_relativelocation()->MergeFrom(*RelativeLocationState);
 	}
 
-	if (ChanneldUtils::SetIfNotSame(RelativeRotationState, SceneComp->GetRelativeRotation().Vector()))
+	if (FullState->babsoluterotation() != SceneComp->IsUsingAbsoluteRotation())
 	{
+		DeltaState->set_babsoluterotation(SceneComp->IsUsingAbsoluteRotation());
 		bStateChanged = true;
-		State->mutable_relativerotation()->MergeFrom(*RelativeRotationState);
 	}
 
-	if (ChanneldUtils::SetIfNotSame(RelativeScaleState, SceneComp->GetRelativeScale3D()))
+	if (FullState->babsolutescale() != SceneComp->IsUsingAbsoluteScale())
+	{
+		DeltaState->set_babsolutescale(SceneComp->IsUsingAbsoluteScale());
+		bStateChanged = true;
+	}
+
+	if (FullState->bvisible() != SceneComp->IsVisible())
+	{
+		DeltaState->set_bvisible(SceneComp->IsVisible());
+		bStateChanged = true;
+	}
+
+	if (FullState->bshouldbeattached() != (bool)*bShouldBeAttachedPtr)
+	{
+		DeltaState->set_bshouldbeattached(*bShouldBeAttachedPtr);
+		bStateChanged = true;
+	}
+
+	if (FullState->bshouldsnaplocationwhenattached() != (bool)*bShouldSnapLocationWhenAttachedPtr)
+	{
+		DeltaState->set_bshouldsnaplocationwhenattached(*bShouldSnapLocationWhenAttachedPtr);
+		bStateChanged = true;
+	}
+
+	if (FullState->bshouldsnaprotationwhenattached() != (bool)*bShouldSnapRotationWhenAttachedPtr)
+	{
+		DeltaState->set_bshouldsnaprotationwhenattached(*bShouldSnapRotationWhenAttachedPtr);
+		bStateChanged = true;
+	}
+
+	UObject* AttachParent = ChanneldUtils::GetObjectByRef(FullState->mutable_attachparent(), SceneComp->GetWorld());
+	if (AttachParent != SceneComp->GetAttachParent())
+	{
+		if (SceneComp->GetAttachParent() == nullptr)
+		{
+			DeltaState->release_attachparent();
+		}
+		else
+		{
+			DeltaState->mutable_attachparent()->MergeFrom(ChanneldUtils::GetRefOfObject(SceneComp->GetAttachParent()));
+		}
+		bStateChanged = true;
+	}
+
+	if (FullState->mutable_attachchildren()->size() != SceneComp->GetAttachChildren().Num())
+	{
+		DeltaState->clear_attachchildren();
+		for (auto Child : SceneComp->GetAttachChildren())
+		{
+			*DeltaState->mutable_attachchildren()->Add() = ChanneldUtils::GetRefOfObject(Child);
+		}
+		bStateChanged = true;
+	}
+
+	FName AttachSocketName(FullState->mutable_attachsocketname()->c_str());
+	if (AttachSocketName != SceneComp->GetAttachSocketName())
+	{
+		*DeltaState->mutable_attachsocketname() = TCHAR_TO_UTF8(*SceneComp->GetAttachSocketName().ToString());
+		bStateChanged = true;
+	}
+
+	if (ChanneldUtils::SetIfNotSame(FullState->mutable_relativelocation(), SceneComp->GetRelativeLocation()))
 	{
 		bStateChanged = true;
-		State->mutable_relativescale()->MergeFrom(*RelativeScaleState);
+		DeltaState->mutable_relativelocation()->MergeFrom(*FullState->mutable_relativelocation());
 	}
+
+	if (ChanneldUtils::SetIfNotSame(FullState->mutable_relativerotation(), SceneComp->GetRelativeRotation().Vector()))
+	{
+		bStateChanged = true;
+		DeltaState->mutable_relativerotation()->MergeFrom(*FullState->mutable_relativerotation());
+	}
+
+	if (ChanneldUtils::SetIfNotSame(FullState->mutable_relativescale(), SceneComp->GetRelativeScale3D()))
+	{
+		bStateChanged = true;
+		DeltaState->mutable_relativescale()->MergeFrom(*FullState->mutable_relativescale());
+	}
+
+	// TODO: Optimization: Set the FullState as well as the DeltaState above
+	FullState->MergeFrom(*DeltaState);
 }
 
-void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::Message* NewState)
+void FChanneldSceneComponentReplicator::ClearState()
+{
+	DeltaState->Clear();
+	bStateChanged = false;
+}
+
+void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::Message* InNewState)
 {
 	if (!SceneComp.IsValid() || !SceneComp->GetOwner())
 	{
 		return;
 	}
 
-	State->CopyFrom(*NewState);
+	// Only proxy need to update from the channel data
+	if (SceneComp->GetOwner()->HasAuthority())
+	{
+		return;
+	}
+
+	auto NewState = static_cast<const unrealpb::SceneComponentState*>(InNewState);
+	FullState->CopyFrom(*NewState);
 	bStateChanged = false;
 
 	bool bTransformChanged = false;
 	FVector NewLocation = SceneComp->GetRelativeLocation();
 	FRotator NewRotation = SceneComp->GetRelativeRotation();
-	if (State->has_relativelocation())
+	if (NewState->has_relativelocation())
 	{
-		NewLocation = ChanneldUtils::GetVector(State->relativelocation());
+		NewLocation = ChanneldUtils::GetVector(NewState->relativelocation());
 		SceneComp->SetRelativeLocation_Direct(NewLocation);
 		bTransformChanged = true;
 	}
 
-	if (State->has_relativerotation())
+	if (NewState->has_relativerotation())
 	{
-		NewRotation = ChanneldUtils::GetRotator(State->relativerotation());
+		NewRotation = ChanneldUtils::GetRotator(NewState->relativerotation());
 		SceneComp->SetRelativeRotation_Direct(NewRotation);
 		bTransformChanged = true;
 	}
 
-	if (State->has_relativescale())
+	if (NewState->has_relativescale())
 	{
-		SceneComp->SetRelativeScale3D_Direct(ChanneldUtils::GetVector(State->relativescale()));
+		SceneComp->SetRelativeScale3D_Direct(ChanneldUtils::GetVector(NewState->relativescale()));
 		bTransformChanged = true;
 	}
 
-	if (State->babsolutelocation() != SceneComp->IsUsingAbsoluteLocation())
+	if (NewState->has_babsolutelocation() && NewState->babsolutelocation() != SceneComp->IsUsingAbsoluteLocation())
 	{
-		SceneComp->SetUsingAbsoluteLocation(State->babsolutelocation());
+		SceneComp->SetUsingAbsoluteLocation(NewState->babsolutelocation());
 		bTransformChanged = true;
 	}
 
-	if (State->babsoluterotation() != SceneComp->IsUsingAbsoluteRotation())
+	if (NewState->has_babsoluterotation() && NewState->babsoluterotation() != SceneComp->IsUsingAbsoluteRotation())
 	{
-		SceneComp->SetUsingAbsoluteRotation(State->babsoluterotation());
+		SceneComp->SetUsingAbsoluteRotation(NewState->babsoluterotation());
 		bTransformChanged = true;
 	}
 
-	if (State->babsolutescale() != SceneComp->IsUsingAbsoluteScale())
+	if (NewState->has_babsolutescale() && NewState->babsolutescale() != SceneComp->IsUsingAbsoluteScale())
 	{
-		SceneComp->SetUsingAbsoluteScale(State->babsolutescale());
+		SceneComp->SetUsingAbsoluteScale(NewState->babsolutescale());
 		bTransformChanged = true;
 	}
 
@@ -220,15 +221,15 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::M
 		//SceneComp->SetRelativeLocationAndRotation(NewLocation, NewRotation);
 	}
 
-	if (State->has_attachparent())
+	if (NewState->has_attachparent())
 	{
-		auto AttachParent = Cast<USceneComponent>(ChanneldUtils::GetObjectByRef(&State->attachparent(), SceneComp->GetWorld()));
+		auto AttachParent = Cast<USceneComponent>(ChanneldUtils::GetObjectByRef(&NewState->attachparent(), SceneComp->GetWorld()));
 		if (AttachParent && AttachParent != SceneComp->GetAttachParent())
 		{
 			FName AttachSocketName; 
-			if (State->attachsocketname().length() > 0)
+			if (NewState->has_attachsocketname())
 			{
-				AttachSocketName = State->mutable_attachsocketname()->c_str();
+				AttachSocketName = NewState->attachsocketname().c_str();
 			}
 			else
 			{
@@ -236,19 +237,32 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::M
 			}
 
 			SceneComp->AttachToComponent(AttachParent, FAttachmentTransformRules(
-				GetAttachmentRule(State->bshouldsnaplocationwhenattached(), SceneComp->IsUsingAbsoluteLocation()),
-				GetAttachmentRule(State->bshouldsnaprotationwhenattached(), SceneComp->IsUsingAbsoluteRotation()),
+				GetAttachmentRule(FullState->bshouldsnaplocationwhenattached(), SceneComp->IsUsingAbsoluteLocation()),
+				GetAttachmentRule(FullState->bshouldsnaprotationwhenattached(), SceneComp->IsUsingAbsoluteRotation()),
 				GetAttachmentRule(false, SceneComp->IsUsingAbsoluteScale()),
 				false));
 		}
 	}
 
-	if (State->bvisible() != SceneComp->IsVisible())
+	if (NewState->has_bvisible() && NewState->bvisible() != SceneComp->IsVisible())
 	{
-		SceneComp->SetVisibility(State->bvisible());
+		SceneComp->SetVisibility(NewState->bvisible());
 	}
 
-	// TODO: bShouldBeAttached, attachChildren
+	if (NewState->has_bshouldbeattached() && NewState->bshouldbeattached() != (bool)*bShouldBeAttachedPtr)
+	{
+		*bShouldBeAttachedPtr = NewState->bshouldbeattached();
+	}
+	if (NewState->has_bshouldsnaplocationwhenattached() && NewState->bshouldsnaplocationwhenattached() != (bool)*bShouldSnapLocationWhenAttachedPtr)
+	{
+		*bShouldSnapLocationWhenAttachedPtr = NewState->bshouldsnaplocationwhenattached();
+	}
+	if (NewState->has_bshouldsnaprotationwhenattached() && NewState->bshouldsnaprotationwhenattached() != (bool)*bShouldSnapRotationWhenAttachedPtr)
+	{
+		*bShouldSnapRotationWhenAttachedPtr = NewState->bshouldsnaprotationwhenattached();
+	}
+
+	// TODO: attachChildren
 }
 
 EAttachmentRule FChanneldSceneComponentReplicator::GetAttachmentRule(bool bShouldSnapWhenAttached, bool bAbsolute)

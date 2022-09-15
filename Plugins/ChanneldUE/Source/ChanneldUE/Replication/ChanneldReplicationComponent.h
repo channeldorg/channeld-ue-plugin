@@ -27,6 +27,7 @@ protected:
 	virtual const google::protobuf::Message* GetStateFromChannelData(google::protobuf::Message* ChannelData, UObject* TargetObject, uint32 NetGUID, bool& bIsRemoved);
 	virtual void SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UObject* TargetObject, uint32 NetGUID);
 
+	bool bInitialized = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EChanneldChannelType ChannelType;
 	ChannelId OwningChannelId;
@@ -36,6 +37,7 @@ protected:
 
 public:
 
+	virtual void InitOnce();
 	virtual void BeginPlay() override;
 	virtual void EndPlay(EEndPlayReason::Type Reason) override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

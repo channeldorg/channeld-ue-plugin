@@ -13,8 +13,8 @@ FChanneldCharacterReplicator::FChanneldCharacterReplicator(UObject* InTargetObj)
 	TArray<FLifetimeProperty> RepProps;
 	DisableAllReplicatedPropertiesOfClass(InTargetObj->GetClass(), ACharacter::StaticClass(), EFieldIteratorFlags::ExcludeSuper, RepProps);
 
-	State = new unrealpb::CharacterState;
-	MovementInfo = new unrealpb::BasedMovementInfo;
+	FullState = new unrealpb::CharacterState;
+	DeltaState = new unrealpb::CharacterState;
 
 	// Prepare Reflection pointers
 	{
@@ -46,19 +46,19 @@ FChanneldCharacterReplicator::FChanneldCharacterReplicator(UObject* InTargetObj)
 
 FChanneldCharacterReplicator::~FChanneldCharacterReplicator()
 {
-	delete State;
-	delete MovementInfo;
+	delete FullState;
+	delete DeltaState;
 }
 
-google::protobuf::Message* FChanneldCharacterReplicator::GetState()
+google::protobuf::Message* FChanneldCharacterReplicator::GetDeltaState()
 {
-	return State;
+	return DeltaState;
 }
 
 void FChanneldCharacterReplicator::ClearState()
 {
+	DeltaState->Clear();
 	bStateChanged = false;
-	State->release_basedmovement();
 }
 
 void FChanneldCharacterReplicator::Tick(float DeltaTime)
@@ -68,6 +68,7 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 		return;
 	}
 
+	// Only server can update channel data
 	if (!Character->HasAuthority())
 	{
 		return;
@@ -76,97 +77,91 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 	// TODO: RootMotion
 
 	bool bMovementInfoChanged = false;
-	unrealpb::BasedMovementInfo MovementInfoDelta;
+	unrealpb::BasedMovementInfo* MovementInfo = FullState->mutable_basedmovement();
+	unrealpb::BasedMovementInfo* MovementInfoDelta = DeltaState->mutable_basedmovement();
 	if (ChanneldUtils::GetObjectByRef(MovementInfo->mutable_movementbase(), Character->GetWorld()) != Character->GetMovementBase())
 	{
-		MovementInfoDelta.mutable_movementbase()->MergeFrom(ChanneldUtils::GetRefOfObject(Character->GetMovementBase()));
-		bMovementInfoChanged = true;
+		MovementInfoDelta->mutable_movementbase()->MergeFrom(ChanneldUtils::GetRefOfObject(Character->GetMovementBase()));
+		bStateChanged = true;
 	}
 	
 	if (FName(MovementInfo->mutable_bonename()->c_str()) != Character->GetBasedMovement().BoneName)
 	{
-		*MovementInfoDelta.mutable_bonename() = TCHAR_TO_UTF8(*Character->GetBasedMovement().BoneName.ToString());
-		bMovementInfoChanged = true;
+		*MovementInfoDelta->mutable_bonename() = TCHAR_TO_UTF8(*Character->GetBasedMovement().BoneName.ToString());
+		bStateChanged = true;
 	}
 
 	if (ChanneldUtils::SetIfNotSame(MovementInfo->mutable_location(), Character->GetBasedMovement().Location))
 	{
-		ChanneldUtils::SetIfNotSame(MovementInfoDelta.mutable_location(), Character->GetBasedMovement().Location);
-		bMovementInfoChanged = true;
+		ChanneldUtils::SetIfNotSame(MovementInfoDelta->mutable_location(), Character->GetBasedMovement().Location);
+		bStateChanged = true;
 	}
 
 	if (ChanneldUtils::SetIfNotSame(MovementInfo->mutable_rotation(), Character->GetBasedMovement().Rotation.Vector()))
 	{
-		ChanneldUtils::SetIfNotSame(MovementInfoDelta.mutable_rotation(), Character->GetBasedMovement().Rotation.Vector());
-		bMovementInfoChanged = true;
+		ChanneldUtils::SetIfNotSame(MovementInfoDelta->mutable_rotation(), Character->GetBasedMovement().Rotation.Vector());
+		bStateChanged = true;
 	}
 
 	if (MovementInfo->bserverhasbasecomponent() != Character->GetBasedMovement().bServerHasBaseComponent)
 	{
-		MovementInfoDelta.set_bserverhasbasecomponent(Character->GetBasedMovement().bServerHasBaseComponent);
-		bMovementInfoChanged = true;
+		MovementInfoDelta->set_bserverhasbasecomponent(Character->GetBasedMovement().bServerHasBaseComponent);
+		bStateChanged = true;
 	}
 
 	if (MovementInfo->brelativerotation() != Character->GetBasedMovement().bRelativeRotation)
 	{
-		MovementInfoDelta.set_brelativerotation(Character->GetBasedMovement().bRelativeRotation);
-		bMovementInfoChanged = true;
+		MovementInfoDelta->set_brelativerotation(Character->GetBasedMovement().bRelativeRotation);
+		bStateChanged = true;
 	}
 
 	if (MovementInfo->bserverhasvelocity() != Character->GetBasedMovement().bServerHasVelocity)
 	{
-		MovementInfoDelta.set_bserverhasvelocity(Character->GetBasedMovement().bServerHasVelocity);
-		bMovementInfoChanged = true;
-	}
-
-	if (bMovementInfoChanged)
-	{
-		MovementInfo->MergeFrom(MovementInfoDelta);
-		State->mutable_basedmovement()->MergeFrom(MovementInfoDelta);
+		MovementInfoDelta->set_bserverhasvelocity(Character->GetBasedMovement().bServerHasVelocity);
 		bStateChanged = true;
 	}
 
-	unrealpb::CharacterState StateDelta;
-	if (!FMath::IsNearlyEqual(State->serverlasttransformupdatetimestamp(), Character->GetReplicatedServerLastTransformUpdateTimeStamp()))
+	if (!FMath::IsNearlyEqual(FullState->serverlasttransformupdatetimestamp(), Character->GetReplicatedServerLastTransformUpdateTimeStamp()))
 	{
-		StateDelta.set_serverlasttransformupdatetimestamp(Character->GetReplicatedServerLastTransformUpdateTimeStamp());
+		DeltaState->set_serverlasttransformupdatetimestamp(Character->GetReplicatedServerLastTransformUpdateTimeStamp());
 		bStateChanged = true;
 	}
 
-	if (State->movementmode() != Character->GetReplicatedMovementMode())
+	if (FullState->movementmode() != Character->GetReplicatedMovementMode())
 	{
-		StateDelta.set_movementmode(Character->GetReplicatedMovementMode());
+		DeltaState->set_movementmode(Character->GetReplicatedMovementMode());
 		bStateChanged = true;
 	}
 
-	if (State->biscrouched() != Character->bIsCrouched)
+	if (FullState->biscrouched() != Character->bIsCrouched)
 	{
-		StateDelta.set_biscrouched(Character->bIsCrouched);
+		DeltaState->set_biscrouched(Character->bIsCrouched);
 		bStateChanged = true;
 	}
 
-	if (State->bproxyisjumpforceapplied() != Character->bProxyIsJumpForceApplied)
+	if (FullState->bproxyisjumpforceapplied() != Character->bProxyIsJumpForceApplied)
 	{
-		StateDelta.set_bproxyisjumpforceapplied(Character->bProxyIsJumpForceApplied);
+		DeltaState->set_bproxyisjumpforceapplied(Character->bProxyIsJumpForceApplied);
 		bStateChanged = true;
 	}
 
-	if (!FMath::IsNearlyEqual(State->animrootmotiontranslationscale(), Character->GetAnimRootMotionTranslationScale()))
+	if (!FMath::IsNearlyEqual(FullState->animrootmotiontranslationscale(), Character->GetAnimRootMotionTranslationScale()))
 	{
-		StateDelta.set_animrootmotiontranslationscale(Character->GetAnimRootMotionTranslationScale());
+		DeltaState->set_animrootmotiontranslationscale(Character->GetAnimRootMotionTranslationScale());
 		bStateChanged = true;
 	}
 
-	if (!FMath::IsNearlyEqual(State->replaylasttransformupdatetimestamp(), *ReplayLastTransformUpdateTimeStampPtr))
+	if (!FMath::IsNearlyEqual(FullState->replaylasttransformupdatetimestamp(), *ReplayLastTransformUpdateTimeStampPtr))
 	{
-		StateDelta.set_replaylasttransformupdatetimestamp(*ReplayLastTransformUpdateTimeStampPtr);
+		DeltaState->set_replaylasttransformupdatetimestamp(*ReplayLastTransformUpdateTimeStampPtr);
 		bStateChanged = true;
 	}
 
-	State->MergeFrom(StateDelta);
+	// TODO: Optimization: Set the FullState as well as the DeltaState above
+	FullState->MergeFrom(*DeltaState);
 }
 
-void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Message* NewState)
+void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Message* InNewState)
 {
 	if (!Character.IsValid())
 	{
@@ -179,40 +174,42 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 		return;
 	}
 
-	auto CharacterState = static_cast<const unrealpb::CharacterState*>(NewState);
+	auto NewState = static_cast<const unrealpb::CharacterState*>(InNewState);
+	FullState->CopyFrom(*NewState);
+	bStateChanged = false;
 
 	// TODO: RootMotion
 
-	if (CharacterState->has_basedmovement())
+	if (NewState->has_basedmovement())
 	{
 		FBasedMovementInfo BasedMovement = Character->GetBasedMovement();
-		if (CharacterState->basedmovement().has_movementbase())
+		if (NewState->basedmovement().has_movementbase())
 		{
-			BasedMovement.MovementBase = Cast<UPrimitiveComponent>(ChanneldUtils::GetObjectByRef(&CharacterState->basedmovement().movementbase(), Character->GetWorld()));
+			BasedMovement.MovementBase = Cast<UPrimitiveComponent>(ChanneldUtils::GetObjectByRef(&NewState->basedmovement().movementbase(), Character->GetWorld()));
 		}
-		if (CharacterState->basedmovement().bonename().length() > 0)
+		if (NewState->basedmovement().has_bonename())
 		{
-			BasedMovement.BoneName = CharacterState->basedmovement().bonename().c_str();
+			BasedMovement.BoneName = NewState->basedmovement().bonename().c_str();
 		}
-		if (CharacterState->basedmovement().has_location())
+		if (NewState->basedmovement().has_location())
 		{
-			BasedMovement.Location = FVector_NetQuantize100(ChanneldUtils::GetVector(CharacterState->basedmovement().location()));
+			BasedMovement.Location = FVector_NetQuantize100(ChanneldUtils::GetVector(NewState->basedmovement().location()));
 		}
-		if (CharacterState->basedmovement().has_rotation())
+		if (NewState->basedmovement().has_rotation())
 		{
-			BasedMovement.Rotation = ChanneldUtils::GetRotator(CharacterState->basedmovement().rotation());
+			BasedMovement.Rotation = ChanneldUtils::GetRotator(NewState->basedmovement().rotation());
 		}
-		if (CharacterState->basedmovement().bserverhasbasecomponent() != State->mutable_basedmovement()->bserverhasbasecomponent())
+		if (NewState->basedmovement().has_bserverhasbasecomponent() && NewState->basedmovement().bserverhasbasecomponent() != BasedMovement.bServerHasBaseComponent)
 		{
-			BasedMovement.bServerHasBaseComponent = CharacterState->basedmovement().bserverhasbasecomponent();
+			BasedMovement.bServerHasBaseComponent = NewState->basedmovement().bserverhasbasecomponent();
 		}
-		if (CharacterState->basedmovement().brelativerotation() != State->mutable_basedmovement()->brelativerotation())
+		if (NewState->basedmovement().has_brelativerotation() && NewState->basedmovement().brelativerotation() != BasedMovement.bRelativeRotation)
 		{
-			BasedMovement.bRelativeRotation = CharacterState->basedmovement().brelativerotation();
+			BasedMovement.bRelativeRotation = NewState->basedmovement().brelativerotation();
 		}
-		if (CharacterState->basedmovement().bserverhasvelocity() != State->mutable_basedmovement()->bserverhasvelocity())
+		if (NewState->basedmovement().has_bserverhasvelocity() && NewState->basedmovement().bserverhasvelocity() != BasedMovement.bServerHasVelocity)
 		{
-			BasedMovement.bServerHasVelocity = CharacterState->basedmovement().bserverhasvelocity();
+			BasedMovement.bServerHasVelocity = NewState->basedmovement().bserverhasvelocity();
 		}
 
 		// Set the protected field via Reflection
@@ -224,37 +221,35 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 		Character->OnRep_ReplicatedBasedMovement();
 	}
 
-	State->MergeFrom(*NewState);
-
-	if (!FMath::IsNearlyEqual(State->serverlasttransformupdatetimestamp(), Character->GetReplicatedServerLastTransformUpdateTimeStamp()))
+	if (NewState->has_serverlasttransformupdatetimestamp() && !FMath::IsNearlyEqual(NewState->serverlasttransformupdatetimestamp(), Character->GetReplicatedServerLastTransformUpdateTimeStamp()))
 	{
-		*ServerLastTransformUpdateTimeStampValuePtr = State->serverlasttransformupdatetimestamp();
+		*ServerLastTransformUpdateTimeStampValuePtr = NewState->serverlasttransformupdatetimestamp();
 	}
 
-	if (State->movementmode() != Character->GetReplicatedMovementMode())
+	if (NewState->has_movementmode() && NewState->movementmode() != Character->GetReplicatedMovementMode())
 	{
-		*MovementModeValuePtr = (uint8)State->movementmode();
+		*MovementModeValuePtr = (uint8)NewState->movementmode();
 	}
 
-	if (State->biscrouched() != Character->bIsCrouched)
+	if (NewState->has_biscrouched() && NewState->biscrouched() != Character->bIsCrouched)
 	{
-		Character->bIsCrouched = State->biscrouched();
+		Character->bIsCrouched = NewState->biscrouched();
 		Character->OnRep_IsCrouched();
 	}
 
-	if (State->bproxyisjumpforceapplied() != Character->bProxyIsJumpForceApplied)
+	if (NewState->has_bproxyisjumpforceapplied() && NewState->bproxyisjumpforceapplied() != Character->bProxyIsJumpForceApplied)
 	{
-		Character->bProxyIsJumpForceApplied = State->bproxyisjumpforceapplied();
+		Character->bProxyIsJumpForceApplied = NewState->bproxyisjumpforceapplied();
 	}
 
-	if (!FMath::IsNearlyEqual(State->animrootmotiontranslationscale(), Character->GetAnimRootMotionTranslationScale()))
+	if (NewState->has_animrootmotiontranslationscale() && !FMath::IsNearlyEqual(NewState->animrootmotiontranslationscale(), Character->GetAnimRootMotionTranslationScale()))
 	{
-		*AnimRootMotionTranslationScaleValuePtr = State->animrootmotiontranslationscale();
+		*AnimRootMotionTranslationScaleValuePtr = NewState->animrootmotiontranslationscale();
 	}
 
-	if (!FMath::IsNearlyEqual(State->replaylasttransformupdatetimestamp(), *ReplayLastTransformUpdateTimeStampPtr))
+	if (NewState->has_replaylasttransformupdatetimestamp() && !FMath::IsNearlyEqual(NewState->replaylasttransformupdatetimestamp(), *ReplayLastTransformUpdateTimeStampPtr))
 	{
-		*ReplayLastTransformUpdateTimeStampPtr = State->replaylasttransformupdatetimestamp();
+		*ReplayLastTransformUpdateTimeStampPtr = NewState->replaylasttransformupdatetimestamp();
 		Character->OnRep_ReplayLastTransformUpdateTimeStamp();
 	}
 }

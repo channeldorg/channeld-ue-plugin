@@ -15,7 +15,8 @@ FChanneldPlayerControllerReplicator::FChanneldPlayerControllerReplicator(UObject
 	DisableAllReplicatedPropertiesOfClass(InTargetObj->GetClass(), APlayerController::StaticClass(), EFieldIteratorFlags::ExcludeSuper, RepProps);
 	*/
 
-	State = new unrealpb::PlayerControllerState;
+	FullState = new unrealpb::PlayerControllerState;
+	DeltaState = new unrealpb::PlayerControllerState;
 
 	// Prepare Reflection pointers
 	{
@@ -27,16 +28,18 @@ FChanneldPlayerControllerReplicator::FChanneldPlayerControllerReplicator(UObject
 
 FChanneldPlayerControllerReplicator::~FChanneldPlayerControllerReplicator()
 {
-	delete State;
+	delete FullState;
+	delete DeltaState;
 }
 
-google::protobuf::Message* FChanneldPlayerControllerReplicator::GetState()
+google::protobuf::Message* FChanneldPlayerControllerReplicator::GetDeltaState()
 {
-	return State;
+	return DeltaState;
 }
 
 void FChanneldPlayerControllerReplicator::ClearState()
 {
+	DeltaState->Clear();
 	bStateChanged = false;
 }
 
@@ -65,7 +68,7 @@ void FChanneldPlayerControllerReplicator::OnStateChanged(const google::protobuf:
 
 	//auto CharacterState = static_cast<const unrealpb::PlayerControllerState*>(NewState);
 
-	State->MergeFrom(*NewState);
+	FullState->MergeFrom(*NewState);
 }
 
 TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::SerializeFunctionParams(UFunction* Func, void* Params)
