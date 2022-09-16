@@ -1,5 +1,5 @@
 #include "ChanneldUE.h"
-#include "ISettingsModule.h"
+#include "Developer/Settings/Public/ISettingsModule.h"
 #include "ChanneldSettings.h"
 #include "Components/SceneComponent.h"
 #include "GameFramework/Character.h"
@@ -16,7 +16,7 @@ void FChanneldUEModule::StartupModule()
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 	{
 		SettingsModule->RegisterSettings("Project", "Plugins", "ChanneldSettings",
-			LOCTEXT("RuntimeSettingsName", "Channeld Settings"), 
+			LOCTEXT("RuntimeSettingsName", "Channeld"), 
 			LOCTEXT("RuntimeSettingsDesc", ""),
 			GetMutableDefault<UChanneldSettings>());
 	}
