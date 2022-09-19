@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Channeld.pb.h"
+#include "channeld.pb.h"
 #include "ChanneldTypes.h"
 #include "Tickable.h"
 #include "Subsystems/GameInstanceSubsystem.h"

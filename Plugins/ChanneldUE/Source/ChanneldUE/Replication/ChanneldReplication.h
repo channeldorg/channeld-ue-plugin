@@ -15,5 +15,5 @@ namespace ChanneldReplication
 }
 
 #define REGISTER_REPLICATOR(ReplicatorClass, TargetClass) \
-	ChanneldReplication::RegisterReplicator(TargetClass::StaticClass(), [](UObject* InTargetObj){ return new ReplicatorClass(CastChecked<##TargetClass>(InTargetObj)); })
+	ChanneldReplication::RegisterReplicator(TargetClass::StaticClass(), [](UObject* InTargetObj){ return new ReplicatorClass(CastChecked<TargetClass>(InTargetObj)); })
 

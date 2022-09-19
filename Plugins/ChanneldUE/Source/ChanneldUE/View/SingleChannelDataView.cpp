@@ -3,7 +3,7 @@
 
 #include "SingleChannelDataView.h"
 #include "ChanneldTypes.h"
-#include "Channeld.pb.h"
+#include "channeld.pb.h"
 //#include "google/protobuf/message.h"
 //#include "Protobuf/ThirdParty/protobuf/include/google/protobuf/descriptor.h"
 

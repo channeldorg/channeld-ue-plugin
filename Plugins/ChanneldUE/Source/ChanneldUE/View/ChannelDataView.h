@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldTypes.h"
-#include "Channeld.pb.h"
+#include "channeld.pb.h"
 #include "ChanneldConnection.h"
 #include "ChannelDataProvider.h"
 #include "google/protobuf/message.h"

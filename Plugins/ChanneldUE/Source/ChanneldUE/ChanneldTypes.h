@@ -1,5 +1,5 @@
 #pragma once
-#include "Channeld.pb.h"
+#include "channeld.pb.h"
 
 //#include "Engine/EngineBaseTypes.h"
 #include "ChanneldTypes.generated.h"

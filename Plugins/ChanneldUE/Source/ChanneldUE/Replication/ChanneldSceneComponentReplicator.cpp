@@ -103,7 +103,9 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 	{
 		if (SceneComp->GetAttachParent() == nullptr)
 		{
-			DeltaState->release_attachparent();
+			// Catch warn_unused_result error for Linux build
+			auto result = DeltaState->release_attachparent();
+			result = nullptr;
 		}
 		else
 		{

@@ -4,7 +4,7 @@
 #include "Sockets.h"
 #include "google/protobuf/message.h"
 #include "ChanneldTypes.h"
-#include "Channeld.pb.h"
+#include "channeld.pb.h"
 #include "ChanneldConnection.generated.h"
 
 class UChanneldConnection;
