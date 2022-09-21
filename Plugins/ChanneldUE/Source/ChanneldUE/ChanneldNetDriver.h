@@ -70,14 +70,14 @@ public:
 		return CastChecked<UChanneldNetConnection>(ServerConnection);
 	}
 
-	UPROPERTY(Config)
-	FString ChanneldIpForClient = "127.0.0.1";
-	UPROPERTY(Config)
-	uint32 ChanneldPortForClient = 12108;
-	UPROPERTY(Config)
-	FString ChanneldIpForServer = "127.0.0.1";
-	UPROPERTY(Config)
-	uint32 ChanneldPortForServer = 11288;
+	//UPROPERTY(Config)
+	//FString ChanneldIpForClient = "127.0.0.1";
+	//UPROPERTY(Config)
+	//uint32 ChanneldPortForClient = 12108;
+	//UPROPERTY(Config)
+	//FString ChanneldIpForServer = "127.0.0.1";
+	//UPROPERTY(Config)
+	//uint32 ChanneldPortForServer = 11288;
 
 	UPROPERTY(Config)
 	bool bDisableHandshaking = true;

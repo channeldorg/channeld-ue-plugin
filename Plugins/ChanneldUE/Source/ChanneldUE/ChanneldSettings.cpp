@@ -2,8 +2,74 @@
 
 
 #include "ChanneldSettings.h"
+#include "ChanneldTypes.h"
+#include "SocketSubsystem.h"
 
 UChanneldSettings::UChanneldSettings(const FObjectInitializer& obj)
 {
-    
+}
+
+void UChanneldSettings::PostInitProperties()
+{
+	Super::PostInitProperties();
+
+	// Command line arguments can override the INI settings
+	const TCHAR* CmdLine = FCommandLine::Get();
+	UE_LOG(LogChanneld, Log, TEXT("Parsing ChanneldSettigns from command line args: %s"), CmdLine);
+
+	if (FParse::Value(CmdLine, TEXT("channeldClientIp="), ChanneldIpForClient))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed Client IP from CLI: %s"), *ChanneldIpForClient);
+	}
+	if (FParse::Value(CmdLine, TEXT("channeldClientPort="), ChanneldPortForClient))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed Client Port from CLI: %d"), ChanneldPortForClient);
+	}
+	if (FParse::Value(CmdLine, TEXT("channeldServerIp="), ChanneldIpForServer))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed Server IP from CLI: %s"), *ChanneldIpForServer);
+	}
+	if (FParse::Value(CmdLine, TEXT("channeldServerPort="), ChanneldPortForServer))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed Server Port from CLI: %d"), ChanneldPortForServer);
+	}
+
+	FString Addr;
+	if (FParse::Value(CmdLine, TEXT("channeldClientAddr="), Addr))
+	{
+		if (ParseNetAddr(Addr, ChanneldIpForClient, ChanneldPortForClient))
+		{
+			UE_LOG(LogChanneld, Log, TEXT("Parsed Client Address from CLI: %s -> %s:%d"), *Addr, *ChanneldIpForClient, ChanneldPortForClient);
+		}
+	}
+	if (FParse::Value(CmdLine, TEXT("channeldServerAddr="), Addr))
+	{
+		if (ParseNetAddr(Addr, ChanneldIpForServer, ChanneldPortForServer))
+		{
+			UE_LOG(LogChanneld, Log, TEXT("Parsed Server Address from CLI: %s -> %s:%d"), *Addr, *ChanneldIpForServer, ChanneldPortForServer);
+		}
+	}
+}
+
+bool UChanneldSettings::ParseNetAddr(const FString& Addr, FString& OutIp, int32& OutPort)
+{
+	/*
+	int32 PortIndex;
+	if (Addr.FindChar(':', PortIndex))
+	{
+		const FString& PortStr = Addr.Right(Addr.Len() - 1 - PortIndex);
+		OutPort = FCString::Atoi(*PortStr);
+	}
+	*/
+	FAddressInfoResult Result = ISocketSubsystem::Get()->GetAddressInfo(*Addr, nullptr, EAddressInfoFlags::Default, NAME_None);
+	if (Result.Results.Num() > 0)
+	{
+		auto NetAddr = Result.Results[0].Address;
+		OutIp = NetAddr->ToString(false);
+		int32 Port = NetAddr->GetPort();
+		if (Port > 0)
+			OutPort = Port;
+		return true;
+	}
+	return false;
 }

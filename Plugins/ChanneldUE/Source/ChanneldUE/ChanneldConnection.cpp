@@ -71,7 +71,7 @@ void UChanneldConnection::Deinitialize()
 	Disconnect(false);
 }
 
-bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int Port, FString& Error)
+bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int32 Port, FString& Error)
 {
 	if (IsConnected())
 		return false;

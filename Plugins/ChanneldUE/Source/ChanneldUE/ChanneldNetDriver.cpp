@@ -14,6 +14,7 @@
 #include "Replication/ChanneldReplicationDriver.h"
 #include "ChanneldUtils.h"
 #include "Replication/ChanneldReplicationComponent.h"
+#include "ChanneldSettings.h"
 
 UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -208,15 +209,16 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 	{
 		FString Host;
 		int Port;
+		auto Settings = GetMutableDefault<UChanneldSettings>();
 		if (bInitAsClient)
 		{
-			Host = ChanneldIpForClient;
-			Port = ChanneldPortForClient;
+			Host = Settings->ChanneldIpForClient;
+			Port = Settings->ChanneldPortForClient;
 		}
 		else
 		{
-			Host = ChanneldIpForServer;
-			Port = ChanneldPortForServer;
+			Host = Settings->ChanneldIpForServer;
+			Port = Settings->ChanneldPortForServer;
 		}
 
 		if (!ConnToChanneld->Connect(bInitAsClient, Host, Port, Error))

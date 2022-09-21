@@ -37,6 +37,6 @@ public class ChanneldUE : ModuleRules
 
         PublicIncludePaths.Add(ModuleDirectory);
 
-        bUseRTTI = true;
+        bUseRTTI = false;
     }
 }

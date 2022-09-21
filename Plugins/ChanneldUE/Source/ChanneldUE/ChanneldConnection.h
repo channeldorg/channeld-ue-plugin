@@ -96,7 +96,7 @@ public:
 
 	//virtual void BeginDestroy() override;
 
-	bool Connect(bool bInitAsClient, const FString& Host, int Port, FString& Error);
+	bool Connect(bool bInitAsClient, const FString& Host, int32 Port, FString& Error);
 	void Disconnect(bool bFlushAll = true);
 	// Thread-safe
 	void Send(ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const FChanneldMessageHandlerFunc& HandlerFunc = nullptr);
