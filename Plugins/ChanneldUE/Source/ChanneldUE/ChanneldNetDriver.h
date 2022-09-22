@@ -17,7 +17,7 @@
 /**
  * 
  */
-UCLASS(transient, config=ChanneldUE)
+UCLASS(transient, config=Engine)
 class CHANNELDUE_API UChanneldNetDriver : public UNetDriver
 {
 	GENERATED_BODY()
@@ -69,22 +69,6 @@ public:
 	{
 		return CastChecked<UChanneldNetConnection>(ServerConnection);
 	}
-
-	//UPROPERTY(Config)
-	//FString ChanneldIpForClient = "127.0.0.1";
-	//UPROPERTY(Config)
-	//uint32 ChanneldPortForClient = 12108;
-	//UPROPERTY(Config)
-	//FString ChanneldIpForServer = "127.0.0.1";
-	//UPROPERTY(Config)
-	//uint32 ChanneldPortForServer = 11288;
-
-	UPROPERTY(Config)
-	bool bDisableHandshaking = true;
-	UPROPERTY(Config)
-	bool bSkipCustomReplication = false;
-	UPROPERTY(Config)
-	bool bSkipCustomRPC = true;
 
 	TSharedRef<ChannelId> LowLevelSendToChannelId = MakeShared<ChannelId>(GlobalChannelId);
 

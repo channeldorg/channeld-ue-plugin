@@ -7,6 +7,7 @@
 #include "Misc/NetworkGuid.h"
 #include "ChanneldReplication.h"
 #include "ChanneldNetDriver.h"
+#include "ChanneldSettings.h"
 
 UChanneldReplicationComponent::UChanneldReplicationComponent(const FObjectInitializer& ObjectInitializer)
 {
@@ -29,8 +30,8 @@ void UChanneldReplicationComponent::InitOnce()
 	if (bInitialized)
 		return;
 
-	auto NetDriver = Cast<UChanneldNetDriver>(GetWorld()->GetNetDriver());
-	if (!NetDriver || (NetDriver->bSkipCustomReplication && NetDriver->bSkipCustomRPC))
+	auto Settings = GetMutableDefault<UChanneldSettings>();
+	if (Settings->bSkipCustomReplication && Settings->bSkipCustomRPC)
 	{
 		return;
 	}

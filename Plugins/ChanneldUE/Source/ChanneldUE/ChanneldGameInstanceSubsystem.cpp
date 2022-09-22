@@ -468,6 +468,10 @@ void UChanneldGameInstanceSubsystem::HandleUnsubFromChannel(UChanneldConnection*
 void UChanneldGameInstanceSubsystem::HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId,
 	const google::protobuf::Message* Msg)
 {
+	if (!OnDataUpdate.IsBound())
+	{
+		return;
+	}
 	auto UpdateResultMsg = static_cast<const channeldpb::ChannelDataUpdateMessage*>(Msg);
 	const google::protobuf::Any& AnyData = UpdateResultMsg->data();
 
@@ -518,25 +522,6 @@ void UChanneldGameInstanceSubsystem::InitChannelDataView()
 	TSubclassOf<UChannelDataView> ChannelDataViewClass = nullptr;
 
 	ChannelDataViewClass = GetMutableDefault<UChanneldSettings>()->ChannelDataViewClass;
-
-	// If not exist, use the class name in ChanneldUE.ini
-	if (!ChannelDataViewClass && ChannelDataViewClassName != TEXT(""))
-	{
-		if (ChannelDataViewClassName.StartsWith("Blueprint'"))
-		{
-			auto BpClass = TSoftClassPtr<UChannelDataView>(FSoftObjectPath(ChannelDataViewClassName));
-			ChannelDataViewClass = BpClass.LoadSynchronous();
-		}
-		else
-		{
-			ChannelDataViewClass = LoadClass<UChannelDataView>(this, *ChannelDataViewClassName, NULL, LOAD_None, NULL);
-		}
-
-		if (ChannelDataViewClass == NULL)
-		{
-			UE_LOG(LogChanneld, Error, TEXT("Failed to load class '%s'"), *ChannelDataViewClassName);
-		}
-	}
 
 	if (ChannelDataViewClass)
 	{

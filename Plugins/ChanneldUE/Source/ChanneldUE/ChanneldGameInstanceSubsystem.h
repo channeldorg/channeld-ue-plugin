@@ -170,10 +170,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Channeld")
 		void SeamlessTravelToChannel(APlayerController* PlayerController, int32 ChId);
 
-
-	UPROPERTY(Config)
-		FString ChannelDataViewClassName;
-
 protected:
 	UPROPERTY()
 		UChanneldConnection* ConnectionInstance = nullptr;

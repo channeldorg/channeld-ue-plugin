@@ -24,7 +24,7 @@ UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializ
 UChanneldNetConnection* UChanneldNetDriver::OnClientConnected(ConnectionId ClientConnId)
 {
 	auto ClientConnection = NewObject<UChanneldNetConnection>(GetTransientPackage(), NetConnectionClass);
-	ClientConnection->bDisableHandshaking = bDisableHandshaking;
+	ClientConnection->bDisableHandshaking = GetMutableDefault<UChanneldSettings>()->bDisableHandshaking;
 	// Server always sees a connected client (forwarded from channeld) as authenticated.
 	ClientConnection->bChanneldAuthenticated = true;
 	ClientConnection->InitRemoteConnection(this, GetSocket(), InitBaseURL, ConnIdToAddr(ClientConnId).Get(), EConnectionState::USOCK_Open);
@@ -36,7 +36,7 @@ UChanneldNetConnection* UChanneldNetDriver::OnClientConnected(ConnectionId Clien
 
 	UE_LOG(LogChanneld, Log, TEXT("Server added client connection %d, total connections: %d (%d)"), ClientConnId, ClientConnections.Num(), ClientConnectionMap.Num());
 
-	if (!bDisableHandshaking && ConnectionlessHandler.IsValid() && StatelessConnectComponent.IsValid())
+	if (!ClientConnection->bDisableHandshaking && ConnectionlessHandler.IsValid() && StatelessConnectComponent.IsValid())
 	{
 		ClientConnection->bInConnectionlessHandshake = true;
 	}
@@ -270,7 +270,7 @@ bool UChanneldNetDriver::InitConnect(FNetworkNotify* InNotify, const FURL& Conne
 		return false;
 	}
 
-	NetConnection->bDisableHandshaking = bDisableHandshaking;
+	NetConnection->bDisableHandshaking = GetMutableDefault<UChanneldSettings>()->bDisableHandshaking;
 	ServerConnection->InitLocalConnection(this, GetSocket(), ConnectURL, USOCK_Open);
 	//NetConnection->bInConnectionlessHandshake = true;
 
@@ -294,7 +294,7 @@ bool UChanneldNetDriver::InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bo
 		return false;
 	}
 
-	if (!bDisableHandshaking)
+	if (!GetMutableDefault<UChanneldSettings>()->bDisableHandshaking)
 	{
 		InitConnectionlessHandler();
 	}
@@ -333,7 +333,7 @@ void UChanneldNetDriver::LowLevelSend(TSharedPtr<const FInternetAddr> Address, v
 
 		FPacketAudit::NotifyLowLevelReceive(DataToSend, DataSize);
 
-		if (!bDisableHandshaking && ConnectionlessHandler.IsValid())
+		if (!GetMutableDefault<UChanneldSettings>()->bDisableHandshaking && ConnectionlessHandler.IsValid())
 		{
 			const ProcessedPacket ProcessedData =
 				ConnectionlessHandler->OutgoingConnectionless(Address, (uint8*)DataToSend, CountBits, Traits);
@@ -432,7 +432,7 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 	int32 Result = Super::ServerReplicateActors(DeltaSeconds);
 	//UE_LOG(LogChanneld, Verbose, TEXT("Super::ServerReplicateActors replicated %d actors"), Result);
 
-	if (!bSkipCustomReplication)
+	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
 	{
 		auto Subsystem = GetSubsystem();
 		if (Subsystem && Subsystem->GetChannelDataView())
@@ -446,7 +446,7 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 
 void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject /*= nullptr*/)
 {
-	if (!bSkipCustomRPC)
+	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomRPC)
 	{
 		UE_LOG(LogChanneld, Verbose, TEXT("Send RPC %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
 
