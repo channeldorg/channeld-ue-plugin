@@ -2,6 +2,7 @@
 #include "ChanneldGameInstanceSubsystem.h"
 #include "ChanneldNetDriver.h"
 #include "ChanneldUtils.h"
+#include "Metrics.h"
 
 UChannelDataView::UChannelDataView(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -217,6 +218,10 @@ int32 UChannelDataView::SendAllChannelUpdates()
 			TotalUpdateCount += UpdateCount;
 		}
 	}
+
+	UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
+	Metrics->AddConnTypeLabel(*Metrics->ReplicatedProviders).Increment(TotalUpdateCount);
+
 	return TotalUpdateCount;
 }
 

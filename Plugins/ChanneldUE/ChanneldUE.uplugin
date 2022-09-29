@@ -34,5 +34,9 @@
 			"Name": "ReplicationGraph",
 			"Enabled": true
 		},
+		{
+			"Name": "PrometheusUE",
+			"Enabled": true
+		},
 	]
 }

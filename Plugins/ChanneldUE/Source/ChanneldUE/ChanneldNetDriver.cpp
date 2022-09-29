@@ -15,6 +15,7 @@
 #include "ChanneldUtils.h"
 #include "Replication/ChanneldReplicationComponent.h"
 #include "ChanneldSettings.h"
+#include "Metrics.h"
 
 UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -468,6 +469,10 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 					if (ConnToChanneld->IsClient())
 					{
 						SendDataToServer(MessageType_RPC, Data, RpcMsg.GetCachedSize());
+
+						UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
+						Metrics->AddConnTypeLabel(*Metrics->SentRPCs).Increment();
+
 						return;
 					}
 					else
@@ -476,6 +481,10 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 						if (NetConn)
 						{
 							SendDataToClient(MessageType_RPC, NetConn->GetConnId(), Data, RpcMsg.GetCachedSize());
+
+							UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
+							Metrics->AddConnTypeLabel(*Metrics->SentRPCs).Increment();
+
 							return;
 						}
 						else
@@ -508,7 +517,10 @@ void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, c
 	if (RepComp)
 	{
 		void* Params = RepComp->DeserializeFunctionParams(Actor, Function, ParamsPayload);
-		Actor->ProcessEvent(Function, Params);
+		if (Params || ParamsPayload.empty())
+		{
+			Actor->ProcessEvent(Function, Params);
+		}
 	}
 }
 
