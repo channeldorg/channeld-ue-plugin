@@ -122,7 +122,13 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 		.Text_Static(&UChanneldEditorSettings::GetServerMapName)
 		.OnTextChanged_Static(&UChanneldEditorSettings::SetServerMapName);
 	MenuBuilder.AddWidget(ServerMapName, LOCTEXT("ServerMapNameLabel", "Server Map Name:"));
-	
+
+	TSharedRef<SWidget> AdditonalArgs = SNew(SEditableText)
+		//.Style(EditableTextStyle)
+		.Text_Static(&UChanneldEditorSettings::GetAdditionalArgs)
+		.OnTextChanged_Static(&UChanneldEditorSettings::SetAdditionalArgs);
+	MenuBuilder.AddWidget(AdditonalArgs, LOCTEXT("AdditonalArgsLabel", "Additional Args:"));
+
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchServersCommand);
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().StopServersCommand);
 
@@ -152,7 +158,7 @@ void FChanneldEditorModule::LaunchServersAction()
 
 	for (int i = 0; i < ServerNum; i++)
 	{
-		FString Params = FString::Printf(TEXT("\"%s\" /Game/Maps/%s -game -PIEVIACONSOLE -Multiprocess -server -log -MultiprocessSaveConfig -forcepassthrough -messaging -SessionName=\"Dedicated Server %d\" -windowed"), *ProjectPath, *MapName, i);
+		FString Params = FString::Printf(TEXT("\"%s\" /Game/Maps/%s -game -PIEVIACONSOLE -Multiprocess -server -log -MultiprocessSaveConfig -forcepassthrough -SessionName=\"Dedicated Server %d\" -windowed %s"), *ProjectPath, *MapName, i, *UChanneldEditorSettings::GetAdditionalArgs().ToString());
 		uint32 ProcessId;
 		FProcHandle ProcHandle = FPlatformProcess::CreateProc(*EditorPath, *Params, true, true, false, &ProcessId, 0, nullptr, nullptr, nullptr);
 		if (ProcHandle.IsValid())

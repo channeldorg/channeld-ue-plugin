@@ -16,6 +16,9 @@ public:
     UPROPERTY(config, EditAnywhere, Category = "Channeld|Editor")
         FText ServerMapName;
 
+	UPROPERTY(config, EditAnywhere, Category = "Channeld|Editor")
+		FText AdditionalArgs;
+
     static int32 GetServerNum()
     {
         auto Settings = GetDefault<UChanneldEditorSettings>();
@@ -41,6 +44,21 @@ public:
 	{
 		auto Settings = GetMutableDefault<UChanneldEditorSettings>();
 		Settings->ServerMapName = InName;
+
+		Settings->PostEditChange();
+		Settings->SaveConfig();
+	}
+
+	static FText GetAdditionalArgs()
+	{
+		auto Settings = GetDefault<UChanneldEditorSettings>();
+		return Settings->AdditionalArgs;
+	}
+
+	static void SetAdditionalArgs(const FText& InArgs)
+	{
+		auto Settings = GetMutableDefault<UChanneldEditorSettings>();
+		Settings->AdditionalArgs = InArgs;
 
 		Settings->PostEditChange();
 		Settings->SaveConfig();
