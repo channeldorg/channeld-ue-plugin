@@ -153,6 +153,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 PROTOBUF_CONSTEXPR Character_ServerMovePacked_Params::Character_ServerMovePacked_Params(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.packedbits_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.bitsnum_)*/0u
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct Character_ServerMovePacked_ParamsDefaultTypeInternal {
   PROTOBUF_CONSTEXPR Character_ServerMovePacked_ParamsDefaultTypeInternal()
@@ -166,6 +167,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 PROTOBUF_CONSTEXPR Character_ClientMoveResponsePacked_Params::Character_ClientMoveResponsePacked_Params(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.packedbits_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.bitsnum_)*/0u
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct Character_ClientMoveResponsePacked_ParamsDefaultTypeInternal {
   PROTOBUF_CONSTEXPR Character_ClientMoveResponsePacked_ParamsDefaultTypeInternal()
@@ -326,6 +328,7 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::Character_ServerMovePacked_Params, _impl_.bitsnum_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::Character_ServerMovePacked_Params, _impl_.packedbits_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::unrealpb::Character_ClientMoveResponsePacked_Params, _internal_metadata_),
@@ -333,6 +336,7 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::Character_ClientMoveResponsePacked_Params, _impl_.bitsnum_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::Character_ClientMoveResponsePacked_Params, _impl_.packedbits_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::PlayerControllerState, _impl_._has_bits_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::PlayerControllerState, _internal_metadata_),
@@ -362,9 +366,9 @@ static const ::_pbi::MigrationSchema schemas_unreal_5fcommon_2eproto[] PROTOBUF_
   { 65, 78, -1, sizeof(::unrealpb::BasedMovementInfo)},
   { 85, 100, -1, sizeof(::unrealpb::CharacterState)},
   { 109, -1, -1, sizeof(::unrealpb::Character_ServerMovePacked_Params)},
-  { 116, -1, -1, sizeof(::unrealpb::Character_ClientMoveResponsePacked_Params)},
-  { 123, 131, -1, sizeof(::unrealpb::PlayerControllerState)},
-  { 133, -1, -1, sizeof(::unrealpb::PlayerController_ServerUpdateCamera_Params)},
+  { 117, -1, -1, sizeof(::unrealpb::Character_ClientMoveResponsePacked_Params)},
+  { 125, 133, -1, sizeof(::unrealpb::PlayerControllerState)},
+  { 135, -1, -1, sizeof(::unrealpb::PlayerController_ServerUpdateCamera_Params)},
 };
 
 static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eproto[] = {
@@ -434,22 +438,23 @@ const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_
   "ntModeB\016\n\014_bIsCrouchedB\033\n\031_bProxyIsJumpF"
   "orceAppliedB!\n\037_animRootMotionTranslatio"
   "nScaleB%\n#_replayLastTransformUpdateTime"
-  "Stamp\"7\n!Character_ServerMovePacked_Para"
-  "ms\022\022\n\nPackedBits\030\001 \001(\014\"\?\n)Character_Clie"
-  "ntMoveResponsePacked_Params\022\022\n\nPackedBit"
-  "s\030\001 \001(\014\"\243\001\n\025PlayerControllerState\0222\n\022tar"
-  "getViewRotation\030\001 \001(\0132\021.unrealpb.FVector"
-  "H\000\210\001\001\022-\n\rspawnLocation\030\002 \001(\0132\021.unrealpb."
-  "FVectorH\001\210\001\001B\025\n\023_targetViewRotationB\020\n\016_"
-  "spawnLocation\"g\n*PlayerController_Server"
-  "UpdateCamera_Params\022!\n\006camLoc\030\001 \001(\0132\021.un"
-  "realpb.FVector\022\026\n\016camPitchAndYaw\030\002 \001(\005B,"
-  "Z*channeld.clewcat.com/channeld/pkg/unre"
-  "alpbb\006proto3"
+  "Stamp\"H\n!Character_ServerMovePacked_Para"
+  "ms\022\017\n\007bitsNum\030\001 \001(\r\022\022\n\npackedBits\030\002 \001(\014\""
+  "P\n)Character_ClientMoveResponsePacked_Pa"
+  "rams\022\017\n\007bitsNum\030\001 \001(\r\022\022\n\npackedBits\030\002 \001("
+  "\014\"\243\001\n\025PlayerControllerState\0222\n\022targetVie"
+  "wRotation\030\001 \001(\0132\021.unrealpb.FVectorH\000\210\001\001\022"
+  "-\n\rspawnLocation\030\002 \001(\0132\021.unrealpb.FVecto"
+  "rH\001\210\001\001B\025\n\023_targetViewRotationB\020\n\016_spawnL"
+  "ocation\"g\n*PlayerController_ServerUpdate"
+  "Camera_Params\022!\n\006camLoc\030\001 \001(\0132\021.unrealpb"
+  ".FVector\022\026\n\016camPitchAndYaw\030\002 \001(\005B,Z*chan"
+  "neld.clewcat.com/channeld/pkg/unrealpbb\006"
+  "proto3"
   ;
 static ::_pbi::once_flag descriptor_table_unreal_5fcommon_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_unreal_5fcommon_2eproto = {
-    false, false, 2532, descriptor_table_protodef_unreal_5fcommon_2eproto,
+    false, false, 2566, descriptor_table_protodef_unreal_5fcommon_2eproto,
     "unreal_common.proto",
     &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 11,
     schemas_unreal_5fcommon_2eproto, file_default_instances_unreal_5fcommon_2eproto, TableStruct_unreal_5fcommon_2eproto::offsets,
@@ -2866,6 +2871,7 @@ Character_ServerMovePacked_Params::Character_ServerMovePacked_Params(const Chara
   Character_ServerMovePacked_Params* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_.packedbits_){}
+    , decltype(_impl_.bitsnum_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -2877,6 +2883,7 @@ Character_ServerMovePacked_Params::Character_ServerMovePacked_Params(const Chara
     _this->_impl_.packedbits_.Set(from._internal_packedbits(), 
       _this->GetArenaForAllocation());
   }
+  _this->_impl_.bitsnum_ = from._impl_.bitsnum_;
   // @@protoc_insertion_point(copy_constructor:unrealpb.Character_ServerMovePacked_Params)
 }
 
@@ -2886,6 +2893,7 @@ inline void Character_ServerMovePacked_Params::SharedCtor(
   (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.packedbits_){}
+    , decltype(_impl_.bitsnum_){0u}
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.packedbits_.InitDefault();
@@ -2919,6 +2927,7 @@ void Character_ServerMovePacked_Params::Clear() {
   (void) cached_has_bits;
 
   _impl_.packedbits_.ClearToEmpty();
+  _impl_.bitsnum_ = 0u;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -2928,9 +2937,17 @@ const char* Character_ServerMovePacked_Params::_InternalParse(const char* ptr, :
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // bytes PackedBits = 1;
+      // uint32 bitsNum = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.bitsnum_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // bytes packedBits = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_packedbits();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
@@ -2966,10 +2983,16 @@ uint8_t* Character_ServerMovePacked_Params::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // bytes PackedBits = 1;
+  // uint32 bitsNum = 1;
+  if (this->_internal_bitsnum() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(1, this->_internal_bitsnum(), target);
+  }
+
+  // bytes packedBits = 2;
   if (!this->_internal_packedbits().empty()) {
     target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_packedbits(), target);
+        2, this->_internal_packedbits(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2988,11 +3011,16 @@ size_t Character_ServerMovePacked_Params::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // bytes PackedBits = 1;
+  // bytes packedBits = 2;
   if (!this->_internal_packedbits().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
         this->_internal_packedbits());
+  }
+
+  // uint32 bitsNum = 1;
+  if (this->_internal_bitsnum() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_bitsnum());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -3015,6 +3043,9 @@ void Character_ServerMovePacked_Params::MergeImpl(::PROTOBUF_NAMESPACE_ID::Messa
 
   if (!from._internal_packedbits().empty()) {
     _this->_internal_set_packedbits(from._internal_packedbits());
+  }
+  if (from._internal_bitsnum() != 0) {
+    _this->_internal_set_bitsnum(from._internal_bitsnum());
   }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -3039,6 +3070,7 @@ void Character_ServerMovePacked_Params::InternalSwap(Character_ServerMovePacked_
       &_impl_.packedbits_, lhs_arena,
       &other->_impl_.packedbits_, rhs_arena
   );
+  swap(_impl_.bitsnum_, other->_impl_.bitsnum_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Character_ServerMovePacked_Params::GetMetadata() const {
@@ -3064,6 +3096,7 @@ Character_ClientMoveResponsePacked_Params::Character_ClientMoveResponsePacked_Pa
   Character_ClientMoveResponsePacked_Params* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_.packedbits_){}
+    , decltype(_impl_.bitsnum_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -3075,6 +3108,7 @@ Character_ClientMoveResponsePacked_Params::Character_ClientMoveResponsePacked_Pa
     _this->_impl_.packedbits_.Set(from._internal_packedbits(), 
       _this->GetArenaForAllocation());
   }
+  _this->_impl_.bitsnum_ = from._impl_.bitsnum_;
   // @@protoc_insertion_point(copy_constructor:unrealpb.Character_ClientMoveResponsePacked_Params)
 }
 
@@ -3084,6 +3118,7 @@ inline void Character_ClientMoveResponsePacked_Params::SharedCtor(
   (void)is_message_owned;
   new (&_impl_) Impl_{
       decltype(_impl_.packedbits_){}
+    , decltype(_impl_.bitsnum_){0u}
     , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.packedbits_.InitDefault();
@@ -3117,6 +3152,7 @@ void Character_ClientMoveResponsePacked_Params::Clear() {
   (void) cached_has_bits;
 
   _impl_.packedbits_.ClearToEmpty();
+  _impl_.bitsnum_ = 0u;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -3126,9 +3162,17 @@ const char* Character_ClientMoveResponsePacked_Params::_InternalParse(const char
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // bytes PackedBits = 1;
+      // uint32 bitsNum = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.bitsnum_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // bytes packedBits = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_packedbits();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
@@ -3164,10 +3208,16 @@ uint8_t* Character_ClientMoveResponsePacked_Params::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // bytes PackedBits = 1;
+  // uint32 bitsNum = 1;
+  if (this->_internal_bitsnum() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(1, this->_internal_bitsnum(), target);
+  }
+
+  // bytes packedBits = 2;
   if (!this->_internal_packedbits().empty()) {
     target = stream->WriteBytesMaybeAliased(
-        1, this->_internal_packedbits(), target);
+        2, this->_internal_packedbits(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -3186,11 +3236,16 @@ size_t Character_ClientMoveResponsePacked_Params::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // bytes PackedBits = 1;
+  // bytes packedBits = 2;
   if (!this->_internal_packedbits().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
         this->_internal_packedbits());
+  }
+
+  // uint32 bitsNum = 1;
+  if (this->_internal_bitsnum() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_bitsnum());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -3213,6 +3268,9 @@ void Character_ClientMoveResponsePacked_Params::MergeImpl(::PROTOBUF_NAMESPACE_I
 
   if (!from._internal_packedbits().empty()) {
     _this->_internal_set_packedbits(from._internal_packedbits());
+  }
+  if (from._internal_bitsnum() != 0) {
+    _this->_internal_set_bitsnum(from._internal_bitsnum());
   }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -3237,6 +3295,7 @@ void Character_ClientMoveResponsePacked_Params::InternalSwap(Character_ClientMov
       &_impl_.packedbits_, lhs_arena,
       &other->_impl_.packedbits_, rhs_arena
   );
+  swap(_impl_.bitsnum_, other->_impl_.bitsnum_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Character_ClientMoveResponsePacked_Params::GetMetadata() const {

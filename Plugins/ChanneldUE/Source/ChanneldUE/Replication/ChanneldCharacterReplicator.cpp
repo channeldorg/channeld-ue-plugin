@@ -261,7 +261,9 @@ TSharedPtr<google::protobuf::Message> FChanneldCharacterReplicator::SerializeFun
 		ServerMovePackedParams* TypedParams = (ServerMovePackedParams*)Params;
 		char* Data = (char*)TypedParams->PackedBits.DataBits.GetData();
 		auto Msg = MakeShared<unrealpb::Character_ServerMovePacked_Params>();
+		Msg->set_bitsnum(TypedParams->PackedBits.DataBits.Num());
 		Msg->set_packedbits(Data, FMath::DivideAndRoundUp(TypedParams->PackedBits.DataBits.Num(), 8));
+		//UE_LOG(LogChanneld, Log, TEXT("Sending ServerMovePacked with PackedBits: %d, Timestamp: %d"), TypedParams->PackedBits.DataBits.Num(), *TypedParams->PackedBits.DataBits.GetData());
 		return Msg;
 	}
 	else if (Func->GetFName() == FName("ClientMoveResponsePacked"))
@@ -269,6 +271,7 @@ TSharedPtr<google::protobuf::Message> FChanneldCharacterReplicator::SerializeFun
 		ClientMoveResponsePackedParams* TypedParams = (ClientMoveResponsePackedParams*)Params;
 		char* Data = (char*)TypedParams->PackedBits.DataBits.GetData();
 		auto Msg = MakeShared<unrealpb::Character_ClientMoveResponsePacked_Params>();
+		Msg->set_bitsnum(TypedParams->PackedBits.DataBits.Num());
 		Msg->set_packedbits(Data, FMath::DivideAndRoundUp(TypedParams->PackedBits.DataBits.Num(), 8));
 		return Msg;
 	}
@@ -280,7 +283,12 @@ void* FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, c
 	if (Func->GetFName() == FName("ServerMovePacked"))
 	{
 		unrealpb::Character_ServerMovePacked_Params Msg;
-		Msg.ParseFromString(ParamsPayload);
+		if (!Msg.ParseFromString(ParamsPayload))
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to parse Character_ServerMovePacked_Params"));
+			return nullptr;
+		}
+
 		auto Params = MakeShared<ServerMovePackedParams>();
 		bool bIDC;
 		FArchive EmptyArchive;
@@ -290,15 +298,21 @@ void* FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, c
 		// ----------------------------------------------------
 		// UCharacterMovementComponent::CallServerMovePacked
 		// ----------------------------------------------------
-		Params->PackedBits.DataBits.SetNumUninitialized(Msg.packedbits().size()*8);
-		FMemory::Memcpy(Params->PackedBits.DataBits.GetData(), &Msg.packedbits(), Msg.packedbits().size());
+		Params->PackedBits.DataBits.SetNumUninitialized(Msg.bitsnum());
+		FMemory::Memcpy(Params->PackedBits.DataBits.GetData(), Msg.packedbits().data(), Msg.packedbits().size());
+		//UE_LOG(LogChanneld, Log, TEXT("Received ServerMovePacked with PackedBits: %d, Timestamp: %d"), Params->PackedBits.DataBits.Num(), *Params->PackedBits.DataBits.GetData());
 
 		return &Params.Get();
 	}
 	else if (Func->GetFName() == FName("ClientMoveResponsePacked"))
 	{
 		unrealpb::Character_ClientMoveResponsePacked_Params Msg;
-		Msg.ParseFromString(ParamsPayload);
+		if (!Msg.ParseFromString(ParamsPayload))
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to parse Character_ServerMovePacked_Params"));
+			return nullptr;
+		}
+
 		auto Params = MakeShared<ClientMoveResponsePackedParams>();
 		bool bIDC;
 		FArchive EmptyArchive;
@@ -308,8 +322,8 @@ void* FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, c
 		// ----------------------------------------------------
 		// UCharacterMovementComponent::ServerSendMoveResponse
 		// ----------------------------------------------------
-		Params->PackedBits.DataBits.SetNumUninitialized(Msg.packedbits().size() * 8);
-		FMemory::Memcpy(Params->PackedBits.DataBits.GetData(), &Msg.packedbits(), Msg.packedbits().size());
+		Params->PackedBits.DataBits.SetNumUninitialized(Msg.bitsnum());
+		FMemory::Memcpy(Params->PackedBits.DataBits.GetData(), Msg.packedbits().data(), Msg.packedbits().size());
 
 		return &Params.Get();
 	}

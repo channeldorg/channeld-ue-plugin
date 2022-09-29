@@ -1759,9 +1759,10 @@ class CHANNELDUE_API Character_ServerMovePacked_Params final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kPackedBitsFieldNumber = 1,
+    kPackedBitsFieldNumber = 2,
+    kBitsNumFieldNumber = 1,
   };
-  // bytes PackedBits = 1;
+  // bytes packedBits = 2;
   void clear_packedbits();
   const std::string& packedbits() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -1775,6 +1776,15 @@ class CHANNELDUE_API Character_ServerMovePacked_Params final :
   std::string* _internal_mutable_packedbits();
   public:
 
+  // uint32 bitsNum = 1;
+  void clear_bitsnum();
+  uint32_t bitsnum() const;
+  void set_bitsnum(uint32_t value);
+  private:
+  uint32_t _internal_bitsnum() const;
+  void _internal_set_bitsnum(uint32_t value);
+  public:
+
   // @@protoc_insertion_point(class_scope:unrealpb.Character_ServerMovePacked_Params)
  private:
   class _Internal;
@@ -1784,6 +1794,7 @@ class CHANNELDUE_API Character_ServerMovePacked_Params final :
   typedef void DestructorSkippable_;
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr packedbits_;
+    uint32_t bitsnum_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -1912,9 +1923,10 @@ class CHANNELDUE_API Character_ClientMoveResponsePacked_Params final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kPackedBitsFieldNumber = 1,
+    kPackedBitsFieldNumber = 2,
+    kBitsNumFieldNumber = 1,
   };
-  // bytes PackedBits = 1;
+  // bytes packedBits = 2;
   void clear_packedbits();
   const std::string& packedbits() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -1928,6 +1940,15 @@ class CHANNELDUE_API Character_ClientMoveResponsePacked_Params final :
   std::string* _internal_mutable_packedbits();
   public:
 
+  // uint32 bitsNum = 1;
+  void clear_bitsnum();
+  uint32_t bitsnum() const;
+  void set_bitsnum(uint32_t value);
+  private:
+  uint32_t _internal_bitsnum() const;
+  void _internal_set_bitsnum(uint32_t value);
+  public:
+
   // @@protoc_insertion_point(class_scope:unrealpb.Character_ClientMoveResponsePacked_Params)
  private:
   class _Internal;
@@ -1937,6 +1958,7 @@ class CHANNELDUE_API Character_ClientMoveResponsePacked_Params final :
   typedef void DestructorSkippable_;
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr packedbits_;
+    uint32_t bitsnum_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -4071,12 +4093,32 @@ inline void CharacterState::set_replaylasttransformupdatetimestamp(float value) 
 
 // Character_ServerMovePacked_Params
 
-// bytes PackedBits = 1;
+// uint32 bitsNum = 1;
+inline void Character_ServerMovePacked_Params::clear_bitsnum() {
+  _impl_.bitsnum_ = 0u;
+}
+inline uint32_t Character_ServerMovePacked_Params::_internal_bitsnum() const {
+  return _impl_.bitsnum_;
+}
+inline uint32_t Character_ServerMovePacked_Params::bitsnum() const {
+  // @@protoc_insertion_point(field_get:unrealpb.Character_ServerMovePacked_Params.bitsNum)
+  return _internal_bitsnum();
+}
+inline void Character_ServerMovePacked_Params::_internal_set_bitsnum(uint32_t value) {
+  
+  _impl_.bitsnum_ = value;
+}
+inline void Character_ServerMovePacked_Params::set_bitsnum(uint32_t value) {
+  _internal_set_bitsnum(value);
+  // @@protoc_insertion_point(field_set:unrealpb.Character_ServerMovePacked_Params.bitsNum)
+}
+
+// bytes packedBits = 2;
 inline void Character_ServerMovePacked_Params::clear_packedbits() {
   _impl_.packedbits_.ClearToEmpty();
 }
 inline const std::string& Character_ServerMovePacked_Params::packedbits() const {
-  // @@protoc_insertion_point(field_get:unrealpb.Character_ServerMovePacked_Params.PackedBits)
+  // @@protoc_insertion_point(field_get:unrealpb.Character_ServerMovePacked_Params.packedBits)
   return _internal_packedbits();
 }
 template <typename ArgT0, typename... ArgT>
@@ -4084,11 +4126,11 @@ inline PROTOBUF_ALWAYS_INLINE
 void Character_ServerMovePacked_Params::set_packedbits(ArgT0&& arg0, ArgT... args) {
  
  _impl_.packedbits_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:unrealpb.Character_ServerMovePacked_Params.PackedBits)
+  // @@protoc_insertion_point(field_set:unrealpb.Character_ServerMovePacked_Params.packedBits)
 }
 inline std::string* Character_ServerMovePacked_Params::mutable_packedbits() {
   std::string* _s = _internal_mutable_packedbits();
-  // @@protoc_insertion_point(field_mutable:unrealpb.Character_ServerMovePacked_Params.PackedBits)
+  // @@protoc_insertion_point(field_mutable:unrealpb.Character_ServerMovePacked_Params.packedBits)
   return _s;
 }
 inline const std::string& Character_ServerMovePacked_Params::_internal_packedbits() const {
@@ -4103,7 +4145,7 @@ inline std::string* Character_ServerMovePacked_Params::_internal_mutable_packedb
   return _impl_.packedbits_.Mutable(GetArenaForAllocation());
 }
 inline std::string* Character_ServerMovePacked_Params::release_packedbits() {
-  // @@protoc_insertion_point(field_release:unrealpb.Character_ServerMovePacked_Params.PackedBits)
+  // @@protoc_insertion_point(field_release:unrealpb.Character_ServerMovePacked_Params.packedBits)
   return _impl_.packedbits_.Release();
 }
 inline void Character_ServerMovePacked_Params::set_allocated_packedbits(std::string* packedbits) {
@@ -4118,19 +4160,39 @@ inline void Character_ServerMovePacked_Params::set_allocated_packedbits(std::str
     _impl_.packedbits_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.Character_ServerMovePacked_Params.PackedBits)
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.Character_ServerMovePacked_Params.packedBits)
 }
 
 // -------------------------------------------------------------------
 
 // Character_ClientMoveResponsePacked_Params
 
-// bytes PackedBits = 1;
+// uint32 bitsNum = 1;
+inline void Character_ClientMoveResponsePacked_Params::clear_bitsnum() {
+  _impl_.bitsnum_ = 0u;
+}
+inline uint32_t Character_ClientMoveResponsePacked_Params::_internal_bitsnum() const {
+  return _impl_.bitsnum_;
+}
+inline uint32_t Character_ClientMoveResponsePacked_Params::bitsnum() const {
+  // @@protoc_insertion_point(field_get:unrealpb.Character_ClientMoveResponsePacked_Params.bitsNum)
+  return _internal_bitsnum();
+}
+inline void Character_ClientMoveResponsePacked_Params::_internal_set_bitsnum(uint32_t value) {
+  
+  _impl_.bitsnum_ = value;
+}
+inline void Character_ClientMoveResponsePacked_Params::set_bitsnum(uint32_t value) {
+  _internal_set_bitsnum(value);
+  // @@protoc_insertion_point(field_set:unrealpb.Character_ClientMoveResponsePacked_Params.bitsNum)
+}
+
+// bytes packedBits = 2;
 inline void Character_ClientMoveResponsePacked_Params::clear_packedbits() {
   _impl_.packedbits_.ClearToEmpty();
 }
 inline const std::string& Character_ClientMoveResponsePacked_Params::packedbits() const {
-  // @@protoc_insertion_point(field_get:unrealpb.Character_ClientMoveResponsePacked_Params.PackedBits)
+  // @@protoc_insertion_point(field_get:unrealpb.Character_ClientMoveResponsePacked_Params.packedBits)
   return _internal_packedbits();
 }
 template <typename ArgT0, typename... ArgT>
@@ -4138,11 +4200,11 @@ inline PROTOBUF_ALWAYS_INLINE
 void Character_ClientMoveResponsePacked_Params::set_packedbits(ArgT0&& arg0, ArgT... args) {
  
  _impl_.packedbits_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:unrealpb.Character_ClientMoveResponsePacked_Params.PackedBits)
+  // @@protoc_insertion_point(field_set:unrealpb.Character_ClientMoveResponsePacked_Params.packedBits)
 }
 inline std::string* Character_ClientMoveResponsePacked_Params::mutable_packedbits() {
   std::string* _s = _internal_mutable_packedbits();
-  // @@protoc_insertion_point(field_mutable:unrealpb.Character_ClientMoveResponsePacked_Params.PackedBits)
+  // @@protoc_insertion_point(field_mutable:unrealpb.Character_ClientMoveResponsePacked_Params.packedBits)
   return _s;
 }
 inline const std::string& Character_ClientMoveResponsePacked_Params::_internal_packedbits() const {
@@ -4157,7 +4219,7 @@ inline std::string* Character_ClientMoveResponsePacked_Params::_internal_mutable
   return _impl_.packedbits_.Mutable(GetArenaForAllocation());
 }
 inline std::string* Character_ClientMoveResponsePacked_Params::release_packedbits() {
-  // @@protoc_insertion_point(field_release:unrealpb.Character_ClientMoveResponsePacked_Params.PackedBits)
+  // @@protoc_insertion_point(field_release:unrealpb.Character_ClientMoveResponsePacked_Params.packedBits)
   return _impl_.packedbits_.Release();
 }
 inline void Character_ClientMoveResponsePacked_Params::set_allocated_packedbits(std::string* packedbits) {
@@ -4172,7 +4234,7 @@ inline void Character_ClientMoveResponsePacked_Params::set_allocated_packedbits(
     _impl_.packedbits_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.Character_ClientMoveResponsePacked_Params.PackedBits)
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.Character_ClientMoveResponsePacked_Params.packedBits)
 }
 
 // -------------------------------------------------------------------
