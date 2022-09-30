@@ -95,5 +95,7 @@ private:
 	void SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, uint8* DataToSend, int32 DataSize);
 	void SendDataToServer(uint32 MsgType, uint8* DataToSend, int32 DataSize);
 
+	void OnSentRPC(class AActor* Actor, FString FuncName);
+
 	UChanneldGameInstanceSubsystem* GetSubsystem();
 };

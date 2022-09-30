@@ -4,6 +4,7 @@
 #include "ChannelDataProvider.h"
 #include "GameFramework\Character.h"
 #include "ChanneldReplicatorBase.h"
+#include "GameFramework/HUD.h"
 
 class CHANNELDUE_API FChanneldPlayerControllerReplicator : public FChanneldReplicatorBase
 {
@@ -29,13 +30,55 @@ protected:
 
 private:
 
+	// [Client] Reflection pointer to set the value back to Character
+	FVector* SpawnLocationPtr;
+
 	struct ServerUpdateCameraParams
 	{
 		FVector_NetQuantize CamLoc;
 		int32 CamPitchAndYaw;
 	};
 
-	// [Client] Reflection pointer to set the value back to Character
-	FVector* SpawnLocationPtr;
+	struct ClientSetHUDParams
+	{
+		TSubclassOf<AHUD> NewHUDClass;
+	};
+
+	struct ClientSetViewTargetParams
+	{
+		AActor* A;
+		FViewTargetTransitionParams TransitionParams;
+	};
+
+	struct ClientEnableNetworkVoiceParams
+	{
+		bool bEnable;
+	};
+
+	struct ClientCapBandwidthParams
+	{
+		int32 Cap;
+	};
+
+	struct ClientRestartParams
+	{
+		APawn* Pawn;
+	};
+
+	struct ClientSetCameraModeParams
+	{
+		FName NewCamMode;
+	};
+
+	struct ClientSetRotationParams
+	{
+		FRotator NewRotation;
+		bool bResetCamera;
+	};
+
+	struct ClientRetryClientRestartParams
+	{
+		APawn* Pawn;
+	};
 
 };

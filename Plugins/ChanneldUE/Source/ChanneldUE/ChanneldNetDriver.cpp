@@ -160,7 +160,6 @@ UChanneldGameInstanceSubsystem* UChanneldNetDriver::GetSubsystem()
 	}
 	return nullptr;
 }
-
 void UChanneldNetDriver::PostInitProperties()
 {
 	Super::PostInitProperties();
@@ -430,15 +429,36 @@ void UChanneldNetDriver::TickDispatch(float DeltaTime)
 
 int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 {
-	int32 Result = Super::ServerReplicateActors(DeltaSeconds);
-	//UE_LOG(LogChanneld, Verbose, TEXT("Super::ServerReplicateActors replicated %d actors"), Result);
+	static int32 UpdatedProvidersAccumulated = 0;
+
+	int32 Result = 0;
+	if (UpdatedProvidersAccumulated < 100)
+	{
+		Super::ServerReplicateActors(DeltaSeconds);
+		if (Result > 0)	UE_LOG(LogChanneld, Verbose, TEXT("NetDriver::ServerReplicateActors replicated %d actors"), Result);
+	}
+	else
+	{
+		for (int32 i = 0; i < ClientConnections.Num(); i++)
+		{
+			UNetConnection* Connection = ClientConnections[i];
+			check(Connection);
+			if (Connection->PlayerController && Connection->PlayerController->GetViewTarget())
+			{
+				// Trigger ClientMoveResponse RPC
+				Connection->PlayerController->SendClientAdjustment();
+			}
+		}
+	}
 
 	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
 	{
 		auto Subsystem = GetSubsystem();
 		if (Subsystem && Subsystem->GetChannelDataView())
 		{
-			Result += Subsystem->GetChannelDataView()->SendAllChannelUpdates();
+			int32 UpdatedProviders = Subsystem->GetChannelDataView()->SendAllChannelUpdates();
+			UpdatedProvidersAccumulated += UpdatedProviders;
+			Result += UpdatedProviders;
 		}
 	}
 	
@@ -447,32 +467,32 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 
 void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject /*= nullptr*/)
 {
+	UE_LOG(LogChanneld, Verbose, TEXT("Sending RPC %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
+	
 	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomRPC)
 	{
-		UE_LOG(LogChanneld, Verbose, TEXT("Send RPC %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
-
 		auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
 		if (RepComp)
 		{
 			auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters);
-			if (ParamsMsg)
+			if (ParamsMsg || Parameters == NULL)
 			{
 				auto ChanneldConn = GEngine->GetEngineSubsystem<UChanneldConnection>();
 				unrealpb::RemoteFunctionMessage RpcMsg;
 				RpcMsg.mutable_targetobj()->MergeFrom(ChanneldUtils::GetRefOfObject(Actor));
 				auto FuncName = Function->GetName();
 				RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
-				RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
+				if (ParamsMsg)
+				{
+					RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
+				}
 				uint8* Data = new uint8[RpcMsg.ByteSizeLong()];
 				if (RpcMsg.SerializeToArray(Data, RpcMsg.GetCachedSize()))
 				{
 					if (ConnToChanneld->IsClient())
 					{
 						SendDataToServer(MessageType_RPC, Data, RpcMsg.GetCachedSize());
-
-						UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
-						Metrics->AddConnTypeLabel(*Metrics->SentRPCs).Increment();
-
+						OnSentRPC(Actor, FuncName);
 						return;
 					}
 					else
@@ -481,10 +501,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 						if (NetConn)
 						{
 							SendDataToClient(MessageType_RPC, NetConn->GetConnId(), Data, RpcMsg.GetCachedSize());
-
-							UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
-							Metrics->AddConnTypeLabel(*Metrics->SentRPCs).Increment();
-
+							OnSentRPC(Actor, FuncName);
 							return;
 						}
 						else
@@ -506,6 +523,13 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 	Super::ProcessRemoteFunction(Actor, Function, Parameters, OutParms, Stack, SubObject);
 }
 
+void UChanneldNetDriver::OnSentRPC(class AActor* Actor, FString FuncName)
+{
+	UE_LOG(LogChanneld, Verbose, TEXT("Sent RPC %s::%s via channeld"), *Actor->GetName(), *FuncName);
+	UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
+	Metrics->AddConnTypeLabel(*Metrics->SentRPCs).Increment();
+}
+
 void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, TSet<FNetworkGUID>& UnmappedGuids)
 {
 	UE_LOG(LogChanneld, Verbose, TEXT("Received RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
@@ -516,9 +540,13 @@ void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, c
 	auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
 	if (RepComp)
 	{
-		void* Params = RepComp->DeserializeFunctionParams(Actor, Function, ParamsPayload);
-		if (Params || ParamsPayload.empty())
+		if (ParamsPayload.empty())
 		{
+			Actor->ProcessEvent(Function, NULL);
+		}
+		else
+		{
+			void* Params = RepComp->DeserializeFunctionParams(Actor, Function, ParamsPayload);
 			Actor->ProcessEvent(Function, Params);
 		}
 	}

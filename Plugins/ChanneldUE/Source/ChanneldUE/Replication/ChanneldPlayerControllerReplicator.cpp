@@ -10,10 +10,10 @@ FChanneldPlayerControllerReplicator::FChanneldPlayerControllerReplicator(UObject
 {
 	PC = CastChecked<APlayerController>(InTargetObj);
 	/*
+	*/
 	// Remove the registered DOREP() properties in the Character
 	TArray<FLifetimeProperty> RepProps;
 	DisableAllReplicatedPropertiesOfClass(InTargetObj->GetClass(), APlayerController::StaticClass(), EFieldIteratorFlags::ExcludeSuper, RepProps);
-	*/
 
 	FullState = new unrealpb::PlayerControllerState;
 	DeltaState = new unrealpb::PlayerControllerState;
@@ -81,6 +81,70 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 		Msg->set_campitchandyaw(TypedParams->CamPitchAndYaw);
 		return Msg;
 	}
+	else if (Func->GetFName() == FName("ClientSetHUD"))
+	{
+		ClientSetHUDParams* TypedParams = (ClientSetHUDParams*)Params;
+		auto Msg = MakeShared<unrealpb::PlayerController_ClientSetHUD_Params>();
+		if (TypedParams->NewHUDClass)
+		{
+			Msg->set_hudclassname(std::string(TCHAR_TO_UTF8(*TypedParams->NewHUDClass->GetName())));
+		}
+		return Msg;
+	}
+	else if (Func->GetFName() == FName("ClientSetViewTarget"))
+	{
+		ClientSetViewTargetParams* TypedParams = (ClientSetViewTargetParams*)Params;
+		auto Msg = MakeShared<unrealpb::PlayerController_ClientSetViewTarget_Params>();
+		Msg->mutable_actor()->MergeFrom(ChanneldUtils::GetRefOfObject(TypedParams->A));
+		Msg->set_blendtime(TypedParams->TransitionParams.BlendTime);
+		Msg->set_blendfunction(TypedParams->TransitionParams.BlendFunction);
+		Msg->set_blendexp(TypedParams->TransitionParams.BlendExp);
+		Msg->set_blockoutgoing(TypedParams->TransitionParams.bLockOutgoing);
+		return Msg;
+	}
+	else if (Func->GetFName() == FName("ClientEnableNetworkVoice"))
+	{
+		ClientEnableNetworkVoiceParams* TypedParams = (ClientEnableNetworkVoiceParams*)Params;
+		auto Msg = MakeShared<unrealpb::PlayerController_ClientEnableNetworkVoice_Params>();
+		Msg->set_benable(TypedParams->bEnable);
+		return Msg;
+	}
+	else if (Func->GetFName() == FName("ClientCapBandwidth"))
+	{
+		ClientCapBandwidthParams* TypedParams = (ClientCapBandwidthParams*)Params;
+		auto Msg = MakeShared<unrealpb::PlayerController_ClientCapBandwidth_Params>();
+		Msg->set_cap(TypedParams->Cap);
+		return Msg;
+	}
+	else if (Func->GetFName() == FName("ClientRestart"))
+	{
+		ClientRestartParams* TypedParams = (ClientRestartParams*)Params;
+		auto Msg = MakeShared<unrealpb::PlayerController_ClientRestart_Params>();
+		Msg->mutable_pawn()->MergeFrom(ChanneldUtils::GetRefOfObject(TypedParams->Pawn));
+		return Msg;
+	}
+	else if (Func->GetFName() == FName("ClientSetCameraMode"))
+	{
+		ClientSetCameraModeParams* TypedParams = (ClientSetCameraModeParams*)Params;
+		auto Msg = MakeShared<unrealpb::PlayerController_ClientSetCameraMode_Params>();
+		Msg->set_newcammode(std::string(TCHAR_TO_UTF8(*TypedParams->NewCamMode.ToString())));
+		return Msg;
+	}
+	else if (Func->GetFName() == FName("ClientSetRotation"))
+	{
+		ClientSetRotationParams* TypedParams = (ClientSetRotationParams*)Params;
+		auto Msg = MakeShared<unrealpb::PlayerController_ClientSetRotation_Params>();
+		ChanneldUtils::SetIfNotSame(Msg->mutable_newrotation(), TypedParams->NewRotation.Vector());
+		Msg->set_bresetcamera(TypedParams->bResetCamera);
+		return Msg;
+	}
+	else if (Func->GetFName() == FName("ClientRetryClientRestart"))
+	{
+		ClientRetryClientRestartParams* TypedParams = (ClientRetryClientRestartParams*)Params;
+		auto Msg = MakeShared<unrealpb::PlayerController_ClientRetryClientRestart_Params>();
+		Msg->mutable_pawn()->MergeFrom(ChanneldUtils::GetRefOfObject(TypedParams->Pawn));
+		return Msg;
+	}
 	return nullptr;
 }
 
@@ -94,6 +158,78 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 		Params->CamLoc = FVector_NetQuantize(ChanneldUtils::GetVector(Msg.camloc()));
 		Params->CamPitchAndYaw = Msg.campitchandyaw();
 
+		return &Params.Get();
+	}
+	else if (Func->GetFName() == FName("ClientSetHUD"))
+	{
+		unrealpb::PlayerController_ClientSetHUD_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		auto Params = MakeShared<ClientSetHUDParams>();
+		if (Msg.has_hudclassname())
+		{
+			Params->NewHUDClass = LoadClass<AHUD>(NULL, UTF8_TO_TCHAR(Msg.hudclassname().c_str()));
+		}
+		return &Params.Get();
+	}
+	else if (Func->GetFName() == FName("ClientSetViewTarget"))
+	{
+		unrealpb::PlayerController_ClientSetViewTarget_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		auto Params = MakeShared<ClientSetViewTargetParams>();
+		Params->A = CastChecked<AActor>(ChanneldUtils::GetObjectByRef(&Msg.actor(), PC->GetWorld()));
+		Params->TransitionParams.BlendTime = Msg.blendtime();
+		Params->TransitionParams.BlendFunction = TEnumAsByte<enum EViewTargetBlendFunction>((uint8)Msg.blendfunction());
+		Params->TransitionParams.BlendExp = Msg.blendexp();
+		Params->TransitionParams.bLockOutgoing = (uint32)Msg.blockoutgoing();
+		return &Params.Get();
+	}
+	else if (Func->GetFName() == FName("ClientEnableNetworkVoice"))
+	{
+		unrealpb::PlayerController_ClientEnableNetworkVoice_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		auto Params = MakeShared<ClientEnableNetworkVoiceParams>();
+		Params->bEnable = Msg.benable();
+		return &Params.Get();
+	}
+	else if (Func->GetFName() == FName("ClientCapBandwidth"))
+	{
+		unrealpb::PlayerController_ClientCapBandwidth_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		auto Params = MakeShared<ClientCapBandwidthParams>();
+		Params->Cap = Msg.cap();
+		return &Params.Get();
+	}
+	else if (Func->GetFName() == FName("ClientRestart"))
+	{
+		unrealpb::PlayerController_ClientRestart_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		auto Params = MakeShared<ClientRestartParams>();
+		Params->Pawn = CastChecked<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld()));
+		return &Params.Get();
+	}
+	else if (Func->GetFName() == FName("ClientSetCameraMode"))
+	{
+		unrealpb::PlayerController_ClientSetCameraMode_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		auto Params = MakeShared<ClientSetCameraModeParams>();
+		Params->NewCamMode = FName(UTF8_TO_TCHAR(Msg.newcammode().c_str()));
+		return &Params.Get();
+	}
+	else if (Func->GetFName() == FName("ClientSetRotation"))
+	{
+		unrealpb::PlayerController_ClientSetRotation_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		auto Params = MakeShared<ClientSetRotationParams>();
+		Params->NewRotation = ChanneldUtils::GetRotator(Msg.newrotation());
+		Params->bResetCamera = Msg.bresetcamera();
+		return &Params.Get();
+	}
+	else if (Func->GetFName() == FName("ClientRetryClientRestart"))
+	{
+		unrealpb::PlayerController_ClientRetryClientRestart_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		auto Params = MakeShared<ClientRetryClientRestartParams>();
+		Params->Pawn = CastChecked<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld()));
 		return &Params.Get();
 	}
 	return nullptr;
