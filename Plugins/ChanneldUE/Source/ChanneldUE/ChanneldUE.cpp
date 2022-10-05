@@ -3,11 +3,14 @@
 #include "ChanneldSettings.h"
 #include "Components/SceneComponent.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/PlayerState.h"
 #include "Replication/ChanneldReplicatorBase.h"
 #include "Replication/ChanneldCharacterReplicator.h"
 #include "Replication/ChanneldSceneComponentReplicator.h"
 #include "Replication/ChanneldReplication.h"
+#include "Replication/ChanneldControllerReplicator.h"
 #include "Replication/ChanneldPlayerControllerReplicator.h"
+#include "Replication/ChanneldPlayerStateReplicator.h"
 
 #define LOCTEXT_NAMESPACE "FChanneldUEModule"
 
@@ -23,7 +26,9 @@ void FChanneldUEModule::StartupModule()
 
 	REGISTER_REPLICATOR(FChanneldSceneComponentReplicator, USceneComponent);
 	REGISTER_REPLICATOR(FChanneldCharacterReplicator, ACharacter);
+	REGISTER_REPLICATOR(FChanneldControllerReplicator, AController);
 	REGISTER_REPLICATOR(FChanneldPlayerControllerReplicator, APlayerController);
+	REGISTER_REPLICATOR(FChanneldPlayerStateReplicator, APlayerState);
 }
 
 void FChanneldUEModule::ShutdownModule()

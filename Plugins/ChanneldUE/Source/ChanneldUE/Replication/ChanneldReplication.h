@@ -11,7 +11,7 @@ namespace ChanneldReplication
 	extern TMap<const UClass*, const FReplicatorCreateFunc> ReplicatorRegistry;
 
 	extern void RegisterReplicator(const UClass* TargetClass, const FReplicatorCreateFunc& Func);
-	extern FChanneldReplicatorBase* FindAndCreateReplicator(UObject* ReplicatedObj);
+	extern TArray<FChanneldReplicatorBase*> FindAndCreateReplicators(UObject* ReplicatedObj);
 }
 
 #define REGISTER_REPLICATOR(ReplicatorClass, TargetClass) \

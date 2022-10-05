@@ -58,6 +58,15 @@ CHANNELDUE_API extern Character_ClientMoveResponsePacked_ParamsDefaultTypeIntern
 class Character_ServerMovePacked_Params;
 struct Character_ServerMovePacked_ParamsDefaultTypeInternal;
 CHANNELDUE_API extern Character_ServerMovePacked_ParamsDefaultTypeInternal _Character_ServerMovePacked_Params_default_instance_;
+class ControllerState;
+struct ControllerStateDefaultTypeInternal;
+CHANNELDUE_API extern ControllerStateDefaultTypeInternal _ControllerState_default_instance_;
+class Controller_ClientSetLocation_Params;
+struct Controller_ClientSetLocation_ParamsDefaultTypeInternal;
+CHANNELDUE_API extern Controller_ClientSetLocation_ParamsDefaultTypeInternal _Controller_ClientSetLocation_Params_default_instance_;
+class Controller_ClientSetRotation_Params;
+struct Controller_ClientSetRotation_ParamsDefaultTypeInternal;
+CHANNELDUE_API extern Controller_ClientSetRotation_ParamsDefaultTypeInternal _Controller_ClientSetRotation_Params_default_instance_;
 class FVector;
 struct FVectorDefaultTypeInternal;
 CHANNELDUE_API extern FVectorDefaultTypeInternal _FVector_default_instance_;
@@ -82,15 +91,15 @@ CHANNELDUE_API extern PlayerController_ClientSetCameraMode_ParamsDefaultTypeInte
 class PlayerController_ClientSetHUD_Params;
 struct PlayerController_ClientSetHUD_ParamsDefaultTypeInternal;
 CHANNELDUE_API extern PlayerController_ClientSetHUD_ParamsDefaultTypeInternal _PlayerController_ClientSetHUD_Params_default_instance_;
-class PlayerController_ClientSetRotation_Params;
-struct PlayerController_ClientSetRotation_ParamsDefaultTypeInternal;
-CHANNELDUE_API extern PlayerController_ClientSetRotation_ParamsDefaultTypeInternal _PlayerController_ClientSetRotation_Params_default_instance_;
 class PlayerController_ClientSetViewTarget_Params;
 struct PlayerController_ClientSetViewTarget_ParamsDefaultTypeInternal;
 CHANNELDUE_API extern PlayerController_ClientSetViewTarget_ParamsDefaultTypeInternal _PlayerController_ClientSetViewTarget_Params_default_instance_;
 class PlayerController_ServerUpdateCamera_Params;
 struct PlayerController_ServerUpdateCamera_ParamsDefaultTypeInternal;
 CHANNELDUE_API extern PlayerController_ServerUpdateCamera_ParamsDefaultTypeInternal _PlayerController_ServerUpdateCamera_Params_default_instance_;
+class PlayerState;
+struct PlayerStateDefaultTypeInternal;
+CHANNELDUE_API extern PlayerStateDefaultTypeInternal _PlayerState_default_instance_;
 class RemoteFunctionMessage;
 struct RemoteFunctionMessageDefaultTypeInternal;
 CHANNELDUE_API extern RemoteFunctionMessageDefaultTypeInternal _RemoteFunctionMessage_default_instance_;
@@ -109,6 +118,9 @@ template<> CHANNELDUE_API ::unrealpb::BasedMovementInfo* Arena::CreateMaybeMessa
 template<> CHANNELDUE_API ::unrealpb::CharacterState* Arena::CreateMaybeMessage<::unrealpb::CharacterState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::Character_ClientMoveResponsePacked_Params* Arena::CreateMaybeMessage<::unrealpb::Character_ClientMoveResponsePacked_Params>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::Character_ServerMovePacked_Params* Arena::CreateMaybeMessage<::unrealpb::Character_ServerMovePacked_Params>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::ControllerState* Arena::CreateMaybeMessage<::unrealpb::ControllerState>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::Controller_ClientSetLocation_Params* Arena::CreateMaybeMessage<::unrealpb::Controller_ClientSetLocation_Params>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::Controller_ClientSetRotation_Params* Arena::CreateMaybeMessage<::unrealpb::Controller_ClientSetRotation_Params>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::FVector* Arena::CreateMaybeMessage<::unrealpb::FVector>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::PlayerControllerState* Arena::CreateMaybeMessage<::unrealpb::PlayerControllerState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::PlayerController_ClientCapBandwidth_Params* Arena::CreateMaybeMessage<::unrealpb::PlayerController_ClientCapBandwidth_Params>(Arena*);
@@ -117,9 +129,9 @@ template<> CHANNELDUE_API ::unrealpb::PlayerController_ClientRestart_Params* Are
 template<> CHANNELDUE_API ::unrealpb::PlayerController_ClientRetryClientRestart_Params* Arena::CreateMaybeMessage<::unrealpb::PlayerController_ClientRetryClientRestart_Params>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::PlayerController_ClientSetCameraMode_Params* Arena::CreateMaybeMessage<::unrealpb::PlayerController_ClientSetCameraMode_Params>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::PlayerController_ClientSetHUD_Params* Arena::CreateMaybeMessage<::unrealpb::PlayerController_ClientSetHUD_Params>(Arena*);
-template<> CHANNELDUE_API ::unrealpb::PlayerController_ClientSetRotation_Params* Arena::CreateMaybeMessage<::unrealpb::PlayerController_ClientSetRotation_Params>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::PlayerController_ClientSetViewTarget_Params* Arena::CreateMaybeMessage<::unrealpb::PlayerController_ClientSetViewTarget_Params>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::PlayerController_ServerUpdateCamera_Params* Arena::CreateMaybeMessage<::unrealpb::PlayerController_ServerUpdateCamera_Params>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::PlayerState* Arena::CreateMaybeMessage<::unrealpb::PlayerState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::RemoteFunctionMessage* Arena::CreateMaybeMessage<::unrealpb::RemoteFunctionMessage>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::RootMotionMontage* Arena::CreateMaybeMessage<::unrealpb::RootMotionMontage>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::SceneComponentState* Arena::CreateMaybeMessage<::unrealpb::SceneComponentState>(Arena*);
@@ -1998,6 +2010,731 @@ class CHANNELDUE_API Character_ClientMoveResponsePacked_Params final :
 };
 // -------------------------------------------------------------------
 
+class CHANNELDUE_API PlayerState final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.PlayerState) */ {
+ public:
+  inline PlayerState() : PlayerState(nullptr) {}
+  ~PlayerState() override;
+  explicit PROTOBUF_CONSTEXPR PlayerState(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  PlayerState(const PlayerState& from);
+  PlayerState(PlayerState&& from) noexcept
+    : PlayerState() {
+    *this = ::std::move(from);
+  }
+
+  inline PlayerState& operator=(const PlayerState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline PlayerState& operator=(PlayerState&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const PlayerState& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const PlayerState* internal_default_instance() {
+    return reinterpret_cast<const PlayerState*>(
+               &_PlayerState_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    9;
+
+  friend void swap(PlayerState& a, PlayerState& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(PlayerState* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(PlayerState* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  PlayerState* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<PlayerState>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const PlayerState& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const PlayerState& from) {
+    PlayerState::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(PlayerState* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.PlayerState";
+  }
+  protected:
+  explicit PlayerState(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kPlayerNameFieldNumber = 4,
+    kScoreFieldNumber = 1,
+    kPlayerIdFieldNumber = 2,
+    kPingFieldNumber = 3,
+  };
+  // optional string playerName = 4;
+  bool has_playername() const;
+  private:
+  bool _internal_has_playername() const;
+  public:
+  void clear_playername();
+  const std::string& playername() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_playername(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_playername();
+  PROTOBUF_NODISCARD std::string* release_playername();
+  void set_allocated_playername(std::string* playername);
+  private:
+  const std::string& _internal_playername() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_playername(const std::string& value);
+  std::string* _internal_mutable_playername();
+  public:
+
+  // optional float score = 1;
+  bool has_score() const;
+  private:
+  bool _internal_has_score() const;
+  public:
+  void clear_score();
+  float score() const;
+  void set_score(float value);
+  private:
+  float _internal_score() const;
+  void _internal_set_score(float value);
+  public:
+
+  // optional int32 playerId = 2;
+  bool has_playerid() const;
+  private:
+  bool _internal_has_playerid() const;
+  public:
+  void clear_playerid();
+  int32_t playerid() const;
+  void set_playerid(int32_t value);
+  private:
+  int32_t _internal_playerid() const;
+  void _internal_set_playerid(int32_t value);
+  public:
+
+  // optional uint32 ping = 3;
+  bool has_ping() const;
+  private:
+  bool _internal_has_ping() const;
+  public:
+  void clear_ping();
+  uint32_t ping() const;
+  void set_ping(uint32_t value);
+  private:
+  uint32_t _internal_ping() const;
+  void _internal_set_ping(uint32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:unrealpb.PlayerState)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr playername_;
+    float score_;
+    int32_t playerid_;
+    uint32_t ping_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API ControllerState final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.ControllerState) */ {
+ public:
+  inline ControllerState() : ControllerState(nullptr) {}
+  ~ControllerState() override;
+  explicit PROTOBUF_CONSTEXPR ControllerState(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ControllerState(const ControllerState& from);
+  ControllerState(ControllerState&& from) noexcept
+    : ControllerState() {
+    *this = ::std::move(from);
+  }
+
+  inline ControllerState& operator=(const ControllerState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ControllerState& operator=(ControllerState&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ControllerState& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ControllerState* internal_default_instance() {
+    return reinterpret_cast<const ControllerState*>(
+               &_ControllerState_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    10;
+
+  friend void swap(ControllerState& a, ControllerState& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ControllerState* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ControllerState* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ControllerState* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<ControllerState>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const ControllerState& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const ControllerState& from) {
+    ControllerState::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ControllerState* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.ControllerState";
+  }
+  protected:
+  explicit ControllerState(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kPlayerStateFieldNumber = 1,
+    kPawnFieldNumber = 2,
+  };
+  // .unrealpb.UnrealObjectRef playerState = 1;
+  bool has_playerstate() const;
+  private:
+  bool _internal_has_playerstate() const;
+  public:
+  void clear_playerstate();
+  const ::unrealpb::UnrealObjectRef& playerstate() const;
+  PROTOBUF_NODISCARD ::unrealpb::UnrealObjectRef* release_playerstate();
+  ::unrealpb::UnrealObjectRef* mutable_playerstate();
+  void set_allocated_playerstate(::unrealpb::UnrealObjectRef* playerstate);
+  private:
+  const ::unrealpb::UnrealObjectRef& _internal_playerstate() const;
+  ::unrealpb::UnrealObjectRef* _internal_mutable_playerstate();
+  public:
+  void unsafe_arena_set_allocated_playerstate(
+      ::unrealpb::UnrealObjectRef* playerstate);
+  ::unrealpb::UnrealObjectRef* unsafe_arena_release_playerstate();
+
+  // .unrealpb.UnrealObjectRef pawn = 2;
+  bool has_pawn() const;
+  private:
+  bool _internal_has_pawn() const;
+  public:
+  void clear_pawn();
+  const ::unrealpb::UnrealObjectRef& pawn() const;
+  PROTOBUF_NODISCARD ::unrealpb::UnrealObjectRef* release_pawn();
+  ::unrealpb::UnrealObjectRef* mutable_pawn();
+  void set_allocated_pawn(::unrealpb::UnrealObjectRef* pawn);
+  private:
+  const ::unrealpb::UnrealObjectRef& _internal_pawn() const;
+  ::unrealpb::UnrealObjectRef* _internal_mutable_pawn();
+  public:
+  void unsafe_arena_set_allocated_pawn(
+      ::unrealpb::UnrealObjectRef* pawn);
+  ::unrealpb::UnrealObjectRef* unsafe_arena_release_pawn();
+
+  // @@protoc_insertion_point(class_scope:unrealpb.ControllerState)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::unrealpb::UnrealObjectRef* playerstate_;
+    ::unrealpb::UnrealObjectRef* pawn_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API Controller_ClientSetLocation_Params final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.Controller_ClientSetLocation_Params) */ {
+ public:
+  inline Controller_ClientSetLocation_Params() : Controller_ClientSetLocation_Params(nullptr) {}
+  ~Controller_ClientSetLocation_Params() override;
+  explicit PROTOBUF_CONSTEXPR Controller_ClientSetLocation_Params(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  Controller_ClientSetLocation_Params(const Controller_ClientSetLocation_Params& from);
+  Controller_ClientSetLocation_Params(Controller_ClientSetLocation_Params&& from) noexcept
+    : Controller_ClientSetLocation_Params() {
+    *this = ::std::move(from);
+  }
+
+  inline Controller_ClientSetLocation_Params& operator=(const Controller_ClientSetLocation_Params& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Controller_ClientSetLocation_Params& operator=(Controller_ClientSetLocation_Params&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const Controller_ClientSetLocation_Params& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const Controller_ClientSetLocation_Params* internal_default_instance() {
+    return reinterpret_cast<const Controller_ClientSetLocation_Params*>(
+               &_Controller_ClientSetLocation_Params_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    11;
+
+  friend void swap(Controller_ClientSetLocation_Params& a, Controller_ClientSetLocation_Params& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Controller_ClientSetLocation_Params* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Controller_ClientSetLocation_Params* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  Controller_ClientSetLocation_Params* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<Controller_ClientSetLocation_Params>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const Controller_ClientSetLocation_Params& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const Controller_ClientSetLocation_Params& from) {
+    Controller_ClientSetLocation_Params::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(Controller_ClientSetLocation_Params* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.Controller_ClientSetLocation_Params";
+  }
+  protected:
+  explicit Controller_ClientSetLocation_Params(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kNewLocationFieldNumber = 1,
+    kNewRotationFieldNumber = 2,
+  };
+  // .unrealpb.FVector newLocation = 1;
+  bool has_newlocation() const;
+  private:
+  bool _internal_has_newlocation() const;
+  public:
+  void clear_newlocation();
+  const ::unrealpb::FVector& newlocation() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_newlocation();
+  ::unrealpb::FVector* mutable_newlocation();
+  void set_allocated_newlocation(::unrealpb::FVector* newlocation);
+  private:
+  const ::unrealpb::FVector& _internal_newlocation() const;
+  ::unrealpb::FVector* _internal_mutable_newlocation();
+  public:
+  void unsafe_arena_set_allocated_newlocation(
+      ::unrealpb::FVector* newlocation);
+  ::unrealpb::FVector* unsafe_arena_release_newlocation();
+
+  // .unrealpb.FVector newRotation = 2;
+  bool has_newrotation() const;
+  private:
+  bool _internal_has_newrotation() const;
+  public:
+  void clear_newrotation();
+  const ::unrealpb::FVector& newrotation() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_newrotation();
+  ::unrealpb::FVector* mutable_newrotation();
+  void set_allocated_newrotation(::unrealpb::FVector* newrotation);
+  private:
+  const ::unrealpb::FVector& _internal_newrotation() const;
+  ::unrealpb::FVector* _internal_mutable_newrotation();
+  public:
+  void unsafe_arena_set_allocated_newrotation(
+      ::unrealpb::FVector* newrotation);
+  ::unrealpb::FVector* unsafe_arena_release_newrotation();
+
+  // @@protoc_insertion_point(class_scope:unrealpb.Controller_ClientSetLocation_Params)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::unrealpb::FVector* newlocation_;
+    ::unrealpb::FVector* newrotation_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API Controller_ClientSetRotation_Params final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.Controller_ClientSetRotation_Params) */ {
+ public:
+  inline Controller_ClientSetRotation_Params() : Controller_ClientSetRotation_Params(nullptr) {}
+  ~Controller_ClientSetRotation_Params() override;
+  explicit PROTOBUF_CONSTEXPR Controller_ClientSetRotation_Params(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  Controller_ClientSetRotation_Params(const Controller_ClientSetRotation_Params& from);
+  Controller_ClientSetRotation_Params(Controller_ClientSetRotation_Params&& from) noexcept
+    : Controller_ClientSetRotation_Params() {
+    *this = ::std::move(from);
+  }
+
+  inline Controller_ClientSetRotation_Params& operator=(const Controller_ClientSetRotation_Params& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Controller_ClientSetRotation_Params& operator=(Controller_ClientSetRotation_Params&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const Controller_ClientSetRotation_Params& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const Controller_ClientSetRotation_Params* internal_default_instance() {
+    return reinterpret_cast<const Controller_ClientSetRotation_Params*>(
+               &_Controller_ClientSetRotation_Params_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    12;
+
+  friend void swap(Controller_ClientSetRotation_Params& a, Controller_ClientSetRotation_Params& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Controller_ClientSetRotation_Params* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Controller_ClientSetRotation_Params* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  Controller_ClientSetRotation_Params* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<Controller_ClientSetRotation_Params>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const Controller_ClientSetRotation_Params& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const Controller_ClientSetRotation_Params& from) {
+    Controller_ClientSetRotation_Params::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(Controller_ClientSetRotation_Params* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.Controller_ClientSetRotation_Params";
+  }
+  protected:
+  explicit Controller_ClientSetRotation_Params(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kNewRotationFieldNumber = 1,
+    kBResetCameraFieldNumber = 2,
+  };
+  // .unrealpb.FVector newRotation = 1;
+  bool has_newrotation() const;
+  private:
+  bool _internal_has_newrotation() const;
+  public:
+  void clear_newrotation();
+  const ::unrealpb::FVector& newrotation() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_newrotation();
+  ::unrealpb::FVector* mutable_newrotation();
+  void set_allocated_newrotation(::unrealpb::FVector* newrotation);
+  private:
+  const ::unrealpb::FVector& _internal_newrotation() const;
+  ::unrealpb::FVector* _internal_mutable_newrotation();
+  public:
+  void unsafe_arena_set_allocated_newrotation(
+      ::unrealpb::FVector* newrotation);
+  ::unrealpb::FVector* unsafe_arena_release_newrotation();
+
+  // bool bResetCamera = 2;
+  void clear_bresetcamera();
+  bool bresetcamera() const;
+  void set_bresetcamera(bool value);
+  private:
+  bool _internal_bresetcamera() const;
+  void _internal_set_bresetcamera(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:unrealpb.Controller_ClientSetRotation_Params)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::unrealpb::FVector* newrotation_;
+    bool bresetcamera_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
 class CHANNELDUE_API PlayerControllerState final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.PlayerControllerState) */ {
  public:
@@ -2046,7 +2783,7 @@ class CHANNELDUE_API PlayerControllerState final :
                &_PlayerControllerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    13;
 
   friend void swap(PlayerControllerState& a, PlayerControllerState& b) {
     a.Swap(&b);
@@ -2224,7 +2961,7 @@ class CHANNELDUE_API PlayerController_ServerUpdateCamera_Params final :
                &_PlayerController_ServerUpdateCamera_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    10;
+    14;
 
   friend void swap(PlayerController_ServerUpdateCamera_Params& a, PlayerController_ServerUpdateCamera_Params& b) {
     a.Swap(&b);
@@ -2392,7 +3129,7 @@ class CHANNELDUE_API PlayerController_ClientSetHUD_Params final :
                &_PlayerController_ClientSetHUD_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    11;
+    15;
 
   friend void swap(PlayerController_ClientSetHUD_Params& a, PlayerController_ClientSetHUD_Params& b) {
     a.Swap(&b);
@@ -2550,7 +3287,7 @@ class CHANNELDUE_API PlayerController_ClientSetViewTarget_Params final :
                &_PlayerController_ClientSetViewTarget_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    16;
 
   friend void swap(PlayerController_ClientSetViewTarget_Params& a, PlayerController_ClientSetViewTarget_Params& b) {
     a.Swap(&b);
@@ -2751,7 +3488,7 @@ class CHANNELDUE_API PlayerController_ClientEnableNetworkVoice_Params final :
                &_PlayerController_ClientEnableNetworkVoice_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    17;
 
   friend void swap(PlayerController_ClientEnableNetworkVoice_Params& a, PlayerController_ClientEnableNetworkVoice_Params& b) {
     a.Swap(&b);
@@ -2899,7 +3636,7 @@ class CHANNELDUE_API PlayerController_ClientCapBandwidth_Params final :
                &_PlayerController_ClientCapBandwidth_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    14;
+    18;
 
   friend void swap(PlayerController_ClientCapBandwidth_Params& a, PlayerController_ClientCapBandwidth_Params& b) {
     a.Swap(&b);
@@ -3047,7 +3784,7 @@ class CHANNELDUE_API PlayerController_ClientRestart_Params final :
                &_PlayerController_ClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    19;
 
   friend void swap(PlayerController_ClientRestart_Params& a, PlayerController_ClientRestart_Params& b) {
     a.Swap(&b);
@@ -3204,7 +3941,7 @@ class CHANNELDUE_API PlayerController_ClientSetCameraMode_Params final :
                &_PlayerController_ClientSetCameraMode_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    20;
 
   friend void swap(PlayerController_ClientSetCameraMode_Params& a, PlayerController_ClientSetCameraMode_Params& b) {
     a.Swap(&b);
@@ -3309,174 +4046,6 @@ class CHANNELDUE_API PlayerController_ClientSetCameraMode_Params final :
 };
 // -------------------------------------------------------------------
 
-class CHANNELDUE_API PlayerController_ClientSetRotation_Params final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.PlayerController_ClientSetRotation_Params) */ {
- public:
-  inline PlayerController_ClientSetRotation_Params() : PlayerController_ClientSetRotation_Params(nullptr) {}
-  ~PlayerController_ClientSetRotation_Params() override;
-  explicit PROTOBUF_CONSTEXPR PlayerController_ClientSetRotation_Params(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  PlayerController_ClientSetRotation_Params(const PlayerController_ClientSetRotation_Params& from);
-  PlayerController_ClientSetRotation_Params(PlayerController_ClientSetRotation_Params&& from) noexcept
-    : PlayerController_ClientSetRotation_Params() {
-    *this = ::std::move(from);
-  }
-
-  inline PlayerController_ClientSetRotation_Params& operator=(const PlayerController_ClientSetRotation_Params& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline PlayerController_ClientSetRotation_Params& operator=(PlayerController_ClientSetRotation_Params&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetOwningArena() == from.GetOwningArena()
-  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetOwningArena() != nullptr
-  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const PlayerController_ClientSetRotation_Params& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const PlayerController_ClientSetRotation_Params* internal_default_instance() {
-    return reinterpret_cast<const PlayerController_ClientSetRotation_Params*>(
-               &_PlayerController_ClientSetRotation_Params_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    17;
-
-  friend void swap(PlayerController_ClientSetRotation_Params& a, PlayerController_ClientSetRotation_Params& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(PlayerController_ClientSetRotation_Params* other) {
-    if (other == this) return;
-  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() != nullptr &&
-        GetOwningArena() == other->GetOwningArena()) {
-   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() == other->GetOwningArena()) {
-  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(PlayerController_ClientSetRotation_Params* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  PlayerController_ClientSetRotation_Params* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<PlayerController_ClientSetRotation_Params>(arena);
-  }
-  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const PlayerController_ClientSetRotation_Params& from);
-  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const PlayerController_ClientSetRotation_Params& from) {
-    PlayerController_ClientSetRotation_Params::MergeImpl(*this, from);
-  }
-  private:
-  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
-  public:
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  uint8_t* _InternalSerialize(
-      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
-  void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(PlayerController_ClientSetRotation_Params* other);
-
-  private:
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "unrealpb.PlayerController_ClientSetRotation_Params";
-  }
-  protected:
-  explicit PlayerController_ClientSetRotation_Params(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                       bool is_message_owned = false);
-  public:
-
-  static const ClassData _class_data_;
-  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kNewRotationFieldNumber = 1,
-    kBResetCameraFieldNumber = 2,
-  };
-  // .unrealpb.FVector newRotation = 1;
-  bool has_newrotation() const;
-  private:
-  bool _internal_has_newrotation() const;
-  public:
-  void clear_newrotation();
-  const ::unrealpb::FVector& newrotation() const;
-  PROTOBUF_NODISCARD ::unrealpb::FVector* release_newrotation();
-  ::unrealpb::FVector* mutable_newrotation();
-  void set_allocated_newrotation(::unrealpb::FVector* newrotation);
-  private:
-  const ::unrealpb::FVector& _internal_newrotation() const;
-  ::unrealpb::FVector* _internal_mutable_newrotation();
-  public:
-  void unsafe_arena_set_allocated_newrotation(
-      ::unrealpb::FVector* newrotation);
-  ::unrealpb::FVector* unsafe_arena_release_newrotation();
-
-  // bool bResetCamera = 2;
-  void clear_bresetcamera();
-  bool bresetcamera() const;
-  void set_bresetcamera(bool value);
-  private:
-  bool _internal_bresetcamera() const;
-  void _internal_set_bresetcamera(bool value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:unrealpb.PlayerController_ClientSetRotation_Params)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  struct Impl_ {
-    ::unrealpb::FVector* newrotation_;
-    bool bresetcamera_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_unreal_5fcommon_2eproto;
-};
-// -------------------------------------------------------------------
-
 class CHANNELDUE_API PlayerController_ClientRetryClientRestart_Params final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.PlayerController_ClientRetryClientRestart_Params) */ {
  public:
@@ -3525,7 +4094,7 @@ class CHANNELDUE_API PlayerController_ClientRetryClientRestart_Params final :
                &_PlayerController_ClientRetryClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    21;
 
   friend void swap(PlayerController_ClientRetryClientRestart_Params& a, PlayerController_ClientRetryClientRestart_Params& b) {
     a.Swap(&b);
@@ -5561,6 +6130,644 @@ inline void Character_ClientMoveResponsePacked_Params::set_allocated_packedbits(
 
 // -------------------------------------------------------------------
 
+// PlayerState
+
+// optional float score = 1;
+inline bool PlayerState::_internal_has_score() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool PlayerState::has_score() const {
+  return _internal_has_score();
+}
+inline void PlayerState::clear_score() {
+  _impl_.score_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000002u;
+}
+inline float PlayerState::_internal_score() const {
+  return _impl_.score_;
+}
+inline float PlayerState::score() const {
+  // @@protoc_insertion_point(field_get:unrealpb.PlayerState.score)
+  return _internal_score();
+}
+inline void PlayerState::_internal_set_score(float value) {
+  _impl_._has_bits_[0] |= 0x00000002u;
+  _impl_.score_ = value;
+}
+inline void PlayerState::set_score(float value) {
+  _internal_set_score(value);
+  // @@protoc_insertion_point(field_set:unrealpb.PlayerState.score)
+}
+
+// optional int32 playerId = 2;
+inline bool PlayerState::_internal_has_playerid() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool PlayerState::has_playerid() const {
+  return _internal_has_playerid();
+}
+inline void PlayerState::clear_playerid() {
+  _impl_.playerid_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000004u;
+}
+inline int32_t PlayerState::_internal_playerid() const {
+  return _impl_.playerid_;
+}
+inline int32_t PlayerState::playerid() const {
+  // @@protoc_insertion_point(field_get:unrealpb.PlayerState.playerId)
+  return _internal_playerid();
+}
+inline void PlayerState::_internal_set_playerid(int32_t value) {
+  _impl_._has_bits_[0] |= 0x00000004u;
+  _impl_.playerid_ = value;
+}
+inline void PlayerState::set_playerid(int32_t value) {
+  _internal_set_playerid(value);
+  // @@protoc_insertion_point(field_set:unrealpb.PlayerState.playerId)
+}
+
+// optional uint32 ping = 3;
+inline bool PlayerState::_internal_has_ping() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool PlayerState::has_ping() const {
+  return _internal_has_ping();
+}
+inline void PlayerState::clear_ping() {
+  _impl_.ping_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000008u;
+}
+inline uint32_t PlayerState::_internal_ping() const {
+  return _impl_.ping_;
+}
+inline uint32_t PlayerState::ping() const {
+  // @@protoc_insertion_point(field_get:unrealpb.PlayerState.ping)
+  return _internal_ping();
+}
+inline void PlayerState::_internal_set_ping(uint32_t value) {
+  _impl_._has_bits_[0] |= 0x00000008u;
+  _impl_.ping_ = value;
+}
+inline void PlayerState::set_ping(uint32_t value) {
+  _internal_set_ping(value);
+  // @@protoc_insertion_point(field_set:unrealpb.PlayerState.ping)
+}
+
+// optional string playerName = 4;
+inline bool PlayerState::_internal_has_playername() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool PlayerState::has_playername() const {
+  return _internal_has_playername();
+}
+inline void PlayerState::clear_playername() {
+  _impl_.playername_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& PlayerState::playername() const {
+  // @@protoc_insertion_point(field_get:unrealpb.PlayerState.playerName)
+  return _internal_playername();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void PlayerState::set_playername(ArgT0&& arg0, ArgT... args) {
+ _impl_._has_bits_[0] |= 0x00000001u;
+ _impl_.playername_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:unrealpb.PlayerState.playerName)
+}
+inline std::string* PlayerState::mutable_playername() {
+  std::string* _s = _internal_mutable_playername();
+  // @@protoc_insertion_point(field_mutable:unrealpb.PlayerState.playerName)
+  return _s;
+}
+inline const std::string& PlayerState::_internal_playername() const {
+  return _impl_.playername_.Get();
+}
+inline void PlayerState::_internal_set_playername(const std::string& value) {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.playername_.Set(value, GetArenaForAllocation());
+}
+inline std::string* PlayerState::_internal_mutable_playername() {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  return _impl_.playername_.Mutable(GetArenaForAllocation());
+}
+inline std::string* PlayerState::release_playername() {
+  // @@protoc_insertion_point(field_release:unrealpb.PlayerState.playerName)
+  if (!_internal_has_playername()) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  auto* p = _impl_.playername_.Release();
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.playername_.IsDefault()) {
+    _impl_.playername_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return p;
+}
+inline void PlayerState::set_allocated_playername(std::string* playername) {
+  if (playername != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  _impl_.playername_.SetAllocated(playername, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.playername_.IsDefault()) {
+    _impl_.playername_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.PlayerState.playerName)
+}
+
+// -------------------------------------------------------------------
+
+// ControllerState
+
+// .unrealpb.UnrealObjectRef playerState = 1;
+inline bool ControllerState::_internal_has_playerstate() const {
+  return this != internal_default_instance() && _impl_.playerstate_ != nullptr;
+}
+inline bool ControllerState::has_playerstate() const {
+  return _internal_has_playerstate();
+}
+inline void ControllerState::clear_playerstate() {
+  if (GetArenaForAllocation() == nullptr && _impl_.playerstate_ != nullptr) {
+    delete _impl_.playerstate_;
+  }
+  _impl_.playerstate_ = nullptr;
+}
+inline const ::unrealpb::UnrealObjectRef& ControllerState::_internal_playerstate() const {
+  const ::unrealpb::UnrealObjectRef* p = _impl_.playerstate_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::UnrealObjectRef&>(
+      ::unrealpb::_UnrealObjectRef_default_instance_);
+}
+inline const ::unrealpb::UnrealObjectRef& ControllerState::playerstate() const {
+  // @@protoc_insertion_point(field_get:unrealpb.ControllerState.playerState)
+  return _internal_playerstate();
+}
+inline void ControllerState::unsafe_arena_set_allocated_playerstate(
+    ::unrealpb::UnrealObjectRef* playerstate) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.playerstate_);
+  }
+  _impl_.playerstate_ = playerstate;
+  if (playerstate) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.ControllerState.playerState)
+}
+inline ::unrealpb::UnrealObjectRef* ControllerState::release_playerstate() {
+  
+  ::unrealpb::UnrealObjectRef* temp = _impl_.playerstate_;
+  _impl_.playerstate_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* ControllerState::unsafe_arena_release_playerstate() {
+  // @@protoc_insertion_point(field_release:unrealpb.ControllerState.playerState)
+  
+  ::unrealpb::UnrealObjectRef* temp = _impl_.playerstate_;
+  _impl_.playerstate_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* ControllerState::_internal_mutable_playerstate() {
+  
+  if (_impl_.playerstate_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::UnrealObjectRef>(GetArenaForAllocation());
+    _impl_.playerstate_ = p;
+  }
+  return _impl_.playerstate_;
+}
+inline ::unrealpb::UnrealObjectRef* ControllerState::mutable_playerstate() {
+  ::unrealpb::UnrealObjectRef* _msg = _internal_mutable_playerstate();
+  // @@protoc_insertion_point(field_mutable:unrealpb.ControllerState.playerState)
+  return _msg;
+}
+inline void ControllerState::set_allocated_playerstate(::unrealpb::UnrealObjectRef* playerstate) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.playerstate_;
+  }
+  if (playerstate) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(playerstate);
+    if (message_arena != submessage_arena) {
+      playerstate = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, playerstate, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.playerstate_ = playerstate;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.ControllerState.playerState)
+}
+
+// .unrealpb.UnrealObjectRef pawn = 2;
+inline bool ControllerState::_internal_has_pawn() const {
+  return this != internal_default_instance() && _impl_.pawn_ != nullptr;
+}
+inline bool ControllerState::has_pawn() const {
+  return _internal_has_pawn();
+}
+inline void ControllerState::clear_pawn() {
+  if (GetArenaForAllocation() == nullptr && _impl_.pawn_ != nullptr) {
+    delete _impl_.pawn_;
+  }
+  _impl_.pawn_ = nullptr;
+}
+inline const ::unrealpb::UnrealObjectRef& ControllerState::_internal_pawn() const {
+  const ::unrealpb::UnrealObjectRef* p = _impl_.pawn_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::UnrealObjectRef&>(
+      ::unrealpb::_UnrealObjectRef_default_instance_);
+}
+inline const ::unrealpb::UnrealObjectRef& ControllerState::pawn() const {
+  // @@protoc_insertion_point(field_get:unrealpb.ControllerState.pawn)
+  return _internal_pawn();
+}
+inline void ControllerState::unsafe_arena_set_allocated_pawn(
+    ::unrealpb::UnrealObjectRef* pawn) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.pawn_);
+  }
+  _impl_.pawn_ = pawn;
+  if (pawn) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.ControllerState.pawn)
+}
+inline ::unrealpb::UnrealObjectRef* ControllerState::release_pawn() {
+  
+  ::unrealpb::UnrealObjectRef* temp = _impl_.pawn_;
+  _impl_.pawn_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* ControllerState::unsafe_arena_release_pawn() {
+  // @@protoc_insertion_point(field_release:unrealpb.ControllerState.pawn)
+  
+  ::unrealpb::UnrealObjectRef* temp = _impl_.pawn_;
+  _impl_.pawn_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* ControllerState::_internal_mutable_pawn() {
+  
+  if (_impl_.pawn_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::UnrealObjectRef>(GetArenaForAllocation());
+    _impl_.pawn_ = p;
+  }
+  return _impl_.pawn_;
+}
+inline ::unrealpb::UnrealObjectRef* ControllerState::mutable_pawn() {
+  ::unrealpb::UnrealObjectRef* _msg = _internal_mutable_pawn();
+  // @@protoc_insertion_point(field_mutable:unrealpb.ControllerState.pawn)
+  return _msg;
+}
+inline void ControllerState::set_allocated_pawn(::unrealpb::UnrealObjectRef* pawn) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.pawn_;
+  }
+  if (pawn) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(pawn);
+    if (message_arena != submessage_arena) {
+      pawn = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, pawn, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.pawn_ = pawn;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.ControllerState.pawn)
+}
+
+// -------------------------------------------------------------------
+
+// Controller_ClientSetLocation_Params
+
+// .unrealpb.FVector newLocation = 1;
+inline bool Controller_ClientSetLocation_Params::_internal_has_newlocation() const {
+  return this != internal_default_instance() && _impl_.newlocation_ != nullptr;
+}
+inline bool Controller_ClientSetLocation_Params::has_newlocation() const {
+  return _internal_has_newlocation();
+}
+inline void Controller_ClientSetLocation_Params::clear_newlocation() {
+  if (GetArenaForAllocation() == nullptr && _impl_.newlocation_ != nullptr) {
+    delete _impl_.newlocation_;
+  }
+  _impl_.newlocation_ = nullptr;
+}
+inline const ::unrealpb::FVector& Controller_ClientSetLocation_Params::_internal_newlocation() const {
+  const ::unrealpb::FVector* p = _impl_.newlocation_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
+}
+inline const ::unrealpb::FVector& Controller_ClientSetLocation_Params::newlocation() const {
+  // @@protoc_insertion_point(field_get:unrealpb.Controller_ClientSetLocation_Params.newLocation)
+  return _internal_newlocation();
+}
+inline void Controller_ClientSetLocation_Params::unsafe_arena_set_allocated_newlocation(
+    ::unrealpb::FVector* newlocation) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.newlocation_);
+  }
+  _impl_.newlocation_ = newlocation;
+  if (newlocation) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.Controller_ClientSetLocation_Params.newLocation)
+}
+inline ::unrealpb::FVector* Controller_ClientSetLocation_Params::release_newlocation() {
+  
+  ::unrealpb::FVector* temp = _impl_.newlocation_;
+  _impl_.newlocation_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FVector* Controller_ClientSetLocation_Params::unsafe_arena_release_newlocation() {
+  // @@protoc_insertion_point(field_release:unrealpb.Controller_ClientSetLocation_Params.newLocation)
+  
+  ::unrealpb::FVector* temp = _impl_.newlocation_;
+  _impl_.newlocation_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FVector* Controller_ClientSetLocation_Params::_internal_mutable_newlocation() {
+  
+  if (_impl_.newlocation_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
+    _impl_.newlocation_ = p;
+  }
+  return _impl_.newlocation_;
+}
+inline ::unrealpb::FVector* Controller_ClientSetLocation_Params::mutable_newlocation() {
+  ::unrealpb::FVector* _msg = _internal_mutable_newlocation();
+  // @@protoc_insertion_point(field_mutable:unrealpb.Controller_ClientSetLocation_Params.newLocation)
+  return _msg;
+}
+inline void Controller_ClientSetLocation_Params::set_allocated_newlocation(::unrealpb::FVector* newlocation) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.newlocation_;
+  }
+  if (newlocation) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(newlocation);
+    if (message_arena != submessage_arena) {
+      newlocation = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, newlocation, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.newlocation_ = newlocation;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.Controller_ClientSetLocation_Params.newLocation)
+}
+
+// .unrealpb.FVector newRotation = 2;
+inline bool Controller_ClientSetLocation_Params::_internal_has_newrotation() const {
+  return this != internal_default_instance() && _impl_.newrotation_ != nullptr;
+}
+inline bool Controller_ClientSetLocation_Params::has_newrotation() const {
+  return _internal_has_newrotation();
+}
+inline void Controller_ClientSetLocation_Params::clear_newrotation() {
+  if (GetArenaForAllocation() == nullptr && _impl_.newrotation_ != nullptr) {
+    delete _impl_.newrotation_;
+  }
+  _impl_.newrotation_ = nullptr;
+}
+inline const ::unrealpb::FVector& Controller_ClientSetLocation_Params::_internal_newrotation() const {
+  const ::unrealpb::FVector* p = _impl_.newrotation_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
+}
+inline const ::unrealpb::FVector& Controller_ClientSetLocation_Params::newrotation() const {
+  // @@protoc_insertion_point(field_get:unrealpb.Controller_ClientSetLocation_Params.newRotation)
+  return _internal_newrotation();
+}
+inline void Controller_ClientSetLocation_Params::unsafe_arena_set_allocated_newrotation(
+    ::unrealpb::FVector* newrotation) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.newrotation_);
+  }
+  _impl_.newrotation_ = newrotation;
+  if (newrotation) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.Controller_ClientSetLocation_Params.newRotation)
+}
+inline ::unrealpb::FVector* Controller_ClientSetLocation_Params::release_newrotation() {
+  
+  ::unrealpb::FVector* temp = _impl_.newrotation_;
+  _impl_.newrotation_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FVector* Controller_ClientSetLocation_Params::unsafe_arena_release_newrotation() {
+  // @@protoc_insertion_point(field_release:unrealpb.Controller_ClientSetLocation_Params.newRotation)
+  
+  ::unrealpb::FVector* temp = _impl_.newrotation_;
+  _impl_.newrotation_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FVector* Controller_ClientSetLocation_Params::_internal_mutable_newrotation() {
+  
+  if (_impl_.newrotation_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
+    _impl_.newrotation_ = p;
+  }
+  return _impl_.newrotation_;
+}
+inline ::unrealpb::FVector* Controller_ClientSetLocation_Params::mutable_newrotation() {
+  ::unrealpb::FVector* _msg = _internal_mutable_newrotation();
+  // @@protoc_insertion_point(field_mutable:unrealpb.Controller_ClientSetLocation_Params.newRotation)
+  return _msg;
+}
+inline void Controller_ClientSetLocation_Params::set_allocated_newrotation(::unrealpb::FVector* newrotation) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.newrotation_;
+  }
+  if (newrotation) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(newrotation);
+    if (message_arena != submessage_arena) {
+      newrotation = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, newrotation, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.newrotation_ = newrotation;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.Controller_ClientSetLocation_Params.newRotation)
+}
+
+// -------------------------------------------------------------------
+
+// Controller_ClientSetRotation_Params
+
+// .unrealpb.FVector newRotation = 1;
+inline bool Controller_ClientSetRotation_Params::_internal_has_newrotation() const {
+  return this != internal_default_instance() && _impl_.newrotation_ != nullptr;
+}
+inline bool Controller_ClientSetRotation_Params::has_newrotation() const {
+  return _internal_has_newrotation();
+}
+inline void Controller_ClientSetRotation_Params::clear_newrotation() {
+  if (GetArenaForAllocation() == nullptr && _impl_.newrotation_ != nullptr) {
+    delete _impl_.newrotation_;
+  }
+  _impl_.newrotation_ = nullptr;
+}
+inline const ::unrealpb::FVector& Controller_ClientSetRotation_Params::_internal_newrotation() const {
+  const ::unrealpb::FVector* p = _impl_.newrotation_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
+}
+inline const ::unrealpb::FVector& Controller_ClientSetRotation_Params::newrotation() const {
+  // @@protoc_insertion_point(field_get:unrealpb.Controller_ClientSetRotation_Params.newRotation)
+  return _internal_newrotation();
+}
+inline void Controller_ClientSetRotation_Params::unsafe_arena_set_allocated_newrotation(
+    ::unrealpb::FVector* newrotation) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.newrotation_);
+  }
+  _impl_.newrotation_ = newrotation;
+  if (newrotation) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.Controller_ClientSetRotation_Params.newRotation)
+}
+inline ::unrealpb::FVector* Controller_ClientSetRotation_Params::release_newrotation() {
+  
+  ::unrealpb::FVector* temp = _impl_.newrotation_;
+  _impl_.newrotation_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FVector* Controller_ClientSetRotation_Params::unsafe_arena_release_newrotation() {
+  // @@protoc_insertion_point(field_release:unrealpb.Controller_ClientSetRotation_Params.newRotation)
+  
+  ::unrealpb::FVector* temp = _impl_.newrotation_;
+  _impl_.newrotation_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FVector* Controller_ClientSetRotation_Params::_internal_mutable_newrotation() {
+  
+  if (_impl_.newrotation_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
+    _impl_.newrotation_ = p;
+  }
+  return _impl_.newrotation_;
+}
+inline ::unrealpb::FVector* Controller_ClientSetRotation_Params::mutable_newrotation() {
+  ::unrealpb::FVector* _msg = _internal_mutable_newrotation();
+  // @@protoc_insertion_point(field_mutable:unrealpb.Controller_ClientSetRotation_Params.newRotation)
+  return _msg;
+}
+inline void Controller_ClientSetRotation_Params::set_allocated_newrotation(::unrealpb::FVector* newrotation) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.newrotation_;
+  }
+  if (newrotation) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(newrotation);
+    if (message_arena != submessage_arena) {
+      newrotation = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, newrotation, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.newrotation_ = newrotation;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.Controller_ClientSetRotation_Params.newRotation)
+}
+
+// bool bResetCamera = 2;
+inline void Controller_ClientSetRotation_Params::clear_bresetcamera() {
+  _impl_.bresetcamera_ = false;
+}
+inline bool Controller_ClientSetRotation_Params::_internal_bresetcamera() const {
+  return _impl_.bresetcamera_;
+}
+inline bool Controller_ClientSetRotation_Params::bresetcamera() const {
+  // @@protoc_insertion_point(field_get:unrealpb.Controller_ClientSetRotation_Params.bResetCamera)
+  return _internal_bresetcamera();
+}
+inline void Controller_ClientSetRotation_Params::_internal_set_bresetcamera(bool value) {
+  
+  _impl_.bresetcamera_ = value;
+}
+inline void Controller_ClientSetRotation_Params::set_bresetcamera(bool value) {
+  _internal_set_bresetcamera(value);
+  // @@protoc_insertion_point(field_set:unrealpb.Controller_ClientSetRotation_Params.bResetCamera)
+}
+
+// -------------------------------------------------------------------
+
 // PlayerControllerState
 
 // optional .unrealpb.FVector targetViewRotation = 1;
@@ -6301,120 +7508,6 @@ inline void PlayerController_ClientSetCameraMode_Params::set_allocated_newcammod
 
 // -------------------------------------------------------------------
 
-// PlayerController_ClientSetRotation_Params
-
-// .unrealpb.FVector newRotation = 1;
-inline bool PlayerController_ClientSetRotation_Params::_internal_has_newrotation() const {
-  return this != internal_default_instance() && _impl_.newrotation_ != nullptr;
-}
-inline bool PlayerController_ClientSetRotation_Params::has_newrotation() const {
-  return _internal_has_newrotation();
-}
-inline void PlayerController_ClientSetRotation_Params::clear_newrotation() {
-  if (GetArenaForAllocation() == nullptr && _impl_.newrotation_ != nullptr) {
-    delete _impl_.newrotation_;
-  }
-  _impl_.newrotation_ = nullptr;
-}
-inline const ::unrealpb::FVector& PlayerController_ClientSetRotation_Params::_internal_newrotation() const {
-  const ::unrealpb::FVector* p = _impl_.newrotation_;
-  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
-      ::unrealpb::_FVector_default_instance_);
-}
-inline const ::unrealpb::FVector& PlayerController_ClientSetRotation_Params::newrotation() const {
-  // @@protoc_insertion_point(field_get:unrealpb.PlayerController_ClientSetRotation_Params.newRotation)
-  return _internal_newrotation();
-}
-inline void PlayerController_ClientSetRotation_Params::unsafe_arena_set_allocated_newrotation(
-    ::unrealpb::FVector* newrotation) {
-  if (GetArenaForAllocation() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.newrotation_);
-  }
-  _impl_.newrotation_ = newrotation;
-  if (newrotation) {
-    
-  } else {
-    
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.PlayerController_ClientSetRotation_Params.newRotation)
-}
-inline ::unrealpb::FVector* PlayerController_ClientSetRotation_Params::release_newrotation() {
-  
-  ::unrealpb::FVector* temp = _impl_.newrotation_;
-  _impl_.newrotation_ = nullptr;
-#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
-  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
-  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  if (GetArenaForAllocation() == nullptr) { delete old; }
-#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
-  if (GetArenaForAllocation() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
-  return temp;
-}
-inline ::unrealpb::FVector* PlayerController_ClientSetRotation_Params::unsafe_arena_release_newrotation() {
-  // @@protoc_insertion_point(field_release:unrealpb.PlayerController_ClientSetRotation_Params.newRotation)
-  
-  ::unrealpb::FVector* temp = _impl_.newrotation_;
-  _impl_.newrotation_ = nullptr;
-  return temp;
-}
-inline ::unrealpb::FVector* PlayerController_ClientSetRotation_Params::_internal_mutable_newrotation() {
-  
-  if (_impl_.newrotation_ == nullptr) {
-    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
-    _impl_.newrotation_ = p;
-  }
-  return _impl_.newrotation_;
-}
-inline ::unrealpb::FVector* PlayerController_ClientSetRotation_Params::mutable_newrotation() {
-  ::unrealpb::FVector* _msg = _internal_mutable_newrotation();
-  // @@protoc_insertion_point(field_mutable:unrealpb.PlayerController_ClientSetRotation_Params.newRotation)
-  return _msg;
-}
-inline void PlayerController_ClientSetRotation_Params::set_allocated_newrotation(::unrealpb::FVector* newrotation) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
-  if (message_arena == nullptr) {
-    delete _impl_.newrotation_;
-  }
-  if (newrotation) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(newrotation);
-    if (message_arena != submessage_arena) {
-      newrotation = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, newrotation, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  _impl_.newrotation_ = newrotation;
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.PlayerController_ClientSetRotation_Params.newRotation)
-}
-
-// bool bResetCamera = 2;
-inline void PlayerController_ClientSetRotation_Params::clear_bresetcamera() {
-  _impl_.bresetcamera_ = false;
-}
-inline bool PlayerController_ClientSetRotation_Params::_internal_bresetcamera() const {
-  return _impl_.bresetcamera_;
-}
-inline bool PlayerController_ClientSetRotation_Params::bresetcamera() const {
-  // @@protoc_insertion_point(field_get:unrealpb.PlayerController_ClientSetRotation_Params.bResetCamera)
-  return _internal_bresetcamera();
-}
-inline void PlayerController_ClientSetRotation_Params::_internal_set_bresetcamera(bool value) {
-  
-  _impl_.bresetcamera_ = value;
-}
-inline void PlayerController_ClientSetRotation_Params::set_bresetcamera(bool value) {
-  _internal_set_bresetcamera(value);
-  // @@protoc_insertion_point(field_set:unrealpb.PlayerController_ClientSetRotation_Params.bResetCamera)
-}
-
-// -------------------------------------------------------------------
-
 // PlayerController_ClientRetryClientRestart_Params
 
 // .unrealpb.UnrealObjectRef pawn = 1;
@@ -6510,6 +7603,12 @@ inline void PlayerController_ClientRetryClientRestart_Params::set_allocated_pawn
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

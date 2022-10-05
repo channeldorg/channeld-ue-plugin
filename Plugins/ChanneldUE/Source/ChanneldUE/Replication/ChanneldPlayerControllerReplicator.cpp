@@ -130,14 +130,6 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 		Msg->set_newcammode(std::string(TCHAR_TO_UTF8(*TypedParams->NewCamMode.ToString())));
 		return Msg;
 	}
-	else if (Func->GetFName() == FName("ClientSetRotation"))
-	{
-		ClientSetRotationParams* TypedParams = (ClientSetRotationParams*)Params;
-		auto Msg = MakeShared<unrealpb::PlayerController_ClientSetRotation_Params>();
-		ChanneldUtils::SetIfNotSame(Msg->mutable_newrotation(), TypedParams->NewRotation.Vector());
-		Msg->set_bresetcamera(TypedParams->bResetCamera);
-		return Msg;
-	}
 	else if (Func->GetFName() == FName("ClientRetryClientRestart"))
 	{
 		ClientRetryClientRestartParams* TypedParams = (ClientRetryClientRestartParams*)Params;
@@ -213,15 +205,6 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ClientSetCameraModeParams>();
 		Params->NewCamMode = FName(UTF8_TO_TCHAR(Msg.newcammode().c_str()));
-		return &Params.Get();
-	}
-	else if (Func->GetFName() == FName("ClientSetRotation"))
-	{
-		unrealpb::PlayerController_ClientSetRotation_Params Msg;
-		Msg.ParseFromString(ParamsPayload);
-		auto Params = MakeShared<ClientSetRotationParams>();
-		Params->NewRotation = ChanneldUtils::GetRotator(Msg.newrotation());
-		Params->bResetCamera = Msg.bresetcamera();
 		return &Params.Get();
 	}
 	else if (Func->GetFName() == FName("ClientRetryClientRestart"))

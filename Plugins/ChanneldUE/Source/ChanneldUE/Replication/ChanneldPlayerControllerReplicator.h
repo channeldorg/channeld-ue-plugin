@@ -70,12 +70,6 @@ private:
 		FName NewCamMode;
 	};
 
-	struct ClientSetRotationParams
-	{
-		FRotator NewRotation;
-		bool bResetCamera;
-	};
-
 	struct ClientRetryClientRestartParams
 	{
 		APawn* Pawn;

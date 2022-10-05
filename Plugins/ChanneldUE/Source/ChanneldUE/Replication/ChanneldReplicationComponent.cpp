@@ -39,10 +39,10 @@ void UChanneldReplicationComponent::InitOnce()
 	// TODO: OwnerOnly replication should use private channels
 	if (GetOwner()->GetIsReplicated() || GetOwner()->bOnlyRelevantToOwner)
 	{
-		auto Replicator = ChanneldReplication::FindAndCreateReplicator(GetOwner());
-		if (Replicator)
+		auto OwnerReplicators = ChanneldReplication::FindAndCreateReplicators(GetOwner());
+		if (OwnerReplicators.Num() > 0)
 		{
-			Replicators.Add(Replicator);
+			Replicators.Append(OwnerReplicators);
 		}
 		else
 		{
@@ -51,10 +51,10 @@ void UChanneldReplicationComponent::InitOnce()
 	}
 	for (auto RepComp : GetOwner()->GetReplicatedComponents())
 	{
-		auto Replicator = ChanneldReplication::FindAndCreateReplicator(RepComp);
-		if (Replicator)
+		auto CompReplicators = ChanneldReplication::FindAndCreateReplicators(RepComp);
+		if (CompReplicators.Num() > 0)
 		{
-			Replicators.Add(Replicator);
+			Replicators.Append(CompReplicators);
 		}
 		else
 		{
