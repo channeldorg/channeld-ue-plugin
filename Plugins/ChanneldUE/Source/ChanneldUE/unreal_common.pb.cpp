@@ -362,8 +362,25 @@ struct PlayerController_ClientRetryClientRestart_ParamsDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PlayerController_ClientRetryClientRestart_ParamsDefaultTypeInternal _PlayerController_ClientRetryClientRestart_Params_default_instance_;
+PROTOBUF_CONSTEXPR GameStateBase::GameStateBase(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_._has_bits_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_.spectatorclassname_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.gamemodeclassname_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.replicatedworldtimeseconds_)*/0
+  , /*decltype(_impl_.breplicatedhasbegunplay_)*/false} {}
+struct GameStateBaseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR GameStateBaseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~GameStateBaseDefaultTypeInternal() {}
+  union {
+    GameStateBase _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GameStateBaseDefaultTypeInternal _GameStateBase_default_instance_;
 }  // namespace unrealpb
-static ::_pb::Metadata file_level_metadata_unreal_5fcommon_2eproto[22];
+static ::_pb::Metadata file_level_metadata_unreal_5fcommon_2eproto[23];
 static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_unreal_5fcommon_2eproto = nullptr;
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_unreal_5fcommon_2eproto = nullptr;
 
@@ -603,6 +620,20 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::unrealpb::PlayerController_ClientRetryClientRestart_Params, _impl_.pawn_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::GameStateBase, _impl_._has_bits_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::GameStateBase, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::GameStateBase, _impl_.spectatorclassname_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::GameStateBase, _impl_.gamemodeclassname_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::GameStateBase, _impl_.replicatedworldtimeseconds_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::GameStateBase, _impl_.breplicatedhasbegunplay_),
+  0,
+  1,
+  2,
+  3,
 };
 static const ::_pbi::MigrationSchema schemas_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::unrealpb::FVector)},
@@ -627,6 +658,7 @@ static const ::_pbi::MigrationSchema schemas_unreal_5fcommon_2eproto[] PROTOBUF_
   { 214, -1, -1, sizeof(::unrealpb::PlayerController_ClientRestart_Params)},
   { 221, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetCameraMode_Params)},
   { 228, -1, -1, sizeof(::unrealpb::PlayerController_ClientRetryClientRestart_Params)},
+  { 235, 245, -1, sizeof(::unrealpb::GameStateBase)},
 };
 
 static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eproto[] = {
@@ -652,6 +684,7 @@ static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eprot
   &::unrealpb::_PlayerController_ClientRestart_Params_default_instance_._instance,
   &::unrealpb::_PlayerController_ClientSetCameraMode_Params_default_instance_._instance,
   &::unrealpb::_PlayerController_ClientRetryClientRestart_Params_default_instance_._instance,
+  &::unrealpb::_GameStateBase_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -745,14 +778,21 @@ const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_
   "ientSetCameraMode_Params\022\022\n\nnewCamMode\030\001"
   " \001(\t\"[\n0PlayerController_ClientRetryClie"
   "ntRestart_Params\022\'\n\004pawn\030\001 \001(\0132\031.unrealp"
-  "b.UnrealObjectRefB,Z*channeld.clewcat.co"
-  "m/channeld/pkg/unrealpbb\006proto3"
+  "b.UnrealObjectRef\"\207\002\n\rGameStateBase\022\037\n\022s"
+  "pectatorClassName\030\001 \001(\tH\000\210\001\001\022\036\n\021gameMode"
+  "ClassName\030\002 \001(\tH\001\210\001\001\022\'\n\032replicatedWorldT"
+  "imeSeconds\030\003 \001(\002H\002\210\001\001\022$\n\027bReplicatedHasB"
+  "egunPlay\030\004 \001(\010H\003\210\001\001B\025\n\023_spectatorClassNa"
+  "meB\024\n\022_gameModeClassNameB\035\n\033_replicatedW"
+  "orldTimeSecondsB\032\n\030_bReplicatedHasBegunP"
+  "layB,Z*channeld.clewcat.com/channeld/pkg"
+  "/unrealpbb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_unreal_5fcommon_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_unreal_5fcommon_2eproto = {
-    false, false, 3671, descriptor_table_protodef_unreal_5fcommon_2eproto,
+    false, false, 3937, descriptor_table_protodef_unreal_5fcommon_2eproto,
     "unreal_common.proto",
-    &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 22,
+    &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 23,
     schemas_unreal_5fcommon_2eproto, file_default_instances_unreal_5fcommon_2eproto, TableStruct_unreal_5fcommon_2eproto::offsets,
     file_level_metadata_unreal_5fcommon_2eproto, file_level_enum_descriptors_unreal_5fcommon_2eproto,
     file_level_service_descriptors_unreal_5fcommon_2eproto,
@@ -6594,6 +6634,356 @@ void PlayerController_ClientRetryClientRestart_Params::InternalSwap(PlayerContro
       file_level_metadata_unreal_5fcommon_2eproto[21]);
 }
 
+// ===================================================================
+
+class GameStateBase::_Internal {
+ public:
+  using HasBits = decltype(std::declval<GameStateBase>()._impl_._has_bits_);
+  static void set_has_spectatorclassname(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static void set_has_gamemodeclassname(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_replicatedworldtimeseconds(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static void set_has_breplicatedhasbegunplay(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+};
+
+GameStateBase::GameStateBase(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:unrealpb.GameStateBase)
+}
+GameStateBase::GameStateBase(const GameStateBase& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  GameStateBase* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_._has_bits_){from._impl_._has_bits_}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.spectatorclassname_){}
+    , decltype(_impl_.gamemodeclassname_){}
+    , decltype(_impl_.replicatedworldtimeseconds_){}
+    , decltype(_impl_.breplicatedhasbegunplay_){}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _impl_.spectatorclassname_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.spectatorclassname_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (from._internal_has_spectatorclassname()) {
+    _this->_impl_.spectatorclassname_.Set(from._internal_spectatorclassname(), 
+      _this->GetArenaForAllocation());
+  }
+  _impl_.gamemodeclassname_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.gamemodeclassname_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (from._internal_has_gamemodeclassname()) {
+    _this->_impl_.gamemodeclassname_.Set(from._internal_gamemodeclassname(), 
+      _this->GetArenaForAllocation());
+  }
+  ::memcpy(&_impl_.replicatedworldtimeseconds_, &from._impl_.replicatedworldtimeseconds_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.breplicatedhasbegunplay_) -
+    reinterpret_cast<char*>(&_impl_.replicatedworldtimeseconds_)) + sizeof(_impl_.breplicatedhasbegunplay_));
+  // @@protoc_insertion_point(copy_constructor:unrealpb.GameStateBase)
+}
+
+inline void GameStateBase::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_._has_bits_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.spectatorclassname_){}
+    , decltype(_impl_.gamemodeclassname_){}
+    , decltype(_impl_.replicatedworldtimeseconds_){0}
+    , decltype(_impl_.breplicatedhasbegunplay_){false}
+  };
+  _impl_.spectatorclassname_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.spectatorclassname_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.gamemodeclassname_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.gamemodeclassname_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+}
+
+GameStateBase::~GameStateBase() {
+  // @@protoc_insertion_point(destructor:unrealpb.GameStateBase)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void GameStateBase::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.spectatorclassname_.Destroy();
+  _impl_.gamemodeclassname_.Destroy();
+}
+
+void GameStateBase::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void GameStateBase::Clear() {
+// @@protoc_insertion_point(message_clear_start:unrealpb.GameStateBase)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      _impl_.spectatorclassname_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _impl_.gamemodeclassname_.ClearNonDefaultToEmpty();
+    }
+  }
+  if (cached_has_bits & 0x0000000cu) {
+    ::memset(&_impl_.replicatedworldtimeseconds_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&_impl_.breplicatedhasbegunplay_) -
+        reinterpret_cast<char*>(&_impl_.replicatedworldtimeseconds_)) + sizeof(_impl_.breplicatedhasbegunplay_));
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* GameStateBase::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // optional string spectatorClassName = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          auto str = _internal_mutable_spectatorclassname();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "unrealpb.GameStateBase.spectatorClassName"));
+        } else
+          goto handle_unusual;
+        continue;
+      // optional string gameModeClassName = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          auto str = _internal_mutable_gamemodeclassname();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "unrealpb.GameStateBase.gameModeClassName"));
+        } else
+          goto handle_unusual;
+        continue;
+      // optional float replicatedWorldTimeSeconds = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 29)) {
+          _Internal::set_has_replicatedworldtimeseconds(&has_bits);
+          _impl_.replicatedworldtimeseconds_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+          ptr += sizeof(float);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional bool bReplicatedHasBegunPlay = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
+          _Internal::set_has_breplicatedhasbegunplay(&has_bits);
+          _impl_.breplicatedhasbegunplay_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  _impl_._has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* GameStateBase::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.GameStateBase)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // optional string spectatorClassName = 1;
+  if (_internal_has_spectatorclassname()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_spectatorclassname().data(), static_cast<int>(this->_internal_spectatorclassname().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "unrealpb.GameStateBase.spectatorClassName");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_spectatorclassname(), target);
+  }
+
+  // optional string gameModeClassName = 2;
+  if (_internal_has_gamemodeclassname()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_gamemodeclassname().data(), static_cast<int>(this->_internal_gamemodeclassname().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "unrealpb.GameStateBase.gameModeClassName");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_gamemodeclassname(), target);
+  }
+
+  // optional float replicatedWorldTimeSeconds = 3;
+  if (_internal_has_replicatedworldtimeseconds()) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(3, this->_internal_replicatedworldtimeseconds(), target);
+  }
+
+  // optional bool bReplicatedHasBegunPlay = 4;
+  if (_internal_has_breplicatedhasbegunplay()) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(4, this->_internal_breplicatedhasbegunplay(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.GameStateBase)
+  return target;
+}
+
+size_t GameStateBase::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:unrealpb.GameStateBase)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x0000000fu) {
+    // optional string spectatorClassName = 1;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_spectatorclassname());
+    }
+
+    // optional string gameModeClassName = 2;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_gamemodeclassname());
+    }
+
+    // optional float replicatedWorldTimeSeconds = 3;
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 + 4;
+    }
+
+    // optional bool bReplicatedHasBegunPlay = 4;
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 + 1;
+    }
+
+  }
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData GameStateBase::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    GameStateBase::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GameStateBase::GetClassData() const { return &_class_data_; }
+
+
+void GameStateBase::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<GameStateBase*>(&to_msg);
+  auto& from = static_cast<const GameStateBase&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.GameStateBase)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (cached_has_bits & 0x0000000fu) {
+    if (cached_has_bits & 0x00000001u) {
+      _this->_internal_set_spectatorclassname(from._internal_spectatorclassname());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _this->_internal_set_gamemodeclassname(from._internal_gamemodeclassname());
+    }
+    if (cached_has_bits & 0x00000004u) {
+      _this->_impl_.replicatedworldtimeseconds_ = from._impl_.replicatedworldtimeseconds_;
+    }
+    if (cached_has_bits & 0x00000008u) {
+      _this->_impl_.breplicatedhasbegunplay_ = from._impl_.breplicatedhasbegunplay_;
+    }
+    _this->_impl_._has_bits_[0] |= cached_has_bits;
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void GameStateBase::CopyFrom(const GameStateBase& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.GameStateBase)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool GameStateBase::IsInitialized() const {
+  return true;
+}
+
+void GameStateBase::InternalSwap(GameStateBase* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.spectatorclassname_, lhs_arena,
+      &other->_impl_.spectatorclassname_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.gamemodeclassname_, lhs_arena,
+      &other->_impl_.gamemodeclassname_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(GameStateBase, _impl_.breplicatedhasbegunplay_)
+      + sizeof(GameStateBase::_impl_.breplicatedhasbegunplay_)
+      - PROTOBUF_FIELD_OFFSET(GameStateBase, _impl_.replicatedworldtimeseconds_)>(
+          reinterpret_cast<char*>(&_impl_.replicatedworldtimeseconds_),
+          reinterpret_cast<char*>(&other->_impl_.replicatedworldtimeseconds_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata GameStateBase::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
+      file_level_metadata_unreal_5fcommon_2eproto[22]);
+}
+
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace unrealpb
 PROTOBUF_NAMESPACE_OPEN
@@ -6684,6 +7074,10 @@ Arena::CreateMaybeMessage< ::unrealpb::PlayerController_ClientSetCameraMode_Para
 template<> PROTOBUF_NOINLINE ::unrealpb::PlayerController_ClientRetryClientRestart_Params*
 Arena::CreateMaybeMessage< ::unrealpb::PlayerController_ClientRetryClientRestart_Params >(Arena* arena) {
   return Arena::CreateMessageInternal< ::unrealpb::PlayerController_ClientRetryClientRestart_Params >(arena);
+}
+template<> PROTOBUF_NOINLINE ::unrealpb::GameStateBase*
+Arena::CreateMaybeMessage< ::unrealpb::GameStateBase >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::unrealpb::GameStateBase >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

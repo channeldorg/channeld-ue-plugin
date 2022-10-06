@@ -4,6 +4,7 @@
 #include "Components/SceneComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
+#include "GameFramework/GameStateBase.h"
 #include "Replication/ChanneldReplicatorBase.h"
 #include "Replication/ChanneldCharacterReplicator.h"
 #include "Replication/ChanneldSceneComponentReplicator.h"
@@ -11,6 +12,7 @@
 #include "Replication/ChanneldControllerReplicator.h"
 #include "Replication/ChanneldPlayerControllerReplicator.h"
 #include "Replication/ChanneldPlayerStateReplicator.h"
+#include "Replication/ChanneldGameStateBaseReplicator.h"
 
 #define LOCTEXT_NAMESPACE "FChanneldUEModule"
 
@@ -29,6 +31,7 @@ void FChanneldUEModule::StartupModule()
 	REGISTER_REPLICATOR(FChanneldControllerReplicator, AController);
 	REGISTER_REPLICATOR(FChanneldPlayerControllerReplicator, APlayerController);
 	REGISTER_REPLICATOR(FChanneldPlayerStateReplicator, APlayerState);
+	REGISTER_REPLICATOR(FChanneldGameStateBaseReplicator, AGameStateBase);
 }
 
 void FChanneldUEModule::ShutdownModule()
