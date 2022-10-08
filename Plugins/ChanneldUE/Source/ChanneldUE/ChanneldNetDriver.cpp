@@ -73,24 +73,31 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 	}
 	else if (MsgType == MessageType_RPC)
 	{
-		unrealpb::RemoteFunctionMessage Msg;
-		if (!Msg.ParseFromString(Payload))
+		auto Msg = MakeShared<unrealpb::RemoteFunctionMessage>();
+		if (!Msg->ParseFromString(Payload))
 		{
 			UE_LOG(LogChanneld, Error, TEXT("Failed to parse RemoteFunction message"));
 			return;
 		}
 
-		AActor* Actor = Cast<AActor>(ChanneldUtils::GetObjectByRef(&Msg.targetobj(), GetWorld()));
-		if (!Actor)
-		{
-			UE_LOG(LogChanneld, Error, TEXT("Cannot find actor to call remote function '%s', NetGUID: %d"), UTF8_TO_TCHAR(Msg.functionname().c_str()), Msg.targetobj().netguid());
-			return;
-		}
-
-		TSet<FNetworkGUID> UnmappedGUID;
-		ReceivedRPC(Actor, UTF8_TO_TCHAR(Msg.functionname().c_str()), Msg.paramspayload(), UnmappedGUID);
-		// TODO: Handle unmapped GUIDs?
+		HandleCustomRPC(Msg);
+		return;
 	}
+}
+
+void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg)
+{
+	AActor* Actor = Cast<AActor>(ChanneldUtils::GetObjectByRef(&Msg->targetobj(), GetWorld()));
+	if (!Actor)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Cannot find actor to call remote function '%s', NetGUID: %d. Pushed to the next tick."), UTF8_TO_TCHAR(Msg->functionname().c_str()), Msg->targetobj().netguid());
+		UnprocessedRPCs.Add(Msg);
+		return;
+	}
+
+	TSet<FNetworkGUID> UnmappedGUID;
+	ReceivedRPC(Actor, UTF8_TO_TCHAR(Msg->functionname().c_str()), Msg->paramspayload(), UnmappedGUID);
+	// TODO: Handle unmapped GUIDs?
 }
 
 void UChanneldNetDriver::ServerHandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
@@ -425,6 +432,14 @@ void UChanneldNetDriver::TickDispatch(float DeltaTime)
 
 	if (IsValid(ConnToChanneld) && ConnToChanneld->IsConnected())
 		ConnToChanneld->TickIncoming();
+
+	int NumToProcess = UnprocessedRPCs.Num();
+	for (int i = 0; i < NumToProcess; i++)
+	{
+		TSharedPtr<unrealpb::RemoteFunctionMessage> RpcMsg = *UnprocessedRPCs.GetData();
+		UnprocessedRPCs.RemoveAt(0);
+		HandleCustomRPC(RpcMsg);
+	}
 }
 
 int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
@@ -432,12 +447,12 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 	static int32 UpdatedProvidersAccumulated = 0;
 
 	int32 Result = 0;
-	if (UpdatedProvidersAccumulated < 100)
-	{
-		Super::ServerReplicateActors(DeltaSeconds);
-		if (Result > 0)	UE_LOG(LogChanneld, Verbose, TEXT("NetDriver::ServerReplicateActors replicated %d actors"), Result);
-	}
-	else
+	//if (UpdatedProvidersAccumulated < 100)
+	//{
+	//	Result = Super::ServerReplicateActors(DeltaSeconds);
+	//	if (Result > 0)	UE_LOG(LogChanneld, Verbose, TEXT("NetDriver::ServerReplicateActors replicated %d actors"), Result);
+	//}
+	//else
 	{
 		for (int32 i = 0; i < ClientConnections.Num(); i++)
 		{
@@ -468,14 +483,19 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject /*= nullptr*/)
 {
 	UE_LOG(LogChanneld, Verbose, TEXT("Sending RPC %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
-	
+	if (Function->GetFName() == FName("ServerSetSpectatorLocation"))
+	{
+		UE_LOG(LogChanneld, Verbose, TEXT("HIT BREAK POINT!"));
+	}
+
 	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomRPC)
 	{
 		auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
 		if (RepComp)
 		{
-			auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters);
-			if (ParamsMsg || Parameters == NULL)
+			bool bSuccess = true;
+			auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters, bSuccess);
+			if (bSuccess)
 			{
 				auto ChanneldConn = GEngine->GetEngineSubsystem<UChanneldConnection>();
 				unrealpb::RemoteFunctionMessage RpcMsg;
@@ -485,6 +505,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 				if (ParamsMsg)
 				{
 					RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
+					UE_LOG(LogChanneld, Verbose, TEXT("Serialized RPC parameters to %dB: %s"), RpcMsg.paramspayload().size(), UTF8_TO_TCHAR(ParamsMsg->DebugString().c_str()));
 				}
 				uint8* Data = new uint8[RpcMsg.ByteSizeLong()];
 				if (RpcMsg.SerializeToArray(Data, RpcMsg.GetCachedSize()))
@@ -512,10 +533,18 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 				}
 				else
 				{
-					UE_LOG(LogChanneld, Warning, TEXT("Failed to serialize RPC message"));
+					UE_LOG(LogChanneld, Warning, TEXT("Failed to serialize RPC proto message: %s::%s"), *Actor->GetName(), *Function->GetName());
 				}
 				// TODO: delete Data?
 			}
+			else
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("Failed to serialize RPC function params: %s::%s"), *Actor->GetName(), *Function->GetName());
+			}
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Can't find the ReplicationComponent to serialize RPC: %s::%s"), *Actor->GetName(), *Function->GetName());
 		}
 	}
 
@@ -525,7 +554,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 
 void UChanneldNetDriver::OnSentRPC(class AActor* Actor, FString FuncName)
 {
-	UE_LOG(LogChanneld, Verbose, TEXT("Sent RPC %s::%s via channeld"), *Actor->GetName(), *FuncName);
+	//UE_LOG(LogChanneld, Verbose, TEXT("Sent RPC %s::%s via channeld"), *Actor->GetName(), *FuncName);
 	UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
 	Metrics->AddConnTypeLabel(*Metrics->SentRPCs).Increment();
 }
@@ -540,14 +569,22 @@ void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, c
 	auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
 	if (RepComp)
 	{
-		if (ParamsPayload.empty())
+		//if (ParamsPayload.empty())
+		//{
+		//	Actor->ProcessEvent(Function, NULL);
+		//}
+		//else
 		{
-			Actor->ProcessEvent(Function, NULL);
-		}
-		else
-		{
-			void* Params = RepComp->DeserializeFunctionParams(Actor, Function, ParamsPayload);
-			Actor->ProcessEvent(Function, Params);
+			bool bSuccess = true;
+			void* Params = RepComp->DeserializeFunctionParams(Actor, Function, ParamsPayload, bSuccess);
+			if (bSuccess)
+			{
+				Actor->ProcessEvent(Function, Params);
+			}
+			else
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("Failed to deserialize function parameters of RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
+			}
 		}
 	}
 }

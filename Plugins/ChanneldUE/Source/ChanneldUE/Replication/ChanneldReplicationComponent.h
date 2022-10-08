@@ -37,6 +37,7 @@ protected:
 
 public:
 
+	virtual void PostInitProperties() override;
 	virtual void InitOnce();
 	virtual void BeginPlay() override;
 	virtual void EndPlay(EEndPlayReason::Type Reason) override;
@@ -53,6 +54,6 @@ public:
 	void OnChannelDataUpdated(google::protobuf::Message* ChannelData) override;
 	//~ End IChannelDataProvider Interface.
 
-	TSharedPtr<google::protobuf::Message> SerializeFunctionParams(AActor* Actor, UFunction* Func, void* Params);
-	void* DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload);
+	TSharedPtr<google::protobuf::Message> SerializeFunctionParams(AActor* Actor, UFunction* Func, void* Params, bool& bSuccess);
+	void* DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload, bool& bSuccess);
 };

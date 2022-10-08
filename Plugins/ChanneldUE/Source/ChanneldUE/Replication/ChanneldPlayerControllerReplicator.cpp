@@ -71,8 +71,9 @@ void FChanneldPlayerControllerReplicator::OnStateChanged(const google::protobuf:
 	FullState->MergeFrom(*NewState);
 }
 
-TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::SerializeFunctionParams(UFunction* Func, void* Params)
+TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess)
 {
+	bSuccess = true;
 	if (Func->GetFName() == FName("ServerUpdateCamera"))
 	{
 		ServerUpdateCameraParams* TypedParams = (ServerUpdateCameraParams*)Params;
@@ -137,11 +138,27 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 		Msg->mutable_pawn()->MergeFrom(ChanneldUtils::GetRefOfObject(TypedParams->Pawn));
 		return Msg;
 	}
+	else if (Func->GetFName() == FName("ServerSetSpectatorLocation"))
+	{
+		ServerSetSpectatorLocationParams* TypedParams = (ServerSetSpectatorLocationParams*)Params;
+		auto Msg = MakeShared<unrealpb::PlayerController_ServerSetSpectatorLocation_Params>();
+		ChanneldUtils::SetIfNotSame(Msg->mutable_newloc(), TypedParams->NewLoc);
+		ChanneldUtils::SetIfNotSame(Msg->mutable_newrot(), TypedParams->NewRot.Vector());
+		return Msg;
+	}
+	else if (NoParamFunctions.Contains(Func->GetFName()))
+	{
+		// No need to serialize anything
+		return nullptr;
+	}
+
+	bSuccess = false;
 	return nullptr;
 }
 
-void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload)
+void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess)
 {
+	bSuccess = true;
 	if (Func->GetFName() == FName("ServerUpdateCamera"))
 	{
 		unrealpb::PlayerController_ServerUpdateCamera_Params Msg;
@@ -149,7 +166,6 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 		auto Params = MakeShared<ServerUpdateCameraParams>();
 		Params->CamLoc = FVector_NetQuantize(ChanneldUtils::GetVector(Msg.camloc()));
 		Params->CamPitchAndYaw = Msg.campitchandyaw();
-
 		return &Params.Get();
 	}
 	else if (Func->GetFName() == FName("ClientSetHUD"))
@@ -168,7 +184,8 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 		unrealpb::PlayerController_ClientSetViewTarget_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ClientSetViewTargetParams>();
-		Params->A = CastChecked<AActor>(ChanneldUtils::GetObjectByRef(&Msg.actor(), PC->GetWorld()));
+		// Parameter "A" can be null
+		Params->A = Cast<AActor>(ChanneldUtils::GetObjectByRef(&Msg.actor(), PC->GetWorld()));
 		Params->TransitionParams.BlendTime = Msg.blendtime();
 		Params->TransitionParams.BlendFunction = TEnumAsByte<enum EViewTargetBlendFunction>((uint8)Msg.blendfunction());
 		Params->TransitionParams.BlendExp = Msg.blendexp();
@@ -196,7 +213,8 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 		unrealpb::PlayerController_ClientRestart_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ClientRestartParams>();
-		Params->Pawn = CastChecked<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld()));
+		// Parameter "NewPawn" can be null
+		Params->Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld()));
 		return &Params.Get();
 	}
 	else if (Func->GetFName() == FName("ClientSetCameraMode"))
@@ -212,8 +230,25 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 		unrealpb::PlayerController_ClientRetryClientRestart_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ClientRetryClientRestartParams>();
-		Params->Pawn = CastChecked<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld()));
+		// Parameter "NewPawn" can be null
+		Params->Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld()));
 		return &Params.Get();
 	}
+	else if (Func->GetFName() == FName("ServerSetSpectatorLocation"))
+	{
+		unrealpb::PlayerController_ServerSetSpectatorLocation_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		auto Params = MakeShared<ServerSetSpectatorLocationParams>();
+		Params->NewLoc = ChanneldUtils::GetVector(Msg.newloc());
+		Params->NewRot = ChanneldUtils::GetRotator(Msg.newrot());
+		return &Params.Get();
+	}
+	else if (NoParamFunctions.Contains(Func->GetFName()))
+	{
+		// No need to deserialize anything
+		return nullptr;
+	}
+
+	bSuccess = false;
 	return nullptr;
 }

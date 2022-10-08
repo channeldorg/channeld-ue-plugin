@@ -1,14 +1,16 @@
 #include "ChanneldUE.h"
 #include "Developer/Settings/Public/ISettingsModule.h"
 #include "ChanneldSettings.h"
+#include "Components/ActorComponent.h"
 #include "Components/SceneComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/GameStateBase.h"
-#include "Replication/ChanneldReplicatorBase.h"
-#include "Replication/ChanneldCharacterReplicator.h"
-#include "Replication/ChanneldSceneComponentReplicator.h"
 #include "Replication/ChanneldReplication.h"
+#include "Replication/ChanneldReplicatorBase.h"
+#include "Replication/ChanneldActorComponentReplicator.h"
+#include "Replication/ChanneldSceneComponentReplicator.h"
+#include "Replication/ChanneldCharacterReplicator.h"
 #include "Replication/ChanneldControllerReplicator.h"
 #include "Replication/ChanneldPlayerControllerReplicator.h"
 #include "Replication/ChanneldPlayerStateReplicator.h"
@@ -26,6 +28,7 @@ void FChanneldUEModule::StartupModule()
 			GetMutableDefault<UChanneldSettings>());
 	}
 
+	REGISTER_REPLICATOR(FChanneldActorComponentReplicator, UActorComponent);
 	REGISTER_REPLICATOR(FChanneldSceneComponentReplicator, USceneComponent);
 	REGISTER_REPLICATOR(FChanneldCharacterReplicator, ACharacter);
 	REGISTER_REPLICATOR(FChanneldControllerReplicator, AController);

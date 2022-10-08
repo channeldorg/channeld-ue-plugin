@@ -10,6 +10,7 @@
 #include "ChanneldSettings.h"
 
 UChanneldReplicationComponent::UChanneldReplicationComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
@@ -25,8 +26,18 @@ void UChanneldReplicationComponent::SetStateToChannelData(const google::protobuf
 
 }
 
+void UChanneldReplicationComponent::PostInitProperties()
+{
+	Super::PostInitProperties();
+
+	InitOnce();
+}
+
 void UChanneldReplicationComponent::InitOnce()
 {
+	if (!GetOwner())
+		return;
+
 	if (bInitialized)
 		return;
 
@@ -159,7 +170,13 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 		Replicator->Tick(FApp::GetDeltaTime());
 		if (Replicator->IsStateChanged())
 		{
-			SetStateToChannelData(Replicator->GetDeltaState(), ChannelData, Replicator->GetTargetObject(), Replicator->GetNetGUID());
+			uint32 NetGUID = Replicator->GetNetGUID();
+			if (NetGUID == 0)
+			{
+				UE_LOG(LogChanneld, Log, TEXT("Replicator of %s doesn't has a NetGUID yet, skip setting channel data"), *Replicator->GetTargetObject()->GetName());
+				continue;
+			}
+			SetStateToChannelData(Replicator->GetDeltaState(), ChannelData, Replicator->GetTargetObject(), NetGUID);
 			Replicator->ClearState();
 			bUpdated = true;
 		}
@@ -200,26 +217,38 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 	}
 }
 
-TSharedPtr<google::protobuf::Message> UChanneldReplicationComponent::SerializeFunctionParams(AActor* Actor, UFunction* Func, void* Params)
+TSharedPtr<google::protobuf::Message> UChanneldReplicationComponent::SerializeFunctionParams(AActor* Actor, UFunction* Func, void* Params, bool& bSuccess)
 {
 	for (auto Replicator : Replicators)
 	{
 		if (Replicator->GetTargetObject() == Actor)
 		{
-			return Replicator->SerializeFunctionParams(Func, Params);
+			auto ParamsMsg = Replicator->SerializeFunctionParams(Func, Params, bSuccess);
+			if (bSuccess)
+			{
+				return ParamsMsg;
+			}
 		}
 	}
+
+	bSuccess = false;
 	return nullptr;
 }
 
-void* UChanneldReplicationComponent::DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload)
+void* UChanneldReplicationComponent::DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload, bool& bSuccess)
 {
 	for (auto Replicator : Replicators)
 	{
 		if (Replicator->GetTargetObject() == Actor)
 		{
-			return Replicator->DeserializeFunctionParams(Func, ParamsPayload);
+			void* Params = Replicator->DeserializeFunctionParams(Func, ParamsPayload, bSuccess);
+			if (bSuccess)
+			{
+				return Params;
+			}
 		}
 	}
+
+	bSuccess = false;
 	return nullptr;
 }

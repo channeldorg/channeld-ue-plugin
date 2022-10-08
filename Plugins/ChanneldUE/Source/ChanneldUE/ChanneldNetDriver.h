@@ -85,9 +85,13 @@ private:
 
 	TMap<ConnectionId, UChanneldNetConnection*> ClientConnectionMap;
 
+	TArray<TSharedPtr<unrealpb::RemoteFunctionMessage>> UnprocessedRPCs;
+
 	UChanneldNetConnection* OnClientConnected(ConnectionId ClientConnId);
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
 	void OnUserSpaceMessageReceived(uint32 MsgType, ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload);
+	void HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
+
 	void HandleLowLevelMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleRemoteFunctionMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);

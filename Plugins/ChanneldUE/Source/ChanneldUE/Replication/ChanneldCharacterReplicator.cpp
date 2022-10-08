@@ -254,8 +254,9 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 	}
 }
 
-TSharedPtr<google::protobuf::Message> FChanneldCharacterReplicator::SerializeFunctionParams(UFunction* Func, void* Params)
+TSharedPtr<google::protobuf::Message> FChanneldCharacterReplicator::SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess)
 {
+	bSuccess = true;
 	if (Func->GetFName() == FName("ServerMovePacked"))
 	{
 		ServerMovePackedParams* TypedParams = (ServerMovePackedParams*)Params;
@@ -275,11 +276,14 @@ TSharedPtr<google::protobuf::Message> FChanneldCharacterReplicator::SerializeFun
 		Msg->set_packedbits(Data, FMath::DivideAndRoundUp(TypedParams->PackedBits.DataBits.Num(), 8));
 		return Msg;
 	}
+
+	bSuccess = false;
 	return nullptr;
 }
 
-void* FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload)
+void* FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess)
 {
+	bSuccess = true;
 	if (Func->GetFName() == FName("ServerMovePacked"))
 	{
 		unrealpb::Character_ServerMovePacked_Params Msg;
@@ -327,5 +331,7 @@ void* FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, c
 
 		return &Params.Get();
 	}
+
+	bSuccess = false;
 	return nullptr;
 }

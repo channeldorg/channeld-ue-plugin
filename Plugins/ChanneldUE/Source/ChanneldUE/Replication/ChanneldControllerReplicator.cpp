@@ -83,8 +83,9 @@ void FChanneldControllerReplicator::OnStateChanged(const google::protobuf::Messa
 	}
 }
 
-TSharedPtr<google::protobuf::Message> FChanneldControllerReplicator::SerializeFunctionParams(UFunction* Func, void* Params)
+TSharedPtr<google::protobuf::Message> FChanneldControllerReplicator::SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess)
 {
+	bSuccess = true;
 	if (Func->GetFName() == FName("ClientSetLocation"))
 	{
 		ClientSetLocationParams* TypedParams = (ClientSetLocationParams*)Params;
@@ -102,11 +103,13 @@ TSharedPtr<google::protobuf::Message> FChanneldControllerReplicator::SerializeFu
 		return Msg;
 	}
 
+	bSuccess = false;
 	return nullptr;
 }
 
-void* FChanneldControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload)
+void* FChanneldControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess)
 {
+	bSuccess = true;
 	if (Func->GetFName() == FName("ClientSetLocation"))
 	{
 		unrealpb::Controller_ClientSetLocation_Params Msg;
@@ -126,5 +129,6 @@ void* FChanneldControllerReplicator::DeserializeFunctionParams(UFunction* Func, 
 		return &Params.Get();
 	}
 
+	bSuccess = false;
 	return nullptr;
 }

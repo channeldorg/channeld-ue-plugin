@@ -19,14 +19,22 @@ public:
 	virtual void OnStateChanged(const google::protobuf::Message* NewState) override;
 	//~End FChanneldReplicatorBase Interface
 
-	virtual TSharedPtr<google::protobuf::Message> SerializeFunctionParams(UFunction* Func, void* Params) override;
-	virtual void* DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload) override;
+	virtual TSharedPtr<google::protobuf::Message> SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess) override;
+	virtual void* DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess) override;
 
 protected:
 	TWeakObjectPtr<APlayerController> PC;
 
 	unrealpb::PlayerControllerState* FullState;
 	unrealpb::PlayerControllerState* DeltaState;
+
+	const TMap<FName, void*> NoParamFunctions
+	{
+		{FName("ClientVoiceHandshakeComplete"), nullptr},
+		{FName("ServerVerifyViewTarget"), nullptr},
+		{FName("ServerCheckClientPossessionReliable"), nullptr},
+		{FName("ServerShortTimeout"), nullptr},
+	};
 
 private:
 
@@ -73,6 +81,12 @@ private:
 	struct ClientRetryClientRestartParams
 	{
 		APawn* Pawn;
+	};
+
+	struct ServerSetSpectatorLocationParams
+	{
+		FVector NewLoc;
+		FRotator NewRot;
 	};
 
 };
