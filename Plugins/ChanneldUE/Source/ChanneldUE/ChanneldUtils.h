@@ -5,6 +5,7 @@
 #include "Engine/PackageMapClient.h"
 #include "ChanneldTypes.h"
 #include "Engine/ActorChannel.h"
+#include "ChanneldNetConnection.h"
 
 class ChanneldUtils
 {
@@ -99,23 +100,19 @@ public:
 					GEngine->NetworkRemapPath(Connection, PathName, true);
 					GuidCache->RegisterNetGUIDFromPath_Client(NewGUID, PathName, FNetworkGUID(CachedObj->outerguid()), 0, false, false);
 					UObject* NewObj = GuidCache->GetObjectFromNetGUID(NewGUID, false);
-					if (NewObj->IsA<ULevel>())
-					{
-						//Cast<ULevel>(NewObj)->OwningWorld = World;
-					}
 					UE_LOG(LogChanneld, Verbose, TEXT("[Client] Registered NetGUID %d from path: %s"), CachedObj->netguid(), *PathName);
 				}
-				/*
-				*/
+
 				if (Ref->bunchbitsnum() > 0)
 				{
 					FInBunch InBunch(World->GetNetDriver()->ServerConnection, (uint8*)Ref->netguidbunch().data(), Ref->bunchbitsnum());
 					auto PackageMap = Cast<UPackageMapClient>(World->GetNetDriver()->ServerConnection->PackageMap);
-					//InBunch.bHasPackageMapExports = true;
-					//PackageMap->ReceiveNetGUIDBunch(InBunch);
 
 					UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::OpenedLocally);
 					AActor* Actor;
+					//-----------------------------------------
+					// Copied from UActorChannel::ProcessBunch
+					//-----------------------------------------
 					if (PackageMap->SerializeNewActor(InBunch, Channel, Actor))
 					{
 						Channel->SetChannelActor(Actor, ESetChannelActorFlags::SkipReplicatorCreation);
@@ -160,17 +157,18 @@ public:
 			if (Obj->IsA<AActor>() && GuidCache->IsNetGUIDAuthority())
 			{
 				auto Actor = Cast<AActor>(Obj);
-				auto PackageMap = Actor->GetNetConnection()->PackageMap;
+				auto Connection = CastChecked<UChanneldNetConnection>(Actor->GetNetConnection());
+				auto PackageMap = CastChecked<UPackageMapClient>(Connection->PackageMap);
 
 				TSet<FNetworkGUID> OldGUIDs;
-				GuidCache->ObjectLookup.GetKeys(OldGUIDs);
+				PackageMap->NetGUIDExportCountMap.GetKeys(OldGUIDs);
 
+
+				//--------------------------------------------------
+				// Copied from UActorChannel::ReplicateActor (L3121)
+				//--------------------------------------------------
 				FOutBunch Ar(PackageMap);
 				Ar.bReliable = true;
-				/*
-				PackageMap->SerializeObject(Ar, AActor::StaticClass(), Obj, &NetGUID);
-				World->GetNetDriver()->GuidCache->ImportedNetGuids.Add(NetGUID);
-				*/
 				UActorChannel* Channel = (UActorChannel*)Actor->GetNetConnection()->CreateChannelByName(NAME_Actor, EChannelCreateFlags::OpenedLocally);
 				if (Channel)
 				{
@@ -179,11 +177,14 @@ public:
 				PackageMap->SerializeNewActor(Ar, Channel, Actor);
 				Actor->OnSerializeNewActor(Ar);
 
+
 				NetGUID = GuidCache->GetNetGUID(Obj);
 
 				TSet<FNetworkGUID> NewGUIDs;
-				GuidCache->ObjectLookup.GetKeys(NewGUIDs);
+				PackageMap->NetGUIDExportCountMap.GetKeys(NewGUIDs);
+				// Find the newly-registered NetGUIDs during SerializeNewActor()
 				NewGUIDs = NewGUIDs.Difference(OldGUIDs);
+
 				for (FNetworkGUID& NewGUID : NewGUIDs)
 				{
 					// Don't send the target NetGUID in the context
@@ -197,8 +198,6 @@ public:
 					Context->set_outerguid(NewCachedObj->OuterGUID.Value);
 					UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send registered NetGUID %d with path: %s"), NewGUID.Value, *NewCachedObj->PathName.ToString());
 				}
-				/*
-				*/
 				ObjRef.set_netguidbunch(Ar.GetData(), Ar.GetNumBytes());
 				ObjRef.set_bunchbitsnum(Ar.GetNumBits());
 			
@@ -209,9 +208,6 @@ public:
 			}
 		}
 
-		/*
-		auto NetGUID = World->GetNetDriver()->GuidCache->GetOrAssignNetGUID(Obj);
-		*/
 		ObjRef.set_netguid(NetGUID.Value);
 		return ObjRef;
 	}

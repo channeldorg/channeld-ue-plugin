@@ -2543,12 +2543,13 @@ class CHANNELDUE_API PlayerState final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kPlayerNameFieldNumber = 4,
-    kScoreFieldNumber = 1,
-    kPlayerIdFieldNumber = 2,
-    kPingFieldNumber = 3,
+    kPlayerNameFieldNumber = 5,
+    kRemovedFieldNumber = 1,
+    kScoreFieldNumber = 2,
+    kPlayerIdFieldNumber = 3,
+    kPingFieldNumber = 4,
   };
-  // optional string playerName = 4;
+  // optional string playerName = 5;
   bool has_playername() const;
   private:
   bool _internal_has_playername() const;
@@ -2566,7 +2567,16 @@ class CHANNELDUE_API PlayerState final :
   std::string* _internal_mutable_playername();
   public:
 
-  // optional float score = 1;
+  // bool removed = 1;
+  void clear_removed();
+  bool removed() const;
+  void set_removed(bool value);
+  private:
+  bool _internal_removed() const;
+  void _internal_set_removed(bool value);
+  public:
+
+  // optional float score = 2;
   bool has_score() const;
   private:
   bool _internal_has_score() const;
@@ -2579,7 +2589,7 @@ class CHANNELDUE_API PlayerState final :
   void _internal_set_score(float value);
   public:
 
-  // optional int32 playerId = 2;
+  // optional int32 playerId = 3;
   bool has_playerid() const;
   private:
   bool _internal_has_playerid() const;
@@ -2592,7 +2602,7 @@ class CHANNELDUE_API PlayerState final :
   void _internal_set_playerid(int32_t value);
   public:
 
-  // optional uint32 ping = 3;
+  // optional uint32 ping = 4;
   bool has_ping() const;
   private:
   bool _internal_has_ping() const;
@@ -2616,6 +2626,7 @@ class CHANNELDUE_API PlayerState final :
     ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr playername_;
+    bool removed_;
     float score_;
     int32_t playerid_;
     uint32_t ping_;
@@ -2746,10 +2757,11 @@ class CHANNELDUE_API ControllerState final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kPlayerStateFieldNumber = 1,
-    kPawnFieldNumber = 2,
+    kPlayerStateFieldNumber = 2,
+    kPawnFieldNumber = 3,
+    kRemovedFieldNumber = 1,
   };
-  // .unrealpb.UnrealObjectRef playerState = 1;
+  // .unrealpb.UnrealObjectRef playerState = 2;
   bool has_playerstate() const;
   private:
   bool _internal_has_playerstate() const;
@@ -2767,7 +2779,7 @@ class CHANNELDUE_API ControllerState final :
       ::unrealpb::UnrealObjectRef* playerstate);
   ::unrealpb::UnrealObjectRef* unsafe_arena_release_playerstate();
 
-  // .unrealpb.UnrealObjectRef pawn = 2;
+  // .unrealpb.UnrealObjectRef pawn = 3;
   bool has_pawn() const;
   private:
   bool _internal_has_pawn() const;
@@ -2785,6 +2797,15 @@ class CHANNELDUE_API ControllerState final :
       ::unrealpb::UnrealObjectRef* pawn);
   ::unrealpb::UnrealObjectRef* unsafe_arena_release_pawn();
 
+  // bool removed = 1;
+  void clear_removed();
+  bool removed() const;
+  void set_removed(bool value);
+  private:
+  bool _internal_removed() const;
+  void _internal_set_removed(bool value);
+  public:
+
   // @@protoc_insertion_point(class_scope:unrealpb.ControllerState)
  private:
   class _Internal;
@@ -2795,6 +2816,7 @@ class CHANNELDUE_API ControllerState final :
   struct Impl_ {
     ::unrealpb::UnrealObjectRef* playerstate_;
     ::unrealpb::UnrealObjectRef* pawn_;
+    bool removed_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -3268,10 +3290,11 @@ class CHANNELDUE_API PlayerControllerState final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kTargetViewRotationFieldNumber = 1,
-    kSpawnLocationFieldNumber = 2,
+    kTargetViewRotationFieldNumber = 2,
+    kSpawnLocationFieldNumber = 3,
+    kRemovedFieldNumber = 1,
   };
-  // optional .unrealpb.FVector targetViewRotation = 1;
+  // optional .unrealpb.FVector targetViewRotation = 2;
   bool has_targetviewrotation() const;
   private:
   bool _internal_has_targetviewrotation() const;
@@ -3289,7 +3312,7 @@ class CHANNELDUE_API PlayerControllerState final :
       ::unrealpb::FVector* targetviewrotation);
   ::unrealpb::FVector* unsafe_arena_release_targetviewrotation();
 
-  // optional .unrealpb.FVector spawnLocation = 2;
+  // optional .unrealpb.FVector spawnLocation = 3;
   bool has_spawnlocation() const;
   private:
   bool _internal_has_spawnlocation() const;
@@ -3307,6 +3330,15 @@ class CHANNELDUE_API PlayerControllerState final :
       ::unrealpb::FVector* spawnlocation);
   ::unrealpb::FVector* unsafe_arena_release_spawnlocation();
 
+  // bool removed = 1;
+  void clear_removed();
+  bool removed() const;
+  void set_removed(bool value);
+  private:
+  bool _internal_removed() const;
+  void _internal_set_removed(bool value);
+  public:
+
   // @@protoc_insertion_point(class_scope:unrealpb.PlayerControllerState)
  private:
   class _Internal;
@@ -3319,6 +3351,7 @@ class CHANNELDUE_API PlayerControllerState final :
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::unrealpb::FVector* targetviewrotation_;
     ::unrealpb::FVector* spawnlocation_;
+    bool removed_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -5075,12 +5108,13 @@ class CHANNELDUE_API GameStateBase final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kSpectatorClassNameFieldNumber = 1,
-    kGameModeClassNameFieldNumber = 2,
-    kReplicatedWorldTimeSecondsFieldNumber = 3,
-    kBReplicatedHasBegunPlayFieldNumber = 4,
+    kSpectatorClassNameFieldNumber = 2,
+    kGameModeClassNameFieldNumber = 3,
+    kRemovedFieldNumber = 1,
+    kBReplicatedHasBegunPlayFieldNumber = 5,
+    kReplicatedWorldTimeSecondsFieldNumber = 4,
   };
-  // optional string spectatorClassName = 1;
+  // optional string spectatorClassName = 2;
   bool has_spectatorclassname() const;
   private:
   bool _internal_has_spectatorclassname() const;
@@ -5098,7 +5132,7 @@ class CHANNELDUE_API GameStateBase final :
   std::string* _internal_mutable_spectatorclassname();
   public:
 
-  // optional string gameModeClassName = 2;
+  // optional string gameModeClassName = 3;
   bool has_gamemodeclassname() const;
   private:
   bool _internal_has_gamemodeclassname() const;
@@ -5116,20 +5150,16 @@ class CHANNELDUE_API GameStateBase final :
   std::string* _internal_mutable_gamemodeclassname();
   public:
 
-  // optional float replicatedWorldTimeSeconds = 3;
-  bool has_replicatedworldtimeseconds() const;
+  // bool removed = 1;
+  void clear_removed();
+  bool removed() const;
+  void set_removed(bool value);
   private:
-  bool _internal_has_replicatedworldtimeseconds() const;
-  public:
-  void clear_replicatedworldtimeseconds();
-  float replicatedworldtimeseconds() const;
-  void set_replicatedworldtimeseconds(float value);
-  private:
-  float _internal_replicatedworldtimeseconds() const;
-  void _internal_set_replicatedworldtimeseconds(float value);
+  bool _internal_removed() const;
+  void _internal_set_removed(bool value);
   public:
 
-  // optional bool bReplicatedHasBegunPlay = 4;
+  // optional bool bReplicatedHasBegunPlay = 5;
   bool has_breplicatedhasbegunplay() const;
   private:
   bool _internal_has_breplicatedhasbegunplay() const;
@@ -5140,6 +5170,19 @@ class CHANNELDUE_API GameStateBase final :
   private:
   bool _internal_breplicatedhasbegunplay() const;
   void _internal_set_breplicatedhasbegunplay(bool value);
+  public:
+
+  // optional float replicatedWorldTimeSeconds = 4;
+  bool has_replicatedworldtimeseconds() const;
+  private:
+  bool _internal_has_replicatedworldtimeseconds() const;
+  public:
+  void clear_replicatedworldtimeseconds();
+  float replicatedworldtimeseconds() const;
+  void set_replicatedworldtimeseconds(float value);
+  private:
+  float _internal_replicatedworldtimeseconds() const;
+  void _internal_set_replicatedworldtimeseconds(float value);
   public:
 
   // @@protoc_insertion_point(class_scope:unrealpb.GameStateBase)
@@ -5154,8 +5197,9 @@ class CHANNELDUE_API GameStateBase final :
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr spectatorclassname_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr gamemodeclassname_;
-    float replicatedworldtimeseconds_;
+    bool removed_;
     bool breplicatedhasbegunplay_;
+    float replicatedworldtimeseconds_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -7355,7 +7399,27 @@ inline void Character_ClientMoveResponsePacked_Params::set_allocated_packedbits(
 
 // PlayerState
 
-// optional float score = 1;
+// bool removed = 1;
+inline void PlayerState::clear_removed() {
+  _impl_.removed_ = false;
+}
+inline bool PlayerState::_internal_removed() const {
+  return _impl_.removed_;
+}
+inline bool PlayerState::removed() const {
+  // @@protoc_insertion_point(field_get:unrealpb.PlayerState.removed)
+  return _internal_removed();
+}
+inline void PlayerState::_internal_set_removed(bool value) {
+  
+  _impl_.removed_ = value;
+}
+inline void PlayerState::set_removed(bool value) {
+  _internal_set_removed(value);
+  // @@protoc_insertion_point(field_set:unrealpb.PlayerState.removed)
+}
+
+// optional float score = 2;
 inline bool PlayerState::_internal_has_score() const {
   bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
   return value;
@@ -7383,7 +7447,7 @@ inline void PlayerState::set_score(float value) {
   // @@protoc_insertion_point(field_set:unrealpb.PlayerState.score)
 }
 
-// optional int32 playerId = 2;
+// optional int32 playerId = 3;
 inline bool PlayerState::_internal_has_playerid() const {
   bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
   return value;
@@ -7411,7 +7475,7 @@ inline void PlayerState::set_playerid(int32_t value) {
   // @@protoc_insertion_point(field_set:unrealpb.PlayerState.playerId)
 }
 
-// optional uint32 ping = 3;
+// optional uint32 ping = 4;
 inline bool PlayerState::_internal_has_ping() const {
   bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
   return value;
@@ -7439,7 +7503,7 @@ inline void PlayerState::set_ping(uint32_t value) {
   // @@protoc_insertion_point(field_set:unrealpb.PlayerState.ping)
 }
 
-// optional string playerName = 4;
+// optional string playerName = 5;
 inline bool PlayerState::_internal_has_playername() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -7511,7 +7575,27 @@ inline void PlayerState::set_allocated_playername(std::string* playername) {
 
 // ControllerState
 
-// .unrealpb.UnrealObjectRef playerState = 1;
+// bool removed = 1;
+inline void ControllerState::clear_removed() {
+  _impl_.removed_ = false;
+}
+inline bool ControllerState::_internal_removed() const {
+  return _impl_.removed_;
+}
+inline bool ControllerState::removed() const {
+  // @@protoc_insertion_point(field_get:unrealpb.ControllerState.removed)
+  return _internal_removed();
+}
+inline void ControllerState::_internal_set_removed(bool value) {
+  
+  _impl_.removed_ = value;
+}
+inline void ControllerState::set_removed(bool value) {
+  _internal_set_removed(value);
+  // @@protoc_insertion_point(field_set:unrealpb.ControllerState.removed)
+}
+
+// .unrealpb.UnrealObjectRef playerState = 2;
 inline bool ControllerState::_internal_has_playerstate() const {
   return this != internal_default_instance() && _impl_.playerstate_ != nullptr;
 }
@@ -7601,7 +7685,7 @@ inline void ControllerState::set_allocated_playerstate(::unrealpb::UnrealObjectR
   // @@protoc_insertion_point(field_set_allocated:unrealpb.ControllerState.playerState)
 }
 
-// .unrealpb.UnrealObjectRef pawn = 2;
+// .unrealpb.UnrealObjectRef pawn = 3;
 inline bool ControllerState::_internal_has_pawn() const {
   return this != internal_default_instance() && _impl_.pawn_ != nullptr;
 }
@@ -7993,7 +8077,27 @@ inline void Controller_ClientSetRotation_Params::set_bresetcamera(bool value) {
 
 // PlayerControllerState
 
-// optional .unrealpb.FVector targetViewRotation = 1;
+// bool removed = 1;
+inline void PlayerControllerState::clear_removed() {
+  _impl_.removed_ = false;
+}
+inline bool PlayerControllerState::_internal_removed() const {
+  return _impl_.removed_;
+}
+inline bool PlayerControllerState::removed() const {
+  // @@protoc_insertion_point(field_get:unrealpb.PlayerControllerState.removed)
+  return _internal_removed();
+}
+inline void PlayerControllerState::_internal_set_removed(bool value) {
+  
+  _impl_.removed_ = value;
+}
+inline void PlayerControllerState::set_removed(bool value) {
+  _internal_set_removed(value);
+  // @@protoc_insertion_point(field_set:unrealpb.PlayerControllerState.removed)
+}
+
+// optional .unrealpb.FVector targetViewRotation = 2;
 inline bool PlayerControllerState::_internal_has_targetviewrotation() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.targetviewrotation_ != nullptr);
@@ -8083,7 +8187,7 @@ inline void PlayerControllerState::set_allocated_targetviewrotation(::unrealpb::
   // @@protoc_insertion_point(field_set_allocated:unrealpb.PlayerControllerState.targetViewRotation)
 }
 
-// optional .unrealpb.FVector spawnLocation = 2;
+// optional .unrealpb.FVector spawnLocation = 3;
 inline bool PlayerControllerState::_internal_has_spawnlocation() const {
   bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.spawnlocation_ != nullptr);
@@ -9113,7 +9217,27 @@ inline void PlayerController_ServerAcknowledgePossession_Params::set_allocated_p
 
 // GameStateBase
 
-// optional string spectatorClassName = 1;
+// bool removed = 1;
+inline void GameStateBase::clear_removed() {
+  _impl_.removed_ = false;
+}
+inline bool GameStateBase::_internal_removed() const {
+  return _impl_.removed_;
+}
+inline bool GameStateBase::removed() const {
+  // @@protoc_insertion_point(field_get:unrealpb.GameStateBase.removed)
+  return _internal_removed();
+}
+inline void GameStateBase::_internal_set_removed(bool value) {
+  
+  _impl_.removed_ = value;
+}
+inline void GameStateBase::set_removed(bool value) {
+  _internal_set_removed(value);
+  // @@protoc_insertion_point(field_set:unrealpb.GameStateBase.removed)
+}
+
+// optional string spectatorClassName = 2;
 inline bool GameStateBase::_internal_has_spectatorclassname() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -9181,7 +9305,7 @@ inline void GameStateBase::set_allocated_spectatorclassname(std::string* spectat
   // @@protoc_insertion_point(field_set_allocated:unrealpb.GameStateBase.spectatorClassName)
 }
 
-// optional string gameModeClassName = 2;
+// optional string gameModeClassName = 3;
 inline bool GameStateBase::_internal_has_gamemodeclassname() const {
   bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
   return value;
@@ -9249,9 +9373,9 @@ inline void GameStateBase::set_allocated_gamemodeclassname(std::string* gamemode
   // @@protoc_insertion_point(field_set_allocated:unrealpb.GameStateBase.gameModeClassName)
 }
 
-// optional float replicatedWorldTimeSeconds = 3;
+// optional float replicatedWorldTimeSeconds = 4;
 inline bool GameStateBase::_internal_has_replicatedworldtimeseconds() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool GameStateBase::has_replicatedworldtimeseconds() const {
@@ -9259,7 +9383,7 @@ inline bool GameStateBase::has_replicatedworldtimeseconds() const {
 }
 inline void GameStateBase::clear_replicatedworldtimeseconds() {
   _impl_.replicatedworldtimeseconds_ = 0;
-  _impl_._has_bits_[0] &= ~0x00000004u;
+  _impl_._has_bits_[0] &= ~0x00000008u;
 }
 inline float GameStateBase::_internal_replicatedworldtimeseconds() const {
   return _impl_.replicatedworldtimeseconds_;
@@ -9269,7 +9393,7 @@ inline float GameStateBase::replicatedworldtimeseconds() const {
   return _internal_replicatedworldtimeseconds();
 }
 inline void GameStateBase::_internal_set_replicatedworldtimeseconds(float value) {
-  _impl_._has_bits_[0] |= 0x00000004u;
+  _impl_._has_bits_[0] |= 0x00000008u;
   _impl_.replicatedworldtimeseconds_ = value;
 }
 inline void GameStateBase::set_replicatedworldtimeseconds(float value) {
@@ -9277,9 +9401,9 @@ inline void GameStateBase::set_replicatedworldtimeseconds(float value) {
   // @@protoc_insertion_point(field_set:unrealpb.GameStateBase.replicatedWorldTimeSeconds)
 }
 
-// optional bool bReplicatedHasBegunPlay = 4;
+// optional bool bReplicatedHasBegunPlay = 5;
 inline bool GameStateBase::_internal_has_breplicatedhasbegunplay() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
 inline bool GameStateBase::has_breplicatedhasbegunplay() const {
@@ -9287,7 +9411,7 @@ inline bool GameStateBase::has_breplicatedhasbegunplay() const {
 }
 inline void GameStateBase::clear_breplicatedhasbegunplay() {
   _impl_.breplicatedhasbegunplay_ = false;
-  _impl_._has_bits_[0] &= ~0x00000008u;
+  _impl_._has_bits_[0] &= ~0x00000004u;
 }
 inline bool GameStateBase::_internal_breplicatedhasbegunplay() const {
   return _impl_.breplicatedhasbegunplay_;
@@ -9297,7 +9421,7 @@ inline bool GameStateBase::breplicatedhasbegunplay() const {
   return _internal_breplicatedhasbegunplay();
 }
 inline void GameStateBase::_internal_set_breplicatedhasbegunplay(bool value) {
-  _impl_._has_bits_[0] |= 0x00000008u;
+  _impl_._has_bits_[0] |= 0x00000004u;
   _impl_.breplicatedhasbegunplay_ = value;
 }
 inline void GameStateBase::set_breplicatedhasbegunplay(bool value) {

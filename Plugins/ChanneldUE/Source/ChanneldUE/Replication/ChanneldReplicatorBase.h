@@ -35,7 +35,7 @@ public:
 protected:
     TWeakObjectPtr<UObject> TargetObject;
 
-    //FNetworkGUID NetGUID;
+    FNetworkGUID NetGUID;
 
     bool bStateChanged;
 

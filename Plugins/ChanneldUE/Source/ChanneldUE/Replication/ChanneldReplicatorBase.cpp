@@ -22,11 +22,16 @@ FChanneldReplicatorBase::FChanneldReplicatorBase(UObject* InTargetObj)
 
 uint32 FChanneldReplicatorBase::GetNetGUID()
 {
-  //  if (!NetGUID.IsValid())
-  //  {
-		//UWorld* World = TargetObject->GetWorld();
-  //      NetGUID = World->GetNetDriver()->GuidCache->GetOrAssignNetGUID(TargetObject.Get());
-  //  }
-  //  return NetGUID.Value;
-    return TargetObject->GetWorld()->GetNetDriver()->GuidCache->GetNetGUID(TargetObject.Get()).Value;
+	if (!NetGUID.IsValid())
+	{
+        if (TargetObject.IsValid())
+        {
+		    UWorld* World = TargetObject->GetWorld();
+            if (World && World->GetNetDriver())
+            {
+		        NetGUID = World->GetNetDriver()->GuidCache->GetNetGUID(TargetObject.Get());
+            }
+        }
+	}
+	return NetGUID.Value;
 }

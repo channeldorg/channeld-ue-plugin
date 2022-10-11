@@ -194,10 +194,18 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 		auto TargetObj = Replicator->GetTargetObject();
 		if (!TargetObj)
 		{
+			UE_LOG(LogChanneld, Warning, TEXT("Replicator's target object is missing (maybe already destroyed)"));
+			continue;
+		}
+		uint32 NetGUID = Replicator->GetNetGUID();
+		if (NetGUID == 0)
+		{
+			// TODO: delay the state update
+			UE_LOG(LogChanneld, Warning, TEXT("Replicator of %s doesn't have a valid NetGUID (maybe the NetDriver is not initialized yet) to find the state."), *Replicator->GetTargetObject()->GetName());
 			continue;
 		}
 		bool bIsRemoved = false;
-		auto State = GetStateFromChannelData(ChannelData, Replicator->GetTargetObject(), Replicator->GetNetGUID(), bIsRemoved);
+		auto State = GetStateFromChannelData(ChannelData, Replicator->GetTargetObject(), NetGUID, bIsRemoved);
 		if (State)
 		{
 			if (bIsRemoved)
