@@ -15,7 +15,7 @@ void UChanneldSettings::PostInitProperties()
 
 	// Command line arguments can override the INI settings
 	const TCHAR* CmdLine = FCommandLine::Get();
-	UE_LOG(LogChanneld, Log, TEXT("Parsing ChanneldSettigns from command line args: %s"), CmdLine);
+	UE_LOG(LogChanneld, Log, TEXT("Parsing ChanneldSettings from command line args: %s"), CmdLine);
 
 	if (FParse::Value(CmdLine, TEXT("channeldClientIp="), ChanneldIpForClient))
 	{

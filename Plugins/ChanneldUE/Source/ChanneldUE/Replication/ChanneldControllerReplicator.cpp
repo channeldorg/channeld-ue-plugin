@@ -107,7 +107,7 @@ TSharedPtr<google::protobuf::Message> FChanneldControllerReplicator::SerializeFu
 	return nullptr;
 }
 
-void* FChanneldControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess)
+void* FChanneldControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ClientSetLocation"))

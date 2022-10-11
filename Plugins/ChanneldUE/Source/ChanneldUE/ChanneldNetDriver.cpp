@@ -94,10 +94,22 @@ void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMess
 		UnprocessedRPCs.Add(Msg);
 		return;
 	}
+	//if (!Actor->HasActorBegunPlay())
+	//{
+	//	UE_LOG(LogChanneld, Warning, TEXT("Actor hasn't begun play to call '%s::%s', NetGUID: %d. Pushed to the next tick."), *Actor->GetName(), UTF8_TO_TCHAR(Msg->functionname().c_str()), Msg->targetobj().netguid());
+	//	UnprocessedRPCs.Add(Msg);
+	//	return;
+	//}
 
-	TSet<FNetworkGUID> UnmappedGUID;
-	ReceivedRPC(Actor, UTF8_TO_TCHAR(Msg->functionname().c_str()), Msg->paramspayload(), UnmappedGUID);
-	// TODO: Handle unmapped GUIDs?
+	//TSet<FNetworkGUID> UnmappedGUID;
+	bool bDelayRPC = false;
+	FName FuncName = UTF8_TO_TCHAR(Msg->functionname().c_str());
+	ReceivedRPC(Actor, FuncName, Msg->paramspayload(), bDelayRPC);
+	if (bDelayRPC)
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Delayed RPC '%s::%s' due to unmapped NetGUID."), *Actor->GetName(), *FuncName.ToString());
+		UnprocessedRPCs.Add(Msg);
+	}
 }
 
 void UChanneldNetDriver::ServerHandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
@@ -559,7 +571,7 @@ void UChanneldNetDriver::OnSentRPC(class AActor* Actor, FString FuncName)
 	Metrics->AddConnTypeLabel(*Metrics->SentRPCs).Increment();
 }
 
-void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, TSet<FNetworkGUID>& UnmappedGuids)
+void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDelayRPC)
 {
 	UE_LOG(LogChanneld, Verbose, TEXT("Received RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
 
@@ -569,22 +581,20 @@ void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, c
 	auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
 	if (RepComp)
 	{
-		//if (ParamsPayload.empty())
-		//{
-		//	Actor->ProcessEvent(Function, NULL);
-		//}
-		//else
+		bool bSuccess = true;
+		void* Params = RepComp->DeserializeFunctionParams(Actor, Function, ParamsPayload, bSuccess, bDelayRPC);
+		if (bDelayRPC)
 		{
-			bool bSuccess = true;
-			void* Params = RepComp->DeserializeFunctionParams(Actor, Function, ParamsPayload, bSuccess);
-			if (bSuccess)
-			{
-				Actor->ProcessEvent(Function, Params);
-			}
-			else
-			{
-				UE_LOG(LogChanneld, Warning, TEXT("Failed to deserialize function parameters of RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
-			}
+			return;
+		}
+
+		if (bSuccess)
+		{
+			Actor->ProcessEvent(Function, Params);
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to deserialize function parameters of RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
 		}
 	}
 }
@@ -600,9 +610,8 @@ void UChanneldNetDriver::HandleRemoteFunctionMessage(UChanneldConnection* Conn, 
 		return;
 	}
 
-	TSet<FNetworkGUID> UnmappedGUID;
-	ReceivedRPC(Actor, UTF8_TO_TCHAR(RpcMsg->functionname().c_str()), RpcMsg->paramspayload(), UnmappedGUID);
-	// TODO: Handle unmapped GUIDs?
+	bool bDelayRPC;
+	ReceivedRPC(Actor, UTF8_TO_TCHAR(RpcMsg->functionname().c_str()), RpcMsg->paramspayload(), bDelayRPC);
 }
 
 void UChanneldNetDriver::HandleLowLevelMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)

@@ -73,12 +73,6 @@ void UChanneldReplicationComponent::InitOnce()
 		}
 	}
 
-	UChannelDataView* View = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
-	if (View)
-	{
-		View->AddProvider(OwningChannelId, this);
-	}
-
 	bInitialized = true;
 }
 
@@ -87,6 +81,12 @@ void UChanneldReplicationComponent::BeginPlay()
 	Super::BeginPlay();
 
 	InitOnce();
+
+	UChannelDataView* View = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
+	if (View)
+	{
+		View->AddProvider(OwningChannelId, this);
+	}
 }
 
 void UChanneldReplicationComponent::EndPlay(EEndPlayReason::Type Reason)
@@ -235,13 +235,13 @@ TSharedPtr<google::protobuf::Message> UChanneldReplicationComponent::SerializeFu
 	return nullptr;
 }
 
-void* UChanneldReplicationComponent::DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload, bool& bSuccess)
+void* UChanneldReplicationComponent::DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
 {
 	for (auto Replicator : Replicators)
 	{
 		if (Replicator->GetTargetObject() == Actor)
 		{
-			void* Params = Replicator->DeserializeFunctionParams(Func, ParamsPayload, bSuccess);
+			void* Params = Replicator->DeserializeFunctionParams(Func, ParamsPayload, bSuccess, bDelayRPC);
 			if (bSuccess)
 			{
 				return Params;

@@ -281,7 +281,7 @@ TSharedPtr<google::protobuf::Message> FChanneldCharacterReplicator::SerializeFun
 	return nullptr;
 }
 
-void* FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess)
+void* FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ServerMovePacked"))

@@ -146,6 +146,13 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 		ChanneldUtils::SetIfNotSame(Msg->mutable_newrot(), TypedParams->NewRot.Vector());
 		return Msg;
 	}
+	else if (Func->GetFName() == FName("ServerAcknowledgePossession"))
+	{
+		ServerAcknowledgePossessionParams* TypedParams = (ServerAcknowledgePossessionParams*)Params;
+		auto Msg = MakeShared<unrealpb::PlayerController_ServerAcknowledgePossession_Params>();
+		Msg->mutable_pawn()->MergeFrom(ChanneldUtils::GetRefOfObject(TypedParams->Pawn));
+		return Msg;
+	}
 	else if (NoParamFunctions.Contains(Func->GetFName()))
 	{
 		// No need to serialize anything
@@ -156,7 +163,7 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	return nullptr;
 }
 
-void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess)
+void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ServerUpdateCamera"))
@@ -183,9 +190,14 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 	{
 		unrealpb::PlayerController_ClientSetViewTarget_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
+		AActor* ViewTarget = Cast<AActor>(ChanneldUtils::GetObjectByRef(&Msg.actor(), PC->GetWorld(), bDelayRPC));
+		if (bDelayRPC)
+		{
+			return nullptr;
+		}
+
 		auto Params = MakeShared<ClientSetViewTargetParams>();
-		// Parameter "A" can be null
-		Params->A = Cast<AActor>(ChanneldUtils::GetObjectByRef(&Msg.actor(), PC->GetWorld()));
+		Params->A = ViewTarget;
 		Params->TransitionParams.BlendTime = Msg.blendtime();
 		Params->TransitionParams.BlendFunction = TEnumAsByte<enum EViewTargetBlendFunction>((uint8)Msg.blendfunction());
 		Params->TransitionParams.BlendExp = Msg.blendexp();
@@ -212,9 +224,14 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 	{
 		unrealpb::PlayerController_ClientRestart_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
+		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDelayRPC));
+		if (bDelayRPC)
+		{
+			return nullptr;
+		}
+
 		auto Params = MakeShared<ClientRestartParams>();
-		// Parameter "NewPawn" can be null
-		Params->Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld()));
+		Params->Pawn = Pawn;
 		return &Params.Get();
 	}
 	else if (Func->GetFName() == FName("ClientSetCameraMode"))
@@ -229,9 +246,14 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 	{
 		unrealpb::PlayerController_ClientRetryClientRestart_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
+		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDelayRPC));
+		if (bDelayRPC)
+		{
+			return nullptr;
+		}
+
 		auto Params = MakeShared<ClientRetryClientRestartParams>();
-		// Parameter "NewPawn" can be null
-		Params->Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld()));
+		Params->Pawn = Pawn;
 		return &Params.Get();
 	}
 	else if (Func->GetFName() == FName("ServerSetSpectatorLocation"))
@@ -241,6 +263,20 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 		auto Params = MakeShared<ServerSetSpectatorLocationParams>();
 		Params->NewLoc = ChanneldUtils::GetVector(Msg.newloc());
 		Params->NewRot = ChanneldUtils::GetRotator(Msg.newrot());
+		return &Params.Get();
+	}
+	else if (Func->GetFName() == FName("ServerAcknowledgePossession"))
+	{
+		unrealpb::PlayerController_ServerAcknowledgePossession_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDelayRPC));
+		if (bDelayRPC)
+		{
+			return nullptr;
+		}
+
+		auto Params = MakeShared<ClientRetryClientRestartParams>();
+		Params->Pawn = Pawn;
 		return &Params.Get();
 	}
 	else if (NoParamFunctions.Contains(Func->GetFName()))

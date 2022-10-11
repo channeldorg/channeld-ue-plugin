@@ -4,6 +4,7 @@
 #include "unreal_common.pb.h"
 #include "Engine/PackageMapClient.h"
 #include "ChanneldTypes.h"
+#include "Engine/ActorChannel.h"
 
 class ChanneldUtils
 {
@@ -50,7 +51,13 @@ public:
 		return bNotSame;
 	}
 
-	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, const UWorld* World)
+	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World)
+	{
+		bool bUnmapped;
+		return GetObjectByRef(Ref, World, bUnmapped);
+	}
+
+	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped)
 	{
 		if (!Ref || !World)
 		{
@@ -61,20 +68,71 @@ public:
 		{
 			return nullptr;
 		}
-		//return World->GetNetDriver()->GuidCache->GetObjectFromNetGUID(NetGUID, false);
-		auto Obj = World->GetNetDriver()->GuidCache->GetObjectFromNetGUID(NetGUID, false);
+		
+		bNetGUIDUnmapped = (World->GetNetDriver() == nullptr);
+		if (bNetGUIDUnmapped)
+		{
+			return nullptr;
+		}
+		auto GuidCache = World->GetNetDriver()->GuidCache;
+		auto Obj = GuidCache->GetObjectFromNetGUID(NetGUID, false);
 		if (Obj == nullptr)
 		{
-			FString PathName;
-			if (Ref->has_pathname())
+			if (!GuidCache->IsNetGUIDAuthority())
 			{
-				PathName = UTF8_TO_TCHAR(Ref->pathname().c_str());
-				World->GetNetDriver()->GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, FNetworkGUID(Ref->outerguid()), 0, true, true);
-				Obj = World->GetNetDriver()->GuidCache->GetObjectFromNetGUID(NetGUID, false);
+				UNetConnection* Connection = World->GetNetDriver()->ServerConnection;
+				TArray<const unrealpb::UnrealObjectRef_GuidCachedObject*> CachedObjs;
+				for (auto& Context : Ref->context())
+				{
+					CachedObjs.Add(&Context);
+				}
+				// Sort by the NetGUID to register in descending order.
+				CachedObjs.Sort([](const unrealpb::UnrealObjectRef_GuidCachedObject& Obj1, const unrealpb::UnrealObjectRef_GuidCachedObject& Obj2)
+					{
+						return Obj1.netguid() > Obj2.netguid();
+					});
+				for (auto CachedObj : CachedObjs)
+				{
+					FNetworkGUID NewGUID = FNetworkGUID(CachedObj->netguid());
+					FString PathName = UTF8_TO_TCHAR(CachedObj->pathname().c_str());
+					// Remap name for PIE
+					GEngine->NetworkRemapPath(Connection, PathName, true);
+					GuidCache->RegisterNetGUIDFromPath_Client(NewGUID, PathName, FNetworkGUID(CachedObj->outerguid()), 0, false, false);
+					UObject* NewObj = GuidCache->GetObjectFromNetGUID(NewGUID, false);
+					if (NewObj->IsA<ULevel>())
+					{
+						//Cast<ULevel>(NewObj)->OwningWorld = World;
+					}
+					UE_LOG(LogChanneld, Verbose, TEXT("[Client] Registered NetGUID %d from path: %s"), CachedObj->netguid(), *PathName);
+				}
+				/*
+				*/
+				if (Ref->bunchbitsnum() > 0)
+				{
+					FInBunch InBunch(World->GetNetDriver()->ServerConnection, (uint8*)Ref->netguidbunch().data(), Ref->bunchbitsnum());
+					auto PackageMap = Cast<UPackageMapClient>(World->GetNetDriver()->ServerConnection->PackageMap);
+					//InBunch.bHasPackageMapExports = true;
+					//PackageMap->ReceiveNetGUIDBunch(InBunch);
+
+					UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::OpenedLocally);
+					AActor* Actor;
+					if (PackageMap->SerializeNewActor(InBunch, Channel, Actor))
+					{
+						Channel->SetChannelActor(Actor, ESetChannelActorFlags::SkipReplicatorCreation);
+						// Setup NetDriver, etc.
+						Channel->NotifyActorChannelOpen(Actor, InBunch);
+						// After all properties have been initialized, call PostNetInit. This should call BeginPlay() so initialization can be done with proper starting values.
+						Actor->PostNetInit();
+						UE_LOG(LogChanneld, Verbose, TEXT("[Client] Created new actor '%s' with NetGUID %d"), *Actor->GetName(), GuidCache->GetNetGUID(Actor).Value);
+						return Actor;
+					}
+				}
 			}
+
 			if (Obj == nullptr)
 			{
-				UE_LOG(LogChanneld, Warning, TEXT("Unable to create object from path: %s, NetGUID: %d"), *PathName, NetGUID.Value);
+				bNetGUIDUnmapped = true;
+				UE_LOG(LogChanneld, Warning, TEXT("[Client] Unable to create object from NetGUID: %d"), NetGUID.Value);
 			}
 		}
 		return Obj;
@@ -94,14 +152,61 @@ public:
 		}
 
 		unrealpb::UnrealObjectRef ObjRef;
-		auto NetGUID = World->GetNetDriver()->GuidCache->GetNetGUID(Obj);
-		// If the NetGUID is not created yet, assign an new one and send the path + outer GUID to the client.
+		auto GuidCache = World->GetNetDriver()->GuidCache;
+		auto NetGUID = GuidCache->GetNetGUID(Obj);
+		// If the NetGUID is not created yet, assign an new one and send the new NetGUID CachedObjects to the client as well.
 		if (!NetGUID.IsValid())
 		{
-			//NetGUID = World->GetNetDriver()->GuidCache->AssignNewNetGUID_Server(Obj);
-			NetGUID = World->GetNetDriver()->GuidCache->AssignNewNetGUIDFromPath_Server(Obj->GetPathName(), Obj->GetOuter(), Obj->GetClass());
-			ObjRef.set_pathname(std::string(TCHAR_TO_UTF8(*Obj->GetPathName())));
-			ObjRef.set_outerguid(World->GetNetDriver()->GuidCache->GetNetGUID(Obj->GetOuter()).Value);
+			if (Obj->IsA<AActor>() && GuidCache->IsNetGUIDAuthority())
+			{
+				auto Actor = Cast<AActor>(Obj);
+				auto PackageMap = Actor->GetNetConnection()->PackageMap;
+
+				TSet<FNetworkGUID> OldGUIDs;
+				GuidCache->ObjectLookup.GetKeys(OldGUIDs);
+
+				FOutBunch Ar(PackageMap);
+				Ar.bReliable = true;
+				/*
+				PackageMap->SerializeObject(Ar, AActor::StaticClass(), Obj, &NetGUID);
+				World->GetNetDriver()->GuidCache->ImportedNetGuids.Add(NetGUID);
+				*/
+				UActorChannel* Channel = (UActorChannel*)Actor->GetNetConnection()->CreateChannelByName(NAME_Actor, EChannelCreateFlags::OpenedLocally);
+				if (Channel)
+				{
+					Channel->SetChannelActor(Actor, ESetChannelActorFlags::None);
+				}
+				PackageMap->SerializeNewActor(Ar, Channel, Actor);
+				Actor->OnSerializeNewActor(Ar);
+
+				NetGUID = GuidCache->GetNetGUID(Obj);
+
+				TSet<FNetworkGUID> NewGUIDs;
+				GuidCache->ObjectLookup.GetKeys(NewGUIDs);
+				NewGUIDs = NewGUIDs.Difference(OldGUIDs);
+				for (FNetworkGUID& NewGUID : NewGUIDs)
+				{
+					// Don't send the target NetGUID in the context
+					if (NewGUID == NetGUID)
+						continue;
+
+					auto NewCachedObj = GuidCache->GetCacheObject(NewGUID);
+					auto Context = ObjRef.add_context();
+					Context->set_netguid(NewGUID.Value);
+					Context->set_pathname(std::string(TCHAR_TO_UTF8(*NewCachedObj->PathName.ToString())));
+					Context->set_outerguid(NewCachedObj->OuterGUID.Value);
+					UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send registered NetGUID %d with path: %s"), NewGUID.Value, *NewCachedObj->PathName.ToString());
+				}
+				/*
+				*/
+				ObjRef.set_netguidbunch(Ar.GetData(), Ar.GetNumBytes());
+				ObjRef.set_bunchbitsnum(Ar.GetNumBits());
+			
+			}
+			else
+			{
+				NetGUID = GuidCache->GetOrAssignNetGUID(Obj);
+			}
 		}
 
 		/*
