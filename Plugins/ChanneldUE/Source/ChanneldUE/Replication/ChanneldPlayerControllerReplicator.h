@@ -5,6 +5,7 @@
 #include "GameFramework\Character.h"
 #include "ChanneldReplicatorBase.h"
 #include "GameFramework/HUD.h"
+#include "GameFramework/PlayerController.h"
 
 class CHANNELDUE_API FChanneldPlayerControllerReplicator : public FChanneldReplicatorBase
 {
@@ -13,6 +14,7 @@ public:
 	virtual ~FChanneldPlayerControllerReplicator();
 
 	//~Begin FChanneldReplicatorBase Interface
+	virtual UClass* GetTargetClass() { return APlayerController::StaticClass(); }
 	virtual google::protobuf::Message* GetDeltaState() override;
 	virtual void ClearState() override;
 	virtual void Tick(float DeltaTime) override;

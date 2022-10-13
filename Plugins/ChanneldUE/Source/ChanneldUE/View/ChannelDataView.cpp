@@ -185,6 +185,7 @@ int32 UChannelDataView::SendAllChannelUpdates()
 			if (MsgTemplate == nullptr)
 				continue;
 
+			// FIXME: reuse the message to decrease the memory footprint
 			auto NewState = MsgTemplate->New();
 
 			int UpdateCount = 0;
@@ -272,6 +273,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 		return;
 	}
 
+	// FIXME: reuse the message to decrease the memory footprint
 	auto UpdateData = MsgTemplate->New();
 	if (!UpdateData->ParseFromString(UpdateMsg->data().value()))
 	{
@@ -281,16 +283,21 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 
 	UE_LOG(LogChanneld, Verbose, TEXT("Receive %s update: %s"), UTF8_TO_TCHAR(UpdateMsg->GetTypeName().c_str()), UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
 
-	auto Providers = ChannelDataProviders.Find(ChId);
-	if (Providers == nullptr)
+	TSet<IChannelDataProvider*>* Providers = ChannelDataProviders.Find(ChId);
+	if (Providers == nullptr || Providers->Num() == 0)
 	{
 		UE_LOG(LogChanneld, Warning, TEXT("No provider registered for channel %d, typeUrl: %s"), ChId, *TypeUrl);
 		return;
 	}
 
-	for (auto Provider : *Providers)
+	// The set can be changed during the iteration, if a new provider is created from the UnrealObjectRef,
+	// during any replicator's OnStateChanged(). So we use a const array to iterate.
+	for (IChannelDataProvider* Provider : Providers->Array())
 	{
-		Provider->OnChannelDataUpdated(UpdateData);
+		if (!Provider->IsRemoved())
+		{
+			Provider->OnChannelDataUpdated(UpdateData);
+		}
 	}
 }
 

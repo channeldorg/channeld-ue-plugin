@@ -528,9 +528,26 @@ void UChanneldGameInstanceSubsystem::InitChannelDataView()
 		ChannelDataView = NewObject<UChannelDataView>(this, ChannelDataViewClass);
 		//ConnToChanneld->OnAuthenticated.AddUObject(ChannelDataView, &UChannelDataView::Initialize);
 		ChannelDataView->Initialize(ConnectionInstance);
+
+		for (IChannelDataProvider*& Provider : UnregisteredDataProviders)
+		{
+			ChannelDataView->AddProvider(Provider->GetChannelId(), Provider);
+		}
 	}
 	else
 	{
 		UE_LOG(LogChanneld, Warning, TEXT("Failed to load any ChannelDataView"));
+	}
+}
+
+void UChanneldGameInstanceSubsystem::RegisterDataProvider(IChannelDataProvider* Provider)
+{
+	if (ChannelDataView)
+	{
+		ChannelDataView->AddProvider(Provider->GetChannelId(), Provider);
+	}
+	else
+	{
+		UnregisteredDataProviders.Add(Provider);
 	}
 }

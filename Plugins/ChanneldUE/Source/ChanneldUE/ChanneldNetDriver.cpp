@@ -456,15 +456,13 @@ void UChanneldNetDriver::TickDispatch(float DeltaTime)
 
 int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 {
-	static int32 UpdatedProvidersAccumulated = 0;
-
 	int32 Result = 0;
-	//if (UpdatedProvidersAccumulated < 100)
-	//{
-	//	Result = Super::ServerReplicateActors(DeltaSeconds);
-	//	if (Result > 0)	UE_LOG(LogChanneld, Verbose, TEXT("NetDriver::ServerReplicateActors replicated %d actors"), Result);
-	//}
-	//else
+
+	if (GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
+	{
+		Result = Super::ServerReplicateActors(DeltaSeconds);
+	}
+	else
 	{
 		for (int32 i = 0; i < ClientConnections.Num(); i++)
 		{
@@ -476,16 +474,11 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 				Connection->PlayerController->SendClientAdjustment();
 			}
 		}
-	}
 
-	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
-	{
 		auto Subsystem = GetSubsystem();
 		if (Subsystem && Subsystem->GetChannelDataView())
 		{
-			int32 UpdatedProviders = Subsystem->GetChannelDataView()->SendAllChannelUpdates();
-			UpdatedProvidersAccumulated += UpdatedProviders;
-			Result += UpdatedProviders;
+			Result = Subsystem->GetChannelDataView()->SendAllChannelUpdates();
 		}
 	}
 	
@@ -495,9 +488,9 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject /*= nullptr*/)
 {
 	UE_LOG(LogChanneld, Verbose, TEXT("Sending RPC %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
-	if (Function->GetFName() == FName("ServerSetSpectatorLocation"))
+	if (Function->GetFName() == FName("ClientSetHUD"))
 	{
-		UE_LOG(LogChanneld, Verbose, TEXT("HIT BREAK POINT!"));
+		UE_DEBUG_BREAK();
 	}
 
 	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomRPC)

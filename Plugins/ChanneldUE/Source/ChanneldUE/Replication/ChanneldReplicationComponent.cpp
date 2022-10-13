@@ -15,13 +15,13 @@ UChanneldReplicationComponent::UChanneldReplicationComponent(const FObjectInitia
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-const google::protobuf::Message* UChanneldReplicationComponent::GetStateFromChannelData(google::protobuf::Message* ChannelData, UObject* TargetObject, uint32 NetGUID, bool& bIsRemoved)
+const google::protobuf::Message* UChanneldReplicationComponent::GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved)
 {
 	bIsRemoved = false;
 	return nullptr;
 }
 
-void UChanneldReplicationComponent::SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UObject* TargetObject, uint32 NetGUID)
+void UChanneldReplicationComponent::SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID)
 {
 
 }
@@ -69,9 +69,12 @@ void UChanneldReplicationComponent::InitOnce()
 		}
 		else
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Unable to add replicator for component '%s' of actor: %s"), *RepComp->GetFullName(), *GetOwner()->GetFullName());
+			UE_LOG(LogChanneld, Warning, TEXT("Unable to add replicator for component '%s' of actor: %s"), *RepComp->GetName(), *GetOwner()->GetName());
 		}
 	}
+
+	// Make sure the DataProvider is always registered
+	GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->RegisterDataProvider(this);
 
 	bInitialized = true;
 }
@@ -81,12 +84,6 @@ void UChanneldReplicationComponent::BeginPlay()
 	Super::BeginPlay();
 
 	InitOnce();
-
-	UChannelDataView* View = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
-	if (View)
-	{
-		View->AddProvider(OwningChannelId, this);
-	}
 }
 
 void UChanneldReplicationComponent::EndPlay(EEndPlayReason::Type Reason)
@@ -98,7 +95,7 @@ void UChanneldReplicationComponent::EndPlay(EEndPlayReason::Type Reason)
 		UChannelDataView* View = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
 		if (View)
 		{
-			View->RemoveProviderFromAllChannels(this, true);
+			View->RemoveProviderFromAllChannels(this, GetNetMode() == ENetMode::NM_DedicatedServer);
 		}
 	}
 }
@@ -173,10 +170,10 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 			uint32 NetGUID = Replicator->GetNetGUID();
 			if (NetGUID == 0)
 			{
-				UE_LOG(LogChanneld, Log, TEXT("Replicator of %s doesn't has a NetGUID yet, skip setting channel data"), *Replicator->GetTargetObject()->GetName());
+				UE_LOG(LogChanneld, Log, TEXT("Replicator of %s doesn't has a NetGUID yet, skip setting channel data"), *Replicator->GetTargetClass()->GetName());
 				continue;
 			}
-			SetStateToChannelData(Replicator->GetDeltaState(), ChannelData, Replicator->GetTargetObject(), NetGUID);
+			SetStateToChannelData(Replicator->GetDeltaState(), ChannelData, Replicator->GetTargetClass(), NetGUID);
 			Replicator->ClearState();
 			bUpdated = true;
 		}
@@ -201,11 +198,12 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 		if (NetGUID == 0)
 		{
 			// TODO: delay the state update
-			UE_LOG(LogChanneld, Warning, TEXT("Replicator of %s doesn't have a valid NetGUID (maybe the NetDriver is not initialized yet) to find the state."), *Replicator->GetTargetObject()->GetName());
+			UE_LOG(LogChanneld, Warning, TEXT("Replicator of %s.%s doesn't have a valid NetGUID (maybe the NetDriver is not initialized yet) to find the state."), 
+				*Replicator->GetTargetObject()->GetName(), *Replicator->GetTargetClass()->GetName());
 			continue;
 		}
 		bool bIsRemoved = false;
-		auto State = GetStateFromChannelData(ChannelData, Replicator->GetTargetObject(), NetGUID, bIsRemoved);
+		auto State = GetStateFromChannelData(ChannelData, Replicator->GetTargetClass(), NetGUID, bIsRemoved);
 		if (State)
 		{
 			if (bIsRemoved)

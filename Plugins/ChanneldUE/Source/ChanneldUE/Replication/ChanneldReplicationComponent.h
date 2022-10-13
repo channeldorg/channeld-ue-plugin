@@ -24,8 +24,8 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	UProtoMessageObject* ProvideChannelDataTemplate() const;
 
-	virtual const google::protobuf::Message* GetStateFromChannelData(google::protobuf::Message* ChannelData, UObject* TargetObject, uint32 NetGUID, bool& bIsRemoved);
-	virtual void SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UObject* TargetObject, uint32 NetGUID);
+	virtual const google::protobuf::Message* GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved);
+	virtual void SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID);
 
 	bool bInitialized = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

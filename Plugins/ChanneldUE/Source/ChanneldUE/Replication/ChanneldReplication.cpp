@@ -12,14 +12,16 @@ TArray<FChanneldReplicatorBase*> ChanneldReplication::FindAndCreateReplicators(U
 {
 	TArray<FChanneldReplicatorBase*> Result;
 	// Recurse the base class until find the matching replicator
-	for (const UClass* Class = ReplicatedObj->GetClass(); Class != nullptr; Class = Class->GetSuperClass())
+	for (const UClass* Class = ReplicatedObj->GetClass(); Class != UObject::StaticClass(); Class = Class->GetSuperClass())
 	{
 		if (ReplicatorRegistry.Contains(Class))
 		{
 			const FReplicatorCreateFunc& Func = ReplicatorRegistry.FindRef(Class);
 			auto Replicator = Func(ReplicatedObj);
-			UE_LOG(LogChanneld, Verbose, TEXT("Created %s replicator for object: %s"), *Class->GetFullName(), *ReplicatedObj->GetFullName());
-			Result.Add(Replicator);
+			UE_LOG(LogChanneld, Verbose, TEXT("Created %sReplicator for object: %s"), *Class->GetName(), *ReplicatedObj->GetName());
+			// Add the replicators in the order as base class -> inherited class (e.g. Actor->GameStateBase),
+			// to make sure the property replication and OnRep functions are executed in the right order (e.g. Actor.Role -> GameStateBase.bReplicatedHasBegunPlay -> NotifyBeginPlay())
+			Result.Insert(Replicator, 0);
 		}
 	}
 

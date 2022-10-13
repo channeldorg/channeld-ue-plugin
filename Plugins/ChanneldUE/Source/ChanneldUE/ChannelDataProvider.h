@@ -28,7 +28,7 @@ public:
 	
 	static FString GetName(const IChannelDataProvider* Provider)
 	{
-		return Provider->_getUObject()->GetClass()->GetName();
+		return Provider->_getUObject()->GetPathName();// GetClass()->GetFullName();
 		//return Cast<UObjectBase>(Provider)->GetClass()->GetName();
 	}
 

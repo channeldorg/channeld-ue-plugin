@@ -1,11 +1,12 @@
 #include "ChanneldUE.h"
 #include "Developer/Settings/Public/ISettingsModule.h"
 #include "ChanneldSettings.h"
-#include "Components/ActorComponent.h"
-#include "Components/SceneComponent.h"
+#include "GameFramework/Actor.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/GameStateBase.h"
+#include "Components/ActorComponent.h"
+#include "Components/SceneComponent.h"
 #include "Replication/ChanneldReplication.h"
 #include "Replication/ChanneldReplicatorBase.h"
 #include "Replication/ChanneldActorComponentReplicator.h"
@@ -15,6 +16,7 @@
 #include "Replication/ChanneldPlayerControllerReplicator.h"
 #include "Replication/ChanneldPlayerStateReplicator.h"
 #include "Replication/ChanneldGameStateBaseReplicator.h"
+#include "Replication/ChanneldActorReplicator.h"
 
 #define LOCTEXT_NAMESPACE "FChanneldUEModule"
 
@@ -28,13 +30,14 @@ void FChanneldUEModule::StartupModule()
 			GetMutableDefault<UChanneldSettings>());
 	}
 
-	REGISTER_REPLICATOR(FChanneldActorComponentReplicator, UActorComponent);
-	REGISTER_REPLICATOR(FChanneldSceneComponentReplicator, USceneComponent);
+	REGISTER_REPLICATOR(FChanneldActorReplicator, AActor);
 	REGISTER_REPLICATOR(FChanneldCharacterReplicator, ACharacter);
 	REGISTER_REPLICATOR(FChanneldControllerReplicator, AController);
 	REGISTER_REPLICATOR(FChanneldPlayerControllerReplicator, APlayerController);
 	REGISTER_REPLICATOR(FChanneldPlayerStateReplicator, APlayerState);
 	REGISTER_REPLICATOR(FChanneldGameStateBaseReplicator, AGameStateBase);
+	REGISTER_REPLICATOR(FChanneldActorComponentReplicator, UActorComponent);
+	REGISTER_REPLICATOR(FChanneldSceneComponentReplicator, USceneComponent);
 }
 
 void FChanneldUEModule::ShutdownModule()

@@ -2,16 +2,16 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldReplicatorBase.h"
-#include "GameFramework/PlayerState.h"
+#include "GameFramework/Actor.h"
 
-class CHANNELDUE_API FChanneldPlayerStateReplicator : public FChanneldReplicatorBase
+class CHANNELDUE_API FChanneldActorReplicator : public FChanneldReplicatorBase
 {
 public:
-	FChanneldPlayerStateReplicator(UObject* InTargetObj);
-	virtual ~FChanneldPlayerStateReplicator();
+	FChanneldActorReplicator(UObject* InTargetObj);
+	virtual ~FChanneldActorReplicator();
 
 	//~Begin FChanneldReplicatorBase Interface
-	virtual UClass* GetTargetClass() { return APlayerState::StaticClass(); }
+	virtual UClass* GetTargetClass() { return AActor::StaticClass(); }
 	virtual google::protobuf::Message* GetDeltaState() override;
 	virtual void ClearState() override;
 	virtual void Tick(float DeltaTime) override;
@@ -19,11 +19,16 @@ public:
 	//~End FChanneldReplicatorBase Interface
 
 protected:
-	TWeakObjectPtr<APlayerState> PlayerState;
+	TWeakObjectPtr<AActor> Actor;
 
 	// [Server+Client] The accumulated channel data of the target object
-	unrealpb::PlayerState* FullState;
+	unrealpb::ActorState* FullState;
 	// [Server] The accumulated delta change before next send
-	unrealpb::PlayerState* DeltaState;
+	unrealpb::ActorState* DeltaState;
+
+private:
+	uint8* RemoteRolePtr;
+	bool* bTearOffPtr;
+	UFunction* OnRep_OwnerFunc;
 
 };

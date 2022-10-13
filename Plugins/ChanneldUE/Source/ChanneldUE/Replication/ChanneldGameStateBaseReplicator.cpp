@@ -2,6 +2,7 @@
 #include "Net/UnrealNetwork.h"
 #include "ChanneldUtils.h"
 #include "GameFramework/SpectatorPawn.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 FChanneldGameStateBaseReplicator::FChanneldGameStateBaseReplicator(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
 {
@@ -36,6 +37,12 @@ FChanneldGameStateBaseReplicator::~FChanneldGameStateBaseReplicator()
 	delete DeltaState;
 }
 
+uint32 FChanneldGameStateBaseReplicator::GetNetGUID()
+{
+	// GameStateBase doesn't have a valid NetGUID, so let's use a constant value.
+	return 1;
+}
+
 google::protobuf::Message* FChanneldGameStateBaseReplicator::GetDeltaState()
 {
 	return DeltaState;
@@ -63,14 +70,14 @@ void FChanneldGameStateBaseReplicator::Tick(float DeltaTime)
 	auto SpectatorClass = LoadClass<ASpectatorPawn>(NULL, UTF8_TO_TCHAR(FullState->mutable_spectatorclassname()->c_str()));
 	if (GameStateBase->SpectatorClass != SpectatorClass)
 	{
-		DeltaState->set_spectatorclassname(std::string(TCHAR_TO_UTF8(*GameStateBase->SpectatorClass->GetName())));
+		DeltaState->set_spectatorclassname(std::string(TCHAR_TO_UTF8(*GameStateBase->SpectatorClass->GetPathName())));
 		bStateChanged = true;
 	}
 
 	auto GameModeClass = LoadClass<AGameModeBase>(NULL, UTF8_TO_TCHAR(FullState->mutable_gamemodeclassname()->c_str()));
 	if (GameStateBase->GameModeClass != GameModeClass)
 	{
-		DeltaState->set_gamemodeclassname(std::string(TCHAR_TO_UTF8(*GameStateBase->GameModeClass->GetName())));
+		DeltaState->set_gamemodeclassname(std::string(TCHAR_TO_UTF8(*GameStateBase->GameModeClass->GetPathName())));
 		bStateChanged = true;
 	}
 
@@ -94,6 +101,11 @@ void FChanneldGameStateBaseReplicator::OnStateChanged(const google::protobuf::Me
 	{
 		return;
 	}
+
+	//if (!UKismetSystemLibrary::IsServer(GameStateBase.Get()))
+	//{
+	//	GameStateBase->SetRole(ROLE_SimulatedProxy);
+	//}
 
 	auto NewState = static_cast<const unrealpb::GameStateBase*>(InNewState);
 	FullState->MergeFrom(*NewState);

@@ -16,7 +16,8 @@ public:
     FChanneldReplicatorBase(UObject* InTargetObj);
 
     FORCEINLINE UObject* GetTargetObject() { return TargetObject.Get(); }
-    uint32 GetNetGUID();
+    virtual UClass* GetTargetClass() = 0;
+    virtual uint32 GetNetGUID();
 
     // [Server] Is the state changed since last send?
     FORCEINLINE bool IsStateChanged() { return bStateChanged; }
@@ -29,8 +30,8 @@ public:
 	// [Client] Apply ChannelDataUpdate received from channeld
     virtual void OnStateChanged(const google::protobuf::Message* NewState) = 0;
 
-    virtual TSharedPtr<google::protobuf::Message> SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess) { return nullptr; }
-    virtual void* DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC) { return nullptr; }
+    virtual TSharedPtr<google::protobuf::Message> SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess) { bSuccess = false; return nullptr; }
+    virtual void* DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC) { bSuccess = false; return nullptr; }
 
 protected:
     TWeakObjectPtr<UObject> TargetObject;

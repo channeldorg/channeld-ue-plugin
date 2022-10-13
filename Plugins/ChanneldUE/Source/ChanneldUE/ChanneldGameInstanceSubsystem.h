@@ -7,6 +7,7 @@
 #include "ChanneldTypes.h"
 #include "Tickable.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "ChannelDataProvider.h"
 #include "ChanneldGameInstanceSubsystem.generated.h"
 
 class UProtoMessageObject;
@@ -170,6 +171,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Channeld")
 		void SeamlessTravelToChannel(APlayerController* PlayerController, int32 ChId);
 
+	void RegisterDataProvider(IChannelDataProvider* Provider);
+
 protected:
 	UPROPERTY()
 		UChanneldConnection* ConnectionInstance = nullptr;
@@ -178,6 +181,8 @@ protected:
 		UChannelDataView* ChannelDataView;
 
 	TMap<EChanneldChannelType, FString> ChannelTypeToProtoFullNameMapping;
+
+	TSet<IChannelDataProvider*> UnregisteredDataProviders;
 
 	void HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleCreateChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
