@@ -156,7 +156,7 @@ void UChannelDataView::OnDisconnect()
 {
 	for (auto& Pair : ChannelDataProviders)
 	{
-		for (auto Provider : Pair.Value)
+		for (IChannelDataProvider* Provider : Pair.Value)
 		{
 			Provider->SetRemoved();
 		}
@@ -171,6 +171,8 @@ int32 UChannelDataView::SendAllChannelUpdates()
 	if (Connection == nullptr)
 		return 0;
 
+	// Use the Arena for faster allocation. See https://developers.google.com/protocol-buffers/docs/reference/arenas
+	google::protobuf::Arena Arena;
 	int32 TotalUpdateCount = 0;
 	for (auto& Pair : Connection->SubscribedChannels)
 	{
@@ -185,16 +187,22 @@ int32 UChannelDataView::SendAllChannelUpdates()
 			if (MsgTemplate == nullptr)
 				continue;
 
-			// FIXME: reuse the message to decrease the memory footprint
-			auto NewState = MsgTemplate->New();
+			auto NewState = MsgTemplate->New(&Arena);
 
 			int UpdateCount = 0;
 			int RemovedCount = 0;
 			for (auto Itr = Providers->CreateIterator(); Itr; ++Itr)
 			{
 				auto Provider = Itr.ElementIt;
+				if (!IsValid(Cast<UObject>(Provider->Value)))
+				{
+					Itr.RemoveCurrent();
+					continue;
+				}
 				if (Provider->Value->UpdateChannelData(NewState))
+				{
 					UpdateCount++;
+				}
 				if (Provider->Value->IsRemoved())
 				{
 					Itr.RemoveCurrent();
@@ -214,7 +222,6 @@ int32 UChannelDataView::SendAllChannelUpdates()
 			}
 
 			NewState->Clear();
-			delete NewState;
 
 			TotalUpdateCount += UpdateCount;
 		}
@@ -265,19 +272,28 @@ void UChannelDataView::HandleUnsub(UChanneldConnection* Conn, ChannelId ChId, co
 void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto UpdateMsg = static_cast<const channeldpb::ChannelDataUpdateMessage*>(Msg);
-	FString TypeUrl(UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
-	auto MsgTemplate = ChannelDataTemplatesByTypeUrl.FindRef(TypeUrl);
-	if (MsgTemplate == nullptr)
+
+	google::protobuf::Message* UpdateData;
+	if (ReceivedUpdateDataInChannels.Contains(ChId))
 	{
-		UE_LOG(LogChanneld, Error, TEXT("Unable to find channel data parser by typeUrl: %s"), *TypeUrl);
-		return;
+		UpdateData = ReceivedUpdateDataInChannels[ChId];
+	}
+	else
+	{
+		FString TypeUrl(UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
+		auto MsgTemplate = ChannelDataTemplatesByTypeUrl.FindRef(TypeUrl);
+		if (MsgTemplate == nullptr)
+		{
+			UE_LOG(LogChanneld, Error, TEXT("Unable to find channel data parser by typeUrl: %s"), *TypeUrl);
+			return;
+		}
+		UpdateData = MsgTemplate->New();
 	}
 
-	// FIXME: reuse the message to decrease the memory footprint
-	auto UpdateData = MsgTemplate->New();
-	if (!UpdateData->ParseFromString(UpdateMsg->data().value()))
+	// Call ParsePartial instead of Parse to keep the existing value from being reset.
+	if (!UpdateData->ParsePartialFromString(UpdateMsg->data().value()))
 	{
-		UE_LOG(LogChanneld, Error, TEXT("Failed to parse channel data of type %s, typeUrl: %s"), UTF8_TO_TCHAR(UpdateMsg->GetTypeName().c_str()), *TypeUrl);
+		UE_LOG(LogChanneld, Error, TEXT("Failed to parse channel data of type %s, typeUrl: %s"), UTF8_TO_TCHAR(UpdateMsg->GetTypeName().c_str()), UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
 		return;
 	}
 
@@ -286,7 +302,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	TSet<IChannelDataProvider*>* Providers = ChannelDataProviders.Find(ChId);
 	if (Providers == nullptr || Providers->Num() == 0)
 	{
-		UE_LOG(LogChanneld, Warning, TEXT("No provider registered for channel %d, typeUrl: %s"), ChId, *TypeUrl);
+		UE_LOG(LogChanneld, Warning, TEXT("No provider registered for channel %d, typeUrl: %s"), ChId, UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
 		return;
 	}
 
@@ -299,5 +315,8 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 			Provider->OnChannelDataUpdated(UpdateData);
 		}
 	}
+
+	// All new states are consumed, now we reset the cached object for next parse.
+	UpdateData->Clear();
 }
 

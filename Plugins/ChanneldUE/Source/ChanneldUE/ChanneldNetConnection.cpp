@@ -1,12 +1,22 @@
 #include "ChanneldNetConnection.h"
 #include "ChanneldNetDriver.h"
+#include "ChanneldTypes.h"
 #include "Net/DataChannel.h"
 #include "PacketHandler.h"
 #include "PacketHandlers/StatelessConnectHandlerComponent.h"
+#include "Replication/ChanneldReplicationComponent.h"
+#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerController.h"
+#include "unreal_common.pb.h"
+#include "ChanneldUtils.h"
 
 UChanneldNetConnection::UChanneldNetConnection(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
+	//MaxPacket = MaxPacketSize;
+	//SetInternalAck(true);
+	//SetAutoFlush(true);
 }
 
 void UChanneldNetConnection::InitBase(UNetDriver* InDriver, class FSocket* InSocket, const FURL& InURL, EConnectionState InState, int32 InMaxPacket /*= 0*/, int32 InPacketOverhead /*= 0*/)

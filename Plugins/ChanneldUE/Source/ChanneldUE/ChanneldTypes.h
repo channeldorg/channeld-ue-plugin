@@ -17,7 +17,8 @@ enum MessageType : uint32 {
 	// Used by ChanneldGameInstanceSubsystem to broadcast the ProtoMessageObject from server side. The message is packed as google::protobuf::any to support anonymous types.
 	MessageType_ANY = 101,
 	// Used by ReplicationDriver to send/receive UE's native RPC.
-	MessageType_RPC = 123,
+	MessageType_RPC = 102,
+	MessageType_SPAWN = 103,
 };
 
 /*
@@ -29,7 +30,7 @@ enum class EChannelId : ChannelId
 */
 const ChannelId GlobalChannelId = 0;
 
-const uint32 MaxPacketSize = 0x0fffff;
+const uint32 MaxPacketSize = 0x00ffff;
 const uint32 MinPacketSize = 20;
 
 

@@ -7,6 +7,7 @@
 FChanneldGameStateBaseReplicator::FChanneldGameStateBaseReplicator(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
 {
 	GameStateBase = CastChecked<AGameStateBase>(InTargetObj);
+
 	// Remove the registered DOREP() properties in the Character
 	TArray<FLifetimeProperty> RepProps;
 	DisableAllReplicatedPropertiesOfClass(InTargetObj->GetClass(), AGameStateBase::StaticClass(), EFieldIteratorFlags::ExcludeSuper, RepProps);
@@ -81,7 +82,7 @@ void FChanneldGameStateBaseReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	if (*ReplicatedWorldTimeSecondsPtr != FullState->replicatedworldtimeseconds())
+	if (!FMath::IsNearlyEqual(*ReplicatedWorldTimeSecondsPtr, FullState->replicatedworldtimeseconds(), 5.0f))
 	{
 		DeltaState->set_replicatedworldtimeseconds(*ReplicatedWorldTimeSecondsPtr);
 		bStateChanged = true;

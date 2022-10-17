@@ -13,9 +13,13 @@
 #include "ChanneldGameInstanceSubsystem.h"
 #include "Replication/ChanneldReplicationDriver.h"
 #include "ChanneldUtils.h"
-#include "Replication/ChanneldReplicationComponent.h"
 #include "ChanneldSettings.h"
 #include "Metrics.h"
+#include "GameFramework/PlayerState.h"
+#include "Replication/ChanneldReplicationComponent.h"
+#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerController.h"
 
 UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -73,15 +77,30 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 	}
 	else if (MsgType == MessageType_RPC)
 	{
-		auto Msg = MakeShared<unrealpb::RemoteFunctionMessage>();
-		if (!Msg->ParseFromString(Payload))
+		auto RpcMsg = MakeShared<unrealpb::RemoteFunctionMessage>();
+		if (!RpcMsg->ParseFromString(Payload))
 		{
-			UE_LOG(LogChanneld, Error, TEXT("Failed to parse RemoteFunction message"));
+			UE_LOG(LogChanneld, Error, TEXT("Failed to parse RemoteFunctionMessage"));
 			return;
 		}
 
-		HandleCustomRPC(Msg);
+		HandleCustomRPC(RpcMsg);
 		return;
+	}
+	else if (MsgType == MessageType_SPAWN)
+	{
+		auto SpawnMsg = MakeShared<unrealpb::SpawnObjectMessage>();
+		if (!SpawnMsg->ParseFromString(Payload))
+		{
+			UE_LOG(LogChanneld, Error, TEXT("Failed to parse SpawnObjectMessage"));
+			return;
+		}
+
+		UObject* SpawnedObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld());
+		if (!SpawnedObj)
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to spawn object from ref: %s"), UTF8_TO_TCHAR(SpawnMsg->obj().DebugString().c_str()));
+		}
 	}
 }
 
@@ -320,6 +339,27 @@ bool UChanneldNetDriver::InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bo
 
 	ConnToChanneld->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this, &UChanneldNetDriver::ServerHandleUnsub);
 
+	FGameModeEvents::GameModePostLoginEvent.AddLambda([&](AGameModeBase* GameMode, APlayerController* NewPlayer)
+		{
+			auto Comp = Cast<UChanneldReplicationComponent>(NewPlayer->GetComponentByClass(UChanneldReplicationComponent::StaticClass()));
+			if (!Comp)
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn the GameStateBase in the client."));
+				return;
+			}
+
+			auto Connection = Cast<UChanneldNetConnection>(NewPlayer->GetNetConnection());
+			if (Connection == nullptr)
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("PlayerController doesn't have the UChanneldNetConnection. Failed to spawn the GameStateBase in the client."));
+				return;
+			}
+			unrealpb::SpawnObjectMessage SpawnMsg;
+			SpawnMsg.mutable_obj()->MergeFrom(ChanneldUtils::GetRefOfObject(GameMode->GameState, NewPlayer->GetNetConnection()));
+			SendDataToClient(MessageType_SPAWN, Connection->GetConnId(), SpawnMsg);
+			//ConnToChanneld->Send(Comp->GetChannelId(), MessageType_SPAWN, SpawnMsg);
+		});
+
 	return true;
 
 	//return Super::InitListen(InNotify, LocalURL, bReuseAddressAndPort, Error);
@@ -390,6 +430,16 @@ void UChanneldNetDriver::SendDataToClient(uint32 MsgType, ConnectionId ClientCon
 	UNCLOCK_CYCLES(SendCycles);
 }
 
+void UChanneldNetDriver::SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, const google::protobuf::Message& Msg)
+{
+	channeldpb::ServerForwardMessage ServerForwardMessage;
+	ServerForwardMessage.set_clientconnid(ClientConnId);
+	ServerForwardMessage.set_payload(Msg.SerializeAsString());
+	CLOCK_CYCLES(SendCycles);
+	ConnToChanneld->Send(LowLevelSendToChannelId.Get(), MsgType, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
+	UNCLOCK_CYCLES(SendCycles);
+}
+
 void UChanneldNetDriver::SendDataToServer(uint32 MsgType, uint8* DataToSend, int32 DataSize)
 {
 	CLOCK_CYCLES(SendCycles);
@@ -435,6 +485,19 @@ bool UChanneldNetDriver::IsNetResourceValid()
 	}
 
 	return false;
+}
+
+void UChanneldNetDriver::NotifyActorChannelOpen(UActorChannel* Channel, AActor* Actor)
+{
+	//if (Actor->IsA<APlayerState>() && Channel->Connection)
+	//{
+	//	Channel->Connection->SetInternalAck(true);
+	//}
+	if (auto Comp = Actor->GetComponentByClass(UChanneldReplicationComponent::StaticClass()))
+	{
+		auto RepComp = Cast<UChanneldReplicationComponent>(Comp);
+		RepComp->InitOnce();
+	}
 }
 
 void UChanneldNetDriver::TickDispatch(float DeltaTime)
@@ -490,7 +553,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 	UE_LOG(LogChanneld, Verbose, TEXT("Sending RPC %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
 	if (Function->GetFName() == FName("ClientSetHUD"))
 	{
-		UE_DEBUG_BREAK();
+		//UE_DEBUG_BREAK();
 	}
 
 	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomRPC)

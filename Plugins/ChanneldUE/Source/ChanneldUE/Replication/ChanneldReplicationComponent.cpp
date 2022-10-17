@@ -8,11 +8,12 @@
 #include "ChanneldReplication.h"
 #include "ChanneldNetDriver.h"
 #include "ChanneldSettings.h"
+#include "GameFramework/GameStateBase.h"
 
 UChanneldReplicationComponent::UChanneldReplicationComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 const google::protobuf::Message* UChanneldReplicationComponent::GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved)
@@ -30,7 +31,9 @@ void UChanneldReplicationComponent::PostInitProperties()
 {
 	Super::PostInitProperties();
 
+//#if !WITH_EDITOR
 	InitOnce();
+//#endif
 }
 
 void UChanneldReplicationComponent::InitOnce()
@@ -98,21 +101,6 @@ void UChanneldReplicationComponent::EndPlay(EEndPlayReason::Type Reason)
 			View->RemoveProviderFromAllChannels(this, GetNetMode() == ENetMode::NM_DedicatedServer);
 		}
 	}
-}
-
-// Called every frame
-void UChanneldReplicationComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// TODO: update the replicators with the dynamically added/removed components
-
-	/*
-	for (auto Pair : SceneComponentReplicators)
-	{
-		Pair.Value->Tick(DeltaTime);
-	}
-	*/
 }
 
 channeldpb::ChannelType UChanneldReplicationComponent::GetChannelType()

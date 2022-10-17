@@ -69,6 +69,9 @@ protected:
 	UPROPERTY()
 	UChanneldConnection* Connection;
 
+	// Reuse the message objects to 1) decrease the memory footprint; 2) save the data for the next update if no state is consumed.
+	TMap<ChannelId, google::protobuf::Message*> ReceivedUpdateDataInChannels;
+
 private:
 
 	TMap<channeldpb::ChannelType, const google::protobuf::Message*> ChannelDataTemplates;

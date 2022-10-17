@@ -39,7 +39,7 @@ public:
 	virtual bool InitBase(bool bInitAsClient, FNetworkNotify* InNotify, const FURL& URL, bool bReuseAddressAndPort, FString& Error) override;
 	// Create NetConnection for client (ServerConnection)
 	virtual bool InitConnect(FNetworkNotify* InNotify, const FURL& ConnectURL, FString& Error) override;
-	// Connect to channeld. Do nothing else.
+	// Create message handlers for server
 	virtual bool InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bool bReuseAddressAndPort, FString& Error) override;
 	// Receive packets from channeld by calling ChanneldConnection.TickIncoming()
 	virtual void TickDispatch(float DeltaTime) override;
@@ -53,6 +53,7 @@ public:
 	virtual void LowLevelSend(TSharedPtr<const FInternetAddr> Address, void* Data, int32 CountBits, FOutPacketTraits& Traits) override;
 	virtual void LowLevelDestroy() override;
 	virtual bool IsNetResourceValid(void) override;
+	virtual void NotifyActorChannelOpen(UActorChannel* Channel, AActor* Actor);
 	//~ End UNetDriver Interface
 
 	virtual int32 ServerReplicateActors(float DeltaSeconds) override;
@@ -97,6 +98,7 @@ private:
 	void ServerHandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 
 	void SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, uint8* DataToSend, int32 DataSize);
+	void SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, const google::protobuf::Message& Msg);
 	void SendDataToServer(uint32 MsgType, uint8* DataToSend, int32 DataSize);
 
 	void OnSentRPC(class AActor* Actor, FString FuncName);

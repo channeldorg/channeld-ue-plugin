@@ -529,10 +529,14 @@ void UChanneldGameInstanceSubsystem::InitChannelDataView()
 		//ConnToChanneld->OnAuthenticated.AddUObject(ChannelDataView, &UChannelDataView::Initialize);
 		ChannelDataView->Initialize(ConnectionInstance);
 
-		for (IChannelDataProvider*& Provider : UnregisteredDataProviders)
+		for (IChannelDataProvider* Provider : UnregisteredDataProviders)
 		{
-			ChannelDataView->AddProvider(Provider->GetChannelId(), Provider);
+			if (IsValid(Cast<UObject>(Provider)))
+			{
+				ChannelDataView->AddProvider(Provider->GetChannelId(), Provider);
+			}
 		}
+		UnregisteredDataProviders.Empty();
 	}
 	else
 	{

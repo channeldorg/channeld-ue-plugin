@@ -172,7 +172,7 @@ void UChanneldConnection::Receive()
 	if (Socket->Recv(ReceiveBuffer + ReceiveBufferOffset, ReceiveBufferSize, BytesRead, ESocketReceiveFlags::None))
 	{
 		ReceiveBufferOffset += BytesRead;
-		if (BytesRead < 5)
+		if (ReceiveBufferOffset < 5)
 		{
 			// Unfinished packet
 			return;

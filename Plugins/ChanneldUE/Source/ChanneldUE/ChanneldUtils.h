@@ -135,7 +135,7 @@ public:
 		return Obj;
 	}
 
-	static const unrealpb::UnrealObjectRef GetRefOfObject(UObject* Obj)
+	static const unrealpb::UnrealObjectRef GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr)
 	{
 		const unrealpb::UnrealObjectRef DefaultValue = unrealpb::UnrealObjectRef::default_instance();
 		if (!Obj)
@@ -151,32 +151,40 @@ public:
 		unrealpb::UnrealObjectRef ObjRef;
 		auto GuidCache = World->GetNetDriver()->GuidCache;
 		auto NetGUID = GuidCache->GetNetGUID(Obj);
-		// If the NetGUID is not created yet, assign an new one and send the new NetGUID CachedObjects to the client as well.
-		if (!NetGUID.IsValid())
+		if (Obj->IsA<AActor>() && GuidCache->IsNetGUIDAuthority())
 		{
-			if (Obj->IsA<AActor>() && GuidCache->IsNetGUIDAuthority())
+			auto Actor = Cast<AActor>(Obj);
+			if (Connection == nullptr)
 			{
-				auto Actor = Cast<AActor>(Obj);
-				auto Connection = CastChecked<UChanneldNetConnection>(Actor->GetNetConnection());
-				auto PackageMap = CastChecked<UPackageMapClient>(Connection->PackageMap);
+				Connection = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
+				if (Connection == nullptr)
+				{
+					UE_LOG(LogChanneld, Warning, TEXT("Failed to get the ref of UObject %s: no PackageMap is provider while the obj has no NetConnection"), *Obj->GetName());
+					return DefaultValue;
+				}
+			}
+			auto PackageMap = CastChecked<UPackageMapClient>(Connection->PackageMap);
 
+			// If the NetGUID is not created yet, assign an new one and send the new NetGUID CachedObjects to the client.
+			// If the NetGUID is already created but hasn't been exported to the client yet, we need to send the CachedObjects as well.
+			if (!NetGUID.IsValid() || !PackageMap->NetGUIDExportCountMap.Contains(NetGUID))
+			{
 				TSet<FNetworkGUID> OldGUIDs;
 				PackageMap->NetGUIDExportCountMap.GetKeys(OldGUIDs);
-
 
 				//--------------------------------------------------
 				// Copied from UActorChannel::ReplicateActor (L3121)
 				//--------------------------------------------------
 				FOutBunch Ar(PackageMap);
 				Ar.bReliable = true;
-				UActorChannel* Channel = (UActorChannel*)Actor->GetNetConnection()->CreateChannelByName(NAME_Actor, EChannelCreateFlags::OpenedLocally);
+				UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::OpenedLocally);
 				if (Channel)
 				{
 					Channel->SetChannelActor(Actor, ESetChannelActorFlags::None);
 				}
 				PackageMap->SerializeNewActor(Ar, Channel, Actor);
 				Actor->OnSerializeNewActor(Ar);
-
+				//--------------------------------------------------
 
 				NetGUID = GuidCache->GetNetGUID(Obj);
 
@@ -200,12 +208,12 @@ public:
 				}
 				ObjRef.set_netguidbunch(Ar.GetData(), Ar.GetNumBytes());
 				ObjRef.set_bunchbitsnum(Ar.GetNumBits());
-			
+
 			}
-			else
-			{
-				NetGUID = GuidCache->GetOrAssignNetGUID(Obj);
-			}
+			//else
+			//{
+			//	NetGUID = GuidCache->GetOrAssignNetGUID(Obj);
+			//}
 		}
 
 		ObjRef.set_netguid(NetGUID.Value);
