@@ -88,7 +88,7 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 	AActor* Owner = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_owner(), Actor->GetWorld()));
 	if (Actor->GetOwner() != Owner)
 	{
-		DeltaState->mutable_owner()->MergeFrom(ChanneldUtils::GetRefOfObject(Actor->GetOwner()));
+		DeltaState->mutable_owner()->CopyFrom(ChanneldUtils::GetRefOfObject(Actor->GetOwner()));
 		bStateChanged = true;
 	}
 
@@ -106,7 +106,7 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 	AActor* Instigator = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_instigator(), Actor->GetWorld()));
 	if (Actor->GetInstigator() != Instigator)
 	{
-		DeltaState->mutable_instigator()->MergeFrom(ChanneldUtils::GetRefOfObject(Actor->GetInstigator()));
+		DeltaState->mutable_instigator()->CopyFrom(ChanneldUtils::GetRefOfObject(Actor->GetInstigator()));
 		bStateChanged = true;
 	}
 

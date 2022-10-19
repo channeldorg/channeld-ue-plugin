@@ -109,7 +109,7 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 		}
 		else
 		{
-			DeltaState->mutable_attachparent()->MergeFrom(ChanneldUtils::GetRefOfObject(SceneComp->GetAttachParent()));
+			DeltaState->mutable_attachparent()->CopyFrom(ChanneldUtils::GetRefOfObject(SceneComp->GetAttachParent()));
 		}
 		bStateChanged = true;
 	}

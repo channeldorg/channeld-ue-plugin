@@ -664,7 +664,11 @@ class CHANNELDUE_API UnrealObjectRef final :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef_GuidCachedObject >&
       context() const;
 
-  // bytes netGUIDBunch = 3;
+  // optional bytes netGUIDBunch = 3;
+  bool has_netguidbunch() const;
+  private:
+  bool _internal_has_netguidbunch() const;
+  public:
   void clear_netguidbunch();
   const std::string& netguidbunch() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -678,7 +682,11 @@ class CHANNELDUE_API UnrealObjectRef final :
   std::string* _internal_mutable_netguidbunch();
   public:
 
-  // uint32 netGUID = 1;
+  // optional uint32 netGUID = 1;
+  bool has_netguid() const;
+  private:
+  bool _internal_has_netguid() const;
+  public:
   void clear_netguid();
   uint32_t netguid() const;
   void set_netguid(uint32_t value);
@@ -687,7 +695,11 @@ class CHANNELDUE_API UnrealObjectRef final :
   void _internal_set_netguid(uint32_t value);
   public:
 
-  // uint32 bunchBitsNum = 4;
+  // optional uint32 bunchBitsNum = 4;
+  bool has_bunchbitsnum() const;
+  private:
+  bool _internal_has_bunchbitsnum() const;
+  public:
   void clear_bunchbitsnum();
   uint32_t bunchbitsnum() const;
   void set_bunchbitsnum(uint32_t value);
@@ -704,11 +716,12 @@ class CHANNELDUE_API UnrealObjectRef final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef_GuidCachedObject > context_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr netguidbunch_;
     uint32_t netguid_;
     uint32_t bunchbitsnum_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -839,7 +852,11 @@ class CHANNELDUE_API ActorComponentRef final :
     kCompNameFieldNumber = 2,
     kOwnerFieldNumber = 1,
   };
-  // string compName = 2;
+  // optional string compName = 2;
+  bool has_compname() const;
+  private:
+  bool _internal_has_compname() const;
+  public:
   void clear_compname();
   const std::string& compname() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -853,7 +870,7 @@ class CHANNELDUE_API ActorComponentRef final :
   std::string* _internal_mutable_compname();
   public:
 
-  // .unrealpb.UnrealObjectRef owner = 1;
+  // optional .unrealpb.UnrealObjectRef owner = 1;
   bool has_owner() const;
   private:
   bool _internal_has_owner() const;
@@ -879,9 +896,10 @@ class CHANNELDUE_API ActorComponentRef final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr compname_;
     ::unrealpb::UnrealObjectRef* owner_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -6025,9 +6043,17 @@ inline void UnrealObjectRef_GuidCachedObject::set_outerguid(uint32_t value) {
 
 // UnrealObjectRef
 
-// uint32 netGUID = 1;
+// optional uint32 netGUID = 1;
+inline bool UnrealObjectRef::_internal_has_netguid() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool UnrealObjectRef::has_netguid() const {
+  return _internal_has_netguid();
+}
 inline void UnrealObjectRef::clear_netguid() {
   _impl_.netguid_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000002u;
 }
 inline uint32_t UnrealObjectRef::_internal_netguid() const {
   return _impl_.netguid_;
@@ -6037,7 +6063,7 @@ inline uint32_t UnrealObjectRef::netguid() const {
   return _internal_netguid();
 }
 inline void UnrealObjectRef::_internal_set_netguid(uint32_t value) {
-  
+  _impl_._has_bits_[0] |= 0x00000002u;
   _impl_.netguid_ = value;
 }
 inline void UnrealObjectRef::set_netguid(uint32_t value) {
@@ -6085,9 +6111,17 @@ UnrealObjectRef::context() const {
   return _impl_.context_;
 }
 
-// bytes netGUIDBunch = 3;
+// optional bytes netGUIDBunch = 3;
+inline bool UnrealObjectRef::_internal_has_netguidbunch() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool UnrealObjectRef::has_netguidbunch() const {
+  return _internal_has_netguidbunch();
+}
 inline void UnrealObjectRef::clear_netguidbunch() {
   _impl_.netguidbunch_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& UnrealObjectRef::netguidbunch() const {
   // @@protoc_insertion_point(field_get:unrealpb.UnrealObjectRef.netGUIDBunch)
@@ -6096,7 +6130,7 @@ inline const std::string& UnrealObjectRef::netguidbunch() const {
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
 void UnrealObjectRef::set_netguidbunch(ArgT0&& arg0, ArgT... args) {
- 
+ _impl_._has_bits_[0] |= 0x00000001u;
  _impl_.netguidbunch_.SetBytes(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
   // @@protoc_insertion_point(field_set:unrealpb.UnrealObjectRef.netGUIDBunch)
 }
@@ -6109,22 +6143,32 @@ inline const std::string& UnrealObjectRef::_internal_netguidbunch() const {
   return _impl_.netguidbunch_.Get();
 }
 inline void UnrealObjectRef::_internal_set_netguidbunch(const std::string& value) {
-  
+  _impl_._has_bits_[0] |= 0x00000001u;
   _impl_.netguidbunch_.Set(value, GetArenaForAllocation());
 }
 inline std::string* UnrealObjectRef::_internal_mutable_netguidbunch() {
-  
+  _impl_._has_bits_[0] |= 0x00000001u;
   return _impl_.netguidbunch_.Mutable(GetArenaForAllocation());
 }
 inline std::string* UnrealObjectRef::release_netguidbunch() {
   // @@protoc_insertion_point(field_release:unrealpb.UnrealObjectRef.netGUIDBunch)
-  return _impl_.netguidbunch_.Release();
+  if (!_internal_has_netguidbunch()) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  auto* p = _impl_.netguidbunch_.Release();
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.netguidbunch_.IsDefault()) {
+    _impl_.netguidbunch_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return p;
 }
 inline void UnrealObjectRef::set_allocated_netguidbunch(std::string* netguidbunch) {
   if (netguidbunch != nullptr) {
-    
+    _impl_._has_bits_[0] |= 0x00000001u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000001u;
   }
   _impl_.netguidbunch_.SetAllocated(netguidbunch, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
@@ -6135,9 +6179,17 @@ inline void UnrealObjectRef::set_allocated_netguidbunch(std::string* netguidbunc
   // @@protoc_insertion_point(field_set_allocated:unrealpb.UnrealObjectRef.netGUIDBunch)
 }
 
-// uint32 bunchBitsNum = 4;
+// optional uint32 bunchBitsNum = 4;
+inline bool UnrealObjectRef::_internal_has_bunchbitsnum() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool UnrealObjectRef::has_bunchbitsnum() const {
+  return _internal_has_bunchbitsnum();
+}
 inline void UnrealObjectRef::clear_bunchbitsnum() {
   _impl_.bunchbitsnum_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000004u;
 }
 inline uint32_t UnrealObjectRef::_internal_bunchbitsnum() const {
   return _impl_.bunchbitsnum_;
@@ -6147,7 +6199,7 @@ inline uint32_t UnrealObjectRef::bunchbitsnum() const {
   return _internal_bunchbitsnum();
 }
 inline void UnrealObjectRef::_internal_set_bunchbitsnum(uint32_t value) {
-  
+  _impl_._has_bits_[0] |= 0x00000004u;
   _impl_.bunchbitsnum_ = value;
 }
 inline void UnrealObjectRef::set_bunchbitsnum(uint32_t value) {
@@ -6159,18 +6211,18 @@ inline void UnrealObjectRef::set_bunchbitsnum(uint32_t value) {
 
 // ActorComponentRef
 
-// .unrealpb.UnrealObjectRef owner = 1;
+// optional .unrealpb.UnrealObjectRef owner = 1;
 inline bool ActorComponentRef::_internal_has_owner() const {
-  return this != internal_default_instance() && _impl_.owner_ != nullptr;
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.owner_ != nullptr);
+  return value;
 }
 inline bool ActorComponentRef::has_owner() const {
   return _internal_has_owner();
 }
 inline void ActorComponentRef::clear_owner() {
-  if (GetArenaForAllocation() == nullptr && _impl_.owner_ != nullptr) {
-    delete _impl_.owner_;
-  }
-  _impl_.owner_ = nullptr;
+  if (_impl_.owner_ != nullptr) _impl_.owner_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000002u;
 }
 inline const ::unrealpb::UnrealObjectRef& ActorComponentRef::_internal_owner() const {
   const ::unrealpb::UnrealObjectRef* p = _impl_.owner_;
@@ -6188,14 +6240,14 @@ inline void ActorComponentRef::unsafe_arena_set_allocated_owner(
   }
   _impl_.owner_ = owner;
   if (owner) {
-    
+    _impl_._has_bits_[0] |= 0x00000002u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000002u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.ActorComponentRef.owner)
 }
 inline ::unrealpb::UnrealObjectRef* ActorComponentRef::release_owner() {
-  
+  _impl_._has_bits_[0] &= ~0x00000002u;
   ::unrealpb::UnrealObjectRef* temp = _impl_.owner_;
   _impl_.owner_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
@@ -6211,13 +6263,13 @@ inline ::unrealpb::UnrealObjectRef* ActorComponentRef::release_owner() {
 }
 inline ::unrealpb::UnrealObjectRef* ActorComponentRef::unsafe_arena_release_owner() {
   // @@protoc_insertion_point(field_release:unrealpb.ActorComponentRef.owner)
-  
+  _impl_._has_bits_[0] &= ~0x00000002u;
   ::unrealpb::UnrealObjectRef* temp = _impl_.owner_;
   _impl_.owner_ = nullptr;
   return temp;
 }
 inline ::unrealpb::UnrealObjectRef* ActorComponentRef::_internal_mutable_owner() {
-  
+  _impl_._has_bits_[0] |= 0x00000002u;
   if (_impl_.owner_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::UnrealObjectRef>(GetArenaForAllocation());
     _impl_.owner_ = p;
@@ -6241,17 +6293,25 @@ inline void ActorComponentRef::set_allocated_owner(::unrealpb::UnrealObjectRef* 
       owner = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, owner, submessage_arena);
     }
-    
+    _impl_._has_bits_[0] |= 0x00000002u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000002u;
   }
   _impl_.owner_ = owner;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.ActorComponentRef.owner)
 }
 
-// string compName = 2;
+// optional string compName = 2;
+inline bool ActorComponentRef::_internal_has_compname() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool ActorComponentRef::has_compname() const {
+  return _internal_has_compname();
+}
 inline void ActorComponentRef::clear_compname() {
   _impl_.compname_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& ActorComponentRef::compname() const {
   // @@protoc_insertion_point(field_get:unrealpb.ActorComponentRef.compName)
@@ -6260,7 +6320,7 @@ inline const std::string& ActorComponentRef::compname() const {
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
 void ActorComponentRef::set_compname(ArgT0&& arg0, ArgT... args) {
- 
+ _impl_._has_bits_[0] |= 0x00000001u;
  _impl_.compname_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
   // @@protoc_insertion_point(field_set:unrealpb.ActorComponentRef.compName)
 }
@@ -6273,22 +6333,32 @@ inline const std::string& ActorComponentRef::_internal_compname() const {
   return _impl_.compname_.Get();
 }
 inline void ActorComponentRef::_internal_set_compname(const std::string& value) {
-  
+  _impl_._has_bits_[0] |= 0x00000001u;
   _impl_.compname_.Set(value, GetArenaForAllocation());
 }
 inline std::string* ActorComponentRef::_internal_mutable_compname() {
-  
+  _impl_._has_bits_[0] |= 0x00000001u;
   return _impl_.compname_.Mutable(GetArenaForAllocation());
 }
 inline std::string* ActorComponentRef::release_compname() {
   // @@protoc_insertion_point(field_release:unrealpb.ActorComponentRef.compName)
-  return _impl_.compname_.Release();
+  if (!_internal_has_compname()) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  auto* p = _impl_.compname_.Release();
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.compname_.IsDefault()) {
+    _impl_.compname_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return p;
 }
 inline void ActorComponentRef::set_allocated_compname(std::string* compname) {
   if (compname != nullptr) {
-    
+    _impl_._has_bits_[0] |= 0x00000001u;
   } else {
-    
+    _impl_._has_bits_[0] &= ~0x00000001u;
   }
   _impl_.compname_.SetAllocated(compname, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING

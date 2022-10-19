@@ -137,18 +137,20 @@ public:
 
 	static const unrealpb::UnrealObjectRef GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr)
 	{
-		const unrealpb::UnrealObjectRef DefaultValue = unrealpb::UnrealObjectRef::default_instance();
+		unrealpb::UnrealObjectRef ObjRef;
+		ObjRef.set_netguid(0);
+		ObjRef.set_bunchbitsnum(0);
+
 		if (!Obj)
 		{
-			return DefaultValue;
+			return ObjRef;
 		}
 		auto World = Obj->GetWorld();
 		if (!World)
 		{
-			return DefaultValue;
+			return ObjRef;
 		}
 
-		unrealpb::UnrealObjectRef ObjRef;
 		auto GuidCache = World->GetNetDriver()->GuidCache;
 		auto NetGUID = GuidCache->GetNetGUID(Obj);
 		if (Obj->IsA<AActor>() && GuidCache->IsNetGUIDAuthority())
@@ -160,7 +162,7 @@ public:
 				if (Connection == nullptr)
 				{
 					UE_LOG(LogChanneld, Warning, TEXT("Failed to get the ref of %s: the actor has no NetConnection"), *Obj->GetName());
-					return DefaultValue;
+					return ObjRef;
 				}
 			}
 			auto PackageMap = CastChecked<UPackageMapClient>(Connection->PackageMap);
@@ -247,18 +249,19 @@ public:
 
 	static const unrealpb::ActorComponentRef GetRefOfActorComponent(UActorComponent* Comp, UNetConnection* Connection = nullptr)
 	{
-		const unrealpb::ActorComponentRef DefaultValue = unrealpb::ActorComponentRef::default_instance();
+		unrealpb::ActorComponentRef CompRef;
 		if (!Comp || !Comp->GetOwner())
 		{
-			return DefaultValue;
+			CompRef.mutable_owner()->set_netguid(0);
+			return CompRef;
 		}
 		auto World = Comp->GetWorld();
 		if (!World)
 		{
-			return DefaultValue;
+			CompRef.mutable_owner()->set_netguid(0);
+			return CompRef;
 		}
 
-		unrealpb::ActorComponentRef CompRef;
 		CompRef.mutable_owner()->MergeFrom(GetRefOfObject(Comp->GetOwner(), Connection));
 		CompRef.set_compname(std::string(TCHAR_TO_UTF8(*Comp->GetFName().ToString())));
 		return CompRef;

@@ -84,7 +84,7 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 	{
 		uint32 OldNetGUID = MovementInfoDelta->mutable_movementbase()->mutable_owner()->netguid();
 		// The movement base's Actor (e.g. the 'Floor') normally doesn't have a NetConnection. In that case, we use the character's NetConnection.
-		MovementInfoDelta->mutable_movementbase()->MergeFrom(ChanneldUtils::GetRefOfActorComponent(Character->GetMovementBase(), Character->GetNetConnection()));
+		MovementInfoDelta->mutable_movementbase()->CopyFrom(ChanneldUtils::GetRefOfActorComponent(Character->GetMovementBase(), Character->GetNetConnection()));
 		bStateChanged = true;
 		UE_LOG(LogChanneld, Log, TEXT("MovementBase changed: %s -> %s, owner NetGUID: %d -> %d"), *GetNameSafe(OldMovementBase), *GetNameSafe(Character->GetMovementBase()), OldNetGUID, MovementInfoDelta->mutable_movementbase()->mutable_owner()->netguid());
 	}
