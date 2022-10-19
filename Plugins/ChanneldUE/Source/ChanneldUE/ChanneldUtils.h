@@ -159,7 +159,7 @@ public:
 				Connection = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
 				if (Connection == nullptr)
 				{
-					UE_LOG(LogChanneld, Warning, TEXT("Failed to get the ref of UObject %s: no PackageMap is provider while the obj has no NetConnection"), *Obj->GetName());
+					UE_LOG(LogChanneld, Warning, TEXT("Failed to get the ref of %s: the actor has no NetConnection"), *Obj->GetName());
 					return DefaultValue;
 				}
 			}
@@ -218,5 +218,49 @@ public:
 
 		ObjRef.set_netguid(NetGUID.Value);
 		return ObjRef;
+	}
+
+	template<class T>
+	static T* GetActorComponentByRef(const unrealpb::ActorComponentRef* Ref, UWorld* World)
+	{
+		if (!Ref || !World)
+		{
+			return nullptr;
+		}
+
+		AActor* Actor = Cast<AActor>(GetObjectByRef(&Ref->owner(), World));
+		if (!Actor)
+		{
+			return nullptr;
+		}
+
+		FName CompName = FName(UTF8_TO_TCHAR(Ref->compname().c_str()));
+		UObject* Comp = Actor->GetDefaultSubobjectByName(CompName);
+		if (Comp)
+		{
+			return Cast<T>(Comp);
+		}
+
+		UE_LOG(LogChanneld, Warning, TEXT("Cannot find component '%s' of actor %s"), *CompName.ToString(), *Actor->GetName());
+		return nullptr;
+	}
+
+	static const unrealpb::ActorComponentRef GetRefOfActorComponent(UActorComponent* Comp, UNetConnection* Connection = nullptr)
+	{
+		const unrealpb::ActorComponentRef DefaultValue = unrealpb::ActorComponentRef::default_instance();
+		if (!Comp || !Comp->GetOwner())
+		{
+			return DefaultValue;
+		}
+		auto World = Comp->GetWorld();
+		if (!World)
+		{
+			return DefaultValue;
+		}
+
+		unrealpb::ActorComponentRef CompRef;
+		CompRef.mutable_owner()->MergeFrom(GetRefOfObject(Comp->GetOwner(), Connection));
+		CompRef.set_compname(std::string(TCHAR_TO_UTF8(*Comp->GetFName().ToString())));
+		return CompRef;
 	}
 };

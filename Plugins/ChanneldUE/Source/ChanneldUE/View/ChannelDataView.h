@@ -31,6 +31,7 @@ public:
 
 	virtual void Initialize(UChanneldConnection* InConn);
 	virtual void Unintialize();
+	virtual void BeginDestroy() override;
 
 	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider);
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);

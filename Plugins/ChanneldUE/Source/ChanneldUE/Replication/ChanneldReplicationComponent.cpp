@@ -32,7 +32,7 @@ void UChanneldReplicationComponent::PostInitProperties()
 	Super::PostInitProperties();
 
 //#if !WITH_EDITOR
-	InitOnce();
+	//InitOnce();
 //#endif
 }
 
@@ -172,7 +172,10 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 
 void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Message* ChannelData)
 {
-	// FIXME: don't update if the source (the connection that updated the channel data) is self.
+	if (GetOwner()->HasAuthority())
+	{
+		return;
+	}
 
 	for (auto Replicator : Replicators)
 	{

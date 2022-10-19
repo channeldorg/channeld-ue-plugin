@@ -79,10 +79,14 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 	bool bMovementInfoChanged = false;
 	unrealpb::BasedMovementInfo* MovementInfo = FullState->mutable_basedmovement();
 	unrealpb::BasedMovementInfo* MovementInfoDelta = DeltaState->mutable_basedmovement();
-	if (ChanneldUtils::GetObjectByRef(MovementInfo->mutable_movementbase(), Character->GetWorld()) != Character->GetMovementBase())
+	auto OldMovementBase = ChanneldUtils::GetActorComponentByRef<UPrimitiveComponent>(MovementInfo->mutable_movementbase(), Character->GetWorld());
+	if (OldMovementBase != Character->GetMovementBase())
 	{
-		MovementInfoDelta->mutable_movementbase()->MergeFrom(ChanneldUtils::GetRefOfObject(Character->GetMovementBase()));
+		uint32 OldNetGUID = MovementInfoDelta->mutable_movementbase()->mutable_owner()->netguid();
+		// The movement base's Actor (e.g. the 'Floor') normally doesn't have a NetConnection. In that case, we use the character's NetConnection.
+		MovementInfoDelta->mutable_movementbase()->MergeFrom(ChanneldUtils::GetRefOfActorComponent(Character->GetMovementBase(), Character->GetNetConnection()));
 		bStateChanged = true;
+		UE_LOG(LogChanneld, Log, TEXT("MovementBase changed: %s -> %s, owner NetGUID: %d -> %d"), *GetNameSafe(OldMovementBase), *GetNameSafe(Character->GetMovementBase()), OldNetGUID, MovementInfoDelta->mutable_movementbase()->mutable_owner()->netguid());
 	}
 	
 	if (FName(MovementInfo->mutable_bonename()->c_str()) != Character->GetBasedMovement().BoneName)
@@ -185,7 +189,7 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 		FBasedMovementInfo BasedMovement = Character->GetBasedMovement();
 		if (NewState->basedmovement().has_movementbase())
 		{
-			BasedMovement.MovementBase = Cast<UPrimitiveComponent>(ChanneldUtils::GetObjectByRef(&NewState->basedmovement().movementbase(), Character->GetWorld()));
+			BasedMovement.MovementBase = ChanneldUtils::GetActorComponentByRef<UPrimitiveComponent>(&NewState->basedmovement().movementbase(), Character->GetWorld());
 		}
 		if (NewState->basedmovement().has_bonename())
 		{

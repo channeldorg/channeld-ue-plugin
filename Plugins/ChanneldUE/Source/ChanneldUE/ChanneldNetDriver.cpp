@@ -20,6 +20,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerController.h"
+#include "ChanneldNetConnection.h"
+#include "Engine/World.h"
 
 UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -97,9 +99,17 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 		}
 
 		UObject* SpawnedObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld());
-		if (!SpawnedObj)
+		if (SpawnedObj)
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Failed to spawn object from ref: %s"), UTF8_TO_TCHAR(SpawnMsg->obj().DebugString().c_str()));
+			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s"), *SpawnedObj->GetName());
+			if (SpawnMsg->has_localrole() && SpawnedObj->IsA<AActor>())
+			{
+				Cast<AActor>(SpawnedObj)->SetRole((ENetRole)SpawnMsg->localrole());
+			}
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to spawn object from msg: %s"), UTF8_TO_TCHAR(SpawnMsg->DebugString().c_str()));
 		}
 	}
 }
@@ -339,26 +349,7 @@ bool UChanneldNetDriver::InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bo
 
 	ConnToChanneld->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this, &UChanneldNetDriver::ServerHandleUnsub);
 
-	FGameModeEvents::GameModePostLoginEvent.AddLambda([&](AGameModeBase* GameMode, APlayerController* NewPlayer)
-		{
-			auto Comp = Cast<UChanneldReplicationComponent>(NewPlayer->GetComponentByClass(UChanneldReplicationComponent::StaticClass()));
-			if (!Comp)
-			{
-				UE_LOG(LogChanneld, Warning, TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn the GameStateBase in the client."));
-				return;
-			}
-
-			auto Connection = Cast<UChanneldNetConnection>(NewPlayer->GetNetConnection());
-			if (Connection == nullptr)
-			{
-				UE_LOG(LogChanneld, Warning, TEXT("PlayerController doesn't have the UChanneldNetConnection. Failed to spawn the GameStateBase in the client."));
-				return;
-			}
-			unrealpb::SpawnObjectMessage SpawnMsg;
-			SpawnMsg.mutable_obj()->MergeFrom(ChanneldUtils::GetRefOfObject(GameMode->GameState, NewPlayer->GetNetConnection()));
-			SendDataToClient(MessageType_SPAWN, Connection->GetConnId(), SpawnMsg);
-			//ConnToChanneld->Send(Comp->GetChannelId(), MessageType_SPAWN, SpawnMsg);
-		});
+	FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &UChanneldNetDriver::OnClientPostLogin);
 
 	return true;
 
@@ -425,9 +416,7 @@ void UChanneldNetDriver::SendDataToClient(uint32 MsgType, ConnectionId ClientCon
 	channeldpb::ServerForwardMessage ServerForwardMessage;
 	ServerForwardMessage.set_clientconnid(ClientConnId);
 	ServerForwardMessage.set_payload(DataToSend, DataSize);
-	CLOCK_CYCLES(SendCycles);
 	ConnToChanneld->Send(LowLevelSendToChannelId.Get(), MsgType, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
-	UNCLOCK_CYCLES(SendCycles);
 }
 
 void UChanneldNetDriver::SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, const google::protobuf::Message& Msg)
@@ -435,21 +424,19 @@ void UChanneldNetDriver::SendDataToClient(uint32 MsgType, ConnectionId ClientCon
 	channeldpb::ServerForwardMessage ServerForwardMessage;
 	ServerForwardMessage.set_clientconnid(ClientConnId);
 	ServerForwardMessage.set_payload(Msg.SerializeAsString());
-	CLOCK_CYCLES(SendCycles);
 	ConnToChanneld->Send(LowLevelSendToChannelId.Get(), MsgType, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
-	UNCLOCK_CYCLES(SendCycles);
 }
 
 void UChanneldNetDriver::SendDataToServer(uint32 MsgType, uint8* DataToSend, int32 DataSize)
 {
-	CLOCK_CYCLES(SendCycles);
 	ConnToChanneld->SendRaw(LowLevelSendToChannelId.Get(), MsgType, DataToSend, DataSize);
-	UNCLOCK_CYCLES(SendCycles);
 }
 
 void UChanneldNetDriver::LowLevelDestroy()
 {
 	Super::LowLevelDestroy();
+
+	FGameModeEvents::GameModePostLoginEvent.RemoveAll(this);
 
 	if (ConnToChanneld)
 	{
@@ -487,6 +474,7 @@ bool UChanneldNetDriver::IsNetResourceValid()
 	return false;
 }
 
+
 void UChanneldNetDriver::NotifyActorChannelOpen(UActorChannel* Channel, AActor* Actor)
 {
 	//if (Actor->IsA<APlayerState>() && Channel->Connection)
@@ -498,6 +486,77 @@ void UChanneldNetDriver::NotifyActorChannelOpen(UActorChannel* Channel, AActor* 
 		auto RepComp = Cast<UChanneldReplicationComponent>(Comp);
 		RepComp->InitOnce();
 	}
+}
+
+void UChanneldNetDriver::OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer)
+{
+	auto NewPlayerConn = Cast<UChanneldNetConnection>(NewPlayer->GetNetConnection());
+	if (NewPlayerConn == nullptr)
+	{
+		UE_LOG(LogChanneld, Error, TEXT("PlayerController doesn't have the UChanneldNetConnection. Failed to spawn the objects in the clients."));
+		return;
+	}
+
+	// Send the GameStateBase to the new player
+	auto Comp = Cast<UChanneldReplicationComponent>(NewPlayer->GetComponentByClass(UChanneldReplicationComponent::StaticClass()));
+	if (Comp)
+	{
+		unrealpb::SpawnObjectMessage SpawnMsg;
+		SpawnMsg.mutable_obj()->MergeFrom(ChanneldUtils::GetRefOfObject(GameMode->GameState, NewPlayer->GetNetConnection()));
+		SendDataToClient(MessageType_SPAWN, NewPlayerConn->GetConnId(), SpawnMsg);
+		//ConnToChanneld->Send(Comp->GetChannelId(), MessageType_SPAWN, SpawnMsg);
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn the GameStateBase in the client."));
+	}
+
+	// By now, the new player's pawn isn't set yet, so we should wait the event
+	NewPlayer->GetOnNewPawnNotifier().AddLambda([&, NewPlayerConn](APawn* NewPawn)
+		{
+			unrealpb::SpawnObjectMessage SpawnPlayerMsg;
+			// Send the spawning of the new player's pawn to other clients
+			for (auto& Pair : ClientConnectionMap)
+			{
+				if (Pair.Value != NewPlayerConn)
+				{
+					SpawnPlayerMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(NewPawn, Pair.Value));
+					SpawnPlayerMsg.set_localrole(ENetRole::ROLE_SimulatedProxy);
+					SendDataToClient(MessageType_SPAWN, Pair.Key, SpawnPlayerMsg);
+				}
+			}
+		});
+
+	// Send the existing player pawns to the new player
+	unrealpb::SpawnObjectMessage SpawnPlayerMsg;
+	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		APlayerController* PC = Iterator->Get();
+		if (PC && PC != NewPlayer && PC->GetPawn())
+		{
+			SpawnPlayerMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(PC->GetPawn(), NewPlayerConn));
+			SpawnPlayerMsg.set_localrole(ENetRole::ROLE_SimulatedProxy);
+			SendDataToClient(MessageType_SPAWN, NewPlayerConn->GetConnId(), SpawnPlayerMsg);
+		}
+	}
+
+	/*
+	// Send the existing player pawns to the new player
+	for (auto& Pair : ClientConnectionMap)
+	{
+		if (Pair.Value == NewPlayerConn)
+			continue;
+
+		unrealpb::SpawnObjectMessage SpawnPlayerMsg;
+		APlayerController* PC = Pair.Value->GetPlayerController(GetWorld());
+		if (PC && PC->GetPawn())
+		{
+			SpawnPlayerMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(PC->GetPawn(), NewPlayerConn));
+			SpawnPlayerMsg.set_localrole(ENetRole::ROLE_SimulatedProxy);
+			SendDataToClient(MessageType_SPAWN, NewPlayerConn->GetConnId(), SpawnPlayerMsg);
+		}
+	}
+	*/
 }
 
 void UChanneldNetDriver::TickDispatch(float DeltaTime)
@@ -529,9 +588,22 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 	{
 		for (int32 i = 0; i < ClientConnections.Num(); i++)
 		{
-			UNetConnection* Connection = ClientConnections[i];
-			check(Connection);
-			if (Connection->PlayerController && Connection->PlayerController->GetViewTarget())
+			UChanneldNetConnection* Connection = CastChecked<UChanneldNetConnection>(ClientConnections[i]);
+
+			/*
+			auto PackageMap = CastChecked<UPackageMapClient>(Connection->PackageMap);
+			for (auto& Pair : GuidCache->ObjectLookup)
+			{
+				if (!PackageMap->NetGUIDExportCountMap.Contains(Pair.Key))
+				{
+					unrealpb::SpawnObjectMessage SpawnMsg;
+					SpawnMsg.mutable_obj()->MergeFrom(ChanneldUtils::GetRefOfObject(Pair.Value.Object.Get(), Connection));
+					SendDataToClient(MessageType_SPAWN, Connection->GetConnId(), SpawnMsg);
+				}
+			}
+			*/
+
+			if (Connection->PlayerController && Connection->PlayerController->GetLocalRole() == ROLE_AutonomousProxy && Connection->PlayerController->GetViewTarget())
 			{
 				// Trigger ClientMoveResponse RPC
 				Connection->PlayerController->SendClientAdjustment();
@@ -550,7 +622,7 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 
 void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject /*= nullptr*/)
 {
-	UE_LOG(LogChanneld, Verbose, TEXT("Sending RPC %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
+	UE_LOG(LogChanneld, VeryVerbose, TEXT("Sending RPC %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
 	if (Function->GetFName() == FName("ClientSetHUD"))
 	{
 		//UE_DEBUG_BREAK();
@@ -573,7 +645,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 				if (ParamsMsg)
 				{
 					RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
-					UE_LOG(LogChanneld, Verbose, TEXT("Serialized RPC parameters to %dB: %s"), RpcMsg.paramspayload().size(), UTF8_TO_TCHAR(ParamsMsg->DebugString().c_str()));
+					UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %dB: %s"), RpcMsg.paramspayload().size(), UTF8_TO_TCHAR(ParamsMsg->DebugString().c_str()));
 				}
 				uint8* Data = new uint8[RpcMsg.ByteSizeLong()];
 				if (RpcMsg.SerializeToArray(Data, RpcMsg.GetCachedSize()))
@@ -629,7 +701,7 @@ void UChanneldNetDriver::OnSentRPC(class AActor* Actor, FString FuncName)
 
 void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDelayRPC)
 {
-	UE_LOG(LogChanneld, Verbose, TEXT("Received RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
+	UE_LOG(LogChanneld, VeryVerbose, TEXT("Received RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
 
 	UFunction* Function = Actor->FindFunction(FunctionName);
 	check(Function);
@@ -705,7 +777,9 @@ void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 
 	if (ConnToChanneld && ConnToChanneld->IsConnected())
 	{
+		CLOCK_CYCLES(SendCycles);
 		ConnToChanneld->TickOutgoing();
+		UNCLOCK_CYCLES(SendCycles);
 	}
 }
 

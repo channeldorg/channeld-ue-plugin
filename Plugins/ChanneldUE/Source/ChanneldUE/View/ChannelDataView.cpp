@@ -102,6 +102,20 @@ void UChannelDataView::Unintialize()
 	UE_LOG(LogChanneld, Log, TEXT("%s uninitialized channels."), *this->GetClass()->GetName());
 }
 
+void UChannelDataView::BeginDestroy()
+{
+	Super::BeginDestroy();
+
+	ReceivedUpdateDataInChannels.Empty();
+	delete AnyForTypeUrl;
+	for (auto& Pair : ChannelDataTemplatesByTypeUrl)
+	{
+		delete Pair.Value;
+	}
+	ChannelDataTemplatesByTypeUrl.Empty();
+	ChannelDataProviders.Empty();
+}
+
 void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provider)
 {
 	if (!ChannelDataTemplates.Contains(Provider->GetChannelType()))
@@ -193,20 +207,22 @@ int32 UChannelDataView::SendAllChannelUpdates()
 			int RemovedCount = 0;
 			for (auto Itr = Providers->CreateIterator(); Itr; ++Itr)
 			{
-				auto Provider = Itr.ElementIt;
-				if (!IsValid(Cast<UObject>(Provider->Value)))
+				auto Provider = Itr.ElementIt->Value;
+				if (Provider && IsValid(Provider->_getUObject()))
+				{
+					if (Provider->UpdateChannelData(NewState))
+					{
+						UpdateCount++;
+					}
+					if (Provider->IsRemoved())
+					{
+						Itr.RemoveCurrent();
+						RemovedCount++;
+					}
+				}
+				else
 				{
 					Itr.RemoveCurrent();
-					continue;
-				}
-				if (Provider->Value->UpdateChannelData(NewState))
-				{
-					UpdateCount++;
-				}
-				if (Provider->Value->IsRemoved())
-				{
-					Itr.RemoveCurrent();
-					RemovedCount++;
 				}
 			}
 			if (RemovedCount > 0)
@@ -293,11 +309,12 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	// Call ParsePartial instead of Parse to keep the existing value from being reset.
 	if (!UpdateData->ParsePartialFromString(UpdateMsg->data().value()))
 	{
-		UE_LOG(LogChanneld, Error, TEXT("Failed to parse channel data of type %s, typeUrl: %s"), UTF8_TO_TCHAR(UpdateMsg->GetTypeName().c_str()), UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
+		
+		UE_LOG(LogChanneld, Error, TEXT("Failed to parse %s channel data, typeUrl: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
 		return;
 	}
 
-	UE_LOG(LogChanneld, Verbose, TEXT("Receive %s update: %s"), UTF8_TO_TCHAR(UpdateMsg->GetTypeName().c_str()), UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
+	UE_LOG(LogChanneld, Verbose, TEXT("Received %s channel update: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
 
 	TSet<IChannelDataProvider*>* Providers = ChannelDataProviders.Find(ChId);
 	if (Providers == nullptr || Providers->Num() == 0)

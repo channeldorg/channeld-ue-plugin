@@ -122,6 +122,12 @@ EChanneldChannelType UChanneldGameInstanceSubsystem::GetChannelTypeByChId(int32 
 	return SubscribedChannelInfo != nullptr ? SubscribedChannelInfo->ChannelType : EChanneldChannelType::ECT_Unknown;
 }
 
+FString UChanneldGameInstanceSubsystem::GetChannelTypeNameByChId(int32 ChId)
+{
+	EChanneldChannelType Type = GetChannelTypeByChId(ChId);
+	return StaticEnum<EChanneldChannelType>()->GetNameStringByValue((int64)Type);
+}
+
 TArray<FSubscribedChannelInfo> UChanneldGameInstanceSubsystem::GetSubscribedChannels()
 {
 	if (ensureMsgf(ConnectionInstance, TEXT("Need to call ConnectToChanneld first!")))
@@ -531,7 +537,7 @@ void UChanneldGameInstanceSubsystem::InitChannelDataView()
 
 		for (IChannelDataProvider* Provider : UnregisteredDataProviders)
 		{
-			if (IsValid(Cast<UObject>(Provider)))
+			if (Provider && IsValid(Provider->_getUObject()))
 			{
 				ChannelDataView->AddProvider(Provider->GetChannelId(), Provider);
 			}

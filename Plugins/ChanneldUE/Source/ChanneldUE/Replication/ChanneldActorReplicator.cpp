@@ -63,6 +63,12 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 		return;
 	}
 
+	auto Connnection = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
+	if (Connnection && Connnection->GetConnId() != FullState->owningconnid())
+	{
+		DeltaState->set_owningconnid(Connnection->GetConnId());
+		bStateChanged = true;
+	}
 	if (Actor->IsReplicatingMovement() != FullState->breplicatemovement())
 	{
 		DeltaState->set_breplicatemovement(Actor->IsReplicatingMovement());
@@ -148,12 +154,39 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 			Actor->SetRole((ENetRole)NewState->remoterole());
 		}
 	}
+	if (NewState->has_owningconnid())
+	{
+		UChanneldNetConnection* Connection = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
+		if (Connection)
+		{
+			if (Connection->GetConnId() == NewState->owningconnid())
+			{
+				Actor->SetRole(ROLE_AutonomousProxy);
+			}
+			else
+			{
+				Actor->SetRole(ROLE_SimulatedProxy);
+			}
+			const static UEnum* Enum = StaticEnum<ENetRole>();
+			UE_LOG(LogChanneld, Log, TEXT("[Client] Updated actor %s's role from %s to %s, local/remote owning connId: %d/%d"),
+				*Actor->GetName(),
+				*Enum->GetNameStringByValue(Actor->GetLocalRole()),
+				*Enum->GetNameStringByValue(Actor->GetLocalRole()),
+				Connection->GetConnId(), 
+				NewState->owningconnid()
+			);
+		}
+	}
 
 	if (NewState->has_owner())
 	{
-		// TODO: handle unmapped NetGUID
-		Actor->SetOwner(Cast<AActor>(ChanneldUtils::GetObjectByRef(&NewState->owner(), Actor->GetWorld())));
-		Actor->ProcessEvent(OnRep_OwnerFunc, NULL);
+		// Special case: the client won't create other player's controller
+		if (!Actor->IsA<APawn>() || Actor->HasAuthority())
+		{
+			// TODO: handle unmapped NetGUID
+			Actor->SetOwner(Cast<AActor>(ChanneldUtils::GetObjectByRef(&NewState->owner(), Actor->GetWorld())));
+			Actor->ProcessEvent(OnRep_OwnerFunc, NULL);
+		}
 	}
 	if (NewState->has_bhidden())
 	{

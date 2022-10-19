@@ -73,6 +73,20 @@ struct UnrealObjectRefDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UnrealObjectRefDefaultTypeInternal _UnrealObjectRef_default_instance_;
+PROTOBUF_CONSTEXPR ActorComponentRef::ActorComponentRef(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.compname_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.owner_)*/nullptr
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct ActorComponentRefDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ActorComponentRefDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ActorComponentRefDefaultTypeInternal() {}
+  union {
+    ActorComponentRef _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ActorComponentRefDefaultTypeInternal _ActorComponentRef_default_instance_;
 PROTOBUF_CONSTEXPR RemoteFunctionMessage::RemoteFunctionMessage(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.functionname_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
@@ -90,8 +104,10 @@ struct RemoteFunctionMessageDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RemoteFunctionMessageDefaultTypeInternal _RemoteFunctionMessage_default_instance_;
 PROTOBUF_CONSTEXPR SpawnObjectMessage::SpawnObjectMessage(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.obj_)*/nullptr
-  , /*decltype(_impl_._cached_size_)*/{}} {}
+    /*decltype(_impl_._has_bits_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_.obj_)*/nullptr
+  , /*decltype(_impl_.localrole_)*/0u} {}
 struct SpawnObjectMessageDefaultTypeInternal {
   PROTOBUF_CONSTEXPR SpawnObjectMessageDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -107,12 +123,13 @@ PROTOBUF_CONSTEXPR ActorState::ActorState(
   , /*decltype(_impl_._cached_size_)*/{}
   , /*decltype(_impl_.owner_)*/nullptr
   , /*decltype(_impl_.instigator_)*/nullptr
+  , /*decltype(_impl_.owningconnid_)*/0u
   , /*decltype(_impl_.localrole_)*/0u
-  , /*decltype(_impl_.remoterole_)*/0u
   , /*decltype(_impl_.removed_)*/false
   , /*decltype(_impl_.breplicatemovement_)*/false
   , /*decltype(_impl_.bhidden_)*/false
   , /*decltype(_impl_.btearoff_)*/false
+  , /*decltype(_impl_.remoterole_)*/0u
   , /*decltype(_impl_.bcanbedamaged_)*/false} {}
 struct ActorStateDefaultTypeInternal {
   PROTOBUF_CONSTEXPR ActorStateDefaultTypeInternal()
@@ -480,7 +497,7 @@ struct GameStateBaseDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GameStateBaseDefaultTypeInternal _GameStateBase_default_instance_;
 }  // namespace unrealpb
-static ::_pb::Metadata file_level_metadata_unreal_5fcommon_2eproto[29];
+static ::_pb::Metadata file_level_metadata_unreal_5fcommon_2eproto[30];
 static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_unreal_5fcommon_2eproto = nullptr;
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_unreal_5fcommon_2eproto = nullptr;
 
@@ -514,6 +531,14 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   PROTOBUF_FIELD_OFFSET(::unrealpb::UnrealObjectRef, _impl_.netguidbunch_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::UnrealObjectRef, _impl_.bunchbitsnum_),
   ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorComponentRef, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorComponentRef, _impl_.owner_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorComponentRef, _impl_.compname_),
+  ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::unrealpb::RemoteFunctionMessage, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -522,13 +547,16 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   PROTOBUF_FIELD_OFFSET(::unrealpb::RemoteFunctionMessage, _impl_.targetobj_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::RemoteFunctionMessage, _impl_.functionname_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::RemoteFunctionMessage, _impl_.paramspayload_),
-  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::SpawnObjectMessage, _impl_._has_bits_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::SpawnObjectMessage, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::unrealpb::SpawnObjectMessage, _impl_.obj_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::SpawnObjectMessage, _impl_.localrole_),
+  ~0u,
+  0,
   PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_._has_bits_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -536,6 +564,7 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.removed_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.owningconnid_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.breplicatemovement_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.localrole_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.remoterole_),
@@ -545,13 +574,14 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.bcanbedamaged_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.instigator_),
   ~0u,
-  4,
   2,
+  4,
   3,
+  7,
   0,
   5,
   6,
-  7,
+  8,
   1,
   PROTOBUF_FIELD_OFFSET(::unrealpb::ActorComponentState, _impl_._has_bits_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::ActorComponentState, _internal_metadata_),
@@ -815,38 +845,40 @@ static const ::_pbi::MigrationSchema schemas_unreal_5fcommon_2eproto[] PROTOBUF_
   { 0, -1, -1, sizeof(::unrealpb::FVector)},
   { 9, -1, -1, sizeof(::unrealpb::UnrealObjectRef_GuidCachedObject)},
   { 18, -1, -1, sizeof(::unrealpb::UnrealObjectRef)},
-  { 28, -1, -1, sizeof(::unrealpb::RemoteFunctionMessage)},
-  { 37, -1, -1, sizeof(::unrealpb::SpawnObjectMessage)},
-  { 44, 59, -1, sizeof(::unrealpb::ActorState)},
-  { 68, 76, -1, sizeof(::unrealpb::ActorComponentState)},
-  { 78, 98, -1, sizeof(::unrealpb::SceneComponentState)},
-  { 112, -1, -1, sizeof(::unrealpb::RootMotionMontage)},
-  { 118, 131, -1, sizeof(::unrealpb::BasedMovementInfo)},
-  { 138, 153, -1, sizeof(::unrealpb::CharacterState)},
-  { 162, -1, -1, sizeof(::unrealpb::Character_ServerMovePacked_Params)},
-  { 170, -1, -1, sizeof(::unrealpb::Character_ClientMoveResponsePacked_Params)},
-  { 178, 189, -1, sizeof(::unrealpb::PlayerState)},
-  { 194, -1, -1, sizeof(::unrealpb::ControllerState)},
-  { 203, -1, -1, sizeof(::unrealpb::Controller_ClientSetLocation_Params)},
-  { 211, -1, -1, sizeof(::unrealpb::Controller_ClientSetRotation_Params)},
-  { 219, 228, -1, sizeof(::unrealpb::PlayerControllerState)},
-  { 231, -1, -1, sizeof(::unrealpb::PlayerController_ServerUpdateCamera_Params)},
-  { 239, 246, -1, sizeof(::unrealpb::PlayerController_ClientSetHUD_Params)},
-  { 247, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetViewTarget_Params)},
-  { 258, 265, -1, sizeof(::unrealpb::PlayerController_ClientEnableNetworkVoice_Params)},
-  { 266, -1, -1, sizeof(::unrealpb::PlayerController_ClientCapBandwidth_Params)},
-  { 273, -1, -1, sizeof(::unrealpb::PlayerController_ClientRestart_Params)},
-  { 280, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetCameraMode_Params)},
-  { 287, -1, -1, sizeof(::unrealpb::PlayerController_ClientRetryClientRestart_Params)},
-  { 294, -1, -1, sizeof(::unrealpb::PlayerController_ServerSetSpectatorLocation_Params)},
-  { 302, -1, -1, sizeof(::unrealpb::PlayerController_ServerAcknowledgePossession_Params)},
-  { 309, 320, -1, sizeof(::unrealpb::GameStateBase)},
+  { 28, -1, -1, sizeof(::unrealpb::ActorComponentRef)},
+  { 36, -1, -1, sizeof(::unrealpb::RemoteFunctionMessage)},
+  { 45, 53, -1, sizeof(::unrealpb::SpawnObjectMessage)},
+  { 55, 71, -1, sizeof(::unrealpb::ActorState)},
+  { 81, 89, -1, sizeof(::unrealpb::ActorComponentState)},
+  { 91, 111, -1, sizeof(::unrealpb::SceneComponentState)},
+  { 125, -1, -1, sizeof(::unrealpb::RootMotionMontage)},
+  { 131, 144, -1, sizeof(::unrealpb::BasedMovementInfo)},
+  { 151, 166, -1, sizeof(::unrealpb::CharacterState)},
+  { 175, -1, -1, sizeof(::unrealpb::Character_ServerMovePacked_Params)},
+  { 183, -1, -1, sizeof(::unrealpb::Character_ClientMoveResponsePacked_Params)},
+  { 191, 202, -1, sizeof(::unrealpb::PlayerState)},
+  { 207, -1, -1, sizeof(::unrealpb::ControllerState)},
+  { 216, -1, -1, sizeof(::unrealpb::Controller_ClientSetLocation_Params)},
+  { 224, -1, -1, sizeof(::unrealpb::Controller_ClientSetRotation_Params)},
+  { 232, 241, -1, sizeof(::unrealpb::PlayerControllerState)},
+  { 244, -1, -1, sizeof(::unrealpb::PlayerController_ServerUpdateCamera_Params)},
+  { 252, 259, -1, sizeof(::unrealpb::PlayerController_ClientSetHUD_Params)},
+  { 260, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetViewTarget_Params)},
+  { 271, 278, -1, sizeof(::unrealpb::PlayerController_ClientEnableNetworkVoice_Params)},
+  { 279, -1, -1, sizeof(::unrealpb::PlayerController_ClientCapBandwidth_Params)},
+  { 286, -1, -1, sizeof(::unrealpb::PlayerController_ClientRestart_Params)},
+  { 293, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetCameraMode_Params)},
+  { 300, -1, -1, sizeof(::unrealpb::PlayerController_ClientRetryClientRestart_Params)},
+  { 307, -1, -1, sizeof(::unrealpb::PlayerController_ServerSetSpectatorLocation_Params)},
+  { 315, -1, -1, sizeof(::unrealpb::PlayerController_ServerAcknowledgePossession_Params)},
+  { 322, 333, -1, sizeof(::unrealpb::GameStateBase)},
 };
 
 static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eproto[] = {
   &::unrealpb::_FVector_default_instance_._instance,
   &::unrealpb::_UnrealObjectRef_GuidCachedObject_default_instance_._instance,
   &::unrealpb::_UnrealObjectRef_default_instance_._instance,
+  &::unrealpb::_ActorComponentRef_default_instance_._instance,
   &::unrealpb::_RemoteFunctionMessage_default_instance_._instance,
   &::unrealpb::_SpawnObjectMessage_default_instance_._instance,
   &::unrealpb::_ActorState_default_instance_._instance,
@@ -883,130 +915,134 @@ const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_
   "dCachedObject\022\024\n\014netGUIDBunch\030\003 \001(\014\022\024\n\014b"
   "unchBitsNum\030\004 \001(\r\032H\n\020GuidCachedObject\022\017\n"
   "\007netGUID\030\001 \001(\r\022\020\n\010pathName\030\002 \001(\t\022\021\n\toute"
-  "rGUID\030\003 \001(\r\"r\n\025RemoteFunctionMessage\022,\n\t"
-  "targetObj\030\001 \001(\0132\031.unrealpb.UnrealObjectR"
-  "ef\022\024\n\014functionName\030\002 \001(\t\022\025\n\rparamsPayloa"
-  "d\030\003 \001(\014\"<\n\022SpawnObjectMessage\022&\n\003obj\030\001 \001"
-  "(\0132\031.unrealpb.UnrealObjectRef\"\223\003\n\nActorS"
-  "tate\022\017\n\007removed\030\001 \001(\010\022\037\n\022bReplicateMovem"
-  "ent\030\002 \001(\010H\000\210\001\001\022\026\n\tlocalRole\030\003 \001(\rH\001\210\001\001\022\027"
-  "\n\nremoteRole\030\004 \001(\rH\002\210\001\001\022-\n\005owner\030\005 \001(\0132\031"
-  ".unrealpb.UnrealObjectRefH\003\210\001\001\022\024\n\007bHidde"
-  "n\030\006 \001(\010H\004\210\001\001\022\025\n\010bTearOff\030\007 \001(\010H\005\210\001\001\022\032\n\rb"
-  "CanBeDamaged\030\010 \001(\010H\006\210\001\001\0222\n\ninstigator\030\t "
-  "\001(\0132\031.unrealpb.UnrealObjectRefH\007\210\001\001B\025\n\023_"
-  "bReplicateMovementB\014\n\n_localRoleB\r\n\013_rem"
-  "oteRoleB\010\n\006_ownerB\n\n\010_bHiddenB\013\n\t_bTearO"
-  "ffB\020\n\016_bCanBeDamagedB\r\n\013_instigator\"e\n\023A"
-  "ctorComponentState\022\026\n\tbIsActive\030\001 \001(\010H\000\210"
-  "\001\001\022\030\n\013bReplicated\030\002 \001(\010H\001\210\001\001B\014\n\n_bIsActi"
-  "veB\016\n\014_bReplicated\"\275\006\n\023SceneComponentSta"
-  "te\022\017\n\007removed\030\001 \001(\010\022\036\n\021bAbsoluteLocation"
-  "\030\002 \001(\010H\000\210\001\001\022\036\n\021bAbsoluteRotation\030\003 \001(\010H\001"
-  "\210\001\001\022\033\n\016bAbsoluteScale\030\004 \001(\010H\002\210\001\001\022\025\n\010bVis"
-  "ible\030\005 \001(\010H\003\210\001\001\022\036\n\021bShouldBeAttached\030\006 \001"
-  "(\010H\004\210\001\001\022,\n\037bShouldSnapLocationWhenAttach"
-  "ed\030\007 \001(\010H\005\210\001\001\022,\n\037bShouldSnapRotationWhen"
-  "Attached\030\010 \001(\010H\006\210\001\001\0224\n\014attachParent\030\t \001("
-  "\0132\031.unrealpb.UnrealObjectRefH\007\210\001\001\0221\n\016att"
-  "achChildren\030\n \003(\0132\031.unrealpb.UnrealObjec"
-  "tRef\022\035\n\020attachSocketName\030\013 \001(\tH\010\210\001\001\0220\n\020r"
-  "elativeLocation\030\014 \001(\0132\021.unrealpb.FVector"
-  "H\t\210\001\001\0220\n\020relativeRotation\030\r \001(\0132\021.unreal"
-  "pb.FVectorH\n\210\001\001\022-\n\rrelativeScale\030\016 \001(\0132\021"
-  ".unrealpb.FVectorH\013\210\001\001B\024\n\022_bAbsoluteLoca"
-  "tionB\024\n\022_bAbsoluteRotationB\021\n\017_bAbsolute"
-  "ScaleB\013\n\t_bVisibleB\024\n\022_bShouldBeAttached"
-  "B\"\n _bShouldSnapLocationWhenAttachedB\"\n "
-  "_bShouldSnapRotationWhenAttachedB\017\n\r_att"
-  "achParentB\023\n\021_attachSocketNameB\023\n\021_relat"
-  "iveLocationB\023\n\021_relativeRotationB\020\n\016_rel"
-  "ativeScale\"\023\n\021RootMotionMontage\"\234\003\n\021Base"
-  "dMovementInfo\0224\n\014movementBase\030\001 \001(\0132\031.un"
-  "realpb.UnrealObjectRefH\000\210\001\001\022\025\n\010boneName\030"
-  "\002 \001(\tH\001\210\001\001\022(\n\010location\030\003 \001(\0132\021.unrealpb."
-  "FVectorH\002\210\001\001\022(\n\010rotation\030\004 \001(\0132\021.unrealp"
-  "b.FVectorH\003\210\001\001\022$\n\027bServerHasBaseComponen"
-  "t\030\005 \001(\010H\004\210\001\001\022\036\n\021bRelativeRotation\030\006 \001(\010H"
-  "\005\210\001\001\022\037\n\022bServerHasVelocity\030\007 \001(\010H\006\210\001\001B\017\n"
-  "\r_movementBaseB\013\n\t_boneNameB\013\n\t_location"
-  "B\013\n\t_rotationB\032\n\030_bServerHasBaseComponen"
-  "tB\024\n\022_bRelativeRotationB\025\n\023_bServerHasVe"
-  "locity\"\313\004\n\016CharacterState\022\017\n\007removed\030\001 \001"
-  "(\010\0224\n\nrootMotion\030\002 \001(\0132\033.unrealpb.RootMo"
-  "tionMontageH\000\210\001\001\0227\n\rbasedMovement\030\003 \001(\0132"
-  "\033.unrealpb.BasedMovementInfoH\001\210\001\001\022/\n\"ser"
-  "verLastTransformUpdateTimeStamp\030\004 \001(\002H\002\210"
-  "\001\001\022\031\n\014movementMode\030\005 \001(\rH\003\210\001\001\022\030\n\013bIsCrou"
-  "ched\030\006 \001(\010H\004\210\001\001\022%\n\030bProxyIsJumpForceAppl"
-  "ied\030\007 \001(\010H\005\210\001\001\022+\n\036animRootMotionTranslat"
-  "ionScale\030\010 \001(\002H\006\210\001\001\022/\n\"replayLastTransfo"
-  "rmUpdateTimeStamp\030\t \001(\002H\007\210\001\001B\r\n\013_rootMot"
-  "ionB\020\n\016_basedMovementB%\n#_serverLastTran"
-  "sformUpdateTimeStampB\017\n\r_movementModeB\016\n"
-  "\014_bIsCrouchedB\033\n\031_bProxyIsJumpForceAppli"
-  "edB!\n\037_animRootMotionTranslationScaleB%\n"
-  "#_replayLastTransformUpdateTimeStamp\"H\n!"
-  "Character_ServerMovePacked_Params\022\017\n\007bit"
-  "sNum\030\001 \001(\r\022\022\n\npackedBits\030\002 \001(\014\"P\n)Charac"
-  "ter_ClientMoveResponsePacked_Params\022\017\n\007b"
-  "itsNum\030\001 \001(\r\022\022\n\npackedBits\030\002 \001(\014\"\244\001\n\013Pla"
-  "yerState\022\017\n\007removed\030\001 \001(\010\022\022\n\005score\030\002 \001(\002"
-  "H\000\210\001\001\022\025\n\010playerId\030\003 \001(\005H\001\210\001\001\022\021\n\004ping\030\004 \001"
-  "(\rH\002\210\001\001\022\027\n\nplayerName\030\005 \001(\tH\003\210\001\001B\010\n\006_sco"
-  "reB\013\n\t_playerIdB\007\n\005_pingB\r\n\013_playerName\""
-  "{\n\017ControllerState\022\017\n\007removed\030\001 \001(\010\022.\n\013p"
-  "layerState\030\002 \001(\0132\031.unrealpb.UnrealObject"
-  "Ref\022\'\n\004pawn\030\003 \001(\0132\031.unrealpb.UnrealObjec"
-  "tRef\"u\n#Controller_ClientSetLocation_Par"
-  "ams\022&\n\013newLocation\030\001 \001(\0132\021.unrealpb.FVec"
-  "tor\022&\n\013newRotation\030\002 \001(\0132\021.unrealpb.FVec"
-  "tor\"c\n#Controller_ClientSetRotation_Para"
-  "ms\022&\n\013newRotation\030\001 \001(\0132\021.unrealpb.FVect"
-  "or\022\024\n\014bResetCamera\030\002 \001(\010\"\264\001\n\025PlayerContr"
-  "ollerState\022\017\n\007removed\030\001 \001(\010\0222\n\022targetVie"
-  "wRotation\030\002 \001(\0132\021.unrealpb.FVectorH\000\210\001\001\022"
-  "-\n\rspawnLocation\030\003 \001(\0132\021.unrealpb.FVecto"
-  "rH\001\210\001\001B\025\n\023_targetViewRotationB\020\n\016_spawnL"
-  "ocation\"g\n*PlayerController_ServerUpdate"
-  "Camera_Params\022!\n\006camLoc\030\001 \001(\0132\021.unrealpb"
-  ".FVector\022\026\n\016camPitchAndYaw\030\002 \001(\005\"R\n$Play"
-  "erController_ClientSetHUD_Params\022\031\n\014hudC"
-  "lassName\030\001 \001(\tH\000\210\001\001B\017\n\r_hudClassName\"\252\001\n"
-  "+PlayerController_ClientSetViewTarget_Pa"
-  "rams\022(\n\005actor\030\001 \001(\0132\031.unrealpb.UnrealObj"
-  "ectRef\022\021\n\tblendTime\030\002 \001(\002\022\025\n\rblendFuncti"
-  "on\030\003 \001(\r\022\020\n\010blendExp\030\004 \001(\002\022\025\n\rbLockOutgo"
-  "ing\030\005 \001(\010\"T\n0PlayerController_ClientEnab"
-  "leNetworkVoice_Params\022\024\n\007bEnable\030\001 \001(\010H\000"
-  "\210\001\001B\n\n\010_bEnable\"9\n*PlayerController_Clie"
-  "ntCapBandwidth_Params\022\013\n\003cap\030\001 \001(\005\"P\n%Pl"
-  "ayerController_ClientRestart_Params\022\'\n\004p"
-  "awn\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\"A\n+"
-  "PlayerController_ClientSetCameraMode_Par"
-  "ams\022\022\n\nnewCamMode\030\001 \001(\t\"[\n0PlayerControl"
-  "ler_ClientRetryClientRestart_Params\022\'\n\004p"
-  "awn\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\"z\n2"
-  "PlayerController_ServerSetSpectatorLocat"
-  "ion_Params\022!\n\006newLoc\030\001 \001(\0132\021.unrealpb.FV"
-  "ector\022!\n\006newRot\030\002 \001(\0132\021.unrealpb.FVector"
-  "\"^\n3PlayerController_ServerAcknowledgePo"
-  "ssession_Params\022\'\n\004pawn\030\001 \001(\0132\031.unrealpb"
-  ".UnrealObjectRef\"\230\002\n\rGameStateBase\022\017\n\007re"
-  "moved\030\001 \001(\010\022\037\n\022spectatorClassName\030\002 \001(\tH"
-  "\000\210\001\001\022\036\n\021gameModeClassName\030\003 \001(\tH\001\210\001\001\022\'\n\032"
-  "replicatedWorldTimeSeconds\030\004 \001(\002H\002\210\001\001\022$\n"
-  "\027bReplicatedHasBegunPlay\030\005 \001(\010H\003\210\001\001B\025\n\023_"
-  "spectatorClassNameB\024\n\022_gameModeClassName"
-  "B\035\n\033_replicatedWorldTimeSecondsB\032\n\030_bRep"
-  "licatedHasBegunPlayB,Z*channeld.clewcat."
-  "com/channeld/pkg/unrealpbb\006proto3"
+  "rGUID\030\003 \001(\r\"O\n\021ActorComponentRef\022(\n\005owne"
+  "r\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\022\020\n\010co"
+  "mpName\030\002 \001(\t\"r\n\025RemoteFunctionMessage\022,\n"
+  "\ttargetObj\030\001 \001(\0132\031.unrealpb.UnrealObject"
+  "Ref\022\024\n\014functionName\030\002 \001(\t\022\025\n\rparamsPaylo"
+  "ad\030\003 \001(\014\"b\n\022SpawnObjectMessage\022&\n\003obj\030\001 "
+  "\001(\0132\031.unrealpb.UnrealObjectRef\022\026\n\tlocalR"
+  "ole\030\002 \001(\rH\000\210\001\001B\014\n\n_localRole\"\277\003\n\nActorSt"
+  "ate\022\017\n\007removed\030\001 \001(\010\022\031\n\014owningConnId\030\002 \001"
+  "(\rH\000\210\001\001\022\037\n\022bReplicateMovement\030\003 \001(\010H\001\210\001\001"
+  "\022\026\n\tlocalRole\030\004 \001(\rH\002\210\001\001\022\027\n\nremoteRole\030\005"
+  " \001(\rH\003\210\001\001\022-\n\005owner\030\006 \001(\0132\031.unrealpb.Unre"
+  "alObjectRefH\004\210\001\001\022\024\n\007bHidden\030\007 \001(\010H\005\210\001\001\022\025"
+  "\n\010bTearOff\030\010 \001(\010H\006\210\001\001\022\032\n\rbCanBeDamaged\030\t"
+  " \001(\010H\007\210\001\001\0222\n\ninstigator\030\n \001(\0132\031.unrealpb"
+  ".UnrealObjectRefH\010\210\001\001B\017\n\r_owningConnIdB\025"
+  "\n\023_bReplicateMovementB\014\n\n_localRoleB\r\n\013_"
+  "remoteRoleB\010\n\006_ownerB\n\n\010_bHiddenB\013\n\t_bTe"
+  "arOffB\020\n\016_bCanBeDamagedB\r\n\013_instigator\"e"
+  "\n\023ActorComponentState\022\026\n\tbIsActive\030\001 \001(\010"
+  "H\000\210\001\001\022\030\n\013bReplicated\030\002 \001(\010H\001\210\001\001B\014\n\n_bIsA"
+  "ctiveB\016\n\014_bReplicated\"\275\006\n\023SceneComponent"
+  "State\022\017\n\007removed\030\001 \001(\010\022\036\n\021bAbsoluteLocat"
+  "ion\030\002 \001(\010H\000\210\001\001\022\036\n\021bAbsoluteRotation\030\003 \001("
+  "\010H\001\210\001\001\022\033\n\016bAbsoluteScale\030\004 \001(\010H\002\210\001\001\022\025\n\010b"
+  "Visible\030\005 \001(\010H\003\210\001\001\022\036\n\021bShouldBeAttached\030"
+  "\006 \001(\010H\004\210\001\001\022,\n\037bShouldSnapLocationWhenAtt"
+  "ached\030\007 \001(\010H\005\210\001\001\022,\n\037bShouldSnapRotationW"
+  "henAttached\030\010 \001(\010H\006\210\001\001\0224\n\014attachParent\030\t"
+  " \001(\0132\031.unrealpb.UnrealObjectRefH\007\210\001\001\0221\n\016"
+  "attachChildren\030\n \003(\0132\031.unrealpb.UnrealOb"
+  "jectRef\022\035\n\020attachSocketName\030\013 \001(\tH\010\210\001\001\0220"
+  "\n\020relativeLocation\030\014 \001(\0132\021.unrealpb.FVec"
+  "torH\t\210\001\001\0220\n\020relativeRotation\030\r \001(\0132\021.unr"
+  "ealpb.FVectorH\n\210\001\001\022-\n\rrelativeScale\030\016 \001("
+  "\0132\021.unrealpb.FVectorH\013\210\001\001B\024\n\022_bAbsoluteL"
+  "ocationB\024\n\022_bAbsoluteRotationB\021\n\017_bAbsol"
+  "uteScaleB\013\n\t_bVisibleB\024\n\022_bShouldBeAttac"
+  "hedB\"\n _bShouldSnapLocationWhenAttachedB"
+  "\"\n _bShouldSnapRotationWhenAttachedB\017\n\r_"
+  "attachParentB\023\n\021_attachSocketNameB\023\n\021_re"
+  "lativeLocationB\023\n\021_relativeRotationB\020\n\016_"
+  "relativeScale\"\023\n\021RootMotionMontage\"\236\003\n\021B"
+  "asedMovementInfo\0226\n\014movementBase\030\001 \001(\0132\033"
+  ".unrealpb.ActorComponentRefH\000\210\001\001\022\025\n\010bone"
+  "Name\030\002 \001(\tH\001\210\001\001\022(\n\010location\030\003 \001(\0132\021.unre"
+  "alpb.FVectorH\002\210\001\001\022(\n\010rotation\030\004 \001(\0132\021.un"
+  "realpb.FVectorH\003\210\001\001\022$\n\027bServerHasBaseCom"
+  "ponent\030\005 \001(\010H\004\210\001\001\022\036\n\021bRelativeRotation\030\006"
+  " \001(\010H\005\210\001\001\022\037\n\022bServerHasVelocity\030\007 \001(\010H\006\210"
+  "\001\001B\017\n\r_movementBaseB\013\n\t_boneNameB\013\n\t_loc"
+  "ationB\013\n\t_rotationB\032\n\030_bServerHasBaseCom"
+  "ponentB\024\n\022_bRelativeRotationB\025\n\023_bServer"
+  "HasVelocity\"\313\004\n\016CharacterState\022\017\n\007remove"
+  "d\030\001 \001(\010\0224\n\nrootMotion\030\002 \001(\0132\033.unrealpb.R"
+  "ootMotionMontageH\000\210\001\001\0227\n\rbasedMovement\030\003"
+  " \001(\0132\033.unrealpb.BasedMovementInfoH\001\210\001\001\022/"
+  "\n\"serverLastTransformUpdateTimeStamp\030\004 \001"
+  "(\002H\002\210\001\001\022\031\n\014movementMode\030\005 \001(\rH\003\210\001\001\022\030\n\013bI"
+  "sCrouched\030\006 \001(\010H\004\210\001\001\022%\n\030bProxyIsJumpForc"
+  "eApplied\030\007 \001(\010H\005\210\001\001\022+\n\036animRootMotionTra"
+  "nslationScale\030\010 \001(\002H\006\210\001\001\022/\n\"replayLastTr"
+  "ansformUpdateTimeStamp\030\t \001(\002H\007\210\001\001B\r\n\013_ro"
+  "otMotionB\020\n\016_basedMovementB%\n#_serverLas"
+  "tTransformUpdateTimeStampB\017\n\r_movementMo"
+  "deB\016\n\014_bIsCrouchedB\033\n\031_bProxyIsJumpForce"
+  "AppliedB!\n\037_animRootMotionTranslationSca"
+  "leB%\n#_replayLastTransformUpdateTimeStam"
+  "p\"H\n!Character_ServerMovePacked_Params\022\017"
+  "\n\007bitsNum\030\001 \001(\r\022\022\n\npackedBits\030\002 \001(\014\"P\n)C"
+  "haracter_ClientMoveResponsePacked_Params"
+  "\022\017\n\007bitsNum\030\001 \001(\r\022\022\n\npackedBits\030\002 \001(\014\"\244\001"
+  "\n\013PlayerState\022\017\n\007removed\030\001 \001(\010\022\022\n\005score\030"
+  "\002 \001(\002H\000\210\001\001\022\025\n\010playerId\030\003 \001(\005H\001\210\001\001\022\021\n\004pin"
+  "g\030\004 \001(\rH\002\210\001\001\022\027\n\nplayerName\030\005 \001(\tH\003\210\001\001B\010\n"
+  "\006_scoreB\013\n\t_playerIdB\007\n\005_pingB\r\n\013_player"
+  "Name\"{\n\017ControllerState\022\017\n\007removed\030\001 \001(\010"
+  "\022.\n\013playerState\030\002 \001(\0132\031.unrealpb.UnrealO"
+  "bjectRef\022\'\n\004pawn\030\003 \001(\0132\031.unrealpb.Unreal"
+  "ObjectRef\"u\n#Controller_ClientSetLocatio"
+  "n_Params\022&\n\013newLocation\030\001 \001(\0132\021.unrealpb"
+  ".FVector\022&\n\013newRotation\030\002 \001(\0132\021.unrealpb"
+  ".FVector\"c\n#Controller_ClientSetRotation"
+  "_Params\022&\n\013newRotation\030\001 \001(\0132\021.unrealpb."
+  "FVector\022\024\n\014bResetCamera\030\002 \001(\010\"\264\001\n\025Player"
+  "ControllerState\022\017\n\007removed\030\001 \001(\010\0222\n\022targ"
+  "etViewRotation\030\002 \001(\0132\021.unrealpb.FVectorH"
+  "\000\210\001\001\022-\n\rspawnLocation\030\003 \001(\0132\021.unrealpb.F"
+  "VectorH\001\210\001\001B\025\n\023_targetViewRotationB\020\n\016_s"
+  "pawnLocation\"g\n*PlayerController_ServerU"
+  "pdateCamera_Params\022!\n\006camLoc\030\001 \001(\0132\021.unr"
+  "ealpb.FVector\022\026\n\016camPitchAndYaw\030\002 \001(\005\"R\n"
+  "$PlayerController_ClientSetHUD_Params\022\031\n"
+  "\014hudClassName\030\001 \001(\tH\000\210\001\001B\017\n\r_hudClassNam"
+  "e\"\252\001\n+PlayerController_ClientSetViewTarg"
+  "et_Params\022(\n\005actor\030\001 \001(\0132\031.unrealpb.Unre"
+  "alObjectRef\022\021\n\tblendTime\030\002 \001(\002\022\025\n\rblendF"
+  "unction\030\003 \001(\r\022\020\n\010blendExp\030\004 \001(\002\022\025\n\rbLock"
+  "Outgoing\030\005 \001(\010\"T\n0PlayerController_Clien"
+  "tEnableNetworkVoice_Params\022\024\n\007bEnable\030\001 "
+  "\001(\010H\000\210\001\001B\n\n\010_bEnable\"9\n*PlayerController"
+  "_ClientCapBandwidth_Params\022\013\n\003cap\030\001 \001(\005\""
+  "P\n%PlayerController_ClientRestart_Params"
+  "\022\'\n\004pawn\030\001 \001(\0132\031.unrealpb.UnrealObjectRe"
+  "f\"A\n+PlayerController_ClientSetCameraMod"
+  "e_Params\022\022\n\nnewCamMode\030\001 \001(\t\"[\n0PlayerCo"
+  "ntroller_ClientRetryClientRestart_Params"
+  "\022\'\n\004pawn\030\001 \001(\0132\031.unrealpb.UnrealObjectRe"
+  "f\"z\n2PlayerController_ServerSetSpectator"
+  "Location_Params\022!\n\006newLoc\030\001 \001(\0132\021.unreal"
+  "pb.FVector\022!\n\006newRot\030\002 \001(\0132\021.unrealpb.FV"
+  "ector\"^\n3PlayerController_ServerAcknowle"
+  "dgePossession_Params\022\'\n\004pawn\030\001 \001(\0132\031.unr"
+  "ealpb.UnrealObjectRef\"\230\002\n\rGameStateBase\022"
+  "\017\n\007removed\030\001 \001(\010\022\037\n\022spectatorClassName\030\002"
+  " \001(\tH\000\210\001\001\022\036\n\021gameModeClassName\030\003 \001(\tH\001\210\001"
+  "\001\022\'\n\032replicatedWorldTimeSeconds\030\004 \001(\002H\002\210"
+  "\001\001\022$\n\027bReplicatedHasBegunPlay\030\005 \001(\010H\003\210\001\001"
+  "B\025\n\023_spectatorClassNameB\024\n\022_gameModeClas"
+  "sNameB\035\n\033_replicatedWorldTimeSecondsB\032\n\030"
+  "_bReplicatedHasBegunPlayB,Z*channeld.cle"
+  "wcat.com/channeld/pkg/unrealpbb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_unreal_5fcommon_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_unreal_5fcommon_2eproto = {
-    false, false, 4993, descriptor_table_protodef_unreal_5fcommon_2eproto,
+    false, false, 5158, descriptor_table_protodef_unreal_5fcommon_2eproto,
     "unreal_common.proto",
-    &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 29,
+    &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 30,
     schemas_unreal_5fcommon_2eproto, file_default_instances_unreal_5fcommon_2eproto, TableStruct_unreal_5fcommon_2eproto::offsets,
     file_level_metadata_unreal_5fcommon_2eproto, file_level_enum_descriptors_unreal_5fcommon_2eproto,
     file_level_service_descriptors_unreal_5fcommon_2eproto,
@@ -1847,6 +1883,251 @@ void UnrealObjectRef::InternalSwap(UnrealObjectRef* other) {
 
 // ===================================================================
 
+class ActorComponentRef::_Internal {
+ public:
+  static const ::unrealpb::UnrealObjectRef& owner(const ActorComponentRef* msg);
+};
+
+const ::unrealpb::UnrealObjectRef&
+ActorComponentRef::_Internal::owner(const ActorComponentRef* msg) {
+  return *msg->_impl_.owner_;
+}
+ActorComponentRef::ActorComponentRef(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:unrealpb.ActorComponentRef)
+}
+ActorComponentRef::ActorComponentRef(const ActorComponentRef& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  ActorComponentRef* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.compname_){}
+    , decltype(_impl_.owner_){nullptr}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _impl_.compname_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.compname_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_compname().empty()) {
+    _this->_impl_.compname_.Set(from._internal_compname(), 
+      _this->GetArenaForAllocation());
+  }
+  if (from._internal_has_owner()) {
+    _this->_impl_.owner_ = new ::unrealpb::UnrealObjectRef(*from._impl_.owner_);
+  }
+  // @@protoc_insertion_point(copy_constructor:unrealpb.ActorComponentRef)
+}
+
+inline void ActorComponentRef::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.compname_){}
+    , decltype(_impl_.owner_){nullptr}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.compname_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.compname_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+}
+
+ActorComponentRef::~ActorComponentRef() {
+  // @@protoc_insertion_point(destructor:unrealpb.ActorComponentRef)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void ActorComponentRef::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.compname_.Destroy();
+  if (this != internal_default_instance()) delete _impl_.owner_;
+}
+
+void ActorComponentRef::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void ActorComponentRef::Clear() {
+// @@protoc_insertion_point(message_clear_start:unrealpb.ActorComponentRef)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.compname_.ClearToEmpty();
+  if (GetArenaForAllocation() == nullptr && _impl_.owner_ != nullptr) {
+    delete _impl_.owner_;
+  }
+  _impl_.owner_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* ActorComponentRef::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // .unrealpb.UnrealObjectRef owner = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_owner(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string compName = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          auto str = _internal_mutable_compname();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "unrealpb.ActorComponentRef.compName"));
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* ActorComponentRef::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.ActorComponentRef)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .unrealpb.UnrealObjectRef owner = 1;
+  if (this->_internal_has_owner()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(1, _Internal::owner(this),
+        _Internal::owner(this).GetCachedSize(), target, stream);
+  }
+
+  // string compName = 2;
+  if (!this->_internal_compname().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_compname().data(), static_cast<int>(this->_internal_compname().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "unrealpb.ActorComponentRef.compName");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_compname(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.ActorComponentRef)
+  return target;
+}
+
+size_t ActorComponentRef::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:unrealpb.ActorComponentRef)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string compName = 2;
+  if (!this->_internal_compname().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_compname());
+  }
+
+  // .unrealpb.UnrealObjectRef owner = 1;
+  if (this->_internal_has_owner()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.owner_);
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData ActorComponentRef::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    ActorComponentRef::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*ActorComponentRef::GetClassData() const { return &_class_data_; }
+
+
+void ActorComponentRef::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<ActorComponentRef*>(&to_msg);
+  auto& from = static_cast<const ActorComponentRef&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.ActorComponentRef)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_compname().empty()) {
+    _this->_internal_set_compname(from._internal_compname());
+  }
+  if (from._internal_has_owner()) {
+    _this->_internal_mutable_owner()->::unrealpb::UnrealObjectRef::MergeFrom(
+        from._internal_owner());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void ActorComponentRef::CopyFrom(const ActorComponentRef& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.ActorComponentRef)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ActorComponentRef::IsInitialized() const {
+  return true;
+}
+
+void ActorComponentRef::InternalSwap(ActorComponentRef* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.compname_, lhs_arena,
+      &other->_impl_.compname_, rhs_arena
+  );
+  swap(_impl_.owner_, other->_impl_.owner_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata ActorComponentRef::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
+      file_level_metadata_unreal_5fcommon_2eproto[3]);
+}
+
+// ===================================================================
+
 class RemoteFunctionMessage::_Internal {
  public:
   static const ::unrealpb::UnrealObjectRef& targetobj(const RemoteFunctionMessage* msg);
@@ -2132,14 +2413,18 @@ void RemoteFunctionMessage::InternalSwap(RemoteFunctionMessage* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata RemoteFunctionMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[3]);
+      file_level_metadata_unreal_5fcommon_2eproto[4]);
 }
 
 // ===================================================================
 
 class SpawnObjectMessage::_Internal {
  public:
+  using HasBits = decltype(std::declval<SpawnObjectMessage>()._impl_._has_bits_);
   static const ::unrealpb::UnrealObjectRef& obj(const SpawnObjectMessage* msg);
+  static void set_has_localrole(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
 };
 
 const ::unrealpb::UnrealObjectRef&
@@ -2156,13 +2441,16 @@ SpawnObjectMessage::SpawnObjectMessage(const SpawnObjectMessage& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   SpawnObjectMessage* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.obj_){nullptr}
-    , /*decltype(_impl_._cached_size_)*/{}};
+      decltype(_impl_._has_bits_){from._impl_._has_bits_}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.obj_){nullptr}
+    , decltype(_impl_.localrole_){}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   if (from._internal_has_obj()) {
     _this->_impl_.obj_ = new ::unrealpb::UnrealObjectRef(*from._impl_.obj_);
   }
+  _this->_impl_.localrole_ = from._impl_.localrole_;
   // @@protoc_insertion_point(copy_constructor:unrealpb.SpawnObjectMessage)
 }
 
@@ -2171,8 +2459,10 @@ inline void SpawnObjectMessage::SharedCtor(
   (void)arena;
   (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.obj_){nullptr}
+      decltype(_impl_._has_bits_){}
     , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.obj_){nullptr}
+    , decltype(_impl_.localrole_){0u}
   };
 }
 
@@ -2204,11 +2494,14 @@ void SpawnObjectMessage::Clear() {
     delete _impl_.obj_;
   }
   _impl_.obj_ = nullptr;
+  _impl_.localrole_ = 0u;
+  _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* SpawnObjectMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
@@ -2217,6 +2510,15 @@ const char* SpawnObjectMessage::_InternalParse(const char* ptr, ::_pbi::ParseCon
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_obj(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional uint32 localRole = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _Internal::set_has_localrole(&has_bits);
+          _impl_.localrole_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2237,6 +2539,7 @@ const char* SpawnObjectMessage::_InternalParse(const char* ptr, ::_pbi::ParseCon
     CHK_(ptr != nullptr);
   }  // while
 message_done:
+  _impl_._has_bits_.Or(has_bits);
   return ptr;
 failure:
   ptr = nullptr;
@@ -2255,6 +2558,12 @@ uint8_t* SpawnObjectMessage::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(1, _Internal::obj(this),
         _Internal::obj(this).GetCachedSize(), target, stream);
+  }
+
+  // optional uint32 localRole = 2;
+  if (_internal_has_localrole()) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_localrole(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2280,6 +2589,12 @@ size_t SpawnObjectMessage::ByteSizeLong() const {
         *_impl_.obj_);
   }
 
+  // optional uint32 localRole = 2;
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_localrole());
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
@@ -2302,6 +2617,9 @@ void SpawnObjectMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, con
     _this->_internal_mutable_obj()->::unrealpb::UnrealObjectRef::MergeFrom(
         from._internal_obj());
   }
+  if (from._internal_has_localrole()) {
+    _this->_internal_set_localrole(from._internal_localrole());
+  }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -2319,13 +2637,19 @@ bool SpawnObjectMessage::IsInitialized() const {
 void SpawnObjectMessage::InternalSwap(SpawnObjectMessage* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_.obj_, other->_impl_.obj_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(SpawnObjectMessage, _impl_.localrole_)
+      + sizeof(SpawnObjectMessage::_impl_.localrole_)
+      - PROTOBUF_FIELD_OFFSET(SpawnObjectMessage, _impl_.obj_)>(
+          reinterpret_cast<char*>(&_impl_.obj_),
+          reinterpret_cast<char*>(&other->_impl_.obj_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata SpawnObjectMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[4]);
+      file_level_metadata_unreal_5fcommon_2eproto[5]);
 }
 
 // ===================================================================
@@ -2333,14 +2657,17 @@ void SpawnObjectMessage::InternalSwap(SpawnObjectMessage* other) {
 class ActorState::_Internal {
  public:
   using HasBits = decltype(std::declval<ActorState>()._impl_._has_bits_);
+  static void set_has_owningconnid(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
   static void set_has_breplicatemovement(HasBits* has_bits) {
     (*has_bits)[0] |= 16u;
   }
   static void set_has_localrole(HasBits* has_bits) {
-    (*has_bits)[0] |= 4u;
+    (*has_bits)[0] |= 8u;
   }
   static void set_has_remoterole(HasBits* has_bits) {
-    (*has_bits)[0] |= 8u;
+    (*has_bits)[0] |= 128u;
   }
   static const ::unrealpb::UnrealObjectRef& owner(const ActorState* msg);
   static void set_has_owner(HasBits* has_bits) {
@@ -2353,7 +2680,7 @@ class ActorState::_Internal {
     (*has_bits)[0] |= 64u;
   }
   static void set_has_bcanbedamaged(HasBits* has_bits) {
-    (*has_bits)[0] |= 128u;
+    (*has_bits)[0] |= 256u;
   }
   static const ::unrealpb::UnrealObjectRef& instigator(const ActorState* msg);
   static void set_has_instigator(HasBits* has_bits) {
@@ -2383,12 +2710,13 @@ ActorState::ActorState(const ActorState& from)
     , /*decltype(_impl_._cached_size_)*/{}
     , decltype(_impl_.owner_){nullptr}
     , decltype(_impl_.instigator_){nullptr}
+    , decltype(_impl_.owningconnid_){}
     , decltype(_impl_.localrole_){}
-    , decltype(_impl_.remoterole_){}
     , decltype(_impl_.removed_){}
     , decltype(_impl_.breplicatemovement_){}
     , decltype(_impl_.bhidden_){}
     , decltype(_impl_.btearoff_){}
+    , decltype(_impl_.remoterole_){}
     , decltype(_impl_.bcanbedamaged_){}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -2398,9 +2726,9 @@ ActorState::ActorState(const ActorState& from)
   if (from._internal_has_instigator()) {
     _this->_impl_.instigator_ = new ::unrealpb::UnrealObjectRef(*from._impl_.instigator_);
   }
-  ::memcpy(&_impl_.localrole_, &from._impl_.localrole_,
+  ::memcpy(&_impl_.owningconnid_, &from._impl_.owningconnid_,
     static_cast<size_t>(reinterpret_cast<char*>(&_impl_.bcanbedamaged_) -
-    reinterpret_cast<char*>(&_impl_.localrole_)) + sizeof(_impl_.bcanbedamaged_));
+    reinterpret_cast<char*>(&_impl_.owningconnid_)) + sizeof(_impl_.bcanbedamaged_));
   // @@protoc_insertion_point(copy_constructor:unrealpb.ActorState)
 }
 
@@ -2413,12 +2741,13 @@ inline void ActorState::SharedCtor(
     , /*decltype(_impl_._cached_size_)*/{}
     , decltype(_impl_.owner_){nullptr}
     , decltype(_impl_.instigator_){nullptr}
+    , decltype(_impl_.owningconnid_){0u}
     , decltype(_impl_.localrole_){0u}
-    , decltype(_impl_.remoterole_){0u}
     , decltype(_impl_.removed_){false}
     , decltype(_impl_.breplicatemovement_){false}
     , decltype(_impl_.bhidden_){false}
     , decltype(_impl_.btearoff_){false}
+    , decltype(_impl_.remoterole_){0u}
     , decltype(_impl_.bcanbedamaged_){false}
   };
 }
@@ -2460,16 +2789,17 @@ void ActorState::Clear() {
     }
   }
   if (cached_has_bits & 0x0000000cu) {
-    ::memset(&_impl_.localrole_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&_impl_.remoterole_) -
-        reinterpret_cast<char*>(&_impl_.localrole_)) + sizeof(_impl_.remoterole_));
+    ::memset(&_impl_.owningconnid_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&_impl_.localrole_) -
+        reinterpret_cast<char*>(&_impl_.owningconnid_)) + sizeof(_impl_.localrole_));
   }
   _impl_.removed_ = false;
   if (cached_has_bits & 0x000000f0u) {
     ::memset(&_impl_.breplicatemovement_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&_impl_.bcanbedamaged_) -
-        reinterpret_cast<char*>(&_impl_.breplicatemovement_)) + sizeof(_impl_.bcanbedamaged_));
+        reinterpret_cast<char*>(&_impl_.remoterole_) -
+        reinterpret_cast<char*>(&_impl_.breplicatemovement_)) + sizeof(_impl_.remoterole_));
   }
+  _impl_.bcanbedamaged_ = false;
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -2489,71 +2819,80 @@ const char* ActorState::_InternalParse(const char* ptr, ::_pbi::ParseContext* ct
         } else
           goto handle_unusual;
         continue;
-      // optional bool bReplicateMovement = 2;
+      // optional uint32 owningConnId = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _Internal::set_has_owningconnid(&has_bits);
+          _impl_.owningconnid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional bool bReplicateMovement = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
           _Internal::set_has_breplicatemovement(&has_bits);
           _impl_.breplicatemovement_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // optional uint32 localRole = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
+      // optional uint32 localRole = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
           _Internal::set_has_localrole(&has_bits);
           _impl_.localrole_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // optional uint32 remoteRole = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
+      // optional uint32 remoteRole = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
           _Internal::set_has_remoterole(&has_bits);
           _impl_.remoterole_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // optional .unrealpb.UnrealObjectRef owner = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
+      // optional .unrealpb.UnrealObjectRef owner = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
           ptr = ctx->ParseMessage(_internal_mutable_owner(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // optional bool bHidden = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 48)) {
+      // optional bool bHidden = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 56)) {
           _Internal::set_has_bhidden(&has_bits);
           _impl_.bhidden_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // optional bool bTearOff = 7;
-      case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 56)) {
+      // optional bool bTearOff = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 64)) {
           _Internal::set_has_btearoff(&has_bits);
           _impl_.btearoff_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // optional bool bCanBeDamaged = 8;
-      case 8:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 64)) {
+      // optional bool bCanBeDamaged = 9;
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 72)) {
           _Internal::set_has_bcanbedamaged(&has_bits);
           _impl_.bcanbedamaged_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // optional .unrealpb.UnrealObjectRef instigator = 9;
-      case 9:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 74)) {
+      // optional .unrealpb.UnrealObjectRef instigator = 10;
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 82)) {
           ptr = ctx->ParseMessage(_internal_mutable_instigator(), ptr);
           CHK_(ptr);
         } else
@@ -2595,53 +2934,59 @@ uint8_t* ActorState::_InternalSerialize(
     target = ::_pbi::WireFormatLite::WriteBoolToArray(1, this->_internal_removed(), target);
   }
 
-  // optional bool bReplicateMovement = 2;
+  // optional uint32 owningConnId = 2;
+  if (_internal_has_owningconnid()) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_owningconnid(), target);
+  }
+
+  // optional bool bReplicateMovement = 3;
   if (_internal_has_breplicatemovement()) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(2, this->_internal_breplicatemovement(), target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(3, this->_internal_breplicatemovement(), target);
   }
 
-  // optional uint32 localRole = 3;
+  // optional uint32 localRole = 4;
   if (_internal_has_localrole()) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(3, this->_internal_localrole(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(4, this->_internal_localrole(), target);
   }
 
-  // optional uint32 remoteRole = 4;
+  // optional uint32 remoteRole = 5;
   if (_internal_has_remoterole()) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(4, this->_internal_remoterole(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(5, this->_internal_remoterole(), target);
   }
 
-  // optional .unrealpb.UnrealObjectRef owner = 5;
+  // optional .unrealpb.UnrealObjectRef owner = 6;
   if (_internal_has_owner()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(5, _Internal::owner(this),
+      InternalWriteMessage(6, _Internal::owner(this),
         _Internal::owner(this).GetCachedSize(), target, stream);
   }
 
-  // optional bool bHidden = 6;
+  // optional bool bHidden = 7;
   if (_internal_has_bhidden()) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(6, this->_internal_bhidden(), target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(7, this->_internal_bhidden(), target);
   }
 
-  // optional bool bTearOff = 7;
+  // optional bool bTearOff = 8;
   if (_internal_has_btearoff()) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(7, this->_internal_btearoff(), target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(8, this->_internal_btearoff(), target);
   }
 
-  // optional bool bCanBeDamaged = 8;
+  // optional bool bCanBeDamaged = 9;
   if (_internal_has_bcanbedamaged()) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(8, this->_internal_bcanbedamaged(), target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(9, this->_internal_bcanbedamaged(), target);
   }
 
-  // optional .unrealpb.UnrealObjectRef instigator = 9;
+  // optional .unrealpb.UnrealObjectRef instigator = 10;
   if (_internal_has_instigator()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(9, _Internal::instigator(this),
+      InternalWriteMessage(10, _Internal::instigator(this),
         _Internal::instigator(this).GetCachedSize(), target, stream);
   }
 
@@ -2663,28 +3008,28 @@ size_t ActorState::ByteSizeLong() const {
 
   cached_has_bits = _impl_._has_bits_[0];
   if (cached_has_bits & 0x0000000fu) {
-    // optional .unrealpb.UnrealObjectRef owner = 5;
+    // optional .unrealpb.UnrealObjectRef owner = 6;
     if (cached_has_bits & 0x00000001u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *_impl_.owner_);
     }
 
-    // optional .unrealpb.UnrealObjectRef instigator = 9;
+    // optional .unrealpb.UnrealObjectRef instigator = 10;
     if (cached_has_bits & 0x00000002u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *_impl_.instigator_);
     }
 
-    // optional uint32 localRole = 3;
+    // optional uint32 owningConnId = 2;
     if (cached_has_bits & 0x00000004u) {
-      total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_localrole());
+      total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_owningconnid());
     }
 
-    // optional uint32 remoteRole = 4;
+    // optional uint32 localRole = 4;
     if (cached_has_bits & 0x00000008u) {
-      total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_remoterole());
+      total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_localrole());
     }
 
   }
@@ -2694,27 +3039,32 @@ size_t ActorState::ByteSizeLong() const {
   }
 
   if (cached_has_bits & 0x000000f0u) {
-    // optional bool bReplicateMovement = 2;
+    // optional bool bReplicateMovement = 3;
     if (cached_has_bits & 0x00000010u) {
       total_size += 1 + 1;
     }
 
-    // optional bool bHidden = 6;
+    // optional bool bHidden = 7;
     if (cached_has_bits & 0x00000020u) {
       total_size += 1 + 1;
     }
 
-    // optional bool bTearOff = 7;
+    // optional bool bTearOff = 8;
     if (cached_has_bits & 0x00000040u) {
       total_size += 1 + 1;
     }
 
-    // optional bool bCanBeDamaged = 8;
+    // optional uint32 remoteRole = 5;
     if (cached_has_bits & 0x00000080u) {
-      total_size += 1 + 1;
+      total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_remoterole());
     }
 
   }
+  // optional bool bCanBeDamaged = 9;
+  if (cached_has_bits & 0x00000100u) {
+    total_size += 1 + 1;
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
@@ -2744,10 +3094,10 @@ void ActorState::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PRO
           from._internal_instigator());
     }
     if (cached_has_bits & 0x00000004u) {
-      _this->_impl_.localrole_ = from._impl_.localrole_;
+      _this->_impl_.owningconnid_ = from._impl_.owningconnid_;
     }
     if (cached_has_bits & 0x00000008u) {
-      _this->_impl_.remoterole_ = from._impl_.remoterole_;
+      _this->_impl_.localrole_ = from._impl_.localrole_;
     }
     _this->_impl_._has_bits_[0] |= cached_has_bits;
   }
@@ -2765,9 +3115,12 @@ void ActorState::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PRO
       _this->_impl_.btearoff_ = from._impl_.btearoff_;
     }
     if (cached_has_bits & 0x00000080u) {
-      _this->_impl_.bcanbedamaged_ = from._impl_.bcanbedamaged_;
+      _this->_impl_.remoterole_ = from._impl_.remoterole_;
     }
     _this->_impl_._has_bits_[0] |= cached_has_bits;
+  }
+  if (cached_has_bits & 0x00000100u) {
+    _this->_internal_set_bcanbedamaged(from._internal_bcanbedamaged());
   }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -2798,7 +3151,7 @@ void ActorState::InternalSwap(ActorState* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata ActorState::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[5]);
+      file_level_metadata_unreal_5fcommon_2eproto[6]);
 }
 
 // ===================================================================
@@ -3031,7 +3384,7 @@ void ActorComponentState::InternalSwap(ActorComponentState* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata ActorComponentState::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[6]);
+      file_level_metadata_unreal_5fcommon_2eproto[7]);
 }
 
 // ===================================================================
@@ -3715,7 +4068,7 @@ void SceneComponentState::InternalSwap(SceneComponentState* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata SceneComponentState::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[7]);
+      file_level_metadata_unreal_5fcommon_2eproto[8]);
 }
 
 // ===================================================================
@@ -3755,7 +4108,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RootMotionMontage::GetClassDat
 ::PROTOBUF_NAMESPACE_ID::Metadata RootMotionMontage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[8]);
+      file_level_metadata_unreal_5fcommon_2eproto[9]);
 }
 
 // ===================================================================
@@ -3763,7 +4116,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RootMotionMontage::GetClassDat
 class BasedMovementInfo::_Internal {
  public:
   using HasBits = decltype(std::declval<BasedMovementInfo>()._impl_._has_bits_);
-  static const ::unrealpb::UnrealObjectRef& movementbase(const BasedMovementInfo* msg);
+  static const ::unrealpb::ActorComponentRef& movementbase(const BasedMovementInfo* msg);
   static void set_has_movementbase(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
   }
@@ -3789,7 +4142,7 @@ class BasedMovementInfo::_Internal {
   }
 };
 
-const ::unrealpb::UnrealObjectRef&
+const ::unrealpb::ActorComponentRef&
 BasedMovementInfo::_Internal::movementbase(const BasedMovementInfo* msg) {
   return *msg->_impl_.movementbase_;
 }
@@ -3831,7 +4184,7 @@ BasedMovementInfo::BasedMovementInfo(const BasedMovementInfo& from)
       _this->GetArenaForAllocation());
   }
   if (from._internal_has_movementbase()) {
-    _this->_impl_.movementbase_ = new ::unrealpb::UnrealObjectRef(*from._impl_.movementbase_);
+    _this->_impl_.movementbase_ = new ::unrealpb::ActorComponentRef(*from._impl_.movementbase_);
   }
   if (from._internal_has_location()) {
     _this->_impl_.location_ = new ::unrealpb::FVector(*from._impl_.location_);
@@ -3925,7 +4278,7 @@ const char* BasedMovementInfo::_InternalParse(const char* ptr, ::_pbi::ParseCont
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // optional .unrealpb.UnrealObjectRef movementBase = 1;
+      // optional .unrealpb.ActorComponentRef movementBase = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_movementbase(), ptr);
@@ -4016,7 +4369,7 @@ uint8_t* BasedMovementInfo::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // optional .unrealpb.UnrealObjectRef movementBase = 1;
+  // optional .unrealpb.ActorComponentRef movementBase = 1;
   if (_internal_has_movementbase()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(1, _Internal::movementbase(this),
@@ -4090,7 +4443,7 @@ size_t BasedMovementInfo::ByteSizeLong() const {
           this->_internal_bonename());
     }
 
-    // optional .unrealpb.UnrealObjectRef movementBase = 1;
+    // optional .unrealpb.ActorComponentRef movementBase = 1;
     if (cached_has_bits & 0x00000002u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -4151,7 +4504,7 @@ void BasedMovementInfo::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, cons
       _this->_internal_set_bonename(from._internal_bonename());
     }
     if (cached_has_bits & 0x00000002u) {
-      _this->_internal_mutable_movementbase()->::unrealpb::UnrealObjectRef::MergeFrom(
+      _this->_internal_mutable_movementbase()->::unrealpb::ActorComponentRef::MergeFrom(
           from._internal_movementbase());
     }
     if (cached_has_bits & 0x00000004u) {
@@ -4208,7 +4561,7 @@ void BasedMovementInfo::InternalSwap(BasedMovementInfo* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata BasedMovementInfo::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[9]);
+      file_level_metadata_unreal_5fcommon_2eproto[10]);
 }
 
 // ===================================================================
@@ -4677,7 +5030,7 @@ void CharacterState::InternalSwap(CharacterState* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata CharacterState::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[10]);
+      file_level_metadata_unreal_5fcommon_2eproto[11]);
 }
 
 // ===================================================================
@@ -4902,7 +5255,7 @@ void Character_ServerMovePacked_Params::InternalSwap(Character_ServerMovePacked_
 ::PROTOBUF_NAMESPACE_ID::Metadata Character_ServerMovePacked_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[11]);
+      file_level_metadata_unreal_5fcommon_2eproto[12]);
 }
 
 // ===================================================================
@@ -5127,7 +5480,7 @@ void Character_ClientMoveResponsePacked_Params::InternalSwap(Character_ClientMov
 ::PROTOBUF_NAMESPACE_ID::Metadata Character_ClientMoveResponsePacked_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[12]);
+      file_level_metadata_unreal_5fcommon_2eproto[13]);
 }
 
 // ===================================================================
@@ -5473,7 +5826,7 @@ void PlayerState::InternalSwap(PlayerState* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerState::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[13]);
+      file_level_metadata_unreal_5fcommon_2eproto[14]);
 }
 
 // ===================================================================
@@ -5738,7 +6091,7 @@ void ControllerState::InternalSwap(ControllerState* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata ControllerState::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[14]);
+      file_level_metadata_unreal_5fcommon_2eproto[15]);
 }
 
 // ===================================================================
@@ -5977,7 +6330,7 @@ void Controller_ClientSetLocation_Params::InternalSwap(Controller_ClientSetLocat
 ::PROTOBUF_NAMESPACE_ID::Metadata Controller_ClientSetLocation_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[15]);
+      file_level_metadata_unreal_5fcommon_2eproto[16]);
 }
 
 // ===================================================================
@@ -6201,7 +6554,7 @@ void Controller_ClientSetRotation_Params::InternalSwap(Controller_ClientSetRotat
 ::PROTOBUF_NAMESPACE_ID::Metadata Controller_ClientSetRotation_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[16]);
+      file_level_metadata_unreal_5fcommon_2eproto[17]);
 }
 
 // ===================================================================
@@ -6488,7 +6841,7 @@ void PlayerControllerState::InternalSwap(PlayerControllerState* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerControllerState::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[17]);
+      file_level_metadata_unreal_5fcommon_2eproto[18]);
 }
 
 // ===================================================================
@@ -6712,7 +7065,7 @@ void PlayerController_ServerUpdateCamera_Params::InternalSwap(PlayerController_S
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ServerUpdateCamera_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[18]);
+      file_level_metadata_unreal_5fcommon_2eproto[19]);
 }
 
 // ===================================================================
@@ -6929,7 +7282,7 @@ void PlayerController_ClientSetHUD_Params::InternalSwap(PlayerController_ClientS
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientSetHUD_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[19]);
+      file_level_metadata_unreal_5fcommon_2eproto[20]);
 }
 
 // ===================================================================
@@ -7253,7 +7606,7 @@ void PlayerController_ClientSetViewTarget_Params::InternalSwap(PlayerController_
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientSetViewTarget_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[20]);
+      file_level_metadata_unreal_5fcommon_2eproto[21]);
 }
 
 // ===================================================================
@@ -7443,7 +7796,7 @@ void PlayerController_ClientEnableNetworkVoice_Params::InternalSwap(PlayerContro
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientEnableNetworkVoice_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[21]);
+      file_level_metadata_unreal_5fcommon_2eproto[22]);
 }
 
 // ===================================================================
@@ -7621,7 +7974,7 @@ void PlayerController_ClientCapBandwidth_Params::InternalSwap(PlayerController_C
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientCapBandwidth_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[22]);
+      file_level_metadata_unreal_5fcommon_2eproto[23]);
 }
 
 // ===================================================================
@@ -7814,7 +8167,7 @@ void PlayerController_ClientRestart_Params::InternalSwap(PlayerController_Client
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientRestart_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[23]);
+      file_level_metadata_unreal_5fcommon_2eproto[24]);
 }
 
 // ===================================================================
@@ -8017,7 +8370,7 @@ void PlayerController_ClientSetCameraMode_Params::InternalSwap(PlayerController_
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientSetCameraMode_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[24]);
+      file_level_metadata_unreal_5fcommon_2eproto[25]);
 }
 
 // ===================================================================
@@ -8210,7 +8563,7 @@ void PlayerController_ClientRetryClientRestart_Params::InternalSwap(PlayerContro
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientRetryClientRestart_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[25]);
+      file_level_metadata_unreal_5fcommon_2eproto[26]);
 }
 
 // ===================================================================
@@ -8449,7 +8802,7 @@ void PlayerController_ServerSetSpectatorLocation_Params::InternalSwap(PlayerCont
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ServerSetSpectatorLocation_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[26]);
+      file_level_metadata_unreal_5fcommon_2eproto[27]);
 }
 
 // ===================================================================
@@ -8642,7 +8995,7 @@ void PlayerController_ServerAcknowledgePossession_Params::InternalSwap(PlayerCon
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ServerAcknowledgePossession_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[27]);
+      file_level_metadata_unreal_5fcommon_2eproto[28]);
 }
 
 // ===================================================================
@@ -9021,7 +9374,7 @@ void GameStateBase::InternalSwap(GameStateBase* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata GameStateBase::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[28]);
+      file_level_metadata_unreal_5fcommon_2eproto[29]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -9038,6 +9391,10 @@ Arena::CreateMaybeMessage< ::unrealpb::UnrealObjectRef_GuidCachedObject >(Arena*
 template<> PROTOBUF_NOINLINE ::unrealpb::UnrealObjectRef*
 Arena::CreateMaybeMessage< ::unrealpb::UnrealObjectRef >(Arena* arena) {
   return Arena::CreateMessageInternal< ::unrealpb::UnrealObjectRef >(arena);
+}
+template<> PROTOBUF_NOINLINE ::unrealpb::ActorComponentRef*
+Arena::CreateMaybeMessage< ::unrealpb::ActorComponentRef >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::unrealpb::ActorComponentRef >(arena);
 }
 template<> PROTOBUF_NOINLINE ::unrealpb::RemoteFunctionMessage*
 Arena::CreateMaybeMessage< ::unrealpb::RemoteFunctionMessage >(Arena* arena) {

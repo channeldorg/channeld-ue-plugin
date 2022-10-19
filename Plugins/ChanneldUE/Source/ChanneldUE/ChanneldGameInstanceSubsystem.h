@@ -97,6 +97,9 @@ public:
 		EChanneldChannelType GetChannelTypeByChId(int32 ChId);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld")
+		FString GetChannelTypeNameByChId(int32 ChId);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld")
 		TArray<FSubscribedChannelInfo> GetSubscribedChannels();
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld")
