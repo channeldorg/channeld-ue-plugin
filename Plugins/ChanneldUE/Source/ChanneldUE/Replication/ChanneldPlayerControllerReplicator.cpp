@@ -143,7 +143,7 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 		ServerSetSpectatorLocationParams* TypedParams = (ServerSetSpectatorLocationParams*)Params;
 		auto Msg = MakeShared<unrealpb::PlayerController_ServerSetSpectatorLocation_Params>();
 		ChanneldUtils::SetIfNotSame(Msg->mutable_newloc(), TypedParams->NewLoc);
-		ChanneldUtils::SetIfNotSame(Msg->mutable_newrot(), TypedParams->NewRot.Vector());
+		ChanneldUtils::SetIfNotSame(Msg->mutable_newrot(), TypedParams->NewRot);
 		return Msg;
 	}
 	else if (Func->GetFName() == FName("ServerAcknowledgePossession"))

@@ -91,14 +91,14 @@ TSharedPtr<google::protobuf::Message> FChanneldControllerReplicator::SerializeFu
 		ClientSetLocationParams* TypedParams = (ClientSetLocationParams*)Params;
 		auto Msg = MakeShared<unrealpb::Controller_ClientSetLocation_Params>();
 		ChanneldUtils::SetIfNotSame(Msg->mutable_newlocation(), TypedParams->NewLocation);
-		ChanneldUtils::SetIfNotSame(Msg->mutable_newrotation(), TypedParams->NewRotation.Vector());
+		ChanneldUtils::SetIfNotSame(Msg->mutable_newrotation(), TypedParams->NewRotation);
 		return Msg;
 	}
 	else if (Func->GetFName() == FName("ClientSetRotation"))
 	{
 		ClientSetRotationParams* TypedParams = (ClientSetRotationParams*)Params;
 		auto Msg = MakeShared<unrealpb::Controller_ClientSetRotation_Params>();
-		ChanneldUtils::SetIfNotSame(Msg->mutable_newrotation(), TypedParams->NewRotation.Vector());
+		ChanneldUtils::SetIfNotSame(Msg->mutable_newrotation(), TypedParams->NewRotation);
 		Msg->set_bresetcamera(TypedParams->bResetCamera);
 		return Msg;
 	}

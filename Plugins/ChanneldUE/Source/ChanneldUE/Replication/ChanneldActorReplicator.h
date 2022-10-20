@@ -29,6 +29,8 @@ protected:
 private:
 	uint8* RemoteRolePtr;
 	bool* bTearOffPtr;
-	UFunction* OnRep_OwnerFunc;
+	FRepMovement* ReplicatedMovementPtr;
 
+	UFunction* OnRep_OwnerFunc;
+	UFunction* OnRep_ReplicatedMovementFunc;
 };

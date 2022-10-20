@@ -101,9 +101,9 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	if (ChanneldUtils::SetIfNotSame(MovementInfo->mutable_rotation(), Character->GetBasedMovement().Rotation.Vector()))
+	if (ChanneldUtils::SetIfNotSame(MovementInfo->mutable_rotation(), Character->GetBasedMovement().Rotation))
 	{
-		ChanneldUtils::SetIfNotSame(MovementInfoDelta->mutable_rotation(), Character->GetBasedMovement().Rotation.Vector());
+		ChanneldUtils::SetIfNotSame(MovementInfoDelta->mutable_rotation(), Character->GetBasedMovement().Rotation);
 		bStateChanged = true;
 	}
 

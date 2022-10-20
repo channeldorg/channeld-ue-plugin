@@ -30,8 +30,17 @@ FChanneldActorReplicator::FChanneldActorReplicator(UObject* InTargetObj) : FChan
 		bTearOffPtr = Property->ContainerPtrToValuePtr<bool>(Actor.Get());
 		check(bTearOffPtr);
 	}
+	{
+		auto Property = CastFieldChecked<const FStructProperty>(Actor->GetClass()->FindPropertyByName(FName("ReplicatedMovement")));
+		ReplicatedMovementPtr = Property->ContainerPtrToValuePtr<FRepMovement>(Actor.Get());
+		check(ReplicatedMovementPtr);
+	}
+
 	OnRep_OwnerFunc = Actor->GetClass()->FindFunctionByName(FName("OnRep_Owner"));
 	check(OnRep_OwnerFunc);
+
+	OnRep_ReplicatedMovementFunc = Actor->GetClass()->FindFunctionByName(FName("OnRep_ReplicatedMovement"));
+	check(OnRep_ReplicatedMovementFunc);
 }
 
 FChanneldActorReplicator::~FChanneldActorReplicator()
@@ -111,12 +120,52 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
+	Actor->GatherCurrentMovement();
+	FRepMovement& RepMovement = *ReplicatedMovementPtr;
+	unrealpb::RepMovement* RepMovementFullState = FullState->mutable_replicatedmovement();
+	unrealpb::RepMovement* RepMovementDeltaState = DeltaState->mutable_replicatedmovement();
+	if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_linearvelocity(), RepMovement.LinearVelocity))
+	{
+		ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_linearvelocity(), RepMovement.LinearVelocity);
+		bStateChanged = true;
+	}
+	if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_angularvelocity(), RepMovement.AngularVelocity))
+	{
+		ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_angularvelocity(), RepMovement.AngularVelocity);
+		bStateChanged = true;
+	}
+	if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_location(), RepMovement.Location))
+	{
+		ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_location(), RepMovement.Location);
+		bStateChanged = true;
+	}
+	if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_rotation(), RepMovement.Rotation))
+	{
+		ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_rotation(), RepMovement.Rotation);
+		bStateChanged = true;
+	}
+	if (RepMovement.bSimulatedPhysicSleep != RepMovementFullState->bsimulatedphysicsleep())
+	{
+		RepMovementDeltaState->set_bsimulatedphysicsleep(RepMovement.bSimulatedPhysicSleep);
+		bStateChanged = true;
+	}
+	if (RepMovement.bRepPhysics != RepMovementFullState->brepphysics())
+	{
+		RepMovementDeltaState->set_brepphysics(RepMovement.bRepPhysics);
+		bStateChanged = true;
+	}
+
 	FullState->MergeFrom(*DeltaState);
 }
 
 void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* InNewState)
 {
 	if (!Actor.IsValid())
+	{
+		return;
+	}
+
+	if (Actor->GetLocalRole() > ENetRole::ROLE_SimulatedProxy)
 	{
 		return;
 	}
@@ -205,6 +254,36 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 		// TODO: handle unmapped NetGUID
 		Actor->SetInstigator(Cast<APawn>(ChanneldUtils::GetObjectByRef(&NewState->instigator(), Actor->GetWorld())));
 		Actor->OnRep_Instigator();
+	}
+
+	if (NewState->has_replicatedmovement())
+	{
+		if (NewState->replicatedmovement().has_linearvelocity())
+		{
+			ReplicatedMovementPtr->LinearVelocity = ChanneldUtils::GetVector(NewState->replicatedmovement().linearvelocity());
+		}
+		if (NewState->replicatedmovement().has_angularvelocity())
+		{
+			ReplicatedMovementPtr->AngularVelocity = ChanneldUtils::GetVector(NewState->replicatedmovement().angularvelocity());
+		}
+		if (NewState->replicatedmovement().has_location())
+		{
+			ReplicatedMovementPtr->Location = ChanneldUtils::GetVector(NewState->replicatedmovement().location());
+		}
+		if (NewState->replicatedmovement().has_rotation())
+		{
+			ReplicatedMovementPtr->Rotation = ChanneldUtils::GetRotator(NewState->replicatedmovement().rotation());
+		}
+		if (NewState->replicatedmovement().has_bsimulatedphysicsleep())
+		{
+			ReplicatedMovementPtr->bSimulatedPhysicSleep = NewState->replicatedmovement().bsimulatedphysicsleep();
+		}
+		if (NewState->replicatedmovement().has_brepphysics())
+		{
+			ReplicatedMovementPtr->bRepPhysics = NewState->replicatedmovement().brepphysics();
+		}
+
+		Actor->ProcessEvent(OnRep_ReplicatedMovementFunc, NULL);
 	}
 }
 

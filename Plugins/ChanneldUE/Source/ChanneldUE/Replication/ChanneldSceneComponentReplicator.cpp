@@ -153,7 +153,7 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 		DeltaState->mutable_relativelocation()->MergeFrom(*FullState->mutable_relativelocation());
 	}
 
-	if (ChanneldUtils::SetIfNotSame(FullState->mutable_relativerotation(), SceneComp->GetRelativeRotation().Vector()))
+	if (ChanneldUtils::SetIfNotSame(FullState->mutable_relativerotation(), SceneComp->GetRelativeRotation()))
 	{
 		bStateChanged = true;
 		DeltaState->mutable_relativerotation()->MergeFrom(*FullState->mutable_relativerotation());

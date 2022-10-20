@@ -240,8 +240,6 @@ int32 UChannelDataView::SendAllChannelUpdates()
 				UE_LOG(LogChanneld, Verbose, TEXT("Sent %s update: %s"), UTF8_TO_TCHAR(NewState->GetTypeName().c_str()), UTF8_TO_TCHAR(NewState->DebugString().c_str()));
 			}
 
-			NewState->Clear();
-
 			TotalUpdateCount += UpdateCount;
 		}
 	}

@@ -52,6 +52,27 @@ public:
 		return bNotSame;
 	}
 
+	static bool SetIfNotSame(unrealpb::FVector* RotatorToSet, const FRotator& RotatorToCheck)
+	{
+		bool bNotSame = false;
+		if (!FMath::IsNearlyEqual(RotatorToSet->x(), RotatorToCheck.Pitch))
+		{
+			RotatorToSet->set_x(RotatorToCheck.Pitch);
+			bNotSame = true;
+		}
+		if (!FMath::IsNearlyEqual(RotatorToSet->y(), RotatorToCheck.Yaw))
+		{
+			RotatorToSet->set_y(RotatorToCheck.Yaw);
+			bNotSame = true;
+		}
+		if (!FMath::IsNearlyEqual(RotatorToSet->z(), RotatorToCheck.Roll))
+		{
+			RotatorToSet->set_z(RotatorToCheck.Roll);
+			bNotSame = true;
+		}
+		return bNotSame;
+	}
+
 	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World)
 	{
 		bool bUnmapped;
