@@ -3,6 +3,7 @@
 #include "ChanneldUtils.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/GameStateBase.h"
+#include "ChanneldConnection.h"
 
 FChanneldActorReplicator::FChanneldActorReplicator(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
 {
@@ -154,28 +155,27 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 			Actor->SetRole((ENetRole)NewState->remoterole());
 		}
 	}
+	/*
+	*/
 	if (NewState->has_owningconnid())
 	{
-		UChanneldNetConnection* Connection = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
-		if (Connection)
+		UChanneldConnection* ConnToChanneld = GEngine->GetEngineSubsystem<UChanneldConnection>();
+		if (ConnToChanneld->GetConnId() == NewState->owningconnid())
 		{
-			if (Connection->GetConnId() == NewState->owningconnid())
-			{
-				Actor->SetRole(ROLE_AutonomousProxy);
-			}
-			else
-			{
-				Actor->SetRole(ROLE_SimulatedProxy);
-			}
-			const static UEnum* Enum = StaticEnum<ENetRole>();
-			UE_LOG(LogChanneld, Log, TEXT("[Client] Updated actor %s's role from %s to %s, local/remote owning connId: %d/%d"),
-				*Actor->GetName(),
-				*Enum->GetNameStringByValue(Actor->GetLocalRole()),
-				*Enum->GetNameStringByValue(Actor->GetLocalRole()),
-				Connection->GetConnId(), 
-				NewState->owningconnid()
-			);
+			Actor->SetRole(ROLE_AutonomousProxy);
 		}
+		else if (Actor->GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			Actor->SetRole(ROLE_SimulatedProxy);
+		}
+		const static UEnum* Enum = StaticEnum<ENetRole>();
+		UE_LOG(LogChanneld, Log, TEXT("[Client] Updated actor %s's role from %s to %s, local/remote owning connId: %d/%d"),
+			*Actor->GetName(),
+			*Enum->GetNameStringByValue(Actor->GetLocalRole()),
+			*Enum->GetNameStringByValue(Actor->GetLocalRole()),
+			ConnToChanneld->GetConnId(),
+			NewState->owningconnid()
+		);
 	}
 
 	if (NewState->has_owner())

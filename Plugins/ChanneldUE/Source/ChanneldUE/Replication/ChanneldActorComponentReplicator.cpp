@@ -13,6 +13,22 @@ FChanneldActorComponentReplicator::FChanneldActorComponentReplicator(UObject* In
 	DeltaState = new unrealpb::ActorComponentState;
 }
 
+uint32 FChanneldActorComponentReplicator::GetNetGUID()
+{
+	if (!NetGUID.IsValid())
+	{
+		if (ActorComponent.IsValid())
+		{
+			UWorld* World = ActorComponent->GetWorld();
+			if (World && World->GetNetDriver())
+			{
+				NetGUID = World->GetNetDriver()->GuidCache->GetNetGUID(ActorComponent->GetOwner());
+			}
+		}
+	}
+	return NetGUID.Value;
+}
+
 FChanneldActorComponentReplicator::~FChanneldActorComponentReplicator()
 {
 	delete FullState;

@@ -54,6 +54,12 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 {
 	if (MsgType == MessageType_LOW_LEVEL)
 	{
+		if (Payload.size() == 0)
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Empty payload for LowLeveSend, ClientConnId: %d"), ClientConnId);
+			return;
+		}
+		
 		if (ConnToChanneld->IsClient())
 		{
 			const auto MyServerConnection = GetServerConnection();
@@ -101,7 +107,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 		UObject* SpawnedObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld());
 		if (SpawnedObj)
 		{
-			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s"), *SpawnedObj->GetName());
+			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, local role: %d"), *SpawnedObj->GetName(), SpawnMsg->localrole());
 			if (SpawnMsg->has_localrole() && SpawnedObj->IsA<AActor>())
 			{
 				Cast<AActor>(SpawnedObj)->SetRole((ENetRole)SpawnMsg->localrole());
@@ -349,7 +355,10 @@ bool UChanneldNetDriver::InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bo
 
 	ConnToChanneld->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this, &UChanneldNetDriver::ServerHandleUnsub);
 
-	FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &UChanneldNetDriver::OnClientPostLogin);
+	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
+	{
+		FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &UChanneldNetDriver::OnClientPostLogin);
+	}
 
 	return true;
 

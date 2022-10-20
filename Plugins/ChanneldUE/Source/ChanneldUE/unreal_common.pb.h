@@ -1683,10 +1683,20 @@ class CHANNELDUE_API ActorComponentState final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kBIsActiveFieldNumber = 1,
-    kBReplicatedFieldNumber = 2,
+    kRemovedFieldNumber = 1,
+    kBIsActiveFieldNumber = 2,
+    kBReplicatedFieldNumber = 3,
   };
-  // optional bool bIsActive = 1;
+  // bool removed = 1;
+  void clear_removed();
+  bool removed() const;
+  void set_removed(bool value);
+  private:
+  bool _internal_removed() const;
+  void _internal_set_removed(bool value);
+  public:
+
+  // optional bool bIsActive = 2;
   bool has_bisactive() const;
   private:
   bool _internal_has_bisactive() const;
@@ -1699,7 +1709,7 @@ class CHANNELDUE_API ActorComponentState final :
   void _internal_set_bisactive(bool value);
   public:
 
-  // optional bool bReplicated = 2;
+  // optional bool bReplicated = 3;
   bool has_breplicated() const;
   private:
   bool _internal_has_breplicated() const;
@@ -1722,6 +1732,7 @@ class CHANNELDUE_API ActorComponentState final :
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+    bool removed_;
     bool bisactive_;
     bool breplicated_;
   };
@@ -1857,7 +1868,6 @@ class CHANNELDUE_API SceneComponentState final :
     kRelativeLocationFieldNumber = 12,
     kRelativeRotationFieldNumber = 13,
     kRelativeScaleFieldNumber = 14,
-    kRemovedFieldNumber = 1,
     kBAbsoluteLocationFieldNumber = 2,
     kBAbsoluteRotationFieldNumber = 3,
     kBAbsoluteScaleFieldNumber = 4,
@@ -1974,15 +1984,6 @@ class CHANNELDUE_API SceneComponentState final :
       ::unrealpb::FVector* relativescale);
   ::unrealpb::FVector* unsafe_arena_release_relativescale();
 
-  // bool removed = 1;
-  void clear_removed();
-  bool removed() const;
-  void set_removed(bool value);
-  private:
-  bool _internal_removed() const;
-  void _internal_set_removed(bool value);
-  public:
-
   // optional bool bAbsoluteLocation = 2;
   bool has_babsolutelocation() const;
   private:
@@ -2090,7 +2091,6 @@ class CHANNELDUE_API SceneComponentState final :
     ::unrealpb::FVector* relativelocation_;
     ::unrealpb::FVector* relativerotation_;
     ::unrealpb::FVector* relativescale_;
-    bool removed_;
     bool babsolutelocation_;
     bool babsoluterotation_;
     bool babsolutescale_;
@@ -2609,10 +2609,9 @@ class CHANNELDUE_API CharacterState final :
     kRootMotionFieldNumber = 2,
     kBasedMovementFieldNumber = 3,
     kServerLastTransformUpdateTimeStampFieldNumber = 4,
-    kRemovedFieldNumber = 1,
+    kMovementModeFieldNumber = 5,
     kBIsCrouchedFieldNumber = 6,
     kBProxyIsJumpForceAppliedFieldNumber = 7,
-    kMovementModeFieldNumber = 5,
     kAnimRootMotionTranslationScaleFieldNumber = 8,
     kReplayLastTransformUpdateTimeStampFieldNumber = 9,
   };
@@ -2665,13 +2664,17 @@ class CHANNELDUE_API CharacterState final :
   void _internal_set_serverlasttransformupdatetimestamp(float value);
   public:
 
-  // bool removed = 1;
-  void clear_removed();
-  bool removed() const;
-  void set_removed(bool value);
+  // optional uint32 movementMode = 5;
+  bool has_movementmode() const;
   private:
-  bool _internal_removed() const;
-  void _internal_set_removed(bool value);
+  bool _internal_has_movementmode() const;
+  public:
+  void clear_movementmode();
+  uint32_t movementmode() const;
+  void set_movementmode(uint32_t value);
+  private:
+  uint32_t _internal_movementmode() const;
+  void _internal_set_movementmode(uint32_t value);
   public:
 
   // optional bool bIsCrouched = 6;
@@ -2698,19 +2701,6 @@ class CHANNELDUE_API CharacterState final :
   private:
   bool _internal_bproxyisjumpforceapplied() const;
   void _internal_set_bproxyisjumpforceapplied(bool value);
-  public:
-
-  // optional uint32 movementMode = 5;
-  bool has_movementmode() const;
-  private:
-  bool _internal_has_movementmode() const;
-  public:
-  void clear_movementmode();
-  uint32_t movementmode() const;
-  void set_movementmode(uint32_t value);
-  private:
-  uint32_t _internal_movementmode() const;
-  void _internal_set_movementmode(uint32_t value);
   public:
 
   // optional float animRootMotionTranslationScale = 8;
@@ -2752,10 +2742,9 @@ class CHANNELDUE_API CharacterState final :
     ::unrealpb::RootMotionMontage* rootmotion_;
     ::unrealpb::BasedMovementInfo* basedmovement_;
     float serverlasttransformupdatetimestamp_;
-    bool removed_;
+    uint32_t movementmode_;
     bool biscrouched_;
     bool bproxyisjumpforceapplied_;
-    uint32_t movementmode_;
     float animrootmotiontranslationscale_;
     float replaylasttransformupdatetimestamp_;
   };
@@ -3214,7 +3203,6 @@ class CHANNELDUE_API PlayerState final :
 
   enum : int {
     kPlayerNameFieldNumber = 5,
-    kRemovedFieldNumber = 1,
     kScoreFieldNumber = 2,
     kPlayerIdFieldNumber = 3,
     kPingFieldNumber = 4,
@@ -3235,15 +3223,6 @@ class CHANNELDUE_API PlayerState final :
   const std::string& _internal_playername() const;
   inline PROTOBUF_ALWAYS_INLINE void _internal_set_playername(const std::string& value);
   std::string* _internal_mutable_playername();
-  public:
-
-  // bool removed = 1;
-  void clear_removed();
-  bool removed() const;
-  void set_removed(bool value);
-  private:
-  bool _internal_removed() const;
-  void _internal_set_removed(bool value);
   public:
 
   // optional float score = 2;
@@ -3296,7 +3275,6 @@ class CHANNELDUE_API PlayerState final :
     ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr playername_;
-    bool removed_;
     float score_;
     int32_t playerid_;
     uint32_t ping_;
@@ -3962,7 +3940,6 @@ class CHANNELDUE_API PlayerControllerState final :
   enum : int {
     kTargetViewRotationFieldNumber = 2,
     kSpawnLocationFieldNumber = 3,
-    kRemovedFieldNumber = 1,
   };
   // optional .unrealpb.FVector targetViewRotation = 2;
   bool has_targetviewrotation() const;
@@ -4000,15 +3977,6 @@ class CHANNELDUE_API PlayerControllerState final :
       ::unrealpb::FVector* spawnlocation);
   ::unrealpb::FVector* unsafe_arena_release_spawnlocation();
 
-  // bool removed = 1;
-  void clear_removed();
-  bool removed() const;
-  void set_removed(bool value);
-  private:
-  bool _internal_removed() const;
-  void _internal_set_removed(bool value);
-  public:
-
   // @@protoc_insertion_point(class_scope:unrealpb.PlayerControllerState)
  private:
   class _Internal;
@@ -4021,7 +3989,6 @@ class CHANNELDUE_API PlayerControllerState final :
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::unrealpb::FVector* targetviewrotation_;
     ::unrealpb::FVector* spawnlocation_;
-    bool removed_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -5780,9 +5747,8 @@ class CHANNELDUE_API GameStateBase final :
   enum : int {
     kSpectatorClassNameFieldNumber = 2,
     kGameModeClassNameFieldNumber = 3,
-    kRemovedFieldNumber = 1,
-    kBReplicatedHasBegunPlayFieldNumber = 5,
     kReplicatedWorldTimeSecondsFieldNumber = 4,
+    kBReplicatedHasBegunPlayFieldNumber = 5,
   };
   // optional string spectatorClassName = 2;
   bool has_spectatorclassname() const;
@@ -5820,13 +5786,17 @@ class CHANNELDUE_API GameStateBase final :
   std::string* _internal_mutable_gamemodeclassname();
   public:
 
-  // bool removed = 1;
-  void clear_removed();
-  bool removed() const;
-  void set_removed(bool value);
+  // optional float replicatedWorldTimeSeconds = 4;
+  bool has_replicatedworldtimeseconds() const;
   private:
-  bool _internal_removed() const;
-  void _internal_set_removed(bool value);
+  bool _internal_has_replicatedworldtimeseconds() const;
+  public:
+  void clear_replicatedworldtimeseconds();
+  float replicatedworldtimeseconds() const;
+  void set_replicatedworldtimeseconds(float value);
+  private:
+  float _internal_replicatedworldtimeseconds() const;
+  void _internal_set_replicatedworldtimeseconds(float value);
   public:
 
   // optional bool bReplicatedHasBegunPlay = 5;
@@ -5842,19 +5812,6 @@ class CHANNELDUE_API GameStateBase final :
   void _internal_set_breplicatedhasbegunplay(bool value);
   public:
 
-  // optional float replicatedWorldTimeSeconds = 4;
-  bool has_replicatedworldtimeseconds() const;
-  private:
-  bool _internal_has_replicatedworldtimeseconds() const;
-  public:
-  void clear_replicatedworldtimeseconds();
-  float replicatedworldtimeseconds() const;
-  void set_replicatedworldtimeseconds(float value);
-  private:
-  float _internal_replicatedworldtimeseconds() const;
-  void _internal_set_replicatedworldtimeseconds(float value);
-  public:
-
   // @@protoc_insertion_point(class_scope:unrealpb.GameStateBase)
  private:
   class _Internal;
@@ -5867,9 +5824,8 @@ class CHANNELDUE_API GameStateBase final :
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr spectatorclassname_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr gamemodeclassname_;
-    bool removed_;
-    bool breplicatedhasbegunplay_;
     float replicatedworldtimeseconds_;
+    bool breplicatedhasbegunplay_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -7089,7 +7045,27 @@ inline void ActorState::set_allocated_instigator(::unrealpb::UnrealObjectRef* in
 
 // ActorComponentState
 
-// optional bool bIsActive = 1;
+// bool removed = 1;
+inline void ActorComponentState::clear_removed() {
+  _impl_.removed_ = false;
+}
+inline bool ActorComponentState::_internal_removed() const {
+  return _impl_.removed_;
+}
+inline bool ActorComponentState::removed() const {
+  // @@protoc_insertion_point(field_get:unrealpb.ActorComponentState.removed)
+  return _internal_removed();
+}
+inline void ActorComponentState::_internal_set_removed(bool value) {
+  
+  _impl_.removed_ = value;
+}
+inline void ActorComponentState::set_removed(bool value) {
+  _internal_set_removed(value);
+  // @@protoc_insertion_point(field_set:unrealpb.ActorComponentState.removed)
+}
+
+// optional bool bIsActive = 2;
 inline bool ActorComponentState::_internal_has_bisactive() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
   return value;
@@ -7117,7 +7093,7 @@ inline void ActorComponentState::set_bisactive(bool value) {
   // @@protoc_insertion_point(field_set:unrealpb.ActorComponentState.bIsActive)
 }
 
-// optional bool bReplicated = 2;
+// optional bool bReplicated = 3;
 inline bool ActorComponentState::_internal_has_breplicated() const {
   bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
   return value;
@@ -7148,26 +7124,6 @@ inline void ActorComponentState::set_breplicated(bool value) {
 // -------------------------------------------------------------------
 
 // SceneComponentState
-
-// bool removed = 1;
-inline void SceneComponentState::clear_removed() {
-  _impl_.removed_ = false;
-}
-inline bool SceneComponentState::_internal_removed() const {
-  return _impl_.removed_;
-}
-inline bool SceneComponentState::removed() const {
-  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.removed)
-  return _internal_removed();
-}
-inline void SceneComponentState::_internal_set_removed(bool value) {
-  
-  _impl_.removed_ = value;
-}
-inline void SceneComponentState::set_removed(bool value) {
-  _internal_set_removed(value);
-  // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.removed)
-}
 
 // optional bool bAbsoluteLocation = 2;
 inline bool SceneComponentState::_internal_has_babsolutelocation() const {
@@ -8267,26 +8223,6 @@ inline void BasedMovementInfo::set_bserverhasvelocity(bool value) {
 
 // CharacterState
 
-// bool removed = 1;
-inline void CharacterState::clear_removed() {
-  _impl_.removed_ = false;
-}
-inline bool CharacterState::_internal_removed() const {
-  return _impl_.removed_;
-}
-inline bool CharacterState::removed() const {
-  // @@protoc_insertion_point(field_get:unrealpb.CharacterState.removed)
-  return _internal_removed();
-}
-inline void CharacterState::_internal_set_removed(bool value) {
-  
-  _impl_.removed_ = value;
-}
-inline void CharacterState::set_removed(bool value) {
-  _internal_set_removed(value);
-  // @@protoc_insertion_point(field_set:unrealpb.CharacterState.removed)
-}
-
 // optional .unrealpb.RootMotionMontage rootMotion = 2;
 inline bool CharacterState::_internal_has_rootmotion() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
@@ -8497,7 +8433,7 @@ inline void CharacterState::set_serverlasttransformupdatetimestamp(float value) 
 
 // optional uint32 movementMode = 5;
 inline bool CharacterState::_internal_has_movementmode() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool CharacterState::has_movementmode() const {
@@ -8505,7 +8441,7 @@ inline bool CharacterState::has_movementmode() const {
 }
 inline void CharacterState::clear_movementmode() {
   _impl_.movementmode_ = 0u;
-  _impl_._has_bits_[0] &= ~0x00000020u;
+  _impl_._has_bits_[0] &= ~0x00000008u;
 }
 inline uint32_t CharacterState::_internal_movementmode() const {
   return _impl_.movementmode_;
@@ -8515,7 +8451,7 @@ inline uint32_t CharacterState::movementmode() const {
   return _internal_movementmode();
 }
 inline void CharacterState::_internal_set_movementmode(uint32_t value) {
-  _impl_._has_bits_[0] |= 0x00000020u;
+  _impl_._has_bits_[0] |= 0x00000008u;
   _impl_.movementmode_ = value;
 }
 inline void CharacterState::set_movementmode(uint32_t value) {
@@ -8525,7 +8461,7 @@ inline void CharacterState::set_movementmode(uint32_t value) {
 
 // optional bool bIsCrouched = 6;
 inline bool CharacterState::_internal_has_biscrouched() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
 inline bool CharacterState::has_biscrouched() const {
@@ -8533,7 +8469,7 @@ inline bool CharacterState::has_biscrouched() const {
 }
 inline void CharacterState::clear_biscrouched() {
   _impl_.biscrouched_ = false;
-  _impl_._has_bits_[0] &= ~0x00000008u;
+  _impl_._has_bits_[0] &= ~0x00000010u;
 }
 inline bool CharacterState::_internal_biscrouched() const {
   return _impl_.biscrouched_;
@@ -8543,7 +8479,7 @@ inline bool CharacterState::biscrouched() const {
   return _internal_biscrouched();
 }
 inline void CharacterState::_internal_set_biscrouched(bool value) {
-  _impl_._has_bits_[0] |= 0x00000008u;
+  _impl_._has_bits_[0] |= 0x00000010u;
   _impl_.biscrouched_ = value;
 }
 inline void CharacterState::set_biscrouched(bool value) {
@@ -8553,7 +8489,7 @@ inline void CharacterState::set_biscrouched(bool value) {
 
 // optional bool bProxyIsJumpForceApplied = 7;
 inline bool CharacterState::_internal_has_bproxyisjumpforceapplied() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
 inline bool CharacterState::has_bproxyisjumpforceapplied() const {
@@ -8561,7 +8497,7 @@ inline bool CharacterState::has_bproxyisjumpforceapplied() const {
 }
 inline void CharacterState::clear_bproxyisjumpforceapplied() {
   _impl_.bproxyisjumpforceapplied_ = false;
-  _impl_._has_bits_[0] &= ~0x00000010u;
+  _impl_._has_bits_[0] &= ~0x00000020u;
 }
 inline bool CharacterState::_internal_bproxyisjumpforceapplied() const {
   return _impl_.bproxyisjumpforceapplied_;
@@ -8571,7 +8507,7 @@ inline bool CharacterState::bproxyisjumpforceapplied() const {
   return _internal_bproxyisjumpforceapplied();
 }
 inline void CharacterState::_internal_set_bproxyisjumpforceapplied(bool value) {
-  _impl_._has_bits_[0] |= 0x00000010u;
+  _impl_._has_bits_[0] |= 0x00000020u;
   _impl_.bproxyisjumpforceapplied_ = value;
 }
 inline void CharacterState::set_bproxyisjumpforceapplied(bool value) {
@@ -8786,26 +8722,6 @@ inline void Character_ClientMoveResponsePacked_Params::set_allocated_packedbits(
 // -------------------------------------------------------------------
 
 // PlayerState
-
-// bool removed = 1;
-inline void PlayerState::clear_removed() {
-  _impl_.removed_ = false;
-}
-inline bool PlayerState::_internal_removed() const {
-  return _impl_.removed_;
-}
-inline bool PlayerState::removed() const {
-  // @@protoc_insertion_point(field_get:unrealpb.PlayerState.removed)
-  return _internal_removed();
-}
-inline void PlayerState::_internal_set_removed(bool value) {
-  
-  _impl_.removed_ = value;
-}
-inline void PlayerState::set_removed(bool value) {
-  _internal_set_removed(value);
-  // @@protoc_insertion_point(field_set:unrealpb.PlayerState.removed)
-}
 
 // optional float score = 2;
 inline bool PlayerState::_internal_has_score() const {
@@ -9464,26 +9380,6 @@ inline void Controller_ClientSetRotation_Params::set_bresetcamera(bool value) {
 // -------------------------------------------------------------------
 
 // PlayerControllerState
-
-// bool removed = 1;
-inline void PlayerControllerState::clear_removed() {
-  _impl_.removed_ = false;
-}
-inline bool PlayerControllerState::_internal_removed() const {
-  return _impl_.removed_;
-}
-inline bool PlayerControllerState::removed() const {
-  // @@protoc_insertion_point(field_get:unrealpb.PlayerControllerState.removed)
-  return _internal_removed();
-}
-inline void PlayerControllerState::_internal_set_removed(bool value) {
-  
-  _impl_.removed_ = value;
-}
-inline void PlayerControllerState::set_removed(bool value) {
-  _internal_set_removed(value);
-  // @@protoc_insertion_point(field_set:unrealpb.PlayerControllerState.removed)
-}
 
 // optional .unrealpb.FVector targetViewRotation = 2;
 inline bool PlayerControllerState::_internal_has_targetviewrotation() const {
@@ -10605,26 +10501,6 @@ inline void PlayerController_ServerAcknowledgePossession_Params::set_allocated_p
 
 // GameStateBase
 
-// bool removed = 1;
-inline void GameStateBase::clear_removed() {
-  _impl_.removed_ = false;
-}
-inline bool GameStateBase::_internal_removed() const {
-  return _impl_.removed_;
-}
-inline bool GameStateBase::removed() const {
-  // @@protoc_insertion_point(field_get:unrealpb.GameStateBase.removed)
-  return _internal_removed();
-}
-inline void GameStateBase::_internal_set_removed(bool value) {
-  
-  _impl_.removed_ = value;
-}
-inline void GameStateBase::set_removed(bool value) {
-  _internal_set_removed(value);
-  // @@protoc_insertion_point(field_set:unrealpb.GameStateBase.removed)
-}
-
 // optional string spectatorClassName = 2;
 inline bool GameStateBase::_internal_has_spectatorclassname() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
@@ -10763,7 +10639,7 @@ inline void GameStateBase::set_allocated_gamemodeclassname(std::string* gamemode
 
 // optional float replicatedWorldTimeSeconds = 4;
 inline bool GameStateBase::_internal_has_replicatedworldtimeseconds() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
 inline bool GameStateBase::has_replicatedworldtimeseconds() const {
@@ -10771,7 +10647,7 @@ inline bool GameStateBase::has_replicatedworldtimeseconds() const {
 }
 inline void GameStateBase::clear_replicatedworldtimeseconds() {
   _impl_.replicatedworldtimeseconds_ = 0;
-  _impl_._has_bits_[0] &= ~0x00000008u;
+  _impl_._has_bits_[0] &= ~0x00000004u;
 }
 inline float GameStateBase::_internal_replicatedworldtimeseconds() const {
   return _impl_.replicatedworldtimeseconds_;
@@ -10781,7 +10657,7 @@ inline float GameStateBase::replicatedworldtimeseconds() const {
   return _internal_replicatedworldtimeseconds();
 }
 inline void GameStateBase::_internal_set_replicatedworldtimeseconds(float value) {
-  _impl_._has_bits_[0] |= 0x00000008u;
+  _impl_._has_bits_[0] |= 0x00000004u;
   _impl_.replicatedworldtimeseconds_ = value;
 }
 inline void GameStateBase::set_replicatedworldtimeseconds(float value) {
@@ -10791,7 +10667,7 @@ inline void GameStateBase::set_replicatedworldtimeseconds(float value) {
 
 // optional bool bReplicatedHasBegunPlay = 5;
 inline bool GameStateBase::_internal_has_breplicatedhasbegunplay() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool GameStateBase::has_breplicatedhasbegunplay() const {
@@ -10799,7 +10675,7 @@ inline bool GameStateBase::has_breplicatedhasbegunplay() const {
 }
 inline void GameStateBase::clear_breplicatedhasbegunplay() {
   _impl_.breplicatedhasbegunplay_ = false;
-  _impl_._has_bits_[0] &= ~0x00000004u;
+  _impl_._has_bits_[0] &= ~0x00000008u;
 }
 inline bool GameStateBase::_internal_breplicatedhasbegunplay() const {
   return _impl_.breplicatedhasbegunplay_;
@@ -10809,7 +10685,7 @@ inline bool GameStateBase::breplicatedhasbegunplay() const {
   return _internal_breplicatedhasbegunplay();
 }
 inline void GameStateBase::_internal_set_breplicatedhasbegunplay(bool value) {
-  _impl_._has_bits_[0] |= 0x00000004u;
+  _impl_._has_bits_[0] |= 0x00000008u;
   _impl_.breplicatedhasbegunplay_ = value;
 }
 inline void GameStateBase::set_breplicatedhasbegunplay(bool value) {

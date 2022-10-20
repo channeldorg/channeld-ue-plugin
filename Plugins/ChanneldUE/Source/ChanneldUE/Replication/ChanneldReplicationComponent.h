@@ -28,6 +28,7 @@ protected:
 	virtual void SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID);
 
 	bool bInitialized = false;
+	bool bUninitialized = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EChanneldChannelType ChannelType;
 	ChannelId OwningChannelId;
@@ -38,9 +39,11 @@ protected:
 public:
 
 	virtual void PostInitProperties() override;
-	virtual void InitOnce();
 	virtual void BeginPlay() override;
+	virtual void InitOnce();
+	virtual void UninitOnce();
 	virtual void EndPlay(EEndPlayReason::Type Reason) override;
+	virtual void DestroyComponent(bool bPromoteChildren /* = false */) override;
 
 	//~ Begin IChannelDataProvider Interface.
 	channeldpb::ChannelType GetChannelType() override;

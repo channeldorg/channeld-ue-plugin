@@ -175,6 +175,7 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 	// All replicated properties in Character are COND_SimulatedOnly
 	if (Character->GetLocalRole() != ROLE_SimulatedProxy)
 	{
+		//UE_LOG(LogChanneld, Verbose, TEXT("Skip updating AutonomousProxy Character %s"), *Character->GetName());
 		return;
 	}
 

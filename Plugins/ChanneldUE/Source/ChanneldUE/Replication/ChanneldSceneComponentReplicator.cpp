@@ -32,6 +32,22 @@ FChanneldSceneComponentReplicator::FChanneldSceneComponentReplicator(USceneCompo
 	}
 }
 
+uint32 FChanneldSceneComponentReplicator::GetNetGUID()
+{
+	if (!NetGUID.IsValid())
+	{
+		if (SceneComp.IsValid())
+		{
+			UWorld* World = SceneComp->GetWorld();
+			if (World && World->GetNetDriver())
+			{
+				NetGUID = World->GetNetDriver()->GuidCache->GetNetGUID(SceneComp->GetOwner());
+			}
+		}
+	}
+	return NetGUID.Value;
+}
+
 FChanneldSceneComponentReplicator::~FChanneldSceneComponentReplicator()
 {
 	if (SceneComp.IsValid())
@@ -166,8 +182,8 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::M
 		return;
 	}
 
-	// Only proxy need to update from the channel data
-	if (SceneComp->GetOwner()->HasAuthority())
+	// Only simulated proxy need to update from the channel data
+	if (SceneComp->GetOwnerRole() > ENetRole::ROLE_SimulatedProxy)
 	{
 		return;
 	}
@@ -177,19 +193,15 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::M
 	bStateChanged = false;
 
 	bool bTransformChanged = false;
-	FVector NewLocation = SceneComp->GetRelativeLocation();
-	FRotator NewRotation = SceneComp->GetRelativeRotation();
 	if (NewState->has_relativelocation())
 	{
-		NewLocation = ChanneldUtils::GetVector(NewState->relativelocation());
-		SceneComp->SetRelativeLocation_Direct(NewLocation);
+		SceneComp->SetRelativeLocation_Direct(ChanneldUtils::GetVector(NewState->relativelocation()));
 		bTransformChanged = true;
 	}
 
 	if (NewState->has_relativerotation())
 	{
-		NewRotation = ChanneldUtils::GetRotator(NewState->relativerotation());
-		SceneComp->SetRelativeRotation_Direct(NewRotation);
+		SceneComp->SetRelativeRotation_Direct(ChanneldUtils::GetRotator(NewState->relativerotation()));
 		bTransformChanged = true;
 	}
 

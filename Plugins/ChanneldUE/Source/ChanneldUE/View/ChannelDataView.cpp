@@ -118,6 +118,7 @@ void UChannelDataView::BeginDestroy()
 
 void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provider)
 {
+	ensureMsgf(Provider->GetChannelType() != channeldpb::UNKNOWN, TEXT("Invalid channel type of data provider: %s"), *IChannelDataProvider::GetName(Provider));
 	if (!ChannelDataTemplates.Contains(Provider->GetChannelType()))
 	{
 		RegisterChannelDataTemplate(Provider->GetChannelType(), Provider->GetChannelDataTemplate());
@@ -132,6 +133,7 @@ void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provide
 
 void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved)
 {
+	ensureMsgf(Provider->GetChannelType() != channeldpb::UNKNOWN, TEXT("Invalid channel type of data provider: %s"), *IChannelDataProvider::GetName(Provider));
 	auto Providers = ChannelDataProviders.Find(ChId);
 	if (Providers != nullptr)
 	{
@@ -156,6 +158,7 @@ void UChannelDataView::RemoveProviderFromAllChannels(IChannelDataProvider* Provi
 		return;
 	}
 
+	ensureMsgf(Provider->GetChannelType() != channeldpb::UNKNOWN, TEXT("Invalid channel type of data provider: %s"), *IChannelDataProvider::GetName(Provider));
 	for (auto& Pair : Connection->SubscribedChannels)
 	{
 		if (static_cast<channeldpb::ChannelType>(Pair.Value.ChannelType) ==Provider->GetChannelType())
@@ -323,11 +326,12 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 		return;
 	}
 
-	// The set can be changed during the iteration, if a new provider is created from the UnrealObjectRef,
-	// during any replicator's OnStateChanged(). So we use a const array to iterate.
-	for (IChannelDataProvider* Provider : Providers->Array())
+	// The set can be changed during the iteration, when a new provider is created from the UnrealObjectRef during any replicator's OnStateChanged(),
+	// or the provider's owner actor got destroyed by removed=true. So we use a const array to iterate.
+	TArray<IChannelDataProvider*> ProvidersArr = Providers->Array();
+	for (IChannelDataProvider* Provider : ProvidersArr)
 	{
-		if (!Provider->IsRemoved())
+		if (Provider && !Provider->IsRemoved())
 		{
 			Provider->OnChannelDataUpdated(UpdateData);
 		}

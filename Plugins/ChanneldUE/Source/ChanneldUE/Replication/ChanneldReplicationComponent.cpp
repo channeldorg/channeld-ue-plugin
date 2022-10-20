@@ -89,18 +89,35 @@ void UChanneldReplicationComponent::BeginPlay()
 	InitOnce();
 }
 
+void UChanneldReplicationComponent::UninitOnce()
+{
+	if (bUninitialized)
+		return;
+
+	UChannelDataView* View = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
+	if (View)
+	{
+		View->RemoveProviderFromAllChannels(this, GetNetMode() == ENetMode::NM_DedicatedServer);
+	}
+
+	bUninitialized = true;
+}
+
 void UChanneldReplicationComponent::EndPlay(EEndPlayReason::Type Reason)
 {
 	Super::EndPlay(Reason);
 
 	//if (Reason != EEndPlayReason::LevelTransition)
 	{
-		UChannelDataView* View = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
-		if (View)
-		{
-			View->RemoveProviderFromAllChannels(this, GetNetMode() == ENetMode::NM_DedicatedServer);
-		}
+		UninitOnce();
 	}
+}
+
+void UChanneldReplicationComponent::DestroyComponent(bool bPromoteChildren /* = false */)
+{
+	Super::DestroyComponent(bPromoteChildren);
+
+	//UninitOnce();
 }
 
 channeldpb::ChannelType UChanneldReplicationComponent::GetChannelType()

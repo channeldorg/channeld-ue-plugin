@@ -13,6 +13,7 @@ public:
 
 	//~Begin FChanneldReplicatorBase Interface
 	virtual UClass* GetTargetClass() { return USceneComponent::StaticClass(); }
+	virtual uint32 GetNetGUID() override;
 	virtual google::protobuf::Message* GetDeltaState() override { return DeltaState; }
 	virtual void ClearState() override;
 	virtual void Tick(float DeltaTime) override;

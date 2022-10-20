@@ -55,8 +55,10 @@ void FChanneldPlayerStateReplicator::Tick(float DeltaTime)
 	}
 	if (PlayerState->Ping != FullState->ping())
 	{
+#if UE_BUILD_SHIPPING
 		DeltaState->set_ping(PlayerState->Ping);
 		bStateChanged = true;
+#endif
 	}
 	if (PlayerState->GetPlayerName() != FString(UTF8_TO_TCHAR(FullState->mutable_playername()->c_str())))
 	{
