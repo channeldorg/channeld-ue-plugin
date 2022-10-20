@@ -189,7 +189,7 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::M
 	}
 
 	auto NewState = static_cast<const unrealpb::SceneComponentState*>(InNewState);
-	FullState->CopyFrom(*NewState);
+	FullState->MergeFrom(*NewState);
 	bStateChanged = false;
 
 	bool bTransformChanged = false;

@@ -35,6 +35,11 @@ FChanneldActorReplicator::FChanneldActorReplicator(UObject* InTargetObj) : FChan
 		ReplicatedMovementPtr = Property->ContainerPtrToValuePtr<FRepMovement>(Actor.Get());
 		check(ReplicatedMovementPtr);
 	}
+	{
+		auto Property = CastFieldChecked<const FStructProperty>(Actor->GetClass()->FindPropertyByName(FName("AttachmentReplication")));
+		AttachmentReplicationPtr = Property->ContainerPtrToValuePtr<FRepAttachment>(Actor.Get());
+		check(AttachmentReplicationPtr);
+	}
 
 	OnRep_OwnerFunc = Actor->GetClass()->FindFunctionByName(FName("OnRep_Owner"));
 	check(OnRep_OwnerFunc);
@@ -120,39 +125,79 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
+	//---------------------------------------------
+	// AActor::PreReplication
+	//---------------------------------------------
 	Actor->GatherCurrentMovement();
-	FRepMovement& RepMovement = *ReplicatedMovementPtr;
-	unrealpb::RepMovement* RepMovementFullState = FullState->mutable_replicatedmovement();
-	unrealpb::RepMovement* RepMovementDeltaState = DeltaState->mutable_replicatedmovement();
-	if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_linearvelocity(), RepMovement.LinearVelocity))
+
+	if (Actor->IsReplicatingMovement())
 	{
-		ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_linearvelocity(), RepMovement.LinearVelocity);
-		bStateChanged = true;
+		FRepMovement& RepMovement = *ReplicatedMovementPtr;
+		unrealpb::FRepMovement* RepMovementFullState = FullState->mutable_replicatedmovement();
+		unrealpb::FRepMovement* RepMovementDeltaState = DeltaState->mutable_replicatedmovement();
+		if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_linearvelocity(), RepMovement.LinearVelocity))
+		{
+			ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_linearvelocity(), RepMovement.LinearVelocity);
+			bStateChanged = true;
+		}
+		if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_angularvelocity(), RepMovement.AngularVelocity))
+		{
+			ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_angularvelocity(), RepMovement.AngularVelocity);
+			bStateChanged = true;
+		}
+		if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_location(), RepMovement.Location))
+		{
+			ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_location(), RepMovement.Location);
+			bStateChanged = true;
+		}
+		if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_rotation(), RepMovement.Rotation))
+		{
+			ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_rotation(), RepMovement.Rotation);
+			bStateChanged = true;
+		}
+		if (RepMovement.bSimulatedPhysicSleep != RepMovementFullState->bsimulatedphysicsleep())
+		{
+			RepMovementDeltaState->set_bsimulatedphysicsleep(RepMovement.bSimulatedPhysicSleep);
+			bStateChanged = true;
+		}
+		if (RepMovement.bRepPhysics != RepMovementFullState->brepphysics())
+		{
+			RepMovementDeltaState->set_brepphysics(RepMovement.bRepPhysics);
+			bStateChanged = true;
+		}
 	}
-	if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_angularvelocity(), RepMovement.AngularVelocity))
+
+	// Don't need to replicate AttachmentReplication if the root component replicates, because it already handles it.
+	if (Actor->GetRootComponent() && !Actor->GetRootComponent()->GetIsReplicated())
 	{
-		ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_angularvelocity(), RepMovement.AngularVelocity);
-		bStateChanged = true;
-	}
-	if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_location(), RepMovement.Location))
-	{
-		ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_location(), RepMovement.Location);
-		bStateChanged = true;
-	}
-	if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_rotation(), RepMovement.Rotation))
-	{
-		ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_rotation(), RepMovement.Rotation);
-		bStateChanged = true;
-	}
-	if (RepMovement.bSimulatedPhysicSleep != RepMovementFullState->bsimulatedphysicsleep())
-	{
-		RepMovementDeltaState->set_bsimulatedphysicsleep(RepMovement.bSimulatedPhysicSleep);
-		bStateChanged = true;
-	}
-	if (RepMovement.bRepPhysics != RepMovementFullState->brepphysics())
-	{
-		RepMovementDeltaState->set_brepphysics(RepMovement.bRepPhysics);
-		bStateChanged = true;
+		const FRepAttachment& RepAttachment = Actor->GetAttachmentReplication();
+		unrealpb::FRepAttachment* RepAttachmentFullState = FullState->mutable_attachmentreplication();
+		unrealpb::FRepAttachment* RepAttachmentDeltaState = DeltaState->mutable_attachmentreplication();
+		if (RepAttachment.AttachParent != ChanneldUtils::GetObjectByRef(RepAttachmentFullState->mutable_attachparent(), Actor->GetWorld()))
+		{
+			RepAttachmentDeltaState->mutable_attachparent()->CopyFrom(ChanneldUtils::GetRefOfObject(RepAttachment.AttachParent, Actor->GetNetConnection()));
+			bStateChanged = true;
+		}
+		if (RepAttachment.AttachComponent != ChanneldUtils::GetActorComponentByRef<USceneComponent>(RepAttachmentFullState->mutable_attachcomponent(), Actor->GetWorld()))
+		{
+			RepAttachmentDeltaState->mutable_attachcomponent()->CopyFrom(ChanneldUtils::GetRefOfActorComponent(RepAttachment.AttachComponent, Actor->GetNetConnection()));
+			bStateChanged = true;
+		}
+		if (ChanneldUtils::SetIfNotSame(RepAttachmentFullState->mutable_locationoffset(), RepAttachment.LocationOffset))
+		{
+			ChanneldUtils::SetIfNotSame(RepAttachmentDeltaState->mutable_locationoffset(), RepAttachment.LocationOffset);
+			bStateChanged = true;
+		}
+		if (ChanneldUtils::SetIfNotSame(RepAttachmentFullState->mutable_relativescale(), RepAttachment.RelativeScale3D))
+		{
+			ChanneldUtils::SetIfNotSame(RepAttachmentDeltaState->mutable_relativescale(), RepAttachment.RelativeScale3D);
+			bStateChanged = true;
+		}
+		if (ChanneldUtils::SetIfNotSame(RepAttachmentFullState->mutable_rotationoffset(), RepAttachment.RotationOffset))
+		{
+			ChanneldUtils::SetIfNotSame(RepAttachmentDeltaState->mutable_rotationoffset(), RepAttachment.RotationOffset);
+			bStateChanged = true;
+		}
 	}
 
 	FullState->MergeFrom(*DeltaState);

@@ -180,7 +180,7 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 	}
 
 	auto NewState = static_cast<const unrealpb::CharacterState*>(InNewState);
-	FullState->CopyFrom(*NewState);
+	FullState->MergeFrom(*NewState);
 	bStateChanged = false;
 
 	// TODO: RootMotion

@@ -76,6 +76,12 @@ CHANNELDUE_API extern Controller_ClientSetLocation_ParamsDefaultTypeInternal _Co
 class Controller_ClientSetRotation_Params;
 struct Controller_ClientSetRotation_ParamsDefaultTypeInternal;
 CHANNELDUE_API extern Controller_ClientSetRotation_ParamsDefaultTypeInternal _Controller_ClientSetRotation_Params_default_instance_;
+class FRepAttachment;
+struct FRepAttachmentDefaultTypeInternal;
+CHANNELDUE_API extern FRepAttachmentDefaultTypeInternal _FRepAttachment_default_instance_;
+class FRepMovement;
+struct FRepMovementDefaultTypeInternal;
+CHANNELDUE_API extern FRepMovementDefaultTypeInternal _FRepMovement_default_instance_;
 class FVector;
 struct FVectorDefaultTypeInternal;
 CHANNELDUE_API extern FVectorDefaultTypeInternal _FVector_default_instance_;
@@ -121,9 +127,6 @@ CHANNELDUE_API extern PlayerStateDefaultTypeInternal _PlayerState_default_instan
 class RemoteFunctionMessage;
 struct RemoteFunctionMessageDefaultTypeInternal;
 CHANNELDUE_API extern RemoteFunctionMessageDefaultTypeInternal _RemoteFunctionMessage_default_instance_;
-class RepMovement;
-struct RepMovementDefaultTypeInternal;
-CHANNELDUE_API extern RepMovementDefaultTypeInternal _RepMovement_default_instance_;
 class RootMotionMontage;
 struct RootMotionMontageDefaultTypeInternal;
 CHANNELDUE_API extern RootMotionMontageDefaultTypeInternal _RootMotionMontage_default_instance_;
@@ -151,6 +154,8 @@ template<> CHANNELDUE_API ::unrealpb::Character_ServerMovePacked_Params* Arena::
 template<> CHANNELDUE_API ::unrealpb::ControllerState* Arena::CreateMaybeMessage<::unrealpb::ControllerState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::Controller_ClientSetLocation_Params* Arena::CreateMaybeMessage<::unrealpb::Controller_ClientSetLocation_Params>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::Controller_ClientSetRotation_Params* Arena::CreateMaybeMessage<::unrealpb::Controller_ClientSetRotation_Params>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::FRepAttachment* Arena::CreateMaybeMessage<::unrealpb::FRepAttachment>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::FRepMovement* Arena::CreateMaybeMessage<::unrealpb::FRepMovement>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::FVector* Arena::CreateMaybeMessage<::unrealpb::FVector>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::GameStateBase* Arena::CreateMaybeMessage<::unrealpb::GameStateBase>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::PlayerControllerState* Arena::CreateMaybeMessage<::unrealpb::PlayerControllerState>(Arena*);
@@ -166,7 +171,6 @@ template<> CHANNELDUE_API ::unrealpb::PlayerController_ServerSetSpectatorLocatio
 template<> CHANNELDUE_API ::unrealpb::PlayerController_ServerUpdateCamera_Params* Arena::CreateMaybeMessage<::unrealpb::PlayerController_ServerUpdateCamera_Params>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::PlayerState* Arena::CreateMaybeMessage<::unrealpb::PlayerState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::RemoteFunctionMessage* Arena::CreateMaybeMessage<::unrealpb::RemoteFunctionMessage>(Arena*);
-template<> CHANNELDUE_API ::unrealpb::RepMovement* Arena::CreateMaybeMessage<::unrealpb::RepMovement>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::RootMotionMontage* Arena::CreateMaybeMessage<::unrealpb::RootMotionMontage>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::SceneComponentState* Arena::CreateMaybeMessage<::unrealpb::SceneComponentState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::SpawnObjectMessage* Arena::CreateMaybeMessage<::unrealpb::SpawnObjectMessage>(Arena*);
@@ -1285,24 +1289,24 @@ class CHANNELDUE_API SpawnObjectMessage final :
 };
 // -------------------------------------------------------------------
 
-class CHANNELDUE_API RepMovement final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.RepMovement) */ {
+class CHANNELDUE_API FRepMovement final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.FRepMovement) */ {
  public:
-  inline RepMovement() : RepMovement(nullptr) {}
-  ~RepMovement() override;
-  explicit PROTOBUF_CONSTEXPR RepMovement(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline FRepMovement() : FRepMovement(nullptr) {}
+  ~FRepMovement() override;
+  explicit PROTOBUF_CONSTEXPR FRepMovement(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  RepMovement(const RepMovement& from);
-  RepMovement(RepMovement&& from) noexcept
-    : RepMovement() {
+  FRepMovement(const FRepMovement& from);
+  FRepMovement(FRepMovement&& from) noexcept
+    : FRepMovement() {
     *this = ::std::move(from);
   }
 
-  inline RepMovement& operator=(const RepMovement& from) {
+  inline FRepMovement& operator=(const FRepMovement& from) {
     CopyFrom(from);
     return *this;
   }
-  inline RepMovement& operator=(RepMovement&& from) noexcept {
+  inline FRepMovement& operator=(FRepMovement&& from) noexcept {
     if (this == &from) return *this;
     if (GetOwningArena() == from.GetOwningArena()
   #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
@@ -1325,20 +1329,20 @@ class CHANNELDUE_API RepMovement final :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return default_instance().GetMetadata().reflection;
   }
-  static const RepMovement& default_instance() {
+  static const FRepMovement& default_instance() {
     return *internal_default_instance();
   }
-  static inline const RepMovement* internal_default_instance() {
-    return reinterpret_cast<const RepMovement*>(
-               &_RepMovement_default_instance_);
+  static inline const FRepMovement* internal_default_instance() {
+    return reinterpret_cast<const FRepMovement*>(
+               &_FRepMovement_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     6;
 
-  friend void swap(RepMovement& a, RepMovement& b) {
+  friend void swap(FRepMovement& a, FRepMovement& b) {
     a.Swap(&b);
   }
-  inline void Swap(RepMovement* other) {
+  inline void Swap(FRepMovement* other) {
     if (other == this) return;
   #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
     if (GetOwningArena() != nullptr &&
@@ -1351,7 +1355,7 @@ class CHANNELDUE_API RepMovement final :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(RepMovement* other) {
+  void UnsafeArenaSwap(FRepMovement* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
     InternalSwap(other);
@@ -1359,14 +1363,14 @@ class CHANNELDUE_API RepMovement final :
 
   // implements Message ----------------------------------------------
 
-  RepMovement* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<RepMovement>(arena);
+  FRepMovement* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<FRepMovement>(arena);
   }
   using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const RepMovement& from);
+  void CopyFrom(const FRepMovement& from);
   using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const RepMovement& from) {
-    RepMovement::MergeImpl(*this, from);
+  void MergeFrom( const FRepMovement& from) {
+    FRepMovement::MergeImpl(*this, from);
   }
   private:
   static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
@@ -1384,15 +1388,15 @@ class CHANNELDUE_API RepMovement final :
   void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
   void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(RepMovement* other);
+  void InternalSwap(FRepMovement* other);
 
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "unrealpb.RepMovement";
+    return "unrealpb.FRepMovement";
   }
   protected:
-  explicit RepMovement(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+  explicit FRepMovement(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                        bool is_message_owned = false);
   public:
 
@@ -1511,7 +1515,7 @@ class CHANNELDUE_API RepMovement final :
   void _internal_set_brepphysics(bool value);
   public:
 
-  // @@protoc_insertion_point(class_scope:unrealpb.RepMovement)
+  // @@protoc_insertion_point(class_scope:unrealpb.FRepMovement)
  private:
   class _Internal;
 
@@ -1527,6 +1531,259 @@ class CHANNELDUE_API RepMovement final :
     ::unrealpb::FVector* rotation_;
     bool bsimulatedphysicsleep_;
     bool brepphysics_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API FRepAttachment final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.FRepAttachment) */ {
+ public:
+  inline FRepAttachment() : FRepAttachment(nullptr) {}
+  ~FRepAttachment() override;
+  explicit PROTOBUF_CONSTEXPR FRepAttachment(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  FRepAttachment(const FRepAttachment& from);
+  FRepAttachment(FRepAttachment&& from) noexcept
+    : FRepAttachment() {
+    *this = ::std::move(from);
+  }
+
+  inline FRepAttachment& operator=(const FRepAttachment& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline FRepAttachment& operator=(FRepAttachment&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const FRepAttachment& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const FRepAttachment* internal_default_instance() {
+    return reinterpret_cast<const FRepAttachment*>(
+               &_FRepAttachment_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    7;
+
+  friend void swap(FRepAttachment& a, FRepAttachment& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(FRepAttachment* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(FRepAttachment* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  FRepAttachment* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<FRepAttachment>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const FRepAttachment& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const FRepAttachment& from) {
+    FRepAttachment::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(FRepAttachment* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.FRepAttachment";
+  }
+  protected:
+  explicit FRepAttachment(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kAttachSocketFieldNumber = 5,
+    kAttachParentFieldNumber = 1,
+    kLocationOffsetFieldNumber = 2,
+    kRelativeScaleFieldNumber = 3,
+    kRotationOffsetFieldNumber = 4,
+    kAttachComponentFieldNumber = 6,
+  };
+  // string attachSocket = 5;
+  void clear_attachsocket();
+  const std::string& attachsocket() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_attachsocket(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_attachsocket();
+  PROTOBUF_NODISCARD std::string* release_attachsocket();
+  void set_allocated_attachsocket(std::string* attachsocket);
+  private:
+  const std::string& _internal_attachsocket() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_attachsocket(const std::string& value);
+  std::string* _internal_mutable_attachsocket();
+  public:
+
+  // .unrealpb.UnrealObjectRef attachParent = 1;
+  bool has_attachparent() const;
+  private:
+  bool _internal_has_attachparent() const;
+  public:
+  void clear_attachparent();
+  const ::unrealpb::UnrealObjectRef& attachparent() const;
+  PROTOBUF_NODISCARD ::unrealpb::UnrealObjectRef* release_attachparent();
+  ::unrealpb::UnrealObjectRef* mutable_attachparent();
+  void set_allocated_attachparent(::unrealpb::UnrealObjectRef* attachparent);
+  private:
+  const ::unrealpb::UnrealObjectRef& _internal_attachparent() const;
+  ::unrealpb::UnrealObjectRef* _internal_mutable_attachparent();
+  public:
+  void unsafe_arena_set_allocated_attachparent(
+      ::unrealpb::UnrealObjectRef* attachparent);
+  ::unrealpb::UnrealObjectRef* unsafe_arena_release_attachparent();
+
+  // .unrealpb.FVector locationOffset = 2;
+  bool has_locationoffset() const;
+  private:
+  bool _internal_has_locationoffset() const;
+  public:
+  void clear_locationoffset();
+  const ::unrealpb::FVector& locationoffset() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_locationoffset();
+  ::unrealpb::FVector* mutable_locationoffset();
+  void set_allocated_locationoffset(::unrealpb::FVector* locationoffset);
+  private:
+  const ::unrealpb::FVector& _internal_locationoffset() const;
+  ::unrealpb::FVector* _internal_mutable_locationoffset();
+  public:
+  void unsafe_arena_set_allocated_locationoffset(
+      ::unrealpb::FVector* locationoffset);
+  ::unrealpb::FVector* unsafe_arena_release_locationoffset();
+
+  // .unrealpb.FVector relativeScale = 3;
+  bool has_relativescale() const;
+  private:
+  bool _internal_has_relativescale() const;
+  public:
+  void clear_relativescale();
+  const ::unrealpb::FVector& relativescale() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_relativescale();
+  ::unrealpb::FVector* mutable_relativescale();
+  void set_allocated_relativescale(::unrealpb::FVector* relativescale);
+  private:
+  const ::unrealpb::FVector& _internal_relativescale() const;
+  ::unrealpb::FVector* _internal_mutable_relativescale();
+  public:
+  void unsafe_arena_set_allocated_relativescale(
+      ::unrealpb::FVector* relativescale);
+  ::unrealpb::FVector* unsafe_arena_release_relativescale();
+
+  // .unrealpb.FVector rotationOffset = 4;
+  bool has_rotationoffset() const;
+  private:
+  bool _internal_has_rotationoffset() const;
+  public:
+  void clear_rotationoffset();
+  const ::unrealpb::FVector& rotationoffset() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_rotationoffset();
+  ::unrealpb::FVector* mutable_rotationoffset();
+  void set_allocated_rotationoffset(::unrealpb::FVector* rotationoffset);
+  private:
+  const ::unrealpb::FVector& _internal_rotationoffset() const;
+  ::unrealpb::FVector* _internal_mutable_rotationoffset();
+  public:
+  void unsafe_arena_set_allocated_rotationoffset(
+      ::unrealpb::FVector* rotationoffset);
+  ::unrealpb::FVector* unsafe_arena_release_rotationoffset();
+
+  // .unrealpb.ActorComponentRef attachComponent = 6;
+  bool has_attachcomponent() const;
+  private:
+  bool _internal_has_attachcomponent() const;
+  public:
+  void clear_attachcomponent();
+  const ::unrealpb::ActorComponentRef& attachcomponent() const;
+  PROTOBUF_NODISCARD ::unrealpb::ActorComponentRef* release_attachcomponent();
+  ::unrealpb::ActorComponentRef* mutable_attachcomponent();
+  void set_allocated_attachcomponent(::unrealpb::ActorComponentRef* attachcomponent);
+  private:
+  const ::unrealpb::ActorComponentRef& _internal_attachcomponent() const;
+  ::unrealpb::ActorComponentRef* _internal_mutable_attachcomponent();
+  public:
+  void unsafe_arena_set_allocated_attachcomponent(
+      ::unrealpb::ActorComponentRef* attachcomponent);
+  ::unrealpb::ActorComponentRef* unsafe_arena_release_attachcomponent();
+
+  // @@protoc_insertion_point(class_scope:unrealpb.FRepAttachment)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr attachsocket_;
+    ::unrealpb::UnrealObjectRef* attachparent_;
+    ::unrealpb::FVector* locationoffset_;
+    ::unrealpb::FVector* relativescale_;
+    ::unrealpb::FVector* rotationoffset_;
+    ::unrealpb::ActorComponentRef* attachcomponent_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -1581,7 +1838,7 @@ class CHANNELDUE_API ActorState final :
                &_ActorState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    8;
 
   friend void swap(ActorState& a, ActorState& b) {
     a.Swap(&b);
@@ -1657,6 +1914,7 @@ class CHANNELDUE_API ActorState final :
     kOwnerFieldNumber = 6,
     kInstigatorFieldNumber = 10,
     kReplicatedMovementFieldNumber = 11,
+    kAttachmentReplicationFieldNumber = 12,
     kOwningConnIdFieldNumber = 2,
     kLocalRoleFieldNumber = 4,
     kRemovedFieldNumber = 1,
@@ -1702,23 +1960,41 @@ class CHANNELDUE_API ActorState final :
       ::unrealpb::UnrealObjectRef* instigator);
   ::unrealpb::UnrealObjectRef* unsafe_arena_release_instigator();
 
-  // optional .unrealpb.RepMovement replicatedMovement = 11;
+  // optional .unrealpb.FRepMovement replicatedMovement = 11;
   bool has_replicatedmovement() const;
   private:
   bool _internal_has_replicatedmovement() const;
   public:
   void clear_replicatedmovement();
-  const ::unrealpb::RepMovement& replicatedmovement() const;
-  PROTOBUF_NODISCARD ::unrealpb::RepMovement* release_replicatedmovement();
-  ::unrealpb::RepMovement* mutable_replicatedmovement();
-  void set_allocated_replicatedmovement(::unrealpb::RepMovement* replicatedmovement);
+  const ::unrealpb::FRepMovement& replicatedmovement() const;
+  PROTOBUF_NODISCARD ::unrealpb::FRepMovement* release_replicatedmovement();
+  ::unrealpb::FRepMovement* mutable_replicatedmovement();
+  void set_allocated_replicatedmovement(::unrealpb::FRepMovement* replicatedmovement);
   private:
-  const ::unrealpb::RepMovement& _internal_replicatedmovement() const;
-  ::unrealpb::RepMovement* _internal_mutable_replicatedmovement();
+  const ::unrealpb::FRepMovement& _internal_replicatedmovement() const;
+  ::unrealpb::FRepMovement* _internal_mutable_replicatedmovement();
   public:
   void unsafe_arena_set_allocated_replicatedmovement(
-      ::unrealpb::RepMovement* replicatedmovement);
-  ::unrealpb::RepMovement* unsafe_arena_release_replicatedmovement();
+      ::unrealpb::FRepMovement* replicatedmovement);
+  ::unrealpb::FRepMovement* unsafe_arena_release_replicatedmovement();
+
+  // optional .unrealpb.FRepAttachment attachmentReplication = 12;
+  bool has_attachmentreplication() const;
+  private:
+  bool _internal_has_attachmentreplication() const;
+  public:
+  void clear_attachmentreplication();
+  const ::unrealpb::FRepAttachment& attachmentreplication() const;
+  PROTOBUF_NODISCARD ::unrealpb::FRepAttachment* release_attachmentreplication();
+  ::unrealpb::FRepAttachment* mutable_attachmentreplication();
+  void set_allocated_attachmentreplication(::unrealpb::FRepAttachment* attachmentreplication);
+  private:
+  const ::unrealpb::FRepAttachment& _internal_attachmentreplication() const;
+  ::unrealpb::FRepAttachment* _internal_mutable_attachmentreplication();
+  public:
+  void unsafe_arena_set_allocated_attachmentreplication(
+      ::unrealpb::FRepAttachment* attachmentreplication);
+  ::unrealpb::FRepAttachment* unsafe_arena_release_attachmentreplication();
 
   // optional uint32 owningConnId = 2;
   bool has_owningconnid() const;
@@ -1832,7 +2108,8 @@ class CHANNELDUE_API ActorState final :
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::unrealpb::UnrealObjectRef* owner_;
     ::unrealpb::UnrealObjectRef* instigator_;
-    ::unrealpb::RepMovement* replicatedmovement_;
+    ::unrealpb::FRepMovement* replicatedmovement_;
+    ::unrealpb::FRepAttachment* attachmentreplication_;
     uint32_t owningconnid_;
     uint32_t localrole_;
     bool removed_;
@@ -1895,7 +2172,7 @@ class CHANNELDUE_API ActorComponentState final :
                &_ActorComponentState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    9;
 
   friend void swap(ActorComponentState& a, ActorComponentState& b) {
     a.Swap(&b);
@@ -2074,7 +2351,7 @@ class CHANNELDUE_API SceneComponentState final :
                &_SceneComponentState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    10;
 
   friend void swap(SceneComponentState& a, SceneComponentState& b) {
     a.Swap(&b);
@@ -2436,7 +2713,7 @@ class CHANNELDUE_API RootMotionMontage final :
                &_RootMotionMontage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    10;
+    11;
 
   friend void swap(RootMotionMontage& a, RootMotionMontage& b) {
     a.Swap(&b);
@@ -2555,7 +2832,7 @@ class CHANNELDUE_API BasedMovementInfo final :
                &_BasedMovementInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    11;
+    12;
 
   friend void swap(BasedMovementInfo& a, BasedMovementInfo& b) {
     a.Swap(&b);
@@ -2818,7 +3095,7 @@ class CHANNELDUE_API CharacterState final :
                &_CharacterState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    13;
 
   friend void swap(CharacterState& a, CharacterState& b) {
     a.Swap(&b);
@@ -3086,7 +3363,7 @@ class CHANNELDUE_API Character_ServerMovePacked_Params final :
                &_Character_ServerMovePacked_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    14;
 
   friend void swap(Character_ServerMovePacked_Params& a, Character_ServerMovePacked_Params& b) {
     a.Swap(&b);
@@ -3250,7 +3527,7 @@ class CHANNELDUE_API Character_ClientMoveResponsePacked_Params final :
                &_Character_ClientMoveResponsePacked_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    14;
+    15;
 
   friend void swap(Character_ClientMoveResponsePacked_Params& a, Character_ClientMoveResponsePacked_Params& b) {
     a.Swap(&b);
@@ -3414,7 +3691,7 @@ class CHANNELDUE_API PlayerState final :
                &_PlayerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    16;
 
   friend void swap(PlayerState& a, PlayerState& b) {
     a.Swap(&b);
@@ -3617,7 +3894,7 @@ class CHANNELDUE_API ControllerState final :
                &_ControllerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    17;
 
   friend void swap(ControllerState& a, ControllerState& b) {
     a.Swap(&b);
@@ -3805,7 +4082,7 @@ class CHANNELDUE_API Controller_ClientSetLocation_Params final :
                &_Controller_ClientSetLocation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    18;
 
   friend void swap(Controller_ClientSetLocation_Params& a, Controller_ClientSetLocation_Params& b) {
     a.Swap(&b);
@@ -3982,7 +4259,7 @@ class CHANNELDUE_API Controller_ClientSetRotation_Params final :
                &_Controller_ClientSetRotation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    19;
 
   friend void swap(Controller_ClientSetRotation_Params& a, Controller_ClientSetRotation_Params& b) {
     a.Swap(&b);
@@ -4150,7 +4427,7 @@ class CHANNELDUE_API PlayerControllerState final :
                &_PlayerControllerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    19;
+    20;
 
   friend void swap(PlayerControllerState& a, PlayerControllerState& b) {
     a.Swap(&b);
@@ -4328,7 +4605,7 @@ class CHANNELDUE_API PlayerController_ServerUpdateCamera_Params final :
                &_PlayerController_ServerUpdateCamera_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    20;
+    21;
 
   friend void swap(PlayerController_ServerUpdateCamera_Params& a, PlayerController_ServerUpdateCamera_Params& b) {
     a.Swap(&b);
@@ -4496,7 +4773,7 @@ class CHANNELDUE_API PlayerController_ClientSetHUD_Params final :
                &_PlayerController_ClientSetHUD_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    22;
 
   friend void swap(PlayerController_ClientSetHUD_Params& a, PlayerController_ClientSetHUD_Params& b) {
     a.Swap(&b);
@@ -4654,7 +4931,7 @@ class CHANNELDUE_API PlayerController_ClientSetViewTarget_Params final :
                &_PlayerController_ClientSetViewTarget_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    23;
 
   friend void swap(PlayerController_ClientSetViewTarget_Params& a, PlayerController_ClientSetViewTarget_Params& b) {
     a.Swap(&b);
@@ -4855,7 +5132,7 @@ class CHANNELDUE_API PlayerController_ClientEnableNetworkVoice_Params final :
                &_PlayerController_ClientEnableNetworkVoice_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    24;
 
   friend void swap(PlayerController_ClientEnableNetworkVoice_Params& a, PlayerController_ClientEnableNetworkVoice_Params& b) {
     a.Swap(&b);
@@ -5008,7 +5285,7 @@ class CHANNELDUE_API PlayerController_ClientCapBandwidth_Params final :
                &_PlayerController_ClientCapBandwidth_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    25;
 
   friend void swap(PlayerController_ClientCapBandwidth_Params& a, PlayerController_ClientCapBandwidth_Params& b) {
     a.Swap(&b);
@@ -5156,7 +5433,7 @@ class CHANNELDUE_API PlayerController_ClientRestart_Params final :
                &_PlayerController_ClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    26;
 
   friend void swap(PlayerController_ClientRestart_Params& a, PlayerController_ClientRestart_Params& b) {
     a.Swap(&b);
@@ -5313,7 +5590,7 @@ class CHANNELDUE_API PlayerController_ClientSetCameraMode_Params final :
                &_PlayerController_ClientSetCameraMode_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    27;
 
   friend void swap(PlayerController_ClientSetCameraMode_Params& a, PlayerController_ClientSetCameraMode_Params& b) {
     a.Swap(&b);
@@ -5466,7 +5743,7 @@ class CHANNELDUE_API PlayerController_ClientRetryClientRestart_Params final :
                &_PlayerController_ClientRetryClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    28;
 
   friend void swap(PlayerController_ClientRetryClientRestart_Params& a, PlayerController_ClientRetryClientRestart_Params& b) {
     a.Swap(&b);
@@ -5623,7 +5900,7 @@ class CHANNELDUE_API PlayerController_ServerSetSpectatorLocation_Params final :
                &_PlayerController_ServerSetSpectatorLocation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    29;
 
   friend void swap(PlayerController_ServerSetSpectatorLocation_Params& a, PlayerController_ServerSetSpectatorLocation_Params& b) {
     a.Swap(&b);
@@ -5800,7 +6077,7 @@ class CHANNELDUE_API PlayerController_ServerAcknowledgePossession_Params final :
                &_PlayerController_ServerAcknowledgePossession_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    30;
 
   friend void swap(PlayerController_ServerAcknowledgePossession_Params& a, PlayerController_ServerAcknowledgePossession_Params& b) {
     a.Swap(&b);
@@ -5957,7 +6234,7 @@ class CHANNELDUE_API GameStateBase final :
                &_GameStateBase_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    31;
 
   friend void swap(GameStateBase& a, GameStateBase& b) {
     a.Swap(&b);
@@ -6952,31 +7229,31 @@ inline void SpawnObjectMessage::set_localrole(uint32_t value) {
 
 // -------------------------------------------------------------------
 
-// RepMovement
+// FRepMovement
 
 // optional .unrealpb.FVector linearVelocity = 1;
-inline bool RepMovement::_internal_has_linearvelocity() const {
+inline bool FRepMovement::_internal_has_linearvelocity() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.linearvelocity_ != nullptr);
   return value;
 }
-inline bool RepMovement::has_linearvelocity() const {
+inline bool FRepMovement::has_linearvelocity() const {
   return _internal_has_linearvelocity();
 }
-inline void RepMovement::clear_linearvelocity() {
+inline void FRepMovement::clear_linearvelocity() {
   if (_impl_.linearvelocity_ != nullptr) _impl_.linearvelocity_->Clear();
   _impl_._has_bits_[0] &= ~0x00000001u;
 }
-inline const ::unrealpb::FVector& RepMovement::_internal_linearvelocity() const {
+inline const ::unrealpb::FVector& FRepMovement::_internal_linearvelocity() const {
   const ::unrealpb::FVector* p = _impl_.linearvelocity_;
   return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
       ::unrealpb::_FVector_default_instance_);
 }
-inline const ::unrealpb::FVector& RepMovement::linearvelocity() const {
-  // @@protoc_insertion_point(field_get:unrealpb.RepMovement.linearVelocity)
+inline const ::unrealpb::FVector& FRepMovement::linearvelocity() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepMovement.linearVelocity)
   return _internal_linearvelocity();
 }
-inline void RepMovement::unsafe_arena_set_allocated_linearvelocity(
+inline void FRepMovement::unsafe_arena_set_allocated_linearvelocity(
     ::unrealpb::FVector* linearvelocity) {
   if (GetArenaForAllocation() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.linearvelocity_);
@@ -6987,9 +7264,9 @@ inline void RepMovement::unsafe_arena_set_allocated_linearvelocity(
   } else {
     _impl_._has_bits_[0] &= ~0x00000001u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.RepMovement.linearVelocity)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepMovement.linearVelocity)
 }
-inline ::unrealpb::FVector* RepMovement::release_linearvelocity() {
+inline ::unrealpb::FVector* FRepMovement::release_linearvelocity() {
   _impl_._has_bits_[0] &= ~0x00000001u;
   ::unrealpb::FVector* temp = _impl_.linearvelocity_;
   _impl_.linearvelocity_ = nullptr;
@@ -7004,14 +7281,14 @@ inline ::unrealpb::FVector* RepMovement::release_linearvelocity() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::unrealpb::FVector* RepMovement::unsafe_arena_release_linearvelocity() {
-  // @@protoc_insertion_point(field_release:unrealpb.RepMovement.linearVelocity)
+inline ::unrealpb::FVector* FRepMovement::unsafe_arena_release_linearvelocity() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepMovement.linearVelocity)
   _impl_._has_bits_[0] &= ~0x00000001u;
   ::unrealpb::FVector* temp = _impl_.linearvelocity_;
   _impl_.linearvelocity_ = nullptr;
   return temp;
 }
-inline ::unrealpb::FVector* RepMovement::_internal_mutable_linearvelocity() {
+inline ::unrealpb::FVector* FRepMovement::_internal_mutable_linearvelocity() {
   _impl_._has_bits_[0] |= 0x00000001u;
   if (_impl_.linearvelocity_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
@@ -7019,12 +7296,12 @@ inline ::unrealpb::FVector* RepMovement::_internal_mutable_linearvelocity() {
   }
   return _impl_.linearvelocity_;
 }
-inline ::unrealpb::FVector* RepMovement::mutable_linearvelocity() {
+inline ::unrealpb::FVector* FRepMovement::mutable_linearvelocity() {
   ::unrealpb::FVector* _msg = _internal_mutable_linearvelocity();
-  // @@protoc_insertion_point(field_mutable:unrealpb.RepMovement.linearVelocity)
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepMovement.linearVelocity)
   return _msg;
 }
-inline void RepMovement::set_allocated_linearvelocity(::unrealpb::FVector* linearvelocity) {
+inline void FRepMovement::set_allocated_linearvelocity(::unrealpb::FVector* linearvelocity) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
     delete _impl_.linearvelocity_;
@@ -7041,32 +7318,32 @@ inline void RepMovement::set_allocated_linearvelocity(::unrealpb::FVector* linea
     _impl_._has_bits_[0] &= ~0x00000001u;
   }
   _impl_.linearvelocity_ = linearvelocity;
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.RepMovement.linearVelocity)
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepMovement.linearVelocity)
 }
 
 // optional .unrealpb.FVector angularVelocity = 2;
-inline bool RepMovement::_internal_has_angularvelocity() const {
+inline bool FRepMovement::_internal_has_angularvelocity() const {
   bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.angularvelocity_ != nullptr);
   return value;
 }
-inline bool RepMovement::has_angularvelocity() const {
+inline bool FRepMovement::has_angularvelocity() const {
   return _internal_has_angularvelocity();
 }
-inline void RepMovement::clear_angularvelocity() {
+inline void FRepMovement::clear_angularvelocity() {
   if (_impl_.angularvelocity_ != nullptr) _impl_.angularvelocity_->Clear();
   _impl_._has_bits_[0] &= ~0x00000002u;
 }
-inline const ::unrealpb::FVector& RepMovement::_internal_angularvelocity() const {
+inline const ::unrealpb::FVector& FRepMovement::_internal_angularvelocity() const {
   const ::unrealpb::FVector* p = _impl_.angularvelocity_;
   return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
       ::unrealpb::_FVector_default_instance_);
 }
-inline const ::unrealpb::FVector& RepMovement::angularvelocity() const {
-  // @@protoc_insertion_point(field_get:unrealpb.RepMovement.angularVelocity)
+inline const ::unrealpb::FVector& FRepMovement::angularvelocity() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepMovement.angularVelocity)
   return _internal_angularvelocity();
 }
-inline void RepMovement::unsafe_arena_set_allocated_angularvelocity(
+inline void FRepMovement::unsafe_arena_set_allocated_angularvelocity(
     ::unrealpb::FVector* angularvelocity) {
   if (GetArenaForAllocation() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.angularvelocity_);
@@ -7077,9 +7354,9 @@ inline void RepMovement::unsafe_arena_set_allocated_angularvelocity(
   } else {
     _impl_._has_bits_[0] &= ~0x00000002u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.RepMovement.angularVelocity)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepMovement.angularVelocity)
 }
-inline ::unrealpb::FVector* RepMovement::release_angularvelocity() {
+inline ::unrealpb::FVector* FRepMovement::release_angularvelocity() {
   _impl_._has_bits_[0] &= ~0x00000002u;
   ::unrealpb::FVector* temp = _impl_.angularvelocity_;
   _impl_.angularvelocity_ = nullptr;
@@ -7094,14 +7371,14 @@ inline ::unrealpb::FVector* RepMovement::release_angularvelocity() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::unrealpb::FVector* RepMovement::unsafe_arena_release_angularvelocity() {
-  // @@protoc_insertion_point(field_release:unrealpb.RepMovement.angularVelocity)
+inline ::unrealpb::FVector* FRepMovement::unsafe_arena_release_angularvelocity() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepMovement.angularVelocity)
   _impl_._has_bits_[0] &= ~0x00000002u;
   ::unrealpb::FVector* temp = _impl_.angularvelocity_;
   _impl_.angularvelocity_ = nullptr;
   return temp;
 }
-inline ::unrealpb::FVector* RepMovement::_internal_mutable_angularvelocity() {
+inline ::unrealpb::FVector* FRepMovement::_internal_mutable_angularvelocity() {
   _impl_._has_bits_[0] |= 0x00000002u;
   if (_impl_.angularvelocity_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
@@ -7109,12 +7386,12 @@ inline ::unrealpb::FVector* RepMovement::_internal_mutable_angularvelocity() {
   }
   return _impl_.angularvelocity_;
 }
-inline ::unrealpb::FVector* RepMovement::mutable_angularvelocity() {
+inline ::unrealpb::FVector* FRepMovement::mutable_angularvelocity() {
   ::unrealpb::FVector* _msg = _internal_mutable_angularvelocity();
-  // @@protoc_insertion_point(field_mutable:unrealpb.RepMovement.angularVelocity)
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepMovement.angularVelocity)
   return _msg;
 }
-inline void RepMovement::set_allocated_angularvelocity(::unrealpb::FVector* angularvelocity) {
+inline void FRepMovement::set_allocated_angularvelocity(::unrealpb::FVector* angularvelocity) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
     delete _impl_.angularvelocity_;
@@ -7131,32 +7408,32 @@ inline void RepMovement::set_allocated_angularvelocity(::unrealpb::FVector* angu
     _impl_._has_bits_[0] &= ~0x00000002u;
   }
   _impl_.angularvelocity_ = angularvelocity;
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.RepMovement.angularVelocity)
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepMovement.angularVelocity)
 }
 
 // optional .unrealpb.FVector location = 3;
-inline bool RepMovement::_internal_has_location() const {
+inline bool FRepMovement::_internal_has_location() const {
   bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.location_ != nullptr);
   return value;
 }
-inline bool RepMovement::has_location() const {
+inline bool FRepMovement::has_location() const {
   return _internal_has_location();
 }
-inline void RepMovement::clear_location() {
+inline void FRepMovement::clear_location() {
   if (_impl_.location_ != nullptr) _impl_.location_->Clear();
   _impl_._has_bits_[0] &= ~0x00000004u;
 }
-inline const ::unrealpb::FVector& RepMovement::_internal_location() const {
+inline const ::unrealpb::FVector& FRepMovement::_internal_location() const {
   const ::unrealpb::FVector* p = _impl_.location_;
   return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
       ::unrealpb::_FVector_default_instance_);
 }
-inline const ::unrealpb::FVector& RepMovement::location() const {
-  // @@protoc_insertion_point(field_get:unrealpb.RepMovement.location)
+inline const ::unrealpb::FVector& FRepMovement::location() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepMovement.location)
   return _internal_location();
 }
-inline void RepMovement::unsafe_arena_set_allocated_location(
+inline void FRepMovement::unsafe_arena_set_allocated_location(
     ::unrealpb::FVector* location) {
   if (GetArenaForAllocation() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.location_);
@@ -7167,9 +7444,9 @@ inline void RepMovement::unsafe_arena_set_allocated_location(
   } else {
     _impl_._has_bits_[0] &= ~0x00000004u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.RepMovement.location)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepMovement.location)
 }
-inline ::unrealpb::FVector* RepMovement::release_location() {
+inline ::unrealpb::FVector* FRepMovement::release_location() {
   _impl_._has_bits_[0] &= ~0x00000004u;
   ::unrealpb::FVector* temp = _impl_.location_;
   _impl_.location_ = nullptr;
@@ -7184,14 +7461,14 @@ inline ::unrealpb::FVector* RepMovement::release_location() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::unrealpb::FVector* RepMovement::unsafe_arena_release_location() {
-  // @@protoc_insertion_point(field_release:unrealpb.RepMovement.location)
+inline ::unrealpb::FVector* FRepMovement::unsafe_arena_release_location() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepMovement.location)
   _impl_._has_bits_[0] &= ~0x00000004u;
   ::unrealpb::FVector* temp = _impl_.location_;
   _impl_.location_ = nullptr;
   return temp;
 }
-inline ::unrealpb::FVector* RepMovement::_internal_mutable_location() {
+inline ::unrealpb::FVector* FRepMovement::_internal_mutable_location() {
   _impl_._has_bits_[0] |= 0x00000004u;
   if (_impl_.location_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
@@ -7199,12 +7476,12 @@ inline ::unrealpb::FVector* RepMovement::_internal_mutable_location() {
   }
   return _impl_.location_;
 }
-inline ::unrealpb::FVector* RepMovement::mutable_location() {
+inline ::unrealpb::FVector* FRepMovement::mutable_location() {
   ::unrealpb::FVector* _msg = _internal_mutable_location();
-  // @@protoc_insertion_point(field_mutable:unrealpb.RepMovement.location)
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepMovement.location)
   return _msg;
 }
-inline void RepMovement::set_allocated_location(::unrealpb::FVector* location) {
+inline void FRepMovement::set_allocated_location(::unrealpb::FVector* location) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
     delete _impl_.location_;
@@ -7221,32 +7498,32 @@ inline void RepMovement::set_allocated_location(::unrealpb::FVector* location) {
     _impl_._has_bits_[0] &= ~0x00000004u;
   }
   _impl_.location_ = location;
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.RepMovement.location)
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepMovement.location)
 }
 
 // optional .unrealpb.FVector rotation = 4;
-inline bool RepMovement::_internal_has_rotation() const {
+inline bool FRepMovement::_internal_has_rotation() const {
   bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.rotation_ != nullptr);
   return value;
 }
-inline bool RepMovement::has_rotation() const {
+inline bool FRepMovement::has_rotation() const {
   return _internal_has_rotation();
 }
-inline void RepMovement::clear_rotation() {
+inline void FRepMovement::clear_rotation() {
   if (_impl_.rotation_ != nullptr) _impl_.rotation_->Clear();
   _impl_._has_bits_[0] &= ~0x00000008u;
 }
-inline const ::unrealpb::FVector& RepMovement::_internal_rotation() const {
+inline const ::unrealpb::FVector& FRepMovement::_internal_rotation() const {
   const ::unrealpb::FVector* p = _impl_.rotation_;
   return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
       ::unrealpb::_FVector_default_instance_);
 }
-inline const ::unrealpb::FVector& RepMovement::rotation() const {
-  // @@protoc_insertion_point(field_get:unrealpb.RepMovement.rotation)
+inline const ::unrealpb::FVector& FRepMovement::rotation() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepMovement.rotation)
   return _internal_rotation();
 }
-inline void RepMovement::unsafe_arena_set_allocated_rotation(
+inline void FRepMovement::unsafe_arena_set_allocated_rotation(
     ::unrealpb::FVector* rotation) {
   if (GetArenaForAllocation() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.rotation_);
@@ -7257,9 +7534,9 @@ inline void RepMovement::unsafe_arena_set_allocated_rotation(
   } else {
     _impl_._has_bits_[0] &= ~0x00000008u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.RepMovement.rotation)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepMovement.rotation)
 }
-inline ::unrealpb::FVector* RepMovement::release_rotation() {
+inline ::unrealpb::FVector* FRepMovement::release_rotation() {
   _impl_._has_bits_[0] &= ~0x00000008u;
   ::unrealpb::FVector* temp = _impl_.rotation_;
   _impl_.rotation_ = nullptr;
@@ -7274,14 +7551,14 @@ inline ::unrealpb::FVector* RepMovement::release_rotation() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::unrealpb::FVector* RepMovement::unsafe_arena_release_rotation() {
-  // @@protoc_insertion_point(field_release:unrealpb.RepMovement.rotation)
+inline ::unrealpb::FVector* FRepMovement::unsafe_arena_release_rotation() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepMovement.rotation)
   _impl_._has_bits_[0] &= ~0x00000008u;
   ::unrealpb::FVector* temp = _impl_.rotation_;
   _impl_.rotation_ = nullptr;
   return temp;
 }
-inline ::unrealpb::FVector* RepMovement::_internal_mutable_rotation() {
+inline ::unrealpb::FVector* FRepMovement::_internal_mutable_rotation() {
   _impl_._has_bits_[0] |= 0x00000008u;
   if (_impl_.rotation_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
@@ -7289,12 +7566,12 @@ inline ::unrealpb::FVector* RepMovement::_internal_mutable_rotation() {
   }
   return _impl_.rotation_;
 }
-inline ::unrealpb::FVector* RepMovement::mutable_rotation() {
+inline ::unrealpb::FVector* FRepMovement::mutable_rotation() {
   ::unrealpb::FVector* _msg = _internal_mutable_rotation();
-  // @@protoc_insertion_point(field_mutable:unrealpb.RepMovement.rotation)
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepMovement.rotation)
   return _msg;
 }
-inline void RepMovement::set_allocated_rotation(::unrealpb::FVector* rotation) {
+inline void FRepMovement::set_allocated_rotation(::unrealpb::FVector* rotation) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
     delete _impl_.rotation_;
@@ -7311,63 +7588,567 @@ inline void RepMovement::set_allocated_rotation(::unrealpb::FVector* rotation) {
     _impl_._has_bits_[0] &= ~0x00000008u;
   }
   _impl_.rotation_ = rotation;
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.RepMovement.rotation)
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepMovement.rotation)
 }
 
 // optional bool bSimulatedPhysicSleep = 5;
-inline bool RepMovement::_internal_has_bsimulatedphysicsleep() const {
+inline bool FRepMovement::_internal_has_bsimulatedphysicsleep() const {
   bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
-inline bool RepMovement::has_bsimulatedphysicsleep() const {
+inline bool FRepMovement::has_bsimulatedphysicsleep() const {
   return _internal_has_bsimulatedphysicsleep();
 }
-inline void RepMovement::clear_bsimulatedphysicsleep() {
+inline void FRepMovement::clear_bsimulatedphysicsleep() {
   _impl_.bsimulatedphysicsleep_ = false;
   _impl_._has_bits_[0] &= ~0x00000010u;
 }
-inline bool RepMovement::_internal_bsimulatedphysicsleep() const {
+inline bool FRepMovement::_internal_bsimulatedphysicsleep() const {
   return _impl_.bsimulatedphysicsleep_;
 }
-inline bool RepMovement::bsimulatedphysicsleep() const {
-  // @@protoc_insertion_point(field_get:unrealpb.RepMovement.bSimulatedPhysicSleep)
+inline bool FRepMovement::bsimulatedphysicsleep() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepMovement.bSimulatedPhysicSleep)
   return _internal_bsimulatedphysicsleep();
 }
-inline void RepMovement::_internal_set_bsimulatedphysicsleep(bool value) {
+inline void FRepMovement::_internal_set_bsimulatedphysicsleep(bool value) {
   _impl_._has_bits_[0] |= 0x00000010u;
   _impl_.bsimulatedphysicsleep_ = value;
 }
-inline void RepMovement::set_bsimulatedphysicsleep(bool value) {
+inline void FRepMovement::set_bsimulatedphysicsleep(bool value) {
   _internal_set_bsimulatedphysicsleep(value);
-  // @@protoc_insertion_point(field_set:unrealpb.RepMovement.bSimulatedPhysicSleep)
+  // @@protoc_insertion_point(field_set:unrealpb.FRepMovement.bSimulatedPhysicSleep)
 }
 
 // optional bool bRepPhysics = 6;
-inline bool RepMovement::_internal_has_brepphysics() const {
+inline bool FRepMovement::_internal_has_brepphysics() const {
   bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
-inline bool RepMovement::has_brepphysics() const {
+inline bool FRepMovement::has_brepphysics() const {
   return _internal_has_brepphysics();
 }
-inline void RepMovement::clear_brepphysics() {
+inline void FRepMovement::clear_brepphysics() {
   _impl_.brepphysics_ = false;
   _impl_._has_bits_[0] &= ~0x00000020u;
 }
-inline bool RepMovement::_internal_brepphysics() const {
+inline bool FRepMovement::_internal_brepphysics() const {
   return _impl_.brepphysics_;
 }
-inline bool RepMovement::brepphysics() const {
-  // @@protoc_insertion_point(field_get:unrealpb.RepMovement.bRepPhysics)
+inline bool FRepMovement::brepphysics() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepMovement.bRepPhysics)
   return _internal_brepphysics();
 }
-inline void RepMovement::_internal_set_brepphysics(bool value) {
+inline void FRepMovement::_internal_set_brepphysics(bool value) {
   _impl_._has_bits_[0] |= 0x00000020u;
   _impl_.brepphysics_ = value;
 }
-inline void RepMovement::set_brepphysics(bool value) {
+inline void FRepMovement::set_brepphysics(bool value) {
   _internal_set_brepphysics(value);
-  // @@protoc_insertion_point(field_set:unrealpb.RepMovement.bRepPhysics)
+  // @@protoc_insertion_point(field_set:unrealpb.FRepMovement.bRepPhysics)
+}
+
+// -------------------------------------------------------------------
+
+// FRepAttachment
+
+// .unrealpb.UnrealObjectRef attachParent = 1;
+inline bool FRepAttachment::_internal_has_attachparent() const {
+  return this != internal_default_instance() && _impl_.attachparent_ != nullptr;
+}
+inline bool FRepAttachment::has_attachparent() const {
+  return _internal_has_attachparent();
+}
+inline void FRepAttachment::clear_attachparent() {
+  if (GetArenaForAllocation() == nullptr && _impl_.attachparent_ != nullptr) {
+    delete _impl_.attachparent_;
+  }
+  _impl_.attachparent_ = nullptr;
+}
+inline const ::unrealpb::UnrealObjectRef& FRepAttachment::_internal_attachparent() const {
+  const ::unrealpb::UnrealObjectRef* p = _impl_.attachparent_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::UnrealObjectRef&>(
+      ::unrealpb::_UnrealObjectRef_default_instance_);
+}
+inline const ::unrealpb::UnrealObjectRef& FRepAttachment::attachparent() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepAttachment.attachParent)
+  return _internal_attachparent();
+}
+inline void FRepAttachment::unsafe_arena_set_allocated_attachparent(
+    ::unrealpb::UnrealObjectRef* attachparent) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.attachparent_);
+  }
+  _impl_.attachparent_ = attachparent;
+  if (attachparent) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepAttachment.attachParent)
+}
+inline ::unrealpb::UnrealObjectRef* FRepAttachment::release_attachparent() {
+  
+  ::unrealpb::UnrealObjectRef* temp = _impl_.attachparent_;
+  _impl_.attachparent_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* FRepAttachment::unsafe_arena_release_attachparent() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepAttachment.attachParent)
+  
+  ::unrealpb::UnrealObjectRef* temp = _impl_.attachparent_;
+  _impl_.attachparent_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* FRepAttachment::_internal_mutable_attachparent() {
+  
+  if (_impl_.attachparent_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::UnrealObjectRef>(GetArenaForAllocation());
+    _impl_.attachparent_ = p;
+  }
+  return _impl_.attachparent_;
+}
+inline ::unrealpb::UnrealObjectRef* FRepAttachment::mutable_attachparent() {
+  ::unrealpb::UnrealObjectRef* _msg = _internal_mutable_attachparent();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepAttachment.attachParent)
+  return _msg;
+}
+inline void FRepAttachment::set_allocated_attachparent(::unrealpb::UnrealObjectRef* attachparent) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.attachparent_;
+  }
+  if (attachparent) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(attachparent);
+    if (message_arena != submessage_arena) {
+      attachparent = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, attachparent, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.attachparent_ = attachparent;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepAttachment.attachParent)
+}
+
+// .unrealpb.FVector locationOffset = 2;
+inline bool FRepAttachment::_internal_has_locationoffset() const {
+  return this != internal_default_instance() && _impl_.locationoffset_ != nullptr;
+}
+inline bool FRepAttachment::has_locationoffset() const {
+  return _internal_has_locationoffset();
+}
+inline void FRepAttachment::clear_locationoffset() {
+  if (GetArenaForAllocation() == nullptr && _impl_.locationoffset_ != nullptr) {
+    delete _impl_.locationoffset_;
+  }
+  _impl_.locationoffset_ = nullptr;
+}
+inline const ::unrealpb::FVector& FRepAttachment::_internal_locationoffset() const {
+  const ::unrealpb::FVector* p = _impl_.locationoffset_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
+}
+inline const ::unrealpb::FVector& FRepAttachment::locationoffset() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepAttachment.locationOffset)
+  return _internal_locationoffset();
+}
+inline void FRepAttachment::unsafe_arena_set_allocated_locationoffset(
+    ::unrealpb::FVector* locationoffset) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.locationoffset_);
+  }
+  _impl_.locationoffset_ = locationoffset;
+  if (locationoffset) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepAttachment.locationOffset)
+}
+inline ::unrealpb::FVector* FRepAttachment::release_locationoffset() {
+  
+  ::unrealpb::FVector* temp = _impl_.locationoffset_;
+  _impl_.locationoffset_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FVector* FRepAttachment::unsafe_arena_release_locationoffset() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepAttachment.locationOffset)
+  
+  ::unrealpb::FVector* temp = _impl_.locationoffset_;
+  _impl_.locationoffset_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FVector* FRepAttachment::_internal_mutable_locationoffset() {
+  
+  if (_impl_.locationoffset_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
+    _impl_.locationoffset_ = p;
+  }
+  return _impl_.locationoffset_;
+}
+inline ::unrealpb::FVector* FRepAttachment::mutable_locationoffset() {
+  ::unrealpb::FVector* _msg = _internal_mutable_locationoffset();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepAttachment.locationOffset)
+  return _msg;
+}
+inline void FRepAttachment::set_allocated_locationoffset(::unrealpb::FVector* locationoffset) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.locationoffset_;
+  }
+  if (locationoffset) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(locationoffset);
+    if (message_arena != submessage_arena) {
+      locationoffset = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, locationoffset, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.locationoffset_ = locationoffset;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepAttachment.locationOffset)
+}
+
+// .unrealpb.FVector relativeScale = 3;
+inline bool FRepAttachment::_internal_has_relativescale() const {
+  return this != internal_default_instance() && _impl_.relativescale_ != nullptr;
+}
+inline bool FRepAttachment::has_relativescale() const {
+  return _internal_has_relativescale();
+}
+inline void FRepAttachment::clear_relativescale() {
+  if (GetArenaForAllocation() == nullptr && _impl_.relativescale_ != nullptr) {
+    delete _impl_.relativescale_;
+  }
+  _impl_.relativescale_ = nullptr;
+}
+inline const ::unrealpb::FVector& FRepAttachment::_internal_relativescale() const {
+  const ::unrealpb::FVector* p = _impl_.relativescale_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
+}
+inline const ::unrealpb::FVector& FRepAttachment::relativescale() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepAttachment.relativeScale)
+  return _internal_relativescale();
+}
+inline void FRepAttachment::unsafe_arena_set_allocated_relativescale(
+    ::unrealpb::FVector* relativescale) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.relativescale_);
+  }
+  _impl_.relativescale_ = relativescale;
+  if (relativescale) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepAttachment.relativeScale)
+}
+inline ::unrealpb::FVector* FRepAttachment::release_relativescale() {
+  
+  ::unrealpb::FVector* temp = _impl_.relativescale_;
+  _impl_.relativescale_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FVector* FRepAttachment::unsafe_arena_release_relativescale() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepAttachment.relativeScale)
+  
+  ::unrealpb::FVector* temp = _impl_.relativescale_;
+  _impl_.relativescale_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FVector* FRepAttachment::_internal_mutable_relativescale() {
+  
+  if (_impl_.relativescale_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
+    _impl_.relativescale_ = p;
+  }
+  return _impl_.relativescale_;
+}
+inline ::unrealpb::FVector* FRepAttachment::mutable_relativescale() {
+  ::unrealpb::FVector* _msg = _internal_mutable_relativescale();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepAttachment.relativeScale)
+  return _msg;
+}
+inline void FRepAttachment::set_allocated_relativescale(::unrealpb::FVector* relativescale) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.relativescale_;
+  }
+  if (relativescale) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(relativescale);
+    if (message_arena != submessage_arena) {
+      relativescale = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, relativescale, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.relativescale_ = relativescale;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepAttachment.relativeScale)
+}
+
+// .unrealpb.FVector rotationOffset = 4;
+inline bool FRepAttachment::_internal_has_rotationoffset() const {
+  return this != internal_default_instance() && _impl_.rotationoffset_ != nullptr;
+}
+inline bool FRepAttachment::has_rotationoffset() const {
+  return _internal_has_rotationoffset();
+}
+inline void FRepAttachment::clear_rotationoffset() {
+  if (GetArenaForAllocation() == nullptr && _impl_.rotationoffset_ != nullptr) {
+    delete _impl_.rotationoffset_;
+  }
+  _impl_.rotationoffset_ = nullptr;
+}
+inline const ::unrealpb::FVector& FRepAttachment::_internal_rotationoffset() const {
+  const ::unrealpb::FVector* p = _impl_.rotationoffset_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
+}
+inline const ::unrealpb::FVector& FRepAttachment::rotationoffset() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepAttachment.rotationOffset)
+  return _internal_rotationoffset();
+}
+inline void FRepAttachment::unsafe_arena_set_allocated_rotationoffset(
+    ::unrealpb::FVector* rotationoffset) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.rotationoffset_);
+  }
+  _impl_.rotationoffset_ = rotationoffset;
+  if (rotationoffset) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepAttachment.rotationOffset)
+}
+inline ::unrealpb::FVector* FRepAttachment::release_rotationoffset() {
+  
+  ::unrealpb::FVector* temp = _impl_.rotationoffset_;
+  _impl_.rotationoffset_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FVector* FRepAttachment::unsafe_arena_release_rotationoffset() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepAttachment.rotationOffset)
+  
+  ::unrealpb::FVector* temp = _impl_.rotationoffset_;
+  _impl_.rotationoffset_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FVector* FRepAttachment::_internal_mutable_rotationoffset() {
+  
+  if (_impl_.rotationoffset_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
+    _impl_.rotationoffset_ = p;
+  }
+  return _impl_.rotationoffset_;
+}
+inline ::unrealpb::FVector* FRepAttachment::mutable_rotationoffset() {
+  ::unrealpb::FVector* _msg = _internal_mutable_rotationoffset();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepAttachment.rotationOffset)
+  return _msg;
+}
+inline void FRepAttachment::set_allocated_rotationoffset(::unrealpb::FVector* rotationoffset) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.rotationoffset_;
+  }
+  if (rotationoffset) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(rotationoffset);
+    if (message_arena != submessage_arena) {
+      rotationoffset = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, rotationoffset, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.rotationoffset_ = rotationoffset;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepAttachment.rotationOffset)
+}
+
+// string attachSocket = 5;
+inline void FRepAttachment::clear_attachsocket() {
+  _impl_.attachsocket_.ClearToEmpty();
+}
+inline const std::string& FRepAttachment::attachsocket() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepAttachment.attachSocket)
+  return _internal_attachsocket();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void FRepAttachment::set_attachsocket(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.attachsocket_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:unrealpb.FRepAttachment.attachSocket)
+}
+inline std::string* FRepAttachment::mutable_attachsocket() {
+  std::string* _s = _internal_mutable_attachsocket();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepAttachment.attachSocket)
+  return _s;
+}
+inline const std::string& FRepAttachment::_internal_attachsocket() const {
+  return _impl_.attachsocket_.Get();
+}
+inline void FRepAttachment::_internal_set_attachsocket(const std::string& value) {
+  
+  _impl_.attachsocket_.Set(value, GetArenaForAllocation());
+}
+inline std::string* FRepAttachment::_internal_mutable_attachsocket() {
+  
+  return _impl_.attachsocket_.Mutable(GetArenaForAllocation());
+}
+inline std::string* FRepAttachment::release_attachsocket() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepAttachment.attachSocket)
+  return _impl_.attachsocket_.Release();
+}
+inline void FRepAttachment::set_allocated_attachsocket(std::string* attachsocket) {
+  if (attachsocket != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.attachsocket_.SetAllocated(attachsocket, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.attachsocket_.IsDefault()) {
+    _impl_.attachsocket_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepAttachment.attachSocket)
+}
+
+// .unrealpb.ActorComponentRef attachComponent = 6;
+inline bool FRepAttachment::_internal_has_attachcomponent() const {
+  return this != internal_default_instance() && _impl_.attachcomponent_ != nullptr;
+}
+inline bool FRepAttachment::has_attachcomponent() const {
+  return _internal_has_attachcomponent();
+}
+inline void FRepAttachment::clear_attachcomponent() {
+  if (GetArenaForAllocation() == nullptr && _impl_.attachcomponent_ != nullptr) {
+    delete _impl_.attachcomponent_;
+  }
+  _impl_.attachcomponent_ = nullptr;
+}
+inline const ::unrealpb::ActorComponentRef& FRepAttachment::_internal_attachcomponent() const {
+  const ::unrealpb::ActorComponentRef* p = _impl_.attachcomponent_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::ActorComponentRef&>(
+      ::unrealpb::_ActorComponentRef_default_instance_);
+}
+inline const ::unrealpb::ActorComponentRef& FRepAttachment::attachcomponent() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepAttachment.attachComponent)
+  return _internal_attachcomponent();
+}
+inline void FRepAttachment::unsafe_arena_set_allocated_attachcomponent(
+    ::unrealpb::ActorComponentRef* attachcomponent) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.attachcomponent_);
+  }
+  _impl_.attachcomponent_ = attachcomponent;
+  if (attachcomponent) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepAttachment.attachComponent)
+}
+inline ::unrealpb::ActorComponentRef* FRepAttachment::release_attachcomponent() {
+  
+  ::unrealpb::ActorComponentRef* temp = _impl_.attachcomponent_;
+  _impl_.attachcomponent_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::ActorComponentRef* FRepAttachment::unsafe_arena_release_attachcomponent() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepAttachment.attachComponent)
+  
+  ::unrealpb::ActorComponentRef* temp = _impl_.attachcomponent_;
+  _impl_.attachcomponent_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::ActorComponentRef* FRepAttachment::_internal_mutable_attachcomponent() {
+  
+  if (_impl_.attachcomponent_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::ActorComponentRef>(GetArenaForAllocation());
+    _impl_.attachcomponent_ = p;
+  }
+  return _impl_.attachcomponent_;
+}
+inline ::unrealpb::ActorComponentRef* FRepAttachment::mutable_attachcomponent() {
+  ::unrealpb::ActorComponentRef* _msg = _internal_mutable_attachcomponent();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepAttachment.attachComponent)
+  return _msg;
+}
+inline void FRepAttachment::set_allocated_attachcomponent(::unrealpb::ActorComponentRef* attachcomponent) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.attachcomponent_;
+  }
+  if (attachcomponent) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(attachcomponent);
+    if (message_arena != submessage_arena) {
+      attachcomponent = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, attachcomponent, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.attachcomponent_ = attachcomponent;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepAttachment.attachComponent)
 }
 
 // -------------------------------------------------------------------
@@ -7396,7 +8177,7 @@ inline void ActorState::set_removed(bool value) {
 
 // optional uint32 owningConnId = 2;
 inline bool ActorState::_internal_has_owningconnid() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
 inline bool ActorState::has_owningconnid() const {
@@ -7404,7 +8185,7 @@ inline bool ActorState::has_owningconnid() const {
 }
 inline void ActorState::clear_owningconnid() {
   _impl_.owningconnid_ = 0u;
-  _impl_._has_bits_[0] &= ~0x00000008u;
+  _impl_._has_bits_[0] &= ~0x00000010u;
 }
 inline uint32_t ActorState::_internal_owningconnid() const {
   return _impl_.owningconnid_;
@@ -7414,7 +8195,7 @@ inline uint32_t ActorState::owningconnid() const {
   return _internal_owningconnid();
 }
 inline void ActorState::_internal_set_owningconnid(uint32_t value) {
-  _impl_._has_bits_[0] |= 0x00000008u;
+  _impl_._has_bits_[0] |= 0x00000010u;
   _impl_.owningconnid_ = value;
 }
 inline void ActorState::set_owningconnid(uint32_t value) {
@@ -7424,7 +8205,7 @@ inline void ActorState::set_owningconnid(uint32_t value) {
 
 // optional bool bReplicateMovement = 3;
 inline bool ActorState::_internal_has_breplicatemovement() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000040u) != 0;
   return value;
 }
 inline bool ActorState::has_breplicatemovement() const {
@@ -7432,7 +8213,7 @@ inline bool ActorState::has_breplicatemovement() const {
 }
 inline void ActorState::clear_breplicatemovement() {
   _impl_.breplicatemovement_ = false;
-  _impl_._has_bits_[0] &= ~0x00000020u;
+  _impl_._has_bits_[0] &= ~0x00000040u;
 }
 inline bool ActorState::_internal_breplicatemovement() const {
   return _impl_.breplicatemovement_;
@@ -7442,7 +8223,7 @@ inline bool ActorState::breplicatemovement() const {
   return _internal_breplicatemovement();
 }
 inline void ActorState::_internal_set_breplicatemovement(bool value) {
-  _impl_._has_bits_[0] |= 0x00000020u;
+  _impl_._has_bits_[0] |= 0x00000040u;
   _impl_.breplicatemovement_ = value;
 }
 inline void ActorState::set_breplicatemovement(bool value) {
@@ -7452,7 +8233,7 @@ inline void ActorState::set_breplicatemovement(bool value) {
 
 // optional uint32 localRole = 4;
 inline bool ActorState::_internal_has_localrole() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
 inline bool ActorState::has_localrole() const {
@@ -7460,7 +8241,7 @@ inline bool ActorState::has_localrole() const {
 }
 inline void ActorState::clear_localrole() {
   _impl_.localrole_ = 0u;
-  _impl_._has_bits_[0] &= ~0x00000010u;
+  _impl_._has_bits_[0] &= ~0x00000020u;
 }
 inline uint32_t ActorState::_internal_localrole() const {
   return _impl_.localrole_;
@@ -7470,7 +8251,7 @@ inline uint32_t ActorState::localrole() const {
   return _internal_localrole();
 }
 inline void ActorState::_internal_set_localrole(uint32_t value) {
-  _impl_._has_bits_[0] |= 0x00000010u;
+  _impl_._has_bits_[0] |= 0x00000020u;
   _impl_.localrole_ = value;
 }
 inline void ActorState::set_localrole(uint32_t value) {
@@ -7480,7 +8261,7 @@ inline void ActorState::set_localrole(uint32_t value) {
 
 // optional uint32 remoteRole = 5;
 inline bool ActorState::_internal_has_remoterole() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000100u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
 inline bool ActorState::has_remoterole() const {
@@ -7488,7 +8269,7 @@ inline bool ActorState::has_remoterole() const {
 }
 inline void ActorState::clear_remoterole() {
   _impl_.remoterole_ = 0u;
-  _impl_._has_bits_[0] &= ~0x00000100u;
+  _impl_._has_bits_[0] &= ~0x00000200u;
 }
 inline uint32_t ActorState::_internal_remoterole() const {
   return _impl_.remoterole_;
@@ -7498,7 +8279,7 @@ inline uint32_t ActorState::remoterole() const {
   return _internal_remoterole();
 }
 inline void ActorState::_internal_set_remoterole(uint32_t value) {
-  _impl_._has_bits_[0] |= 0x00000100u;
+  _impl_._has_bits_[0] |= 0x00000200u;
   _impl_.remoterole_ = value;
 }
 inline void ActorState::set_remoterole(uint32_t value) {
@@ -7598,7 +8379,7 @@ inline void ActorState::set_allocated_owner(::unrealpb::UnrealObjectRef* owner) 
 
 // optional bool bHidden = 7;
 inline bool ActorState::_internal_has_bhidden() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000040u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000080u) != 0;
   return value;
 }
 inline bool ActorState::has_bhidden() const {
@@ -7606,7 +8387,7 @@ inline bool ActorState::has_bhidden() const {
 }
 inline void ActorState::clear_bhidden() {
   _impl_.bhidden_ = false;
-  _impl_._has_bits_[0] &= ~0x00000040u;
+  _impl_._has_bits_[0] &= ~0x00000080u;
 }
 inline bool ActorState::_internal_bhidden() const {
   return _impl_.bhidden_;
@@ -7616,7 +8397,7 @@ inline bool ActorState::bhidden() const {
   return _internal_bhidden();
 }
 inline void ActorState::_internal_set_bhidden(bool value) {
-  _impl_._has_bits_[0] |= 0x00000040u;
+  _impl_._has_bits_[0] |= 0x00000080u;
   _impl_.bhidden_ = value;
 }
 inline void ActorState::set_bhidden(bool value) {
@@ -7626,7 +8407,7 @@ inline void ActorState::set_bhidden(bool value) {
 
 // optional bool bTearOff = 8;
 inline bool ActorState::_internal_has_btearoff() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000080u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000100u) != 0;
   return value;
 }
 inline bool ActorState::has_btearoff() const {
@@ -7634,7 +8415,7 @@ inline bool ActorState::has_btearoff() const {
 }
 inline void ActorState::clear_btearoff() {
   _impl_.btearoff_ = false;
-  _impl_._has_bits_[0] &= ~0x00000080u;
+  _impl_._has_bits_[0] &= ~0x00000100u;
 }
 inline bool ActorState::_internal_btearoff() const {
   return _impl_.btearoff_;
@@ -7644,7 +8425,7 @@ inline bool ActorState::btearoff() const {
   return _internal_btearoff();
 }
 inline void ActorState::_internal_set_btearoff(bool value) {
-  _impl_._has_bits_[0] |= 0x00000080u;
+  _impl_._has_bits_[0] |= 0x00000100u;
   _impl_.btearoff_ = value;
 }
 inline void ActorState::set_btearoff(bool value) {
@@ -7654,7 +8435,7 @@ inline void ActorState::set_btearoff(bool value) {
 
 // optional bool bCanBeDamaged = 9;
 inline bool ActorState::_internal_has_bcanbedamaged() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000200u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
 inline bool ActorState::has_bcanbedamaged() const {
@@ -7662,7 +8443,7 @@ inline bool ActorState::has_bcanbedamaged() const {
 }
 inline void ActorState::clear_bcanbedamaged() {
   _impl_.bcanbedamaged_ = false;
-  _impl_._has_bits_[0] &= ~0x00000200u;
+  _impl_._has_bits_[0] &= ~0x00000400u;
 }
 inline bool ActorState::_internal_bcanbedamaged() const {
   return _impl_.bcanbedamaged_;
@@ -7672,7 +8453,7 @@ inline bool ActorState::bcanbedamaged() const {
   return _internal_bcanbedamaged();
 }
 inline void ActorState::_internal_set_bcanbedamaged(bool value) {
-  _impl_._has_bits_[0] |= 0x00000200u;
+  _impl_._has_bits_[0] |= 0x00000400u;
   _impl_.bcanbedamaged_ = value;
 }
 inline void ActorState::set_bcanbedamaged(bool value) {
@@ -7770,7 +8551,7 @@ inline void ActorState::set_allocated_instigator(::unrealpb::UnrealObjectRef* in
   // @@protoc_insertion_point(field_set_allocated:unrealpb.ActorState.instigator)
 }
 
-// optional .unrealpb.RepMovement replicatedMovement = 11;
+// optional .unrealpb.FRepMovement replicatedMovement = 11;
 inline bool ActorState::_internal_has_replicatedmovement() const {
   bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.replicatedmovement_ != nullptr);
@@ -7783,17 +8564,17 @@ inline void ActorState::clear_replicatedmovement() {
   if (_impl_.replicatedmovement_ != nullptr) _impl_.replicatedmovement_->Clear();
   _impl_._has_bits_[0] &= ~0x00000004u;
 }
-inline const ::unrealpb::RepMovement& ActorState::_internal_replicatedmovement() const {
-  const ::unrealpb::RepMovement* p = _impl_.replicatedmovement_;
-  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::RepMovement&>(
-      ::unrealpb::_RepMovement_default_instance_);
+inline const ::unrealpb::FRepMovement& ActorState::_internal_replicatedmovement() const {
+  const ::unrealpb::FRepMovement* p = _impl_.replicatedmovement_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FRepMovement&>(
+      ::unrealpb::_FRepMovement_default_instance_);
 }
-inline const ::unrealpb::RepMovement& ActorState::replicatedmovement() const {
+inline const ::unrealpb::FRepMovement& ActorState::replicatedmovement() const {
   // @@protoc_insertion_point(field_get:unrealpb.ActorState.replicatedMovement)
   return _internal_replicatedmovement();
 }
 inline void ActorState::unsafe_arena_set_allocated_replicatedmovement(
-    ::unrealpb::RepMovement* replicatedmovement) {
+    ::unrealpb::FRepMovement* replicatedmovement) {
   if (GetArenaForAllocation() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.replicatedmovement_);
   }
@@ -7805,9 +8586,9 @@ inline void ActorState::unsafe_arena_set_allocated_replicatedmovement(
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.ActorState.replicatedMovement)
 }
-inline ::unrealpb::RepMovement* ActorState::release_replicatedmovement() {
+inline ::unrealpb::FRepMovement* ActorState::release_replicatedmovement() {
   _impl_._has_bits_[0] &= ~0x00000004u;
-  ::unrealpb::RepMovement* temp = _impl_.replicatedmovement_;
+  ::unrealpb::FRepMovement* temp = _impl_.replicatedmovement_;
   _impl_.replicatedmovement_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
   auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
@@ -7820,27 +8601,27 @@ inline ::unrealpb::RepMovement* ActorState::release_replicatedmovement() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::unrealpb::RepMovement* ActorState::unsafe_arena_release_replicatedmovement() {
+inline ::unrealpb::FRepMovement* ActorState::unsafe_arena_release_replicatedmovement() {
   // @@protoc_insertion_point(field_release:unrealpb.ActorState.replicatedMovement)
   _impl_._has_bits_[0] &= ~0x00000004u;
-  ::unrealpb::RepMovement* temp = _impl_.replicatedmovement_;
+  ::unrealpb::FRepMovement* temp = _impl_.replicatedmovement_;
   _impl_.replicatedmovement_ = nullptr;
   return temp;
 }
-inline ::unrealpb::RepMovement* ActorState::_internal_mutable_replicatedmovement() {
+inline ::unrealpb::FRepMovement* ActorState::_internal_mutable_replicatedmovement() {
   _impl_._has_bits_[0] |= 0x00000004u;
   if (_impl_.replicatedmovement_ == nullptr) {
-    auto* p = CreateMaybeMessage<::unrealpb::RepMovement>(GetArenaForAllocation());
+    auto* p = CreateMaybeMessage<::unrealpb::FRepMovement>(GetArenaForAllocation());
     _impl_.replicatedmovement_ = p;
   }
   return _impl_.replicatedmovement_;
 }
-inline ::unrealpb::RepMovement* ActorState::mutable_replicatedmovement() {
-  ::unrealpb::RepMovement* _msg = _internal_mutable_replicatedmovement();
+inline ::unrealpb::FRepMovement* ActorState::mutable_replicatedmovement() {
+  ::unrealpb::FRepMovement* _msg = _internal_mutable_replicatedmovement();
   // @@protoc_insertion_point(field_mutable:unrealpb.ActorState.replicatedMovement)
   return _msg;
 }
-inline void ActorState::set_allocated_replicatedmovement(::unrealpb::RepMovement* replicatedmovement) {
+inline void ActorState::set_allocated_replicatedmovement(::unrealpb::FRepMovement* replicatedmovement) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
     delete _impl_.replicatedmovement_;
@@ -7858,6 +8639,96 @@ inline void ActorState::set_allocated_replicatedmovement(::unrealpb::RepMovement
   }
   _impl_.replicatedmovement_ = replicatedmovement;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.ActorState.replicatedMovement)
+}
+
+// optional .unrealpb.FRepAttachment attachmentReplication = 12;
+inline bool ActorState::_internal_has_attachmentreplication() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.attachmentreplication_ != nullptr);
+  return value;
+}
+inline bool ActorState::has_attachmentreplication() const {
+  return _internal_has_attachmentreplication();
+}
+inline void ActorState::clear_attachmentreplication() {
+  if (_impl_.attachmentreplication_ != nullptr) _impl_.attachmentreplication_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000008u;
+}
+inline const ::unrealpb::FRepAttachment& ActorState::_internal_attachmentreplication() const {
+  const ::unrealpb::FRepAttachment* p = _impl_.attachmentreplication_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FRepAttachment&>(
+      ::unrealpb::_FRepAttachment_default_instance_);
+}
+inline const ::unrealpb::FRepAttachment& ActorState::attachmentreplication() const {
+  // @@protoc_insertion_point(field_get:unrealpb.ActorState.attachmentReplication)
+  return _internal_attachmentreplication();
+}
+inline void ActorState::unsafe_arena_set_allocated_attachmentreplication(
+    ::unrealpb::FRepAttachment* attachmentreplication) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.attachmentreplication_);
+  }
+  _impl_.attachmentreplication_ = attachmentreplication;
+  if (attachmentreplication) {
+    _impl_._has_bits_[0] |= 0x00000008u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000008u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.ActorState.attachmentReplication)
+}
+inline ::unrealpb::FRepAttachment* ActorState::release_attachmentreplication() {
+  _impl_._has_bits_[0] &= ~0x00000008u;
+  ::unrealpb::FRepAttachment* temp = _impl_.attachmentreplication_;
+  _impl_.attachmentreplication_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FRepAttachment* ActorState::unsafe_arena_release_attachmentreplication() {
+  // @@protoc_insertion_point(field_release:unrealpb.ActorState.attachmentReplication)
+  _impl_._has_bits_[0] &= ~0x00000008u;
+  ::unrealpb::FRepAttachment* temp = _impl_.attachmentreplication_;
+  _impl_.attachmentreplication_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FRepAttachment* ActorState::_internal_mutable_attachmentreplication() {
+  _impl_._has_bits_[0] |= 0x00000008u;
+  if (_impl_.attachmentreplication_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FRepAttachment>(GetArenaForAllocation());
+    _impl_.attachmentreplication_ = p;
+  }
+  return _impl_.attachmentreplication_;
+}
+inline ::unrealpb::FRepAttachment* ActorState::mutable_attachmentreplication() {
+  ::unrealpb::FRepAttachment* _msg = _internal_mutable_attachmentreplication();
+  // @@protoc_insertion_point(field_mutable:unrealpb.ActorState.attachmentReplication)
+  return _msg;
+}
+inline void ActorState::set_allocated_attachmentreplication(::unrealpb::FRepAttachment* attachmentreplication) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.attachmentreplication_;
+  }
+  if (attachmentreplication) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(attachmentreplication);
+    if (message_arena != submessage_arena) {
+      attachmentreplication = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, attachmentreplication, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000008u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000008u;
+  }
+  _impl_.attachmentreplication_ = attachmentreplication;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.ActorState.attachmentReplication)
 }
 
 // -------------------------------------------------------------------
@@ -11515,6 +12386,8 @@ inline void GameStateBase::set_breplicatedhasbegunplay(bool value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

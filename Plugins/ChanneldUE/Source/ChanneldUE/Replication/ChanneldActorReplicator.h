@@ -30,6 +30,7 @@ private:
 	uint8* RemoteRolePtr;
 	bool* bTearOffPtr;
 	FRepMovement* ReplicatedMovementPtr;
+	FRepAttachment* AttachmentReplicationPtr;
 
 	UFunction* OnRep_OwnerFunc;
 	UFunction* OnRep_ReplicatedMovementFunc;
