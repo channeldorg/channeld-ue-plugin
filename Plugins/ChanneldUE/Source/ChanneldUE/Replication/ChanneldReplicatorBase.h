@@ -41,3 +41,13 @@ protected:
     bool bStateChanged;
 
 };
+
+class CHANNELDUE_API FChanneldReplicatorBase_BP : public FChanneldReplicatorBase
+{
+public:
+    FChanneldReplicatorBase_BP(UObject* InTargetObj, UClass* InBpClass) : FChanneldReplicatorBase(InTargetObj), BpClass(InBpClass) {}
+    virtual UClass* GetTargetClass() override { return BpClass; }
+
+protected:
+    UClass* BpClass;
+};

@@ -211,7 +211,7 @@ int32 UChannelDataView::SendAllChannelUpdates()
 			for (auto Itr = Providers->CreateIterator(); Itr; ++Itr)
 			{
 				auto Provider = Itr.ElementIt->Value;
-				if (Provider && IsValid(Provider->_getUObject()))
+				if (Provider && IsValid(Cast<UObject>(Provider)))
 				{
 					if (Provider->UpdateChannelData(NewState))
 					{

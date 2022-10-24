@@ -1219,169 +1219,169 @@ const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_
   "tReplication\"v\n\023ActorComponentState\022\017\n\007r"
   "emoved\030\001 \001(\010\022\026\n\tbIsActive\030\002 \001(\010H\000\210\001\001\022\030\n\013"
   "bReplicated\030\003 \001(\010H\001\210\001\001B\014\n\n_bIsActiveB\016\n\014"
-  "_bReplicated\"\254\006\n\023SceneComponentState\022\036\n\021"
+  "_bReplicated\"\260\006\n\023SceneComponentState\022\036\n\021"
   "bAbsoluteLocation\030\002 \001(\010H\000\210\001\001\022\036\n\021bAbsolut"
   "eRotation\030\003 \001(\010H\001\210\001\001\022\033\n\016bAbsoluteScale\030\004"
   " \001(\010H\002\210\001\001\022\025\n\010bVisible\030\005 \001(\010H\003\210\001\001\022\036\n\021bSho"
   "uldBeAttached\030\006 \001(\010H\004\210\001\001\022,\n\037bShouldSnapL"
   "ocationWhenAttached\030\007 \001(\010H\005\210\001\001\022,\n\037bShoul"
-  "dSnapRotationWhenAttached\030\010 \001(\010H\006\210\001\001\0224\n\014"
-  "attachParent\030\t \001(\0132\031.unrealpb.UnrealObje"
-  "ctRefH\007\210\001\001\0221\n\016attachChildren\030\n \003(\0132\031.unr"
-  "ealpb.UnrealObjectRef\022\035\n\020attachSocketNam"
-  "e\030\013 \001(\tH\010\210\001\001\0220\n\020relativeLocation\030\014 \001(\0132\021"
-  ".unrealpb.FVectorH\t\210\001\001\0220\n\020relativeRotati"
-  "on\030\r \001(\0132\021.unrealpb.FVectorH\n\210\001\001\022-\n\rrela"
-  "tiveScale\030\016 \001(\0132\021.unrealpb.FVectorH\013\210\001\001B"
-  "\024\n\022_bAbsoluteLocationB\024\n\022_bAbsoluteRotat"
-  "ionB\021\n\017_bAbsoluteScaleB\013\n\t_bVisibleB\024\n\022_"
-  "bShouldBeAttachedB\"\n _bShouldSnapLocatio"
-  "nWhenAttachedB\"\n _bShouldSnapRotationWhe"
-  "nAttachedB\017\n\r_attachParentB\023\n\021_attachSoc"
-  "ketNameB\023\n\021_relativeLocationB\023\n\021_relativ"
-  "eRotationB\020\n\016_relativeScale\"\237\003\n\022FBasedMo"
-  "vementInfo\0226\n\014movementBase\030\001 \001(\0132\033.unrea"
-  "lpb.ActorComponentRefH\000\210\001\001\022\025\n\010boneName\030\002"
-  " \001(\tH\001\210\001\001\022(\n\010location\030\003 \001(\0132\021.unrealpb.F"
-  "VectorH\002\210\001\001\022(\n\010rotation\030\004 \001(\0132\021.unrealpb"
-  ".FVectorH\003\210\001\001\022$\n\027bServerHasBaseComponent"
-  "\030\005 \001(\010H\004\210\001\001\022\036\n\021bRelativeRotation\030\006 \001(\010H\005"
-  "\210\001\001\022\037\n\022bServerHasVelocity\030\007 \001(\010H\006\210\001\001B\017\n\r"
-  "_movementBaseB\013\n\t_boneNameB\013\n\t_locationB"
-  "\013\n\t_rotationB\032\n\030_bServerHasBaseComponent"
-  "B\024\n\022_bRelativeRotationB\025\n\023_bServerHasVel"
-  "ocity\"\341\022\n\025FRepRootMotionMontage\022\026\n\tbIsAc"
-  "tive\030\001 \001(\010H\000\210\001\001\0223\n\013animMontage\030\002 \001(\0132\031.u"
-  "nrealpb.UnrealObjectRefH\001\210\001\001\022\025\n\010position"
-  "\030\003 \001(\002H\002\210\001\001\022(\n\010location\030\004 \001(\0132\021.unrealpb"
-  ".FVectorH\003\210\001\001\022(\n\010rotation\030\005 \001(\0132\021.unreal"
-  "pb.FVectorH\004\210\001\001\0226\n\014movementBase\030\006 \001(\0132\033."
-  "unrealpb.ActorComponentRefH\005\210\001\001\022!\n\024movem"
-  "entBaseBoneName\030\007 \001(\tH\006\210\001\001\022\036\n\021bRelativeP"
-  "osition\030\010 \001(\010H\007\210\001\001\022\036\n\021bRelativeRotation\030"
-  "\t \001(\010H\010\210\001\001\022\\\n\027authoritativeRootMotion\030\n "
-  "\001(\01326.unrealpb.FRepRootMotionMontage.FRo"
-  "otMotionSourceGroupH\t\210\001\001\022,\n\014acceleration"
-  "\030\013 \001(\0132\021.unrealpb.FVectorH\n\210\001\001\022.\n\016linear"
-  "Velocity\030\014 \001(\0132\021.unrealpb.FVectorH\013\210\001\001\032\345"
-  "\007\n\021FRootMotionSource\022\025\n\010priority\030\001 \001(\rH\000"
-  "\210\001\001\022\024\n\007localId\030\002 \001(\rH\001\210\001\001\022\034\n\017accumulated"
-  "Mode\030\003 \001(\rH\002\210\001\001\022\031\n\014instanceName\030\004 \001(\tH\003\210"
-  "\001\001\022\026\n\tstartTime\030\005 \001(\002H\004\210\001\001\022\030\n\013currentTim"
-  "e\030\006 \001(\002H\005\210\001\001\022\031\n\014previousTime\030\007 \001(\002H\006\210\001\001\022"
-  "\025\n\010duration\030\010 \001(\002H\007\210\001\001\022\023\n\006status\030\t \001(\rH\010"
-  "\210\001\001\022\025\n\010settings\030\n \001(\rH\t\210\001\001\022\032\n\rbInLocalSp"
-  "ace\030\013 \001(\010H\n\210\001\001\022#\n\026bNeedsSimulatedCatchup"
-  "\030\014 \001(\010H\013\210\001\001\022%\n\030bSimulatedNeedsSmoothing\030"
-  "\r \001(\010H\014\210\001\001\022\033\n\016bHasRootMotion\030\016 \001(\010H\r\210\001\001\022"
-  "\030\n\013blendWeight\030\017 \001(\002H\016\210\001\001\022v\n\024finishVeloc"
-  "ityParams\030\020 \001(\0132S.unrealpb.FRepRootMotio"
-  "nMontage.FRootMotionSource.FRootMotionFi"
-  "nishVelocitySettingsH\017\210\001\001\032\252\001\n!FRootMotio"
-  "nFinishVelocitySettings\022\021\n\004mode\030\001 \001(\rH\000\210"
-  "\001\001\022+\n\013setVelocity\030\002 \001(\0132\021.unrealpb.FVect"
-  "orH\001\210\001\001\022\032\n\rclampVelocity\030\003 \001(\002H\002\210\001\001B\007\n\005_"
-  "modeB\016\n\014_setVelocityB\020\n\016_clampVelocityB\013"
-  "\n\t_priorityB\n\n\010_localIdB\022\n\020_accumulatedM"
-  "odeB\017\n\r_instanceNameB\014\n\n_startTimeB\016\n\014_c"
-  "urrentTimeB\017\n\r_previousTimeB\013\n\t_duration"
-  "B\t\n\007_statusB\013\n\t_settingsB\020\n\016_bInLocalSpa"
-  "ceB\031\n\027_bNeedsSimulatedCatchupB\033\n\031_bSimul"
-  "atedNeedsSmoothingB\021\n\017_bHasRootMotionB\016\n"
-  "\014_blendWeightB\027\n\025_finishVelocityParams\032\365"
-  "\004\n\026FRootMotionSourceGroup\022L\n\021rootMotionS"
-  "ources\030\001 \003(\01321.unrealpb.FRepRootMotionMo"
-  "ntage.FRootMotionSource\022V\n\033pendingAddRoo"
-  "tMotionSources\030\002 \003(\01321.unrealpb.FRepRoot"
-  "MotionMontage.FRootMotionSource\022 \n\023bHasA"
-  "dditiveSources\030\003 \001(\010H\000\210\001\001\022 \n\023bHasOverrid"
-  "eSources\030\004 \001(\010H\001\210\001\001\0225\n(bHasOverrideSourc"
-  "esWithIgnoreZAccumulate\030\005 \001(\010H\002\210\001\001\022\'\n\032bI"
-  "sAdditiveVelocityApplied\030\006 \001(\010H\003\210\001\001\022$\n\027l"
-  "astAccumulatedSettings\030\007 \001(\rH\004\210\001\001\0227\n\027las"
-  "tPreAdditiveVelocity\030\010 \001(\0132\021.unrealpb.FV"
-  "ectorH\005\210\001\001B\026\n\024_bHasAdditiveSourcesB\026\n\024_b"
-  "HasOverrideSourcesB+\n)_bHasOverrideSourc"
-  "esWithIgnoreZAccumulateB\035\n\033_bIsAdditiveV"
-  "elocityAppliedB\032\n\030_lastAccumulatedSettin"
-  "gsB\032\n\030_lastPreAdditiveVelocityB\014\n\n_bIsAc"
-  "tiveB\016\n\014_animMontageB\013\n\t_positionB\013\n\t_lo"
-  "cationB\013\n\t_rotationB\017\n\r_movementBaseB\027\n\025"
-  "_movementBaseBoneNameB\024\n\022_bRelativePosit"
-  "ionB\024\n\022_bRelativeRotationB\032\n\030_authoritat"
-  "iveRootMotionB\017\n\r_accelerationB\021\n\017_linea"
-  "rVelocity\"\277\004\n\016CharacterState\0228\n\nrootMoti"
-  "on\030\002 \001(\0132\037.unrealpb.FRepRootMotionMontag"
-  "eH\000\210\001\001\0228\n\rbasedMovement\030\003 \001(\0132\034.unrealpb"
-  ".FBasedMovementInfoH\001\210\001\001\022/\n\"serverLastTr"
-  "ansformUpdateTimeStamp\030\004 \001(\002H\002\210\001\001\022\031\n\014mov"
-  "ementMode\030\005 \001(\rH\003\210\001\001\022\030\n\013bIsCrouched\030\006 \001("
-  "\010H\004\210\001\001\022%\n\030bProxyIsJumpForceApplied\030\007 \001(\010"
-  "H\005\210\001\001\022+\n\036animRootMotionTranslationScale\030"
-  "\010 \001(\002H\006\210\001\001\022/\n\"replayLastTransformUpdateT"
-  "imeStamp\030\t \001(\002H\007\210\001\001B\r\n\013_rootMotionB\020\n\016_b"
-  "asedMovementB%\n#_serverLastTransformUpda"
-  "teTimeStampB\017\n\r_movementModeB\016\n\014_bIsCrou"
-  "chedB\033\n\031_bProxyIsJumpForceAppliedB!\n\037_an"
-  "imRootMotionTranslationScaleB%\n#_replayL"
-  "astTransformUpdateTimeStamp\"H\n!Character"
-  "_ServerMovePacked_Params\022\017\n\007bitsNum\030\001 \001("
-  "\r\022\022\n\npackedBits\030\002 \001(\014\"P\n)Character_Clien"
-  "tMoveResponsePacked_Params\022\017\n\007bitsNum\030\001 "
-  "\001(\r\022\022\n\npackedBits\030\002 \001(\014\"\223\001\n\013PlayerState\022"
-  "\022\n\005score\030\002 \001(\002H\000\210\001\001\022\025\n\010playerId\030\003 \001(\005H\001\210"
-  "\001\001\022\021\n\004ping\030\004 \001(\rH\002\210\001\001\022\027\n\nplayerName\030\005 \001("
-  "\tH\003\210\001\001B\010\n\006_scoreB\013\n\t_playerIdB\007\n\005_pingB\r"
-  "\n\013_playerName\"{\n\017ControllerState\022\017\n\007remo"
-  "ved\030\001 \001(\010\022.\n\013playerState\030\002 \001(\0132\031.unrealp"
-  "b.UnrealObjectRef\022\'\n\004pawn\030\003 \001(\0132\031.unreal"
-  "pb.UnrealObjectRef\"u\n#Controller_ClientS"
-  "etLocation_Params\022&\n\013newLocation\030\001 \001(\0132\021"
-  ".unrealpb.FVector\022&\n\013newRotation\030\002 \001(\0132\021"
-  ".unrealpb.FVector\"c\n#Controller_ClientSe"
-  "tRotation_Params\022&\n\013newRotation\030\001 \001(\0132\021."
-  "unrealpb.FVector\022\024\n\014bResetCamera\030\002 \001(\010\"\243"
-  "\001\n\025PlayerControllerState\0222\n\022targetViewRo"
-  "tation\030\002 \001(\0132\021.unrealpb.FVectorH\000\210\001\001\022-\n\r"
-  "spawnLocation\030\003 \001(\0132\021.unrealpb.FVectorH\001"
-  "\210\001\001B\025\n\023_targetViewRotationB\020\n\016_spawnLoca"
-  "tion\"g\n*PlayerController_ServerUpdateCam"
-  "era_Params\022!\n\006camLoc\030\001 \001(\0132\021.unrealpb.FV"
-  "ector\022\026\n\016camPitchAndYaw\030\002 \001(\005\"R\n$PlayerC"
-  "ontroller_ClientSetHUD_Params\022\031\n\014hudClas"
-  "sName\030\001 \001(\tH\000\210\001\001B\017\n\r_hudClassName\"\252\001\n+Pl"
-  "ayerController_ClientSetViewTarget_Param"
-  "s\022(\n\005actor\030\001 \001(\0132\031.unrealpb.UnrealObject"
-  "Ref\022\021\n\tblendTime\030\002 \001(\002\022\025\n\rblendFunction\030"
-  "\003 \001(\r\022\020\n\010blendExp\030\004 \001(\002\022\025\n\rbLockOutgoing"
-  "\030\005 \001(\010\"T\n0PlayerController_ClientEnableN"
-  "etworkVoice_Params\022\024\n\007bEnable\030\001 \001(\010H\000\210\001\001"
-  "B\n\n\010_bEnable\"9\n*PlayerController_ClientC"
-  "apBandwidth_Params\022\013\n\003cap\030\001 \001(\005\"P\n%Playe"
-  "rController_ClientRestart_Params\022\'\n\004pawn"
-  "\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\"A\n+Pla"
-  "yerController_ClientSetCameraMode_Params"
-  "\022\022\n\nnewCamMode\030\001 \001(\t\"[\n0PlayerController"
-  "_ClientRetryClientRestart_Params\022\'\n\004pawn"
-  "\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\"z\n2Pla"
-  "yerController_ServerSetSpectatorLocation"
-  "_Params\022!\n\006newLoc\030\001 \001(\0132\021.unrealpb.FVect"
-  "or\022!\n\006newRot\030\002 \001(\0132\021.unrealpb.FVector\"^\n"
-  "3PlayerController_ServerAcknowledgePosse"
-  "ssion_Params\022\'\n\004pawn\030\001 \001(\0132\031.unrealpb.Un"
-  "realObjectRef\"\207\002\n\rGameStateBase\022\037\n\022spect"
-  "atorClassName\030\002 \001(\tH\000\210\001\001\022\036\n\021gameModeClas"
-  "sName\030\003 \001(\tH\001\210\001\001\022\'\n\032replicatedWorldTimeS"
-  "econds\030\004 \001(\002H\002\210\001\001\022$\n\027bReplicatedHasBegun"
-  "Play\030\005 \001(\010H\003\210\001\001B\025\n\023_spectatorClassNameB\024"
-  "\n\022_gameModeClassNameB\035\n\033_replicatedWorld"
-  "TimeSecondsB\032\n\030_bReplicatedHasBegunPlayB"
-  ",Z*channeld.clewcat.com/channeld/pkg/unr"
-  "ealpbb\006proto3"
+  "dSnapRotationWhenAttached\030\010 \001(\010H\006\210\001\001\0226\n\014"
+  "attachParent\030\t \001(\0132\033.unrealpb.ActorCompo"
+  "nentRefH\007\210\001\001\0223\n\016attachChildren\030\n \003(\0132\033.u"
+  "nrealpb.ActorComponentRef\022\035\n\020attachSocke"
+  "tName\030\013 \001(\tH\010\210\001\001\0220\n\020relativeLocation\030\014 \001"
+  "(\0132\021.unrealpb.FVectorH\t\210\001\001\0220\n\020relativeRo"
+  "tation\030\r \001(\0132\021.unrealpb.FVectorH\n\210\001\001\022-\n\r"
+  "relativeScale\030\016 \001(\0132\021.unrealpb.FVectorH\013"
+  "\210\001\001B\024\n\022_bAbsoluteLocationB\024\n\022_bAbsoluteR"
+  "otationB\021\n\017_bAbsoluteScaleB\013\n\t_bVisibleB"
+  "\024\n\022_bShouldBeAttachedB\"\n _bShouldSnapLoc"
+  "ationWhenAttachedB\"\n _bShouldSnapRotatio"
+  "nWhenAttachedB\017\n\r_attachParentB\023\n\021_attac"
+  "hSocketNameB\023\n\021_relativeLocationB\023\n\021_rel"
+  "ativeRotationB\020\n\016_relativeScale\"\237\003\n\022FBas"
+  "edMovementInfo\0226\n\014movementBase\030\001 \001(\0132\033.u"
+  "nrealpb.ActorComponentRefH\000\210\001\001\022\025\n\010boneNa"
+  "me\030\002 \001(\tH\001\210\001\001\022(\n\010location\030\003 \001(\0132\021.unreal"
+  "pb.FVectorH\002\210\001\001\022(\n\010rotation\030\004 \001(\0132\021.unre"
+  "alpb.FVectorH\003\210\001\001\022$\n\027bServerHasBaseCompo"
+  "nent\030\005 \001(\010H\004\210\001\001\022\036\n\021bRelativeRotation\030\006 \001"
+  "(\010H\005\210\001\001\022\037\n\022bServerHasVelocity\030\007 \001(\010H\006\210\001\001"
+  "B\017\n\r_movementBaseB\013\n\t_boneNameB\013\n\t_locat"
+  "ionB\013\n\t_rotationB\032\n\030_bServerHasBaseCompo"
+  "nentB\024\n\022_bRelativeRotationB\025\n\023_bServerHa"
+  "sVelocity\"\341\022\n\025FRepRootMotionMontage\022\026\n\tb"
+  "IsActive\030\001 \001(\010H\000\210\001\001\0223\n\013animMontage\030\002 \001(\013"
+  "2\031.unrealpb.UnrealObjectRefH\001\210\001\001\022\025\n\010posi"
+  "tion\030\003 \001(\002H\002\210\001\001\022(\n\010location\030\004 \001(\0132\021.unre"
+  "alpb.FVectorH\003\210\001\001\022(\n\010rotation\030\005 \001(\0132\021.un"
+  "realpb.FVectorH\004\210\001\001\0226\n\014movementBase\030\006 \001("
+  "\0132\033.unrealpb.ActorComponentRefH\005\210\001\001\022!\n\024m"
+  "ovementBaseBoneName\030\007 \001(\tH\006\210\001\001\022\036\n\021bRelat"
+  "ivePosition\030\010 \001(\010H\007\210\001\001\022\036\n\021bRelativeRotat"
+  "ion\030\t \001(\010H\010\210\001\001\022\\\n\027authoritativeRootMotio"
+  "n\030\n \001(\01326.unrealpb.FRepRootMotionMontage"
+  ".FRootMotionSourceGroupH\t\210\001\001\022,\n\014accelera"
+  "tion\030\013 \001(\0132\021.unrealpb.FVectorH\n\210\001\001\022.\n\016li"
+  "nearVelocity\030\014 \001(\0132\021.unrealpb.FVectorH\013\210"
+  "\001\001\032\345\007\n\021FRootMotionSource\022\025\n\010priority\030\001 \001"
+  "(\rH\000\210\001\001\022\024\n\007localId\030\002 \001(\rH\001\210\001\001\022\034\n\017accumul"
+  "atedMode\030\003 \001(\rH\002\210\001\001\022\031\n\014instanceName\030\004 \001("
+  "\tH\003\210\001\001\022\026\n\tstartTime\030\005 \001(\002H\004\210\001\001\022\030\n\013curren"
+  "tTime\030\006 \001(\002H\005\210\001\001\022\031\n\014previousTime\030\007 \001(\002H\006"
+  "\210\001\001\022\025\n\010duration\030\010 \001(\002H\007\210\001\001\022\023\n\006status\030\t \001"
+  "(\rH\010\210\001\001\022\025\n\010settings\030\n \001(\rH\t\210\001\001\022\032\n\rbInLoc"
+  "alSpace\030\013 \001(\010H\n\210\001\001\022#\n\026bNeedsSimulatedCat"
+  "chup\030\014 \001(\010H\013\210\001\001\022%\n\030bSimulatedNeedsSmooth"
+  "ing\030\r \001(\010H\014\210\001\001\022\033\n\016bHasRootMotion\030\016 \001(\010H\r"
+  "\210\001\001\022\030\n\013blendWeight\030\017 \001(\002H\016\210\001\001\022v\n\024finishV"
+  "elocityParams\030\020 \001(\0132S.unrealpb.FRepRootM"
+  "otionMontage.FRootMotionSource.FRootMoti"
+  "onFinishVelocitySettingsH\017\210\001\001\032\252\001\n!FRootM"
+  "otionFinishVelocitySettings\022\021\n\004mode\030\001 \001("
+  "\rH\000\210\001\001\022+\n\013setVelocity\030\002 \001(\0132\021.unrealpb.F"
+  "VectorH\001\210\001\001\022\032\n\rclampVelocity\030\003 \001(\002H\002\210\001\001B"
+  "\007\n\005_modeB\016\n\014_setVelocityB\020\n\016_clampVeloci"
+  "tyB\013\n\t_priorityB\n\n\010_localIdB\022\n\020_accumula"
+  "tedModeB\017\n\r_instanceNameB\014\n\n_startTimeB\016"
+  "\n\014_currentTimeB\017\n\r_previousTimeB\013\n\t_dura"
+  "tionB\t\n\007_statusB\013\n\t_settingsB\020\n\016_bInLoca"
+  "lSpaceB\031\n\027_bNeedsSimulatedCatchupB\033\n\031_bS"
+  "imulatedNeedsSmoothingB\021\n\017_bHasRootMotio"
+  "nB\016\n\014_blendWeightB\027\n\025_finishVelocityPara"
+  "ms\032\365\004\n\026FRootMotionSourceGroup\022L\n\021rootMot"
+  "ionSources\030\001 \003(\01321.unrealpb.FRepRootMoti"
+  "onMontage.FRootMotionSource\022V\n\033pendingAd"
+  "dRootMotionSources\030\002 \003(\01321.unrealpb.FRep"
+  "RootMotionMontage.FRootMotionSource\022 \n\023b"
+  "HasAdditiveSources\030\003 \001(\010H\000\210\001\001\022 \n\023bHasOve"
+  "rrideSources\030\004 \001(\010H\001\210\001\001\0225\n(bHasOverrideS"
+  "ourcesWithIgnoreZAccumulate\030\005 \001(\010H\002\210\001\001\022\'"
+  "\n\032bIsAdditiveVelocityApplied\030\006 \001(\010H\003\210\001\001\022"
+  "$\n\027lastAccumulatedSettings\030\007 \001(\rH\004\210\001\001\0227\n"
+  "\027lastPreAdditiveVelocity\030\010 \001(\0132\021.unrealp"
+  "b.FVectorH\005\210\001\001B\026\n\024_bHasAdditiveSourcesB\026"
+  "\n\024_bHasOverrideSourcesB+\n)_bHasOverrideS"
+  "ourcesWithIgnoreZAccumulateB\035\n\033_bIsAddit"
+  "iveVelocityAppliedB\032\n\030_lastAccumulatedSe"
+  "ttingsB\032\n\030_lastPreAdditiveVelocityB\014\n\n_b"
+  "IsActiveB\016\n\014_animMontageB\013\n\t_positionB\013\n"
+  "\t_locationB\013\n\t_rotationB\017\n\r_movementBase"
+  "B\027\n\025_movementBaseBoneNameB\024\n\022_bRelativeP"
+  "ositionB\024\n\022_bRelativeRotationB\032\n\030_author"
+  "itativeRootMotionB\017\n\r_accelerationB\021\n\017_l"
+  "inearVelocity\"\277\004\n\016CharacterState\0228\n\nroot"
+  "Motion\030\002 \001(\0132\037.unrealpb.FRepRootMotionMo"
+  "ntageH\000\210\001\001\0228\n\rbasedMovement\030\003 \001(\0132\034.unre"
+  "alpb.FBasedMovementInfoH\001\210\001\001\022/\n\"serverLa"
+  "stTransformUpdateTimeStamp\030\004 \001(\002H\002\210\001\001\022\031\n"
+  "\014movementMode\030\005 \001(\rH\003\210\001\001\022\030\n\013bIsCrouched\030"
+  "\006 \001(\010H\004\210\001\001\022%\n\030bProxyIsJumpForceApplied\030\007"
+  " \001(\010H\005\210\001\001\022+\n\036animRootMotionTranslationSc"
+  "ale\030\010 \001(\002H\006\210\001\001\022/\n\"replayLastTransformUpd"
+  "ateTimeStamp\030\t \001(\002H\007\210\001\001B\r\n\013_rootMotionB\020"
+  "\n\016_basedMovementB%\n#_serverLastTransform"
+  "UpdateTimeStampB\017\n\r_movementModeB\016\n\014_bIs"
+  "CrouchedB\033\n\031_bProxyIsJumpForceAppliedB!\n"
+  "\037_animRootMotionTranslationScaleB%\n#_rep"
+  "layLastTransformUpdateTimeStamp\"H\n!Chara"
+  "cter_ServerMovePacked_Params\022\017\n\007bitsNum\030"
+  "\001 \001(\r\022\022\n\npackedBits\030\002 \001(\014\"P\n)Character_C"
+  "lientMoveResponsePacked_Params\022\017\n\007bitsNu"
+  "m\030\001 \001(\r\022\022\n\npackedBits\030\002 \001(\014\"\223\001\n\013PlayerSt"
+  "ate\022\022\n\005score\030\002 \001(\002H\000\210\001\001\022\025\n\010playerId\030\003 \001("
+  "\005H\001\210\001\001\022\021\n\004ping\030\004 \001(\rH\002\210\001\001\022\027\n\nplayerName\030"
+  "\005 \001(\tH\003\210\001\001B\010\n\006_scoreB\013\n\t_playerIdB\007\n\005_pi"
+  "ngB\r\n\013_playerName\"{\n\017ControllerState\022\017\n\007"
+  "removed\030\001 \001(\010\022.\n\013playerState\030\002 \001(\0132\031.unr"
+  "ealpb.UnrealObjectRef\022\'\n\004pawn\030\003 \001(\0132\031.un"
+  "realpb.UnrealObjectRef\"u\n#Controller_Cli"
+  "entSetLocation_Params\022&\n\013newLocation\030\001 \001"
+  "(\0132\021.unrealpb.FVector\022&\n\013newRotation\030\002 \001"
+  "(\0132\021.unrealpb.FVector\"c\n#Controller_Clie"
+  "ntSetRotation_Params\022&\n\013newRotation\030\001 \001("
+  "\0132\021.unrealpb.FVector\022\024\n\014bResetCamera\030\002 \001"
+  "(\010\"\243\001\n\025PlayerControllerState\0222\n\022targetVi"
+  "ewRotation\030\002 \001(\0132\021.unrealpb.FVectorH\000\210\001\001"
+  "\022-\n\rspawnLocation\030\003 \001(\0132\021.unrealpb.FVect"
+  "orH\001\210\001\001B\025\n\023_targetViewRotationB\020\n\016_spawn"
+  "Location\"g\n*PlayerController_ServerUpdat"
+  "eCamera_Params\022!\n\006camLoc\030\001 \001(\0132\021.unrealp"
+  "b.FVector\022\026\n\016camPitchAndYaw\030\002 \001(\005\"R\n$Pla"
+  "yerController_ClientSetHUD_Params\022\031\n\014hud"
+  "ClassName\030\001 \001(\tH\000\210\001\001B\017\n\r_hudClassName\"\252\001"
+  "\n+PlayerController_ClientSetViewTarget_P"
+  "arams\022(\n\005actor\030\001 \001(\0132\031.unrealpb.UnrealOb"
+  "jectRef\022\021\n\tblendTime\030\002 \001(\002\022\025\n\rblendFunct"
+  "ion\030\003 \001(\r\022\020\n\010blendExp\030\004 \001(\002\022\025\n\rbLockOutg"
+  "oing\030\005 \001(\010\"T\n0PlayerController_ClientEna"
+  "bleNetworkVoice_Params\022\024\n\007bEnable\030\001 \001(\010H"
+  "\000\210\001\001B\n\n\010_bEnable\"9\n*PlayerController_Cli"
+  "entCapBandwidth_Params\022\013\n\003cap\030\001 \001(\005\"P\n%P"
+  "layerController_ClientRestart_Params\022\'\n\004"
+  "pawn\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\"A\n"
+  "+PlayerController_ClientSetCameraMode_Pa"
+  "rams\022\022\n\nnewCamMode\030\001 \001(\t\"[\n0PlayerContro"
+  "ller_ClientRetryClientRestart_Params\022\'\n\004"
+  "pawn\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\"z\n"
+  "2PlayerController_ServerSetSpectatorLoca"
+  "tion_Params\022!\n\006newLoc\030\001 \001(\0132\021.unrealpb.F"
+  "Vector\022!\n\006newRot\030\002 \001(\0132\021.unrealpb.FVecto"
+  "r\"^\n3PlayerController_ServerAcknowledgeP"
+  "ossession_Params\022\'\n\004pawn\030\001 \001(\0132\031.unrealp"
+  "b.UnrealObjectRef\"\207\002\n\rGameStateBase\022\037\n\022s"
+  "pectatorClassName\030\002 \001(\tH\000\210\001\001\022\036\n\021gameMode"
+  "ClassName\030\003 \001(\tH\001\210\001\001\022\'\n\032replicatedWorldT"
+  "imeSeconds\030\004 \001(\002H\002\210\001\001\022$\n\027bReplicatedHasB"
+  "egunPlay\030\005 \001(\010H\003\210\001\001B\025\n\023_spectatorClassNa"
+  "meB\024\n\022_gameModeClassNameB\035\n\033_replicatedW"
+  "orldTimeSecondsB\032\n\030_bReplicatedHasBegunP"
+  "layB,Z*channeld.clewcat.com/channeld/pkg"
+  "/unrealpbb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_unreal_5fcommon_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_unreal_5fcommon_2eproto = {
-    false, false, 8413, descriptor_table_protodef_unreal_5fcommon_2eproto,
+    false, false, 8417, descriptor_table_protodef_unreal_5fcommon_2eproto,
     "unreal_common.proto",
     &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 35,
     schemas_unreal_5fcommon_2eproto, file_default_instances_unreal_5fcommon_2eproto, TableStruct_unreal_5fcommon_2eproto::offsets,
@@ -4749,7 +4749,7 @@ class SceneComponentState::_Internal {
   static void set_has_bshouldsnaprotationwhenattached(HasBits* has_bits) {
     (*has_bits)[0] |= 2048u;
   }
-  static const ::unrealpb::UnrealObjectRef& attachparent(const SceneComponentState* msg);
+  static const ::unrealpb::ActorComponentRef& attachparent(const SceneComponentState* msg);
   static void set_has_attachparent(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
   }
@@ -4770,7 +4770,7 @@ class SceneComponentState::_Internal {
   }
 };
 
-const ::unrealpb::UnrealObjectRef&
+const ::unrealpb::ActorComponentRef&
 SceneComponentState::_Internal::attachparent(const SceneComponentState* msg) {
   return *msg->_impl_.attachparent_;
 }
@@ -4822,7 +4822,7 @@ SceneComponentState::SceneComponentState(const SceneComponentState& from)
       _this->GetArenaForAllocation());
   }
   if (from._internal_has_attachparent()) {
-    _this->_impl_.attachparent_ = new ::unrealpb::UnrealObjectRef(*from._impl_.attachparent_);
+    _this->_impl_.attachparent_ = new ::unrealpb::ActorComponentRef(*from._impl_.attachparent_);
   }
   if (from._internal_has_relativelocation()) {
     _this->_impl_.relativelocation_ = new ::unrealpb::FVector(*from._impl_.relativelocation_);
@@ -5002,7 +5002,7 @@ const char* SceneComponentState::_InternalParse(const char* ptr, ::_pbi::ParseCo
         } else
           goto handle_unusual;
         continue;
-      // optional .unrealpb.UnrealObjectRef attachParent = 9;
+      // optional .unrealpb.ActorComponentRef attachParent = 9;
       case 9:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 74)) {
           ptr = ctx->ParseMessage(_internal_mutable_attachparent(), ptr);
@@ -5010,7 +5010,7 @@ const char* SceneComponentState::_InternalParse(const char* ptr, ::_pbi::ParseCo
         } else
           goto handle_unusual;
         continue;
-      // repeated .unrealpb.UnrealObjectRef attachChildren = 10;
+      // repeated .unrealpb.ActorComponentRef attachChildren = 10;
       case 10:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 82)) {
           ptr -= 1;
@@ -5129,14 +5129,14 @@ uint8_t* SceneComponentState::_InternalSerialize(
     target = ::_pbi::WireFormatLite::WriteBoolToArray(8, this->_internal_bshouldsnaprotationwhenattached(), target);
   }
 
-  // optional .unrealpb.UnrealObjectRef attachParent = 9;
+  // optional .unrealpb.ActorComponentRef attachParent = 9;
   if (_internal_has_attachparent()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(9, _Internal::attachparent(this),
         _Internal::attachparent(this).GetCachedSize(), target, stream);
   }
 
-  // repeated .unrealpb.UnrealObjectRef attachChildren = 10;
+  // repeated .unrealpb.ActorComponentRef attachChildren = 10;
   for (unsigned i = 0,
       n = static_cast<unsigned>(this->_internal_attachchildren_size()); i < n; i++) {
     const auto& repfield = this->_internal_attachchildren(i);
@@ -5191,7 +5191,7 @@ size_t SceneComponentState::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .unrealpb.UnrealObjectRef attachChildren = 10;
+  // repeated .unrealpb.ActorComponentRef attachChildren = 10;
   total_size += 1UL * this->_internal_attachchildren_size();
   for (const auto& msg : this->_impl_.attachchildren_) {
     total_size +=
@@ -5207,7 +5207,7 @@ size_t SceneComponentState::ByteSizeLong() const {
           this->_internal_attachsocketname());
     }
 
-    // optional .unrealpb.UnrealObjectRef attachParent = 9;
+    // optional .unrealpb.ActorComponentRef attachParent = 9;
     if (cached_has_bits & 0x00000002u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -5298,7 +5298,7 @@ void SceneComponentState::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, co
       _this->_internal_set_attachsocketname(from._internal_attachsocketname());
     }
     if (cached_has_bits & 0x00000002u) {
-      _this->_internal_mutable_attachparent()->::unrealpb::UnrealObjectRef::MergeFrom(
+      _this->_internal_mutable_attachparent()->::unrealpb::ActorComponentRef::MergeFrom(
           from._internal_attachparent());
     }
     if (cached_has_bits & 0x00000004u) {

@@ -107,7 +107,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 		UObject* SpawnedObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld());
 		if (SpawnedObj)
 		{
-			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, local role: %d"), *SpawnedObj->GetName(), SpawnMsg->localrole());
+			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetGUID: %d, local role: %d"), *SpawnedObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->localrole());
 			if (SpawnMsg->has_localrole() && SpawnedObj->IsA<AActor>())
 			{
 				Cast<AActor>(SpawnedObj)->SetRole((ENetRole)SpawnMsg->localrole());

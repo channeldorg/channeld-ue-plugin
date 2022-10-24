@@ -114,7 +114,7 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	UObject* AttachParent = ChanneldUtils::GetObjectByRef(FullState->mutable_attachparent(), SceneComp->GetWorld());
+	USceneComponent* AttachParent = ChanneldUtils::GetActorComponentByRef<USceneComponent>(FullState->mutable_attachparent(), SceneComp->GetWorld());
 	if (AttachParent != SceneComp->GetAttachParent())
 	{
 		if (SceneComp->GetAttachParent() == nullptr)
@@ -125,7 +125,7 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 		}
 		else
 		{
-			DeltaState->mutable_attachparent()->CopyFrom(ChanneldUtils::GetRefOfObject(SceneComp->GetAttachParent()));
+			DeltaState->mutable_attachparent()->CopyFrom(ChanneldUtils::GetRefOfActorComponent(SceneComp->GetAttachParent()));
 		}
 		bStateChanged = true;
 	}
@@ -135,7 +135,7 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 		DeltaState->clear_attachchildren();
 		for (auto Child : SceneComp->GetAttachChildren())
 		{
-			*DeltaState->mutable_attachchildren()->Add() = ChanneldUtils::GetRefOfObject(Child);
+			*DeltaState->mutable_attachchildren()->Add() = ChanneldUtils::GetRefOfActorComponent(Child);
 		}
 		bStateChanged = true;
 	}
@@ -237,7 +237,7 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::M
 
 	if (NewState->has_attachparent())
 	{
-		auto AttachParent = Cast<USceneComponent>(ChanneldUtils::GetObjectByRef(&NewState->attachparent(), SceneComp->GetWorld()));
+		USceneComponent* AttachParent = ChanneldUtils::GetActorComponentByRef<USceneComponent>(&NewState->attachparent(), SceneComp->GetWorld());
 		if (AttachParent && AttachParent != SceneComp->GetAttachParent())
 		{
 			FName AttachSocketName; 

@@ -2449,22 +2449,22 @@ class CHANNELDUE_API SceneComponentState final :
     kBShouldSnapLocationWhenAttachedFieldNumber = 7,
     kBShouldSnapRotationWhenAttachedFieldNumber = 8,
   };
-  // repeated .unrealpb.UnrealObjectRef attachChildren = 10;
+  // repeated .unrealpb.ActorComponentRef attachChildren = 10;
   int attachchildren_size() const;
   private:
   int _internal_attachchildren_size() const;
   public:
   void clear_attachchildren();
-  ::unrealpb::UnrealObjectRef* mutable_attachchildren(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef >*
+  ::unrealpb::ActorComponentRef* mutable_attachchildren(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::ActorComponentRef >*
       mutable_attachchildren();
   private:
-  const ::unrealpb::UnrealObjectRef& _internal_attachchildren(int index) const;
-  ::unrealpb::UnrealObjectRef* _internal_add_attachchildren();
+  const ::unrealpb::ActorComponentRef& _internal_attachchildren(int index) const;
+  ::unrealpb::ActorComponentRef* _internal_add_attachchildren();
   public:
-  const ::unrealpb::UnrealObjectRef& attachchildren(int index) const;
-  ::unrealpb::UnrealObjectRef* add_attachchildren();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef >&
+  const ::unrealpb::ActorComponentRef& attachchildren(int index) const;
+  ::unrealpb::ActorComponentRef* add_attachchildren();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::ActorComponentRef >&
       attachchildren() const;
 
   // optional string attachSocketName = 11;
@@ -2485,23 +2485,23 @@ class CHANNELDUE_API SceneComponentState final :
   std::string* _internal_mutable_attachsocketname();
   public:
 
-  // optional .unrealpb.UnrealObjectRef attachParent = 9;
+  // optional .unrealpb.ActorComponentRef attachParent = 9;
   bool has_attachparent() const;
   private:
   bool _internal_has_attachparent() const;
   public:
   void clear_attachparent();
-  const ::unrealpb::UnrealObjectRef& attachparent() const;
-  PROTOBUF_NODISCARD ::unrealpb::UnrealObjectRef* release_attachparent();
-  ::unrealpb::UnrealObjectRef* mutable_attachparent();
-  void set_allocated_attachparent(::unrealpb::UnrealObjectRef* attachparent);
+  const ::unrealpb::ActorComponentRef& attachparent() const;
+  PROTOBUF_NODISCARD ::unrealpb::ActorComponentRef* release_attachparent();
+  ::unrealpb::ActorComponentRef* mutable_attachparent();
+  void set_allocated_attachparent(::unrealpb::ActorComponentRef* attachparent);
   private:
-  const ::unrealpb::UnrealObjectRef& _internal_attachparent() const;
-  ::unrealpb::UnrealObjectRef* _internal_mutable_attachparent();
+  const ::unrealpb::ActorComponentRef& _internal_attachparent() const;
+  ::unrealpb::ActorComponentRef* _internal_mutable_attachparent();
   public:
   void unsafe_arena_set_allocated_attachparent(
-      ::unrealpb::UnrealObjectRef* attachparent);
-  ::unrealpb::UnrealObjectRef* unsafe_arena_release_attachparent();
+      ::unrealpb::ActorComponentRef* attachparent);
+  ::unrealpb::ActorComponentRef* unsafe_arena_release_attachparent();
 
   // optional .unrealpb.FVector relativeLocation = 12;
   bool has_relativelocation() const;
@@ -2658,9 +2658,9 @@ class CHANNELDUE_API SceneComponentState final :
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef > attachchildren_;
+    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::ActorComponentRef > attachchildren_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr attachsocketname_;
-    ::unrealpb::UnrealObjectRef* attachparent_;
+    ::unrealpb::ActorComponentRef* attachparent_;
     ::unrealpb::FVector* relativelocation_;
     ::unrealpb::FVector* relativerotation_;
     ::unrealpb::FVector* relativescale_;
@@ -10116,7 +10116,7 @@ inline void SceneComponentState::set_bshouldsnaprotationwhenattached(bool value)
   // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.bShouldSnapRotationWhenAttached)
 }
 
-// optional .unrealpb.UnrealObjectRef attachParent = 9;
+// optional .unrealpb.ActorComponentRef attachParent = 9;
 inline bool SceneComponentState::_internal_has_attachparent() const {
   bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.attachparent_ != nullptr);
@@ -10129,17 +10129,17 @@ inline void SceneComponentState::clear_attachparent() {
   if (_impl_.attachparent_ != nullptr) _impl_.attachparent_->Clear();
   _impl_._has_bits_[0] &= ~0x00000002u;
 }
-inline const ::unrealpb::UnrealObjectRef& SceneComponentState::_internal_attachparent() const {
-  const ::unrealpb::UnrealObjectRef* p = _impl_.attachparent_;
-  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::UnrealObjectRef&>(
-      ::unrealpb::_UnrealObjectRef_default_instance_);
+inline const ::unrealpb::ActorComponentRef& SceneComponentState::_internal_attachparent() const {
+  const ::unrealpb::ActorComponentRef* p = _impl_.attachparent_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::ActorComponentRef&>(
+      ::unrealpb::_ActorComponentRef_default_instance_);
 }
-inline const ::unrealpb::UnrealObjectRef& SceneComponentState::attachparent() const {
+inline const ::unrealpb::ActorComponentRef& SceneComponentState::attachparent() const {
   // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.attachParent)
   return _internal_attachparent();
 }
 inline void SceneComponentState::unsafe_arena_set_allocated_attachparent(
-    ::unrealpb::UnrealObjectRef* attachparent) {
+    ::unrealpb::ActorComponentRef* attachparent) {
   if (GetArenaForAllocation() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.attachparent_);
   }
@@ -10151,9 +10151,9 @@ inline void SceneComponentState::unsafe_arena_set_allocated_attachparent(
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.SceneComponentState.attachParent)
 }
-inline ::unrealpb::UnrealObjectRef* SceneComponentState::release_attachparent() {
+inline ::unrealpb::ActorComponentRef* SceneComponentState::release_attachparent() {
   _impl_._has_bits_[0] &= ~0x00000002u;
-  ::unrealpb::UnrealObjectRef* temp = _impl_.attachparent_;
+  ::unrealpb::ActorComponentRef* temp = _impl_.attachparent_;
   _impl_.attachparent_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
   auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
@@ -10166,27 +10166,27 @@ inline ::unrealpb::UnrealObjectRef* SceneComponentState::release_attachparent() 
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::unrealpb::UnrealObjectRef* SceneComponentState::unsafe_arena_release_attachparent() {
+inline ::unrealpb::ActorComponentRef* SceneComponentState::unsafe_arena_release_attachparent() {
   // @@protoc_insertion_point(field_release:unrealpb.SceneComponentState.attachParent)
   _impl_._has_bits_[0] &= ~0x00000002u;
-  ::unrealpb::UnrealObjectRef* temp = _impl_.attachparent_;
+  ::unrealpb::ActorComponentRef* temp = _impl_.attachparent_;
   _impl_.attachparent_ = nullptr;
   return temp;
 }
-inline ::unrealpb::UnrealObjectRef* SceneComponentState::_internal_mutable_attachparent() {
+inline ::unrealpb::ActorComponentRef* SceneComponentState::_internal_mutable_attachparent() {
   _impl_._has_bits_[0] |= 0x00000002u;
   if (_impl_.attachparent_ == nullptr) {
-    auto* p = CreateMaybeMessage<::unrealpb::UnrealObjectRef>(GetArenaForAllocation());
+    auto* p = CreateMaybeMessage<::unrealpb::ActorComponentRef>(GetArenaForAllocation());
     _impl_.attachparent_ = p;
   }
   return _impl_.attachparent_;
 }
-inline ::unrealpb::UnrealObjectRef* SceneComponentState::mutable_attachparent() {
-  ::unrealpb::UnrealObjectRef* _msg = _internal_mutable_attachparent();
+inline ::unrealpb::ActorComponentRef* SceneComponentState::mutable_attachparent() {
+  ::unrealpb::ActorComponentRef* _msg = _internal_mutable_attachparent();
   // @@protoc_insertion_point(field_mutable:unrealpb.SceneComponentState.attachParent)
   return _msg;
 }
-inline void SceneComponentState::set_allocated_attachparent(::unrealpb::UnrealObjectRef* attachparent) {
+inline void SceneComponentState::set_allocated_attachparent(::unrealpb::ActorComponentRef* attachparent) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
     delete _impl_.attachparent_;
@@ -10206,7 +10206,7 @@ inline void SceneComponentState::set_allocated_attachparent(::unrealpb::UnrealOb
   // @@protoc_insertion_point(field_set_allocated:unrealpb.SceneComponentState.attachParent)
 }
 
-// repeated .unrealpb.UnrealObjectRef attachChildren = 10;
+// repeated .unrealpb.ActorComponentRef attachChildren = 10;
 inline int SceneComponentState::_internal_attachchildren_size() const {
   return _impl_.attachchildren_.size();
 }
@@ -10216,31 +10216,31 @@ inline int SceneComponentState::attachchildren_size() const {
 inline void SceneComponentState::clear_attachchildren() {
   _impl_.attachchildren_.Clear();
 }
-inline ::unrealpb::UnrealObjectRef* SceneComponentState::mutable_attachchildren(int index) {
+inline ::unrealpb::ActorComponentRef* SceneComponentState::mutable_attachchildren(int index) {
   // @@protoc_insertion_point(field_mutable:unrealpb.SceneComponentState.attachChildren)
   return _impl_.attachchildren_.Mutable(index);
 }
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef >*
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::ActorComponentRef >*
 SceneComponentState::mutable_attachchildren() {
   // @@protoc_insertion_point(field_mutable_list:unrealpb.SceneComponentState.attachChildren)
   return &_impl_.attachchildren_;
 }
-inline const ::unrealpb::UnrealObjectRef& SceneComponentState::_internal_attachchildren(int index) const {
+inline const ::unrealpb::ActorComponentRef& SceneComponentState::_internal_attachchildren(int index) const {
   return _impl_.attachchildren_.Get(index);
 }
-inline const ::unrealpb::UnrealObjectRef& SceneComponentState::attachchildren(int index) const {
+inline const ::unrealpb::ActorComponentRef& SceneComponentState::attachchildren(int index) const {
   // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.attachChildren)
   return _internal_attachchildren(index);
 }
-inline ::unrealpb::UnrealObjectRef* SceneComponentState::_internal_add_attachchildren() {
+inline ::unrealpb::ActorComponentRef* SceneComponentState::_internal_add_attachchildren() {
   return _impl_.attachchildren_.Add();
 }
-inline ::unrealpb::UnrealObjectRef* SceneComponentState::add_attachchildren() {
-  ::unrealpb::UnrealObjectRef* _add = _internal_add_attachchildren();
+inline ::unrealpb::ActorComponentRef* SceneComponentState::add_attachchildren() {
+  ::unrealpb::ActorComponentRef* _add = _internal_add_attachchildren();
   // @@protoc_insertion_point(field_add:unrealpb.SceneComponentState.attachChildren)
   return _add;
 }
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef >&
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::ActorComponentRef >&
 SceneComponentState::attachchildren() const {
   // @@protoc_insertion_point(field_list:unrealpb.SceneComponentState.attachChildren)
   return _impl_.attachchildren_;
