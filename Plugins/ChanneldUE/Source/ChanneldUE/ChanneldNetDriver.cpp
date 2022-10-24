@@ -233,24 +233,17 @@ bool UChanneldNetDriver::InitConnectionClass()
 bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, const FURL& URL,
 	bool bReuseAddressAndPort, FString& Error)
 {
+	auto Subsystem = GetSubsystem();
+	if (Subsystem)
 	{
-		auto Subsystem = GetSubsystem();
-		if (Subsystem)
-		{
-			LowLevelSendToChannelId = Subsystem->LowLevelSendToChannelId;
-			/*
-			// Share the same ChanneldConnection with the subsystem if it exists.
-			// In the standalone net game, NetDriver::InitBase is called when starting client travel, so the connection in the subsystem should be already created.
-			ConnToChanneld = Subsystem->GetConnection();
-			*/
-		}
+		LowLevelSendToChannelId = Subsystem->LowLevelSendToChannelId;
+		/*
+		// Share the same ChanneldConnection with the subsystem if it exists.
+		// In the standalone net game, NetDriver::InitBase is called when starting client travel, so the connection in the subsystem should be already created.
+		ConnToChanneld = Subsystem->GetConnection();
+		*/
 	}
-	/*
-	if (ConnToChanneld == nullptr)
-	{
-		ConnToChanneld = NewObject<UChanneldConnection>(this);
-	}
-	*/
+
 	ConnToChanneld = GEngine->GetEngineSubsystem<UChanneldConnection>();
 
 	ConnToChanneld->OnUserSpaceMessageReceived.AddUObject(this, &UChanneldNetDriver::OnUserSpaceMessageReceived);
@@ -359,6 +352,8 @@ bool UChanneldNetDriver::InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bo
 	{
 		FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &UChanneldNetDriver::OnClientPostLogin);
 	}
+
+	GetWorld()->AddOnActorSpawnedHandler(FOnActorSpawned::FDelegate::CreateUObject(this, &UChanneldNetDriver::OnServerSpawnedActor));
 
 	return true;
 
@@ -483,6 +478,21 @@ bool UChanneldNetDriver::IsNetResourceValid()
 	return false;
 }
 
+void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
+{
+	if (!Actor->GetIsReplicated())
+	{
+		return;
+	}
+
+	unrealpb::SpawnObjectMessage SpawnMsg;
+	// Send the spawning to the clients
+	for (auto& Pair : ClientConnectionMap)
+	{
+		SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Actor, Pair.Value));
+		SendDataToClient(MessageType_SPAWN, Pair.Key, SpawnMsg);
+	}
+}
 
 void UChanneldNetDriver::NotifyActorChannelOpen(UActorChannel* Channel, AActor* Actor)
 {
@@ -520,6 +530,7 @@ void UChanneldNetDriver::OnClientPostLogin(AGameModeBase* GameMode, APlayerContr
 		UE_LOG(LogChanneld, Warning, TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn the GameStateBase in the client."));
 	}
 
+	/* OnServerSpawnedActor handles this
 	// By now, the new player's pawn isn't set yet, so we should wait the event
 	NewPlayer->GetOnNewPawnNotifier().AddLambda([&, NewPlayerConn](APawn* NewPawn)
 		{
@@ -535,6 +546,7 @@ void UChanneldNetDriver::OnClientPostLogin(AGameModeBase* GameMode, APlayerContr
 				}
 			}
 		});
+	*/
 
 	// Send the existing player pawns to the new player
 	unrealpb::SpawnObjectMessage SpawnPlayerMsg;
@@ -548,24 +560,6 @@ void UChanneldNetDriver::OnClientPostLogin(AGameModeBase* GameMode, APlayerContr
 			SendDataToClient(MessageType_SPAWN, NewPlayerConn->GetConnId(), SpawnPlayerMsg);
 		}
 	}
-
-	/*
-	// Send the existing player pawns to the new player
-	for (auto& Pair : ClientConnectionMap)
-	{
-		if (Pair.Value == NewPlayerConn)
-			continue;
-
-		unrealpb::SpawnObjectMessage SpawnPlayerMsg;
-		APlayerController* PC = Pair.Value->GetPlayerController(GetWorld());
-		if (PC && PC->GetPawn())
-		{
-			SpawnPlayerMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(PC->GetPawn(), NewPlayerConn));
-			SpawnPlayerMsg.set_localrole(ENetRole::ROLE_SimulatedProxy);
-			SendDataToClient(MessageType_SPAWN, NewPlayerConn->GetConnId(), SpawnPlayerMsg);
-		}
-	}
-	*/
 }
 
 void UChanneldNetDriver::TickDispatch(float DeltaTime)

@@ -53,12 +53,12 @@ public:
 	virtual void LowLevelSend(TSharedPtr<const FInternetAddr> Address, void* Data, int32 CountBits, FOutPacketTraits& Traits) override;
 	virtual void LowLevelDestroy() override;
 	virtual bool IsNetResourceValid(void) override;
-	virtual void NotifyActorChannelOpen(UActorChannel* Channel, AActor* Actor);
+
+	virtual void NotifyActorChannelOpen(UActorChannel* Channel, AActor* Actor) override;
+	virtual int32 ServerReplicateActors(float DeltaSeconds) override;
+	virtual void ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject = nullptr) override;
 	//~ End UNetDriver Interface
 
-	virtual int32 ServerReplicateActors(float DeltaSeconds) override;
-
-	virtual void ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject = nullptr) override;
 	void ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDelayRPC);
 
 	UChanneldConnection* GetConnToChanneld() { return ConnToChanneld; }
@@ -93,6 +93,7 @@ private:
 	void OnUserSpaceMessageReceived(uint32 MsgType, ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload);
 	void HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
 	void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer);
+	void OnServerSpawnedActor(AActor* Actor);
 	void HandleLowLevelMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleRemoteFunctionMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
