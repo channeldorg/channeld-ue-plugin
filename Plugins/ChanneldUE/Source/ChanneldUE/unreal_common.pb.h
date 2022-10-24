@@ -23,7 +23,6 @@
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/arena.h>
 #include <google/protobuf/arenastring.h>
-#include <google/protobuf/generated_message_bases.h>
 #include <google/protobuf/generated_message_util.h>
 #include <google/protobuf/metadata_lite.h>
 #include <google/protobuf/generated_message_reflection.h>
@@ -55,9 +54,6 @@ CHANNELDUE_API extern ActorComponentStateDefaultTypeInternal _ActorComponentStat
 class ActorState;
 struct ActorStateDefaultTypeInternal;
 CHANNELDUE_API extern ActorStateDefaultTypeInternal _ActorState_default_instance_;
-class BasedMovementInfo;
-struct BasedMovementInfoDefaultTypeInternal;
-CHANNELDUE_API extern BasedMovementInfoDefaultTypeInternal _BasedMovementInfo_default_instance_;
 class CharacterState;
 struct CharacterStateDefaultTypeInternal;
 CHANNELDUE_API extern CharacterStateDefaultTypeInternal _CharacterState_default_instance_;
@@ -76,12 +72,27 @@ CHANNELDUE_API extern Controller_ClientSetLocation_ParamsDefaultTypeInternal _Co
 class Controller_ClientSetRotation_Params;
 struct Controller_ClientSetRotation_ParamsDefaultTypeInternal;
 CHANNELDUE_API extern Controller_ClientSetRotation_ParamsDefaultTypeInternal _Controller_ClientSetRotation_Params_default_instance_;
+class FBasedMovementInfo;
+struct FBasedMovementInfoDefaultTypeInternal;
+CHANNELDUE_API extern FBasedMovementInfoDefaultTypeInternal _FBasedMovementInfo_default_instance_;
 class FRepAttachment;
 struct FRepAttachmentDefaultTypeInternal;
 CHANNELDUE_API extern FRepAttachmentDefaultTypeInternal _FRepAttachment_default_instance_;
 class FRepMovement;
 struct FRepMovementDefaultTypeInternal;
 CHANNELDUE_API extern FRepMovementDefaultTypeInternal _FRepMovement_default_instance_;
+class FRepRootMotionMontage;
+struct FRepRootMotionMontageDefaultTypeInternal;
+CHANNELDUE_API extern FRepRootMotionMontageDefaultTypeInternal _FRepRootMotionMontage_default_instance_;
+class FRepRootMotionMontage_FRootMotionSource;
+struct FRepRootMotionMontage_FRootMotionSourceDefaultTypeInternal;
+CHANNELDUE_API extern FRepRootMotionMontage_FRootMotionSourceDefaultTypeInternal _FRepRootMotionMontage_FRootMotionSource_default_instance_;
+class FRepRootMotionMontage_FRootMotionSourceGroup;
+struct FRepRootMotionMontage_FRootMotionSourceGroupDefaultTypeInternal;
+CHANNELDUE_API extern FRepRootMotionMontage_FRootMotionSourceGroupDefaultTypeInternal _FRepRootMotionMontage_FRootMotionSourceGroup_default_instance_;
+class FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings;
+struct FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettingsDefaultTypeInternal;
+CHANNELDUE_API extern FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettingsDefaultTypeInternal _FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings_default_instance_;
 class FVector;
 struct FVectorDefaultTypeInternal;
 CHANNELDUE_API extern FVectorDefaultTypeInternal _FVector_default_instance_;
@@ -127,9 +138,6 @@ CHANNELDUE_API extern PlayerStateDefaultTypeInternal _PlayerState_default_instan
 class RemoteFunctionMessage;
 struct RemoteFunctionMessageDefaultTypeInternal;
 CHANNELDUE_API extern RemoteFunctionMessageDefaultTypeInternal _RemoteFunctionMessage_default_instance_;
-class RootMotionMontage;
-struct RootMotionMontageDefaultTypeInternal;
-CHANNELDUE_API extern RootMotionMontageDefaultTypeInternal _RootMotionMontage_default_instance_;
 class SceneComponentState;
 struct SceneComponentStateDefaultTypeInternal;
 CHANNELDUE_API extern SceneComponentStateDefaultTypeInternal _SceneComponentState_default_instance_;
@@ -147,15 +155,19 @@ PROTOBUF_NAMESPACE_OPEN
 template<> CHANNELDUE_API ::unrealpb::ActorComponentRef* Arena::CreateMaybeMessage<::unrealpb::ActorComponentRef>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::ActorComponentState* Arena::CreateMaybeMessage<::unrealpb::ActorComponentState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::ActorState* Arena::CreateMaybeMessage<::unrealpb::ActorState>(Arena*);
-template<> CHANNELDUE_API ::unrealpb::BasedMovementInfo* Arena::CreateMaybeMessage<::unrealpb::BasedMovementInfo>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::CharacterState* Arena::CreateMaybeMessage<::unrealpb::CharacterState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::Character_ClientMoveResponsePacked_Params* Arena::CreateMaybeMessage<::unrealpb::Character_ClientMoveResponsePacked_Params>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::Character_ServerMovePacked_Params* Arena::CreateMaybeMessage<::unrealpb::Character_ServerMovePacked_Params>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::ControllerState* Arena::CreateMaybeMessage<::unrealpb::ControllerState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::Controller_ClientSetLocation_Params* Arena::CreateMaybeMessage<::unrealpb::Controller_ClientSetLocation_Params>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::Controller_ClientSetRotation_Params* Arena::CreateMaybeMessage<::unrealpb::Controller_ClientSetRotation_Params>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::FBasedMovementInfo* Arena::CreateMaybeMessage<::unrealpb::FBasedMovementInfo>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::FRepAttachment* Arena::CreateMaybeMessage<::unrealpb::FRepAttachment>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::FRepMovement* Arena::CreateMaybeMessage<::unrealpb::FRepMovement>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::FRepRootMotionMontage* Arena::CreateMaybeMessage<::unrealpb::FRepRootMotionMontage>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::FRepRootMotionMontage_FRootMotionSource* Arena::CreateMaybeMessage<::unrealpb::FRepRootMotionMontage_FRootMotionSource>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* Arena::CreateMaybeMessage<::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* Arena::CreateMaybeMessage<::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::FVector* Arena::CreateMaybeMessage<::unrealpb::FVector>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::GameStateBase* Arena::CreateMaybeMessage<::unrealpb::GameStateBase>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::PlayerControllerState* Arena::CreateMaybeMessage<::unrealpb::PlayerControllerState>(Arena*);
@@ -171,7 +183,6 @@ template<> CHANNELDUE_API ::unrealpb::PlayerController_ServerSetSpectatorLocatio
 template<> CHANNELDUE_API ::unrealpb::PlayerController_ServerUpdateCamera_Params* Arena::CreateMaybeMessage<::unrealpb::PlayerController_ServerUpdateCamera_Params>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::PlayerState* Arena::CreateMaybeMessage<::unrealpb::PlayerState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::RemoteFunctionMessage* Arena::CreateMaybeMessage<::unrealpb::RemoteFunctionMessage>(Arena*);
-template<> CHANNELDUE_API ::unrealpb::RootMotionMontage* Arena::CreateMaybeMessage<::unrealpb::RootMotionMontage>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::SceneComponentState* Arena::CreateMaybeMessage<::unrealpb::SceneComponentState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::SpawnObjectMessage* Arena::CreateMaybeMessage<::unrealpb::SpawnObjectMessage>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::UnrealObjectRef* Arena::CreateMaybeMessage<::unrealpb::UnrealObjectRef>(Arena*);
@@ -2666,23 +2677,24 @@ class CHANNELDUE_API SceneComponentState final :
 };
 // -------------------------------------------------------------------
 
-class CHANNELDUE_API RootMotionMontage final :
-    public ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase /* @@protoc_insertion_point(class_definition:unrealpb.RootMotionMontage) */ {
+class CHANNELDUE_API FBasedMovementInfo final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.FBasedMovementInfo) */ {
  public:
-  inline RootMotionMontage() : RootMotionMontage(nullptr) {}
-  explicit PROTOBUF_CONSTEXPR RootMotionMontage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline FBasedMovementInfo() : FBasedMovementInfo(nullptr) {}
+  ~FBasedMovementInfo() override;
+  explicit PROTOBUF_CONSTEXPR FBasedMovementInfo(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  RootMotionMontage(const RootMotionMontage& from);
-  RootMotionMontage(RootMotionMontage&& from) noexcept
-    : RootMotionMontage() {
+  FBasedMovementInfo(const FBasedMovementInfo& from);
+  FBasedMovementInfo(FBasedMovementInfo&& from) noexcept
+    : FBasedMovementInfo() {
     *this = ::std::move(from);
   }
 
-  inline RootMotionMontage& operator=(const RootMotionMontage& from) {
+  inline FBasedMovementInfo& operator=(const FBasedMovementInfo& from) {
     CopyFrom(from);
     return *this;
   }
-  inline RootMotionMontage& operator=(RootMotionMontage&& from) noexcept {
+  inline FBasedMovementInfo& operator=(FBasedMovementInfo&& from) noexcept {
     if (this == &from) return *this;
     if (GetOwningArena() == from.GetOwningArena()
   #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
@@ -2705,20 +2717,20 @@ class CHANNELDUE_API RootMotionMontage final :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return default_instance().GetMetadata().reflection;
   }
-  static const RootMotionMontage& default_instance() {
+  static const FBasedMovementInfo& default_instance() {
     return *internal_default_instance();
   }
-  static inline const RootMotionMontage* internal_default_instance() {
-    return reinterpret_cast<const RootMotionMontage*>(
-               &_RootMotionMontage_default_instance_);
+  static inline const FBasedMovementInfo* internal_default_instance() {
+    return reinterpret_cast<const FBasedMovementInfo*>(
+               &_FBasedMovementInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     11;
 
-  friend void swap(RootMotionMontage& a, RootMotionMontage& b) {
+  friend void swap(FBasedMovementInfo& a, FBasedMovementInfo& b) {
     a.Swap(&b);
   }
-  inline void Swap(RootMotionMontage* other) {
+  inline void Swap(FBasedMovementInfo* other) {
     if (other == this) return;
   #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
     if (GetOwningArena() != nullptr &&
@@ -2731,7 +2743,7 @@ class CHANNELDUE_API RootMotionMontage final :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(RootMotionMontage* other) {
+  void UnsafeArenaSwap(FBasedMovementInfo* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
     InternalSwap(other);
@@ -2739,133 +2751,14 @@ class CHANNELDUE_API RootMotionMontage final :
 
   // implements Message ----------------------------------------------
 
-  RootMotionMontage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<RootMotionMontage>(arena);
-  }
-  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyFrom;
-  inline void CopyFrom(const RootMotionMontage& from) {
-    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl(*this, from);
-  }
-  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeFrom;
-  void MergeFrom(const RootMotionMontage& from) {
-    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl(*this, from);
-  }
-  public:
-
-  private:
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "unrealpb.RootMotionMontage";
-  }
-  protected:
-  explicit RootMotionMontage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                       bool is_message_owned = false);
-  public:
-
-  static const ClassData _class_data_;
-  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // @@protoc_insertion_point(class_scope:unrealpb.RootMotionMontage)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  struct Impl_ {
-  };
-  friend struct ::TableStruct_unreal_5fcommon_2eproto;
-};
-// -------------------------------------------------------------------
-
-class CHANNELDUE_API BasedMovementInfo final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.BasedMovementInfo) */ {
- public:
-  inline BasedMovementInfo() : BasedMovementInfo(nullptr) {}
-  ~BasedMovementInfo() override;
-  explicit PROTOBUF_CONSTEXPR BasedMovementInfo(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  BasedMovementInfo(const BasedMovementInfo& from);
-  BasedMovementInfo(BasedMovementInfo&& from) noexcept
-    : BasedMovementInfo() {
-    *this = ::std::move(from);
-  }
-
-  inline BasedMovementInfo& operator=(const BasedMovementInfo& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline BasedMovementInfo& operator=(BasedMovementInfo&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetOwningArena() == from.GetOwningArena()
-  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetOwningArena() != nullptr
-  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const BasedMovementInfo& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const BasedMovementInfo* internal_default_instance() {
-    return reinterpret_cast<const BasedMovementInfo*>(
-               &_BasedMovementInfo_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    12;
-
-  friend void swap(BasedMovementInfo& a, BasedMovementInfo& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(BasedMovementInfo* other) {
-    if (other == this) return;
-  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() != nullptr &&
-        GetOwningArena() == other->GetOwningArena()) {
-   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() == other->GetOwningArena()) {
-  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(BasedMovementInfo* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  BasedMovementInfo* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<BasedMovementInfo>(arena);
+  FBasedMovementInfo* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<FBasedMovementInfo>(arena);
   }
   using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const BasedMovementInfo& from);
+  void CopyFrom(const FBasedMovementInfo& from);
   using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const BasedMovementInfo& from) {
-    BasedMovementInfo::MergeImpl(*this, from);
+  void MergeFrom( const FBasedMovementInfo& from) {
+    FBasedMovementInfo::MergeImpl(*this, from);
   }
   private:
   static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
@@ -2883,15 +2776,15 @@ class CHANNELDUE_API BasedMovementInfo final :
   void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
   void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(BasedMovementInfo* other);
+  void InternalSwap(FBasedMovementInfo* other);
 
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "unrealpb.BasedMovementInfo";
+    return "unrealpb.FBasedMovementInfo";
   }
   protected:
-  explicit BasedMovementInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+  explicit FBasedMovementInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                        bool is_message_owned = false);
   public:
 
@@ -3024,7 +2917,7 @@ class CHANNELDUE_API BasedMovementInfo final :
   void _internal_set_bserverhasvelocity(bool value);
   public:
 
-  // @@protoc_insertion_point(class_scope:unrealpb.BasedMovementInfo)
+  // @@protoc_insertion_point(class_scope:unrealpb.FBasedMovementInfo)
  private:
   class _Internal;
 
@@ -3041,6 +2934,1218 @@ class CHANNELDUE_API BasedMovementInfo final :
     bool bserverhasbasecomponent_;
     bool brelativerotation_;
     bool bserverhasvelocity_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings) */ {
+ public:
+  inline FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings() : FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings(nullptr) {}
+  ~FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings() override;
+  explicit PROTOBUF_CONSTEXPR FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings(const FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& from);
+  FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings(FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings&& from) noexcept
+    : FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings() {
+    *this = ::std::move(from);
+  }
+
+  inline FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& operator=(const FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& operator=(FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* internal_default_instance() {
+    return reinterpret_cast<const FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings*>(
+               &_FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    12;
+
+  friend void swap(FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& a, FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& from) {
+    FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings";
+  }
+  protected:
+  explicit FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSetVelocityFieldNumber = 2,
+    kModeFieldNumber = 1,
+    kClampVelocityFieldNumber = 3,
+  };
+  // optional .unrealpb.FVector setVelocity = 2;
+  bool has_setvelocity() const;
+  private:
+  bool _internal_has_setvelocity() const;
+  public:
+  void clear_setvelocity();
+  const ::unrealpb::FVector& setvelocity() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_setvelocity();
+  ::unrealpb::FVector* mutable_setvelocity();
+  void set_allocated_setvelocity(::unrealpb::FVector* setvelocity);
+  private:
+  const ::unrealpb::FVector& _internal_setvelocity() const;
+  ::unrealpb::FVector* _internal_mutable_setvelocity();
+  public:
+  void unsafe_arena_set_allocated_setvelocity(
+      ::unrealpb::FVector* setvelocity);
+  ::unrealpb::FVector* unsafe_arena_release_setvelocity();
+
+  // optional uint32 mode = 1;
+  bool has_mode() const;
+  private:
+  bool _internal_has_mode() const;
+  public:
+  void clear_mode();
+  uint32_t mode() const;
+  void set_mode(uint32_t value);
+  private:
+  uint32_t _internal_mode() const;
+  void _internal_set_mode(uint32_t value);
+  public:
+
+  // optional float clampVelocity = 3;
+  bool has_clampvelocity() const;
+  private:
+  bool _internal_has_clampvelocity() const;
+  public:
+  void clear_clampvelocity();
+  float clampvelocity() const;
+  void set_clampvelocity(float value);
+  private:
+  float _internal_clampvelocity() const;
+  void _internal_set_clampvelocity(float value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+    ::unrealpb::FVector* setvelocity_;
+    uint32_t mode_;
+    float clampvelocity_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API FRepRootMotionMontage_FRootMotionSource final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.FRepRootMotionMontage.FRootMotionSource) */ {
+ public:
+  inline FRepRootMotionMontage_FRootMotionSource() : FRepRootMotionMontage_FRootMotionSource(nullptr) {}
+  ~FRepRootMotionMontage_FRootMotionSource() override;
+  explicit PROTOBUF_CONSTEXPR FRepRootMotionMontage_FRootMotionSource(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  FRepRootMotionMontage_FRootMotionSource(const FRepRootMotionMontage_FRootMotionSource& from);
+  FRepRootMotionMontage_FRootMotionSource(FRepRootMotionMontage_FRootMotionSource&& from) noexcept
+    : FRepRootMotionMontage_FRootMotionSource() {
+    *this = ::std::move(from);
+  }
+
+  inline FRepRootMotionMontage_FRootMotionSource& operator=(const FRepRootMotionMontage_FRootMotionSource& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline FRepRootMotionMontage_FRootMotionSource& operator=(FRepRootMotionMontage_FRootMotionSource&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const FRepRootMotionMontage_FRootMotionSource& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const FRepRootMotionMontage_FRootMotionSource* internal_default_instance() {
+    return reinterpret_cast<const FRepRootMotionMontage_FRootMotionSource*>(
+               &_FRepRootMotionMontage_FRootMotionSource_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    13;
+
+  friend void swap(FRepRootMotionMontage_FRootMotionSource& a, FRepRootMotionMontage_FRootMotionSource& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(FRepRootMotionMontage_FRootMotionSource* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(FRepRootMotionMontage_FRootMotionSource* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  FRepRootMotionMontage_FRootMotionSource* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<FRepRootMotionMontage_FRootMotionSource>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const FRepRootMotionMontage_FRootMotionSource& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const FRepRootMotionMontage_FRootMotionSource& from) {
+    FRepRootMotionMontage_FRootMotionSource::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(FRepRootMotionMontage_FRootMotionSource* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.FRepRootMotionMontage.FRootMotionSource";
+  }
+  protected:
+  explicit FRepRootMotionMontage_FRootMotionSource(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  typedef FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings FRootMotionFinishVelocitySettings;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kInstanceNameFieldNumber = 4,
+    kFinishVelocityParamsFieldNumber = 16,
+    kPriorityFieldNumber = 1,
+    kLocalIdFieldNumber = 2,
+    kAccumulatedModeFieldNumber = 3,
+    kStartTimeFieldNumber = 5,
+    kCurrentTimeFieldNumber = 6,
+    kPreviousTimeFieldNumber = 7,
+    kDurationFieldNumber = 8,
+    kStatusFieldNumber = 9,
+    kSettingsFieldNumber = 10,
+    kBInLocalSpaceFieldNumber = 11,
+    kBNeedsSimulatedCatchupFieldNumber = 12,
+    kBSimulatedNeedsSmoothingFieldNumber = 13,
+    kBHasRootMotionFieldNumber = 14,
+    kBlendWeightFieldNumber = 15,
+  };
+  // optional string instanceName = 4;
+  bool has_instancename() const;
+  private:
+  bool _internal_has_instancename() const;
+  public:
+  void clear_instancename();
+  const std::string& instancename() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_instancename(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_instancename();
+  PROTOBUF_NODISCARD std::string* release_instancename();
+  void set_allocated_instancename(std::string* instancename);
+  private:
+  const std::string& _internal_instancename() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_instancename(const std::string& value);
+  std::string* _internal_mutable_instancename();
+  public:
+
+  // optional .unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings finishVelocityParams = 16;
+  bool has_finishvelocityparams() const;
+  private:
+  bool _internal_has_finishvelocityparams() const;
+  public:
+  void clear_finishvelocityparams();
+  const ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& finishvelocityparams() const;
+  PROTOBUF_NODISCARD ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* release_finishvelocityparams();
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* mutable_finishvelocityparams();
+  void set_allocated_finishvelocityparams(::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* finishvelocityparams);
+  private:
+  const ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& _internal_finishvelocityparams() const;
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* _internal_mutable_finishvelocityparams();
+  public:
+  void unsafe_arena_set_allocated_finishvelocityparams(
+      ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* finishvelocityparams);
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* unsafe_arena_release_finishvelocityparams();
+
+  // optional uint32 priority = 1;
+  bool has_priority() const;
+  private:
+  bool _internal_has_priority() const;
+  public:
+  void clear_priority();
+  uint32_t priority() const;
+  void set_priority(uint32_t value);
+  private:
+  uint32_t _internal_priority() const;
+  void _internal_set_priority(uint32_t value);
+  public:
+
+  // optional uint32 localId = 2;
+  bool has_localid() const;
+  private:
+  bool _internal_has_localid() const;
+  public:
+  void clear_localid();
+  uint32_t localid() const;
+  void set_localid(uint32_t value);
+  private:
+  uint32_t _internal_localid() const;
+  void _internal_set_localid(uint32_t value);
+  public:
+
+  // optional uint32 accumulatedMode = 3;
+  bool has_accumulatedmode() const;
+  private:
+  bool _internal_has_accumulatedmode() const;
+  public:
+  void clear_accumulatedmode();
+  uint32_t accumulatedmode() const;
+  void set_accumulatedmode(uint32_t value);
+  private:
+  uint32_t _internal_accumulatedmode() const;
+  void _internal_set_accumulatedmode(uint32_t value);
+  public:
+
+  // optional float startTime = 5;
+  bool has_starttime() const;
+  private:
+  bool _internal_has_starttime() const;
+  public:
+  void clear_starttime();
+  float starttime() const;
+  void set_starttime(float value);
+  private:
+  float _internal_starttime() const;
+  void _internal_set_starttime(float value);
+  public:
+
+  // optional float currentTime = 6;
+  bool has_currenttime() const;
+  private:
+  bool _internal_has_currenttime() const;
+  public:
+  void clear_currenttime();
+  float currenttime() const;
+  void set_currenttime(float value);
+  private:
+  float _internal_currenttime() const;
+  void _internal_set_currenttime(float value);
+  public:
+
+  // optional float previousTime = 7;
+  bool has_previoustime() const;
+  private:
+  bool _internal_has_previoustime() const;
+  public:
+  void clear_previoustime();
+  float previoustime() const;
+  void set_previoustime(float value);
+  private:
+  float _internal_previoustime() const;
+  void _internal_set_previoustime(float value);
+  public:
+
+  // optional float duration = 8;
+  bool has_duration() const;
+  private:
+  bool _internal_has_duration() const;
+  public:
+  void clear_duration();
+  float duration() const;
+  void set_duration(float value);
+  private:
+  float _internal_duration() const;
+  void _internal_set_duration(float value);
+  public:
+
+  // optional uint32 status = 9;
+  bool has_status() const;
+  private:
+  bool _internal_has_status() const;
+  public:
+  void clear_status();
+  uint32_t status() const;
+  void set_status(uint32_t value);
+  private:
+  uint32_t _internal_status() const;
+  void _internal_set_status(uint32_t value);
+  public:
+
+  // optional uint32 settings = 10;
+  bool has_settings() const;
+  private:
+  bool _internal_has_settings() const;
+  public:
+  void clear_settings();
+  uint32_t settings() const;
+  void set_settings(uint32_t value);
+  private:
+  uint32_t _internal_settings() const;
+  void _internal_set_settings(uint32_t value);
+  public:
+
+  // optional bool bInLocalSpace = 11;
+  bool has_binlocalspace() const;
+  private:
+  bool _internal_has_binlocalspace() const;
+  public:
+  void clear_binlocalspace();
+  bool binlocalspace() const;
+  void set_binlocalspace(bool value);
+  private:
+  bool _internal_binlocalspace() const;
+  void _internal_set_binlocalspace(bool value);
+  public:
+
+  // optional bool bNeedsSimulatedCatchup = 12;
+  bool has_bneedssimulatedcatchup() const;
+  private:
+  bool _internal_has_bneedssimulatedcatchup() const;
+  public:
+  void clear_bneedssimulatedcatchup();
+  bool bneedssimulatedcatchup() const;
+  void set_bneedssimulatedcatchup(bool value);
+  private:
+  bool _internal_bneedssimulatedcatchup() const;
+  void _internal_set_bneedssimulatedcatchup(bool value);
+  public:
+
+  // optional bool bSimulatedNeedsSmoothing = 13;
+  bool has_bsimulatedneedssmoothing() const;
+  private:
+  bool _internal_has_bsimulatedneedssmoothing() const;
+  public:
+  void clear_bsimulatedneedssmoothing();
+  bool bsimulatedneedssmoothing() const;
+  void set_bsimulatedneedssmoothing(bool value);
+  private:
+  bool _internal_bsimulatedneedssmoothing() const;
+  void _internal_set_bsimulatedneedssmoothing(bool value);
+  public:
+
+  // optional bool bHasRootMotion = 14;
+  bool has_bhasrootmotion() const;
+  private:
+  bool _internal_has_bhasrootmotion() const;
+  public:
+  void clear_bhasrootmotion();
+  bool bhasrootmotion() const;
+  void set_bhasrootmotion(bool value);
+  private:
+  bool _internal_bhasrootmotion() const;
+  void _internal_set_bhasrootmotion(bool value);
+  public:
+
+  // optional float blendWeight = 15;
+  bool has_blendweight() const;
+  private:
+  bool _internal_has_blendweight() const;
+  public:
+  void clear_blendweight();
+  float blendweight() const;
+  void set_blendweight(float value);
+  private:
+  float _internal_blendweight() const;
+  void _internal_set_blendweight(float value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:unrealpb.FRepRootMotionMontage.FRootMotionSource)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr instancename_;
+    ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* finishvelocityparams_;
+    uint32_t priority_;
+    uint32_t localid_;
+    uint32_t accumulatedmode_;
+    float starttime_;
+    float currenttime_;
+    float previoustime_;
+    float duration_;
+    uint32_t status_;
+    uint32_t settings_;
+    bool binlocalspace_;
+    bool bneedssimulatedcatchup_;
+    bool bsimulatedneedssmoothing_;
+    bool bhasrootmotion_;
+    float blendweight_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API FRepRootMotionMontage_FRootMotionSourceGroup final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup) */ {
+ public:
+  inline FRepRootMotionMontage_FRootMotionSourceGroup() : FRepRootMotionMontage_FRootMotionSourceGroup(nullptr) {}
+  ~FRepRootMotionMontage_FRootMotionSourceGroup() override;
+  explicit PROTOBUF_CONSTEXPR FRepRootMotionMontage_FRootMotionSourceGroup(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  FRepRootMotionMontage_FRootMotionSourceGroup(const FRepRootMotionMontage_FRootMotionSourceGroup& from);
+  FRepRootMotionMontage_FRootMotionSourceGroup(FRepRootMotionMontage_FRootMotionSourceGroup&& from) noexcept
+    : FRepRootMotionMontage_FRootMotionSourceGroup() {
+    *this = ::std::move(from);
+  }
+
+  inline FRepRootMotionMontage_FRootMotionSourceGroup& operator=(const FRepRootMotionMontage_FRootMotionSourceGroup& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline FRepRootMotionMontage_FRootMotionSourceGroup& operator=(FRepRootMotionMontage_FRootMotionSourceGroup&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const FRepRootMotionMontage_FRootMotionSourceGroup& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const FRepRootMotionMontage_FRootMotionSourceGroup* internal_default_instance() {
+    return reinterpret_cast<const FRepRootMotionMontage_FRootMotionSourceGroup*>(
+               &_FRepRootMotionMontage_FRootMotionSourceGroup_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    14;
+
+  friend void swap(FRepRootMotionMontage_FRootMotionSourceGroup& a, FRepRootMotionMontage_FRootMotionSourceGroup& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(FRepRootMotionMontage_FRootMotionSourceGroup* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(FRepRootMotionMontage_FRootMotionSourceGroup* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  FRepRootMotionMontage_FRootMotionSourceGroup* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<FRepRootMotionMontage_FRootMotionSourceGroup>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const FRepRootMotionMontage_FRootMotionSourceGroup& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const FRepRootMotionMontage_FRootMotionSourceGroup& from) {
+    FRepRootMotionMontage_FRootMotionSourceGroup::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(FRepRootMotionMontage_FRootMotionSourceGroup* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup";
+  }
+  protected:
+  explicit FRepRootMotionMontage_FRootMotionSourceGroup(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kRootMotionSourcesFieldNumber = 1,
+    kPendingAddRootMotionSourcesFieldNumber = 2,
+    kLastPreAdditiveVelocityFieldNumber = 8,
+    kBHasAdditiveSourcesFieldNumber = 3,
+    kBHasOverrideSourcesFieldNumber = 4,
+    kBHasOverrideSourcesWithIgnoreZAccumulateFieldNumber = 5,
+    kBIsAdditiveVelocityAppliedFieldNumber = 6,
+    kLastAccumulatedSettingsFieldNumber = 7,
+  };
+  // repeated .unrealpb.FRepRootMotionMontage.FRootMotionSource rootMotionSources = 1;
+  int rootmotionsources_size() const;
+  private:
+  int _internal_rootmotionsources_size() const;
+  public:
+  void clear_rootmotionsources();
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSource* mutable_rootmotionsources(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::FRepRootMotionMontage_FRootMotionSource >*
+      mutable_rootmotionsources();
+  private:
+  const ::unrealpb::FRepRootMotionMontage_FRootMotionSource& _internal_rootmotionsources(int index) const;
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSource* _internal_add_rootmotionsources();
+  public:
+  const ::unrealpb::FRepRootMotionMontage_FRootMotionSource& rootmotionsources(int index) const;
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSource* add_rootmotionsources();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::FRepRootMotionMontage_FRootMotionSource >&
+      rootmotionsources() const;
+
+  // repeated .unrealpb.FRepRootMotionMontage.FRootMotionSource pendingAddRootMotionSources = 2;
+  int pendingaddrootmotionsources_size() const;
+  private:
+  int _internal_pendingaddrootmotionsources_size() const;
+  public:
+  void clear_pendingaddrootmotionsources();
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSource* mutable_pendingaddrootmotionsources(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::FRepRootMotionMontage_FRootMotionSource >*
+      mutable_pendingaddrootmotionsources();
+  private:
+  const ::unrealpb::FRepRootMotionMontage_FRootMotionSource& _internal_pendingaddrootmotionsources(int index) const;
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSource* _internal_add_pendingaddrootmotionsources();
+  public:
+  const ::unrealpb::FRepRootMotionMontage_FRootMotionSource& pendingaddrootmotionsources(int index) const;
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSource* add_pendingaddrootmotionsources();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::FRepRootMotionMontage_FRootMotionSource >&
+      pendingaddrootmotionsources() const;
+
+  // optional .unrealpb.FVector lastPreAdditiveVelocity = 8;
+  bool has_lastpreadditivevelocity() const;
+  private:
+  bool _internal_has_lastpreadditivevelocity() const;
+  public:
+  void clear_lastpreadditivevelocity();
+  const ::unrealpb::FVector& lastpreadditivevelocity() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_lastpreadditivevelocity();
+  ::unrealpb::FVector* mutable_lastpreadditivevelocity();
+  void set_allocated_lastpreadditivevelocity(::unrealpb::FVector* lastpreadditivevelocity);
+  private:
+  const ::unrealpb::FVector& _internal_lastpreadditivevelocity() const;
+  ::unrealpb::FVector* _internal_mutable_lastpreadditivevelocity();
+  public:
+  void unsafe_arena_set_allocated_lastpreadditivevelocity(
+      ::unrealpb::FVector* lastpreadditivevelocity);
+  ::unrealpb::FVector* unsafe_arena_release_lastpreadditivevelocity();
+
+  // optional bool bHasAdditiveSources = 3;
+  bool has_bhasadditivesources() const;
+  private:
+  bool _internal_has_bhasadditivesources() const;
+  public:
+  void clear_bhasadditivesources();
+  bool bhasadditivesources() const;
+  void set_bhasadditivesources(bool value);
+  private:
+  bool _internal_bhasadditivesources() const;
+  void _internal_set_bhasadditivesources(bool value);
+  public:
+
+  // optional bool bHasOverrideSources = 4;
+  bool has_bhasoverridesources() const;
+  private:
+  bool _internal_has_bhasoverridesources() const;
+  public:
+  void clear_bhasoverridesources();
+  bool bhasoverridesources() const;
+  void set_bhasoverridesources(bool value);
+  private:
+  bool _internal_bhasoverridesources() const;
+  void _internal_set_bhasoverridesources(bool value);
+  public:
+
+  // optional bool bHasOverrideSourcesWithIgnoreZAccumulate = 5;
+  bool has_bhasoverridesourceswithignorezaccumulate() const;
+  private:
+  bool _internal_has_bhasoverridesourceswithignorezaccumulate() const;
+  public:
+  void clear_bhasoverridesourceswithignorezaccumulate();
+  bool bhasoverridesourceswithignorezaccumulate() const;
+  void set_bhasoverridesourceswithignorezaccumulate(bool value);
+  private:
+  bool _internal_bhasoverridesourceswithignorezaccumulate() const;
+  void _internal_set_bhasoverridesourceswithignorezaccumulate(bool value);
+  public:
+
+  // optional bool bIsAdditiveVelocityApplied = 6;
+  bool has_bisadditivevelocityapplied() const;
+  private:
+  bool _internal_has_bisadditivevelocityapplied() const;
+  public:
+  void clear_bisadditivevelocityapplied();
+  bool bisadditivevelocityapplied() const;
+  void set_bisadditivevelocityapplied(bool value);
+  private:
+  bool _internal_bisadditivevelocityapplied() const;
+  void _internal_set_bisadditivevelocityapplied(bool value);
+  public:
+
+  // optional uint32 lastAccumulatedSettings = 7;
+  bool has_lastaccumulatedsettings() const;
+  private:
+  bool _internal_has_lastaccumulatedsettings() const;
+  public:
+  void clear_lastaccumulatedsettings();
+  uint32_t lastaccumulatedsettings() const;
+  void set_lastaccumulatedsettings(uint32_t value);
+  private:
+  uint32_t _internal_lastaccumulatedsettings() const;
+  void _internal_set_lastaccumulatedsettings(uint32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::FRepRootMotionMontage_FRootMotionSource > rootmotionsources_;
+    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::FRepRootMotionMontage_FRootMotionSource > pendingaddrootmotionsources_;
+    ::unrealpb::FVector* lastpreadditivevelocity_;
+    bool bhasadditivesources_;
+    bool bhasoverridesources_;
+    bool bhasoverridesourceswithignorezaccumulate_;
+    bool bisadditivevelocityapplied_;
+    uint32_t lastaccumulatedsettings_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API FRepRootMotionMontage final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.FRepRootMotionMontage) */ {
+ public:
+  inline FRepRootMotionMontage() : FRepRootMotionMontage(nullptr) {}
+  ~FRepRootMotionMontage() override;
+  explicit PROTOBUF_CONSTEXPR FRepRootMotionMontage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  FRepRootMotionMontage(const FRepRootMotionMontage& from);
+  FRepRootMotionMontage(FRepRootMotionMontage&& from) noexcept
+    : FRepRootMotionMontage() {
+    *this = ::std::move(from);
+  }
+
+  inline FRepRootMotionMontage& operator=(const FRepRootMotionMontage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline FRepRootMotionMontage& operator=(FRepRootMotionMontage&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const FRepRootMotionMontage& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const FRepRootMotionMontage* internal_default_instance() {
+    return reinterpret_cast<const FRepRootMotionMontage*>(
+               &_FRepRootMotionMontage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    15;
+
+  friend void swap(FRepRootMotionMontage& a, FRepRootMotionMontage& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(FRepRootMotionMontage* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(FRepRootMotionMontage* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  FRepRootMotionMontage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<FRepRootMotionMontage>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const FRepRootMotionMontage& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const FRepRootMotionMontage& from) {
+    FRepRootMotionMontage::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(FRepRootMotionMontage* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.FRepRootMotionMontage";
+  }
+  protected:
+  explicit FRepRootMotionMontage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  typedef FRepRootMotionMontage_FRootMotionSource FRootMotionSource;
+  typedef FRepRootMotionMontage_FRootMotionSourceGroup FRootMotionSourceGroup;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kMovementBaseBoneNameFieldNumber = 7,
+    kAnimMontageFieldNumber = 2,
+    kLocationFieldNumber = 4,
+    kRotationFieldNumber = 5,
+    kMovementBaseFieldNumber = 6,
+    kAuthoritativeRootMotionFieldNumber = 10,
+    kAccelerationFieldNumber = 11,
+    kLinearVelocityFieldNumber = 12,
+    kPositionFieldNumber = 3,
+    kBIsActiveFieldNumber = 1,
+    kBRelativePositionFieldNumber = 8,
+    kBRelativeRotationFieldNumber = 9,
+  };
+  // optional string movementBaseBoneName = 7;
+  bool has_movementbasebonename() const;
+  private:
+  bool _internal_has_movementbasebonename() const;
+  public:
+  void clear_movementbasebonename();
+  const std::string& movementbasebonename() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_movementbasebonename(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_movementbasebonename();
+  PROTOBUF_NODISCARD std::string* release_movementbasebonename();
+  void set_allocated_movementbasebonename(std::string* movementbasebonename);
+  private:
+  const std::string& _internal_movementbasebonename() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_movementbasebonename(const std::string& value);
+  std::string* _internal_mutable_movementbasebonename();
+  public:
+
+  // optional .unrealpb.UnrealObjectRef animMontage = 2;
+  bool has_animmontage() const;
+  private:
+  bool _internal_has_animmontage() const;
+  public:
+  void clear_animmontage();
+  const ::unrealpb::UnrealObjectRef& animmontage() const;
+  PROTOBUF_NODISCARD ::unrealpb::UnrealObjectRef* release_animmontage();
+  ::unrealpb::UnrealObjectRef* mutable_animmontage();
+  void set_allocated_animmontage(::unrealpb::UnrealObjectRef* animmontage);
+  private:
+  const ::unrealpb::UnrealObjectRef& _internal_animmontage() const;
+  ::unrealpb::UnrealObjectRef* _internal_mutable_animmontage();
+  public:
+  void unsafe_arena_set_allocated_animmontage(
+      ::unrealpb::UnrealObjectRef* animmontage);
+  ::unrealpb::UnrealObjectRef* unsafe_arena_release_animmontage();
+
+  // optional .unrealpb.FVector location = 4;
+  bool has_location() const;
+  private:
+  bool _internal_has_location() const;
+  public:
+  void clear_location();
+  const ::unrealpb::FVector& location() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_location();
+  ::unrealpb::FVector* mutable_location();
+  void set_allocated_location(::unrealpb::FVector* location);
+  private:
+  const ::unrealpb::FVector& _internal_location() const;
+  ::unrealpb::FVector* _internal_mutable_location();
+  public:
+  void unsafe_arena_set_allocated_location(
+      ::unrealpb::FVector* location);
+  ::unrealpb::FVector* unsafe_arena_release_location();
+
+  // optional .unrealpb.FVector rotation = 5;
+  bool has_rotation() const;
+  private:
+  bool _internal_has_rotation() const;
+  public:
+  void clear_rotation();
+  const ::unrealpb::FVector& rotation() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_rotation();
+  ::unrealpb::FVector* mutable_rotation();
+  void set_allocated_rotation(::unrealpb::FVector* rotation);
+  private:
+  const ::unrealpb::FVector& _internal_rotation() const;
+  ::unrealpb::FVector* _internal_mutable_rotation();
+  public:
+  void unsafe_arena_set_allocated_rotation(
+      ::unrealpb::FVector* rotation);
+  ::unrealpb::FVector* unsafe_arena_release_rotation();
+
+  // optional .unrealpb.ActorComponentRef movementBase = 6;
+  bool has_movementbase() const;
+  private:
+  bool _internal_has_movementbase() const;
+  public:
+  void clear_movementbase();
+  const ::unrealpb::ActorComponentRef& movementbase() const;
+  PROTOBUF_NODISCARD ::unrealpb::ActorComponentRef* release_movementbase();
+  ::unrealpb::ActorComponentRef* mutable_movementbase();
+  void set_allocated_movementbase(::unrealpb::ActorComponentRef* movementbase);
+  private:
+  const ::unrealpb::ActorComponentRef& _internal_movementbase() const;
+  ::unrealpb::ActorComponentRef* _internal_mutable_movementbase();
+  public:
+  void unsafe_arena_set_allocated_movementbase(
+      ::unrealpb::ActorComponentRef* movementbase);
+  ::unrealpb::ActorComponentRef* unsafe_arena_release_movementbase();
+
+  // optional .unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup authoritativeRootMotion = 10;
+  bool has_authoritativerootmotion() const;
+  private:
+  bool _internal_has_authoritativerootmotion() const;
+  public:
+  void clear_authoritativerootmotion();
+  const ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup& authoritativerootmotion() const;
+  PROTOBUF_NODISCARD ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* release_authoritativerootmotion();
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* mutable_authoritativerootmotion();
+  void set_allocated_authoritativerootmotion(::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* authoritativerootmotion);
+  private:
+  const ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup& _internal_authoritativerootmotion() const;
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* _internal_mutable_authoritativerootmotion();
+  public:
+  void unsafe_arena_set_allocated_authoritativerootmotion(
+      ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* authoritativerootmotion);
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* unsafe_arena_release_authoritativerootmotion();
+
+  // optional .unrealpb.FVector acceleration = 11;
+  bool has_acceleration() const;
+  private:
+  bool _internal_has_acceleration() const;
+  public:
+  void clear_acceleration();
+  const ::unrealpb::FVector& acceleration() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_acceleration();
+  ::unrealpb::FVector* mutable_acceleration();
+  void set_allocated_acceleration(::unrealpb::FVector* acceleration);
+  private:
+  const ::unrealpb::FVector& _internal_acceleration() const;
+  ::unrealpb::FVector* _internal_mutable_acceleration();
+  public:
+  void unsafe_arena_set_allocated_acceleration(
+      ::unrealpb::FVector* acceleration);
+  ::unrealpb::FVector* unsafe_arena_release_acceleration();
+
+  // optional .unrealpb.FVector linearVelocity = 12;
+  bool has_linearvelocity() const;
+  private:
+  bool _internal_has_linearvelocity() const;
+  public:
+  void clear_linearvelocity();
+  const ::unrealpb::FVector& linearvelocity() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_linearvelocity();
+  ::unrealpb::FVector* mutable_linearvelocity();
+  void set_allocated_linearvelocity(::unrealpb::FVector* linearvelocity);
+  private:
+  const ::unrealpb::FVector& _internal_linearvelocity() const;
+  ::unrealpb::FVector* _internal_mutable_linearvelocity();
+  public:
+  void unsafe_arena_set_allocated_linearvelocity(
+      ::unrealpb::FVector* linearvelocity);
+  ::unrealpb::FVector* unsafe_arena_release_linearvelocity();
+
+  // optional float position = 3;
+  bool has_position() const;
+  private:
+  bool _internal_has_position() const;
+  public:
+  void clear_position();
+  float position() const;
+  void set_position(float value);
+  private:
+  float _internal_position() const;
+  void _internal_set_position(float value);
+  public:
+
+  // optional bool bIsActive = 1;
+  bool has_bisactive() const;
+  private:
+  bool _internal_has_bisactive() const;
+  public:
+  void clear_bisactive();
+  bool bisactive() const;
+  void set_bisactive(bool value);
+  private:
+  bool _internal_bisactive() const;
+  void _internal_set_bisactive(bool value);
+  public:
+
+  // optional bool bRelativePosition = 8;
+  bool has_brelativeposition() const;
+  private:
+  bool _internal_has_brelativeposition() const;
+  public:
+  void clear_brelativeposition();
+  bool brelativeposition() const;
+  void set_brelativeposition(bool value);
+  private:
+  bool _internal_brelativeposition() const;
+  void _internal_set_brelativeposition(bool value);
+  public:
+
+  // optional bool bRelativeRotation = 9;
+  bool has_brelativerotation() const;
+  private:
+  bool _internal_has_brelativerotation() const;
+  public:
+  void clear_brelativerotation();
+  bool brelativerotation() const;
+  void set_brelativerotation(bool value);
+  private:
+  bool _internal_brelativerotation() const;
+  void _internal_set_brelativerotation(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:unrealpb.FRepRootMotionMontage)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr movementbasebonename_;
+    ::unrealpb::UnrealObjectRef* animmontage_;
+    ::unrealpb::FVector* location_;
+    ::unrealpb::FVector* rotation_;
+    ::unrealpb::ActorComponentRef* movementbase_;
+    ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* authoritativerootmotion_;
+    ::unrealpb::FVector* acceleration_;
+    ::unrealpb::FVector* linearvelocity_;
+    float position_;
+    bool bisactive_;
+    bool brelativeposition_;
+    bool brelativerotation_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -3095,7 +4200,7 @@ class CHANNELDUE_API CharacterState final :
                &_CharacterState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    16;
 
   friend void swap(CharacterState& a, CharacterState& b) {
     a.Swap(&b);
@@ -3177,41 +4282,41 @@ class CHANNELDUE_API CharacterState final :
     kAnimRootMotionTranslationScaleFieldNumber = 8,
     kReplayLastTransformUpdateTimeStampFieldNumber = 9,
   };
-  // optional .unrealpb.RootMotionMontage rootMotion = 2;
+  // optional .unrealpb.FRepRootMotionMontage rootMotion = 2;
   bool has_rootmotion() const;
   private:
   bool _internal_has_rootmotion() const;
   public:
   void clear_rootmotion();
-  const ::unrealpb::RootMotionMontage& rootmotion() const;
-  PROTOBUF_NODISCARD ::unrealpb::RootMotionMontage* release_rootmotion();
-  ::unrealpb::RootMotionMontage* mutable_rootmotion();
-  void set_allocated_rootmotion(::unrealpb::RootMotionMontage* rootmotion);
+  const ::unrealpb::FRepRootMotionMontage& rootmotion() const;
+  PROTOBUF_NODISCARD ::unrealpb::FRepRootMotionMontage* release_rootmotion();
+  ::unrealpb::FRepRootMotionMontage* mutable_rootmotion();
+  void set_allocated_rootmotion(::unrealpb::FRepRootMotionMontage* rootmotion);
   private:
-  const ::unrealpb::RootMotionMontage& _internal_rootmotion() const;
-  ::unrealpb::RootMotionMontage* _internal_mutable_rootmotion();
+  const ::unrealpb::FRepRootMotionMontage& _internal_rootmotion() const;
+  ::unrealpb::FRepRootMotionMontage* _internal_mutable_rootmotion();
   public:
   void unsafe_arena_set_allocated_rootmotion(
-      ::unrealpb::RootMotionMontage* rootmotion);
-  ::unrealpb::RootMotionMontage* unsafe_arena_release_rootmotion();
+      ::unrealpb::FRepRootMotionMontage* rootmotion);
+  ::unrealpb::FRepRootMotionMontage* unsafe_arena_release_rootmotion();
 
-  // optional .unrealpb.BasedMovementInfo basedMovement = 3;
+  // optional .unrealpb.FBasedMovementInfo basedMovement = 3;
   bool has_basedmovement() const;
   private:
   bool _internal_has_basedmovement() const;
   public:
   void clear_basedmovement();
-  const ::unrealpb::BasedMovementInfo& basedmovement() const;
-  PROTOBUF_NODISCARD ::unrealpb::BasedMovementInfo* release_basedmovement();
-  ::unrealpb::BasedMovementInfo* mutable_basedmovement();
-  void set_allocated_basedmovement(::unrealpb::BasedMovementInfo* basedmovement);
+  const ::unrealpb::FBasedMovementInfo& basedmovement() const;
+  PROTOBUF_NODISCARD ::unrealpb::FBasedMovementInfo* release_basedmovement();
+  ::unrealpb::FBasedMovementInfo* mutable_basedmovement();
+  void set_allocated_basedmovement(::unrealpb::FBasedMovementInfo* basedmovement);
   private:
-  const ::unrealpb::BasedMovementInfo& _internal_basedmovement() const;
-  ::unrealpb::BasedMovementInfo* _internal_mutable_basedmovement();
+  const ::unrealpb::FBasedMovementInfo& _internal_basedmovement() const;
+  ::unrealpb::FBasedMovementInfo* _internal_mutable_basedmovement();
   public:
   void unsafe_arena_set_allocated_basedmovement(
-      ::unrealpb::BasedMovementInfo* basedmovement);
-  ::unrealpb::BasedMovementInfo* unsafe_arena_release_basedmovement();
+      ::unrealpb::FBasedMovementInfo* basedmovement);
+  ::unrealpb::FBasedMovementInfo* unsafe_arena_release_basedmovement();
 
   // optional float serverLastTransformUpdateTimeStamp = 4;
   bool has_serverlasttransformupdatetimestamp() const;
@@ -3301,8 +4406,8 @@ class CHANNELDUE_API CharacterState final :
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-    ::unrealpb::RootMotionMontage* rootmotion_;
-    ::unrealpb::BasedMovementInfo* basedmovement_;
+    ::unrealpb::FRepRootMotionMontage* rootmotion_;
+    ::unrealpb::FBasedMovementInfo* basedmovement_;
     float serverlasttransformupdatetimestamp_;
     uint32_t movementmode_;
     bool biscrouched_;
@@ -3363,7 +4468,7 @@ class CHANNELDUE_API Character_ServerMovePacked_Params final :
                &_Character_ServerMovePacked_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    14;
+    17;
 
   friend void swap(Character_ServerMovePacked_Params& a, Character_ServerMovePacked_Params& b) {
     a.Swap(&b);
@@ -3527,7 +4632,7 @@ class CHANNELDUE_API Character_ClientMoveResponsePacked_Params final :
                &_Character_ClientMoveResponsePacked_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    18;
 
   friend void swap(Character_ClientMoveResponsePacked_Params& a, Character_ClientMoveResponsePacked_Params& b) {
     a.Swap(&b);
@@ -3691,7 +4796,7 @@ class CHANNELDUE_API PlayerState final :
                &_PlayerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    19;
 
   friend void swap(PlayerState& a, PlayerState& b) {
     a.Swap(&b);
@@ -3894,7 +4999,7 @@ class CHANNELDUE_API ControllerState final :
                &_ControllerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    20;
 
   friend void swap(ControllerState& a, ControllerState& b) {
     a.Swap(&b);
@@ -4082,7 +5187,7 @@ class CHANNELDUE_API Controller_ClientSetLocation_Params final :
                &_Controller_ClientSetLocation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    21;
 
   friend void swap(Controller_ClientSetLocation_Params& a, Controller_ClientSetLocation_Params& b) {
     a.Swap(&b);
@@ -4259,7 +5364,7 @@ class CHANNELDUE_API Controller_ClientSetRotation_Params final :
                &_Controller_ClientSetRotation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    19;
+    22;
 
   friend void swap(Controller_ClientSetRotation_Params& a, Controller_ClientSetRotation_Params& b) {
     a.Swap(&b);
@@ -4427,7 +5532,7 @@ class CHANNELDUE_API PlayerControllerState final :
                &_PlayerControllerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    20;
+    23;
 
   friend void swap(PlayerControllerState& a, PlayerControllerState& b) {
     a.Swap(&b);
@@ -4605,7 +5710,7 @@ class CHANNELDUE_API PlayerController_ServerUpdateCamera_Params final :
                &_PlayerController_ServerUpdateCamera_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    24;
 
   friend void swap(PlayerController_ServerUpdateCamera_Params& a, PlayerController_ServerUpdateCamera_Params& b) {
     a.Swap(&b);
@@ -4773,7 +5878,7 @@ class CHANNELDUE_API PlayerController_ClientSetHUD_Params final :
                &_PlayerController_ClientSetHUD_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    25;
 
   friend void swap(PlayerController_ClientSetHUD_Params& a, PlayerController_ClientSetHUD_Params& b) {
     a.Swap(&b);
@@ -4931,7 +6036,7 @@ class CHANNELDUE_API PlayerController_ClientSetViewTarget_Params final :
                &_PlayerController_ClientSetViewTarget_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    26;
 
   friend void swap(PlayerController_ClientSetViewTarget_Params& a, PlayerController_ClientSetViewTarget_Params& b) {
     a.Swap(&b);
@@ -5132,7 +6237,7 @@ class CHANNELDUE_API PlayerController_ClientEnableNetworkVoice_Params final :
                &_PlayerController_ClientEnableNetworkVoice_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    27;
 
   friend void swap(PlayerController_ClientEnableNetworkVoice_Params& a, PlayerController_ClientEnableNetworkVoice_Params& b) {
     a.Swap(&b);
@@ -5285,7 +6390,7 @@ class CHANNELDUE_API PlayerController_ClientCapBandwidth_Params final :
                &_PlayerController_ClientCapBandwidth_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    28;
 
   friend void swap(PlayerController_ClientCapBandwidth_Params& a, PlayerController_ClientCapBandwidth_Params& b) {
     a.Swap(&b);
@@ -5433,7 +6538,7 @@ class CHANNELDUE_API PlayerController_ClientRestart_Params final :
                &_PlayerController_ClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    29;
 
   friend void swap(PlayerController_ClientRestart_Params& a, PlayerController_ClientRestart_Params& b) {
     a.Swap(&b);
@@ -5590,7 +6695,7 @@ class CHANNELDUE_API PlayerController_ClientSetCameraMode_Params final :
                &_PlayerController_ClientSetCameraMode_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    30;
 
   friend void swap(PlayerController_ClientSetCameraMode_Params& a, PlayerController_ClientSetCameraMode_Params& b) {
     a.Swap(&b);
@@ -5743,7 +6848,7 @@ class CHANNELDUE_API PlayerController_ClientRetryClientRestart_Params final :
                &_PlayerController_ClientRetryClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    31;
 
   friend void swap(PlayerController_ClientRetryClientRestart_Params& a, PlayerController_ClientRetryClientRestart_Params& b) {
     a.Swap(&b);
@@ -5900,7 +7005,7 @@ class CHANNELDUE_API PlayerController_ServerSetSpectatorLocation_Params final :
                &_PlayerController_ServerSetSpectatorLocation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    32;
 
   friend void swap(PlayerController_ServerSetSpectatorLocation_Params& a, PlayerController_ServerSetSpectatorLocation_Params& b) {
     a.Swap(&b);
@@ -6077,7 +7182,7 @@ class CHANNELDUE_API PlayerController_ServerAcknowledgePossession_Params final :
                &_PlayerController_ServerAcknowledgePossession_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    33;
 
   friend void swap(PlayerController_ServerAcknowledgePossession_Params& a, PlayerController_ServerAcknowledgePossession_Params& b) {
     a.Swap(&b);
@@ -6234,7 +7339,7 @@ class CHANNELDUE_API GameStateBase final :
                &_GameStateBase_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    34;
 
   friend void swap(GameStateBase& a, GameStateBase& b) {
     a.Swap(&b);
@@ -9481,35 +10586,31 @@ inline void SceneComponentState::set_allocated_relativescale(::unrealpb::FVector
 
 // -------------------------------------------------------------------
 
-// RootMotionMontage
-
-// -------------------------------------------------------------------
-
-// BasedMovementInfo
+// FBasedMovementInfo
 
 // optional .unrealpb.ActorComponentRef movementBase = 1;
-inline bool BasedMovementInfo::_internal_has_movementbase() const {
+inline bool FBasedMovementInfo::_internal_has_movementbase() const {
   bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.movementbase_ != nullptr);
   return value;
 }
-inline bool BasedMovementInfo::has_movementbase() const {
+inline bool FBasedMovementInfo::has_movementbase() const {
   return _internal_has_movementbase();
 }
-inline void BasedMovementInfo::clear_movementbase() {
+inline void FBasedMovementInfo::clear_movementbase() {
   if (_impl_.movementbase_ != nullptr) _impl_.movementbase_->Clear();
   _impl_._has_bits_[0] &= ~0x00000002u;
 }
-inline const ::unrealpb::ActorComponentRef& BasedMovementInfo::_internal_movementbase() const {
+inline const ::unrealpb::ActorComponentRef& FBasedMovementInfo::_internal_movementbase() const {
   const ::unrealpb::ActorComponentRef* p = _impl_.movementbase_;
   return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::ActorComponentRef&>(
       ::unrealpb::_ActorComponentRef_default_instance_);
 }
-inline const ::unrealpb::ActorComponentRef& BasedMovementInfo::movementbase() const {
-  // @@protoc_insertion_point(field_get:unrealpb.BasedMovementInfo.movementBase)
+inline const ::unrealpb::ActorComponentRef& FBasedMovementInfo::movementbase() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FBasedMovementInfo.movementBase)
   return _internal_movementbase();
 }
-inline void BasedMovementInfo::unsafe_arena_set_allocated_movementbase(
+inline void FBasedMovementInfo::unsafe_arena_set_allocated_movementbase(
     ::unrealpb::ActorComponentRef* movementbase) {
   if (GetArenaForAllocation() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.movementbase_);
@@ -9520,9 +10621,9 @@ inline void BasedMovementInfo::unsafe_arena_set_allocated_movementbase(
   } else {
     _impl_._has_bits_[0] &= ~0x00000002u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.BasedMovementInfo.movementBase)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FBasedMovementInfo.movementBase)
 }
-inline ::unrealpb::ActorComponentRef* BasedMovementInfo::release_movementbase() {
+inline ::unrealpb::ActorComponentRef* FBasedMovementInfo::release_movementbase() {
   _impl_._has_bits_[0] &= ~0x00000002u;
   ::unrealpb::ActorComponentRef* temp = _impl_.movementbase_;
   _impl_.movementbase_ = nullptr;
@@ -9537,14 +10638,14 @@ inline ::unrealpb::ActorComponentRef* BasedMovementInfo::release_movementbase() 
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::unrealpb::ActorComponentRef* BasedMovementInfo::unsafe_arena_release_movementbase() {
-  // @@protoc_insertion_point(field_release:unrealpb.BasedMovementInfo.movementBase)
+inline ::unrealpb::ActorComponentRef* FBasedMovementInfo::unsafe_arena_release_movementbase() {
+  // @@protoc_insertion_point(field_release:unrealpb.FBasedMovementInfo.movementBase)
   _impl_._has_bits_[0] &= ~0x00000002u;
   ::unrealpb::ActorComponentRef* temp = _impl_.movementbase_;
   _impl_.movementbase_ = nullptr;
   return temp;
 }
-inline ::unrealpb::ActorComponentRef* BasedMovementInfo::_internal_mutable_movementbase() {
+inline ::unrealpb::ActorComponentRef* FBasedMovementInfo::_internal_mutable_movementbase() {
   _impl_._has_bits_[0] |= 0x00000002u;
   if (_impl_.movementbase_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::ActorComponentRef>(GetArenaForAllocation());
@@ -9552,12 +10653,12 @@ inline ::unrealpb::ActorComponentRef* BasedMovementInfo::_internal_mutable_movem
   }
   return _impl_.movementbase_;
 }
-inline ::unrealpb::ActorComponentRef* BasedMovementInfo::mutable_movementbase() {
+inline ::unrealpb::ActorComponentRef* FBasedMovementInfo::mutable_movementbase() {
   ::unrealpb::ActorComponentRef* _msg = _internal_mutable_movementbase();
-  // @@protoc_insertion_point(field_mutable:unrealpb.BasedMovementInfo.movementBase)
+  // @@protoc_insertion_point(field_mutable:unrealpb.FBasedMovementInfo.movementBase)
   return _msg;
 }
-inline void BasedMovementInfo::set_allocated_movementbase(::unrealpb::ActorComponentRef* movementbase) {
+inline void FBasedMovementInfo::set_allocated_movementbase(::unrealpb::ActorComponentRef* movementbase) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
     delete _impl_.movementbase_;
@@ -9574,50 +10675,50 @@ inline void BasedMovementInfo::set_allocated_movementbase(::unrealpb::ActorCompo
     _impl_._has_bits_[0] &= ~0x00000002u;
   }
   _impl_.movementbase_ = movementbase;
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.BasedMovementInfo.movementBase)
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FBasedMovementInfo.movementBase)
 }
 
 // optional string boneName = 2;
-inline bool BasedMovementInfo::_internal_has_bonename() const {
+inline bool FBasedMovementInfo::_internal_has_bonename() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
-inline bool BasedMovementInfo::has_bonename() const {
+inline bool FBasedMovementInfo::has_bonename() const {
   return _internal_has_bonename();
 }
-inline void BasedMovementInfo::clear_bonename() {
+inline void FBasedMovementInfo::clear_bonename() {
   _impl_.bonename_.ClearToEmpty();
   _impl_._has_bits_[0] &= ~0x00000001u;
 }
-inline const std::string& BasedMovementInfo::bonename() const {
-  // @@protoc_insertion_point(field_get:unrealpb.BasedMovementInfo.boneName)
+inline const std::string& FBasedMovementInfo::bonename() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FBasedMovementInfo.boneName)
   return _internal_bonename();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void BasedMovementInfo::set_bonename(ArgT0&& arg0, ArgT... args) {
+void FBasedMovementInfo::set_bonename(ArgT0&& arg0, ArgT... args) {
  _impl_._has_bits_[0] |= 0x00000001u;
  _impl_.bonename_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:unrealpb.BasedMovementInfo.boneName)
+  // @@protoc_insertion_point(field_set:unrealpb.FBasedMovementInfo.boneName)
 }
-inline std::string* BasedMovementInfo::mutable_bonename() {
+inline std::string* FBasedMovementInfo::mutable_bonename() {
   std::string* _s = _internal_mutable_bonename();
-  // @@protoc_insertion_point(field_mutable:unrealpb.BasedMovementInfo.boneName)
+  // @@protoc_insertion_point(field_mutable:unrealpb.FBasedMovementInfo.boneName)
   return _s;
 }
-inline const std::string& BasedMovementInfo::_internal_bonename() const {
+inline const std::string& FBasedMovementInfo::_internal_bonename() const {
   return _impl_.bonename_.Get();
 }
-inline void BasedMovementInfo::_internal_set_bonename(const std::string& value) {
+inline void FBasedMovementInfo::_internal_set_bonename(const std::string& value) {
   _impl_._has_bits_[0] |= 0x00000001u;
   _impl_.bonename_.Set(value, GetArenaForAllocation());
 }
-inline std::string* BasedMovementInfo::_internal_mutable_bonename() {
+inline std::string* FBasedMovementInfo::_internal_mutable_bonename() {
   _impl_._has_bits_[0] |= 0x00000001u;
   return _impl_.bonename_.Mutable(GetArenaForAllocation());
 }
-inline std::string* BasedMovementInfo::release_bonename() {
-  // @@protoc_insertion_point(field_release:unrealpb.BasedMovementInfo.boneName)
+inline std::string* FBasedMovementInfo::release_bonename() {
+  // @@protoc_insertion_point(field_release:unrealpb.FBasedMovementInfo.boneName)
   if (!_internal_has_bonename()) {
     return nullptr;
   }
@@ -9630,7 +10731,7 @@ inline std::string* BasedMovementInfo::release_bonename() {
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   return p;
 }
-inline void BasedMovementInfo::set_allocated_bonename(std::string* bonename) {
+inline void FBasedMovementInfo::set_allocated_bonename(std::string* bonename) {
   if (bonename != nullptr) {
     _impl_._has_bits_[0] |= 0x00000001u;
   } else {
@@ -9642,32 +10743,32 @@ inline void BasedMovementInfo::set_allocated_bonename(std::string* bonename) {
     _impl_.bonename_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.BasedMovementInfo.boneName)
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FBasedMovementInfo.boneName)
 }
 
 // optional .unrealpb.FVector location = 3;
-inline bool BasedMovementInfo::_internal_has_location() const {
+inline bool FBasedMovementInfo::_internal_has_location() const {
   bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.location_ != nullptr);
   return value;
 }
-inline bool BasedMovementInfo::has_location() const {
+inline bool FBasedMovementInfo::has_location() const {
   return _internal_has_location();
 }
-inline void BasedMovementInfo::clear_location() {
+inline void FBasedMovementInfo::clear_location() {
   if (_impl_.location_ != nullptr) _impl_.location_->Clear();
   _impl_._has_bits_[0] &= ~0x00000004u;
 }
-inline const ::unrealpb::FVector& BasedMovementInfo::_internal_location() const {
+inline const ::unrealpb::FVector& FBasedMovementInfo::_internal_location() const {
   const ::unrealpb::FVector* p = _impl_.location_;
   return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
       ::unrealpb::_FVector_default_instance_);
 }
-inline const ::unrealpb::FVector& BasedMovementInfo::location() const {
-  // @@protoc_insertion_point(field_get:unrealpb.BasedMovementInfo.location)
+inline const ::unrealpb::FVector& FBasedMovementInfo::location() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FBasedMovementInfo.location)
   return _internal_location();
 }
-inline void BasedMovementInfo::unsafe_arena_set_allocated_location(
+inline void FBasedMovementInfo::unsafe_arena_set_allocated_location(
     ::unrealpb::FVector* location) {
   if (GetArenaForAllocation() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.location_);
@@ -9678,9 +10779,9 @@ inline void BasedMovementInfo::unsafe_arena_set_allocated_location(
   } else {
     _impl_._has_bits_[0] &= ~0x00000004u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.BasedMovementInfo.location)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FBasedMovementInfo.location)
 }
-inline ::unrealpb::FVector* BasedMovementInfo::release_location() {
+inline ::unrealpb::FVector* FBasedMovementInfo::release_location() {
   _impl_._has_bits_[0] &= ~0x00000004u;
   ::unrealpb::FVector* temp = _impl_.location_;
   _impl_.location_ = nullptr;
@@ -9695,14 +10796,14 @@ inline ::unrealpb::FVector* BasedMovementInfo::release_location() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::unrealpb::FVector* BasedMovementInfo::unsafe_arena_release_location() {
-  // @@protoc_insertion_point(field_release:unrealpb.BasedMovementInfo.location)
+inline ::unrealpb::FVector* FBasedMovementInfo::unsafe_arena_release_location() {
+  // @@protoc_insertion_point(field_release:unrealpb.FBasedMovementInfo.location)
   _impl_._has_bits_[0] &= ~0x00000004u;
   ::unrealpb::FVector* temp = _impl_.location_;
   _impl_.location_ = nullptr;
   return temp;
 }
-inline ::unrealpb::FVector* BasedMovementInfo::_internal_mutable_location() {
+inline ::unrealpb::FVector* FBasedMovementInfo::_internal_mutable_location() {
   _impl_._has_bits_[0] |= 0x00000004u;
   if (_impl_.location_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
@@ -9710,12 +10811,12 @@ inline ::unrealpb::FVector* BasedMovementInfo::_internal_mutable_location() {
   }
   return _impl_.location_;
 }
-inline ::unrealpb::FVector* BasedMovementInfo::mutable_location() {
+inline ::unrealpb::FVector* FBasedMovementInfo::mutable_location() {
   ::unrealpb::FVector* _msg = _internal_mutable_location();
-  // @@protoc_insertion_point(field_mutable:unrealpb.BasedMovementInfo.location)
+  // @@protoc_insertion_point(field_mutable:unrealpb.FBasedMovementInfo.location)
   return _msg;
 }
-inline void BasedMovementInfo::set_allocated_location(::unrealpb::FVector* location) {
+inline void FBasedMovementInfo::set_allocated_location(::unrealpb::FVector* location) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
     delete _impl_.location_;
@@ -9732,32 +10833,32 @@ inline void BasedMovementInfo::set_allocated_location(::unrealpb::FVector* locat
     _impl_._has_bits_[0] &= ~0x00000004u;
   }
   _impl_.location_ = location;
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.BasedMovementInfo.location)
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FBasedMovementInfo.location)
 }
 
 // optional .unrealpb.FVector rotation = 4;
-inline bool BasedMovementInfo::_internal_has_rotation() const {
+inline bool FBasedMovementInfo::_internal_has_rotation() const {
   bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.rotation_ != nullptr);
   return value;
 }
-inline bool BasedMovementInfo::has_rotation() const {
+inline bool FBasedMovementInfo::has_rotation() const {
   return _internal_has_rotation();
 }
-inline void BasedMovementInfo::clear_rotation() {
+inline void FBasedMovementInfo::clear_rotation() {
   if (_impl_.rotation_ != nullptr) _impl_.rotation_->Clear();
   _impl_._has_bits_[0] &= ~0x00000008u;
 }
-inline const ::unrealpb::FVector& BasedMovementInfo::_internal_rotation() const {
+inline const ::unrealpb::FVector& FBasedMovementInfo::_internal_rotation() const {
   const ::unrealpb::FVector* p = _impl_.rotation_;
   return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
       ::unrealpb::_FVector_default_instance_);
 }
-inline const ::unrealpb::FVector& BasedMovementInfo::rotation() const {
-  // @@protoc_insertion_point(field_get:unrealpb.BasedMovementInfo.rotation)
+inline const ::unrealpb::FVector& FBasedMovementInfo::rotation() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FBasedMovementInfo.rotation)
   return _internal_rotation();
 }
-inline void BasedMovementInfo::unsafe_arena_set_allocated_rotation(
+inline void FBasedMovementInfo::unsafe_arena_set_allocated_rotation(
     ::unrealpb::FVector* rotation) {
   if (GetArenaForAllocation() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.rotation_);
@@ -9768,9 +10869,9 @@ inline void BasedMovementInfo::unsafe_arena_set_allocated_rotation(
   } else {
     _impl_._has_bits_[0] &= ~0x00000008u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.BasedMovementInfo.rotation)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FBasedMovementInfo.rotation)
 }
-inline ::unrealpb::FVector* BasedMovementInfo::release_rotation() {
+inline ::unrealpb::FVector* FBasedMovementInfo::release_rotation() {
   _impl_._has_bits_[0] &= ~0x00000008u;
   ::unrealpb::FVector* temp = _impl_.rotation_;
   _impl_.rotation_ = nullptr;
@@ -9785,14 +10886,14 @@ inline ::unrealpb::FVector* BasedMovementInfo::release_rotation() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::unrealpb::FVector* BasedMovementInfo::unsafe_arena_release_rotation() {
-  // @@protoc_insertion_point(field_release:unrealpb.BasedMovementInfo.rotation)
+inline ::unrealpb::FVector* FBasedMovementInfo::unsafe_arena_release_rotation() {
+  // @@protoc_insertion_point(field_release:unrealpb.FBasedMovementInfo.rotation)
   _impl_._has_bits_[0] &= ~0x00000008u;
   ::unrealpb::FVector* temp = _impl_.rotation_;
   _impl_.rotation_ = nullptr;
   return temp;
 }
-inline ::unrealpb::FVector* BasedMovementInfo::_internal_mutable_rotation() {
+inline ::unrealpb::FVector* FBasedMovementInfo::_internal_mutable_rotation() {
   _impl_._has_bits_[0] |= 0x00000008u;
   if (_impl_.rotation_ == nullptr) {
     auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
@@ -9800,12 +10901,12 @@ inline ::unrealpb::FVector* BasedMovementInfo::_internal_mutable_rotation() {
   }
   return _impl_.rotation_;
 }
-inline ::unrealpb::FVector* BasedMovementInfo::mutable_rotation() {
+inline ::unrealpb::FVector* FBasedMovementInfo::mutable_rotation() {
   ::unrealpb::FVector* _msg = _internal_mutable_rotation();
-  // @@protoc_insertion_point(field_mutable:unrealpb.BasedMovementInfo.rotation)
+  // @@protoc_insertion_point(field_mutable:unrealpb.FBasedMovementInfo.rotation)
   return _msg;
 }
-inline void BasedMovementInfo::set_allocated_rotation(::unrealpb::FVector* rotation) {
+inline void FBasedMovementInfo::set_allocated_rotation(::unrealpb::FVector* rotation) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
     delete _impl_.rotation_;
@@ -9822,98 +10923,1930 @@ inline void BasedMovementInfo::set_allocated_rotation(::unrealpb::FVector* rotat
     _impl_._has_bits_[0] &= ~0x00000008u;
   }
   _impl_.rotation_ = rotation;
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.BasedMovementInfo.rotation)
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FBasedMovementInfo.rotation)
 }
 
 // optional bool bServerHasBaseComponent = 5;
-inline bool BasedMovementInfo::_internal_has_bserverhasbasecomponent() const {
+inline bool FBasedMovementInfo::_internal_has_bserverhasbasecomponent() const {
   bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
-inline bool BasedMovementInfo::has_bserverhasbasecomponent() const {
+inline bool FBasedMovementInfo::has_bserverhasbasecomponent() const {
   return _internal_has_bserverhasbasecomponent();
 }
-inline void BasedMovementInfo::clear_bserverhasbasecomponent() {
+inline void FBasedMovementInfo::clear_bserverhasbasecomponent() {
   _impl_.bserverhasbasecomponent_ = false;
   _impl_._has_bits_[0] &= ~0x00000010u;
 }
-inline bool BasedMovementInfo::_internal_bserverhasbasecomponent() const {
+inline bool FBasedMovementInfo::_internal_bserverhasbasecomponent() const {
   return _impl_.bserverhasbasecomponent_;
 }
-inline bool BasedMovementInfo::bserverhasbasecomponent() const {
-  // @@protoc_insertion_point(field_get:unrealpb.BasedMovementInfo.bServerHasBaseComponent)
+inline bool FBasedMovementInfo::bserverhasbasecomponent() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FBasedMovementInfo.bServerHasBaseComponent)
   return _internal_bserverhasbasecomponent();
 }
-inline void BasedMovementInfo::_internal_set_bserverhasbasecomponent(bool value) {
+inline void FBasedMovementInfo::_internal_set_bserverhasbasecomponent(bool value) {
   _impl_._has_bits_[0] |= 0x00000010u;
   _impl_.bserverhasbasecomponent_ = value;
 }
-inline void BasedMovementInfo::set_bserverhasbasecomponent(bool value) {
+inline void FBasedMovementInfo::set_bserverhasbasecomponent(bool value) {
   _internal_set_bserverhasbasecomponent(value);
-  // @@protoc_insertion_point(field_set:unrealpb.BasedMovementInfo.bServerHasBaseComponent)
+  // @@protoc_insertion_point(field_set:unrealpb.FBasedMovementInfo.bServerHasBaseComponent)
 }
 
 // optional bool bRelativeRotation = 6;
-inline bool BasedMovementInfo::_internal_has_brelativerotation() const {
+inline bool FBasedMovementInfo::_internal_has_brelativerotation() const {
   bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
-inline bool BasedMovementInfo::has_brelativerotation() const {
+inline bool FBasedMovementInfo::has_brelativerotation() const {
   return _internal_has_brelativerotation();
 }
-inline void BasedMovementInfo::clear_brelativerotation() {
+inline void FBasedMovementInfo::clear_brelativerotation() {
   _impl_.brelativerotation_ = false;
   _impl_._has_bits_[0] &= ~0x00000020u;
 }
-inline bool BasedMovementInfo::_internal_brelativerotation() const {
+inline bool FBasedMovementInfo::_internal_brelativerotation() const {
   return _impl_.brelativerotation_;
 }
-inline bool BasedMovementInfo::brelativerotation() const {
-  // @@protoc_insertion_point(field_get:unrealpb.BasedMovementInfo.bRelativeRotation)
+inline bool FBasedMovementInfo::brelativerotation() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FBasedMovementInfo.bRelativeRotation)
   return _internal_brelativerotation();
 }
-inline void BasedMovementInfo::_internal_set_brelativerotation(bool value) {
+inline void FBasedMovementInfo::_internal_set_brelativerotation(bool value) {
   _impl_._has_bits_[0] |= 0x00000020u;
   _impl_.brelativerotation_ = value;
 }
-inline void BasedMovementInfo::set_brelativerotation(bool value) {
+inline void FBasedMovementInfo::set_brelativerotation(bool value) {
   _internal_set_brelativerotation(value);
-  // @@protoc_insertion_point(field_set:unrealpb.BasedMovementInfo.bRelativeRotation)
+  // @@protoc_insertion_point(field_set:unrealpb.FBasedMovementInfo.bRelativeRotation)
 }
 
 // optional bool bServerHasVelocity = 7;
-inline bool BasedMovementInfo::_internal_has_bserverhasvelocity() const {
+inline bool FBasedMovementInfo::_internal_has_bserverhasvelocity() const {
   bool value = (_impl_._has_bits_[0] & 0x00000040u) != 0;
   return value;
 }
-inline bool BasedMovementInfo::has_bserverhasvelocity() const {
+inline bool FBasedMovementInfo::has_bserverhasvelocity() const {
   return _internal_has_bserverhasvelocity();
 }
-inline void BasedMovementInfo::clear_bserverhasvelocity() {
+inline void FBasedMovementInfo::clear_bserverhasvelocity() {
   _impl_.bserverhasvelocity_ = false;
   _impl_._has_bits_[0] &= ~0x00000040u;
 }
-inline bool BasedMovementInfo::_internal_bserverhasvelocity() const {
+inline bool FBasedMovementInfo::_internal_bserverhasvelocity() const {
   return _impl_.bserverhasvelocity_;
 }
-inline bool BasedMovementInfo::bserverhasvelocity() const {
-  // @@protoc_insertion_point(field_get:unrealpb.BasedMovementInfo.bServerHasVelocity)
+inline bool FBasedMovementInfo::bserverhasvelocity() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FBasedMovementInfo.bServerHasVelocity)
   return _internal_bserverhasvelocity();
 }
-inline void BasedMovementInfo::_internal_set_bserverhasvelocity(bool value) {
+inline void FBasedMovementInfo::_internal_set_bserverhasvelocity(bool value) {
   _impl_._has_bits_[0] |= 0x00000040u;
   _impl_.bserverhasvelocity_ = value;
 }
-inline void BasedMovementInfo::set_bserverhasvelocity(bool value) {
+inline void FBasedMovementInfo::set_bserverhasvelocity(bool value) {
   _internal_set_bserverhasvelocity(value);
-  // @@protoc_insertion_point(field_set:unrealpb.BasedMovementInfo.bServerHasVelocity)
+  // @@protoc_insertion_point(field_set:unrealpb.FBasedMovementInfo.bServerHasVelocity)
+}
+
+// -------------------------------------------------------------------
+
+// FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings
+
+// optional uint32 mode = 1;
+inline bool FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::_internal_has_mode() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::has_mode() const {
+  return _internal_has_mode();
+}
+inline void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::clear_mode() {
+  _impl_.mode_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000002u;
+}
+inline uint32_t FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::_internal_mode() const {
+  return _impl_.mode_;
+}
+inline uint32_t FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::mode() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings.mode)
+  return _internal_mode();
+}
+inline void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::_internal_set_mode(uint32_t value) {
+  _impl_._has_bits_[0] |= 0x00000002u;
+  _impl_.mode_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::set_mode(uint32_t value) {
+  _internal_set_mode(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings.mode)
+}
+
+// optional .unrealpb.FVector setVelocity = 2;
+inline bool FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::_internal_has_setvelocity() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.setvelocity_ != nullptr);
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::has_setvelocity() const {
+  return _internal_has_setvelocity();
+}
+inline void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::clear_setvelocity() {
+  if (_impl_.setvelocity_ != nullptr) _impl_.setvelocity_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const ::unrealpb::FVector& FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::_internal_setvelocity() const {
+  const ::unrealpb::FVector* p = _impl_.setvelocity_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
+}
+inline const ::unrealpb::FVector& FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::setvelocity() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings.setVelocity)
+  return _internal_setvelocity();
+}
+inline void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::unsafe_arena_set_allocated_setvelocity(
+    ::unrealpb::FVector* setvelocity) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.setvelocity_);
+  }
+  _impl_.setvelocity_ = setvelocity;
+  if (setvelocity) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings.setVelocity)
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::release_setvelocity() {
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::unrealpb::FVector* temp = _impl_.setvelocity_;
+  _impl_.setvelocity_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::unsafe_arena_release_setvelocity() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings.setVelocity)
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::unrealpb::FVector* temp = _impl_.setvelocity_;
+  _impl_.setvelocity_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::_internal_mutable_setvelocity() {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  if (_impl_.setvelocity_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
+    _impl_.setvelocity_ = p;
+  }
+  return _impl_.setvelocity_;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::mutable_setvelocity() {
+  ::unrealpb::FVector* _msg = _internal_mutable_setvelocity();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings.setVelocity)
+  return _msg;
+}
+inline void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::set_allocated_setvelocity(::unrealpb::FVector* setvelocity) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.setvelocity_;
+  }
+  if (setvelocity) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(setvelocity);
+    if (message_arena != submessage_arena) {
+      setvelocity = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, setvelocity, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  _impl_.setvelocity_ = setvelocity;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings.setVelocity)
+}
+
+// optional float clampVelocity = 3;
+inline bool FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::_internal_has_clampvelocity() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::has_clampvelocity() const {
+  return _internal_has_clampvelocity();
+}
+inline void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::clear_clampvelocity() {
+  _impl_.clampvelocity_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000004u;
+}
+inline float FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::_internal_clampvelocity() const {
+  return _impl_.clampvelocity_;
+}
+inline float FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::clampvelocity() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings.clampVelocity)
+  return _internal_clampvelocity();
+}
+inline void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::_internal_set_clampvelocity(float value) {
+  _impl_._has_bits_[0] |= 0x00000004u;
+  _impl_.clampvelocity_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::set_clampvelocity(float value) {
+  _internal_set_clampvelocity(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings.clampVelocity)
+}
+
+// -------------------------------------------------------------------
+
+// FRepRootMotionMontage_FRootMotionSource
+
+// optional uint32 priority = 1;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_priority() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_priority() const {
+  return _internal_has_priority();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_priority() {
+  _impl_.priority_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000004u;
+}
+inline uint32_t FRepRootMotionMontage_FRootMotionSource::_internal_priority() const {
+  return _impl_.priority_;
+}
+inline uint32_t FRepRootMotionMontage_FRootMotionSource::priority() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.priority)
+  return _internal_priority();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::_internal_set_priority(uint32_t value) {
+  _impl_._has_bits_[0] |= 0x00000004u;
+  _impl_.priority_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_priority(uint32_t value) {
+  _internal_set_priority(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.priority)
+}
+
+// optional uint32 localId = 2;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_localid() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_localid() const {
+  return _internal_has_localid();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_localid() {
+  _impl_.localid_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000008u;
+}
+inline uint32_t FRepRootMotionMontage_FRootMotionSource::_internal_localid() const {
+  return _impl_.localid_;
+}
+inline uint32_t FRepRootMotionMontage_FRootMotionSource::localid() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.localId)
+  return _internal_localid();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::_internal_set_localid(uint32_t value) {
+  _impl_._has_bits_[0] |= 0x00000008u;
+  _impl_.localid_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_localid(uint32_t value) {
+  _internal_set_localid(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.localId)
+}
+
+// optional uint32 accumulatedMode = 3;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_accumulatedmode() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_accumulatedmode() const {
+  return _internal_has_accumulatedmode();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_accumulatedmode() {
+  _impl_.accumulatedmode_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000010u;
+}
+inline uint32_t FRepRootMotionMontage_FRootMotionSource::_internal_accumulatedmode() const {
+  return _impl_.accumulatedmode_;
+}
+inline uint32_t FRepRootMotionMontage_FRootMotionSource::accumulatedmode() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.accumulatedMode)
+  return _internal_accumulatedmode();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::_internal_set_accumulatedmode(uint32_t value) {
+  _impl_._has_bits_[0] |= 0x00000010u;
+  _impl_.accumulatedmode_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_accumulatedmode(uint32_t value) {
+  _internal_set_accumulatedmode(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.accumulatedMode)
+}
+
+// optional string instanceName = 4;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_instancename() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_instancename() const {
+  return _internal_has_instancename();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_instancename() {
+  _impl_.instancename_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& FRepRootMotionMontage_FRootMotionSource::instancename() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.instanceName)
+  return _internal_instancename();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void FRepRootMotionMontage_FRootMotionSource::set_instancename(ArgT0&& arg0, ArgT... args) {
+ _impl_._has_bits_[0] |= 0x00000001u;
+ _impl_.instancename_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.instanceName)
+}
+inline std::string* FRepRootMotionMontage_FRootMotionSource::mutable_instancename() {
+  std::string* _s = _internal_mutable_instancename();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepRootMotionMontage.FRootMotionSource.instanceName)
+  return _s;
+}
+inline const std::string& FRepRootMotionMontage_FRootMotionSource::_internal_instancename() const {
+  return _impl_.instancename_.Get();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::_internal_set_instancename(const std::string& value) {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.instancename_.Set(value, GetArenaForAllocation());
+}
+inline std::string* FRepRootMotionMontage_FRootMotionSource::_internal_mutable_instancename() {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  return _impl_.instancename_.Mutable(GetArenaForAllocation());
+}
+inline std::string* FRepRootMotionMontage_FRootMotionSource::release_instancename() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepRootMotionMontage.FRootMotionSource.instanceName)
+  if (!_internal_has_instancename()) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  auto* p = _impl_.instancename_.Release();
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.instancename_.IsDefault()) {
+    _impl_.instancename_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return p;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_allocated_instancename(std::string* instancename) {
+  if (instancename != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  _impl_.instancename_.SetAllocated(instancename, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.instancename_.IsDefault()) {
+    _impl_.instancename_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepRootMotionMontage.FRootMotionSource.instanceName)
+}
+
+// optional float startTime = 5;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_starttime() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_starttime() const {
+  return _internal_has_starttime();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_starttime() {
+  _impl_.starttime_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000020u;
+}
+inline float FRepRootMotionMontage_FRootMotionSource::_internal_starttime() const {
+  return _impl_.starttime_;
+}
+inline float FRepRootMotionMontage_FRootMotionSource::starttime() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.startTime)
+  return _internal_starttime();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::_internal_set_starttime(float value) {
+  _impl_._has_bits_[0] |= 0x00000020u;
+  _impl_.starttime_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_starttime(float value) {
+  _internal_set_starttime(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.startTime)
+}
+
+// optional float currentTime = 6;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_currenttime() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_currenttime() const {
+  return _internal_has_currenttime();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_currenttime() {
+  _impl_.currenttime_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000040u;
+}
+inline float FRepRootMotionMontage_FRootMotionSource::_internal_currenttime() const {
+  return _impl_.currenttime_;
+}
+inline float FRepRootMotionMontage_FRootMotionSource::currenttime() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.currentTime)
+  return _internal_currenttime();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::_internal_set_currenttime(float value) {
+  _impl_._has_bits_[0] |= 0x00000040u;
+  _impl_.currenttime_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_currenttime(float value) {
+  _internal_set_currenttime(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.currentTime)
+}
+
+// optional float previousTime = 7;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_previoustime() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_previoustime() const {
+  return _internal_has_previoustime();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_previoustime() {
+  _impl_.previoustime_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000080u;
+}
+inline float FRepRootMotionMontage_FRootMotionSource::_internal_previoustime() const {
+  return _impl_.previoustime_;
+}
+inline float FRepRootMotionMontage_FRootMotionSource::previoustime() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.previousTime)
+  return _internal_previoustime();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::_internal_set_previoustime(float value) {
+  _impl_._has_bits_[0] |= 0x00000080u;
+  _impl_.previoustime_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_previoustime(float value) {
+  _internal_set_previoustime(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.previousTime)
+}
+
+// optional float duration = 8;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_duration() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_duration() const {
+  return _internal_has_duration();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_duration() {
+  _impl_.duration_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000100u;
+}
+inline float FRepRootMotionMontage_FRootMotionSource::_internal_duration() const {
+  return _impl_.duration_;
+}
+inline float FRepRootMotionMontage_FRootMotionSource::duration() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.duration)
+  return _internal_duration();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::_internal_set_duration(float value) {
+  _impl_._has_bits_[0] |= 0x00000100u;
+  _impl_.duration_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_duration(float value) {
+  _internal_set_duration(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.duration)
+}
+
+// optional uint32 status = 9;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_status() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000200u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_status() const {
+  return _internal_has_status();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_status() {
+  _impl_.status_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000200u;
+}
+inline uint32_t FRepRootMotionMontage_FRootMotionSource::_internal_status() const {
+  return _impl_.status_;
+}
+inline uint32_t FRepRootMotionMontage_FRootMotionSource::status() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.status)
+  return _internal_status();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::_internal_set_status(uint32_t value) {
+  _impl_._has_bits_[0] |= 0x00000200u;
+  _impl_.status_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_status(uint32_t value) {
+  _internal_set_status(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.status)
+}
+
+// optional uint32 settings = 10;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_settings() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000400u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_settings() const {
+  return _internal_has_settings();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_settings() {
+  _impl_.settings_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000400u;
+}
+inline uint32_t FRepRootMotionMontage_FRootMotionSource::_internal_settings() const {
+  return _impl_.settings_;
+}
+inline uint32_t FRepRootMotionMontage_FRootMotionSource::settings() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.settings)
+  return _internal_settings();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::_internal_set_settings(uint32_t value) {
+  _impl_._has_bits_[0] |= 0x00000400u;
+  _impl_.settings_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_settings(uint32_t value) {
+  _internal_set_settings(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.settings)
+}
+
+// optional bool bInLocalSpace = 11;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_binlocalspace() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000800u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_binlocalspace() const {
+  return _internal_has_binlocalspace();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_binlocalspace() {
+  _impl_.binlocalspace_ = false;
+  _impl_._has_bits_[0] &= ~0x00000800u;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_binlocalspace() const {
+  return _impl_.binlocalspace_;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::binlocalspace() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.bInLocalSpace)
+  return _internal_binlocalspace();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::_internal_set_binlocalspace(bool value) {
+  _impl_._has_bits_[0] |= 0x00000800u;
+  _impl_.binlocalspace_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_binlocalspace(bool value) {
+  _internal_set_binlocalspace(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.bInLocalSpace)
+}
+
+// optional bool bNeedsSimulatedCatchup = 12;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_bneedssimulatedcatchup() const {
+  bool value = (_impl_._has_bits_[0] & 0x00001000u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_bneedssimulatedcatchup() const {
+  return _internal_has_bneedssimulatedcatchup();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_bneedssimulatedcatchup() {
+  _impl_.bneedssimulatedcatchup_ = false;
+  _impl_._has_bits_[0] &= ~0x00001000u;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_bneedssimulatedcatchup() const {
+  return _impl_.bneedssimulatedcatchup_;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::bneedssimulatedcatchup() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.bNeedsSimulatedCatchup)
+  return _internal_bneedssimulatedcatchup();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::_internal_set_bneedssimulatedcatchup(bool value) {
+  _impl_._has_bits_[0] |= 0x00001000u;
+  _impl_.bneedssimulatedcatchup_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_bneedssimulatedcatchup(bool value) {
+  _internal_set_bneedssimulatedcatchup(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.bNeedsSimulatedCatchup)
+}
+
+// optional bool bSimulatedNeedsSmoothing = 13;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_bsimulatedneedssmoothing() const {
+  bool value = (_impl_._has_bits_[0] & 0x00002000u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_bsimulatedneedssmoothing() const {
+  return _internal_has_bsimulatedneedssmoothing();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_bsimulatedneedssmoothing() {
+  _impl_.bsimulatedneedssmoothing_ = false;
+  _impl_._has_bits_[0] &= ~0x00002000u;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_bsimulatedneedssmoothing() const {
+  return _impl_.bsimulatedneedssmoothing_;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::bsimulatedneedssmoothing() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.bSimulatedNeedsSmoothing)
+  return _internal_bsimulatedneedssmoothing();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::_internal_set_bsimulatedneedssmoothing(bool value) {
+  _impl_._has_bits_[0] |= 0x00002000u;
+  _impl_.bsimulatedneedssmoothing_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_bsimulatedneedssmoothing(bool value) {
+  _internal_set_bsimulatedneedssmoothing(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.bSimulatedNeedsSmoothing)
+}
+
+// optional bool bHasRootMotion = 14;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_bhasrootmotion() const {
+  bool value = (_impl_._has_bits_[0] & 0x00004000u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_bhasrootmotion() const {
+  return _internal_has_bhasrootmotion();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_bhasrootmotion() {
+  _impl_.bhasrootmotion_ = false;
+  _impl_._has_bits_[0] &= ~0x00004000u;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_bhasrootmotion() const {
+  return _impl_.bhasrootmotion_;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::bhasrootmotion() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.bHasRootMotion)
+  return _internal_bhasrootmotion();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::_internal_set_bhasrootmotion(bool value) {
+  _impl_._has_bits_[0] |= 0x00004000u;
+  _impl_.bhasrootmotion_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_bhasrootmotion(bool value) {
+  _internal_set_bhasrootmotion(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.bHasRootMotion)
+}
+
+// optional float blendWeight = 15;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_blendweight() const {
+  bool value = (_impl_._has_bits_[0] & 0x00008000u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_blendweight() const {
+  return _internal_has_blendweight();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_blendweight() {
+  _impl_.blendweight_ = 0;
+  _impl_._has_bits_[0] &= ~0x00008000u;
+}
+inline float FRepRootMotionMontage_FRootMotionSource::_internal_blendweight() const {
+  return _impl_.blendweight_;
+}
+inline float FRepRootMotionMontage_FRootMotionSource::blendweight() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.blendWeight)
+  return _internal_blendweight();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::_internal_set_blendweight(float value) {
+  _impl_._has_bits_[0] |= 0x00008000u;
+  _impl_.blendweight_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_blendweight(float value) {
+  _internal_set_blendweight(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSource.blendWeight)
+}
+
+// optional .unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings finishVelocityParams = 16;
+inline bool FRepRootMotionMontage_FRootMotionSource::_internal_has_finishvelocityparams() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.finishvelocityparams_ != nullptr);
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSource::has_finishvelocityparams() const {
+  return _internal_has_finishvelocityparams();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::clear_finishvelocityparams() {
+  if (_impl_.finishvelocityparams_ != nullptr) _impl_.finishvelocityparams_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000002u;
+}
+inline const ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& FRepRootMotionMontage_FRootMotionSource::_internal_finishvelocityparams() const {
+  const ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* p = _impl_.finishvelocityparams_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings&>(
+      ::unrealpb::_FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings_default_instance_);
+}
+inline const ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& FRepRootMotionMontage_FRootMotionSource::finishvelocityparams() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSource.finishVelocityParams)
+  return _internal_finishvelocityparams();
+}
+inline void FRepRootMotionMontage_FRootMotionSource::unsafe_arena_set_allocated_finishvelocityparams(
+    ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* finishvelocityparams) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.finishvelocityparams_);
+  }
+  _impl_.finishvelocityparams_ = finishvelocityparams;
+  if (finishvelocityparams) {
+    _impl_._has_bits_[0] |= 0x00000002u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepRootMotionMontage.FRootMotionSource.finishVelocityParams)
+}
+inline ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* FRepRootMotionMontage_FRootMotionSource::release_finishvelocityparams() {
+  _impl_._has_bits_[0] &= ~0x00000002u;
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* temp = _impl_.finishvelocityparams_;
+  _impl_.finishvelocityparams_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* FRepRootMotionMontage_FRootMotionSource::unsafe_arena_release_finishvelocityparams() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepRootMotionMontage.FRootMotionSource.finishVelocityParams)
+  _impl_._has_bits_[0] &= ~0x00000002u;
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* temp = _impl_.finishvelocityparams_;
+  _impl_.finishvelocityparams_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* FRepRootMotionMontage_FRootMotionSource::_internal_mutable_finishvelocityparams() {
+  _impl_._has_bits_[0] |= 0x00000002u;
+  if (_impl_.finishvelocityparams_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings>(GetArenaForAllocation());
+    _impl_.finishvelocityparams_ = p;
+  }
+  return _impl_.finishvelocityparams_;
+}
+inline ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* FRepRootMotionMontage_FRootMotionSource::mutable_finishvelocityparams() {
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* _msg = _internal_mutable_finishvelocityparams();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepRootMotionMontage.FRootMotionSource.finishVelocityParams)
+  return _msg;
+}
+inline void FRepRootMotionMontage_FRootMotionSource::set_allocated_finishvelocityparams(::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* finishvelocityparams) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.finishvelocityparams_;
+  }
+  if (finishvelocityparams) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(finishvelocityparams);
+    if (message_arena != submessage_arena) {
+      finishvelocityparams = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, finishvelocityparams, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000002u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002u;
+  }
+  _impl_.finishvelocityparams_ = finishvelocityparams;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepRootMotionMontage.FRootMotionSource.finishVelocityParams)
+}
+
+// -------------------------------------------------------------------
+
+// FRepRootMotionMontage_FRootMotionSourceGroup
+
+// repeated .unrealpb.FRepRootMotionMontage.FRootMotionSource rootMotionSources = 1;
+inline int FRepRootMotionMontage_FRootMotionSourceGroup::_internal_rootmotionsources_size() const {
+  return _impl_.rootmotionsources_.size();
+}
+inline int FRepRootMotionMontage_FRootMotionSourceGroup::rootmotionsources_size() const {
+  return _internal_rootmotionsources_size();
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::clear_rootmotionsources() {
+  _impl_.rootmotionsources_.Clear();
+}
+inline ::unrealpb::FRepRootMotionMontage_FRootMotionSource* FRepRootMotionMontage_FRootMotionSourceGroup::mutable_rootmotionsources(int index) {
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.rootMotionSources)
+  return _impl_.rootmotionsources_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::FRepRootMotionMontage_FRootMotionSource >*
+FRepRootMotionMontage_FRootMotionSourceGroup::mutable_rootmotionsources() {
+  // @@protoc_insertion_point(field_mutable_list:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.rootMotionSources)
+  return &_impl_.rootmotionsources_;
+}
+inline const ::unrealpb::FRepRootMotionMontage_FRootMotionSource& FRepRootMotionMontage_FRootMotionSourceGroup::_internal_rootmotionsources(int index) const {
+  return _impl_.rootmotionsources_.Get(index);
+}
+inline const ::unrealpb::FRepRootMotionMontage_FRootMotionSource& FRepRootMotionMontage_FRootMotionSourceGroup::rootmotionsources(int index) const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.rootMotionSources)
+  return _internal_rootmotionsources(index);
+}
+inline ::unrealpb::FRepRootMotionMontage_FRootMotionSource* FRepRootMotionMontage_FRootMotionSourceGroup::_internal_add_rootmotionsources() {
+  return _impl_.rootmotionsources_.Add();
+}
+inline ::unrealpb::FRepRootMotionMontage_FRootMotionSource* FRepRootMotionMontage_FRootMotionSourceGroup::add_rootmotionsources() {
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSource* _add = _internal_add_rootmotionsources();
+  // @@protoc_insertion_point(field_add:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.rootMotionSources)
+  return _add;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::FRepRootMotionMontage_FRootMotionSource >&
+FRepRootMotionMontage_FRootMotionSourceGroup::rootmotionsources() const {
+  // @@protoc_insertion_point(field_list:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.rootMotionSources)
+  return _impl_.rootmotionsources_;
+}
+
+// repeated .unrealpb.FRepRootMotionMontage.FRootMotionSource pendingAddRootMotionSources = 2;
+inline int FRepRootMotionMontage_FRootMotionSourceGroup::_internal_pendingaddrootmotionsources_size() const {
+  return _impl_.pendingaddrootmotionsources_.size();
+}
+inline int FRepRootMotionMontage_FRootMotionSourceGroup::pendingaddrootmotionsources_size() const {
+  return _internal_pendingaddrootmotionsources_size();
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::clear_pendingaddrootmotionsources() {
+  _impl_.pendingaddrootmotionsources_.Clear();
+}
+inline ::unrealpb::FRepRootMotionMontage_FRootMotionSource* FRepRootMotionMontage_FRootMotionSourceGroup::mutable_pendingaddrootmotionsources(int index) {
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.pendingAddRootMotionSources)
+  return _impl_.pendingaddrootmotionsources_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::FRepRootMotionMontage_FRootMotionSource >*
+FRepRootMotionMontage_FRootMotionSourceGroup::mutable_pendingaddrootmotionsources() {
+  // @@protoc_insertion_point(field_mutable_list:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.pendingAddRootMotionSources)
+  return &_impl_.pendingaddrootmotionsources_;
+}
+inline const ::unrealpb::FRepRootMotionMontage_FRootMotionSource& FRepRootMotionMontage_FRootMotionSourceGroup::_internal_pendingaddrootmotionsources(int index) const {
+  return _impl_.pendingaddrootmotionsources_.Get(index);
+}
+inline const ::unrealpb::FRepRootMotionMontage_FRootMotionSource& FRepRootMotionMontage_FRootMotionSourceGroup::pendingaddrootmotionsources(int index) const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.pendingAddRootMotionSources)
+  return _internal_pendingaddrootmotionsources(index);
+}
+inline ::unrealpb::FRepRootMotionMontage_FRootMotionSource* FRepRootMotionMontage_FRootMotionSourceGroup::_internal_add_pendingaddrootmotionsources() {
+  return _impl_.pendingaddrootmotionsources_.Add();
+}
+inline ::unrealpb::FRepRootMotionMontage_FRootMotionSource* FRepRootMotionMontage_FRootMotionSourceGroup::add_pendingaddrootmotionsources() {
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSource* _add = _internal_add_pendingaddrootmotionsources();
+  // @@protoc_insertion_point(field_add:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.pendingAddRootMotionSources)
+  return _add;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::FRepRootMotionMontage_FRootMotionSource >&
+FRepRootMotionMontage_FRootMotionSourceGroup::pendingaddrootmotionsources() const {
+  // @@protoc_insertion_point(field_list:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.pendingAddRootMotionSources)
+  return _impl_.pendingaddrootmotionsources_;
+}
+
+// optional bool bHasAdditiveSources = 3;
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::_internal_has_bhasadditivesources() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::has_bhasadditivesources() const {
+  return _internal_has_bhasadditivesources();
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::clear_bhasadditivesources() {
+  _impl_.bhasadditivesources_ = false;
+  _impl_._has_bits_[0] &= ~0x00000002u;
+}
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::_internal_bhasadditivesources() const {
+  return _impl_.bhasadditivesources_;
+}
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::bhasadditivesources() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.bHasAdditiveSources)
+  return _internal_bhasadditivesources();
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::_internal_set_bhasadditivesources(bool value) {
+  _impl_._has_bits_[0] |= 0x00000002u;
+  _impl_.bhasadditivesources_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::set_bhasadditivesources(bool value) {
+  _internal_set_bhasadditivesources(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.bHasAdditiveSources)
+}
+
+// optional bool bHasOverrideSources = 4;
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::_internal_has_bhasoverridesources() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::has_bhasoverridesources() const {
+  return _internal_has_bhasoverridesources();
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::clear_bhasoverridesources() {
+  _impl_.bhasoverridesources_ = false;
+  _impl_._has_bits_[0] &= ~0x00000004u;
+}
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::_internal_bhasoverridesources() const {
+  return _impl_.bhasoverridesources_;
+}
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::bhasoverridesources() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.bHasOverrideSources)
+  return _internal_bhasoverridesources();
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::_internal_set_bhasoverridesources(bool value) {
+  _impl_._has_bits_[0] |= 0x00000004u;
+  _impl_.bhasoverridesources_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::set_bhasoverridesources(bool value) {
+  _internal_set_bhasoverridesources(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.bHasOverrideSources)
+}
+
+// optional bool bHasOverrideSourcesWithIgnoreZAccumulate = 5;
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::_internal_has_bhasoverridesourceswithignorezaccumulate() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::has_bhasoverridesourceswithignorezaccumulate() const {
+  return _internal_has_bhasoverridesourceswithignorezaccumulate();
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::clear_bhasoverridesourceswithignorezaccumulate() {
+  _impl_.bhasoverridesourceswithignorezaccumulate_ = false;
+  _impl_._has_bits_[0] &= ~0x00000008u;
+}
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::_internal_bhasoverridesourceswithignorezaccumulate() const {
+  return _impl_.bhasoverridesourceswithignorezaccumulate_;
+}
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::bhasoverridesourceswithignorezaccumulate() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.bHasOverrideSourcesWithIgnoreZAccumulate)
+  return _internal_bhasoverridesourceswithignorezaccumulate();
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::_internal_set_bhasoverridesourceswithignorezaccumulate(bool value) {
+  _impl_._has_bits_[0] |= 0x00000008u;
+  _impl_.bhasoverridesourceswithignorezaccumulate_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::set_bhasoverridesourceswithignorezaccumulate(bool value) {
+  _internal_set_bhasoverridesourceswithignorezaccumulate(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.bHasOverrideSourcesWithIgnoreZAccumulate)
+}
+
+// optional bool bIsAdditiveVelocityApplied = 6;
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::_internal_has_bisadditivevelocityapplied() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::has_bisadditivevelocityapplied() const {
+  return _internal_has_bisadditivevelocityapplied();
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::clear_bisadditivevelocityapplied() {
+  _impl_.bisadditivevelocityapplied_ = false;
+  _impl_._has_bits_[0] &= ~0x00000010u;
+}
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::_internal_bisadditivevelocityapplied() const {
+  return _impl_.bisadditivevelocityapplied_;
+}
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::bisadditivevelocityapplied() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.bIsAdditiveVelocityApplied)
+  return _internal_bisadditivevelocityapplied();
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::_internal_set_bisadditivevelocityapplied(bool value) {
+  _impl_._has_bits_[0] |= 0x00000010u;
+  _impl_.bisadditivevelocityapplied_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::set_bisadditivevelocityapplied(bool value) {
+  _internal_set_bisadditivevelocityapplied(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.bIsAdditiveVelocityApplied)
+}
+
+// optional uint32 lastAccumulatedSettings = 7;
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::_internal_has_lastaccumulatedsettings() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::has_lastaccumulatedsettings() const {
+  return _internal_has_lastaccumulatedsettings();
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::clear_lastaccumulatedsettings() {
+  _impl_.lastaccumulatedsettings_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000020u;
+}
+inline uint32_t FRepRootMotionMontage_FRootMotionSourceGroup::_internal_lastaccumulatedsettings() const {
+  return _impl_.lastaccumulatedsettings_;
+}
+inline uint32_t FRepRootMotionMontage_FRootMotionSourceGroup::lastaccumulatedsettings() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.lastAccumulatedSettings)
+  return _internal_lastaccumulatedsettings();
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::_internal_set_lastaccumulatedsettings(uint32_t value) {
+  _impl_._has_bits_[0] |= 0x00000020u;
+  _impl_.lastaccumulatedsettings_ = value;
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::set_lastaccumulatedsettings(uint32_t value) {
+  _internal_set_lastaccumulatedsettings(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.lastAccumulatedSettings)
+}
+
+// optional .unrealpb.FVector lastPreAdditiveVelocity = 8;
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::_internal_has_lastpreadditivevelocity() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.lastpreadditivevelocity_ != nullptr);
+  return value;
+}
+inline bool FRepRootMotionMontage_FRootMotionSourceGroup::has_lastpreadditivevelocity() const {
+  return _internal_has_lastpreadditivevelocity();
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::clear_lastpreadditivevelocity() {
+  if (_impl_.lastpreadditivevelocity_ != nullptr) _impl_.lastpreadditivevelocity_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const ::unrealpb::FVector& FRepRootMotionMontage_FRootMotionSourceGroup::_internal_lastpreadditivevelocity() const {
+  const ::unrealpb::FVector* p = _impl_.lastpreadditivevelocity_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
+}
+inline const ::unrealpb::FVector& FRepRootMotionMontage_FRootMotionSourceGroup::lastpreadditivevelocity() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.lastPreAdditiveVelocity)
+  return _internal_lastpreadditivevelocity();
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::unsafe_arena_set_allocated_lastpreadditivevelocity(
+    ::unrealpb::FVector* lastpreadditivevelocity) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.lastpreadditivevelocity_);
+  }
+  _impl_.lastpreadditivevelocity_ = lastpreadditivevelocity;
+  if (lastpreadditivevelocity) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.lastPreAdditiveVelocity)
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage_FRootMotionSourceGroup::release_lastpreadditivevelocity() {
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::unrealpb::FVector* temp = _impl_.lastpreadditivevelocity_;
+  _impl_.lastpreadditivevelocity_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage_FRootMotionSourceGroup::unsafe_arena_release_lastpreadditivevelocity() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.lastPreAdditiveVelocity)
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::unrealpb::FVector* temp = _impl_.lastpreadditivevelocity_;
+  _impl_.lastpreadditivevelocity_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage_FRootMotionSourceGroup::_internal_mutable_lastpreadditivevelocity() {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  if (_impl_.lastpreadditivevelocity_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
+    _impl_.lastpreadditivevelocity_ = p;
+  }
+  return _impl_.lastpreadditivevelocity_;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage_FRootMotionSourceGroup::mutable_lastpreadditivevelocity() {
+  ::unrealpb::FVector* _msg = _internal_mutable_lastpreadditivevelocity();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.lastPreAdditiveVelocity)
+  return _msg;
+}
+inline void FRepRootMotionMontage_FRootMotionSourceGroup::set_allocated_lastpreadditivevelocity(::unrealpb::FVector* lastpreadditivevelocity) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.lastpreadditivevelocity_;
+  }
+  if (lastpreadditivevelocity) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(lastpreadditivevelocity);
+    if (message_arena != submessage_arena) {
+      lastpreadditivevelocity = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, lastpreadditivevelocity, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  _impl_.lastpreadditivevelocity_ = lastpreadditivevelocity;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup.lastPreAdditiveVelocity)
+}
+
+// -------------------------------------------------------------------
+
+// FRepRootMotionMontage
+
+// optional bool bIsActive = 1;
+inline bool FRepRootMotionMontage::_internal_has_bisactive() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000200u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage::has_bisactive() const {
+  return _internal_has_bisactive();
+}
+inline void FRepRootMotionMontage::clear_bisactive() {
+  _impl_.bisactive_ = false;
+  _impl_._has_bits_[0] &= ~0x00000200u;
+}
+inline bool FRepRootMotionMontage::_internal_bisactive() const {
+  return _impl_.bisactive_;
+}
+inline bool FRepRootMotionMontage::bisactive() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.bIsActive)
+  return _internal_bisactive();
+}
+inline void FRepRootMotionMontage::_internal_set_bisactive(bool value) {
+  _impl_._has_bits_[0] |= 0x00000200u;
+  _impl_.bisactive_ = value;
+}
+inline void FRepRootMotionMontage::set_bisactive(bool value) {
+  _internal_set_bisactive(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.bIsActive)
+}
+
+// optional .unrealpb.UnrealObjectRef animMontage = 2;
+inline bool FRepRootMotionMontage::_internal_has_animmontage() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.animmontage_ != nullptr);
+  return value;
+}
+inline bool FRepRootMotionMontage::has_animmontage() const {
+  return _internal_has_animmontage();
+}
+inline void FRepRootMotionMontage::clear_animmontage() {
+  if (_impl_.animmontage_ != nullptr) _impl_.animmontage_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000002u;
+}
+inline const ::unrealpb::UnrealObjectRef& FRepRootMotionMontage::_internal_animmontage() const {
+  const ::unrealpb::UnrealObjectRef* p = _impl_.animmontage_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::UnrealObjectRef&>(
+      ::unrealpb::_UnrealObjectRef_default_instance_);
+}
+inline const ::unrealpb::UnrealObjectRef& FRepRootMotionMontage::animmontage() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.animMontage)
+  return _internal_animmontage();
+}
+inline void FRepRootMotionMontage::unsafe_arena_set_allocated_animmontage(
+    ::unrealpb::UnrealObjectRef* animmontage) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.animmontage_);
+  }
+  _impl_.animmontage_ = animmontage;
+  if (animmontage) {
+    _impl_._has_bits_[0] |= 0x00000002u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepRootMotionMontage.animMontage)
+}
+inline ::unrealpb::UnrealObjectRef* FRepRootMotionMontage::release_animmontage() {
+  _impl_._has_bits_[0] &= ~0x00000002u;
+  ::unrealpb::UnrealObjectRef* temp = _impl_.animmontage_;
+  _impl_.animmontage_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* FRepRootMotionMontage::unsafe_arena_release_animmontage() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepRootMotionMontage.animMontage)
+  _impl_._has_bits_[0] &= ~0x00000002u;
+  ::unrealpb::UnrealObjectRef* temp = _impl_.animmontage_;
+  _impl_.animmontage_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* FRepRootMotionMontage::_internal_mutable_animmontage() {
+  _impl_._has_bits_[0] |= 0x00000002u;
+  if (_impl_.animmontage_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::UnrealObjectRef>(GetArenaForAllocation());
+    _impl_.animmontage_ = p;
+  }
+  return _impl_.animmontage_;
+}
+inline ::unrealpb::UnrealObjectRef* FRepRootMotionMontage::mutable_animmontage() {
+  ::unrealpb::UnrealObjectRef* _msg = _internal_mutable_animmontage();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepRootMotionMontage.animMontage)
+  return _msg;
+}
+inline void FRepRootMotionMontage::set_allocated_animmontage(::unrealpb::UnrealObjectRef* animmontage) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.animmontage_;
+  }
+  if (animmontage) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(animmontage);
+    if (message_arena != submessage_arena) {
+      animmontage = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, animmontage, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000002u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002u;
+  }
+  _impl_.animmontage_ = animmontage;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepRootMotionMontage.animMontage)
+}
+
+// optional float position = 3;
+inline bool FRepRootMotionMontage::_internal_has_position() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage::has_position() const {
+  return _internal_has_position();
+}
+inline void FRepRootMotionMontage::clear_position() {
+  _impl_.position_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000100u;
+}
+inline float FRepRootMotionMontage::_internal_position() const {
+  return _impl_.position_;
+}
+inline float FRepRootMotionMontage::position() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.position)
+  return _internal_position();
+}
+inline void FRepRootMotionMontage::_internal_set_position(float value) {
+  _impl_._has_bits_[0] |= 0x00000100u;
+  _impl_.position_ = value;
+}
+inline void FRepRootMotionMontage::set_position(float value) {
+  _internal_set_position(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.position)
+}
+
+// optional .unrealpb.FVector location = 4;
+inline bool FRepRootMotionMontage::_internal_has_location() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.location_ != nullptr);
+  return value;
+}
+inline bool FRepRootMotionMontage::has_location() const {
+  return _internal_has_location();
+}
+inline void FRepRootMotionMontage::clear_location() {
+  if (_impl_.location_ != nullptr) _impl_.location_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000004u;
+}
+inline const ::unrealpb::FVector& FRepRootMotionMontage::_internal_location() const {
+  const ::unrealpb::FVector* p = _impl_.location_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
+}
+inline const ::unrealpb::FVector& FRepRootMotionMontage::location() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.location)
+  return _internal_location();
+}
+inline void FRepRootMotionMontage::unsafe_arena_set_allocated_location(
+    ::unrealpb::FVector* location) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.location_);
+  }
+  _impl_.location_ = location;
+  if (location) {
+    _impl_._has_bits_[0] |= 0x00000004u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000004u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepRootMotionMontage.location)
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::release_location() {
+  _impl_._has_bits_[0] &= ~0x00000004u;
+  ::unrealpb::FVector* temp = _impl_.location_;
+  _impl_.location_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::unsafe_arena_release_location() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepRootMotionMontage.location)
+  _impl_._has_bits_[0] &= ~0x00000004u;
+  ::unrealpb::FVector* temp = _impl_.location_;
+  _impl_.location_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::_internal_mutable_location() {
+  _impl_._has_bits_[0] |= 0x00000004u;
+  if (_impl_.location_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
+    _impl_.location_ = p;
+  }
+  return _impl_.location_;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::mutable_location() {
+  ::unrealpb::FVector* _msg = _internal_mutable_location();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepRootMotionMontage.location)
+  return _msg;
+}
+inline void FRepRootMotionMontage::set_allocated_location(::unrealpb::FVector* location) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.location_;
+  }
+  if (location) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(location);
+    if (message_arena != submessage_arena) {
+      location = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, location, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000004u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000004u;
+  }
+  _impl_.location_ = location;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepRootMotionMontage.location)
+}
+
+// optional .unrealpb.FVector rotation = 5;
+inline bool FRepRootMotionMontage::_internal_has_rotation() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.rotation_ != nullptr);
+  return value;
+}
+inline bool FRepRootMotionMontage::has_rotation() const {
+  return _internal_has_rotation();
+}
+inline void FRepRootMotionMontage::clear_rotation() {
+  if (_impl_.rotation_ != nullptr) _impl_.rotation_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000008u;
+}
+inline const ::unrealpb::FVector& FRepRootMotionMontage::_internal_rotation() const {
+  const ::unrealpb::FVector* p = _impl_.rotation_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
+}
+inline const ::unrealpb::FVector& FRepRootMotionMontage::rotation() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.rotation)
+  return _internal_rotation();
+}
+inline void FRepRootMotionMontage::unsafe_arena_set_allocated_rotation(
+    ::unrealpb::FVector* rotation) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.rotation_);
+  }
+  _impl_.rotation_ = rotation;
+  if (rotation) {
+    _impl_._has_bits_[0] |= 0x00000008u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000008u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepRootMotionMontage.rotation)
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::release_rotation() {
+  _impl_._has_bits_[0] &= ~0x00000008u;
+  ::unrealpb::FVector* temp = _impl_.rotation_;
+  _impl_.rotation_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::unsafe_arena_release_rotation() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepRootMotionMontage.rotation)
+  _impl_._has_bits_[0] &= ~0x00000008u;
+  ::unrealpb::FVector* temp = _impl_.rotation_;
+  _impl_.rotation_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::_internal_mutable_rotation() {
+  _impl_._has_bits_[0] |= 0x00000008u;
+  if (_impl_.rotation_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
+    _impl_.rotation_ = p;
+  }
+  return _impl_.rotation_;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::mutable_rotation() {
+  ::unrealpb::FVector* _msg = _internal_mutable_rotation();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepRootMotionMontage.rotation)
+  return _msg;
+}
+inline void FRepRootMotionMontage::set_allocated_rotation(::unrealpb::FVector* rotation) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.rotation_;
+  }
+  if (rotation) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(rotation);
+    if (message_arena != submessage_arena) {
+      rotation = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, rotation, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000008u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000008u;
+  }
+  _impl_.rotation_ = rotation;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepRootMotionMontage.rotation)
+}
+
+// optional .unrealpb.ActorComponentRef movementBase = 6;
+inline bool FRepRootMotionMontage::_internal_has_movementbase() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.movementbase_ != nullptr);
+  return value;
+}
+inline bool FRepRootMotionMontage::has_movementbase() const {
+  return _internal_has_movementbase();
+}
+inline void FRepRootMotionMontage::clear_movementbase() {
+  if (_impl_.movementbase_ != nullptr) _impl_.movementbase_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000010u;
+}
+inline const ::unrealpb::ActorComponentRef& FRepRootMotionMontage::_internal_movementbase() const {
+  const ::unrealpb::ActorComponentRef* p = _impl_.movementbase_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::ActorComponentRef&>(
+      ::unrealpb::_ActorComponentRef_default_instance_);
+}
+inline const ::unrealpb::ActorComponentRef& FRepRootMotionMontage::movementbase() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.movementBase)
+  return _internal_movementbase();
+}
+inline void FRepRootMotionMontage::unsafe_arena_set_allocated_movementbase(
+    ::unrealpb::ActorComponentRef* movementbase) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.movementbase_);
+  }
+  _impl_.movementbase_ = movementbase;
+  if (movementbase) {
+    _impl_._has_bits_[0] |= 0x00000010u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000010u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepRootMotionMontage.movementBase)
+}
+inline ::unrealpb::ActorComponentRef* FRepRootMotionMontage::release_movementbase() {
+  _impl_._has_bits_[0] &= ~0x00000010u;
+  ::unrealpb::ActorComponentRef* temp = _impl_.movementbase_;
+  _impl_.movementbase_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::ActorComponentRef* FRepRootMotionMontage::unsafe_arena_release_movementbase() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepRootMotionMontage.movementBase)
+  _impl_._has_bits_[0] &= ~0x00000010u;
+  ::unrealpb::ActorComponentRef* temp = _impl_.movementbase_;
+  _impl_.movementbase_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::ActorComponentRef* FRepRootMotionMontage::_internal_mutable_movementbase() {
+  _impl_._has_bits_[0] |= 0x00000010u;
+  if (_impl_.movementbase_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::ActorComponentRef>(GetArenaForAllocation());
+    _impl_.movementbase_ = p;
+  }
+  return _impl_.movementbase_;
+}
+inline ::unrealpb::ActorComponentRef* FRepRootMotionMontage::mutable_movementbase() {
+  ::unrealpb::ActorComponentRef* _msg = _internal_mutable_movementbase();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepRootMotionMontage.movementBase)
+  return _msg;
+}
+inline void FRepRootMotionMontage::set_allocated_movementbase(::unrealpb::ActorComponentRef* movementbase) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.movementbase_;
+  }
+  if (movementbase) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(movementbase);
+    if (message_arena != submessage_arena) {
+      movementbase = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, movementbase, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000010u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000010u;
+  }
+  _impl_.movementbase_ = movementbase;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepRootMotionMontage.movementBase)
+}
+
+// optional string movementBaseBoneName = 7;
+inline bool FRepRootMotionMontage::_internal_has_movementbasebonename() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage::has_movementbasebonename() const {
+  return _internal_has_movementbasebonename();
+}
+inline void FRepRootMotionMontage::clear_movementbasebonename() {
+  _impl_.movementbasebonename_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& FRepRootMotionMontage::movementbasebonename() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.movementBaseBoneName)
+  return _internal_movementbasebonename();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void FRepRootMotionMontage::set_movementbasebonename(ArgT0&& arg0, ArgT... args) {
+ _impl_._has_bits_[0] |= 0x00000001u;
+ _impl_.movementbasebonename_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.movementBaseBoneName)
+}
+inline std::string* FRepRootMotionMontage::mutable_movementbasebonename() {
+  std::string* _s = _internal_mutable_movementbasebonename();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepRootMotionMontage.movementBaseBoneName)
+  return _s;
+}
+inline const std::string& FRepRootMotionMontage::_internal_movementbasebonename() const {
+  return _impl_.movementbasebonename_.Get();
+}
+inline void FRepRootMotionMontage::_internal_set_movementbasebonename(const std::string& value) {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.movementbasebonename_.Set(value, GetArenaForAllocation());
+}
+inline std::string* FRepRootMotionMontage::_internal_mutable_movementbasebonename() {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  return _impl_.movementbasebonename_.Mutable(GetArenaForAllocation());
+}
+inline std::string* FRepRootMotionMontage::release_movementbasebonename() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepRootMotionMontage.movementBaseBoneName)
+  if (!_internal_has_movementbasebonename()) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  auto* p = _impl_.movementbasebonename_.Release();
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.movementbasebonename_.IsDefault()) {
+    _impl_.movementbasebonename_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return p;
+}
+inline void FRepRootMotionMontage::set_allocated_movementbasebonename(std::string* movementbasebonename) {
+  if (movementbasebonename != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  _impl_.movementbasebonename_.SetAllocated(movementbasebonename, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.movementbasebonename_.IsDefault()) {
+    _impl_.movementbasebonename_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepRootMotionMontage.movementBaseBoneName)
+}
+
+// optional bool bRelativePosition = 8;
+inline bool FRepRootMotionMontage::_internal_has_brelativeposition() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000400u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage::has_brelativeposition() const {
+  return _internal_has_brelativeposition();
+}
+inline void FRepRootMotionMontage::clear_brelativeposition() {
+  _impl_.brelativeposition_ = false;
+  _impl_._has_bits_[0] &= ~0x00000400u;
+}
+inline bool FRepRootMotionMontage::_internal_brelativeposition() const {
+  return _impl_.brelativeposition_;
+}
+inline bool FRepRootMotionMontage::brelativeposition() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.bRelativePosition)
+  return _internal_brelativeposition();
+}
+inline void FRepRootMotionMontage::_internal_set_brelativeposition(bool value) {
+  _impl_._has_bits_[0] |= 0x00000400u;
+  _impl_.brelativeposition_ = value;
+}
+inline void FRepRootMotionMontage::set_brelativeposition(bool value) {
+  _internal_set_brelativeposition(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.bRelativePosition)
+}
+
+// optional bool bRelativeRotation = 9;
+inline bool FRepRootMotionMontage::_internal_has_brelativerotation() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000800u) != 0;
+  return value;
+}
+inline bool FRepRootMotionMontage::has_brelativerotation() const {
+  return _internal_has_brelativerotation();
+}
+inline void FRepRootMotionMontage::clear_brelativerotation() {
+  _impl_.brelativerotation_ = false;
+  _impl_._has_bits_[0] &= ~0x00000800u;
+}
+inline bool FRepRootMotionMontage::_internal_brelativerotation() const {
+  return _impl_.brelativerotation_;
+}
+inline bool FRepRootMotionMontage::brelativerotation() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.bRelativeRotation)
+  return _internal_brelativerotation();
+}
+inline void FRepRootMotionMontage::_internal_set_brelativerotation(bool value) {
+  _impl_._has_bits_[0] |= 0x00000800u;
+  _impl_.brelativerotation_ = value;
+}
+inline void FRepRootMotionMontage::set_brelativerotation(bool value) {
+  _internal_set_brelativerotation(value);
+  // @@protoc_insertion_point(field_set:unrealpb.FRepRootMotionMontage.bRelativeRotation)
+}
+
+// optional .unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup authoritativeRootMotion = 10;
+inline bool FRepRootMotionMontage::_internal_has_authoritativerootmotion() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.authoritativerootmotion_ != nullptr);
+  return value;
+}
+inline bool FRepRootMotionMontage::has_authoritativerootmotion() const {
+  return _internal_has_authoritativerootmotion();
+}
+inline void FRepRootMotionMontage::clear_authoritativerootmotion() {
+  if (_impl_.authoritativerootmotion_ != nullptr) _impl_.authoritativerootmotion_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000020u;
+}
+inline const ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup& FRepRootMotionMontage::_internal_authoritativerootmotion() const {
+  const ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* p = _impl_.authoritativerootmotion_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup&>(
+      ::unrealpb::_FRepRootMotionMontage_FRootMotionSourceGroup_default_instance_);
+}
+inline const ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup& FRepRootMotionMontage::authoritativerootmotion() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.authoritativeRootMotion)
+  return _internal_authoritativerootmotion();
+}
+inline void FRepRootMotionMontage::unsafe_arena_set_allocated_authoritativerootmotion(
+    ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* authoritativerootmotion) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.authoritativerootmotion_);
+  }
+  _impl_.authoritativerootmotion_ = authoritativerootmotion;
+  if (authoritativerootmotion) {
+    _impl_._has_bits_[0] |= 0x00000020u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000020u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepRootMotionMontage.authoritativeRootMotion)
+}
+inline ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* FRepRootMotionMontage::release_authoritativerootmotion() {
+  _impl_._has_bits_[0] &= ~0x00000020u;
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* temp = _impl_.authoritativerootmotion_;
+  _impl_.authoritativerootmotion_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* FRepRootMotionMontage::unsafe_arena_release_authoritativerootmotion() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepRootMotionMontage.authoritativeRootMotion)
+  _impl_._has_bits_[0] &= ~0x00000020u;
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* temp = _impl_.authoritativerootmotion_;
+  _impl_.authoritativerootmotion_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* FRepRootMotionMontage::_internal_mutable_authoritativerootmotion() {
+  _impl_._has_bits_[0] |= 0x00000020u;
+  if (_impl_.authoritativerootmotion_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup>(GetArenaForAllocation());
+    _impl_.authoritativerootmotion_ = p;
+  }
+  return _impl_.authoritativerootmotion_;
+}
+inline ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* FRepRootMotionMontage::mutable_authoritativerootmotion() {
+  ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* _msg = _internal_mutable_authoritativerootmotion();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepRootMotionMontage.authoritativeRootMotion)
+  return _msg;
+}
+inline void FRepRootMotionMontage::set_allocated_authoritativerootmotion(::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup* authoritativerootmotion) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.authoritativerootmotion_;
+  }
+  if (authoritativerootmotion) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(authoritativerootmotion);
+    if (message_arena != submessage_arena) {
+      authoritativerootmotion = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, authoritativerootmotion, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000020u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000020u;
+  }
+  _impl_.authoritativerootmotion_ = authoritativerootmotion;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepRootMotionMontage.authoritativeRootMotion)
+}
+
+// optional .unrealpb.FVector acceleration = 11;
+inline bool FRepRootMotionMontage::_internal_has_acceleration() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000040u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.acceleration_ != nullptr);
+  return value;
+}
+inline bool FRepRootMotionMontage::has_acceleration() const {
+  return _internal_has_acceleration();
+}
+inline void FRepRootMotionMontage::clear_acceleration() {
+  if (_impl_.acceleration_ != nullptr) _impl_.acceleration_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000040u;
+}
+inline const ::unrealpb::FVector& FRepRootMotionMontage::_internal_acceleration() const {
+  const ::unrealpb::FVector* p = _impl_.acceleration_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
+}
+inline const ::unrealpb::FVector& FRepRootMotionMontage::acceleration() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.acceleration)
+  return _internal_acceleration();
+}
+inline void FRepRootMotionMontage::unsafe_arena_set_allocated_acceleration(
+    ::unrealpb::FVector* acceleration) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.acceleration_);
+  }
+  _impl_.acceleration_ = acceleration;
+  if (acceleration) {
+    _impl_._has_bits_[0] |= 0x00000040u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000040u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepRootMotionMontage.acceleration)
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::release_acceleration() {
+  _impl_._has_bits_[0] &= ~0x00000040u;
+  ::unrealpb::FVector* temp = _impl_.acceleration_;
+  _impl_.acceleration_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::unsafe_arena_release_acceleration() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepRootMotionMontage.acceleration)
+  _impl_._has_bits_[0] &= ~0x00000040u;
+  ::unrealpb::FVector* temp = _impl_.acceleration_;
+  _impl_.acceleration_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::_internal_mutable_acceleration() {
+  _impl_._has_bits_[0] |= 0x00000040u;
+  if (_impl_.acceleration_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
+    _impl_.acceleration_ = p;
+  }
+  return _impl_.acceleration_;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::mutable_acceleration() {
+  ::unrealpb::FVector* _msg = _internal_mutable_acceleration();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepRootMotionMontage.acceleration)
+  return _msg;
+}
+inline void FRepRootMotionMontage::set_allocated_acceleration(::unrealpb::FVector* acceleration) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.acceleration_;
+  }
+  if (acceleration) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(acceleration);
+    if (message_arena != submessage_arena) {
+      acceleration = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, acceleration, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000040u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000040u;
+  }
+  _impl_.acceleration_ = acceleration;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepRootMotionMontage.acceleration)
+}
+
+// optional .unrealpb.FVector linearVelocity = 12;
+inline bool FRepRootMotionMontage::_internal_has_linearvelocity() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000080u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.linearvelocity_ != nullptr);
+  return value;
+}
+inline bool FRepRootMotionMontage::has_linearvelocity() const {
+  return _internal_has_linearvelocity();
+}
+inline void FRepRootMotionMontage::clear_linearvelocity() {
+  if (_impl_.linearvelocity_ != nullptr) _impl_.linearvelocity_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000080u;
+}
+inline const ::unrealpb::FVector& FRepRootMotionMontage::_internal_linearvelocity() const {
+  const ::unrealpb::FVector* p = _impl_.linearvelocity_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
+}
+inline const ::unrealpb::FVector& FRepRootMotionMontage::linearvelocity() const {
+  // @@protoc_insertion_point(field_get:unrealpb.FRepRootMotionMontage.linearVelocity)
+  return _internal_linearvelocity();
+}
+inline void FRepRootMotionMontage::unsafe_arena_set_allocated_linearvelocity(
+    ::unrealpb::FVector* linearvelocity) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.linearvelocity_);
+  }
+  _impl_.linearvelocity_ = linearvelocity;
+  if (linearvelocity) {
+    _impl_._has_bits_[0] |= 0x00000080u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000080u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.FRepRootMotionMontage.linearVelocity)
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::release_linearvelocity() {
+  _impl_._has_bits_[0] &= ~0x00000080u;
+  ::unrealpb::FVector* temp = _impl_.linearvelocity_;
+  _impl_.linearvelocity_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::unsafe_arena_release_linearvelocity() {
+  // @@protoc_insertion_point(field_release:unrealpb.FRepRootMotionMontage.linearVelocity)
+  _impl_._has_bits_[0] &= ~0x00000080u;
+  ::unrealpb::FVector* temp = _impl_.linearvelocity_;
+  _impl_.linearvelocity_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::_internal_mutable_linearvelocity() {
+  _impl_._has_bits_[0] |= 0x00000080u;
+  if (_impl_.linearvelocity_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
+    _impl_.linearvelocity_ = p;
+  }
+  return _impl_.linearvelocity_;
+}
+inline ::unrealpb::FVector* FRepRootMotionMontage::mutable_linearvelocity() {
+  ::unrealpb::FVector* _msg = _internal_mutable_linearvelocity();
+  // @@protoc_insertion_point(field_mutable:unrealpb.FRepRootMotionMontage.linearVelocity)
+  return _msg;
+}
+inline void FRepRootMotionMontage::set_allocated_linearvelocity(::unrealpb::FVector* linearvelocity) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.linearvelocity_;
+  }
+  if (linearvelocity) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(linearvelocity);
+    if (message_arena != submessage_arena) {
+      linearvelocity = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, linearvelocity, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000080u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000080u;
+  }
+  _impl_.linearvelocity_ = linearvelocity;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.FRepRootMotionMontage.linearVelocity)
 }
 
 // -------------------------------------------------------------------
 
 // CharacterState
 
-// optional .unrealpb.RootMotionMontage rootMotion = 2;
+// optional .unrealpb.FRepRootMotionMontage rootMotion = 2;
 inline bool CharacterState::_internal_has_rootmotion() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.rootmotion_ != nullptr);
@@ -9926,17 +12859,17 @@ inline void CharacterState::clear_rootmotion() {
   if (_impl_.rootmotion_ != nullptr) _impl_.rootmotion_->Clear();
   _impl_._has_bits_[0] &= ~0x00000001u;
 }
-inline const ::unrealpb::RootMotionMontage& CharacterState::_internal_rootmotion() const {
-  const ::unrealpb::RootMotionMontage* p = _impl_.rootmotion_;
-  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::RootMotionMontage&>(
-      ::unrealpb::_RootMotionMontage_default_instance_);
+inline const ::unrealpb::FRepRootMotionMontage& CharacterState::_internal_rootmotion() const {
+  const ::unrealpb::FRepRootMotionMontage* p = _impl_.rootmotion_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FRepRootMotionMontage&>(
+      ::unrealpb::_FRepRootMotionMontage_default_instance_);
 }
-inline const ::unrealpb::RootMotionMontage& CharacterState::rootmotion() const {
+inline const ::unrealpb::FRepRootMotionMontage& CharacterState::rootmotion() const {
   // @@protoc_insertion_point(field_get:unrealpb.CharacterState.rootMotion)
   return _internal_rootmotion();
 }
 inline void CharacterState::unsafe_arena_set_allocated_rootmotion(
-    ::unrealpb::RootMotionMontage* rootmotion) {
+    ::unrealpb::FRepRootMotionMontage* rootmotion) {
   if (GetArenaForAllocation() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.rootmotion_);
   }
@@ -9948,9 +12881,9 @@ inline void CharacterState::unsafe_arena_set_allocated_rootmotion(
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.CharacterState.rootMotion)
 }
-inline ::unrealpb::RootMotionMontage* CharacterState::release_rootmotion() {
+inline ::unrealpb::FRepRootMotionMontage* CharacterState::release_rootmotion() {
   _impl_._has_bits_[0] &= ~0x00000001u;
-  ::unrealpb::RootMotionMontage* temp = _impl_.rootmotion_;
+  ::unrealpb::FRepRootMotionMontage* temp = _impl_.rootmotion_;
   _impl_.rootmotion_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
   auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
@@ -9963,27 +12896,27 @@ inline ::unrealpb::RootMotionMontage* CharacterState::release_rootmotion() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::unrealpb::RootMotionMontage* CharacterState::unsafe_arena_release_rootmotion() {
+inline ::unrealpb::FRepRootMotionMontage* CharacterState::unsafe_arena_release_rootmotion() {
   // @@protoc_insertion_point(field_release:unrealpb.CharacterState.rootMotion)
   _impl_._has_bits_[0] &= ~0x00000001u;
-  ::unrealpb::RootMotionMontage* temp = _impl_.rootmotion_;
+  ::unrealpb::FRepRootMotionMontage* temp = _impl_.rootmotion_;
   _impl_.rootmotion_ = nullptr;
   return temp;
 }
-inline ::unrealpb::RootMotionMontage* CharacterState::_internal_mutable_rootmotion() {
+inline ::unrealpb::FRepRootMotionMontage* CharacterState::_internal_mutable_rootmotion() {
   _impl_._has_bits_[0] |= 0x00000001u;
   if (_impl_.rootmotion_ == nullptr) {
-    auto* p = CreateMaybeMessage<::unrealpb::RootMotionMontage>(GetArenaForAllocation());
+    auto* p = CreateMaybeMessage<::unrealpb::FRepRootMotionMontage>(GetArenaForAllocation());
     _impl_.rootmotion_ = p;
   }
   return _impl_.rootmotion_;
 }
-inline ::unrealpb::RootMotionMontage* CharacterState::mutable_rootmotion() {
-  ::unrealpb::RootMotionMontage* _msg = _internal_mutable_rootmotion();
+inline ::unrealpb::FRepRootMotionMontage* CharacterState::mutable_rootmotion() {
+  ::unrealpb::FRepRootMotionMontage* _msg = _internal_mutable_rootmotion();
   // @@protoc_insertion_point(field_mutable:unrealpb.CharacterState.rootMotion)
   return _msg;
 }
-inline void CharacterState::set_allocated_rootmotion(::unrealpb::RootMotionMontage* rootmotion) {
+inline void CharacterState::set_allocated_rootmotion(::unrealpb::FRepRootMotionMontage* rootmotion) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
     delete _impl_.rootmotion_;
@@ -10003,7 +12936,7 @@ inline void CharacterState::set_allocated_rootmotion(::unrealpb::RootMotionMonta
   // @@protoc_insertion_point(field_set_allocated:unrealpb.CharacterState.rootMotion)
 }
 
-// optional .unrealpb.BasedMovementInfo basedMovement = 3;
+// optional .unrealpb.FBasedMovementInfo basedMovement = 3;
 inline bool CharacterState::_internal_has_basedmovement() const {
   bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.basedmovement_ != nullptr);
@@ -10016,17 +12949,17 @@ inline void CharacterState::clear_basedmovement() {
   if (_impl_.basedmovement_ != nullptr) _impl_.basedmovement_->Clear();
   _impl_._has_bits_[0] &= ~0x00000002u;
 }
-inline const ::unrealpb::BasedMovementInfo& CharacterState::_internal_basedmovement() const {
-  const ::unrealpb::BasedMovementInfo* p = _impl_.basedmovement_;
-  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::BasedMovementInfo&>(
-      ::unrealpb::_BasedMovementInfo_default_instance_);
+inline const ::unrealpb::FBasedMovementInfo& CharacterState::_internal_basedmovement() const {
+  const ::unrealpb::FBasedMovementInfo* p = _impl_.basedmovement_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FBasedMovementInfo&>(
+      ::unrealpb::_FBasedMovementInfo_default_instance_);
 }
-inline const ::unrealpb::BasedMovementInfo& CharacterState::basedmovement() const {
+inline const ::unrealpb::FBasedMovementInfo& CharacterState::basedmovement() const {
   // @@protoc_insertion_point(field_get:unrealpb.CharacterState.basedMovement)
   return _internal_basedmovement();
 }
 inline void CharacterState::unsafe_arena_set_allocated_basedmovement(
-    ::unrealpb::BasedMovementInfo* basedmovement) {
+    ::unrealpb::FBasedMovementInfo* basedmovement) {
   if (GetArenaForAllocation() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.basedmovement_);
   }
@@ -10038,9 +12971,9 @@ inline void CharacterState::unsafe_arena_set_allocated_basedmovement(
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.CharacterState.basedMovement)
 }
-inline ::unrealpb::BasedMovementInfo* CharacterState::release_basedmovement() {
+inline ::unrealpb::FBasedMovementInfo* CharacterState::release_basedmovement() {
   _impl_._has_bits_[0] &= ~0x00000002u;
-  ::unrealpb::BasedMovementInfo* temp = _impl_.basedmovement_;
+  ::unrealpb::FBasedMovementInfo* temp = _impl_.basedmovement_;
   _impl_.basedmovement_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
   auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
@@ -10053,27 +12986,27 @@ inline ::unrealpb::BasedMovementInfo* CharacterState::release_basedmovement() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::unrealpb::BasedMovementInfo* CharacterState::unsafe_arena_release_basedmovement() {
+inline ::unrealpb::FBasedMovementInfo* CharacterState::unsafe_arena_release_basedmovement() {
   // @@protoc_insertion_point(field_release:unrealpb.CharacterState.basedMovement)
   _impl_._has_bits_[0] &= ~0x00000002u;
-  ::unrealpb::BasedMovementInfo* temp = _impl_.basedmovement_;
+  ::unrealpb::FBasedMovementInfo* temp = _impl_.basedmovement_;
   _impl_.basedmovement_ = nullptr;
   return temp;
 }
-inline ::unrealpb::BasedMovementInfo* CharacterState::_internal_mutable_basedmovement() {
+inline ::unrealpb::FBasedMovementInfo* CharacterState::_internal_mutable_basedmovement() {
   _impl_._has_bits_[0] |= 0x00000002u;
   if (_impl_.basedmovement_ == nullptr) {
-    auto* p = CreateMaybeMessage<::unrealpb::BasedMovementInfo>(GetArenaForAllocation());
+    auto* p = CreateMaybeMessage<::unrealpb::FBasedMovementInfo>(GetArenaForAllocation());
     _impl_.basedmovement_ = p;
   }
   return _impl_.basedmovement_;
 }
-inline ::unrealpb::BasedMovementInfo* CharacterState::mutable_basedmovement() {
-  ::unrealpb::BasedMovementInfo* _msg = _internal_mutable_basedmovement();
+inline ::unrealpb::FBasedMovementInfo* CharacterState::mutable_basedmovement() {
+  ::unrealpb::FBasedMovementInfo* _msg = _internal_mutable_basedmovement();
   // @@protoc_insertion_point(field_mutable:unrealpb.CharacterState.basedMovement)
   return _msg;
 }
-inline void CharacterState::set_allocated_basedmovement(::unrealpb::BasedMovementInfo* basedmovement) {
+inline void CharacterState::set_allocated_basedmovement(::unrealpb::FBasedMovementInfo* basedmovement) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
     delete _impl_.basedmovement_;
@@ -12386,6 +15319,12 @@ inline void GameStateBase::set_breplicatedhasbegunplay(bool value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

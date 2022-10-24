@@ -44,6 +44,10 @@ void UChanneldReplicationComponent::InitOnce()
 	if (bInitialized)
 		return;
 
+	UGameInstance* GameInstance = GetOwner()->GetGameInstance();
+	if (!GameInstance)
+		return;
+
 	auto Settings = GetMutableDefault<UChanneldSettings>();
 	if (Settings->bSkipCustomReplication && Settings->bSkipCustomRPC)
 	{
@@ -77,7 +81,7 @@ void UChanneldReplicationComponent::InitOnce()
 	}
 
 	// Make sure the DataProvider is always registered
-	GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->RegisterDataProvider(this);
+	GameInstance->GetSubsystem<UChanneldGameInstanceSubsystem>()->RegisterDataProvider(this);
 
 	bInitialized = true;
 }

@@ -77,8 +77,8 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 	// TODO: RootMotion
 
 	bool bMovementInfoChanged = false;
-	unrealpb::BasedMovementInfo* MovementInfo = FullState->mutable_basedmovement();
-	unrealpb::BasedMovementInfo* MovementInfoDelta = DeltaState->mutable_basedmovement();
+	unrealpb::FBasedMovementInfo* MovementInfo = FullState->mutable_basedmovement();
+	unrealpb::FBasedMovementInfo* MovementInfoDelta = DeltaState->mutable_basedmovement();
 	auto OldMovementBase = ChanneldUtils::GetActorComponentByRef<UPrimitiveComponent>(MovementInfo->mutable_movementbase(), Character->GetWorld());
 	if (OldMovementBase != Character->GetMovementBase())
 	{
