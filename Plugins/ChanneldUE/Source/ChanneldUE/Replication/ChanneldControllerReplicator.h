@@ -20,7 +20,7 @@ public:
 	//~End FChanneldReplicatorBase Interface
 
 	virtual TSharedPtr<google::protobuf::Message> SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess) override;
-	virtual void* DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC) override;
+	virtual TSharedPtr<void> DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC) override;
 
 protected:
 	TWeakObjectPtr<AController> Controller;

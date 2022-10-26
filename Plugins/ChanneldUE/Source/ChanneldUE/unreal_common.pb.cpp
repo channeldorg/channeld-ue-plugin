@@ -597,6 +597,36 @@ struct PlayerController_ServerAcknowledgePossession_ParamsDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PlayerController_ServerAcknowledgePossession_ParamsDefaultTypeInternal _PlayerController_ServerAcknowledgePossession_Params_default_instance_;
+PROTOBUF_CONSTEXPR PlayerController_ClientGotoState_Params::PlayerController_ClientGotoState_Params(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.newstate_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct PlayerController_ClientGotoState_ParamsDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR PlayerController_ClientGotoState_ParamsDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~PlayerController_ClientGotoState_ParamsDefaultTypeInternal() {}
+  union {
+    PlayerController_ClientGotoState_Params _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PlayerController_ClientGotoState_ParamsDefaultTypeInternal _PlayerController_ClientGotoState_Params_default_instance_;
+PROTOBUF_CONSTEXPR PlayerController_ClientReceiveLocalizedMessage_Params::PlayerController_ClientReceiveLocalizedMessage_Params(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.message_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.relatedplayerstate_1_)*/nullptr
+  , /*decltype(_impl_.relatedplayerstate_2_)*/nullptr
+  , /*decltype(_impl_.optionalobject_)*/nullptr
+  , /*decltype(_impl_.switch__)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct PlayerController_ClientReceiveLocalizedMessage_ParamsDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR PlayerController_ClientReceiveLocalizedMessage_ParamsDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~PlayerController_ClientReceiveLocalizedMessage_ParamsDefaultTypeInternal() {}
+  union {
+    PlayerController_ClientReceiveLocalizedMessage_Params _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PlayerController_ClientReceiveLocalizedMessage_ParamsDefaultTypeInternal _PlayerController_ClientReceiveLocalizedMessage_Params_default_instance_;
 PROTOBUF_CONSTEXPR GameStateBase::GameStateBase(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_._has_bits_)*/{}
@@ -615,7 +645,7 @@ struct GameStateBaseDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GameStateBaseDefaultTypeInternal _GameStateBase_default_instance_;
 }  // namespace unrealpb
-static ::_pb::Metadata file_level_metadata_unreal_5fcommon_2eproto[35];
+static ::_pb::Metadata file_level_metadata_unreal_5fcommon_2eproto[37];
 static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_unreal_5fcommon_2eproto = nullptr;
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_unreal_5fcommon_2eproto = nullptr;
 
@@ -1075,6 +1105,24 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::unrealpb::PlayerController_ServerAcknowledgePossession_Params, _impl_.pawn_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::PlayerController_ClientGotoState_Params, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::PlayerController_ClientGotoState_Params, _impl_.newstate_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params, _impl_.message_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params, _impl_.switch__),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params, _impl_.relatedplayerstate_1_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params, _impl_.relatedplayerstate_2_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params, _impl_.optionalobject_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::GameStateBase, _impl_._has_bits_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::GameStateBase, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1125,7 +1173,9 @@ static const ::_pbi::MigrationSchema schemas_unreal_5fcommon_2eproto[] PROTOBUF_
   { 433, -1, -1, sizeof(::unrealpb::PlayerController_ClientRetryClientRestart_Params)},
   { 440, -1, -1, sizeof(::unrealpb::PlayerController_ServerSetSpectatorLocation_Params)},
   { 448, -1, -1, sizeof(::unrealpb::PlayerController_ServerAcknowledgePossession_Params)},
-  { 455, 465, -1, sizeof(::unrealpb::GameStateBase)},
+  { 455, -1, -1, sizeof(::unrealpb::PlayerController_ClientGotoState_Params)},
+  { 462, -1, -1, sizeof(::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params)},
+  { 473, 483, -1, sizeof(::unrealpb::GameStateBase)},
 };
 
 static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eproto[] = {
@@ -1163,6 +1213,8 @@ static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eprot
   &::unrealpb::_PlayerController_ClientRetryClientRestart_Params_default_instance_._instance,
   &::unrealpb::_PlayerController_ServerSetSpectatorLocation_Params_default_instance_._instance,
   &::unrealpb::_PlayerController_ServerAcknowledgePossession_Params_default_instance_._instance,
+  &::unrealpb::_PlayerController_ClientGotoState_Params_default_instance_._instance,
+  &::unrealpb::_PlayerController_ClientReceiveLocalizedMessage_Params_default_instance_._instance,
   &::unrealpb::_GameStateBase_default_instance_._instance,
 };
 
@@ -1369,21 +1421,29 @@ const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_
   "Vector\022!\n\006newRot\030\002 \001(\0132\021.unrealpb.FVecto"
   "r\"^\n3PlayerController_ServerAcknowledgeP"
   "ossession_Params\022\'\n\004pawn\030\001 \001(\0132\031.unrealp"
-  "b.UnrealObjectRef\"\207\002\n\rGameStateBase\022\037\n\022s"
-  "pectatorClassName\030\002 \001(\tH\000\210\001\001\022\036\n\021gameMode"
-  "ClassName\030\003 \001(\tH\001\210\001\001\022\'\n\032replicatedWorldT"
-  "imeSeconds\030\004 \001(\002H\002\210\001\001\022$\n\027bReplicatedHasB"
-  "egunPlay\030\005 \001(\010H\003\210\001\001B\025\n\023_spectatorClassNa"
-  "meB\024\n\022_gameModeClassNameB\035\n\033_replicatedW"
-  "orldTimeSecondsB\032\n\030_bReplicatedHasBegunP"
-  "layB,Z*channeld.clewcat.com/channeld/pkg"
-  "/unrealpbb\006proto3"
+  "b.UnrealObjectRef\";\n\'PlayerController_Cl"
+  "ientGotoState_Params\022\020\n\010newState\030\001 \001(\t\"\375"
+  "\001\n5PlayerController_ClientReceiveLocaliz"
+  "edMessage_Params\022\017\n\007message\030\001 \001(\t\022\016\n\006swi"
+  "tch\030\002 \001(\005\0227\n\024relatedPlayerState_1\030\003 \001(\0132"
+  "\031.unrealpb.UnrealObjectRef\0227\n\024relatedPla"
+  "yerState_2\030\004 \001(\0132\031.unrealpb.UnrealObject"
+  "Ref\0221\n\016optionalObject\030\005 \001(\0132\031.unrealpb.U"
+  "nrealObjectRef\"\207\002\n\rGameStateBase\022\037\n\022spec"
+  "tatorClassName\030\002 \001(\tH\000\210\001\001\022\036\n\021gameModeCla"
+  "ssName\030\003 \001(\tH\001\210\001\001\022\'\n\032replicatedWorldTime"
+  "Seconds\030\004 \001(\002H\002\210\001\001\022$\n\027bReplicatedHasBegu"
+  "nPlay\030\005 \001(\010H\003\210\001\001B\025\n\023_spectatorClassNameB"
+  "\024\n\022_gameModeClassNameB\035\n\033_replicatedWorl"
+  "dTimeSecondsB\032\n\030_bReplicatedHasBegunPlay"
+  "B,Z*channeld.clewcat.com/channeld/pkg/un"
+  "realpbb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_unreal_5fcommon_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_unreal_5fcommon_2eproto = {
-    false, false, 8417, descriptor_table_protodef_unreal_5fcommon_2eproto,
+    false, false, 8734, descriptor_table_protodef_unreal_5fcommon_2eproto,
     "unreal_common.proto",
-    &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 35,
+    &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 37,
     schemas_unreal_5fcommon_2eproto, file_default_instances_unreal_5fcommon_2eproto, TableStruct_unreal_5fcommon_2eproto::offsets,
     file_level_metadata_unreal_5fcommon_2eproto, file_level_enum_descriptors_unreal_5fcommon_2eproto,
     file_level_service_descriptors_unreal_5fcommon_2eproto,
@@ -12245,6 +12305,567 @@ void PlayerController_ServerAcknowledgePossession_Params::InternalSwap(PlayerCon
 
 // ===================================================================
 
+class PlayerController_ClientGotoState_Params::_Internal {
+ public:
+};
+
+PlayerController_ClientGotoState_Params::PlayerController_ClientGotoState_Params(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:unrealpb.PlayerController_ClientGotoState_Params)
+}
+PlayerController_ClientGotoState_Params::PlayerController_ClientGotoState_Params(const PlayerController_ClientGotoState_Params& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  PlayerController_ClientGotoState_Params* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.newstate_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _impl_.newstate_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.newstate_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_newstate().empty()) {
+    _this->_impl_.newstate_.Set(from._internal_newstate(), 
+      _this->GetArenaForAllocation());
+  }
+  // @@protoc_insertion_point(copy_constructor:unrealpb.PlayerController_ClientGotoState_Params)
+}
+
+inline void PlayerController_ClientGotoState_Params::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.newstate_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.newstate_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.newstate_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+}
+
+PlayerController_ClientGotoState_Params::~PlayerController_ClientGotoState_Params() {
+  // @@protoc_insertion_point(destructor:unrealpb.PlayerController_ClientGotoState_Params)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void PlayerController_ClientGotoState_Params::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.newstate_.Destroy();
+}
+
+void PlayerController_ClientGotoState_Params::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void PlayerController_ClientGotoState_Params::Clear() {
+// @@protoc_insertion_point(message_clear_start:unrealpb.PlayerController_ClientGotoState_Params)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.newstate_.ClearToEmpty();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* PlayerController_ClientGotoState_Params::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // string newState = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          auto str = _internal_mutable_newstate();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "unrealpb.PlayerController_ClientGotoState_Params.newState"));
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* PlayerController_ClientGotoState_Params::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.PlayerController_ClientGotoState_Params)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string newState = 1;
+  if (!this->_internal_newstate().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_newstate().data(), static_cast<int>(this->_internal_newstate().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "unrealpb.PlayerController_ClientGotoState_Params.newState");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_newstate(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.PlayerController_ClientGotoState_Params)
+  return target;
+}
+
+size_t PlayerController_ClientGotoState_Params::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:unrealpb.PlayerController_ClientGotoState_Params)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string newState = 1;
+  if (!this->_internal_newstate().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_newstate());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData PlayerController_ClientGotoState_Params::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    PlayerController_ClientGotoState_Params::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*PlayerController_ClientGotoState_Params::GetClassData() const { return &_class_data_; }
+
+
+void PlayerController_ClientGotoState_Params::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<PlayerController_ClientGotoState_Params*>(&to_msg);
+  auto& from = static_cast<const PlayerController_ClientGotoState_Params&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.PlayerController_ClientGotoState_Params)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_newstate().empty()) {
+    _this->_internal_set_newstate(from._internal_newstate());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void PlayerController_ClientGotoState_Params::CopyFrom(const PlayerController_ClientGotoState_Params& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.PlayerController_ClientGotoState_Params)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool PlayerController_ClientGotoState_Params::IsInitialized() const {
+  return true;
+}
+
+void PlayerController_ClientGotoState_Params::InternalSwap(PlayerController_ClientGotoState_Params* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.newstate_, lhs_arena,
+      &other->_impl_.newstate_, rhs_arena
+  );
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientGotoState_Params::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
+      file_level_metadata_unreal_5fcommon_2eproto[34]);
+}
+
+// ===================================================================
+
+class PlayerController_ClientReceiveLocalizedMessage_Params::_Internal {
+ public:
+  static const ::unrealpb::UnrealObjectRef& relatedplayerstate_1(const PlayerController_ClientReceiveLocalizedMessage_Params* msg);
+  static const ::unrealpb::UnrealObjectRef& relatedplayerstate_2(const PlayerController_ClientReceiveLocalizedMessage_Params* msg);
+  static const ::unrealpb::UnrealObjectRef& optionalobject(const PlayerController_ClientReceiveLocalizedMessage_Params* msg);
+};
+
+const ::unrealpb::UnrealObjectRef&
+PlayerController_ClientReceiveLocalizedMessage_Params::_Internal::relatedplayerstate_1(const PlayerController_ClientReceiveLocalizedMessage_Params* msg) {
+  return *msg->_impl_.relatedplayerstate_1_;
+}
+const ::unrealpb::UnrealObjectRef&
+PlayerController_ClientReceiveLocalizedMessage_Params::_Internal::relatedplayerstate_2(const PlayerController_ClientReceiveLocalizedMessage_Params* msg) {
+  return *msg->_impl_.relatedplayerstate_2_;
+}
+const ::unrealpb::UnrealObjectRef&
+PlayerController_ClientReceiveLocalizedMessage_Params::_Internal::optionalobject(const PlayerController_ClientReceiveLocalizedMessage_Params* msg) {
+  return *msg->_impl_.optionalobject_;
+}
+PlayerController_ClientReceiveLocalizedMessage_Params::PlayerController_ClientReceiveLocalizedMessage_Params(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:unrealpb.PlayerController_ClientReceiveLocalizedMessage_Params)
+}
+PlayerController_ClientReceiveLocalizedMessage_Params::PlayerController_ClientReceiveLocalizedMessage_Params(const PlayerController_ClientReceiveLocalizedMessage_Params& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  PlayerController_ClientReceiveLocalizedMessage_Params* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_){}
+    , decltype(_impl_.relatedplayerstate_1_){nullptr}
+    , decltype(_impl_.relatedplayerstate_2_){nullptr}
+    , decltype(_impl_.optionalobject_){nullptr}
+    , decltype(_impl_.switch__){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _impl_.message_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.message_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_message().empty()) {
+    _this->_impl_.message_.Set(from._internal_message(), 
+      _this->GetArenaForAllocation());
+  }
+  if (from._internal_has_relatedplayerstate_1()) {
+    _this->_impl_.relatedplayerstate_1_ = new ::unrealpb::UnrealObjectRef(*from._impl_.relatedplayerstate_1_);
+  }
+  if (from._internal_has_relatedplayerstate_2()) {
+    _this->_impl_.relatedplayerstate_2_ = new ::unrealpb::UnrealObjectRef(*from._impl_.relatedplayerstate_2_);
+  }
+  if (from._internal_has_optionalobject()) {
+    _this->_impl_.optionalobject_ = new ::unrealpb::UnrealObjectRef(*from._impl_.optionalobject_);
+  }
+  _this->_impl_.switch__ = from._impl_.switch__;
+  // @@protoc_insertion_point(copy_constructor:unrealpb.PlayerController_ClientReceiveLocalizedMessage_Params)
+}
+
+inline void PlayerController_ClientReceiveLocalizedMessage_Params::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.message_){}
+    , decltype(_impl_.relatedplayerstate_1_){nullptr}
+    , decltype(_impl_.relatedplayerstate_2_){nullptr}
+    , decltype(_impl_.optionalobject_){nullptr}
+    , decltype(_impl_.switch__){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.message_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.message_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+}
+
+PlayerController_ClientReceiveLocalizedMessage_Params::~PlayerController_ClientReceiveLocalizedMessage_Params() {
+  // @@protoc_insertion_point(destructor:unrealpb.PlayerController_ClientReceiveLocalizedMessage_Params)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void PlayerController_ClientReceiveLocalizedMessage_Params::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.message_.Destroy();
+  if (this != internal_default_instance()) delete _impl_.relatedplayerstate_1_;
+  if (this != internal_default_instance()) delete _impl_.relatedplayerstate_2_;
+  if (this != internal_default_instance()) delete _impl_.optionalobject_;
+}
+
+void PlayerController_ClientReceiveLocalizedMessage_Params::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void PlayerController_ClientReceiveLocalizedMessage_Params::Clear() {
+// @@protoc_insertion_point(message_clear_start:unrealpb.PlayerController_ClientReceiveLocalizedMessage_Params)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.message_.ClearToEmpty();
+  if (GetArenaForAllocation() == nullptr && _impl_.relatedplayerstate_1_ != nullptr) {
+    delete _impl_.relatedplayerstate_1_;
+  }
+  _impl_.relatedplayerstate_1_ = nullptr;
+  if (GetArenaForAllocation() == nullptr && _impl_.relatedplayerstate_2_ != nullptr) {
+    delete _impl_.relatedplayerstate_2_;
+  }
+  _impl_.relatedplayerstate_2_ = nullptr;
+  if (GetArenaForAllocation() == nullptr && _impl_.optionalobject_ != nullptr) {
+    delete _impl_.optionalobject_;
+  }
+  _impl_.optionalobject_ = nullptr;
+  _impl_.switch__ = 0;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* PlayerController_ClientReceiveLocalizedMessage_Params::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // string message = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          auto str = _internal_mutable_message();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "unrealpb.PlayerController_ClientReceiveLocalizedMessage_Params.message"));
+        } else
+          goto handle_unusual;
+        continue;
+      // int32 switch = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _impl_.switch__ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .unrealpb.UnrealObjectRef relatedPlayerState_1 = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_relatedplayerstate_1(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .unrealpb.UnrealObjectRef relatedPlayerState_2 = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+          ptr = ctx->ParseMessage(_internal_mutable_relatedplayerstate_2(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .unrealpb.UnrealObjectRef optionalObject = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
+          ptr = ctx->ParseMessage(_internal_mutable_optionalobject(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* PlayerController_ClientReceiveLocalizedMessage_Params::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.PlayerController_ClientReceiveLocalizedMessage_Params)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string message = 1;
+  if (!this->_internal_message().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_message().data(), static_cast<int>(this->_internal_message().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "unrealpb.PlayerController_ClientReceiveLocalizedMessage_Params.message");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_message(), target);
+  }
+
+  // int32 switch = 2;
+  if (this->_internal_switch_() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(2, this->_internal_switch_(), target);
+  }
+
+  // .unrealpb.UnrealObjectRef relatedPlayerState_1 = 3;
+  if (this->_internal_has_relatedplayerstate_1()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(3, _Internal::relatedplayerstate_1(this),
+        _Internal::relatedplayerstate_1(this).GetCachedSize(), target, stream);
+  }
+
+  // .unrealpb.UnrealObjectRef relatedPlayerState_2 = 4;
+  if (this->_internal_has_relatedplayerstate_2()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(4, _Internal::relatedplayerstate_2(this),
+        _Internal::relatedplayerstate_2(this).GetCachedSize(), target, stream);
+  }
+
+  // .unrealpb.UnrealObjectRef optionalObject = 5;
+  if (this->_internal_has_optionalobject()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(5, _Internal::optionalobject(this),
+        _Internal::optionalobject(this).GetCachedSize(), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.PlayerController_ClientReceiveLocalizedMessage_Params)
+  return target;
+}
+
+size_t PlayerController_ClientReceiveLocalizedMessage_Params::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:unrealpb.PlayerController_ClientReceiveLocalizedMessage_Params)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string message = 1;
+  if (!this->_internal_message().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_message());
+  }
+
+  // .unrealpb.UnrealObjectRef relatedPlayerState_1 = 3;
+  if (this->_internal_has_relatedplayerstate_1()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.relatedplayerstate_1_);
+  }
+
+  // .unrealpb.UnrealObjectRef relatedPlayerState_2 = 4;
+  if (this->_internal_has_relatedplayerstate_2()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.relatedplayerstate_2_);
+  }
+
+  // .unrealpb.UnrealObjectRef optionalObject = 5;
+  if (this->_internal_has_optionalobject()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.optionalobject_);
+  }
+
+  // int32 switch = 2;
+  if (this->_internal_switch_() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_switch_());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData PlayerController_ClientReceiveLocalizedMessage_Params::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    PlayerController_ClientReceiveLocalizedMessage_Params::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*PlayerController_ClientReceiveLocalizedMessage_Params::GetClassData() const { return &_class_data_; }
+
+
+void PlayerController_ClientReceiveLocalizedMessage_Params::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<PlayerController_ClientReceiveLocalizedMessage_Params*>(&to_msg);
+  auto& from = static_cast<const PlayerController_ClientReceiveLocalizedMessage_Params&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.PlayerController_ClientReceiveLocalizedMessage_Params)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_message().empty()) {
+    _this->_internal_set_message(from._internal_message());
+  }
+  if (from._internal_has_relatedplayerstate_1()) {
+    _this->_internal_mutable_relatedplayerstate_1()->::unrealpb::UnrealObjectRef::MergeFrom(
+        from._internal_relatedplayerstate_1());
+  }
+  if (from._internal_has_relatedplayerstate_2()) {
+    _this->_internal_mutable_relatedplayerstate_2()->::unrealpb::UnrealObjectRef::MergeFrom(
+        from._internal_relatedplayerstate_2());
+  }
+  if (from._internal_has_optionalobject()) {
+    _this->_internal_mutable_optionalobject()->::unrealpb::UnrealObjectRef::MergeFrom(
+        from._internal_optionalobject());
+  }
+  if (from._internal_switch_() != 0) {
+    _this->_internal_set_switch_(from._internal_switch_());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void PlayerController_ClientReceiveLocalizedMessage_Params::CopyFrom(const PlayerController_ClientReceiveLocalizedMessage_Params& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.PlayerController_ClientReceiveLocalizedMessage_Params)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool PlayerController_ClientReceiveLocalizedMessage_Params::IsInitialized() const {
+  return true;
+}
+
+void PlayerController_ClientReceiveLocalizedMessage_Params::InternalSwap(PlayerController_ClientReceiveLocalizedMessage_Params* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.message_, lhs_arena,
+      &other->_impl_.message_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(PlayerController_ClientReceiveLocalizedMessage_Params, _impl_.switch__)
+      + sizeof(PlayerController_ClientReceiveLocalizedMessage_Params::_impl_.switch__)
+      - PROTOBUF_FIELD_OFFSET(PlayerController_ClientReceiveLocalizedMessage_Params, _impl_.relatedplayerstate_1_)>(
+          reinterpret_cast<char*>(&_impl_.relatedplayerstate_1_),
+          reinterpret_cast<char*>(&other->_impl_.relatedplayerstate_1_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientReceiveLocalizedMessage_Params::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
+      file_level_metadata_unreal_5fcommon_2eproto[35]);
+}
+
+// ===================================================================
+
 class GameStateBase::_Internal {
  public:
   using HasBits = decltype(std::declval<GameStateBase>()._impl_._has_bits_);
@@ -12590,7 +13211,7 @@ void GameStateBase::InternalSwap(GameStateBase* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata GameStateBase::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[34]);
+      file_level_metadata_unreal_5fcommon_2eproto[36]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -12731,6 +13352,14 @@ Arena::CreateMaybeMessage< ::unrealpb::PlayerController_ServerSetSpectatorLocati
 template<> PROTOBUF_NOINLINE ::unrealpb::PlayerController_ServerAcknowledgePossession_Params*
 Arena::CreateMaybeMessage< ::unrealpb::PlayerController_ServerAcknowledgePossession_Params >(Arena* arena) {
   return Arena::CreateMessageInternal< ::unrealpb::PlayerController_ServerAcknowledgePossession_Params >(arena);
+}
+template<> PROTOBUF_NOINLINE ::unrealpb::PlayerController_ClientGotoState_Params*
+Arena::CreateMaybeMessage< ::unrealpb::PlayerController_ClientGotoState_Params >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::unrealpb::PlayerController_ClientGotoState_Params >(arena);
+}
+template<> PROTOBUF_NOINLINE ::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params*
+Arena::CreateMaybeMessage< ::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params >(arena);
 }
 template<> PROTOBUF_NOINLINE ::unrealpb::GameStateBase*
 Arena::CreateMaybeMessage< ::unrealpb::GameStateBase >(Arena* arena) {

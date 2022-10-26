@@ -4,6 +4,7 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/GameStateBase.h"
 #include "ChanneldConnection.h"
+#include "GameFramework/PlayerState.h"
 
 FChanneldActorReplicator::FChanneldActorReplicator(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
 {
@@ -274,8 +275,8 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 
 	if (NewState->has_owner())
 	{
-		// Special case: the client won't create other player's controller
-		if (!Actor->IsA<APawn>() || Actor->HasAuthority())
+		// Special case: the client won't create other player's controller. Pawn and PlayerState's owner is PlayerController.
+		if (Actor->HasAuthority() || (!Actor->IsA<APawn>() && !Actor->IsA<APlayerState>()))
 		{
 			// TODO: handle unmapped NetGUID
 			Actor->SetOwner(Cast<AActor>(ChanneldUtils::GetObjectByRef(&NewState->owner(), Actor->GetWorld())));

@@ -1,6 +1,7 @@
 #include "Metrics.h"
 #include "channeld.pb.h"
 #include "ChanneldConnection.h"
+#include "ChanneldTypes.h"
 
 void UMetrics::Initialize(FSubsystemCollectionBase& Collection)
 {

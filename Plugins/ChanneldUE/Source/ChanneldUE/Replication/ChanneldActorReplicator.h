@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldReplicatorBase.h"
+#include "ChanneldTypes.h"
 #include "GameFramework/Actor.h"
 
 class CHANNELDUE_API FChanneldActorReplicator : public FChanneldReplicatorBase

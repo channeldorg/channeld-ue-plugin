@@ -286,7 +286,7 @@ TSharedPtr<google::protobuf::Message> FChanneldCharacterReplicator::SerializeFun
 	return nullptr;
 }
 
-void* FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
+TSharedPtr<void> FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ServerMovePacked"))
@@ -302,16 +302,17 @@ void* FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, c
 		bool bIDC;
 		FArchive EmptyArchive;
 		// Hack the package map into to the PackedBits for further deserialization. IDC = I don't care.
-		Params->PackedBits.NetSerialize(EmptyArchive, Character->GetNetConnection()->PackageMap, bIDC);
+		if (Params->PackedBits.NetSerialize(EmptyArchive, Character->GetNetConnection()->PackageMap, bIDC))
+		{
+			// ----------------------------------------------------
+			// UCharacterMovementComponent::CallServerMovePacked
+			// ----------------------------------------------------
+			Params->PackedBits.DataBits.SetNumUninitialized(Msg.bitsnum());
+			FMemory::Memcpy(Params->PackedBits.DataBits.GetData(), Msg.packedbits().data(), Msg.packedbits().size());
+			//UE_LOG(LogChanneld, Log, TEXT("Received ServerMovePacked with PackedBits: %d, Timestamp: %d"), Params->PackedBits.DataBits.Num(), *Params->PackedBits.DataBits.GetData());
+		}
 
-		// ----------------------------------------------------
-		// UCharacterMovementComponent::CallServerMovePacked
-		// ----------------------------------------------------
-		Params->PackedBits.DataBits.SetNumUninitialized(Msg.bitsnum());
-		FMemory::Memcpy(Params->PackedBits.DataBits.GetData(), Msg.packedbits().data(), Msg.packedbits().size());
-		//UE_LOG(LogChanneld, Log, TEXT("Received ServerMovePacked with PackedBits: %d, Timestamp: %d"), Params->PackedBits.DataBits.Num(), *Params->PackedBits.DataBits.GetData());
-
-		return &Params.Get();
+		return Params;
 	}
 	else if (Func->GetFName() == FName("ClientMoveResponsePacked"))
 	{
@@ -326,15 +327,16 @@ void* FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, c
 		bool bIDC;
 		FArchive EmptyArchive;
 		// Hack the package map into to the PackedBits for further deserialization. IDC = I don't care.
-		Params->PackedBits.NetSerialize(EmptyArchive, Character->GetNetConnection()->PackageMap, bIDC);
+		if (Params->PackedBits.NetSerialize(EmptyArchive, Character->GetNetConnection()->PackageMap, bIDC))
+		{
+			// ----------------------------------------------------
+			// UCharacterMovementComponent::ServerSendMoveResponse
+			// ----------------------------------------------------
+			Params->PackedBits.DataBits.SetNumUninitialized(Msg.bitsnum());
+			FMemory::Memcpy(Params->PackedBits.DataBits.GetData(), Msg.packedbits().data(), Msg.packedbits().size());
+		}
 
-		// ----------------------------------------------------
-		// UCharacterMovementComponent::ServerSendMoveResponse
-		// ----------------------------------------------------
-		Params->PackedBits.DataBits.SetNumUninitialized(Msg.bitsnum());
-		FMemory::Memcpy(Params->PackedBits.DataBits.GetData(), Msg.packedbits().data(), Msg.packedbits().size());
-
-		return &Params.Get();
+		return Params;
 	}
 
 	bSuccess = false;

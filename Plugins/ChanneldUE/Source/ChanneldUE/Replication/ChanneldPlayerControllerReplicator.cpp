@@ -153,6 +153,24 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 		Msg->mutable_pawn()->MergeFrom(ChanneldUtils::GetRefOfObject(TypedParams->Pawn));
 		return Msg;
 	}
+	else if (Func->GetFName() == FName("ClientGotoState"))
+	{
+		ClientGotoStateParams* TypedParams = (ClientGotoStateParams*)Params;
+		auto Msg = MakeShared<unrealpb::PlayerController_ClientGotoState_Params>();
+		Msg->set_newstate(std::string(TCHAR_TO_UTF8(*TypedParams->NewState.ToString())));
+		return Msg;
+	}
+	else if (Func->GetFName() == FName("ClientReceiveLocalizedMessage"))
+	{
+		ClientReceiveLocalizedMessageParams* TypedParams = (ClientReceiveLocalizedMessageParams*)Params;
+		auto Msg = MakeShared<unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params>();
+		Msg->set_message(std::string(TCHAR_TO_UTF8(*TypedParams->Message->GetName())));
+		Msg->set_switch_(TypedParams->Switch);
+		Msg->mutable_relatedplayerstate_1()->CopyFrom(ChanneldUtils::GetRefOfObject(TypedParams->RelatedPlayerState_1));
+		Msg->mutable_relatedplayerstate_2()->CopyFrom(ChanneldUtils::GetRefOfObject(TypedParams->RelatedPlayerState_2));
+		Msg->mutable_optionalobject()->CopyFrom(ChanneldUtils::GetRefOfObject(TypedParams->OptionalObject));
+		return Msg;
+	}
 	else if (NoParamFunctions.Contains(Func->GetFName()))
 	{
 		// No need to serialize anything
@@ -163,7 +181,7 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	return nullptr;
 }
 
-void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
+TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ServerUpdateCamera"))
@@ -173,7 +191,7 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 		auto Params = MakeShared<ServerUpdateCameraParams>();
 		Params->CamLoc = FVector_NetQuantize(ChanneldUtils::GetVector(Msg.camloc()));
 		Params->CamPitchAndYaw = Msg.campitchandyaw();
-		return &Params.Get();
+		return Params;
 	}
 	else if (Func->GetFName() == FName("ClientSetHUD"))
 	{
@@ -184,7 +202,7 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 		{
 			Params->NewHUDClass = LoadClass<AHUD>(NULL, UTF8_TO_TCHAR(Msg.hudclassname().c_str()));
 		}
-		return &Params.Get();
+		return Params;
 	}
 	else if (Func->GetFName() == FName("ClientSetViewTarget"))
 	{
@@ -202,7 +220,7 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 		Params->TransitionParams.BlendFunction = TEnumAsByte<enum EViewTargetBlendFunction>((uint8)Msg.blendfunction());
 		Params->TransitionParams.BlendExp = Msg.blendexp();
 		Params->TransitionParams.bLockOutgoing = (uint32)Msg.blockoutgoing();
-		return &Params.Get();
+		return Params;
 	}
 	else if (Func->GetFName() == FName("ClientEnableNetworkVoice"))
 	{
@@ -210,7 +228,7 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ClientEnableNetworkVoiceParams>();
 		Params->bEnable = Msg.benable();
-		return &Params.Get();
+		return Params;
 	}
 	else if (Func->GetFName() == FName("ClientCapBandwidth"))
 	{
@@ -218,7 +236,7 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ClientCapBandwidthParams>();
 		Params->Cap = Msg.cap();
-		return &Params.Get();
+		return Params;
 	}
 	else if (Func->GetFName() == FName("ClientRestart"))
 	{
@@ -232,7 +250,7 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 
 		auto Params = MakeShared<ClientRestartParams>();
 		Params->Pawn = Pawn;
-		return &Params.Get();
+		return Params;
 	}
 	else if (Func->GetFName() == FName("ClientSetCameraMode"))
 	{
@@ -240,7 +258,7 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ClientSetCameraModeParams>();
 		Params->NewCamMode = FName(UTF8_TO_TCHAR(Msg.newcammode().c_str()));
-		return &Params.Get();
+		return Params;
 	}
 	else if (Func->GetFName() == FName("ClientRetryClientRestart"))
 	{
@@ -254,7 +272,7 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 
 		auto Params = MakeShared<ClientRetryClientRestartParams>();
 		Params->Pawn = Pawn;
-		return &Params.Get();
+		return Params;
 	}
 	else if (Func->GetFName() == FName("ServerSetSpectatorLocation"))
 	{
@@ -263,7 +281,7 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 		auto Params = MakeShared<ServerSetSpectatorLocationParams>();
 		Params->NewLoc = ChanneldUtils::GetVector(Msg.newloc());
 		Params->NewRot = ChanneldUtils::GetRotator(Msg.newrot());
-		return &Params.Get();
+		return Params;
 	}
 	else if (Func->GetFName() == FName("ServerAcknowledgePossession"))
 	{
@@ -277,7 +295,27 @@ void* FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* 
 
 		auto Params = MakeShared<ClientRetryClientRestartParams>();
 		Params->Pawn = Pawn;
-		return &Params.Get();
+		return Params;
+	}
+	else if (Func->GetFName() == FName("ClientGotoState"))
+	{
+		unrealpb::PlayerController_ClientGotoState_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		auto Params = MakeShared<ClientGotoStateParams>();
+		Params->NewState = FName(UTF8_TO_TCHAR(Msg.newstate().c_str()));
+		return Params;
+	}
+	else if (Func->GetFName() == FName("ClientReceiveLocalizedMessage"))
+	{
+		unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params Msg;
+		Msg.ParseFromString(ParamsPayload);
+		auto Params = MakeShared<ClientReceiveLocalizedMessageParams>();
+		Params->Message = LoadClass<ULocalMessage>(NULL, UTF8_TO_TCHAR(Msg.message().c_str()));
+		Params->Switch = Msg.switch_();
+		Params->RelatedPlayerState_1 = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(&Msg.relatedplayerstate_1(), PC->GetWorld()));
+		Params->RelatedPlayerState_2 = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(&Msg.relatedplayerstate_2(), PC->GetWorld()));
+		Params->OptionalObject = ChanneldUtils::GetObjectByRef(&Msg.optionalobject(), PC->GetWorld());
+		return Params;
 	}
 	else if (NoParamFunctions.Contains(Func->GetFName()))
 	{

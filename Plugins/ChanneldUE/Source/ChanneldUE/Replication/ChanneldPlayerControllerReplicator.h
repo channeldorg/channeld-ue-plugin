@@ -2,10 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "ChannelDataProvider.h"
+#include "ChanneldTypes.h"
 #include "GameFramework\Character.h"
 #include "ChanneldReplicatorBase.h"
 #include "GameFramework/HUD.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/LocalMessage.h"
+#include "GameFramework/PlayerState.h"
 
 class CHANNELDUE_API FChanneldPlayerControllerReplicator : public FChanneldReplicatorBase
 {
@@ -22,7 +25,7 @@ public:
 	//~End FChanneldReplicatorBase Interface
 
 	virtual TSharedPtr<google::protobuf::Message> SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess) override;
-	virtual void* DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC) override;
+	virtual TSharedPtr<void> DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC) override;
 
 protected:
 	TWeakObjectPtr<APlayerController> PC;
@@ -96,4 +99,17 @@ private:
 		APawn* Pawn;
 	};
 
+	struct ClientGotoStateParams
+	{
+		FName NewState;
+	};
+
+	struct ClientReceiveLocalizedMessageParams
+	{
+		TSubclassOf<ULocalMessage> Message;
+		int32 Switch;
+		APlayerState* RelatedPlayerState_1;
+		APlayerState* RelatedPlayerState_2;
+		UObject* OptionalObject;
+	};
 };

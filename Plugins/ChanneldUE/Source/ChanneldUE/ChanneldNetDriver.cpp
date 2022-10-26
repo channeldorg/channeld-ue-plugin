@@ -161,8 +161,6 @@ void UChanneldNetDriver::ServerHandleUnsub(UChanneldConnection* Conn, ChannelId 
 		auto ClientConnection = ClientConnectionMap.FindRef(ResultMsg->connid());
 		if (ClientConnection)
 		{
-			ClientConnectionMap.Remove(ResultMsg->connid());
-
 			//~ Start copy from UNetDriver::Shutdown()
 			if (ClientConnection->PlayerController)
 			{
@@ -176,6 +174,8 @@ void UChanneldNetDriver::ServerHandleUnsub(UChanneldConnection* Conn, ChannelId 
 			// Calls Close() internally and removes from ClientConnections
 			ClientConnection->CleanUp();
 			//~ End copy
+
+			ClientConnectionMap.Remove(ResultMsg->connid());
 		}
 	}
 }
@@ -713,7 +713,7 @@ void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, c
 	if (RepComp)
 	{
 		bool bSuccess = true;
-		void* Params = RepComp->DeserializeFunctionParams(Actor, Function, ParamsPayload, bSuccess, bDelayRPC);
+		TSharedPtr<void> Params = RepComp->DeserializeFunctionParams(Actor, Function, ParamsPayload, bSuccess, bDelayRPC);
 		if (bDelayRPC)
 		{
 			return;
@@ -721,7 +721,7 @@ void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, c
 
 		if (bSuccess)
 		{
-			Actor->ProcessEvent(Function, Params);
+			Actor->ProcessEvent(Function, Params.Get());
 		}
 		else
 		{

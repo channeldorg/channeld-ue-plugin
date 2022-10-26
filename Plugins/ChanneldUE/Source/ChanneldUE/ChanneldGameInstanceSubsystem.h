@@ -8,6 +8,7 @@
 #include "Tickable.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "ChannelDataProvider.h"
+#include "UObject/WeakInterfacePtr.h"
 #include "ChanneldGameInstanceSubsystem.generated.h"
 
 class UProtoMessageObject;
@@ -185,7 +186,7 @@ protected:
 
 	TMap<EChanneldChannelType, FString> ChannelTypeToProtoFullNameMapping;
 
-	TSet<IChannelDataProvider*> UnregisteredDataProviders;
+	TArray<TWeakInterfacePtr<IChannelDataProvider>> UnregisteredDataProviders;
 
 	void HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleCreateChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);

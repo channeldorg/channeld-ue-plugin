@@ -535,11 +535,11 @@ void UChanneldGameInstanceSubsystem::InitChannelDataView()
 		//ConnToChanneld->OnAuthenticated.AddUObject(ChannelDataView, &UChannelDataView::Initialize);
 		ChannelDataView->Initialize(ConnectionInstance);
 
-		for (IChannelDataProvider* Provider : UnregisteredDataProviders)
+		for (TWeakInterfacePtr<IChannelDataProvider> Provider : UnregisteredDataProviders)
 		{
-			if (Provider && IsValid(Provider->_getUObject()))
+			if (Provider.IsValid())
 			{
-				ChannelDataView->AddProvider(Provider->GetChannelId(), Provider);
+				ChannelDataView->AddProvider(Provider->GetChannelId(), Provider.Get());
 			}
 		}
 		UnregisteredDataProviders.Empty();

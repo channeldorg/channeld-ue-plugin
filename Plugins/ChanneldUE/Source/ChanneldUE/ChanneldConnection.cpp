@@ -3,7 +3,7 @@
 #include "ChanneldNetDriver.h"
 #include "SocketSubsystem.h"
 
-DEFINE_LOG_CATEGORY(LogChanneld);
+//DEFINE_LOG_CATEGORY(LogChanneld);
 
 void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 {

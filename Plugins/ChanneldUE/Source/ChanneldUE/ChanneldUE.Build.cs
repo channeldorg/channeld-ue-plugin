@@ -31,8 +31,7 @@ public class ChanneldUE : ModuleRules
             new string[]
             {
                 ModuleDirectory,
-                Path.Combine(ModuleDirectory, "channeldpb"),
-                //Path.Combine(ModuleDirectory, "Testpb.h"),
+                //Path.Combine(ModuleDirectory, "channeldpb"),
             }
             );
 

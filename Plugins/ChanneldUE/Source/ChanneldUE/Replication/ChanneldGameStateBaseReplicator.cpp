@@ -68,14 +68,15 @@ void FChanneldGameStateBaseReplicator::Tick(float DeltaTime)
 		return;
 	}
 
-	auto SpectatorClass = LoadClass<ASpectatorPawn>(NULL, UTF8_TO_TCHAR(FullState->mutable_spectatorclassname()->c_str()));
+	// For LoadClass(), check if the class name is set before calling can avoid warning
+	TSubclassOf<ASpectatorPawn> SpectatorClass = FullState->has_spectatorclassname() ? LoadClass<ASpectatorPawn>(NULL, UTF8_TO_TCHAR(FullState->spectatorclassname().c_str())) : NULL;
 	if (GameStateBase->SpectatorClass != SpectatorClass)
 	{
 		DeltaState->set_spectatorclassname(std::string(TCHAR_TO_UTF8(*GameStateBase->SpectatorClass->GetPathName())));
 		bStateChanged = true;
 	}
 
-	auto GameModeClass = LoadClass<AGameModeBase>(NULL, UTF8_TO_TCHAR(FullState->mutable_gamemodeclassname()->c_str()));
+	TSubclassOf<AGameModeBase> GameModeClass = FullState->has_gamemodeclassname() ? LoadClass<AGameModeBase>(NULL, UTF8_TO_TCHAR(FullState->gamemodeclassname().c_str())) : NULL;
 	if (GameStateBase->GameModeClass != GameModeClass)
 	{
 		DeltaState->set_gamemodeclassname(std::string(TCHAR_TO_UTF8(*GameStateBase->GameModeClass->GetPathName())));

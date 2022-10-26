@@ -253,13 +253,13 @@ TSharedPtr<google::protobuf::Message> UChanneldReplicationComponent::SerializeFu
 	return nullptr;
 }
 
-void* UChanneldReplicationComponent::DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
+TSharedPtr<void> UChanneldReplicationComponent::DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
 {
 	for (auto Replicator : Replicators)
 	{
 		if (Replicator->GetTargetObject() == Actor)
 		{
-			void* Params = Replicator->DeserializeFunctionParams(Func, ParamsPayload, bSuccess, bDelayRPC);
+			TSharedPtr<void> Params = Replicator->DeserializeFunctionParams(Func, ParamsPayload, bSuccess, bDelayRPC);
 			if (bSuccess)
 			{
 				return Params;

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ChanneldTypes.h"
 #include "ChanneldSettings.generated.h"
 
 /**

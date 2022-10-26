@@ -4,6 +4,9 @@
 #include "ChanneldSettings.h"
 #include "ChanneldTypes.h"
 #include "SocketSubsystem.h"
+#include "View/ChannelDataView.h"
+
+//DEFINE_LOG_CATEGORY(LogChanneld)
 
 UChanneldSettings::UChanneldSettings(const FObjectInitializer& obj)
 {
@@ -17,6 +20,12 @@ void UChanneldSettings::PostInitProperties()
 	const TCHAR* CmdLine = FCommandLine::Get();
 	UE_LOG(LogChanneld, Log, TEXT("Parsing ChanneldSettings from command line args: %s"), CmdLine);
 
+	FString ViewClassName;
+	if (FParse::Value(CmdLine, TEXT("ViewClass="), ViewClassName))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed View Class Name from CLI: %s"), *ViewClassName);
+		ChannelDataViewClass = LoadClass<UChannelDataView>(NULL, *ViewClassName);
+	}
 	if (FParse::Value(CmdLine, TEXT("channeldClientIp="), ChanneldIpForClient))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed Client IP from CLI: %s"), *ChanneldIpForClient);

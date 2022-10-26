@@ -107,7 +107,7 @@ TSharedPtr<google::protobuf::Message> FChanneldControllerReplicator::SerializeFu
 	return nullptr;
 }
 
-void* FChanneldControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
+TSharedPtr<void> FChanneldControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ClientSetLocation"))
@@ -117,7 +117,7 @@ void* FChanneldControllerReplicator::DeserializeFunctionParams(UFunction* Func, 
 		auto Params = MakeShared<ClientSetLocationParams>();
 		Params->NewLocation = ChanneldUtils::GetVector(Msg.newlocation());
 		Params->NewRotation = ChanneldUtils::GetRotator(Msg.newrotation());
-		return &Params.Get();
+		return Params;
 	}
 	else if (Func->GetFName() == FName("ClientSetRotation"))
 	{
@@ -126,7 +126,7 @@ void* FChanneldControllerReplicator::DeserializeFunctionParams(UFunction* Func, 
 		auto Params = MakeShared<ClientSetRotationParams>();
 		Params->NewRotation = ChanneldUtils::GetRotator(Msg.newrotation());
 		Params->bResetCamera = Msg.bresetcamera();
-		return &Params.Get();
+		return Params;
 	}
 
 	bSuccess = false;
