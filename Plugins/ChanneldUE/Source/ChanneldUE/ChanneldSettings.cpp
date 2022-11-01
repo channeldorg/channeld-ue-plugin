@@ -59,17 +59,17 @@ void UChanneldSettings::PostInitProperties()
 		}
 	}
 
-	if (FParse::Bool(CmdLine, TEXT("DisableHandshaking"), bDisableHandshaking))
+	if (FParse::Bool(CmdLine, TEXT("DisableHandshaking="), bDisableHandshaking))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bDisableHandshaking from CLI: %d"), bDisableHandshaking);
 	}
 
-	if (FParse::Bool(CmdLine, TEXT("SkipCustomReplication"), bSkipCustomReplication))
+	if (FParse::Bool(CmdLine, TEXT("SkipCustomReplication="), bSkipCustomReplication))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bSkipCustomReplication from CLI: %d"), bSkipCustomReplication);
 	}
 
-	if (FParse::Bool(CmdLine, TEXT("SkipCustomRPC"), bSkipCustomRPC))
+	if (FParse::Bool(CmdLine, TEXT("SkipCustomRPC="), bSkipCustomRPC))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bSkipCustomRPC from CLI: %d"), bSkipCustomRPC);
 	}
