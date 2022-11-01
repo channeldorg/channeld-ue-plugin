@@ -80,7 +80,7 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 	}
 
 	auto Connnection = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
-	if (Connnection && Connnection->GetConnId() != FullState->owningconnid())
+	if (IsValid(Connnection) && Connnection->GetConnId() != FullState->owningconnid())
 	{
 		DeltaState->set_owningconnid(Connnection->GetConnId());
 		bStateChanged = true;

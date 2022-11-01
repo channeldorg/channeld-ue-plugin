@@ -535,7 +535,7 @@ void UChanneldGameInstanceSubsystem::InitChannelDataView()
 		//ConnToChanneld->OnAuthenticated.AddUObject(ChannelDataView, &UChannelDataView::Initialize);
 		ChannelDataView->Initialize(ConnectionInstance);
 
-		for (TWeakInterfacePtr<IChannelDataProvider> Provider : UnregisteredDataProviders)
+		for (TWeakInterfacePtr<IChannelDataProvider>& Provider : UnregisteredDataProviders)
 		{
 			if (Provider.IsValid())
 			{

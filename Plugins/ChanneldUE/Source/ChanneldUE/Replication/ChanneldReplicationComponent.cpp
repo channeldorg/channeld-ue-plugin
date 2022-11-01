@@ -117,13 +117,6 @@ void UChanneldReplicationComponent::EndPlay(EEndPlayReason::Type Reason)
 	}
 }
 
-void UChanneldReplicationComponent::DestroyComponent(bool bPromoteChildren /* = false */)
-{
-	Super::DestroyComponent(bPromoteChildren);
-
-	//UninitOnce();
-}
-
 channeldpb::ChannelType UChanneldReplicationComponent::GetChannelType()
 {
 	return static_cast<channeldpb::ChannelType>(ChannelType);
@@ -170,18 +163,25 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 		return false;
 	}
 
-	bool bUpdated = false;
-	for (auto Replicator : Replicators)
+	bool bUpdated = IsRemoved();
+	for (auto& Replicator : Replicators)
 	{
+		uint32 NetGUID = Replicator->GetNetGUID();
+		if (NetGUID == 0)
+		{
+			UE_LOG(LogChanneld, Log, TEXT("Replicator of %s doesn't has a NetGUID yet, skip setting channel data"), *Replicator->GetTargetClass()->GetName());
+			continue;
+		}
+		
+		if (IsRemoved())
+		{
+			SetStateToChannelData(NULL, ChannelData, Replicator->GetTargetClass(), NetGUID);
+			continue;
+		}
+		
 		Replicator->Tick(FApp::GetDeltaTime());
 		if (Replicator->IsStateChanged())
 		{
-			uint32 NetGUID = Replicator->GetNetGUID();
-			if (NetGUID == 0)
-			{
-				UE_LOG(LogChanneld, Log, TEXT("Replicator of %s doesn't has a NetGUID yet, skip setting channel data"), *Replicator->GetTargetClass()->GetName());
-				continue;
-			}
 			SetStateToChannelData(Replicator->GetDeltaState(), ChannelData, Replicator->GetTargetClass(), NetGUID);
 			Replicator->ClearState();
 			bUpdated = true;

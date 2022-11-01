@@ -6,6 +6,7 @@
 #include "ChanneldConnection.h"
 #include "ChannelDataProvider.h"
 #include "google/protobuf/message.h"
+#include "UObject/WeakInterfacePtr.h"
 #include "ChannelDataView.generated.h"
 
 // Owned by UChanneldGameInstanceSubsystem.
@@ -44,6 +45,22 @@ public:
 
 protected:
 
+	// TSet doesn't support TWeakInterfacePtr, so we need to wrap it in a new type. 
+	struct FProviderInternal : TWeakInterfacePtr<IChannelDataProvider>
+	{
+		FProviderInternal(IChannelDataProvider* ProviderInstance) : TWeakInterfacePtr(ProviderInstance) {}
+
+		bool operator==(const FProviderInternal& s) const
+		{
+			return Get() == s.Get();
+		}
+
+		friend FORCEINLINE uint32 GetTypeHash(const FProviderInternal& s)
+		{
+			return PointerHash(s.Get());
+		}
+	};
+
 	virtual void LoadCmdLineArgs() {}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure/*, meta=(CallableWithoutWorldContext)*/)
@@ -65,7 +82,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BeginUninitClient"))
 	void ReceiveUninitClient();
 
-	virtual void OnUnsubFromChannel(ChannelId ChId, const TSet<IChannelDataProvider*>& RemovedProviders) {}
+	virtual void OnUnsubFromChannel(ChannelId ChId, const TSet<FProviderInternal>& RemovedProviders) {}
 
 	UPROPERTY()
 	UChanneldConnection* Connection;
@@ -79,7 +96,8 @@ private:
 	google::protobuf::Any* AnyForTypeUrl;
 	TMap<FString, const google::protobuf::Message*> ChannelDataTemplatesByTypeUrl;
 
-	TMap<ChannelId, TSet<IChannelDataProvider*>> ChannelDataProviders;
+	TMap<ChannelId, TSet<FProviderInternal>> ChannelDataProviders;
+	TMap<ChannelId, google::protobuf::Message*> RemovedProvidersData;
 
 	void HandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 

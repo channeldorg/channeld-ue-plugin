@@ -129,7 +129,8 @@ public:
 					FInBunch InBunch(World->GetNetDriver()->ServerConnection, (uint8*)Ref->netguidbunch().data(), Ref->bunchbitsnum());
 					auto PackageMap = Cast<UPackageMapClient>(World->GetNetDriver()->ServerConnection->PackageMap);
 
-					UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::OpenedLocally);
+					UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);
+					UE_LOG(LogChanneld, VeryVerbose, TEXT("[Client] ActorChannels: %d"), Connection->ActorChannelsNum());
 					AActor* Actor;
 					//-----------------------------------------
 					// Copied from UActorChannel::ProcessBunch
@@ -142,6 +143,9 @@ public:
 						// After all properties have been initialized, call PostNetInit. This should call BeginPlay() so initialization can be done with proper starting values.
 						Actor->PostNetInit();
 						UE_LOG(LogChanneld, Verbose, TEXT("[Client] Created new actor '%s' with NetGUID %d"), *Actor->GetName(), GuidCache->GetNetGUID(Actor).Value);
+
+						//// Remove the channel after using it
+						//Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
 						return Actor;
 					}
 				}
@@ -180,63 +184,70 @@ public:
 			if (Connection == nullptr)
 			{
 				Connection = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
-				if (Connection == nullptr)
-				{
-					UE_LOG(LogChanneld, Warning, TEXT("Failed to get the ref of %s: the actor has no NetConnection"), *Obj->GetName());
-					return ObjRef;
-				}
 			}
-			auto PackageMap = CastChecked<UPackageMapClient>(Connection->PackageMap);
-
-			// If the NetGUID is not created yet, assign an new one and send the new NetGUID CachedObjects to the client.
-			// If the NetGUID is already created but hasn't been exported to the client yet, we need to send the CachedObjects as well.
-			if (!NetGUID.IsValid() || !PackageMap->NetGUIDExportCountMap.Contains(NetGUID))
+			if (!IsValid(Connection))
 			{
-				TSet<FNetworkGUID> OldGUIDs;
-				PackageMap->NetGUIDExportCountMap.GetKeys(OldGUIDs);
-
-				//--------------------------------------------------
-				// Copied from UActorChannel::ReplicateActor (L3121)
-				//--------------------------------------------------
-				FOutBunch Ar(PackageMap);
-				Ar.bReliable = true;
-				UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::OpenedLocally);
-				if (Channel)
-				{
-					Channel->SetChannelActor(Actor, ESetChannelActorFlags::None);
-				}
-				PackageMap->SerializeNewActor(Ar, Channel, Actor);
-				Actor->OnSerializeNewActor(Ar);
-				//--------------------------------------------------
-
-				NetGUID = GuidCache->GetNetGUID(Obj);
-
-				TSet<FNetworkGUID> NewGUIDs;
-				PackageMap->NetGUIDExportCountMap.GetKeys(NewGUIDs);
-				// Find the newly-registered NetGUIDs during SerializeNewActor()
-				NewGUIDs = NewGUIDs.Difference(OldGUIDs);
-
-				for (FNetworkGUID& NewGUID : NewGUIDs)
-				{
-					// Don't send the target NetGUID in the context
-					if (NewGUID == NetGUID)
-						continue;
-
-					auto NewCachedObj = GuidCache->GetCacheObject(NewGUID);
-					auto Context = ObjRef.add_context();
-					Context->set_netguid(NewGUID.Value);
-					Context->set_pathname(std::string(TCHAR_TO_UTF8(*NewCachedObj->PathName.ToString())));
-					Context->set_outerguid(NewCachedObj->OuterGUID.Value);
-					UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send registered NetGUID %d with path: %s"), NewGUID.Value, *NewCachedObj->PathName.ToString());
-				}
-				ObjRef.set_netguidbunch(Ar.GetData(), Ar.GetNumBytes());
-				ObjRef.set_bunchbitsnum(Ar.GetNumBits());
-
+				UE_LOG(LogChanneld, Warning, TEXT("Failed to get the ref of %s: the NetConnection is not valid"), *Obj->GetName());
+				return ObjRef;
 			}
-			//else
-			//{
-			//	NetGUID = GuidCache->GetOrAssignNetGUID(Obj);
-			//}
+			auto PackageMap = Cast<UPackageMapClient>(Connection->PackageMap);
+
+			if (IsValid(PackageMap))
+			{
+				// If the NetGUID is not created yet, assign an new one and send the new NetGUID CachedObjects to the client.
+				// If the NetGUID is already created but hasn't been exported to the client yet, we need to send the CachedObjects as well.
+				if (!NetGUID.IsValid() || !PackageMap->NetGUIDExportCountMap.Contains(NetGUID))
+				{
+					TSet<FNetworkGUID> OldGUIDs;
+					PackageMap->NetGUIDExportCountMap.GetKeys(OldGUIDs);
+
+					//--------------------------------------------------
+					// Copied from UActorChannel::ReplicateActor (L3121)
+					//--------------------------------------------------
+					FOutBunch Ar(PackageMap);
+					Ar.bReliable = true;
+					UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);
+					UE_LOG(LogChanneld, VeryVerbose, TEXT("[Server] ActorChannels: %d"), Connection->ActorChannelsNum());
+					Channel->SetChannelActor(Actor, ESetChannelActorFlags::None);
+					PackageMap->SerializeNewActor(Ar, Channel, Actor);
+					Actor->OnSerializeNewActor(Ar);
+					//--------------------------------------------------
+
+					NetGUID = GuidCache->GetNetGUID(Obj);
+
+					TSet<FNetworkGUID> NewGUIDs;
+					PackageMap->NetGUIDExportCountMap.GetKeys(NewGUIDs);
+					// Find the newly-registered NetGUIDs during SerializeNewActor()
+					NewGUIDs = NewGUIDs.Difference(OldGUIDs);
+
+					for (FNetworkGUID& NewGUID : NewGUIDs)
+					{
+						// Don't send the target NetGUID in the context
+						if (NewGUID == NetGUID)
+							continue;
+
+						auto NewCachedObj = GuidCache->GetCacheObject(NewGUID);
+						auto Context = ObjRef.add_context();
+						Context->set_netguid(NewGUID.Value);
+						Context->set_pathname(std::string(TCHAR_TO_UTF8(*NewCachedObj->PathName.ToString())));
+						Context->set_outerguid(NewCachedObj->OuterGUID.Value);
+						UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send registered NetGUID %d with path: %s"), NewGUID.Value, *NewCachedObj->PathName.ToString());
+					}
+					ObjRef.set_netguidbunch(Ar.GetData(), Ar.GetNumBytes());
+					ObjRef.set_bunchbitsnum(Ar.GetNumBits());
+
+					// Remove the channel after using it
+					Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
+				}
+				//else
+				//{
+				//	NetGUID = GuidCache->GetOrAssignNetGUID(Obj);
+				//}
+			}
+			else
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("Failed to get the ref of %s: the Actor's NetConnection has no PackageMapClient"), *Obj->GetName());
+			}
 		}
 
 		ObjRef.set_netguid(NetGUID.Value);

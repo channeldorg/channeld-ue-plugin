@@ -57,6 +57,7 @@ public:
 	virtual void NotifyActorChannelOpen(UActorChannel* Channel, AActor* Actor) override;
 	virtual int32 ServerReplicateActors(float DeltaSeconds) override;
 	virtual void ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject = nullptr) override;
+	virtual void NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTravel) override;
 	//~ End UNetDriver Interface
 
 	void ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDelayRPC);

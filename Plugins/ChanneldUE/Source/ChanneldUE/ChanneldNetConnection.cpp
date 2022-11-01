@@ -10,13 +10,18 @@
 #include "GameFramework/PlayerController.h"
 #include "unreal_common.pb.h"
 #include "ChanneldUtils.h"
+#include "ChanneldSettings.h"
 
 UChanneldNetConnection::UChanneldNetConnection(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
 	//MaxPacket = MaxPacketSize;
-	//SetInternalAck(true);
-	//SetAutoFlush(true);
+	if (GetMutableDefault<UChanneldSettings>()->bDisableHandshaking)
+	{
+		SetInternalAck(true);
+		SetReplay(false);
+		SetAutoFlush(true);
+	}
 }
 
 void UChanneldNetConnection::InitBase(UNetDriver* InDriver, class FSocket* InSocket, const FURL& InURL, EConnectionState InState, int32 InMaxPacket /*= 0*/, int32 InPacketOverhead /*= 0*/)
@@ -96,7 +101,9 @@ void UChanneldNetConnection::LowLevelSend(void* Data, int32 CountBits, FOutPacke
 		}
 
 		bool bBlockSend = false;
+#if !UE_BUILD_SHIPPING
 		LowLevelSendDel.ExecuteIfBound((void*)DataToSend, DataSize, bBlockSend);
+#endif
 
 		if (!bBlockSend && DataSize > 0)
 		{

@@ -124,7 +124,7 @@ void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provide
 		RegisterChannelDataTemplate(Provider->GetChannelType(), Provider->GetChannelDataTemplate());
 	}
 
-	TSet<IChannelDataProvider*> Providers = ChannelDataProviders.FindOrAdd(ChId);
+	TSet<FProviderInternal>& Providers = ChannelDataProviders.FindOrAdd(ChId);
 	Providers.Add(Provider);
 	ChannelDataProviders[ChId] = Providers;
 
@@ -134,7 +134,7 @@ void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provide
 void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved)
 {
 	ensureMsgf(Provider->GetChannelType() != channeldpb::UNKNOWN, TEXT("Invalid channel type of data provider: %s"), *IChannelDataProvider::GetName(Provider));
-	auto Providers = ChannelDataProviders.Find(ChId);
+	TSet<FProviderInternal>* Providers = ChannelDataProviders.Find(ChId);
 	if (Providers != nullptr)
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Removing channel data provider %s from channel %d"), *IChannelDataProvider::GetName(Provider), ChId);
@@ -142,6 +142,16 @@ void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Prov
 		if (bSendRemoved)
 		{
 			Provider->SetRemoved();
+
+			// Collect the removed states immediately (before the provider gets destroyed completely)
+			google::protobuf::Message* RemovedData = RemovedProvidersData.FindRef(ChId);
+			if (!RemovedData)
+			{
+				auto MsgTemplate = ChannelDataTemplates.FindRef(Provider->GetChannelType());
+				RemovedData = MsgTemplate->New();
+				RemovedProvidersData.Add(ChId, RemovedData);
+			}
+			Provider->UpdateChannelData(RemovedData);
 		}
 		else
 		{
@@ -173,9 +183,12 @@ void UChannelDataView::OnDisconnect()
 {
 	for (auto& Pair : ChannelDataProviders)
 	{
-		for (IChannelDataProvider* Provider : Pair.Value)
+		for (FProviderInternal& Provider : Pair.Value)
 		{
-			Provider->SetRemoved();
+			if (Provider.IsValid())
+			{
+				Provider->SetRemoved();
+			}
 		}
 	}
 
@@ -196,7 +209,7 @@ int32 UChannelDataView::SendAllChannelUpdates()
 		if (static_cast<channeldpb::ChannelDataAccess>(Pair.Value.SubOptions.DataAccess) == channeldpb::WRITE_ACCESS)
 		{
 			ChannelId ChId = Pair.Key;
-			auto Providers = ChannelDataProviders.Find(ChId);
+			TSet<FProviderInternal>* Providers = ChannelDataProviders.Find(ChId);
 			if (Providers == nullptr)
 				continue;
 
@@ -211,7 +224,7 @@ int32 UChannelDataView::SendAllChannelUpdates()
 			for (auto Itr = Providers->CreateIterator(); Itr; ++Itr)
 			{
 				auto Provider = Itr.ElementIt->Value;
-				if (Provider && IsValid(Cast<UObject>(Provider)))
+				if (Provider.IsValid())
 				{
 					if (Provider->UpdateChannelData(NewState))
 					{
@@ -226,13 +239,22 @@ int32 UChannelDataView::SendAllChannelUpdates()
 				else
 				{
 					Itr.RemoveCurrent();
+					RemovedCount++;
 				}
 			}
 			if (RemovedCount > 0)
 				UE_LOG(LogChanneld, Log, TEXT("Removed %d channel data provider(s) from channel %d"), RemovedCount, ChId);
 
-			if (UpdateCount > 0)
+			if (UpdateCount > 0 || RemovedCount > 0)
 			{
+				// Merge removed states
+				google::protobuf::Message* RemovedData;
+				if (RemovedProvidersData.RemoveAndCopyValue(ChId, RemovedData))
+				{
+					NewState->MergeFrom(*RemovedData);
+					delete RemovedData;
+				}
+				
 				channeldpb::ChannelDataUpdateMessage UpdateMsg;
 				UpdateMsg.mutable_data()->PackFrom(*NewState);
 				Connection->Send(ChId, channeldpb::CHANNEL_DATA_UPDATE, UpdateMsg);
@@ -277,7 +299,7 @@ void UChannelDataView::HandleUnsub(UChanneldConnection* Conn, ChannelId ChId, co
 	auto UnsubMsg = static_cast<const channeldpb::UnsubscribedFromChannelResultMessage*>(Msg);
 	if (UnsubMsg->connid() == Connection->GetConnId())
 	{
-		TSet<IChannelDataProvider*> Providers;
+		TSet<FProviderInternal> Providers;
 		if (ChannelDataProviders.RemoveAndCopyValue(ChId, Providers))
 		{
 			UE_LOG(LogChanneld, Log, TEXT("Received Unsub message. Removed all data providers(%d) from channel %d"), Providers.Num(), ChId);
@@ -317,7 +339,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 
 	UE_LOG(LogChanneld, Verbose, TEXT("Received %s channel update: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
 
-	TSet<IChannelDataProvider*>* Providers = ChannelDataProviders.Find(ChId);
+	TSet<FProviderInternal>* Providers = ChannelDataProviders.Find(ChId);
 	if (Providers == nullptr || Providers->Num() == 0)
 	{
 		UE_LOG(LogChanneld, Warning, TEXT("No provider registered for channel %d, typeUrl: %s"), ChId, UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
@@ -326,10 +348,10 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 
 	// The set can be changed during the iteration, when a new provider is created from the UnrealObjectRef during any replicator's OnStateChanged(),
 	// or the provider's owner actor got destroyed by removed=true. So we use a const array to iterate.
-	TArray<IChannelDataProvider*> ProvidersArr = Providers->Array();
-	for (IChannelDataProvider* Provider : ProvidersArr)
+	TArray<FProviderInternal> ProvidersArr = Providers->Array();
+	for (FProviderInternal& Provider : ProvidersArr)
 	{
-		if (Provider && !Provider->IsRemoved())
+		if (Provider.IsValid() && !Provider->IsRemoved())
 		{
 			Provider->OnChannelDataUpdated(UpdateData);
 		}

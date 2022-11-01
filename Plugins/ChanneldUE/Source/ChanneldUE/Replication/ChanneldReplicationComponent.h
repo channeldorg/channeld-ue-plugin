@@ -43,8 +43,11 @@ public:
 	virtual void InitOnce();
 	virtual void UninitOnce();
 	virtual void EndPlay(EEndPlayReason::Type Reason) override;
-	virtual void DestroyComponent(bool bPromoteChildren /* = false */) override;
-
+	/* Only EndPlay() will be triggered on the server when the Actor is being destroy!
+	virtual void DestroyComponent(bool bPromoteChildren = false) override;
+	virtual void BeginDestroy() override;
+	*/
+	
 	//~ Begin IChannelDataProvider Interface.
 	channeldpb::ChannelType GetChannelType() override;
 	virtual google::protobuf::Message* GetChannelDataTemplate() const override;

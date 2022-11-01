@@ -158,8 +158,8 @@ void UChanneldNetDriver::ServerHandleUnsub(UChanneldConnection* Conn, ChannelId 
 
 	if (ResultMsg->conntype() == channeldpb::CLIENT && Conn->OwnedChannels.Contains(ChId))
 	{
-		auto ClientConnection = ClientConnectionMap.FindRef(ResultMsg->connid());
-		if (ClientConnection)
+		UChanneldNetConnection* ClientConnection;
+		if (ClientConnectionMap.RemoveAndCopyValue(ResultMsg->connid(), ClientConnection))
 		{
 			//~ Start copy from UNetDriver::Shutdown()
 			if (ClientConnection->PlayerController)
@@ -174,8 +174,6 @@ void UChanneldNetDriver::ServerHandleUnsub(UChanneldConnection* Conn, ChannelId 
 			// Calls Close() internally and removes from ClientConnections
 			ClientConnection->CleanUp();
 			//~ End copy
-
-			ClientConnectionMap.Remove(ResultMsg->connid());
 		}
 	}
 }
@@ -480,6 +478,11 @@ bool UChanneldNetDriver::IsNetResourceValid()
 
 void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 {
+	if (GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
+	{
+		return;
+	}
+	
 	if (!Actor->GetIsReplicated())
 	{
 		return;
@@ -489,7 +492,10 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	// Send the spawning to the clients
 	for (auto& Pair : ClientConnectionMap)
 	{
-		SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Actor, Pair.Value));
+		if (!IsValid(Pair.Value))
+			continue;
+		auto ObjRef = ChanneldUtils::GetRefOfObject(Actor, Pair.Value);
+		SpawnMsg.mutable_obj()->CopyFrom(ObjRef);
 		SendDataToClient(MessageType_SPAWN, Pair.Key, SpawnMsg);
 	}
 }
@@ -606,7 +612,7 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 			}
 			*/
 
-			if (Connection->PlayerController && Connection->PlayerController->GetLocalRole() == ROLE_AutonomousProxy && Connection->PlayerController->GetViewTarget())
+			if (Connection->PlayerController && Connection->PlayerController->GetViewTarget())
 			{
 				// Trigger ClientMoveResponse RPC
 				Connection->PlayerController->SendClientAdjustment();
@@ -775,7 +781,7 @@ void UChanneldNetDriver::HandleLowLevelMessage(UChanneldConnection* Conn, Channe
 
 void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 {
-	// Trigger the callings of LowLevelSend()
+	// Trigger the callings of ServerReplicateActors() and LowLevelSend()
 	UNetDriver::TickFlush(DeltaSeconds);
 
 	if (ConnToChanneld && ConnToChanneld->IsConnected())
@@ -795,4 +801,58 @@ void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 		MyServerConnection->bChanneldAuthenticated = true;
 		MyServerConnection->FlushUnauthData();
 	}
+}
+
+void UChanneldNetDriver::NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTravel)
+{
+	Super::NotifyActorDestroyed(Actor, IsSeamlessTravel);
+
+	/*
+	if (!IsServer())
+		return;
+	
+	FNetworkGUID NetGUID = GuidCache->GetOrAssignNetGUID( Actor );
+	if (NetGUID.IsDefault())
+	{
+		UE_LOG(LogNet, Error, TEXT("CreateDestructionInfo got an invalid NetGUID for %s"), *Actor->GetName());
+		return;
+	}
+
+	TUniquePtr<FActorDestructionInfo>& NewInfoPtr = DestroyedStartupOrDormantActors.FindOrAdd( NetGUID );
+	if (NewInfoPtr.IsValid() == false)
+	{
+		NewInfoPtr = MakeUnique<FActorDestructionInfo>();
+	}
+
+	FActorDestructionInfo &NewInfo = *NewInfoPtr;
+	NewInfo.DestroyedPosition = Actor->GetActorLocation();
+	NewInfo.NetGUID = NetGUID;
+	NewInfo.Level = Actor->GetLevel();
+	NewInfo.ObjOuter = Actor->GetOuter();
+	NewInfo.PathName = Actor->GetName();
+
+	// Look for renamed actor now so we can clear it after the destroy is queued
+	FName RenamedPath = RenamedStartupActors.FindRef(Actor->GetFName());
+	if (RenamedPath != NAME_None)
+	{
+		NewInfo.PathName = RenamedPath.ToString();
+	}
+
+	if (NewInfo.Level.IsValid() && !NewInfo.Level->IsPersistentLevel() )
+	{
+		NewInfo.StreamingLevelName = NewInfo.Level->GetOutermost()->GetFName();
+	}
+	else
+	{
+		NewInfo.StreamingLevelName = NAME_None;
+	}
+
+	NewInfo.Reason = EChannelCloseReason::Destroyed;
+
+	for( int32 i=ClientConnections.Num()-1; i>=0; i-- )
+	{
+		UNetConnection* Connection = ClientConnections[i];
+		SendDestructionInfo(Connection, NewInfoPtr.Get());
+	}
+	*/
 }
