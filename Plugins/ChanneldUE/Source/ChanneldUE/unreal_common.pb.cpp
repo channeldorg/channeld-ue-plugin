@@ -405,7 +405,6 @@ PROTOBUF_CONSTEXPR ControllerState::ControllerState(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.playerstate_)*/nullptr
   , /*decltype(_impl_.pawn_)*/nullptr
-  , /*decltype(_impl_.removed_)*/false
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct ControllerStateDefaultTypeInternal {
   PROTOBUF_CONSTEXPR ControllerStateDefaultTypeInternal()
@@ -998,7 +997,6 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::unrealpb::ControllerState, _impl_.removed_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::ControllerState, _impl_.playerstate_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::ControllerState, _impl_.pawn_),
   ~0u,  // no _has_bits_
@@ -1160,22 +1158,22 @@ static const ::_pbi::MigrationSchema schemas_unreal_5fcommon_2eproto[] PROTOBUF_
   { 320, -1, -1, sizeof(::unrealpb::Character_ClientMoveResponsePacked_Params)},
   { 328, 338, -1, sizeof(::unrealpb::PlayerState)},
   { 342, -1, -1, sizeof(::unrealpb::ControllerState)},
-  { 351, -1, -1, sizeof(::unrealpb::Controller_ClientSetLocation_Params)},
-  { 359, -1, -1, sizeof(::unrealpb::Controller_ClientSetRotation_Params)},
-  { 367, 375, -1, sizeof(::unrealpb::PlayerControllerState)},
-  { 377, -1, -1, sizeof(::unrealpb::PlayerController_ServerUpdateCamera_Params)},
-  { 385, 392, -1, sizeof(::unrealpb::PlayerController_ClientSetHUD_Params)},
-  { 393, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetViewTarget_Params)},
-  { 404, 411, -1, sizeof(::unrealpb::PlayerController_ClientEnableNetworkVoice_Params)},
-  { 412, -1, -1, sizeof(::unrealpb::PlayerController_ClientCapBandwidth_Params)},
-  { 419, -1, -1, sizeof(::unrealpb::PlayerController_ClientRestart_Params)},
-  { 426, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetCameraMode_Params)},
-  { 433, -1, -1, sizeof(::unrealpb::PlayerController_ClientRetryClientRestart_Params)},
-  { 440, -1, -1, sizeof(::unrealpb::PlayerController_ServerSetSpectatorLocation_Params)},
-  { 448, -1, -1, sizeof(::unrealpb::PlayerController_ServerAcknowledgePossession_Params)},
-  { 455, -1, -1, sizeof(::unrealpb::PlayerController_ClientGotoState_Params)},
-  { 462, -1, -1, sizeof(::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params)},
-  { 473, 483, -1, sizeof(::unrealpb::GameStateBase)},
+  { 350, -1, -1, sizeof(::unrealpb::Controller_ClientSetLocation_Params)},
+  { 358, -1, -1, sizeof(::unrealpb::Controller_ClientSetRotation_Params)},
+  { 366, 374, -1, sizeof(::unrealpb::PlayerControllerState)},
+  { 376, -1, -1, sizeof(::unrealpb::PlayerController_ServerUpdateCamera_Params)},
+  { 384, 391, -1, sizeof(::unrealpb::PlayerController_ClientSetHUD_Params)},
+  { 392, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetViewTarget_Params)},
+  { 403, 410, -1, sizeof(::unrealpb::PlayerController_ClientEnableNetworkVoice_Params)},
+  { 411, -1, -1, sizeof(::unrealpb::PlayerController_ClientCapBandwidth_Params)},
+  { 418, -1, -1, sizeof(::unrealpb::PlayerController_ClientRestart_Params)},
+  { 425, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetCameraMode_Params)},
+  { 432, -1, -1, sizeof(::unrealpb::PlayerController_ClientRetryClientRestart_Params)},
+  { 439, -1, -1, sizeof(::unrealpb::PlayerController_ServerSetSpectatorLocation_Params)},
+  { 447, -1, -1, sizeof(::unrealpb::PlayerController_ServerAcknowledgePossession_Params)},
+  { 454, -1, -1, sizeof(::unrealpb::PlayerController_ClientGotoState_Params)},
+  { 461, -1, -1, sizeof(::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params)},
+  { 472, 482, -1, sizeof(::unrealpb::GameStateBase)},
 };
 
 static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eproto[] = {
@@ -1384,64 +1382,63 @@ const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_
   "ate\022\022\n\005score\030\002 \001(\002H\000\210\001\001\022\025\n\010playerId\030\003 \001("
   "\005H\001\210\001\001\022\021\n\004ping\030\004 \001(\rH\002\210\001\001\022\027\n\nplayerName\030"
   "\005 \001(\tH\003\210\001\001B\010\n\006_scoreB\013\n\t_playerIdB\007\n\005_pi"
-  "ngB\r\n\013_playerName\"{\n\017ControllerState\022\017\n\007"
-  "removed\030\001 \001(\010\022.\n\013playerState\030\002 \001(\0132\031.unr"
-  "ealpb.UnrealObjectRef\022\'\n\004pawn\030\003 \001(\0132\031.un"
-  "realpb.UnrealObjectRef\"u\n#Controller_Cli"
-  "entSetLocation_Params\022&\n\013newLocation\030\001 \001"
-  "(\0132\021.unrealpb.FVector\022&\n\013newRotation\030\002 \001"
-  "(\0132\021.unrealpb.FVector\"c\n#Controller_Clie"
-  "ntSetRotation_Params\022&\n\013newRotation\030\001 \001("
-  "\0132\021.unrealpb.FVector\022\024\n\014bResetCamera\030\002 \001"
-  "(\010\"\243\001\n\025PlayerControllerState\0222\n\022targetVi"
-  "ewRotation\030\002 \001(\0132\021.unrealpb.FVectorH\000\210\001\001"
-  "\022-\n\rspawnLocation\030\003 \001(\0132\021.unrealpb.FVect"
-  "orH\001\210\001\001B\025\n\023_targetViewRotationB\020\n\016_spawn"
-  "Location\"g\n*PlayerController_ServerUpdat"
-  "eCamera_Params\022!\n\006camLoc\030\001 \001(\0132\021.unrealp"
-  "b.FVector\022\026\n\016camPitchAndYaw\030\002 \001(\005\"R\n$Pla"
-  "yerController_ClientSetHUD_Params\022\031\n\014hud"
-  "ClassName\030\001 \001(\tH\000\210\001\001B\017\n\r_hudClassName\"\252\001"
-  "\n+PlayerController_ClientSetViewTarget_P"
-  "arams\022(\n\005actor\030\001 \001(\0132\031.unrealpb.UnrealOb"
-  "jectRef\022\021\n\tblendTime\030\002 \001(\002\022\025\n\rblendFunct"
-  "ion\030\003 \001(\r\022\020\n\010blendExp\030\004 \001(\002\022\025\n\rbLockOutg"
-  "oing\030\005 \001(\010\"T\n0PlayerController_ClientEna"
-  "bleNetworkVoice_Params\022\024\n\007bEnable\030\001 \001(\010H"
-  "\000\210\001\001B\n\n\010_bEnable\"9\n*PlayerController_Cli"
-  "entCapBandwidth_Params\022\013\n\003cap\030\001 \001(\005\"P\n%P"
-  "layerController_ClientRestart_Params\022\'\n\004"
-  "pawn\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\"A\n"
-  "+PlayerController_ClientSetCameraMode_Pa"
-  "rams\022\022\n\nnewCamMode\030\001 \001(\t\"[\n0PlayerContro"
-  "ller_ClientRetryClientRestart_Params\022\'\n\004"
-  "pawn\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\"z\n"
-  "2PlayerController_ServerSetSpectatorLoca"
-  "tion_Params\022!\n\006newLoc\030\001 \001(\0132\021.unrealpb.F"
-  "Vector\022!\n\006newRot\030\002 \001(\0132\021.unrealpb.FVecto"
-  "r\"^\n3PlayerController_ServerAcknowledgeP"
-  "ossession_Params\022\'\n\004pawn\030\001 \001(\0132\031.unrealp"
-  "b.UnrealObjectRef\";\n\'PlayerController_Cl"
-  "ientGotoState_Params\022\020\n\010newState\030\001 \001(\t\"\375"
-  "\001\n5PlayerController_ClientReceiveLocaliz"
-  "edMessage_Params\022\017\n\007message\030\001 \001(\t\022\016\n\006swi"
-  "tch\030\002 \001(\005\0227\n\024relatedPlayerState_1\030\003 \001(\0132"
-  "\031.unrealpb.UnrealObjectRef\0227\n\024relatedPla"
-  "yerState_2\030\004 \001(\0132\031.unrealpb.UnrealObject"
-  "Ref\0221\n\016optionalObject\030\005 \001(\0132\031.unrealpb.U"
-  "nrealObjectRef\"\207\002\n\rGameStateBase\022\037\n\022spec"
-  "tatorClassName\030\002 \001(\tH\000\210\001\001\022\036\n\021gameModeCla"
-  "ssName\030\003 \001(\tH\001\210\001\001\022\'\n\032replicatedWorldTime"
-  "Seconds\030\004 \001(\002H\002\210\001\001\022$\n\027bReplicatedHasBegu"
-  "nPlay\030\005 \001(\010H\003\210\001\001B\025\n\023_spectatorClassNameB"
-  "\024\n\022_gameModeClassNameB\035\n\033_replicatedWorl"
-  "dTimeSecondsB\032\n\030_bReplicatedHasBegunPlay"
-  "B,Z*channeld.clewcat.com/channeld/pkg/un"
-  "realpbb\006proto3"
+  "ngB\r\n\013_playerName\"j\n\017ControllerState\022.\n\013"
+  "playerState\030\002 \001(\0132\031.unrealpb.UnrealObjec"
+  "tRef\022\'\n\004pawn\030\003 \001(\0132\031.unrealpb.UnrealObje"
+  "ctRef\"u\n#Controller_ClientSetLocation_Pa"
+  "rams\022&\n\013newLocation\030\001 \001(\0132\021.unrealpb.FVe"
+  "ctor\022&\n\013newRotation\030\002 \001(\0132\021.unrealpb.FVe"
+  "ctor\"c\n#Controller_ClientSetRotation_Par"
+  "ams\022&\n\013newRotation\030\001 \001(\0132\021.unrealpb.FVec"
+  "tor\022\024\n\014bResetCamera\030\002 \001(\010\"\243\001\n\025PlayerCont"
+  "rollerState\0222\n\022targetViewRotation\030\002 \001(\0132"
+  "\021.unrealpb.FVectorH\000\210\001\001\022-\n\rspawnLocation"
+  "\030\003 \001(\0132\021.unrealpb.FVectorH\001\210\001\001B\025\n\023_targe"
+  "tViewRotationB\020\n\016_spawnLocation\"g\n*Playe"
+  "rController_ServerUpdateCamera_Params\022!\n"
+  "\006camLoc\030\001 \001(\0132\021.unrealpb.FVector\022\026\n\016camP"
+  "itchAndYaw\030\002 \001(\005\"R\n$PlayerController_Cli"
+  "entSetHUD_Params\022\031\n\014hudClassName\030\001 \001(\tH\000"
+  "\210\001\001B\017\n\r_hudClassName\"\252\001\n+PlayerControlle"
+  "r_ClientSetViewTarget_Params\022(\n\005actor\030\001 "
+  "\001(\0132\031.unrealpb.UnrealObjectRef\022\021\n\tblendT"
+  "ime\030\002 \001(\002\022\025\n\rblendFunction\030\003 \001(\r\022\020\n\010blen"
+  "dExp\030\004 \001(\002\022\025\n\rbLockOutgoing\030\005 \001(\010\"T\n0Pla"
+  "yerController_ClientEnableNetworkVoice_P"
+  "arams\022\024\n\007bEnable\030\001 \001(\010H\000\210\001\001B\n\n\010_bEnable\""
+  "9\n*PlayerController_ClientCapBandwidth_P"
+  "arams\022\013\n\003cap\030\001 \001(\005\"P\n%PlayerController_C"
+  "lientRestart_Params\022\'\n\004pawn\030\001 \001(\0132\031.unre"
+  "alpb.UnrealObjectRef\"A\n+PlayerController"
+  "_ClientSetCameraMode_Params\022\022\n\nnewCamMod"
+  "e\030\001 \001(\t\"[\n0PlayerController_ClientRetryC"
+  "lientRestart_Params\022\'\n\004pawn\030\001 \001(\0132\031.unre"
+  "alpb.UnrealObjectRef\"z\n2PlayerController"
+  "_ServerSetSpectatorLocation_Params\022!\n\006ne"
+  "wLoc\030\001 \001(\0132\021.unrealpb.FVector\022!\n\006newRot\030"
+  "\002 \001(\0132\021.unrealpb.FVector\"^\n3PlayerContro"
+  "ller_ServerAcknowledgePossession_Params\022"
+  "\'\n\004pawn\030\001 \001(\0132\031.unrealpb.UnrealObjectRef"
+  "\";\n\'PlayerController_ClientGotoState_Par"
+  "ams\022\020\n\010newState\030\001 \001(\t\"\375\001\n5PlayerControll"
+  "er_ClientReceiveLocalizedMessage_Params\022"
+  "\017\n\007message\030\001 \001(\t\022\016\n\006switch\030\002 \001(\005\0227\n\024rela"
+  "tedPlayerState_1\030\003 \001(\0132\031.unrealpb.Unreal"
+  "ObjectRef\0227\n\024relatedPlayerState_2\030\004 \001(\0132"
+  "\031.unrealpb.UnrealObjectRef\0221\n\016optionalOb"
+  "ject\030\005 \001(\0132\031.unrealpb.UnrealObjectRef\"\207\002"
+  "\n\rGameStateBase\022\037\n\022spectatorClassName\030\002 "
+  "\001(\tH\000\210\001\001\022\036\n\021gameModeClassName\030\003 \001(\tH\001\210\001\001"
+  "\022\'\n\032replicatedWorldTimeSeconds\030\004 \001(\002H\002\210\001"
+  "\001\022$\n\027bReplicatedHasBegunPlay\030\005 \001(\010H\003\210\001\001B"
+  "\025\n\023_spectatorClassNameB\024\n\022_gameModeClass"
+  "NameB\035\n\033_replicatedWorldTimeSecondsB\032\n\030_"
+  "bReplicatedHasBegunPlayB,Z*channeld.clew"
+  "cat.com/channeld/pkg/unrealpbb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_unreal_5fcommon_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_unreal_5fcommon_2eproto = {
-    false, false, 8734, descriptor_table_protodef_unreal_5fcommon_2eproto,
+    false, false, 8717, descriptor_table_protodef_unreal_5fcommon_2eproto,
     "unreal_common.proto",
     &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 37,
     schemas_unreal_5fcommon_2eproto, file_default_instances_unreal_5fcommon_2eproto, TableStruct_unreal_5fcommon_2eproto::offsets,
@@ -9188,7 +9185,6 @@ ControllerState::ControllerState(const ControllerState& from)
   new (&_impl_) Impl_{
       decltype(_impl_.playerstate_){nullptr}
     , decltype(_impl_.pawn_){nullptr}
-    , decltype(_impl_.removed_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -9198,7 +9194,6 @@ ControllerState::ControllerState(const ControllerState& from)
   if (from._internal_has_pawn()) {
     _this->_impl_.pawn_ = new ::unrealpb::UnrealObjectRef(*from._impl_.pawn_);
   }
-  _this->_impl_.removed_ = from._impl_.removed_;
   // @@protoc_insertion_point(copy_constructor:unrealpb.ControllerState)
 }
 
@@ -9209,7 +9204,6 @@ inline void ControllerState::SharedCtor(
   new (&_impl_) Impl_{
       decltype(_impl_.playerstate_){nullptr}
     , decltype(_impl_.pawn_){nullptr}
-    , decltype(_impl_.removed_){false}
     , /*decltype(_impl_._cached_size_)*/{}
   };
 }
@@ -9247,7 +9241,6 @@ void ControllerState::Clear() {
     delete _impl_.pawn_;
   }
   _impl_.pawn_ = nullptr;
-  _impl_.removed_ = false;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -9257,14 +9250,6 @@ const char* ControllerState::_InternalParse(const char* ptr, ::_pbi::ParseContex
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // bool removed = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          _impl_.removed_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
       // .unrealpb.UnrealObjectRef playerState = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
@@ -9310,12 +9295,6 @@ uint8_t* ControllerState::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // bool removed = 1;
-  if (this->_internal_removed() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(1, this->_internal_removed(), target);
-  }
-
   // .unrealpb.UnrealObjectRef playerState = 2;
   if (this->_internal_has_playerstate()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -9360,11 +9339,6 @@ size_t ControllerState::ByteSizeLong() const {
         *_impl_.pawn_);
   }
 
-  // bool removed = 1;
-  if (this->_internal_removed() != 0) {
-    total_size += 1 + 1;
-  }
-
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
@@ -9391,9 +9365,6 @@ void ControllerState::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const 
     _this->_internal_mutable_pawn()->::unrealpb::UnrealObjectRef::MergeFrom(
         from._internal_pawn());
   }
-  if (from._internal_removed() != 0) {
-    _this->_internal_set_removed(from._internal_removed());
-  }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -9412,8 +9383,8 @@ void ControllerState::InternalSwap(ControllerState* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(ControllerState, _impl_.removed_)
-      + sizeof(ControllerState::_impl_.removed_)
+      PROTOBUF_FIELD_OFFSET(ControllerState, _impl_.pawn_)
+      + sizeof(ControllerState::_impl_.pawn_)
       - PROTOBUF_FIELD_OFFSET(ControllerState, _impl_.playerstate_)>(
           reinterpret_cast<char*>(&_impl_.playerstate_),
           reinterpret_cast<char*>(&other->_impl_.playerstate_));

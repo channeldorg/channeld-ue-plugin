@@ -8,6 +8,7 @@ void ChanneldReplication::RegisterReplicator(const UClass* TargetClass, const FR
 	UE_LOG(LogChanneld, Log, TEXT("Registered replicator for %s, registry size: %d"), *TargetClass->GetFullName(), ReplicatorRegistry.Num());
 }
 
+// TODO: use the pool
 TArray<FChanneldReplicatorBase*> ChanneldReplication::FindAndCreateReplicators(UObject* ReplicatedObj)
 {
 	TArray<FChanneldReplicatorBase*> Result;

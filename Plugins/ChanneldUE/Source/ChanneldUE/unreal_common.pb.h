@@ -5082,7 +5082,6 @@ class CHANNELDUE_API ControllerState final :
   enum : int {
     kPlayerStateFieldNumber = 2,
     kPawnFieldNumber = 3,
-    kRemovedFieldNumber = 1,
   };
   // .unrealpb.UnrealObjectRef playerState = 2;
   bool has_playerstate() const;
@@ -5120,15 +5119,6 @@ class CHANNELDUE_API ControllerState final :
       ::unrealpb::UnrealObjectRef* pawn);
   ::unrealpb::UnrealObjectRef* unsafe_arena_release_pawn();
 
-  // bool removed = 1;
-  void clear_removed();
-  bool removed() const;
-  void set_removed(bool value);
-  private:
-  bool _internal_removed() const;
-  void _internal_set_removed(bool value);
-  public:
-
   // @@protoc_insertion_point(class_scope:unrealpb.ControllerState)
  private:
   class _Internal;
@@ -5139,7 +5129,6 @@ class CHANNELDUE_API ControllerState final :
   struct Impl_ {
     ::unrealpb::UnrealObjectRef* playerstate_;
     ::unrealpb::UnrealObjectRef* pawn_;
-    bool removed_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -13886,26 +13875,6 @@ inline void PlayerState::set_allocated_playername(std::string* playername) {
 // -------------------------------------------------------------------
 
 // ControllerState
-
-// bool removed = 1;
-inline void ControllerState::clear_removed() {
-  _impl_.removed_ = false;
-}
-inline bool ControllerState::_internal_removed() const {
-  return _impl_.removed_;
-}
-inline bool ControllerState::removed() const {
-  // @@protoc_insertion_point(field_get:unrealpb.ControllerState.removed)
-  return _internal_removed();
-}
-inline void ControllerState::_internal_set_removed(bool value) {
-  
-  _impl_.removed_ = value;
-}
-inline void ControllerState::set_removed(bool value) {
-  _internal_set_removed(value);
-  // @@protoc_insertion_point(field_set:unrealpb.ControllerState.removed)
-}
 
 // .unrealpb.UnrealObjectRef playerState = 2;
 inline bool ControllerState::_internal_has_playerstate() const {

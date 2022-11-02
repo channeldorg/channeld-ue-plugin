@@ -60,6 +60,11 @@ void UChanneldReplicationComponent::InitOnce()
 		auto OwnerReplicators = ChanneldReplication::FindAndCreateReplicators(GetOwner());
 		if (OwnerReplicators.Num() > 0)
 		{
+			// for (auto OwnerReplicator : OwnerReplicators)
+			// {
+			// 	TUniquePtr<FChanneldReplicatorBase> Ptr(OwnerReplicator);
+			// 	Replicators.Add(Ptr);
+			// }
 			Replicators.Append(OwnerReplicators);
 		}
 		else
@@ -103,7 +108,7 @@ void UChanneldReplicationComponent::UninitOnce()
 	{
 		View->RemoveProviderFromAllChannels(this, GetNetMode() == ENetMode::NM_DedicatedServer);
 	}
-
+	
 	bUninitialized = true;
 }
 
@@ -158,6 +163,11 @@ void UChanneldReplicationComponent::SetRemoved()
 
 bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message* ChannelData)
 {
+	if (bUninitialized)
+	{
+		return false;
+	}
+	
 	if (!GetOwner()->HasAuthority())
 	{
 		return false;
@@ -193,12 +203,17 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 
 void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Message* ChannelData)
 {
+	if (bUninitialized)
+	{
+		return;
+	}
+	
 	if (GetOwner()->HasAuthority())
 	{
 		return;
 	}
 
-	for (auto Replicator : Replicators)
+	for (auto& Replicator : Replicators)
 	{
 		auto TargetObj = Replicator->GetTargetObject();
 		if (!TargetObj)
@@ -237,7 +252,7 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 
 TSharedPtr<google::protobuf::Message> UChanneldReplicationComponent::SerializeFunctionParams(AActor* Actor, UFunction* Func, void* Params, bool& bSuccess)
 {
-	for (auto Replicator : Replicators)
+	for (auto& Replicator : Replicators)
 	{
 		if (Replicator->GetTargetObject() == Actor)
 		{
@@ -255,7 +270,7 @@ TSharedPtr<google::protobuf::Message> UChanneldReplicationComponent::SerializeFu
 
 TSharedPtr<void> UChanneldReplicationComponent::DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
 {
-	for (auto Replicator : Replicators)
+	for (auto& Replicator : Replicators)
 	{
 		if (Replicator->GetTargetObject() == Actor)
 		{

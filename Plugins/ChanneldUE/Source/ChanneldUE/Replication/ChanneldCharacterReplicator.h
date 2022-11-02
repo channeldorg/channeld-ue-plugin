@@ -9,10 +9,10 @@ class CHANNELDUE_API FChanneldCharacterReplicator : public FChanneldReplicatorBa
 {
 public:
 	FChanneldCharacterReplicator(UObject* InTargetObj);
-	virtual ~FChanneldCharacterReplicator();
+	virtual ~FChanneldCharacterReplicator() override;
 
 	//~Begin FChanneldReplicatorBase Interface
-	virtual UClass* GetTargetClass() { return ACharacter::StaticClass(); }
+	virtual UClass* GetTargetClass() override { return ACharacter::StaticClass(); }
 	virtual google::protobuf::Message* GetDeltaState() override;
 	virtual void ClearState() override;
 	virtual void Tick(float DeltaTime) override;

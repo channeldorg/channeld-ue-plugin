@@ -14,6 +14,7 @@ class CHANNELDUE_API FChanneldReplicatorBase// : UObject
 public:
     //template<class T>
     FChanneldReplicatorBase(UObject* InTargetObj);
+    virtual ~FChanneldReplicatorBase() = default;
 
     FORCEINLINE UObject* GetTargetObject() { return TargetObject.Get(); }
     virtual UClass* GetTargetClass() = 0;

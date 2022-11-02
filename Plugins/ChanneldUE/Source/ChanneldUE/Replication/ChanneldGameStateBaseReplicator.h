@@ -8,10 +8,10 @@ class CHANNELDUE_API FChanneldGameStateBaseReplicator : public FChanneldReplicat
 {
 public:
 	FChanneldGameStateBaseReplicator(UObject* InTargetObj);
-	virtual ~FChanneldGameStateBaseReplicator();
+	virtual ~FChanneldGameStateBaseReplicator() override;
 
 	//~Begin FChanneldReplicatorBase Interface
-	virtual UClass* GetTargetClass() { return AGameStateBase::StaticClass(); }
+	virtual UClass* GetTargetClass() override { return AGameStateBase::StaticClass(); }
 	virtual uint32 GetNetGUID() override;
 	virtual google::protobuf::Message* GetDeltaState() override;
 	virtual void ClearState() override;

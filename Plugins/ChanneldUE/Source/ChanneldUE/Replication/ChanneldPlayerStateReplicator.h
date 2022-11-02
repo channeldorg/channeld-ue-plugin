@@ -8,10 +8,10 @@ class CHANNELDUE_API FChanneldPlayerStateReplicator : public FChanneldReplicator
 {
 public:
 	FChanneldPlayerStateReplicator(UObject* InTargetObj);
-	virtual ~FChanneldPlayerStateReplicator();
+	virtual ~FChanneldPlayerStateReplicator() override;
 
 	//~Begin FChanneldReplicatorBase Interface
-	virtual UClass* GetTargetClass() { return APlayerState::StaticClass(); }
+	virtual UClass* GetTargetClass() override { return APlayerState::StaticClass(); }
 	virtual google::protobuf::Message* GetDeltaState() override;
 	virtual void ClearState() override;
 	virtual void Tick(float DeltaTime) override;

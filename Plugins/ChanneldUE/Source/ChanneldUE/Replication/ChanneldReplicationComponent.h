@@ -34,7 +34,7 @@ protected:
 	ChannelId OwningChannelId;
 	bool bRemoved = false;
 
-	TArray< FChanneldReplicatorBase* > Replicators;
+	TArray< TUniquePtr<FChanneldReplicatorBase> > Replicators;
 
 public:
 
