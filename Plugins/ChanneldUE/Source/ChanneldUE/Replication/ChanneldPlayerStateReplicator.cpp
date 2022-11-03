@@ -76,6 +76,12 @@ void FChanneldPlayerStateReplicator::OnStateChanged(const google::protobuf::Mess
 		return;
 	}
 
+	// Only client needs to apply the new state
+	if (PlayerState->HasAuthority())
+	{
+		return;
+	}
+
 	auto NewState = static_cast<const unrealpb::PlayerState*>(InNewState);
 	FullState->MergeFrom(*NewState);
 	bStateChanged = false;

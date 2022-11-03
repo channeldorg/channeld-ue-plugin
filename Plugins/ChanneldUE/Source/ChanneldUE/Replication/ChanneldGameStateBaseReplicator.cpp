@@ -104,10 +104,11 @@ void FChanneldGameStateBaseReplicator::OnStateChanged(const google::protobuf::Me
 		return;
 	}
 
-	//if (!UKismetSystemLibrary::IsServer(GameStateBase.Get()))
-	//{
-	//	GameStateBase->SetRole(ROLE_SimulatedProxy);
-	//}
+	// Only client needs to apply the new state
+	if (GameStateBase->HasAuthority())
+	{
+		return;
+	}
 
 	auto NewState = static_cast<const unrealpb::GameStateBase*>(InNewState);
 	FullState->MergeFrom(*NewState);
