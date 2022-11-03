@@ -1257,7 +1257,8 @@ class CHANNELDUE_API SpawnObjectMessage final :
 
   enum : int {
     kObjFieldNumber = 1,
-    kLocalRoleFieldNumber = 2,
+    kChannelIdFieldNumber = 2,
+    kLocalRoleFieldNumber = 3,
   };
   // .unrealpb.UnrealObjectRef obj = 1;
   bool has_obj() const;
@@ -1277,7 +1278,20 @@ class CHANNELDUE_API SpawnObjectMessage final :
       ::unrealpb::UnrealObjectRef* obj);
   ::unrealpb::UnrealObjectRef* unsafe_arena_release_obj();
 
-  // optional uint32 localRole = 2;
+  // optional uint32 channelId = 2;
+  bool has_channelid() const;
+  private:
+  bool _internal_has_channelid() const;
+  public:
+  void clear_channelid();
+  uint32_t channelid() const;
+  void set_channelid(uint32_t value);
+  private:
+  uint32_t _internal_channelid() const;
+  void _internal_set_channelid(uint32_t value);
+  public:
+
+  // optional uint32 localRole = 3;
   bool has_localrole() const;
   private:
   bool _internal_has_localrole() const;
@@ -1301,6 +1315,7 @@ class CHANNELDUE_API SpawnObjectMessage final :
     ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::unrealpb::UnrealObjectRef* obj_;
+    uint32_t channelid_;
     uint32_t localrole_;
   };
   union { Impl_ _impl_; };
@@ -8678,9 +8693,37 @@ inline void SpawnObjectMessage::set_allocated_obj(::unrealpb::UnrealObjectRef* o
   // @@protoc_insertion_point(field_set_allocated:unrealpb.SpawnObjectMessage.obj)
 }
 
-// optional uint32 localRole = 2;
-inline bool SpawnObjectMessage::_internal_has_localrole() const {
+// optional uint32 channelId = 2;
+inline bool SpawnObjectMessage::_internal_has_channelid() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool SpawnObjectMessage::has_channelid() const {
+  return _internal_has_channelid();
+}
+inline void SpawnObjectMessage::clear_channelid() {
+  _impl_.channelid_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline uint32_t SpawnObjectMessage::_internal_channelid() const {
+  return _impl_.channelid_;
+}
+inline uint32_t SpawnObjectMessage::channelid() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SpawnObjectMessage.channelId)
+  return _internal_channelid();
+}
+inline void SpawnObjectMessage::_internal_set_channelid(uint32_t value) {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.channelid_ = value;
+}
+inline void SpawnObjectMessage::set_channelid(uint32_t value) {
+  _internal_set_channelid(value);
+  // @@protoc_insertion_point(field_set:unrealpb.SpawnObjectMessage.channelId)
+}
+
+// optional uint32 localRole = 3;
+inline bool SpawnObjectMessage::_internal_has_localrole() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool SpawnObjectMessage::has_localrole() const {
@@ -8688,7 +8731,7 @@ inline bool SpawnObjectMessage::has_localrole() const {
 }
 inline void SpawnObjectMessage::clear_localrole() {
   _impl_.localrole_ = 0u;
-  _impl_._has_bits_[0] &= ~0x00000001u;
+  _impl_._has_bits_[0] &= ~0x00000002u;
 }
 inline uint32_t SpawnObjectMessage::_internal_localrole() const {
   return _impl_.localrole_;
@@ -8698,7 +8741,7 @@ inline uint32_t SpawnObjectMessage::localrole() const {
   return _internal_localrole();
 }
 inline void SpawnObjectMessage::_internal_set_localrole(uint32_t value) {
-  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_._has_bits_[0] |= 0x00000002u;
   _impl_.localrole_ = value;
 }
 inline void SpawnObjectMessage::set_localrole(uint32_t value) {

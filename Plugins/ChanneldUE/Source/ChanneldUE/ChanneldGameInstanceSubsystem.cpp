@@ -395,6 +395,18 @@ UChannelDataView* UChanneldGameInstanceSubsystem::GetChannelDataView()
 void UChanneldGameInstanceSubsystem::SetLowLevelSendToChannelId(int32 ChId)
 {
 	*LowLevelSendToChannelId = ChId;
+
+	// At this moment, we can add the queued providers to the right channels.
+	for (TWeakInterfacePtr<IChannelDataProvider>& Provider : UnregisteredDataProviders)
+	{
+		if (Provider.IsValid())
+		{
+			ChannelDataView->AddProvider(ChId, Provider.Get());
+		}
+	}
+	UnregisteredDataProviders.Empty();
+
+	OnSetLowLevelSendChannelId.Broadcast();
 }
 
 void UChanneldGameInstanceSubsystem::OpenLevel(FName LevelName, bool bAbsolute /*= true*/, FString Options /*= FString(TEXT(""))*/)
@@ -535,14 +547,7 @@ void UChanneldGameInstanceSubsystem::InitChannelDataView()
 		//ConnToChanneld->OnAuthenticated.AddUObject(ChannelDataView, &UChannelDataView::Initialize);
 		ChannelDataView->Initialize(ConnectionInstance);
 
-		for (TWeakInterfacePtr<IChannelDataProvider>& Provider : UnregisteredDataProviders)
-		{
-			if (Provider.IsValid())
-			{
-				ChannelDataView->AddProvider(Provider->GetChannelId(), Provider.Get());
-			}
-		}
-		UnregisteredDataProviders.Empty();
+		OnViewInitialized.Broadcast(ChannelDataView);
 	}
 	else
 	{
@@ -554,10 +559,11 @@ void UChanneldGameInstanceSubsystem::RegisterDataProvider(IChannelDataProvider* 
 {
 	if (ChannelDataView)
 	{
-		ChannelDataView->AddProvider(Provider->GetChannelId(), Provider);
+		ChannelDataView->AddProvider(LowLevelSendToChannelId.Get(), Provider);
 	}
 	else
 	{
+		// If the view is not initialized yet, postpone the registration to SetLowLevelSendToChannelId()
 		UnregisteredDataProviders.Add(Provider);
 	}
 }

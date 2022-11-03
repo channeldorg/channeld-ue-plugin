@@ -21,17 +21,14 @@ public:
 	UChanneldReplicationComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 protected:
-	UFUNCTION(BlueprintImplementableEvent)
-	UProtoMessageObject* ProvideChannelDataTemplate() const;
-
 	virtual const google::protobuf::Message* GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved);
 	virtual void SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID);
 
 	bool bInitialized = false;
 	bool bUninitialized = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EChanneldChannelType ChannelType;
-	ChannelId OwningChannelId;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	// EChanneldChannelType ChannelType;
+	// ChannelId OwningChannelId;
 	bool bRemoved = false;
 
 	TArray< TUniquePtr<FChanneldReplicatorBase> > Replicators;
@@ -49,10 +46,10 @@ public:
 	*/
 	
 	//~ Begin IChannelDataProvider Interface.
-	channeldpb::ChannelType GetChannelType() override;
-	virtual google::protobuf::Message* GetChannelDataTemplate() const override;
-	ChannelId GetChannelId() override;
-	void SetChannelId(ChannelId ChId) override;
+	// channeldpb::ChannelType GetChannelType() override;
+	// virtual google::protobuf::Message* GetChannelDataTemplate() const override;
+	// ChannelId GetChannelId() override;
+	// void SetChannelId(ChannelId ChId) override;
 	bool IsRemoved() override;
 	void SetRemoved() override;
 	bool UpdateChannelData(google::protobuf::Message* ChannelData) override;

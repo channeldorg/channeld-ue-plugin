@@ -9,6 +9,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "ChannelDataProvider.h"
 #include "UObject/WeakInterfacePtr.h"
+#include "View/ChannelDataView.h"
 #include "ChanneldGameInstanceSubsystem.generated.h"
 
 class UProtoMessageObject;
@@ -30,6 +31,9 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FOnceOnListChannel, const TArray<FListedChanne
 DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnSubToChannel, int32, ChId, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
 DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnUnsubFromChannel, int32, ChId, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnViewInitialized, UChannelDataView*);
+DECLARE_MULTICAST_DELEGATE(FOnSetLowLevelSendChannelId);
+
 UCLASS(Meta = (DisplayName = "Channeld"), config = ChanneldUE)
 class CHANNELDUE_API UChanneldGameInstanceSubsystem : public UGameInstanceSubsystem, public FTickableGameObject
 {
@@ -41,6 +45,10 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 		FOnAuth OnAuth;
+
+	//UPROPERTY(BlueprintAssignable)
+	FOnViewInitialized OnViewInitialized;
+	FOnSetLowLevelSendChannelId OnSetLowLevelSendChannelId;
 
 	UPROPERTY(BlueprintAssignable)
 		FOnCreateChannel OnCreateChannel;

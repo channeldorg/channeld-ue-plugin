@@ -107,7 +107,13 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 		UObject* SpawnedObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld());
 		if (SpawnedObj)
 		{
-			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetGUID: %d, local role: %d"), *SpawnedObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->localrole());
+			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetGUID: %d, owning channel: %d, local role: %d"), *SpawnedObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), SpawnMsg->localrole());
+
+			if (SpawnMsg->has_channelid())
+			{
+				GetSubsystem()->GetChannelDataView()->OnSpawnedObject(SpawnedObj, FNetworkGUID(SpawnMsg->obj().netguid()), SpawnMsg->channelid());
+			}
+			
 			if (SpawnMsg->has_localrole() && SpawnedObj->IsA<AActor>())
 			{
 				Cast<AActor>(SpawnedObj)->SetRole((ENetRole)SpawnMsg->localrole());
@@ -482,6 +488,24 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	{
 		return;
 	}
+
+	/* Moved to UChanneldGameInstanceSubsystem::OnActorSpawned
+	UChanneldGameInstanceSubsystem* ChanneldSubsystem = GetSubsystem();
+	UChannelDataView* View = ChanneldSubsystem->GetChannelDataView();
+	FNetworkGUID NetId = GuidCache->GetNetGUID(Actor);
+	ChannelId ChId = LowLevelSendToChannelId.Get();
+	if (View)
+	{
+		View->OnSpawnedObject(Actor, NetId, ChId);
+	}
+	else
+	{
+		ChanneldSubsystem->OnViewInitialized.AddWeakLambda(Actor, [Actor, NetId, ChId](UChannelDataView* InView)
+		{
+			InView->OnSpawnedObject(Actor, NetId, ChId);
+		});
+	}
+	*/
 	
 	if (!Actor->GetIsReplicated())
 	{
@@ -489,6 +513,7 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	}
 
 	unrealpb::SpawnObjectMessage SpawnMsg;
+	SpawnMsg.set_channelid(LowLevelSendToChannelId.Get());
 	// Send the spawning to the clients
 	for (auto& Pair : ClientConnectionMap)
 	{
@@ -528,31 +553,15 @@ void UChanneldNetDriver::OnClientPostLogin(AGameModeBase* GameMode, APlayerContr
 	{
 		unrealpb::SpawnObjectMessage SpawnMsg;
 		SpawnMsg.mutable_obj()->MergeFrom(ChanneldUtils::GetRefOfObject(GameMode->GameState, NewPlayer->GetNetConnection()));
+		SpawnMsg.set_channelid(LowLevelSendToChannelId.Get());
 		SendDataToClient(MessageType_SPAWN, NewPlayerConn->GetConnId(), SpawnMsg);
-		//ConnToChanneld->Send(Comp->GetChannelId(), MessageType_SPAWN, SpawnMsg);
 	}
 	else
 	{
 		UE_LOG(LogChanneld, Warning, TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn the GameStateBase in the client."));
 	}
 
-	/* OnServerSpawnedActor handles this
-	// By now, the new player's pawn isn't set yet, so we should wait the event
-	NewPlayer->GetOnNewPawnNotifier().AddLambda([&, NewPlayerConn](APawn* NewPawn)
-		{
-			unrealpb::SpawnObjectMessage SpawnPlayerMsg;
-			// Send the spawning of the new player's pawn to other clients
-			for (auto& Pair : ClientConnectionMap)
-			{
-				if (Pair.Value != NewPlayerConn)
-				{
-					SpawnPlayerMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(NewPawn, Pair.Value));
-					SpawnPlayerMsg.set_localrole(ENetRole::ROLE_SimulatedProxy);
-					SendDataToClient(MessageType_SPAWN, Pair.Key, SpawnPlayerMsg);
-				}
-			}
-		});
-	*/
+	/* OnServerSpawnedActor() sends the spawning of the new player's pawn to other clients */
 
 	// Send the existing player pawns to the new player
 	unrealpb::SpawnObjectMessage SpawnPlayerMsg;

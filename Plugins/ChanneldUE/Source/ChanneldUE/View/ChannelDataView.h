@@ -39,9 +39,14 @@ public:
 	//virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider);
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
 
-	void OnDisconnect();
+	void OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, ChannelId ChId);
 
 	int32 SendAllChannelUpdates();
+
+	void OnDisconnect();
+
+	UPROPERTY(EditAnywhere)
+	EChanneldChannelType DefaultChannelType = EChanneldChannelType::ECT_Global;
 
 protected:
 
@@ -64,7 +69,7 @@ protected:
 	virtual void LoadCmdLineArgs() {}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure/*, meta=(CallableWithoutWorldContext)*/)
-	UChanneldGameInstanceSubsystem* GetChanneldSubsystem();
+	class UChanneldGameInstanceSubsystem* GetChanneldSubsystem();
 
 	virtual void InitServer();
 	virtual void InitClient();
@@ -89,6 +94,9 @@ protected:
 
 	// Reuse the message objects to 1) decrease the memory footprint; 2) save the data for the next update if no state is consumed.
 	TMap<ChannelId, google::protobuf::Message*> ReceivedUpdateDataInChannels;
+
+	// The spawned object's NetGUID mapping to the ID of the channel that owns the object.
+	TMap<const FNetworkGUID, ChannelId> NetIdOwningChannels;
 
 private:
 

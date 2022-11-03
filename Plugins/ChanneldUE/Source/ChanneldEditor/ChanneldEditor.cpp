@@ -160,7 +160,7 @@ void FChanneldEditorModule::LaunchServersAction()
 	{
 		FString Params = FString::Printf(TEXT("\"%s\" /Game/Maps/%s -game -PIEVIACONSOLE -Multiprocess -server -log -MultiprocessSaveConfig -forcepassthrough -SessionName=\"Dedicated Server %d\" -windowed %s"), *ProjectPath, *MapName, i, *UChanneldEditorSettings::GetAdditionalArgs().ToString());
 		uint32 ProcessId;
-		FProcHandle ProcHandle = FPlatformProcess::CreateProc(*EditorPath, *Params, true, true, false, &ProcessId, 0, nullptr, nullptr, nullptr);
+		FProcHandle ProcHandle = FPlatformProcess::CreateProc(*EditorPath, *Params, true, false, false, &ProcessId, 0, nullptr, nullptr, nullptr);
 		if (ProcHandle.IsValid())
 		{
 			ServerProcHandles.Add(ProcHandle);

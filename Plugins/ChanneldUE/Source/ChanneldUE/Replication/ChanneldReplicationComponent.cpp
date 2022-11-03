@@ -87,7 +87,7 @@ void UChanneldReplicationComponent::InitOnce()
 
 	// Make sure the DataProvider is always registered
 	GameInstance->GetSubsystem<UChanneldGameInstanceSubsystem>()->RegisterDataProvider(this);
-
+	
 	bInitialized = true;
 }
 
@@ -121,7 +121,7 @@ void UChanneldReplicationComponent::EndPlay(EEndPlayReason::Type Reason)
 		UninitOnce();
 	}
 }
-
+/*
 channeldpb::ChannelType UChanneldReplicationComponent::GetChannelType()
 {
 	return static_cast<channeldpb::ChannelType>(ChannelType);
@@ -141,15 +141,15 @@ google::protobuf::Message* UChanneldReplicationComponent::GetChannelDataTemplate
 	}
 }
 
-ChannelId UChanneldReplicationComponent::GetChannelId()
-{
-	return OwningChannelId;
-}
-
 void UChanneldReplicationComponent::SetChannelId(ChannelId ChId)
 {
 	OwningChannelId = ChId;
 }
+ChannelId UChanneldReplicationComponent::GetChannelId()
+{
+	return OwningChannelId;
+}
+*/
 
 bool UChanneldReplicationComponent::IsRemoved()
 {

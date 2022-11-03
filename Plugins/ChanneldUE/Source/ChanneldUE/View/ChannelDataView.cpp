@@ -3,6 +3,7 @@
 #include "ChanneldNetDriver.h"
 #include "ChanneldUtils.h"
 #include "Metrics.h"
+#include "Replication/ChanneldReplicationComponent.h"
 
 UChannelDataView::UChannelDataView(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -118,11 +119,13 @@ void UChannelDataView::BeginDestroy()
 
 void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provider)
 {
+	/*
 	ensureMsgf(Provider->GetChannelType() != channeldpb::UNKNOWN, TEXT("Invalid channel type of data provider: %s"), *IChannelDataProvider::GetName(Provider));
 	if (!ChannelDataTemplates.Contains(Provider->GetChannelType()))
 	{
 		RegisterChannelDataTemplate(Provider->GetChannelType(), Provider->GetChannelDataTemplate());
 	}
+	*/
 
 	TSet<FProviderInternal>& Providers = ChannelDataProviders.FindOrAdd(ChId);
 	Providers.Add(Provider);
@@ -133,7 +136,7 @@ void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provide
 
 void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved)
 {
-	ensureMsgf(Provider->GetChannelType() != channeldpb::UNKNOWN, TEXT("Invalid channel type of data provider: %s"), *IChannelDataProvider::GetName(Provider));
+	// ensureMsgf(Provider->GetChannelType() != channeldpb::UNKNOWN, TEXT("Invalid channel type of data provider: %s"), *IChannelDataProvider::GetName(Provider));
 	TSet<FProviderInternal>* Providers = ChannelDataProviders.Find(ChId);
 	if (Providers != nullptr)
 	{
@@ -147,9 +150,17 @@ void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Prov
 			google::protobuf::Message* RemovedData = RemovedProvidersData.FindRef(ChId);
 			if (!RemovedData)
 			{
-				auto MsgTemplate = ChannelDataTemplates.FindRef(Provider->GetChannelType());
-				RemovedData = MsgTemplate->New();
-				RemovedProvidersData.Add(ChId, RemovedData);
+				EChanneldChannelType ChannelType = GetChanneldSubsystem()->GetChannelTypeByChId(ChId);
+				if (ChannelType == EChanneldChannelType::ECT_Unknown)
+				{
+					UE_LOG(LogChanneld, Error, TEXT("Can't map channel type from channel id: %d. Removed states won't be created for provider: %s"), ChId, *IChannelDataProvider::GetName(Provider));
+				}
+				else
+				{
+					const auto MsgTemplate = ChannelDataTemplates.FindRef(static_cast<channeldpb::ChannelType>(ChannelType));
+					RemovedData = MsgTemplate->New();
+					RemovedProvidersData.Add(ChId, RemovedData);
+				}
 			}
 			Provider->UpdateChannelData(RemovedData);
 		}
@@ -168,13 +179,40 @@ void UChannelDataView::RemoveProviderFromAllChannels(IChannelDataProvider* Provi
 		return;
 	}
 
+	/*
 	ensureMsgf(Provider->GetChannelType() != channeldpb::UNKNOWN, TEXT("Invalid channel type of data provider: %s"), *IChannelDataProvider::GetName(Provider));
 	for (auto& Pair : Connection->SubscribedChannels)
 	{
-		if (static_cast<channeldpb::ChannelType>(Pair.Value.ChannelType) ==Provider->GetChannelType())
+		if (static_cast<channeldpb::ChannelType>(Pair.Value.ChannelType) == Provider->GetChannelType())
 		{
 			RemoveProvider(Pair.Key, Provider, bSendRemoved);
 			return;
+		}
+	}
+	*/
+	for (auto& Pair : ChannelDataProviders)
+	{
+		if (Pair.Value.Contains(Provider))
+		{
+			RemoveProvider(Pair.Key, Provider, bSendRemoved);
+		}
+	}
+}
+
+void UChannelDataView::OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, ChannelId ChId)
+{
+	if (!NetId.IsValid())
+		return;
+	
+	NetIdOwningChannels.Add(NetId, ChId);
+	UE_LOG(LogChanneld, Log, TEXT("Set up mapping of netId: %d -> channeldId: %d, spawned: %s"), NetId.Value, ChId, *GetNameSafe(Obj));
+
+	if (Obj->IsA<AActor>())
+	{
+		auto Providers = Cast<AActor>(Obj)->GetComponentsByInterface(UChannelDataProvider::StaticClass());
+		for (auto Provider : Providers)
+		{
+			AddProvider(ChId, Cast<IChannelDataProvider>(Provider));
 		}
 	}
 }
@@ -332,7 +370,6 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	// Call ParsePartial instead of Parse to keep the existing value from being reset.
 	if (!UpdateData->ParsePartialFromString(UpdateMsg->data().value()))
 	{
-		
 		UE_LOG(LogChanneld, Error, TEXT("Failed to parse %s channel data, typeUrl: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
 		return;
 	}
@@ -349,15 +386,20 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	// The set can be changed during the iteration, when a new provider is created from the UnrealObjectRef during any replicator's OnStateChanged(),
 	// or the provider's owner actor got destroyed by removed=true. So we use a const array to iterate.
 	TArray<FProviderInternal> ProvidersArr = Providers->Array();
+	bool bConsumed = false;
 	for (FProviderInternal& Provider : ProvidersArr)
 	{
 		if (Provider.IsValid() && !Provider->IsRemoved())
 		{
 			Provider->OnChannelDataUpdated(UpdateData);
+			bConsumed = true;
 		}
 	}
 
 	// All new states are consumed, now we reset the cached object for next parse.
-	UpdateData->Clear();
+	if (bConsumed)
+	{
+		UpdateData->Clear();
+	}
 }
 
