@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldTypes.h"
+#include "unreal_common.pb.h"
 #include "ChanneldNetConnection.generated.h"
 
 UCLASS(transient, config=ChanneldUE)
@@ -30,6 +31,9 @@ public:
 		return ConnId;
 	}
 
+	TFunction<ChannelId()> GetLowLevelSendChannelId;
+	void SendData(uint32 MsgType, const uint8* DataToSend, int32 DataSize);
+	void SendMessage(uint32 MsgType, const google::protobuf::Message& Msg);
 	void FlushUnauthData();
 
 	bool bDisableHandshaking = false;

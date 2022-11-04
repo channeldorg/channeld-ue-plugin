@@ -410,34 +410,13 @@ void UChanneldNetDriver::LowLevelSend(TSharedPtr<const FInternetAddr> Address, v
 		if (ConnToChanneld->IsServer())
 		{
 			ConnectionId ClientConnId = AddrToConnId(*Address);
-			SendDataToClient(MessageType_LOW_LEVEL, ClientConnId, DataToSend, DataSize);
+			ClientConnectionMap[ClientConnId]->SendData(MessageType_LOW_LEVEL, DataToSend, DataSize);
 		}
 		else
 		{
-			SendDataToServer(MessageType_LOW_LEVEL, DataToSend, DataSize);
+			GetServerConnection()->SendData(MessageType_LOW_LEVEL, DataToSend, DataSize);
 		}
 	}
-}
-
-void UChanneldNetDriver::SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, uint8* DataToSend, int32 DataSize)
-{
-	channeldpb::ServerForwardMessage ServerForwardMessage;
-	ServerForwardMessage.set_clientconnid(ClientConnId);
-	ServerForwardMessage.set_payload(DataToSend, DataSize);
-	ConnToChanneld->Send(LowLevelSendToChannelId.Get(), MsgType, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
-}
-
-void UChanneldNetDriver::SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, const google::protobuf::Message& Msg)
-{
-	channeldpb::ServerForwardMessage ServerForwardMessage;
-	ServerForwardMessage.set_clientconnid(ClientConnId);
-	ServerForwardMessage.set_payload(Msg.SerializeAsString());
-	ConnToChanneld->Send(LowLevelSendToChannelId.Get(), MsgType, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
-}
-
-void UChanneldNetDriver::SendDataToServer(uint32 MsgType, uint8* DataToSend, int32 DataSize)
-{
-	ConnToChanneld->SendRaw(LowLevelSendToChannelId.Get(), MsgType, DataToSend, DataSize);
 }
 
 void UChanneldNetDriver::LowLevelDestroy()
@@ -521,7 +500,7 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 			continue;
 		auto ObjRef = ChanneldUtils::GetRefOfObject(Actor, Pair.Value);
 		SpawnMsg.mutable_obj()->CopyFrom(ObjRef);
-		SendDataToClient(MessageType_SPAWN, Pair.Key, SpawnMsg);
+		Pair.Value->SendMessage(MessageType_SPAWN, SpawnMsg);
 	}
 }
 
@@ -554,7 +533,7 @@ void UChanneldNetDriver::OnClientPostLogin(AGameModeBase* GameMode, APlayerContr
 		unrealpb::SpawnObjectMessage SpawnMsg;
 		SpawnMsg.mutable_obj()->MergeFrom(ChanneldUtils::GetRefOfObject(GameMode->GameState, NewPlayer->GetNetConnection()));
 		SpawnMsg.set_channelid(LowLevelSendToChannelId.Get());
-		SendDataToClient(MessageType_SPAWN, NewPlayerConn->GetConnId(), SpawnMsg);
+		NewPlayerConn->SendMessage(MessageType_SPAWN, SpawnMsg);
 	}
 	else
 	{
@@ -572,7 +551,7 @@ void UChanneldNetDriver::OnClientPostLogin(AGameModeBase* GameMode, APlayerContr
 		{
 			SpawnPlayerMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(PC->GetPawn(), NewPlayerConn));
 			SpawnPlayerMsg.set_localrole(ENetRole::ROLE_SimulatedProxy);
-			SendDataToClient(MessageType_SPAWN, NewPlayerConn->GetConnId(), SpawnPlayerMsg);
+			NewPlayerConn->SendMessage(MessageType_SPAWN, SpawnPlayerMsg);
 		}
 	}
 }
@@ -608,7 +587,8 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 		{
 			UChanneldNetConnection* Connection = CastChecked<UChanneldNetConnection>(ClientConnections[i]);
 
-			/*
+			/* Try to reproduce native UE's way of spawning new objects but didn't work
+			 * because there are a lot of unrelated objects in the ObjectLookup that failed to be spawned in the client.
 			auto PackageMap = CastChecked<UPackageMapClient>(Connection->PackageMap);
 			for (auto& Pair : GuidCache->ObjectLookup)
 			{
@@ -616,7 +596,7 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 				{
 					unrealpb::SpawnObjectMessage SpawnMsg;
 					SpawnMsg.mutable_obj()->MergeFrom(ChanneldUtils::GetRefOfObject(Pair.Value.Object.Get(), Connection));
-					SendDataToClient(MessageType_SPAWN, Connection->GetConnId(), SpawnMsg);
+					Connection->SendMessage(MessageType_SPAWN, SpawnMsg);
 				}
 			}
 			*/
@@ -641,10 +621,10 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject /*= nullptr*/)
 {
 	UE_LOG(LogChanneld, VeryVerbose, TEXT("Sending RPC %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
-	if (Function->GetFName() == FName("ClientSetHUD"))
-	{
-		//UE_DEBUG_BREAK();
-	}
+	// if (Function->GetFName() == FName("ClientSetHUD"))
+	// {
+	// 	UE_DEBUG_BREAK();
+	// }
 
 	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomRPC)
 	{
@@ -670,7 +650,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 				{
 					if (ConnToChanneld->IsClient())
 					{
-						SendDataToServer(MessageType_RPC, Data, RpcMsg.GetCachedSize());
+						GetServerConnection()->SendData(MessageType_RPC, Data, RpcMsg.GetCachedSize());
 						OnSentRPC(Actor, FuncName);
 						return;
 					}
@@ -679,7 +659,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 						auto NetConn = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
 						if (NetConn)
 						{
-							SendDataToClient(MessageType_RPC, NetConn->GetConnId(), Data, RpcMsg.GetCachedSize());
+							NetConn->SendData(MessageType_RPC, Data, RpcMsg.GetCachedSize());
 							OnSentRPC(Actor, FuncName);
 							return;
 						}
