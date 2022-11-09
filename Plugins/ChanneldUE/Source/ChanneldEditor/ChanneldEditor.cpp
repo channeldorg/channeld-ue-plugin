@@ -2,8 +2,8 @@
 #include "ChanneldEditorCommands.h"
 #include "LevelEditor.h"
 #include "Widgets/Input/SSpinBox.h"
-#include "ChanneldEditorSettings.h"
 #include "ChanneldEditorStyle.h"
+#include "ISettingsModule.h"
 
 #define LOCTEXT_NAMESPACE "FChanneldUEModule"
 
@@ -28,6 +28,9 @@ void FChanneldEditorModule::StartupModule()
 		FChanneldEditorCommands::Get().LaunchServersCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::LaunchServersAction));
 	PluginCommands->MapAction(
+		FChanneldEditorCommands::Get().ServerSettingsCommand,
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::OpenEditorSettingsAction));
+	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().StopServersCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::StopServersAction));
 
@@ -49,6 +52,15 @@ void FChanneldEditorModule::StartupModule()
 			StopChanneldAction();
 			StopServersAction();
 		});
+
+	// Add editor settings 
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		SettingsModule->RegisterSettings("Editor", "Plugins", "ChanneldEditorSettings",
+			LOCTEXT("EditorSettingsName", "Channeld Editor"), 
+			LOCTEXT("EditorSettingsDesc", ""),
+			GetMutableDefault<UChanneldEditorSettings>());
+	}
 }
 
 void FChanneldEditorModule::ShutdownModule()
@@ -90,6 +102,7 @@ void FChanneldEditorModule::FillSubmenu(FMenuBuilder& Builder)
 	Builder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchChanneldCommand);
 	Builder.AddMenuEntry(FChanneldEditorCommands::Get().StopChanneldCommand);
 	Builder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchServersCommand);
+	Builder.AddMenuEntry(FChanneldEditorCommands::Get().ServerSettingsCommand);
 	Builder.AddMenuEntry(FChanneldEditorCommands::Get().StopServersCommand);
 }
 
@@ -102,6 +115,7 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 
 	MenuBuilder.AddSeparator();
 
+	/*
 	TSharedRef<SWidget> NumServers = SNew(SSpinBox<int32>)
 		.MinValue(1)
 		.MaxValue(16)
@@ -128,8 +142,10 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 		.Text_Static(&UChanneldEditorSettings::GetAdditionalArgs)
 		.OnTextChanged_Static(&UChanneldEditorSettings::SetAdditionalArgs);
 	MenuBuilder.AddWidget(AdditonalArgs, LOCTEXT("AdditonalArgsLabel", "Additional Args:"));
-
+	*/
+	
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchServersCommand);
+	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().ServerSettingsCommand);
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().StopServersCommand);
 
 	return MenuBuilder.MakeWidget();
@@ -137,28 +153,67 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 
 void FChanneldEditorModule::LaunchChanneldAction()
 {
-	UE_LOG(LogTemp, Warning, TEXT("LaunchChanneldAction is not implemented yet"));
+	UE_LOG(LogChanneldEditor, Warning, TEXT("LaunchChanneldAction is not implemented yet"));
 }
 
 void FChanneldEditorModule::StopChanneldAction()
 {
-	UE_LOG(LogTemp, Warning, TEXT("LaunchChanneldAction is not implemented yet"));
+	UE_LOG(LogChanneldEditor, Warning, TEXT("LaunchChanneldAction is not implemented yet"));
+}
+
+FTimerManager* FChanneldEditorModule::GetTimerManager()
+{
+	return &GEditor->GetTimerManager().Get();
 }
 
 void FChanneldEditorModule::LaunchServersAction()
 {
-	FString EditorPath = FString(FPlatformProcess::ExecutablePath());
-	FString ProjectPath = FPaths::GetProjectFilePath();
-
-	int ServerNum = UChanneldEditorSettings::GetServerNum();
-	if (ServerNum <= 0)	ServerNum = 1;
-
-	FString MapName = UChanneldEditorSettings::GetServerMapName().ToString();
-	if (MapName.Len() == 0) MapName = GEditor->GetEditorWorldContext().World()->GetMapName();
-
-	for (int i = 0; i < ServerNum; i++)
+	UChanneldEditorSettings* Settings = GetMutableDefault<UChanneldEditorSettings>();
+	FTimerManager* TimerManager = GetTimerManager();
+	for (FServerGroup& ServerGroup : Settings->ServerGroups)
 	{
-		FString Params = FString::Printf(TEXT("\"%s\" /Game/Maps/%s -game -PIEVIACONSOLE -Multiprocess -server -log -MultiprocessSaveConfig -forcepassthrough -SessionName=\"Dedicated Server %d\" -windowed %s"), *ProjectPath, *MapName, i, *UChanneldEditorSettings::GetAdditionalArgs().ToString());
+		if (!ServerGroup.bEnabled)
+			continue;
+
+		if (TimerManager)
+		{
+			TimerManager->ClearTimer(ServerGroup.DelayHandle);
+		}
+		
+		if (ServerGroup.DelayTime > 0)
+		{
+			if (TimerManager)
+			{
+				TimerManager->SetTimer(ServerGroup.DelayHandle, [&, ServerGroup]()
+				{
+					LaunchServerGroup(ServerGroup);
+				}, ServerGroup.DelayTime, false, ServerGroup.DelayTime);
+			}
+			else
+			{
+				UE_LOG(LogChanneldEditor, Error, TEXT("Unable to find any TimerManager to delay the server launch."))
+			}
+		}
+		else
+		{
+			LaunchServerGroup(ServerGroup);
+		}
+	}
+}
+
+void FChanneldEditorModule::LaunchServerGroup(const FServerGroup& ServerGroup)
+{
+	const FString EditorPath = FString(FPlatformProcess::ExecutablePath());
+	const FString ProjectPath = FPaths::GetProjectFilePath();
+		
+	// If server map is not set, use current level.
+	FString MapName = ServerGroup.ServerMap ? ServerGroup.ServerMap->GetMapName() : GEditor->GetEditorWorldContext().World()->GetMapName();
+	FString ViewClassName = ServerGroup.ServerViewClass->GetPathName();
+		
+	for (int i = 0; i < ServerGroup.ServerNum; i++)
+	{
+		FString Params = FString::Printf(TEXT("\"%s\" /Game/Maps/%s -game -PIEVIACONSOLE -Multiprocess -server -log -MultiprocessSaveConfig -forcepassthrough -SessionName=\"%s - Server %d\" -windowed ViewClass=%s %s"),
+			*ProjectPath, *MapName, *MapName, i, *ViewClassName, *ServerGroup.AdditionalArgs.ToString());
 		uint32 ProcessId;
 		FProcHandle ProcHandle = FPlatformProcess::CreateProc(*EditorPath, *Params, true, false, false, &ProcessId, 0, nullptr, nullptr, nullptr);
 		if (ProcHandle.IsValid())
@@ -170,11 +225,27 @@ void FChanneldEditorModule::LaunchServersAction()
 
 void FChanneldEditorModule::StopServersAction()
 {
+	if (FTimerManager* TimerManager = GetTimerManager())
+	{
+		for (FServerGroup& ServerGroup : GetMutableDefault<UChanneldEditorSettings>()->ServerGroups)
+		{
+			TimerManager->ClearTimer(ServerGroup.DelayHandle);
+		}
+	}
+	
 	for (FProcHandle& ServerProc : ServerProcHandles)
 	{
 		FPlatformProcess::TerminateProc(ServerProc, true);
 	}
 	ServerProcHandles.Reset();
+}
+
+void FChanneldEditorModule::OpenEditorSettingsAction()
+{
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		SettingsModule->ShowViewer("Editor", "Plugins", "ChanneldEditorSettings");
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

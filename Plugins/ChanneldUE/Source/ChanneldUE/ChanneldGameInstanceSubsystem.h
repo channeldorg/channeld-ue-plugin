@@ -185,6 +185,8 @@ public:
 
 	void RegisterDataProvider(IChannelDataProvider* Provider);
 
+	class UChanneldNetDriver* GetNetDriver();
+
 protected:
 	UPROPERTY()
 		UChanneldConnection* ConnectionInstance = nullptr;
@@ -205,8 +207,6 @@ protected:
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 
 	void HandleUserSpaceAnyMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-
-	class UChanneldNetDriver* GetNetDriver();
 
 	void InitChannelDataView();
 };

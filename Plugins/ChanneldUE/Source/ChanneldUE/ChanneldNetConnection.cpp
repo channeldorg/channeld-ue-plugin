@@ -38,12 +38,6 @@ void UChanneldNetConnection::InitBase(UNetDriver* InDriver, class FSocket* InSoc
 		// Reset the PacketHandler to remove the StatelessConnectHandler and bypass the handshake process.
 		Handler.Reset(NULL);
 	}
-
-	GetLowLevelSendChannelId = [&]()
-	{
-		auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
-		return NetDriver->LowLevelSendToChannelId.Get();
-	};
 }
 
 void UChanneldNetConnection::InitLocalConnection(UNetDriver* InDriver, class FSocket* InSocket, const FURL& InURL, EConnectionState InState, int32 InMaxPacket /*= 0*/, int32 InPacketOverhead /*= 0*/)
@@ -118,44 +112,50 @@ void UChanneldNetConnection::LowLevelSend(void* Data, int32 CountBits, FOutPacke
 	}
 }
 
-void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, int32 DataSize)
+void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, int32 DataSize, ChannelId ChId)
 {
 	if (DataSize <= 0)
 		return;
 
 	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
 	auto ConnToChanneld = NetDriver->GetConnToChanneld();
+	
+	if (ChId == InvalidChannelId)
+	{
+		ChId = NetDriver->GetSendToChannelId(this);
+	}
+	
 	if (ConnToChanneld->IsServer())
 	{
 		channeldpb::ServerForwardMessage ServerForwardMessage;
 		ServerForwardMessage.set_clientconnid(GetConnId());
 		ServerForwardMessage.set_payload(DataToSend, DataSize);
-		ConnToChanneld->Send(GetLowLevelSendChannelId(), MsgType, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
+		ConnToChanneld->Send(ChId, MsgType, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
 	}
 	else
 	{
-		ConnToChanneld->SendRaw(GetLowLevelSendChannelId(), MsgType, DataToSend, DataSize);
+		ConnToChanneld->SendRaw(ChId, MsgType, DataToSend, DataSize);
 	}
 }
 
-void UChanneldNetConnection::SendMessage(uint32 MsgType, const google::protobuf::Message& Msg)
+void UChanneldNetConnection::SendMessage(uint32 MsgType, const google::protobuf::Message& Msg, ChannelId ChId)
 {
-	// uint8* MessageData = new uint8[Msg.ByteSizeLong()];
-	// Msg.SerializeToArray(MessageData, Msg.GetCachedSize());
-	// SendData(MsgType, MessageData, Msg.GetCachedSize());
 	const std::string StrData = Msg.SerializeAsString();
 	SendData(MsgType, reinterpret_cast<const uint8*>(StrData.data()), StrData.size());
 }
 
 FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= false*/)
 {
+	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
 	if (RemoteAddr)
 	{
+		if (bAppendPort)
+			RemoteAddr->SetPort(NetDriver->GetSendToChannelId(this));
 		return RemoteAddr->ToString(bAppendPort);
 	}
 	else
 	{
-		return FString::Printf(TEXT("0.0.0.0%s"), bAppendPort ? ":0" : "");
+		return FString::Printf(TEXT("0.0.0.0%s"), bAppendPort ? TEXT(":" + NetDriver->GetSendToChannelId(this)) : TEXT(""));
 	}
 }
 

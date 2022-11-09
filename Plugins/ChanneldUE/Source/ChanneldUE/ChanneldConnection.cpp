@@ -56,6 +56,14 @@ void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 		{
 			HandleChannelDataUpdate(Conn, ChId, Msg);
 		});
+	RegisterMessageHandler((uint32)channeldpb::CREATE_SPATIAL_CHANNEL, new channeldpb::CreateChannelResultMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+		{
+			HandleCreateSpatialChannel(Conn, ChId, Msg);
+		});	
+	RegisterMessageHandler(channeldpb::CREATE_SPATIAL_CHANNEL, new channeldpb::CreateSpatialChannelsResultMessage());
+	RegisterMessageHandler(channeldpb::QUERY_SPATIAL_CHANNEL, new channeldpb::QuerySpatialChannelResultMessage());
+	RegisterMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, new channeldpb::ChannelDataHandoverMessage());
+	RegisterMessageHandler(channeldpb::SPATIAL_REGIONS_UPDATE, new channeldpb::SpatialRegionsUpdateMessage());
 }
 
 void UChanneldConnection::Deinitialize()
@@ -128,6 +136,8 @@ void UChanneldConnection::OnDisconnected()
 	IncomingQueue.Empty();
 	OutgoingQueue.Empty();
 	RpcCallbacks.Empty();
+	// StubId=0 is reserved.
+	RpcCallbacks.Add(0, nullptr);
 
 	OnAuthenticated.Clear();
 	OnUserSpaceMessageReceived.Clear();
@@ -496,6 +506,21 @@ void UChanneldConnection::CreateChannel(channeldpb::ChannelType ChannelType, con
 	Send(GlobalChannelId, channeldpb::CREATE_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
+void UChanneldConnection::CreateSpatialChannel(const FString& Metadata, const channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const google::protobuf::Message* Data /*= nullptr*/, const channeldpb::ChannelDataMergeOptions* MergeOptions /*= nullptr*/, const TFunction<void(const channeldpb::CreateSpatialChannelsResultMessage*)>& Callback /*= nullptr*/)
+{
+	channeldpb::CreateChannelMessage Msg;
+	Msg.set_channeltype(channeldpb::SPATIAL);
+	Msg.set_metadata(TCHAR_TO_UTF8(*Metadata));
+	if (SubOptions != nullptr)
+		Msg.mutable_suboptions()->MergeFrom(*SubOptions);
+	if (Data != nullptr)
+		Msg.mutable_data()->PackFrom(*Data);
+	if (MergeOptions != nullptr)
+		Msg.mutable_mergeoptions()->MergeFrom(*MergeOptions);
+
+	Send(GlobalChannelId, channeldpb::CREATE_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
+}
+
 void UChanneldConnection::RemoveChannel(uint32 ChannelToRemove, const TFunction<void(const channeldpb::RemoveChannelMessage*)>& Callback)
 {
 	channeldpb::RemoveChannelMessage Msg;
@@ -543,6 +568,19 @@ void UChanneldConnection::UnsubConnectionFromChannel(ConnectionId TargetConnId, 
 	Msg.set_connid(TargetConnId);
 
 	Send(ChId, channeldpb::UNSUB_FROM_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
+}
+
+void UChanneldConnection::QuerySpatialChannel(const TArray<FVector>& Positions, const TFunction<void(const channeldpb::QuerySpatialChannelResultMessage*)>& Callback)
+{
+	channeldpb::QuerySpatialChannelMessage Msg;
+	for (auto& Pos : Positions)
+	{
+		channeldpb::SpatialInfo* SpatialInfo = Msg.add_spatialinfo();
+		SpatialInfo->set_x(Pos.X);
+		SpatialInfo->set_y(Pos.Y);
+		SpatialInfo->set_z(Pos.Z);
+	}
+	Send(GlobalChannelId, channeldpb::QUERY_SPATIAL_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
 void UChanneldConnection::HandleAuth(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
@@ -623,9 +661,9 @@ void UChanneldConnection::HandleSubToChannel(UChanneldConnection* Conn, ChannelI
 	}
 	else
 	{
-		// Other than channel owner
+		// Other than the channel owner. Could be Master server.
 		FOwnedChannelInfo* ExistingOwnedChannel = OwnedChannels.Find(ChId);
-		if (ensureMsgf(ExistingOwnedChannel != nullptr, TEXT("Received other connnection's SubscribedToChannelResultMessage while not owning the channel, Channel ID: %d"), ChId))
+		if (ExistingOwnedChannel)
 		{
 			FSubscribedChannelInfo SubscribedInfo;
 			SubscribedInfo.Merge(*SubMsg);
@@ -643,9 +681,9 @@ void UChanneldConnection::HandleUnsubFromChannel(UChanneldConnection* Conn, Chan
 	}
 	else
 	{
-		// Other than channel owner
+		// Other than then channel owner. Could be Master server.
 		FOwnedChannelInfo* ExistingOwnedChannel = OwnedChannels.Find(ChId);
-		if (ensureMsgf(ExistingOwnedChannel != nullptr, TEXT("Received other connnection's SubscribedToChannelResultMessage while not owning the channel, Channel ID: %d"), ChId))
+		if (ExistingOwnedChannel)
 		{
 			ExistingOwnedChannel->Subscribeds.Remove(UnsubMsg->connid());
 		}
@@ -657,3 +695,19 @@ void UChanneldConnection::HandleChannelDataUpdate(UChanneldConnection* Conn, Cha
 
 }
 
+void UChanneldConnection::HandleCreateSpatialChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	auto ResultMsg = static_cast<const channeldpb::CreateSpatialChannelsResultMessage*>(Msg);
+	if (ResultMsg->ownerconnid() == GetConnId())
+	{
+		for (const ChannelId& SpatialChId : ResultMsg->spatialchannelid())
+		{
+			FOwnedChannelInfo ChannelInfo;
+			ChannelInfo.ChannelType = EChanneldChannelType::ECT_Spatial;
+			ChannelInfo.ChannelId = SpatialChId;
+			ChannelInfo.Metadata = FString(UTF8_TO_TCHAR(ResultMsg->metadata().c_str()));
+			ChannelInfo.OwnerConnId = ResultMsg->ownerconnid();
+			OwnedChannels.Add(SpatialChId, ChannelInfo);
+		}
+	}
+}

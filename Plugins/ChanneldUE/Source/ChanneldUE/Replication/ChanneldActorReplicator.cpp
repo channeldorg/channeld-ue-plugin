@@ -101,7 +101,7 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	AActor* Owner = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_owner(), Actor->GetWorld()));
+	AActor* Owner = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_owner(), Actor->GetWorld(), false));
 	if (Actor->GetOwner() != Owner)
 	{
 		DeltaState->mutable_owner()->CopyFrom(ChanneldUtils::GetRefOfObject(Actor->GetOwner()));
@@ -119,7 +119,7 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	AActor* Instigator = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_instigator(), Actor->GetWorld()));
+	AActor* Instigator = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_instigator(), Actor->GetWorld(), false));
 	if (Actor->GetInstigator() != Instigator)
 	{
 		DeltaState->mutable_instigator()->CopyFrom(ChanneldUtils::GetRefOfObject(Actor->GetInstigator()));
@@ -174,7 +174,7 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 		const FRepAttachment& RepAttachment = Actor->GetAttachmentReplication();
 		unrealpb::FRepAttachment* RepAttachmentFullState = FullState->mutable_attachmentreplication();
 		unrealpb::FRepAttachment* RepAttachmentDeltaState = DeltaState->mutable_attachmentreplication();
-		if (RepAttachment.AttachParent != ChanneldUtils::GetObjectByRef(RepAttachmentFullState->mutable_attachparent(), Actor->GetWorld()))
+		if (RepAttachment.AttachParent != ChanneldUtils::GetObjectByRef(RepAttachmentFullState->mutable_attachparent(), Actor->GetWorld(), false))
 		{
 			RepAttachmentDeltaState->mutable_attachparent()->CopyFrom(ChanneldUtils::GetRefOfObject(RepAttachment.AttachParent, Actor->GetNetConnection()));
 			bStateChanged = true;

@@ -2,23 +2,47 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "View/ChannelDataView.h"
 #include "ChanneldEditorSettings.generated.h"
 
-UCLASS(config = ChanneldEditor)
+USTRUCT()
+struct FServerGroup
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	bool bEnabled;
+	
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "1", ClampMax = "16"))
+	int32 ServerNum;
+
+	UPROPERTY(EditAnywhere)
+	float DelayTime;
+
+	UPROPERTY(EditAnywhere)
+	//FText ServerMapName;
+	TSoftObjectPtr<UWorld> ServerMap;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UChannelDataView> ServerViewClass;
+	
+	UPROPERTY(EditAnywhere)
+	FText AdditionalArgs;
+	
+	FTimerHandle DelayHandle;
+};
+
+UCLASS(config = EditorPerProjectUserSettings)
 class UChanneldEditorSettings : public UObject
 {
     GENERATED_BODY()
 
 public:
-    UPROPERTY(config, EditAnywhere, Category = "Channeld|Editor", meta = (ClampMin = "1", ClampMax = "16"))
-        int32 ServerNum;
 
-    UPROPERTY(config, EditAnywhere, Category = "Channeld|Editor")
-        FText ServerMapName;
+	UPROPERTY(Config, EditAnywhere, Category = "Channeld")
+	TArray<FServerGroup> ServerGroups;
 
-	UPROPERTY(config, EditAnywhere, Category = "Channeld|Editor")
-		FText AdditionalArgs;
-
+	/*
     static int32 GetServerNum()
     {
         auto Settings = GetDefault<UChanneldEditorSettings>();
@@ -63,4 +87,5 @@ public:
 		Settings->PostEditChange();
 		Settings->SaveConfig();
 	}
+	*/
 };

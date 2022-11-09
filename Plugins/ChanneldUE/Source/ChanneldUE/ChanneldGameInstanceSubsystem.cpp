@@ -24,7 +24,6 @@ void UChanneldGameInstanceSubsystem::Deinitialize()
 	if (ChannelDataView)
 	{
 		ChannelDataView->Unintialize();
-		ChannelDataView = NULL;
 	}
 
 	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::AUTH, this);
@@ -551,7 +550,7 @@ void UChanneldGameInstanceSubsystem::InitChannelDataView()
 	}
 	else
 	{
-		UE_LOG(LogChanneld, Warning, TEXT("Failed to load any ChannelDataView"));
+		UE_LOG(LogChanneld, Error, TEXT("Failed to load any ChannelDataView"));
 	}
 }
 
@@ -559,7 +558,10 @@ void UChanneldGameInstanceSubsystem::RegisterDataProvider(IChannelDataProvider* 
 {
 	if (ChannelDataView)
 	{
+		/* DO NOT use LowLevelSendToChannelId here as it's for LowLevelSend() only!
 		ChannelDataView->AddProvider(LowLevelSendToChannelId.Get(), Provider);
+		*/
+		ChannelDataView->AddProviderToDefaultChannel(Provider);
 	}
 	else
 	{

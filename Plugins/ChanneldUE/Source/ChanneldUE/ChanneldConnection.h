@@ -27,11 +27,14 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	FORCEINLINE void RegisterMessageHandler(uint32 MsgType, google::protobuf::Message* MessageTemplate, const FChanneldMessageHandlerFunc& Handler)
+	FORCEINLINE void RegisterMessageHandler(uint32 MsgType, google::protobuf::Message* MessageTemplate, const FChanneldMessageHandlerFunc& Handler = nullptr)
 	{
 		MessageHandlerEntry& Entry = MessageHandlers.FindOrAdd(MsgType);
 		Entry.Msg = MessageTemplate;
-		Entry.Handlers.Add(Handler);
+		if (Handler)
+		{
+			Entry.Handlers.Add(Handler);
+		}
 	}
 
 	template <typename UserClass>
@@ -104,7 +107,7 @@ public:
 
 	void Auth(const FString& PIT, const FString& LT, const TFunction<void(const channeldpb::AuthResultMessage*)>& Callback = nullptr);
 	void CreateChannel(channeldpb::ChannelType ChannelType, const FString& Metadata, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const google::protobuf::Message* Data = nullptr, const channeldpb::ChannelDataMergeOptions* MergeOptions = nullptr, const TFunction<void(const channeldpb::CreateChannelResultMessage*)>& Callback = nullptr);
-
+	void CreateSpatialChannel(const FString& Metadata, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const google::protobuf::Message* Data = nullptr, const channeldpb::ChannelDataMergeOptions* MergeOptions = nullptr, const TFunction<void(const channeldpb::CreateSpatialChannelsResultMessage*)>& Callback = nullptr);
 	/**
 	 * Remove Channel by channel Id
 	 *
@@ -116,7 +119,8 @@ public:
 	void SubConnectionToChannel(ConnectionId ConnId, ChannelId ChId, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
 	void UnsubFromChannel(ChannelId ChId, const TFunction<void(const channeldpb::UnsubscribedFromChannelResultMessage*)>& Callback = nullptr);
 	void UnsubConnectionFromChannel(ConnectionId ConnId, ChannelId ChId, const TFunction<void(const channeldpb::UnsubscribedFromChannelResultMessage*)>& Callback = nullptr);
-
+	void QuerySpatialChannel(const TArray<FVector>& Positions, const TFunction<void(const channeldpb::QuerySpatialChannelResultMessage*)>& Callback = nullptr);
+	
 	void TickIncoming();
 	void TickOutgoing();
 
@@ -190,5 +194,5 @@ private:
 	void HandleSubToChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleUnsubFromChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-
+	void HandleCreateSpatialChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 };

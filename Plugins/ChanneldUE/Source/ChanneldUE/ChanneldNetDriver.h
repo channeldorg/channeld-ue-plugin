@@ -59,20 +59,26 @@ public:
 	virtual void ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject = nullptr) override;
 	virtual void NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTravel) override;
 	//~ End UNetDriver Interface
+	
+	UChanneldNetConnection* AddChanneldClientConnection(ConnectionId ClientConnId);
 
 	void ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDelayRPC);
 
-	UChanneldConnection* GetConnToChanneld() { return ConnToChanneld; }
+	UChanneldConnection* GetConnToChanneld() const { return ConnToChanneld; }
 
 	ConnectionId AddrToConnId(const FInternetAddr& Addr);
 	TSharedRef<FInternetAddr> ConnIdToAddr(ConnectionId ConnId);
 
-	UChanneldNetConnection* GetServerConnection()
+	UChanneldNetConnection* GetServerConnection() const
 	{
 		return CastChecked<UChanneldNetConnection>(ServerConnection);
 	}
 
+	virtual ChannelId GetSendToChannelId(UChanneldNetConnection* NetConn) const;
+
+protected:
 	TSharedRef<ChannelId> LowLevelSendToChannelId = MakeShared<ChannelId>(GlobalChannelId);
+	TSharedPtr<UChannelDataView> ChannelDataView;
 
 private:
 
@@ -89,14 +95,11 @@ private:
 
 	TArray<TSharedPtr<unrealpb::RemoteFunctionMessage>> UnprocessedRPCs;
 
-	UChanneldNetConnection* OnClientConnected(ConnectionId ClientConnId);
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
 	void OnUserSpaceMessageReceived(uint32 MsgType, ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload);
 	void HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
 	void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer);
 	void OnServerSpawnedActor(AActor* Actor);
-	void HandleLowLevelMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-	void HandleRemoteFunctionMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 
 	void SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, uint8* DataToSend, int32 DataSize);
@@ -105,5 +108,5 @@ private:
 
 	void OnSentRPC(class AActor* Actor, FString FuncName);
 
-	UChanneldGameInstanceSubsystem* GetSubsystem();
+	UChanneldGameInstanceSubsystem* GetSubsystem() const;
 };

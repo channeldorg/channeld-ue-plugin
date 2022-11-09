@@ -208,7 +208,7 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 	{
 		unrealpb::PlayerController_ClientSetViewTarget_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
-		AActor* ViewTarget = Cast<AActor>(ChanneldUtils::GetObjectByRef(&Msg.actor(), PC->GetWorld(), bDelayRPC));
+		AActor* ViewTarget = Cast<AActor>(ChanneldUtils::GetObjectByRef(&Msg.actor(), PC->GetWorld(), bDelayRPC, true));
 		if (bDelayRPC)
 		{
 			return nullptr;
@@ -242,7 +242,7 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 	{
 		unrealpb::PlayerController_ClientRestart_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
-		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDelayRPC));
+		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDelayRPC, true));
 		if (bDelayRPC)
 		{
 			return nullptr;
@@ -264,7 +264,7 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 	{
 		unrealpb::PlayerController_ClientRetryClientRestart_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
-		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDelayRPC));
+		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDelayRPC, true));
 		if (bDelayRPC)
 		{
 			return nullptr;
@@ -287,9 +287,13 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 	{
 		unrealpb::PlayerController_ServerAcknowledgePossession_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
-		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDelayRPC));
-		if (bDelayRPC)
+		// Server should have all NetGUID (no need to delay RPC). If unmapped, there must be something wrong.
+		bool bNetGUIDUnmapped;
+		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bNetGUIDUnmapped, false));
+		if (bNetGUIDUnmapped)
 		{
+			UE_LOG(LogChanneld, Warning, TEXT("ServerAcknowledgePossession's pawn has unmapped NetGUID: %d"), Msg.pawn().netguid());
+			bSuccess = false;
 			return nullptr;
 		}
 

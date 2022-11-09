@@ -2,6 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+#include "ChanneldEditorSettings.h"
+
+DECLARE_LOG_CATEGORY_CLASS(LogChanneldEditor, Log, All);
 
 class FToolBarBuilder;
 class FMenuBuilder;
@@ -23,9 +26,13 @@ private:
 
 	void LaunchChanneldAction();
 	void StopChanneldAction();
+	FTimerManager* GetTimerManager();
 	void LaunchServersAction();
 	void StopServersAction();
-
+	void OpenEditorSettingsAction();
+	
+	void LaunchServerGroup(const FServerGroup& ServerGroup);
+	
 	TSharedPtr<class FUICommandList> PluginCommands;
 	TSharedRef<SWidget> CreateMenuContent(TSharedPtr<FUICommandList> Commands);
 	TArray<FProcHandle> ServerProcHandles;

@@ -19,6 +19,7 @@ enum MessageType : uint32 {
 	// Used by ReplicationDriver to send/receive UE's native RPC.
 	MessageType_RPC = 102,
 	MessageType_SPAWN = 103,
+	MessageType_SERVER_PLAYER_SPAWNED = 104,
 };
 
 /*
@@ -28,10 +29,11 @@ enum class EChannelId : ChannelId
 	Global = 0
 };
 */
-const ChannelId GlobalChannelId = 0;
+constexpr ChannelId GlobalChannelId = 0;
+constexpr ChannelId InvalidChannelId = 0xffffffff;
 
-const uint32 MaxPacketSize = 0x00ffff;
-const uint32 MinPacketSize = 20;
+constexpr uint32 MaxPacketSize = 0x00ffff;
+constexpr uint32 MinPacketSize = 20;
 
 
 UENUM(BlueprintType)

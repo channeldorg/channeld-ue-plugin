@@ -5,6 +5,7 @@
 #include "channeld.pb.h"
 #include "ChanneldConnection.h"
 #include "ChannelDataProvider.h"
+#include "ChanneldNetConnection.h"
 #include "google/protobuf/message.h"
 #include "UObject/WeakInterfacePtr.h"
 #include "ChannelDataView.generated.h"
@@ -33,21 +34,29 @@ public:
 	virtual void Initialize(UChanneldConnection* InConn);
 	virtual void Unintialize();
 	virtual void BeginDestroy() override;
+	
+	virtual bool GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const {return false;}
 
 	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider);
+	void AddProviderToDefaultChannel(IChannelDataProvider* Provider);
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
 	//virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider);
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
 
 	void OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, ChannelId ChId);
+	void SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId);
+	ChannelId GetOwningChannelId(const AActor* Actor) const;
 
 	int32 SendAllChannelUpdates();
 
 	void OnDisconnect();
-
+	
 	UPROPERTY(EditAnywhere)
 	EChanneldChannelType DefaultChannelType = EChanneldChannelType::ECT_Global;
 
+	// DO NOT loop-reference, otherwise the destruction can cause exception.
+	// TSharedPtr< class UChanneldNetDriver > NetDriver;
+	
 protected:
 
 	// TSet doesn't support TWeakInterfacePtr, so we need to wrap it in a new type. 

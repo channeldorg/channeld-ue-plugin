@@ -26,6 +26,15 @@ public:
 		return FVector(InVec.x(), InVec.y(), InVec.z());
 	}
 
+	static unrealpb::FVector GetVectorPB(const FVector& InVec)
+	{
+		unrealpb::FVector Vec;
+		Vec.set_x(InVec.X);
+		Vec.set_y(InVec.Y);
+		Vec.set_z(InVec.Z);
+		return Vec;
+	}
+
 	static FRotator GetRotator(const unrealpb::FVector& InVec)
 	{
 		return FRotator(InVec.x(), InVec.y(), InVec.z());
@@ -73,13 +82,13 @@ public:
 		return bNotSame;
 	}
 
-	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World)
+	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool bCreateIfNotInCache = true)
 	{
 		bool bUnmapped;
-		return GetObjectByRef(Ref, World, bUnmapped);
+		return GetObjectByRef(Ref, World, bUnmapped, bCreateIfNotInCache);
 	}
 
-	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped)
+	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache = true)
 	{
 		if (!Ref || !World)
 		{
@@ -98,7 +107,7 @@ public:
 		}
 		auto GuidCache = World->GetNetDriver()->GuidCache;
 		auto Obj = GuidCache->GetObjectFromNetGUID(NetGUID, false);
-		if (Obj == nullptr)
+		if (Obj == nullptr && bCreateIfNotInCache)
 		{
 			if (!GuidCache->IsNetGUIDAuthority())
 			{
