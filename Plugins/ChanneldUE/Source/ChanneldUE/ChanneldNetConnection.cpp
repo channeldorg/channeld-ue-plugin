@@ -144,6 +144,17 @@ void UChanneldNetConnection::SendMessage(uint32 MsgType, const google::protobuf:
 	SendData(MsgType, reinterpret_cast<const uint8*>(StrData.data()), StrData.size());
 }
 
+void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*= ENetRole::None*/)
+{
+	unrealpb::SpawnObjectMessage SpawnMsg;
+	SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Object, this));
+	SpawnMsg.set_channelid( CastChecked<UChanneldNetDriver>(Driver)->GetSendToChannelId(this));
+	if (Role > ENetRole::ROLE_None)
+		SpawnMsg.set_localrole(Role);
+	SendMessage(MessageType_SPAWN, SpawnMsg);
+	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %d, owning channel: %d, local role: %d"), GetConnId(), *GetNameSafe(Object), SpawnMsg.obj().netguid(), SpawnMsg.channelid(), SpawnMsg.localrole());
+}
+
 FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= false*/)
 {
 	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);

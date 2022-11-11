@@ -196,25 +196,24 @@ struct CHANNELDUE_API FOwnedChannelInfo
 {
 	GENERATED_BODY()
 
-		/*
-		 * Key: Connection id of subscriber
-		 * Value: Sub to channel result
-		 */
-		UPROPERTY(BlueprintReadWrite)
-		TMap<int32, FSubscribedChannelInfo> Subscribeds;
+	/*
+	 * Key: Connection id of subscriber
+	 * Value: Sub to channel result
+	 */
+	UPROPERTY(BlueprintReadWrite)
+	TMap<int32, FSubscribedChannelInfo> Subscribeds;
 
 	UPROPERTY(BlueprintReadWrite)
-		EChanneldChannelType ChannelType;
+	EChanneldChannelType ChannelType;
 
 	UPROPERTY(BlueprintReadWrite)
-		int32 ChannelId;
+	int32 ChannelId;
 
 	UPROPERTY(BlueprintReadWrite)
-		FString Metadata;
+	FString Metadata;
 
 	UPROPERTY(BlueprintReadWrite)
-		int32 OwnerConnId;
-
+	int32 OwnerConnId;
 };
 
 USTRUCT(BlueprintType)
@@ -222,12 +221,13 @@ struct CHANNELDUE_API FListedChannelInfo
 {
 	GENERATED_BODY()
 
-		UPROPERTY(BlueprintReadWrite)
-		EChanneldChannelType ChannelType;
+	UPROPERTY(BlueprintReadWrite)
+	EChanneldChannelType ChannelType;
 
 	UPROPERTY(BlueprintReadWrite)
-		int32 ChannelId;
+	int32 ChannelId;
 
 	UPROPERTY(BlueprintReadWrite)
-		FString Metadata;
+	FString Metadata;
 };
+

@@ -78,9 +78,12 @@ public:
 
 protected:
 	TSharedRef<ChannelId> LowLevelSendToChannelId = MakeShared<ChannelId>(GlobalChannelId);
-	TSharedPtr<UChannelDataView> ChannelDataView;
+	TWeakObjectPtr<UChannelDataView> ChannelDataView;
 
 private:
+	
+	const FName ServerMovePackedFuncName = FName("ServerMovePacked");
+	const FName ClientMoveResponsePackedFuncName = FName("ClientMoveResponsePacked");
 
 	// Prevent the engine from GC the connection
 	UPROPERTY()
@@ -91,7 +94,8 @@ private:
 	// Cache the FInternetAddr so it won't be created again every time when mapping from ConnectionId.
 	TMap<ConnectionId, TSharedRef<FInternetAddr>> CachedAddr;
 
-	TMap<ConnectionId, UChanneldNetConnection*> ClientConnectionMap;
+	UPROPERTY()
+	TMap<uint32, UChanneldNetConnection*> ClientConnectionMap;
 
 	TArray<TSharedPtr<unrealpb::RemoteFunctionMessage>> UnprocessedRPCs;
 
@@ -101,10 +105,6 @@ private:
 	void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer);
 	void OnServerSpawnedActor(AActor* Actor);
 	void ServerHandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-
-	void SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, uint8* DataToSend, int32 DataSize);
-	void SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, const google::protobuf::Message& Msg);
-	void SendDataToServer(uint32 MsgType, uint8* DataToSend, int32 DataSize);
 
 	void OnSentRPC(class AActor* Actor, FString FuncName);
 

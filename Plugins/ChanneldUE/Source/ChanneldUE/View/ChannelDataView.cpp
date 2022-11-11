@@ -107,16 +107,43 @@ void UChannelDataView::Unintialize()
 
 void UChannelDataView::BeginDestroy()
 {
-	Super::BeginDestroy();
-
-	ReceivedUpdateDataInChannels.Empty();
+	/*
+	*/
 	delete AnyForTypeUrl;
-	for (auto& Pair : ChannelDataTemplatesByTypeUrl)
+
+	for (auto Itr = ChannelDataTemplatesByTypeUrl.CreateIterator(); Itr; ++Itr)
 	{
-		delete Pair.Value;
+		delete Itr.Value();
 	}
+	// for (auto& Pair : ChannelDataTemplatesByTypeUrl)
+	// {
+	// 	delete Pair.Value;
+	// }
 	ChannelDataTemplatesByTypeUrl.Empty();
+
+	for (auto Itr = ReceivedUpdateDataInChannels.CreateIterator(); Itr; ++Itr)
+	{
+		delete Itr.Value();
+	}
+	// for (auto& Pair : ReceivedUpdateDataInChannels)
+	// {
+	// 	delete Pair.Value;
+	// }
+	ReceivedUpdateDataInChannels.Empty();
+
+	for (auto Itr = RemovedProvidersData.CreateIterator(); Itr; ++Itr)
+	{
+		delete Itr.Value();
+	}
+	// for (auto& Pair : RemovedProvidersData)
+	// {
+	// 	delete Pair.Value;
+	// }
+	RemovedProvidersData.Empty();
+	
 	ChannelDataProviders.Empty();
+
+	Super::BeginDestroy();
 }
 
 void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provider)
@@ -138,34 +165,22 @@ void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provide
 
 void UChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* Provider)
 {
-	if (Connection == nullptr)
+	FNetworkGUID NetId = GetNetId(Provider);
+	if (NetId.IsValid())
 	{
-		UE_LOG(LogChanneld, Error, TEXT("Unable to call AddChannelDataProviderToDefaultChannel. The connection to channeld hasn't been set up yet and there's no subscription to any channel."));
-		return;
-	}
-
-	if (Connection->IsServer())
-	{
-		for (const auto Pair : Connection->OwnedChannels)
+		ChannelId ChId = GetOwningChannelId(NetId);
+		if (ChId != InvalidChannelId)
 		{
-			if (Pair.Value.ChannelType == DefaultChannelType)
-			{
-				AddProvider(Pair.Key, Provider);
-			}
-		}
-	}
-	else if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
-	{
-		const FNetworkGUID NetId = NetDriver->GuidCache->GetNetGUID(Cast<UObject>(Provider));
-		ChannelId* ChId = NetIdOwningChannels.Find(NetId);
-		if (ChId)
-		{
-			AddProvider(*ChId, Provider);
+			AddProvider(ChId, Provider);
 		}
 		else
 		{
-			UE_LOG(LogChanneld, Error, TEXT("Failed to add provider: no channelId mapping found for actor: %s"), *IChannelDataProvider::GetName(Provider));
-		}
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to add provider: no channelId mapping found for object: %s"), *IChannelDataProvider::GetName(Provider));
+		}			
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Failed to add provider: can't find NetGUID for object: %s"), *IChannelDataProvider::GetName(Provider));
 	}
 }
 
@@ -238,18 +253,35 @@ void UChannelDataView::RemoveProviderFromAllChannels(IChannelDataProvider* Provi
 	}
 }
 
+FNetworkGUID UChannelDataView::GetNetId(IChannelDataProvider* Provider) const
+{
+	if (const auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
+	{
+		if (NetDriver->IsServer())
+		{
+			return NetDriver->GuidCache->GetOrAssignNetGUID(Provider->GetTargetObject());
+		}
+		else
+		{
+			return NetDriver->GuidCache->GetNetGUID(Provider->GetTargetObject());
+		}
+	}
+	return FNetworkGUID();
+}
+
 void UChannelDataView::OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, ChannelId ChId)
 {
 	if (!NetId.IsValid())
 		return;
-	
-	NetIdOwningChannels.Add(NetId, ChId);
-	UE_LOG(LogChanneld, Log, TEXT("Set up mapping of netId: %d -> channelId: %d, spawned: %s"), NetId.Value, ChId, *GetNameSafe(Obj));
+
+	SetOwningChannelId(NetId, ChId);
+	// NetIdOwningChannels.Add(NetId, ChId);
+	// UE_LOG(LogChanneld, Log, TEXT("Set up mapping of netId: %d -> channelId: %d, spawned: %s"), NetId.Value, ChId, *GetNameSafe(Obj));
 
 	if (Obj->IsA<AActor>())
 	{
 		auto Providers = Cast<AActor>(Obj)->GetComponentsByInterface(UChannelDataProvider::StaticClass());
-		for (auto Provider : Providers)
+		for (const auto Provider : Providers)
 		{
 			AddProvider(ChId, Cast<IChannelDataProvider>(Provider));
 		}
@@ -265,6 +297,16 @@ void UChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, ChannelId Ch
 	UE_LOG(LogChanneld, Log, TEXT("Set up mapping of netId: %d -> channelId: %d"), NetId.Value, ChId);
 }
 
+ChannelId UChannelDataView::GetOwningChannelId(const FNetworkGUID NetId) const
+{
+	const ChannelId* ChId = NetIdOwningChannels.Find(NetId);
+	if (ChId)
+	{
+		return *ChId;
+	}
+	return InvalidChannelId;
+}
+
 ChannelId UChannelDataView::GetOwningChannelId(const AActor* Actor) const
 {
 	if (const auto NetConn = Actor->GetNetConnection())
@@ -274,16 +316,13 @@ ChannelId UChannelDataView::GetOwningChannelId(const AActor* Actor) const
 			const FNetworkGUID NetId = NetDriver->GuidCache->GetNetGUID(Actor);
 			if (NetId.IsValid())
 			{
-				const ChannelId* ChId = NetIdOwningChannels.Find(NetId);
-				if (ChId)
-				{
-					return *ChId;
-				}
+				return GetOwningChannelId(NetId);
 			}
 			else
 			{
 				UE_LOG(LogChanneld, Log, TEXT("No NetGUID has been assigned to Actor %s"), *GetNameSafe(Actor));
-			}		}
+			}
+		}
 	}
 
 	return InvalidChannelId;
@@ -324,7 +363,7 @@ int32 UChannelDataView::SendAllChannelUpdates()
 				continue;
 
 			auto MsgTemplate = ChannelDataTemplates.FindRef(static_cast<channeldpb::ChannelType>(Pair.Value.ChannelType));
-			if (!ensureMsgf(MsgTemplate, TEXT("Can't find channel data message template of channel type: %s"), *UEnum::GetValueAsString(Pair.Value.ChannelType)))
+			if (!ensureMsgf(MsgTemplate, TEXT("Can't find channel data message template of channel type: %d"), Pair.Value.ChannelType))
 			{
 				continue;
 			}
@@ -384,7 +423,7 @@ int32 UChannelDataView::SendAllChannelUpdates()
 	return TotalUpdateCount;
 }
 
-UChanneldGameInstanceSubsystem* UChannelDataView::GetChanneldSubsystem()
+UChanneldGameInstanceSubsystem* UChannelDataView::GetChanneldSubsystem() const
 {
 	// The subsystem owns the view.
 	return Cast<UChanneldGameInstanceSubsystem>(GetOuter());

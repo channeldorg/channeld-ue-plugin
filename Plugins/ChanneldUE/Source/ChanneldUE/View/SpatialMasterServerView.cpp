@@ -7,6 +7,7 @@
 #include "ChanneldNetConnection.h"
 #include "ChanneldUtils.h"
 #include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameStateBase.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 USpatialMasterServerView::USpatialMasterServerView(const FObjectInitializer& ObjectInitializer)
@@ -96,4 +97,22 @@ void USpatialMasterServerView::InitServer()
 		{
 			GetChanneldSubsystem()->SetLowLevelSendToChannelId(GlobalChannelId);
 		});
+
+	Super::InitServer();
+}
+
+void USpatialMasterServerView::AddProvider(ChannelId ChId, IChannelDataProvider* Provider)
+{
+	// Should only replicates the GameStateBase
+	if (!Provider->GetTargetObject()->IsA(AGameStateBase::StaticClass()))
+	{
+		return;
+	}
+
+	Super::AddProvider(ChId, Provider);
+}
+
+ChannelId USpatialMasterServerView::GetOwningChannelId(const FNetworkGUID NetId) const
+{
+	return GlobalChannelId;
 }

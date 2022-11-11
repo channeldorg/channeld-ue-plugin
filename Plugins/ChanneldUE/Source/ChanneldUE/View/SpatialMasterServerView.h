@@ -18,6 +18,8 @@ public:
 	USpatialMasterServerView(const FObjectInitializer& ObjectInitializer);
 	
 	virtual void InitServer() override;
+	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider) override;
+	virtual ChannelId GetOwningChannelId(const FNetworkGUID NetId) const override;	
 
 	UPROPERTY(EditAnywhere)
 	uint32 ClientFanOutIntervalMs = 20;

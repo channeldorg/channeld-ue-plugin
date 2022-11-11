@@ -33,8 +33,10 @@ void UChanneldGameInstanceSubsystem::Deinitialize()
 	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::SUB_TO_CHANNEL, this);
 	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::UNSUB_FROM_CHANNEL, this);
 	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, this);
-	ConnectionInstance->OnUserSpaceMessageReceived.RemoveAll(this);
+	// ConnectionInstance->OnUserSpaceMessageReceived.RemoveAll(this);
 	ConnectionInstance->Disconnect();
+
+	Super::Deinitialize();
 }
 
 void UChanneldGameInstanceSubsystem::Tick(float DeltaTime)
@@ -330,8 +332,22 @@ void UChanneldGameInstanceSubsystem::SendDataUpdate(int32 ChId, UProtoMessageObj
 	ConnectionInstance->Send(ChId, channeldpb::CHANNEL_DATA_UPDATE, UpdateMsg);
 }
 
+void UChanneldGameInstanceSubsystem::QuerySpatialChannel(const AActor* Actor,
+	const FOnceOnQuerySpatialChannel& Callback)
+{
+	InitConnection();
+
+	TArray<FVector> Positions;
+	Positions.Add(Actor->GetActorLocation());
+	ConnectionInstance->QuerySpatialChannel(Positions, [Callback](const channeldpb::QuerySpatialChannelResultMessage* ResultMsg)
+	{
+		ChannelId ChId = ResultMsg->channelid_size() == 0 ? InvalidChannelId : ResultMsg->channelid(0);
+		Callback.ExecuteIfBound((int64)ChId);
+	});
+}
+
 void UChanneldGameInstanceSubsystem::ServerBroadcast(int32 ChId, int32 ClientConnId, UProtoMessageObject* MessageObject,
-	EChanneldBroadcastType BroadcastType)
+                                                     EChanneldBroadcastType BroadcastType)
 {
 	InitConnection();
 
@@ -400,7 +416,8 @@ void UChanneldGameInstanceSubsystem::SetLowLevelSendToChannelId(int32 ChId)
 	{
 		if (Provider.IsValid())
 		{
-			ChannelDataView->AddProvider(ChId, Provider.Get());
+			// ChannelDataView->AddProvider(ChId, Provider.Get());
+			ChannelDataView->AddProviderToDefaultChannel(Provider.Get());
 		}
 	}
 	UnregisteredDataProviders.Empty();

@@ -17,6 +17,7 @@ class CHANNELDUE_API IChannelDataProvider
 {
 	GENERATED_BODY()
 public:
+	virtual UObject* GetTargetObject() = 0;
 	// virtual channeldpb::ChannelType GetChannelType() = 0;
 	// virtual google::protobuf::Message* GetChannelDataTemplate() const = 0;
 	//virtual ChannelId GetChannelId() = 0;

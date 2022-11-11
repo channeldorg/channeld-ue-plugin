@@ -30,6 +30,7 @@ DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnceOnRemoveChannel, int32, ChId, int32, Rem
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnceOnListChannel, const TArray<FListedChannelInfo>&, Channels);
 DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnSubToChannel, int32, ChId, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
 DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnUnsubFromChannel, int32, ChId, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnceOnQuerySpatialChannel, int64, SpatialChId);
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnViewInitialized, UChannelDataView*);
 DECLARE_MULTICAST_DELEGATE(FOnSetLowLevelSendChannelId);
@@ -156,6 +157,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Channeld")
 		void SendDataUpdate(int32 ChId, UProtoMessageObject* MessageObject);
 
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Spatial")
+	void QuerySpatialChannel(const AActor* Actor, const FOnceOnQuerySpatialChannel& Callback);
+
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Net", Meta = (ToolTip = "Only run on server"))
 		void ServerBroadcast(int32 ChId, int32 ClientConnId, UProtoMessageObject* MessageObject, EChanneldBroadcastType BroadcastType);
 
@@ -188,11 +192,12 @@ public:
 	class UChanneldNetDriver* GetNetDriver();
 
 protected:
+	
 	UPROPERTY()
-		UChanneldConnection* ConnectionInstance = nullptr;
+	UChanneldConnection* ConnectionInstance = nullptr;
 
 	UPROPERTY()
-		UChannelDataView* ChannelDataView;
+	UChannelDataView* ChannelDataView;
 
 	TMap<EChanneldChannelType, FString> ChannelTypeToProtoFullNameMapping;
 

@@ -36,6 +36,7 @@ public:
 	void SendData(uint32 MsgType, const uint8* DataToSend, int32 DataSize, ChannelId ChId = InvalidChannelId);
 	// Send message between UE client and sever via channeld. MsgType should be in user space (>= 100).
 	void SendMessage(uint32 MsgType, const google::protobuf::Message& Msg, ChannelId ChId = InvalidChannelId);
+	void SendSpawnMessage(UObject* Object, ENetRole Role = ENetRole::ROLE_None);
 	// Flush the handshake packets that are queued before received AuthResultMessage to the server.
 	void FlushUnauthData();
 

@@ -355,7 +355,7 @@ void UChanneldConnection::TickIncoming()
 			auto CallbackFunc = RpcCallbacks.Find(Entry.StubId);
 			if (CallbackFunc != nullptr)
 			{
-				UE_LOG(LogChanneld, Verbose, TEXT("Handling RPC callback of %s, stubId: %d"), UTF8_TO_TCHAR(Entry.Msg->GetTypeName().c_str()), Entry.StubId);
+				UE_LOG(LogChanneld, VeryVerbose, TEXT("Handling RPC callback of %s, stubId: %d"), UTF8_TO_TCHAR(Entry.Msg->GetTypeName().c_str()), Entry.StubId);
 				(*CallbackFunc)(this, Entry.ChId, Entry.Msg);
 				RpcCallbacks.Remove(Entry.StubId);
 			}
@@ -465,7 +465,7 @@ void UChanneldConnection::HandleServerForwardMessage(UChanneldConnection* Conn, 
 	auto UserSpaceMsg = static_cast<const channeldpb::ServerForwardMessage*>(Msg);
 	if (!OnUserSpaceMessageReceived.IsBound())
 	{
-		UE_LOG(LogChanneld, Warning, TEXT("No handler for user-space message, channelId=%d, client connId=%d"), ChId, UserSpaceMsg->clientconnid());
+		UE_LOG(LogChanneld, Warning, TEXT("No handler for user-space message %d, channelId=%d, client connId=%d"), MsgType, ChId, UserSpaceMsg->clientconnid());
 		return;
 	}
 	OnUserSpaceMessageReceived.Broadcast(MsgType, ChId, UserSpaceMsg->clientconnid(), UserSpaceMsg->payload());

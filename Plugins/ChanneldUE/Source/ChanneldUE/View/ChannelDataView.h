@@ -26,6 +26,7 @@ public:
 			AnyForTypeUrl = new google::protobuf::Any;
 		AnyForTypeUrl->PackFrom(*MsgTemplate);
 		ChannelDataTemplatesByTypeUrl.Add(FString(UTF8_TO_TCHAR(AnyForTypeUrl->type_url().c_str())), MsgTemplate);
+		UE_LOG(LogChanneld, Log, TEXT("Registered %s for channel type %d"), UTF8_TO_TCHAR(MsgTemplate->GetTypeName().c_str()), ChannelType);
 	}
 
 	UFUNCTION(BlueprintCallable)
@@ -38,14 +39,15 @@ public:
 	virtual bool GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const {return false;}
 
 	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider);
-	void AddProviderToDefaultChannel(IChannelDataProvider* Provider);
+	virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider);
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
-	//virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider);
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
 
+	virtual FNetworkGUID GetNetId(IChannelDataProvider* Provider) const;
 	void OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, ChannelId ChId);
-	void SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId);
-	ChannelId GetOwningChannelId(const AActor* Actor) const;
+	virtual void SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId);
+	virtual ChannelId GetOwningChannelId(const FNetworkGUID NetId) const;
+	virtual ChannelId GetOwningChannelId(const AActor* Actor) const;
 
 	int32 SendAllChannelUpdates();
 
@@ -78,7 +80,7 @@ protected:
 	virtual void LoadCmdLineArgs() {}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure/*, meta=(CallableWithoutWorldContext)*/)
-	class UChanneldGameInstanceSubsystem* GetChanneldSubsystem();
+	class UChanneldGameInstanceSubsystem* GetChanneldSubsystem() const;
 
 	virtual void InitServer();
 	virtual void InitClient();

@@ -23,7 +23,8 @@ public:
 
 	virtual bool GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const override;
 	
-	void AddProvider(ChannelId ChId, IChannelDataProvider* Provider) override;
+	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider) override;
+	virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider) override;
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved) override;
 	
 private:

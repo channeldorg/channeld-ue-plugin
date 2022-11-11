@@ -39,14 +39,20 @@ void UChanneldReplicationComponent::PostInitProperties()
 void UChanneldReplicationComponent::InitOnce()
 {
 	if (!GetOwner())
+	{
 		return;
+	}
 
 	if (bInitialized)
+	{
 		return;
+	}
 
 	UGameInstance* GameInstance = GetOwner()->GetGameInstance();
 	if (!GameInstance)
+	{
 		return;
+	}
 
 	auto Settings = GetMutableDefault<UChanneldSettings>();
 	if (Settings->bSkipCustomReplication && Settings->bSkipCustomRPC)
@@ -103,7 +109,7 @@ void UChanneldReplicationComponent::UninitOnce()
 	if (bUninitialized)
 		return;
 
-	UChannelDataView* View = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
+	auto View = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
 	if (View)
 	{
 		View->RemoveProviderFromAllChannels(this, GetNetMode() == ENetMode::NM_DedicatedServer);
