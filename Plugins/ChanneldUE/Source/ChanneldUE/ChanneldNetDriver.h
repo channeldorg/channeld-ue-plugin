@@ -99,6 +99,8 @@ private:
 
 	TArray<TSharedPtr<unrealpb::RemoteFunctionMessage>> UnprocessedRPCs;
 
+	TSet<FNetworkGUID> SentSpawnedNetGUIDs;
+
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
 	void OnUserSpaceMessageReceived(uint32 MsgType, ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload);
 	void HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);

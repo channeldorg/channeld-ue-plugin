@@ -123,6 +123,11 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 		{
 			// Set up the mapping before actually spawn it, so AddProvider() can find the mapping.
 			ChannelDataView->SetOwningChannelId(FNetworkGUID(SpawnMsg->obj().netguid()), SpawnMsg->channelid());
+			// Also add the mapping of all context NetGUIDs
+			for (auto& ContextObj : SpawnMsg->obj().context())
+			{
+				ChannelDataView->SetOwningChannelId(FNetworkGUID(ContextObj.netguid()), SpawnMsg->channelid());
+			}
 		}
 		
 		UObject* NewObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld());
@@ -139,7 +144,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 			{
 				if (SpawnMsg->has_localrole())
 				{
-					NewActor->SetRole((ENetRole)SpawnMsg->localrole());
+					NewActor->SetRole(static_cast<ENetRole>(SpawnMsg->localrole()));
 				}
 
 				// UChanneldNetDriver::NotifyActorChannelOpen doesn't always get called in ChanneldUtils::GetObjectByRef.
@@ -552,8 +557,15 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		return;
 	}
 
+	if (Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()).Num() == 0)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("[Server] Replicating actor %s doesn't implement IChannelDataProvider, will not be spawn to client."), *Actor->GetName());
+		return;
+	}
+
 	// Already sent
-	if (GuidCache->GetNetGUID(Actor).IsValid())
+	FNetworkGUID NetId = GuidCache->GetNetGUID(Actor);
+	if (NetId.IsValid() && SentSpawnedNetGUIDs.Contains(NetId))
 	{
 		return;
 	}
@@ -565,6 +577,13 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		{
 			Pair.Value->SendSpawnMessage(Actor, Actor->GetRemoteRole());
 		}
+	}
+
+	// Get the NetGUID from the cache again, as it could be assigned during SendSpawnMessage()
+	NetId = GuidCache->GetNetGUID(Actor);
+	if (NetId.IsValid())
+	{
+		SentSpawnedNetGUIDs.Add(NetId);
 	}
 }
 

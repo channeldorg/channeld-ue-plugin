@@ -207,7 +207,7 @@ void FChanneldEditorModule::LaunchServerGroup(const FServerGroup& ServerGroup)
 	const FString ProjectPath = FPaths::GetProjectFilePath();
 		
 	// If server map is not set, use current level.
-	FString MapName = ServerGroup.ServerMap ? ServerGroup.ServerMap->GetMapName() : GEditor->GetEditorWorldContext().World()->GetMapName();
+	FString MapName = ServerGroup.ServerMap.IsValid() ? ServerGroup.ServerMap.GetAssetName() : GEditor->GetEditorWorldContext().World()->GetMapName();
 	FString ViewClassName = ServerGroup.ServerViewClass->GetPathName();
 		
 	for (int i = 0; i < ServerGroup.ServerNum; i++)

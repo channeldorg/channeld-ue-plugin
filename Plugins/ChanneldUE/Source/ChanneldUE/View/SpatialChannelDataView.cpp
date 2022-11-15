@@ -21,9 +21,11 @@ void USpatialChannelDataView::InitServer()
 	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
 	{
 		auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
-        // A client is subscribed to a spatial channel the server owns (by Master server)
+        // A client is subscribed to a spatial channel the server owns (Sub message is sent by Master server)
 		if (SubResultMsg->conntype() == channeldpb::CLIENT && SubResultMsg->channeltype() == channeldpb::SPATIAL && SubResultMsg->suboptions().dataaccess() == channeldpb::WRITE_ACCESS)
 		{
+			ensureMsgf(!ClientInChannels.Contains(SubResultMsg->connid()), TEXT("Client conn %d had already been added to this server"), SubResultMsg->connid());
+			
 			ClientInChannels.Add(SubResultMsg->connid(), ChId);
 
 			if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())//NetDriver.IsValid())
@@ -32,6 +34,8 @@ void USpatialChannelDataView::InitServer()
 				// Create the ControlChannel and set OpenAcked = 1
 				UChannel* ControlChannel = ClientConn->CreateChannelByName(NAME_Control, EChannelCreateFlags::OpenedLocally);
 				ControlChannel->OpenAcked = 1;
+				ControlChannel->OpenPacketId.First = 0;
+				ControlChannel->OpenPacketId.Last = 0;
 
 				//~ Begin copy of UWorld::NotifyControlMessage
 				FURL InURL( NULL, *ClientConn->RequestURL, TRAVEL_Absolute );
@@ -39,6 +43,8 @@ void USpatialChannelDataView::InitServer()
 				ClientConn->PlayerController = GetWorld()->SpawnPlayActor( ClientConn, ROLE_AutonomousProxy, InURL, ClientConn->PlayerId, ErrorMsg );
 				ClientConn->SetClientLoginState(EClientLoginState::ReceivedJoin);
 				//~ End copy
+
+				GetWorld()->GetAuthGameMode()->RestartPlayer(ClientConn->PlayerController);
 			}
 			else
 			{

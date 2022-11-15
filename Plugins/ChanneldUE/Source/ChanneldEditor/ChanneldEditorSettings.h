@@ -19,9 +19,12 @@ struct FServerGroup
 	UPROPERTY(EditAnywhere)
 	float DelayTime;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, meta=(AllowedClasses="World"))
 	//FText ServerMapName;
-	TSoftObjectPtr<UWorld> ServerMap;
+	// TSoftObjectPtr<UWorld> ServerMap;
+	/** The map that will be loaded by default when no other map is loaded (DEDICATED SERVER). */
+	// UPROPERTY(config, EditAnywhere, Category=DefaultMaps, AdvancedDisplay, meta=(AllowedClasses="World"))
+	FSoftObjectPath ServerMap;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UChannelDataView> ServerViewClass;
