@@ -144,8 +144,25 @@ void UChanneldNetConnection::SendMessage(uint32 MsgType, const google::protobuf:
 	SendData(MsgType, reinterpret_cast<const uint8*>(StrData.data()), StrData.size());
 }
 
+bool UChanneldNetConnection::HasSentSpawn(UObject* Object) const
+{
+	const FNetworkGUID NetId = Driver->GuidCache->GetOrAssignNetGUID(Object);
+	UPackageMapClient* PackageMapClient = CastChecked<UPackageMapClient>(PackageMap);
+	int32* ExportCount = PackageMapClient->NetGUIDExportCountMap.Find(NetId);
+	return (ExportCount != nullptr && *ExportCount > 0);
+}
+
 void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*= ENetRole::None*/)
 {
+	const FNetworkGUID NetId = Driver->GuidCache->GetOrAssignNetGUID(Object);
+	UPackageMapClient* PackageMapClient = CastChecked<UPackageMapClient>(PackageMap);
+	int32* ExportCount = PackageMapClient->NetGUIDExportCountMap.Find(NetId);
+	if (ExportCount != nullptr && *ExportCount > 0)
+	{
+		UE_LOG(LogChanneld, Verbose, TEXT("[Server] Skip sending spawn to conn %d, obj: %s"), GetConnId(), *GetNameSafe(Object));
+		return;
+	}
+
 	unrealpb::SpawnObjectMessage SpawnMsg;
 	SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Object, this));
 	SpawnMsg.set_channelid( CastChecked<UChanneldNetDriver>(Driver)->GetSendToChannelId(this));
@@ -153,6 +170,12 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 		SpawnMsg.set_localrole(Role);
 	SendMessage(MessageType_SPAWN, SpawnMsg);
 	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %d, owning channel: %d, local role: %d"), GetConnId(), *GetNameSafe(Object), SpawnMsg.obj().netguid(), SpawnMsg.channelid(), SpawnMsg.localrole());
+
+	if (ExportCount == nullptr)
+	{
+		ExportCount = &PackageMapClient->NetGUIDExportCountMap.Add(NetId, 0);
+	}
+	(*ExportCount)++;
 }
 
 FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= false*/)

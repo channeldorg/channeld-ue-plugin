@@ -26,6 +26,8 @@ public:
 	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider) override;
 	virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider) override;
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved) override;
+
+	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
 	
 private:
 

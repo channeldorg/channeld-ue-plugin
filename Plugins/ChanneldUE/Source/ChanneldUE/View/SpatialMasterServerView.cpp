@@ -9,6 +9,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Replication/ChanneldReplicationComponent.h"
 
 USpatialMasterServerView::USpatialMasterServerView(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -115,4 +116,18 @@ void USpatialMasterServerView::AddProvider(ChannelId ChId, IChannelDataProvider*
 ChannelId USpatialMasterServerView::GetOwningChannelId(const FNetworkGUID NetId) const
 {
 	return GlobalChannelId;
+}
+
+void USpatialMasterServerView::OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn)
+{
+	// Send the GameStateBase to the new player
+	auto Comp = Cast<UChanneldReplicationComponent>(NewPlayer->GetComponentByClass(UChanneldReplicationComponent::StaticClass()));
+	if (Comp)
+	{
+		NewPlayerConn->SendSpawnMessage(GameMode->GameState, ENetRole::ROLE_SimulatedProxy);
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn the GameStateBase in the client."));
+	}
 }

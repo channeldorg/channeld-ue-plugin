@@ -104,13 +104,15 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 			return;
 		}
 
+		FNetworkGUID NetId = FNetworkGUID(SpawnMsg->obj().netguid());
+		
 		// If the object with the same NetId exists, destroy it before spawning a new one.
 		UObject* OldObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld(), false);
 		if (OldObj)
 		{
-			UE_LOG(LogChanneld, Log, TEXT("Found spawned object %s of duplicated NetId: %d, will be destroyed."), *GetNameSafe(OldObj), SpawnMsg->obj().netguid());
+			UE_LOG(LogChanneld, Log, TEXT("[Client] Found spawned object %s of duplicated NetId: %d, will be destroyed."), *GetNameSafe(OldObj), SpawnMsg->obj().netguid());
 			
-			GuidCache->ObjectLookup.Remove(FNetworkGUID(SpawnMsg->obj().netguid()));
+			GuidCache->ObjectLookup.Remove(NetId);
 			GuidCache->NetGUIDLookup.Remove(OldObj);
 			
 			if (AActor* OldActor = Cast<AActor>(OldObj))
@@ -122,11 +124,11 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 		if (ChannelDataView.IsValid() && SpawnMsg->has_channelid())
 		{
 			// Set up the mapping before actually spawn it, so AddProvider() can find the mapping.
-			ChannelDataView->SetOwningChannelId(FNetworkGUID(SpawnMsg->obj().netguid()), SpawnMsg->channelid());
+			ChannelDataView->SetOwningChannelId(NetId, SpawnMsg->channelid());
 			// Also add the mapping of all context NetGUIDs
 			for (auto& ContextObj : SpawnMsg->obj().context())
 			{
-				ChannelDataView->SetOwningChannelId(FNetworkGUID(ContextObj.netguid()), SpawnMsg->channelid());
+				ChannelDataView->SetOwningChannelId(ContextObj.netguid(), SpawnMsg->channelid());
 			}
 		}
 		
@@ -557,18 +559,22 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		return;
 	}
 
+	/*
 	if (Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()).Num() == 0)
 	{
 		UE_LOG(LogChanneld, Warning, TEXT("[Server] Replicating actor %s doesn't implement IChannelDataProvider, will not be spawn to client."), *Actor->GetName());
 		return;
 	}
+	*/
 
+	/*
 	// Already sent
-	FNetworkGUID NetId = GuidCache->GetNetGUID(Actor);
+	const FNetworkGUID NetId = GuidCache->GetNetGUID(Actor);
 	if (NetId.IsValid() && SentSpawnedNetGUIDs.Contains(NetId))
 	{
 		return;
 	}
+	*/
 
 	// Send the spawning to the clients
 	for (auto& Pair : ClientConnectionMap)
@@ -579,12 +585,16 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		}
 	}
 
+	// TODO: Send the spawning to nearby spatial servers that sub to the actor's spatial channel (if exist)
+
+	/*
 	// Get the NetGUID from the cache again, as it could be assigned during SendSpawnMessage()
 	NetId = GuidCache->GetNetGUID(Actor);
 	if (NetId.IsValid())
 	{
 		SentSpawnedNetGUIDs.Add(NetId);
 	}
+	*/
 }
 
 void UChanneldNetDriver::NotifyActorChannelOpen(UActorChannel* Channel, AActor* Actor)
@@ -606,34 +616,8 @@ void UChanneldNetDriver::OnClientPostLogin(AGameModeBase* GameMode, APlayerContr
 		UE_LOG(LogChanneld, Error, TEXT("PlayerController doesn't have the UChanneldNetConnection. Failed to spawn the objects in the clients."));
 		return;
 	}
-
-	/* Unfortunately, a couple of RPC on the PC is called in GameMode::PostLogin BEFORE invoking this event. So we need to handle the RPC properly.
-	// Send the PlayerController to the client (in case any RPC on the PC is called but it doesn't have the current channelId when spawned)
-	NewPlayerConn->SendSpawnMessage(NewPlayer, NewPlayer->GetRemoteRole());
-	*/
-
-	// Send the GameStateBase to the new player
-	auto Comp = Cast<UChanneldReplicationComponent>(NewPlayer->GetComponentByClass(UChanneldReplicationComponent::StaticClass()));
-	if (Comp)
-	{
-		NewPlayerConn->SendSpawnMessage(GameMode->GameState, ENetRole::ROLE_SimulatedProxy);
-	}
-	else
-	{
-		UE_LOG(LogChanneld, Warning, TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn the GameStateBase in the client."));
-	}
-
-	/* OnServerSpawnedActor() sends the spawning of the new player's pawn to other clients */
-
-	// Send the existing player pawns to the new player
-	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
-	{
-		APlayerController* PC = Iterator->Get();
-		if (PC && PC != NewPlayer && PC->GetPawn())
-		{
-			NewPlayerConn->SendSpawnMessage(PC->GetPawn(), ENetRole::ROLE_SimulatedProxy);
-		}
-	}
+	
+	ChannelDataView->OnClientPostLogin(GameMode, NewPlayer, NewPlayerConn);
 }
 
 void UChanneldNetDriver::TickDispatch(float DeltaTime)
@@ -721,9 +705,9 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 				auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters, bSuccess);
 				if (bSuccess)
 				{
-					// If the target object hasn't been spawned in the remote end yet, send the Spawn message before the RPC message.
-					if (!GuidCache->GetNetGUID(Actor).IsValid())
+					if (IsServer() && !NetConn->HasSentSpawn(Actor))
 					{
+						// If the target object hasn't been spawned in the remote end yet, send the Spawn message before the RPC message.
 						NetConn->SendSpawnMessage(Actor, Actor->GetRemoteRole());
 					}
 				
@@ -820,6 +804,11 @@ void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 
 void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 {
+	// IMPORTANT: offset with the ConnId to avoid NetworkGUID conflicts
+	const uint32 UniqueNetIdOffset = ConnToChanneld->GetConnId() << ConnectionIdBitOffset;
+	GuidCache->UniqueNetIDs[0] = UniqueNetIdOffset;
+	GuidCache->UniqueNetIDs[1] = UniqueNetIdOffset;
+
 	if (ConnToChanneld->IsClient())
 	{
 		auto MyServerConnection = GetServerConnection();

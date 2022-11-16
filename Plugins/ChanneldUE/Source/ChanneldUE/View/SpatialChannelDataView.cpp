@@ -208,3 +208,16 @@ void USpatialChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvide
 	
 	Super::RemoveProvider(ChId, Provider, bSendRemoved);
 }
+
+void USpatialChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn)
+{
+	// Send the existing player pawns to the new player
+	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		APlayerController* PC = Iterator->Get();
+		if (PC && PC != NewPlayer && PC->GetPawn())
+		{
+			NewPlayerConn->SendSpawnMessage(PC->GetPawn(), ENetRole::ROLE_SimulatedProxy);
+		}
+	}
+}

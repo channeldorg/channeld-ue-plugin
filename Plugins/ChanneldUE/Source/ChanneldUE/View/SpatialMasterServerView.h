@@ -19,7 +19,8 @@ public:
 	
 	virtual void InitServer() override;
 	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider) override;
-	virtual ChannelId GetOwningChannelId(const FNetworkGUID NetId) const override;	
+	virtual ChannelId GetOwningChannelId(const FNetworkGUID NetId) const override;
+	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
 
 	UPROPERTY(EditAnywhere)
 	uint32 ClientFanOutIntervalMs = 20;

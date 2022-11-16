@@ -43,6 +43,7 @@ public:
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
 
+	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn);
 	virtual FNetworkGUID GetNetId(IChannelDataProvider* Provider) const;
 	void OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, ChannelId ChId);
 	virtual void SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId);
@@ -52,7 +53,7 @@ public:
 	int32 SendAllChannelUpdates();
 
 	void OnDisconnect();
-	
+
 	UPROPERTY(EditAnywhere)
 	EChanneldChannelType DefaultChannelType = EChanneldChannelType::ECT_Global;
 

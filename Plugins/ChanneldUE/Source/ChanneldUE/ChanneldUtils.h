@@ -3,8 +3,9 @@
 #include "CoreMinimal.h"
 #include "unreal_common.pb.h"
 #include "Engine/PackageMapClient.h"
-#include "ChanneldTypes.h"
 #include "Engine/ActorChannel.h"
+#include "ChanneldTypes.h"
+#include "ChanneldConnection.h"
 #include "ChanneldNetConnection.h"
 
 class ChanneldUtils
@@ -99,6 +100,14 @@ public:
 		{
 			return nullptr;
 		}
+
+		/*
+		// Client uses different NetworkGUID than server
+		if (World->IsClient())
+		{
+			GetUniqueNetId(NetGUID, Ref->connid());
+		}
+		*/
 		
 		bNetGUIDUnmapped = (World->GetNetDriver() == nullptr);
 		if (bNetGUIDUnmapped)
@@ -125,12 +134,21 @@ public:
 				for (auto CachedObj : CachedObjs)
 				{
 					FNetworkGUID NewGUID = FNetworkGUID(CachedObj->netguid());
+
+					/*
+					// Client uses different NetworkGUID than server
+					if (World->IsClient())
+					{
+						GetUniqueNetId(NewGUID, Ref->connid());
+					}
+					*/
+				
 					FString PathName = UTF8_TO_TCHAR(CachedObj->pathname().c_str());
 					// Remap name for PIE
 					GEngine->NetworkRemapPath(Connection, PathName, true);
-					GuidCache->RegisterNetGUIDFromPath_Client(NewGUID, PathName, FNetworkGUID(CachedObj->outerguid()), 0, false, false);
+					GuidCache->RegisterNetGUIDFromPath_Client(NewGUID, PathName, CachedObj->outerguid(), 0, false, false);
 					UObject* NewObj = GuidCache->GetObjectFromNetGUID(NewGUID, false);
-					UE_LOG(LogChanneld, Verbose, TEXT("[Client] Registered NetGUID %d from path: %s"), CachedObj->netguid(), *PathName);
+					UE_LOG(LogChanneld, Verbose, TEXT("[Client] Registered NetGUID %d (%d) from path: %s"), NewGUID.Value, ChanneldUtils::GetNativeNetId(NewGUID.Value), *PathName);
 				}
 
 				if (Ref->bunchbitsnum() > 0)
@@ -151,7 +169,7 @@ public:
 						Channel->NotifyActorChannelOpen(Actor, InBunch);
 						// After all properties have been initialized, call PostNetInit. This should call BeginPlay() so initialization can be done with proper starting values.
 						Actor->PostNetInit();
-						UE_LOG(LogChanneld, Verbose, TEXT("[Client] Created new actor '%s' with NetGUID %d"), *Actor->GetName(), GuidCache->GetNetGUID(Actor).Value);
+						UE_LOG(LogChanneld, Verbose, TEXT("[Client] Created new actor '%s' with NetGUID %d (%d)"), *Actor->GetName(), GuidCache->GetNetGUID(Actor).Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
 
 						//// Remove the channel after using it
 						//Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
@@ -163,12 +181,12 @@ public:
 			if (Obj == nullptr)
 			{
 				bNetGUIDUnmapped = true;
-				UE_LOG(LogChanneld, Warning, TEXT("[Client] Unable to create object from NetGUID: %d"), NetGUID.Value);
+				UE_LOG(LogChanneld, Warning, TEXT("[Client] Unable to create object from NetGUID: %d (%d)"), NetGUID.Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
 			}
 		}
 		return Obj;
 	}
-
+	
 	static const unrealpb::UnrealObjectRef GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr)
 	{
 		unrealpb::UnrealObjectRef ObjRef;
@@ -260,6 +278,7 @@ public:
 		}
 
 		ObjRef.set_netguid(NetGUID.Value);
+		// ObjRef.set_connid(GEngine->GetEngineSubsystem<UChanneldConnection>()->GetConnId());
 		return ObjRef;
 	}
 
@@ -306,5 +325,29 @@ public:
 		CompRef.mutable_owner()->MergeFrom(GetRefOfObject(Comp->GetOwner(), Connection));
 		CompRef.set_compname(std::string(TCHAR_TO_UTF8(*Comp->GetFName().ToString())));
 		return CompRef;
+	}
+
+	/* Changed to UChanneldNetDriver::OnChanneldAuthenticated: set GuidCache->UniqueNetIDs
+	// Client uses ConnId for at the first bits to resolve the conflicts of NetGUIDs on different servers.
+	static FNetworkGUID GetUniqueNetId(uint32 NetId, uint32 ConnId)
+	{
+		FNetworkGUID NetworkGUID(NetId);
+		return GetUniqueNetId(NetworkGUID, ConnId);
+	}
+
+	// Client uses ConnId for at the first bits to resolve the conflicts of NetGUIDs on different servers.
+	static FNetworkGUID& GetUniqueNetId(FNetworkGUID& NetworkGUID, uint32 ConnId)
+	{
+		if (NetworkGUID.IsValid())
+		{
+			NetworkGUID.Value |= ConnId << ConnectionIdBitOffset;
+		}
+		return NetworkGUID;
+	}
+	*/
+
+	static uint32 GetNativeNetId(uint32 UniqueNetId)
+	{
+		return UniqueNetId & ((1 << ConnectionIdBitOffset) - 1);
 	}
 };

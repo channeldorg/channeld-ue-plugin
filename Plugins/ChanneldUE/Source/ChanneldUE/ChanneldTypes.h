@@ -34,7 +34,8 @@ constexpr ChannelId InvalidChannelId = 0xffffffff;
 
 constexpr uint32 MaxPacketSize = 0x00ffff;
 constexpr uint32 MinPacketSize = 20;
-
+constexpr uint8 MaxConnectionIdBits = 13;
+constexpr uint8 ConnectionIdBitOffset = (31 - MaxConnectionIdBits);
 
 UENUM(BlueprintType)
 enum class EChanneldChannelType : uint8

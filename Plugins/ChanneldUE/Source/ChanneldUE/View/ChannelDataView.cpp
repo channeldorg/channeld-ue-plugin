@@ -3,6 +3,8 @@
 #include "ChanneldNetDriver.h"
 #include "ChanneldUtils.h"
 #include "Metrics.h"
+#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameStateBase.h"
 #include "Replication/ChanneldReplicationComponent.h"
 
 UChannelDataView::UChannelDataView(const FObjectInitializer& ObjectInitializer)
@@ -253,6 +255,38 @@ void UChannelDataView::RemoveProviderFromAllChannels(IChannelDataProvider* Provi
 	}
 }
 
+void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn)
+{
+
+	/* Unfortunately, a couple of RPC on the PC is called in GameMode::PostLogin BEFORE invoking this event. So we need to handle the RPC properly.
+	// Send the PlayerController to the client (in case any RPC on the PC is called but it doesn't have the current channelId when spawned)
+	NewPlayerConn->SendSpawnMessage(NewPlayer, NewPlayer->GetRemoteRole());
+	*/
+
+	// Send the GameStateBase to the new player
+	auto Comp = Cast<UChanneldReplicationComponent>(NewPlayer->GetComponentByClass(UChanneldReplicationComponent::StaticClass()));
+	if (Comp)
+	{
+		NewPlayerConn->SendSpawnMessage(GameMode->GameState, ENetRole::ROLE_SimulatedProxy);
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn the GameStateBase in the client."));
+	}
+
+	/* OnServerSpawnedActor() sends the spawning of the new player's pawn to other clients */
+
+	// Send the existing player pawns to the new player
+	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		APlayerController* PC = Iterator->Get();
+		if (PC && PC != NewPlayer && PC->GetPawn())
+		{
+			NewPlayerConn->SendSpawnMessage(PC->GetPawn(), ENetRole::ROLE_SimulatedProxy);
+		}
+	}
+}
+
 FNetworkGUID UChannelDataView::GetNetId(IChannelDataProvider* Provider) const
 {
 	if (const auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
@@ -294,7 +328,7 @@ void UChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, ChannelId Ch
 		return;
 	
 	NetIdOwningChannels.Add(NetId, ChId);
-	UE_LOG(LogChanneld, Log, TEXT("Set up mapping of netId: %d -> channelId: %d"), NetId.Value, ChId);
+	UE_LOG(LogChanneld, Log, TEXT("Set up mapping of netId: %d (%d) -> channelId: %d"), NetId.Value, ChanneldUtils::GetNativeNetId(NetId.Value), ChId);
 }
 
 ChannelId UChannelDataView::GetOwningChannelId(const FNetworkGUID NetId) const
