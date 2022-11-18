@@ -87,7 +87,7 @@ public:
 		return ConnId;
 	}
 
-	FORCEINLINE bool IsConnected() { return !IsPendingKill() && Socket != nullptr && Socket->GetConnectionState() == SCS_Connected && bReceiveThreadRunning; }
+	FORCEINLINE bool IsConnected() { return !IsPendingKill() && Socket != nullptr && Socket->GetConnectionState() == SCS_Connected; }
 
 	FORCEINLINE bool IsAuthenticated() { return ConnId > 0; }
 
@@ -126,7 +126,7 @@ public:
 
 	UPROPERTY(Config)
 		int32 ReceiveBufferSize = MaxPacketSize;
-
+	
 	UPROPERTY(Config)
 		bool bShowUserSpaceMessageLog = false;
 

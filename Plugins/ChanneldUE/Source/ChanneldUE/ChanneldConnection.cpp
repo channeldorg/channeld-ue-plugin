@@ -1,6 +1,7 @@
 #include "ChanneldConnection.h"
 
 #include "ChanneldNetDriver.h"
+#include "ChanneldSettings.h"
 #include "SocketSubsystem.h"
 
 //DEFINE_LOG_CATEGORY(LogChanneld);
@@ -119,10 +120,13 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int32
 		return false;
 	}
 
-	if (!ensure(StartReceiveThread()))
+	if (GetMutableDefault<UChanneldSettings>()->bUseReceiveThread)
 	{
-		Error = FString::Printf(TEXT("Start receive thread failed"));
-		return false;
+		if (!ensure(StartReceiveThread()))
+		{
+			Error = FString::Printf(TEXT("Start receive thread failed"));
+			return false;
+		}
 	}
 	return true;
 }
@@ -304,6 +308,7 @@ uint32 UChanneldConnection::Run()
 	while (bReceiveThreadRunning)
 	{
 		Receive();
+		FPlatformProcess::Sleep(0.001f);
 	}
 	return 0;
 }
@@ -333,6 +338,11 @@ uint32 UChanneldConnection::AddRpcCallback(const FChanneldMessageHandlerFunc& Ha
 
 void UChanneldConnection::TickIncoming()
 {
+	if (!bReceiveThreadRunning)
+	{
+		Receive();
+	}
+	
 	MessageQueueEntry Entry;
 	while (IncomingQueue.Dequeue(Entry))
 	{

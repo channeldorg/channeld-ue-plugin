@@ -29,6 +29,8 @@ public:
 	FString ChanneldIpForServer = "127.0.0.1";
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	int32 ChanneldPortForServer = 11288;
+	UPROPERTY(Config, EditAnywhere, Category = "Transport")
+	bool bUseReceiveThread = false;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	bool bDisableHandshaking = true;
