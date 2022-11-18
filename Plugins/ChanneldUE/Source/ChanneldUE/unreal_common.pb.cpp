@@ -259,23 +259,23 @@ struct FBasedMovementInfoDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FBasedMovementInfoDefaultTypeInternal _FBasedMovementInfo_default_instance_;
-PROTOBUF_CONSTEXPR FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings(
+PROTOBUF_CONSTEXPR FRootMotionSource_FRootMotionFinishVelocitySettings::FRootMotionSource_FRootMotionFinishVelocitySettings(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_._has_bits_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}
   , /*decltype(_impl_.setvelocity_)*/nullptr
   , /*decltype(_impl_.mode_)*/0u
   , /*decltype(_impl_.clampvelocity_)*/0} {}
-struct FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettingsDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettingsDefaultTypeInternal()
+struct FRootMotionSource_FRootMotionFinishVelocitySettingsDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR FRootMotionSource_FRootMotionFinishVelocitySettingsDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
-  ~FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettingsDefaultTypeInternal() {}
+  ~FRootMotionSource_FRootMotionFinishVelocitySettingsDefaultTypeInternal() {}
   union {
-    FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings _instance;
+    FRootMotionSource_FRootMotionFinishVelocitySettings _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettingsDefaultTypeInternal _FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings_default_instance_;
-PROTOBUF_CONSTEXPR FRepRootMotionMontage_FRootMotionSource::FRepRootMotionMontage_FRootMotionSource(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FRootMotionSource_FRootMotionFinishVelocitySettingsDefaultTypeInternal _FRootMotionSource_FRootMotionFinishVelocitySettings_default_instance_;
+PROTOBUF_CONSTEXPR FRootMotionSource::FRootMotionSource(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_._has_bits_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}
@@ -295,16 +295,16 @@ PROTOBUF_CONSTEXPR FRepRootMotionMontage_FRootMotionSource::FRepRootMotionMontag
   , /*decltype(_impl_.bsimulatedneedssmoothing_)*/false
   , /*decltype(_impl_.bhasrootmotion_)*/false
   , /*decltype(_impl_.blendweight_)*/0} {}
-struct FRepRootMotionMontage_FRootMotionSourceDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR FRepRootMotionMontage_FRootMotionSourceDefaultTypeInternal()
+struct FRootMotionSourceDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR FRootMotionSourceDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
-  ~FRepRootMotionMontage_FRootMotionSourceDefaultTypeInternal() {}
+  ~FRootMotionSourceDefaultTypeInternal() {}
   union {
-    FRepRootMotionMontage_FRootMotionSource _instance;
+    FRootMotionSource _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FRepRootMotionMontage_FRootMotionSourceDefaultTypeInternal _FRepRootMotionMontage_FRootMotionSource_default_instance_;
-PROTOBUF_CONSTEXPR FRepRootMotionMontage_FRootMotionSourceGroup::FRepRootMotionMontage_FRootMotionSourceGroup(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FRootMotionSourceDefaultTypeInternal _FRootMotionSource_default_instance_;
+PROTOBUF_CONSTEXPR FRootMotionSourceGroup::FRootMotionSourceGroup(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_._has_bits_)*/{}
   , /*decltype(_impl_._cached_size_)*/{}
@@ -316,15 +316,15 @@ PROTOBUF_CONSTEXPR FRepRootMotionMontage_FRootMotionSourceGroup::FRepRootMotionM
   , /*decltype(_impl_.bhasoverridesourceswithignorezaccumulate_)*/false
   , /*decltype(_impl_.bisadditivevelocityapplied_)*/false
   , /*decltype(_impl_.lastaccumulatedsettings_)*/0u} {}
-struct FRepRootMotionMontage_FRootMotionSourceGroupDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR FRepRootMotionMontage_FRootMotionSourceGroupDefaultTypeInternal()
+struct FRootMotionSourceGroupDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR FRootMotionSourceGroupDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
-  ~FRepRootMotionMontage_FRootMotionSourceGroupDefaultTypeInternal() {}
+  ~FRootMotionSourceGroupDefaultTypeInternal() {}
   union {
-    FRepRootMotionMontage_FRootMotionSourceGroup _instance;
+    FRootMotionSourceGroup _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FRepRootMotionMontage_FRootMotionSourceGroupDefaultTypeInternal _FRepRootMotionMontage_FRootMotionSourceGroup_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FRootMotionSourceGroupDefaultTypeInternal _FRootMotionSourceGroup_default_instance_;
 PROTOBUF_CONSTEXPR FRepRootMotionMontage::FRepRootMotionMontage(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_._has_bits_)*/{}
@@ -658,8 +658,32 @@ struct GameStateBaseDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GameStateBaseDefaultTypeInternal _GameStateBase_default_instance_;
+PROTOBUF_CONSTEXPR FClientAdjustment::FClientAdjustment(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_._has_bits_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_.newbasebonename_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.newloc_)*/nullptr
+  , /*decltype(_impl_.newvel_)*/nullptr
+  , /*decltype(_impl_.newrot_)*/nullptr
+  , /*decltype(_impl_.newbase_)*/nullptr
+  , /*decltype(_impl_.rootmotionsourcecorrection_)*/nullptr
+  , /*decltype(_impl_.rootmotionrotation_)*/nullptr
+  , /*decltype(_impl_.timestamp_)*/0
+  , /*decltype(_impl_.backgoodmove_)*/false
+  , /*decltype(_impl_.bbaserelativeposition_)*/false
+  , /*decltype(_impl_.movementmode_)*/0u} {}
+struct FClientAdjustmentDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR FClientAdjustmentDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~FClientAdjustmentDefaultTypeInternal() {}
+  union {
+    FClientAdjustment _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FClientAdjustmentDefaultTypeInternal _FClientAdjustment_default_instance_;
 }  // namespace unrealpb
-static ::_pb::Metadata file_level_metadata_unreal_5fcommon_2eproto[38];
+static ::_pb::Metadata file_level_metadata_unreal_5fcommon_2eproto[39];
 static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_unreal_5fcommon_2eproto = nullptr;
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_unreal_5fcommon_2eproto = nullptr;
 
@@ -862,40 +886,40 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   4,
   5,
   6,
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings, _impl_._has_bits_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings, _impl_._has_bits_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings, _impl_.mode_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings, _impl_.setvelocity_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings, _impl_.clampvelocity_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings, _impl_.mode_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings, _impl_.setvelocity_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings, _impl_.clampvelocity_),
   1,
   0,
   2,
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_._has_bits_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_._has_bits_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.priority_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.localid_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.accumulatedmode_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.instancename_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.starttime_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.currenttime_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.previoustime_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.duration_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.status_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.settings_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.binlocalspace_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.bneedssimulatedcatchup_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.bsimulatedneedssmoothing_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.bhasrootmotion_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.blendweight_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSource, _impl_.finishvelocityparams_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.priority_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.localid_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.accumulatedmode_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.instancename_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.starttime_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.currenttime_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.previoustime_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.duration_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.status_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.settings_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.binlocalspace_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.bneedssimulatedcatchup_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.bsimulatedneedssmoothing_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.bhasrootmotion_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.blendweight_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSource, _impl_.finishvelocityparams_),
   2,
   3,
   4,
@@ -912,20 +936,20 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   14,
   15,
   1,
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup, _impl_._has_bits_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSourceGroup, _impl_._has_bits_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSourceGroup, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup, _impl_.rootmotionsources_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup, _impl_.pendingaddrootmotionsources_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup, _impl_.bhasadditivesources_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup, _impl_.bhasoverridesources_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup, _impl_.bhasoverridesourceswithignorezaccumulate_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup, _impl_.bisadditivevelocityapplied_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup, _impl_.lastaccumulatedsettings_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup, _impl_.lastpreadditivevelocity_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSourceGroup, _impl_.rootmotionsources_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSourceGroup, _impl_.pendingaddrootmotionsources_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSourceGroup, _impl_.bhasadditivesources_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSourceGroup, _impl_.bhasoverridesources_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSourceGroup, _impl_.bhasoverridesourceswithignorezaccumulate_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSourceGroup, _impl_.bisadditivevelocityapplied_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSourceGroup, _impl_.lastaccumulatedsettings_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FRootMotionSourceGroup, _impl_.lastpreadditivevelocity_),
   ~0u,
   ~0u,
   1,
@@ -1160,6 +1184,34 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   1,
   2,
   3,
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FClientAdjustment, _impl_._has_bits_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FClientAdjustment, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FClientAdjustment, _impl_.backgoodmove_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FClientAdjustment, _impl_.timestamp_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FClientAdjustment, _impl_.newloc_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FClientAdjustment, _impl_.newvel_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FClientAdjustment, _impl_.newrot_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FClientAdjustment, _impl_.newbase_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FClientAdjustment, _impl_.newbasebonename_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FClientAdjustment, _impl_.bbaserelativeposition_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FClientAdjustment, _impl_.rootmotionsourcecorrection_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FClientAdjustment, _impl_.rootmotionrotation_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::FClientAdjustment, _impl_.movementmode_),
+  8,
+  7,
+  1,
+  2,
+  3,
+  4,
+  0,
+  9,
+  5,
+  6,
+  10,
 };
 static const ::_pbi::MigrationSchema schemas_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, 9, -1, sizeof(::unrealpb::FVector)},
@@ -1175,9 +1227,9 @@ static const ::_pbi::MigrationSchema schemas_unreal_5fcommon_2eproto[] PROTOBUF_
   { 134, 143, -1, sizeof(::unrealpb::ActorComponentState)},
   { 146, 165, -1, sizeof(::unrealpb::SceneComponentState)},
   { 178, 191, -1, sizeof(::unrealpb::FBasedMovementInfo)},
-  { 198, 207, -1, sizeof(::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings)},
-  { 210, 232, -1, sizeof(::unrealpb::FRepRootMotionMontage_FRootMotionSource)},
-  { 248, 262, -1, sizeof(::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup)},
+  { 198, 207, -1, sizeof(::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings)},
+  { 210, 232, -1, sizeof(::unrealpb::FRootMotionSource)},
+  { 248, 262, -1, sizeof(::unrealpb::FRootMotionSourceGroup)},
   { 270, 288, -1, sizeof(::unrealpb::FRepRootMotionMontage)},
   { 300, 314, -1, sizeof(::unrealpb::CharacterState)},
   { 322, -1, -1, sizeof(::unrealpb::Character_ServerMovePacked_Params)},
@@ -1200,6 +1252,7 @@ static const ::_pbi::MigrationSchema schemas_unreal_5fcommon_2eproto[] PROTOBUF_
   { 464, -1, -1, sizeof(::unrealpb::PlayerController_ClientGotoState_Params)},
   { 471, -1, -1, sizeof(::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params)},
   { 482, 492, -1, sizeof(::unrealpb::GameStateBase)},
+  { 496, 513, -1, sizeof(::unrealpb::FClientAdjustment)},
 };
 
 static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eproto[] = {
@@ -1216,9 +1269,9 @@ static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eprot
   &::unrealpb::_ActorComponentState_default_instance_._instance,
   &::unrealpb::_SceneComponentState_default_instance_._instance,
   &::unrealpb::_FBasedMovementInfo_default_instance_._instance,
-  &::unrealpb::_FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings_default_instance_._instance,
-  &::unrealpb::_FRepRootMotionMontage_FRootMotionSource_default_instance_._instance,
-  &::unrealpb::_FRepRootMotionMontage_FRootMotionSourceGroup_default_instance_._instance,
+  &::unrealpb::_FRootMotionSource_FRootMotionFinishVelocitySettings_default_instance_._instance,
+  &::unrealpb::_FRootMotionSource_default_instance_._instance,
+  &::unrealpb::_FRootMotionSourceGroup_default_instance_._instance,
   &::unrealpb::_FRepRootMotionMontage_default_instance_._instance,
   &::unrealpb::_CharacterState_default_instance_._instance,
   &::unrealpb::_Character_ServerMovePacked_Params_default_instance_._instance,
@@ -1241,6 +1294,7 @@ static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eprot
   &::unrealpb::_PlayerController_ClientGotoState_Params_default_instance_._instance,
   &::unrealpb::_PlayerController_ClientReceiveLocalizedMessage_Params_default_instance_._instance,
   &::unrealpb::_GameStateBase_default_instance_._instance,
+  &::unrealpb::_FClientAdjustment_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -1330,148 +1384,162 @@ const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_
   "\001(\010H\006\210\001\001B\017\n\r_movementBaseB\013\n\t_boneNameB\013"
   "\n\t_locationB\013\n\t_rotationB\032\n\030_bServerHasB"
   "aseComponentB\024\n\022_bRelativeRotationB\025\n\023_b"
-  "ServerHasVelocity\"\341\022\n\025FRepRootMotionMont"
-  "age\022\026\n\tbIsActive\030\001 \001(\010H\000\210\001\001\0223\n\013animMonta"
-  "ge\030\002 \001(\0132\031.unrealpb.UnrealObjectRefH\001\210\001\001"
-  "\022\025\n\010position\030\003 \001(\002H\002\210\001\001\022(\n\010location\030\004 \001("
-  "\0132\021.unrealpb.FVectorH\003\210\001\001\022(\n\010rotation\030\005 "
-  "\001(\0132\021.unrealpb.FVectorH\004\210\001\001\0226\n\014movementB"
-  "ase\030\006 \001(\0132\033.unrealpb.ActorComponentRefH\005"
-  "\210\001\001\022!\n\024movementBaseBoneName\030\007 \001(\tH\006\210\001\001\022\036"
-  "\n\021bRelativePosition\030\010 \001(\010H\007\210\001\001\022\036\n\021bRelat"
-  "iveRotation\030\t \001(\010H\010\210\001\001\022\\\n\027authoritativeR"
-  "ootMotion\030\n \001(\01326.unrealpb.FRepRootMotio"
-  "nMontage.FRootMotionSourceGroupH\t\210\001\001\022,\n\014"
-  "acceleration\030\013 \001(\0132\021.unrealpb.FVectorH\n\210"
-  "\001\001\022.\n\016linearVelocity\030\014 \001(\0132\021.unrealpb.FV"
-  "ectorH\013\210\001\001\032\345\007\n\021FRootMotionSource\022\025\n\010prio"
-  "rity\030\001 \001(\rH\000\210\001\001\022\024\n\007localId\030\002 \001(\rH\001\210\001\001\022\034\n"
-  "\017accumulatedMode\030\003 \001(\rH\002\210\001\001\022\031\n\014instanceN"
-  "ame\030\004 \001(\tH\003\210\001\001\022\026\n\tstartTime\030\005 \001(\002H\004\210\001\001\022\030"
-  "\n\013currentTime\030\006 \001(\002H\005\210\001\001\022\031\n\014previousTime"
-  "\030\007 \001(\002H\006\210\001\001\022\025\n\010duration\030\010 \001(\002H\007\210\001\001\022\023\n\006st"
-  "atus\030\t \001(\rH\010\210\001\001\022\025\n\010settings\030\n \001(\rH\t\210\001\001\022\032"
-  "\n\rbInLocalSpace\030\013 \001(\010H\n\210\001\001\022#\n\026bNeedsSimu"
-  "latedCatchup\030\014 \001(\010H\013\210\001\001\022%\n\030bSimulatedNee"
-  "dsSmoothing\030\r \001(\010H\014\210\001\001\022\033\n\016bHasRootMotion"
-  "\030\016 \001(\010H\r\210\001\001\022\030\n\013blendWeight\030\017 \001(\002H\016\210\001\001\022v\n"
-  "\024finishVelocityParams\030\020 \001(\0132S.unrealpb.F"
-  "RepRootMotionMontage.FRootMotionSource.F"
-  "RootMotionFinishVelocitySettingsH\017\210\001\001\032\252\001"
-  "\n!FRootMotionFinishVelocitySettings\022\021\n\004m"
-  "ode\030\001 \001(\rH\000\210\001\001\022+\n\013setVelocity\030\002 \001(\0132\021.un"
-  "realpb.FVectorH\001\210\001\001\022\032\n\rclampVelocity\030\003 \001"
-  "(\002H\002\210\001\001B\007\n\005_modeB\016\n\014_setVelocityB\020\n\016_cla"
-  "mpVelocityB\013\n\t_priorityB\n\n\010_localIdB\022\n\020_"
-  "accumulatedModeB\017\n\r_instanceNameB\014\n\n_sta"
-  "rtTimeB\016\n\014_currentTimeB\017\n\r_previousTimeB"
-  "\013\n\t_durationB\t\n\007_statusB\013\n\t_settingsB\020\n\016"
-  "_bInLocalSpaceB\031\n\027_bNeedsSimulatedCatchu"
-  "pB\033\n\031_bSimulatedNeedsSmoothingB\021\n\017_bHasR"
-  "ootMotionB\016\n\014_blendWeightB\027\n\025_finishVelo"
-  "cityParams\032\365\004\n\026FRootMotionSourceGroup\022L\n"
-  "\021rootMotionSources\030\001 \003(\01321.unrealpb.FRep"
-  "RootMotionMontage.FRootMotionSource\022V\n\033p"
-  "endingAddRootMotionSources\030\002 \003(\01321.unrea"
-  "lpb.FRepRootMotionMontage.FRootMotionSou"
-  "rce\022 \n\023bHasAdditiveSources\030\003 \001(\010H\000\210\001\001\022 \n"
-  "\023bHasOverrideSources\030\004 \001(\010H\001\210\001\001\0225\n(bHasO"
-  "verrideSourcesWithIgnoreZAccumulate\030\005 \001("
-  "\010H\002\210\001\001\022\'\n\032bIsAdditiveVelocityApplied\030\006 \001"
-  "(\010H\003\210\001\001\022$\n\027lastAccumulatedSettings\030\007 \001(\r"
-  "H\004\210\001\001\0227\n\027lastPreAdditiveVelocity\030\010 \001(\0132\021"
-  ".unrealpb.FVectorH\005\210\001\001B\026\n\024_bHasAdditiveS"
-  "ourcesB\026\n\024_bHasOverrideSourcesB+\n)_bHasO"
-  "verrideSourcesWithIgnoreZAccumulateB\035\n\033_"
-  "bIsAdditiveVelocityAppliedB\032\n\030_lastAccum"
-  "ulatedSettingsB\032\n\030_lastPreAdditiveVeloci"
-  "tyB\014\n\n_bIsActiveB\016\n\014_animMontageB\013\n\t_pos"
-  "itionB\013\n\t_locationB\013\n\t_rotationB\017\n\r_move"
-  "mentBaseB\027\n\025_movementBaseBoneNameB\024\n\022_bR"
-  "elativePositionB\024\n\022_bRelativeRotationB\032\n"
-  "\030_authoritativeRootMotionB\017\n\r_accelerati"
-  "onB\021\n\017_linearVelocity\"\277\004\n\016CharacterState"
-  "\0228\n\nrootMotion\030\002 \001(\0132\037.unrealpb.FRepRoot"
-  "MotionMontageH\000\210\001\001\0228\n\rbasedMovement\030\003 \001("
-  "\0132\034.unrealpb.FBasedMovementInfoH\001\210\001\001\022/\n\""
-  "serverLastTransformUpdateTimeStamp\030\004 \001(\002"
-  "H\002\210\001\001\022\031\n\014movementMode\030\005 \001(\rH\003\210\001\001\022\030\n\013bIsC"
-  "rouched\030\006 \001(\010H\004\210\001\001\022%\n\030bProxyIsJumpForceA"
-  "pplied\030\007 \001(\010H\005\210\001\001\022+\n\036animRootMotionTrans"
-  "lationScale\030\010 \001(\002H\006\210\001\001\022/\n\"replayLastTran"
-  "sformUpdateTimeStamp\030\t \001(\002H\007\210\001\001B\r\n\013_root"
-  "MotionB\020\n\016_basedMovementB%\n#_serverLastT"
-  "ransformUpdateTimeStampB\017\n\r_movementMode"
-  "B\016\n\014_bIsCrouchedB\033\n\031_bProxyIsJumpForceAp"
-  "pliedB!\n\037_animRootMotionTranslationScale"
-  "B%\n#_replayLastTransformUpdateTimeStamp\""
-  "H\n!Character_ServerMovePacked_Params\022\017\n\007"
-  "bitsNum\030\001 \001(\r\022\022\n\npackedBits\030\002 \001(\014\"P\n)Cha"
-  "racter_ClientMoveResponsePacked_Params\022\017"
-  "\n\007bitsNum\030\001 \001(\r\022\022\n\npackedBits\030\002 \001(\014\"\223\001\n\013"
-  "PlayerState\022\022\n\005score\030\002 \001(\002H\000\210\001\001\022\025\n\010playe"
-  "rId\030\003 \001(\005H\001\210\001\001\022\021\n\004ping\030\004 \001(\rH\002\210\001\001\022\027\n\npla"
-  "yerName\030\005 \001(\tH\003\210\001\001B\010\n\006_scoreB\013\n\t_playerI"
-  "dB\007\n\005_pingB\r\n\013_playerName\"j\n\017ControllerS"
-  "tate\022.\n\013playerState\030\002 \001(\0132\031.unrealpb.Unr"
-  "ealObjectRef\022\'\n\004pawn\030\003 \001(\0132\031.unrealpb.Un"
-  "realObjectRef\"u\n#Controller_ClientSetLoc"
-  "ation_Params\022&\n\013newLocation\030\001 \001(\0132\021.unre"
-  "alpb.FVector\022&\n\013newRotation\030\002 \001(\0132\021.unre"
-  "alpb.FVector\"c\n#Controller_ClientSetRota"
-  "tion_Params\022&\n\013newRotation\030\001 \001(\0132\021.unrea"
-  "lpb.FVector\022\024\n\014bResetCamera\030\002 \001(\010\"\243\001\n\025Pl"
-  "ayerControllerState\0222\n\022targetViewRotatio"
-  "n\030\002 \001(\0132\021.unrealpb.FVectorH\000\210\001\001\022-\n\rspawn"
-  "Location\030\003 \001(\0132\021.unrealpb.FVectorH\001\210\001\001B\025"
-  "\n\023_targetViewRotationB\020\n\016_spawnLocation\""
-  "g\n*PlayerController_ServerUpdateCamera_P"
-  "arams\022!\n\006camLoc\030\001 \001(\0132\021.unrealpb.FVector"
-  "\022\026\n\016camPitchAndYaw\030\002 \001(\005\"R\n$PlayerContro"
-  "ller_ClientSetHUD_Params\022\031\n\014hudClassName"
-  "\030\001 \001(\tH\000\210\001\001B\017\n\r_hudClassName\"\252\001\n+PlayerC"
-  "ontroller_ClientSetViewTarget_Params\022(\n\005"
-  "actor\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\022\021"
-  "\n\tblendTime\030\002 \001(\002\022\025\n\rblendFunction\030\003 \001(\r"
-  "\022\020\n\010blendExp\030\004 \001(\002\022\025\n\rbLockOutgoing\030\005 \001("
-  "\010\"T\n0PlayerController_ClientEnableNetwor"
-  "kVoice_Params\022\024\n\007bEnable\030\001 \001(\010H\000\210\001\001B\n\n\010_"
-  "bEnable\"9\n*PlayerController_ClientCapBan"
-  "dwidth_Params\022\013\n\003cap\030\001 \001(\005\"P\n%PlayerCont"
-  "roller_ClientRestart_Params\022\'\n\004pawn\030\001 \001("
-  "\0132\031.unrealpb.UnrealObjectRef\"A\n+PlayerCo"
-  "ntroller_ClientSetCameraMode_Params\022\022\n\nn"
-  "ewCamMode\030\001 \001(\t\"[\n0PlayerController_Clie"
-  "ntRetryClientRestart_Params\022\'\n\004pawn\030\001 \001("
-  "\0132\031.unrealpb.UnrealObjectRef\"z\n2PlayerCo"
-  "ntroller_ServerSetSpectatorLocation_Para"
-  "ms\022!\n\006newLoc\030\001 \001(\0132\021.unrealpb.FVector\022!\n"
-  "\006newRot\030\002 \001(\0132\021.unrealpb.FVector\"^\n3Play"
-  "erController_ServerAcknowledgePossession"
-  "_Params\022\'\n\004pawn\030\001 \001(\0132\031.unrealpb.UnrealO"
-  "bjectRef\";\n\'PlayerController_ClientGotoS"
-  "tate_Params\022\020\n\010newState\030\001 \001(\t\"\375\001\n5Player"
-  "Controller_ClientReceiveLocalizedMessage"
-  "_Params\022\017\n\007message\030\001 \001(\t\022\016\n\006switch\030\002 \001(\005"
-  "\0227\n\024relatedPlayerState_1\030\003 \001(\0132\031.unrealp"
-  "b.UnrealObjectRef\0227\n\024relatedPlayerState_"
-  "2\030\004 \001(\0132\031.unrealpb.UnrealObjectRef\0221\n\016op"
-  "tionalObject\030\005 \001(\0132\031.unrealpb.UnrealObje"
-  "ctRef\"\207\002\n\rGameStateBase\022\037\n\022spectatorClas"
-  "sName\030\002 \001(\tH\000\210\001\001\022\036\n\021gameModeClassName\030\003 "
-  "\001(\tH\001\210\001\001\022\'\n\032replicatedWorldTimeSeconds\030\004"
-  " \001(\002H\002\210\001\001\022$\n\027bReplicatedHasBegunPlay\030\005 \001"
-  "(\010H\003\210\001\001B\025\n\023_spectatorClassNameB\024\n\022_gameM"
-  "odeClassNameB\035\n\033_replicatedWorldTimeSeco"
-  "ndsB\032\n\030_bReplicatedHasBegunPlayB,Z*chann"
-  "eld.clewcat.com/channeld/pkg/unrealpbb\006p"
-  "roto3"
+  "ServerHasVelocity\"\317\007\n\021FRootMotionSource\022"
+  "\025\n\010priority\030\001 \001(\rH\000\210\001\001\022\024\n\007localId\030\002 \001(\rH"
+  "\001\210\001\001\022\034\n\017accumulatedMode\030\003 \001(\rH\002\210\001\001\022\031\n\014in"
+  "stanceName\030\004 \001(\tH\003\210\001\001\022\026\n\tstartTime\030\005 \001(\002"
+  "H\004\210\001\001\022\030\n\013currentTime\030\006 \001(\002H\005\210\001\001\022\031\n\014previ"
+  "ousTime\030\007 \001(\002H\006\210\001\001\022\025\n\010duration\030\010 \001(\002H\007\210\001"
+  "\001\022\023\n\006status\030\t \001(\rH\010\210\001\001\022\025\n\010settings\030\n \001(\r"
+  "H\t\210\001\001\022\032\n\rbInLocalSpace\030\013 \001(\010H\n\210\001\001\022#\n\026bNe"
+  "edsSimulatedCatchup\030\014 \001(\010H\013\210\001\001\022%\n\030bSimul"
+  "atedNeedsSmoothing\030\r \001(\010H\014\210\001\001\022\033\n\016bHasRoo"
+  "tMotion\030\016 \001(\010H\r\210\001\001\022\030\n\013blendWeight\030\017 \001(\002H"
+  "\016\210\001\001\022`\n\024finishVelocityParams\030\020 \001(\0132=.unr"
+  "ealpb.FRootMotionSource.FRootMotionFinis"
+  "hVelocitySettingsH\017\210\001\001\032\252\001\n!FRootMotionFi"
+  "nishVelocitySettings\022\021\n\004mode\030\001 \001(\rH\000\210\001\001\022"
+  "+\n\013setVelocity\030\002 \001(\0132\021.unrealpb.FVectorH"
+  "\001\210\001\001\022\032\n\rclampVelocity\030\003 \001(\002H\002\210\001\001B\007\n\005_mod"
+  "eB\016\n\014_setVelocityB\020\n\016_clampVelocityB\013\n\t_"
+  "priorityB\n\n\010_localIdB\022\n\020_accumulatedMode"
+  "B\017\n\r_instanceNameB\014\n\n_startTimeB\016\n\014_curr"
+  "entTimeB\017\n\r_previousTimeB\013\n\t_durationB\t\n"
+  "\007_statusB\013\n\t_settingsB\020\n\016_bInLocalSpaceB"
+  "\031\n\027_bNeedsSimulatedCatchupB\033\n\031_bSimulate"
+  "dNeedsSmoothingB\021\n\017_bHasRootMotionB\016\n\014_b"
+  "lendWeightB\027\n\025_finishVelocityParams\"\311\004\n\026"
+  "FRootMotionSourceGroup\0226\n\021rootMotionSour"
+  "ces\030\001 \003(\0132\033.unrealpb.FRootMotionSource\022@"
+  "\n\033pendingAddRootMotionSources\030\002 \003(\0132\033.un"
+  "realpb.FRootMotionSource\022 \n\023bHasAdditive"
+  "Sources\030\003 \001(\010H\000\210\001\001\022 \n\023bHasOverrideSource"
+  "s\030\004 \001(\010H\001\210\001\001\0225\n(bHasOverrideSourcesWithI"
+  "gnoreZAccumulate\030\005 \001(\010H\002\210\001\001\022\'\n\032bIsAdditi"
+  "veVelocityApplied\030\006 \001(\010H\003\210\001\001\022$\n\027lastAccu"
+  "mulatedSettings\030\007 \001(\rH\004\210\001\001\0227\n\027lastPreAdd"
+  "itiveVelocity\030\010 \001(\0132\021.unrealpb.FVectorH\005"
+  "\210\001\001B\026\n\024_bHasAdditiveSourcesB\026\n\024_bHasOver"
+  "rideSourcesB+\n)_bHasOverrideSourcesWithI"
+  "gnoreZAccumulateB\035\n\033_bIsAdditiveVelocity"
+  "AppliedB\032\n\030_lastAccumulatedSettingsB\032\n\030_"
+  "lastPreAdditiveVelocity\"\353\005\n\025FRepRootMoti"
+  "onMontage\022\026\n\tbIsActive\030\001 \001(\010H\000\210\001\001\0223\n\013ani"
+  "mMontage\030\002 \001(\0132\031.unrealpb.UnrealObjectRe"
+  "fH\001\210\001\001\022\025\n\010position\030\003 \001(\002H\002\210\001\001\022(\n\010locatio"
+  "n\030\004 \001(\0132\021.unrealpb.FVectorH\003\210\001\001\022(\n\010rotat"
+  "ion\030\005 \001(\0132\021.unrealpb.FVectorH\004\210\001\001\0226\n\014mov"
+  "ementBase\030\006 \001(\0132\033.unrealpb.ActorComponen"
+  "tRefH\005\210\001\001\022!\n\024movementBaseBoneName\030\007 \001(\tH"
+  "\006\210\001\001\022\036\n\021bRelativePosition\030\010 \001(\010H\007\210\001\001\022\036\n\021"
+  "bRelativeRotation\030\t \001(\010H\010\210\001\001\022F\n\027authorit"
+  "ativeRootMotion\030\n \001(\0132 .unrealpb.FRootMo"
+  "tionSourceGroupH\t\210\001\001\022,\n\014acceleration\030\013 \001"
+  "(\0132\021.unrealpb.FVectorH\n\210\001\001\022.\n\016linearVelo"
+  "city\030\014 \001(\0132\021.unrealpb.FVectorH\013\210\001\001B\014\n\n_b"
+  "IsActiveB\016\n\014_animMontageB\013\n\t_positionB\013\n"
+  "\t_locationB\013\n\t_rotationB\017\n\r_movementBase"
+  "B\027\n\025_movementBaseBoneNameB\024\n\022_bRelativeP"
+  "ositionB\024\n\022_bRelativeRotationB\032\n\030_author"
+  "itativeRootMotionB\017\n\r_accelerationB\021\n\017_l"
+  "inearVelocity\"\277\004\n\016CharacterState\0228\n\nroot"
+  "Motion\030\002 \001(\0132\037.unrealpb.FRepRootMotionMo"
+  "ntageH\000\210\001\001\0228\n\rbasedMovement\030\003 \001(\0132\034.unre"
+  "alpb.FBasedMovementInfoH\001\210\001\001\022/\n\"serverLa"
+  "stTransformUpdateTimeStamp\030\004 \001(\002H\002\210\001\001\022\031\n"
+  "\014movementMode\030\005 \001(\rH\003\210\001\001\022\030\n\013bIsCrouched\030"
+  "\006 \001(\010H\004\210\001\001\022%\n\030bProxyIsJumpForceApplied\030\007"
+  " \001(\010H\005\210\001\001\022+\n\036animRootMotionTranslationSc"
+  "ale\030\010 \001(\002H\006\210\001\001\022/\n\"replayLastTransformUpd"
+  "ateTimeStamp\030\t \001(\002H\007\210\001\001B\r\n\013_rootMotionB\020"
+  "\n\016_basedMovementB%\n#_serverLastTransform"
+  "UpdateTimeStampB\017\n\r_movementModeB\016\n\014_bIs"
+  "CrouchedB\033\n\031_bProxyIsJumpForceAppliedB!\n"
+  "\037_animRootMotionTranslationScaleB%\n#_rep"
+  "layLastTransformUpdateTimeStamp\"H\n!Chara"
+  "cter_ServerMovePacked_Params\022\017\n\007bitsNum\030"
+  "\001 \001(\r\022\022\n\npackedBits\030\002 \001(\014\"P\n)Character_C"
+  "lientMoveResponsePacked_Params\022\017\n\007bitsNu"
+  "m\030\001 \001(\r\022\022\n\npackedBits\030\002 \001(\014\"\223\001\n\013PlayerSt"
+  "ate\022\022\n\005score\030\002 \001(\002H\000\210\001\001\022\025\n\010playerId\030\003 \001("
+  "\005H\001\210\001\001\022\021\n\004ping\030\004 \001(\rH\002\210\001\001\022\027\n\nplayerName\030"
+  "\005 \001(\tH\003\210\001\001B\010\n\006_scoreB\013\n\t_playerIdB\007\n\005_pi"
+  "ngB\r\n\013_playerName\"j\n\017ControllerState\022.\n\013"
+  "playerState\030\002 \001(\0132\031.unrealpb.UnrealObjec"
+  "tRef\022\'\n\004pawn\030\003 \001(\0132\031.unrealpb.UnrealObje"
+  "ctRef\"u\n#Controller_ClientSetLocation_Pa"
+  "rams\022&\n\013newLocation\030\001 \001(\0132\021.unrealpb.FVe"
+  "ctor\022&\n\013newRotation\030\002 \001(\0132\021.unrealpb.FVe"
+  "ctor\"c\n#Controller_ClientSetRotation_Par"
+  "ams\022&\n\013newRotation\030\001 \001(\0132\021.unrealpb.FVec"
+  "tor\022\024\n\014bResetCamera\030\002 \001(\010\"\243\001\n\025PlayerCont"
+  "rollerState\0222\n\022targetViewRotation\030\002 \001(\0132"
+  "\021.unrealpb.FVectorH\000\210\001\001\022-\n\rspawnLocation"
+  "\030\003 \001(\0132\021.unrealpb.FVectorH\001\210\001\001B\025\n\023_targe"
+  "tViewRotationB\020\n\016_spawnLocation\"g\n*Playe"
+  "rController_ServerUpdateCamera_Params\022!\n"
+  "\006camLoc\030\001 \001(\0132\021.unrealpb.FVector\022\026\n\016camP"
+  "itchAndYaw\030\002 \001(\005\"R\n$PlayerController_Cli"
+  "entSetHUD_Params\022\031\n\014hudClassName\030\001 \001(\tH\000"
+  "\210\001\001B\017\n\r_hudClassName\"\252\001\n+PlayerControlle"
+  "r_ClientSetViewTarget_Params\022(\n\005actor\030\001 "
+  "\001(\0132\031.unrealpb.UnrealObjectRef\022\021\n\tblendT"
+  "ime\030\002 \001(\002\022\025\n\rblendFunction\030\003 \001(\r\022\020\n\010blen"
+  "dExp\030\004 \001(\002\022\025\n\rbLockOutgoing\030\005 \001(\010\"T\n0Pla"
+  "yerController_ClientEnableNetworkVoice_P"
+  "arams\022\024\n\007bEnable\030\001 \001(\010H\000\210\001\001B\n\n\010_bEnable\""
+  "9\n*PlayerController_ClientCapBandwidth_P"
+  "arams\022\013\n\003cap\030\001 \001(\005\"P\n%PlayerController_C"
+  "lientRestart_Params\022\'\n\004pawn\030\001 \001(\0132\031.unre"
+  "alpb.UnrealObjectRef\"A\n+PlayerController"
+  "_ClientSetCameraMode_Params\022\022\n\nnewCamMod"
+  "e\030\001 \001(\t\"[\n0PlayerController_ClientRetryC"
+  "lientRestart_Params\022\'\n\004pawn\030\001 \001(\0132\031.unre"
+  "alpb.UnrealObjectRef\"z\n2PlayerController"
+  "_ServerSetSpectatorLocation_Params\022!\n\006ne"
+  "wLoc\030\001 \001(\0132\021.unrealpb.FVector\022!\n\006newRot\030"
+  "\002 \001(\0132\021.unrealpb.FVector\"^\n3PlayerContro"
+  "ller_ServerAcknowledgePossession_Params\022"
+  "\'\n\004pawn\030\001 \001(\0132\031.unrealpb.UnrealObjectRef"
+  "\";\n\'PlayerController_ClientGotoState_Par"
+  "ams\022\020\n\010newState\030\001 \001(\t\"\375\001\n5PlayerControll"
+  "er_ClientReceiveLocalizedMessage_Params\022"
+  "\017\n\007message\030\001 \001(\t\022\016\n\006switch\030\002 \001(\005\0227\n\024rela"
+  "tedPlayerState_1\030\003 \001(\0132\031.unrealpb.Unreal"
+  "ObjectRef\0227\n\024relatedPlayerState_2\030\004 \001(\0132"
+  "\031.unrealpb.UnrealObjectRef\0221\n\016optionalOb"
+  "ject\030\005 \001(\0132\031.unrealpb.UnrealObjectRef\"\207\002"
+  "\n\rGameStateBase\022\037\n\022spectatorClassName\030\002 "
+  "\001(\tH\000\210\001\001\022\036\n\021gameModeClassName\030\003 \001(\tH\001\210\001\001"
+  "\022\'\n\032replicatedWorldTimeSeconds\030\004 \001(\002H\002\210\001"
+  "\001\022$\n\027bReplicatedHasBegunPlay\030\005 \001(\010H\003\210\001\001B"
+  "\025\n\023_spectatorClassNameB\024\n\022_gameModeClass"
+  "NameB\035\n\033_replicatedWorldTimeSecondsB\032\n\030_"
+  "bReplicatedHasBegunPlay\"\214\005\n\021FClientAdjus"
+  "tment\022\031\n\014bAckGoodMove\030\001 \001(\010H\000\210\001\001\022\026\n\ttime"
+  "Stamp\030\002 \001(\002H\001\210\001\001\022&\n\006newLoc\030\003 \001(\0132\021.unrea"
+  "lpb.FVectorH\002\210\001\001\022&\n\006newVel\030\004 \001(\0132\021.unrea"
+  "lpb.FVectorH\003\210\001\001\022&\n\006newRot\030\005 \001(\0132\021.unrea"
+  "lpb.FVectorH\004\210\001\001\022/\n\007newBase\030\006 \001(\0132\031.unre"
+  "alpb.UnrealObjectRefH\005\210\001\001\022\034\n\017newBaseBone"
+  "Name\030\007 \001(\tH\006\210\001\001\022\"\n\025bBaseRelativePosition"
+  "\030\010 \001(\010H\007\210\001\001\022I\n\032rootMotionSourceCorrectio"
+  "n\030\t \001(\0132 .unrealpb.FRootMotionSourceGrou"
+  "pH\010\210\001\001\0222\n\022rootMotionRotation\030\n \001(\0132\021.unr"
+  "ealpb.FVectorH\t\210\001\001\022\031\n\014movementMode\030\013 \001(\r"
+  "H\n\210\001\001B\017\n\r_bAckGoodMoveB\014\n\n_timeStampB\t\n\007"
+  "_newLocB\t\n\007_newVelB\t\n\007_newRotB\n\n\010_newBas"
+  "eB\022\n\020_newBaseBoneNameB\030\n\026_bBaseRelativeP"
+  "ositionB\035\n\033_rootMotionSourceCorrectionB\025"
+  "\n\023_rootMotionRotationB\017\n\r_movementModeB,"
+  "Z*channeld.clewcat.com/channeld/pkg/unre"
+  "alpbb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_unreal_5fcommon_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_unreal_5fcommon_2eproto = {
-    false, false, 8845, descriptor_table_protodef_unreal_5fcommon_2eproto,
+    false, false, 9412, descriptor_table_protodef_unreal_5fcommon_2eproto,
     "unreal_common.proto",
-    &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 38,
+    &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 39,
     schemas_unreal_5fcommon_2eproto, file_default_instances_unreal_5fcommon_2eproto, TableStruct_unreal_5fcommon_2eproto::offsets,
     file_level_metadata_unreal_5fcommon_2eproto, file_level_enum_descriptors_unreal_5fcommon_2eproto,
     file_level_service_descriptors_unreal_5fcommon_2eproto,
@@ -6186,13 +6254,13 @@ void FBasedMovementInfo::InternalSwap(FBasedMovementInfo* other) {
 
 // ===================================================================
 
-class FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::_Internal {
+class FRootMotionSource_FRootMotionFinishVelocitySettings::_Internal {
  public:
-  using HasBits = decltype(std::declval<FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings>()._impl_._has_bits_);
+  using HasBits = decltype(std::declval<FRootMotionSource_FRootMotionFinishVelocitySettings>()._impl_._has_bits_);
   static void set_has_mode(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
   }
-  static const ::unrealpb::FVector& setvelocity(const FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* msg);
+  static const ::unrealpb::FVector& setvelocity(const FRootMotionSource_FRootMotionFinishVelocitySettings* msg);
   static void set_has_setvelocity(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
@@ -6202,18 +6270,18 @@ class FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings:
 };
 
 const ::unrealpb::FVector&
-FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::_Internal::setvelocity(const FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* msg) {
+FRootMotionSource_FRootMotionFinishVelocitySettings::_Internal::setvelocity(const FRootMotionSource_FRootMotionFinishVelocitySettings* msg) {
   return *msg->_impl_.setvelocity_;
 }
-FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+FRootMotionSource_FRootMotionFinishVelocitySettings::FRootMotionSource_FRootMotionFinishVelocitySettings(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings)
+  // @@protoc_insertion_point(arena_constructor:unrealpb.FRootMotionSource.FRootMotionFinishVelocitySettings)
 }
-FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings(const FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& from)
+FRootMotionSource_FRootMotionFinishVelocitySettings::FRootMotionSource_FRootMotionFinishVelocitySettings(const FRootMotionSource_FRootMotionFinishVelocitySettings& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
-  FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* const _this = this; (void)_this;
+  FRootMotionSource_FRootMotionFinishVelocitySettings* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_._has_bits_){from._impl_._has_bits_}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -6228,10 +6296,10 @@ FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::FRepR
   ::memcpy(&_impl_.mode_, &from._impl_.mode_,
     static_cast<size_t>(reinterpret_cast<char*>(&_impl_.clampvelocity_) -
     reinterpret_cast<char*>(&_impl_.mode_)) + sizeof(_impl_.clampvelocity_));
-  // @@protoc_insertion_point(copy_constructor:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings)
+  // @@protoc_insertion_point(copy_constructor:unrealpb.FRootMotionSource.FRootMotionFinishVelocitySettings)
 }
 
-inline void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::SharedCtor(
+inline void FRootMotionSource_FRootMotionFinishVelocitySettings::SharedCtor(
     ::_pb::Arena* arena, bool is_message_owned) {
   (void)arena;
   (void)is_message_owned;
@@ -6244,8 +6312,8 @@ inline void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySet
   };
 }
 
-FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::~FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings() {
-  // @@protoc_insertion_point(destructor:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings)
+FRootMotionSource_FRootMotionFinishVelocitySettings::~FRootMotionSource_FRootMotionFinishVelocitySettings() {
+  // @@protoc_insertion_point(destructor:unrealpb.FRootMotionSource.FRootMotionFinishVelocitySettings)
   if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
   (void)arena;
     return;
@@ -6253,17 +6321,17 @@ FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::~FRep
   SharedDtor();
 }
 
-inline void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::SharedDtor() {
+inline void FRootMotionSource_FRootMotionFinishVelocitySettings::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   if (this != internal_default_instance()) delete _impl_.setvelocity_;
 }
 
-void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::SetCachedSize(int size) const {
+void FRootMotionSource_FRootMotionFinishVelocitySettings::SetCachedSize(int size) const {
   _impl_._cached_size_.Set(size);
 }
 
-void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::Clear() {
-// @@protoc_insertion_point(message_clear_start:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings)
+void FRootMotionSource_FRootMotionFinishVelocitySettings::Clear() {
+// @@protoc_insertion_point(message_clear_start:unrealpb.FRootMotionSource.FRootMotionFinishVelocitySettings)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -6282,7 +6350,7 @@ void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+const char* FRootMotionSource_FRootMotionFinishVelocitySettings::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
@@ -6339,9 +6407,9 @@ failure:
 #undef CHK_
 }
 
-uint8_t* FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::_InternalSerialize(
+uint8_t* FRootMotionSource_FRootMotionFinishVelocitySettings::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings)
+  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.FRootMotionSource.FRootMotionFinishVelocitySettings)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -6368,12 +6436,12 @@ uint8_t* FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettin
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings)
+  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.FRootMotionSource.FRootMotionFinishVelocitySettings)
   return target;
 }
 
-size_t FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings)
+size_t FRootMotionSource_FRootMotionFinishVelocitySettings::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:unrealpb.FRootMotionSource.FRootMotionFinishVelocitySettings)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -6403,17 +6471,17 @@ size_t FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::_class_data_ = {
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FRootMotionSource_FRootMotionFinishVelocitySettings::_class_data_ = {
     ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::MergeImpl
+    FRootMotionSource_FRootMotionFinishVelocitySettings::MergeImpl
 };
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::GetClassData() const { return &_class_data_; }
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FRootMotionSource_FRootMotionFinishVelocitySettings::GetClassData() const { return &_class_data_; }
 
 
-void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
-  auto* const _this = static_cast<FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings*>(&to_msg);
-  auto& from = static_cast<const FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings)
+void FRootMotionSource_FRootMotionFinishVelocitySettings::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<FRootMotionSource_FRootMotionFinishVelocitySettings*>(&to_msg);
+  auto& from = static_cast<const FRootMotionSource_FRootMotionFinishVelocitySettings&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.FRootMotionSource.FRootMotionFinishVelocitySettings)
   GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -6435,30 +6503,30 @@ void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
-void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::CopyFrom(const FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings)
+void FRootMotionSource_FRootMotionFinishVelocitySettings::CopyFrom(const FRootMotionSource_FRootMotionFinishVelocitySettings& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.FRootMotionSource.FRootMotionFinishVelocitySettings)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::IsInitialized() const {
+bool FRootMotionSource_FRootMotionFinishVelocitySettings::IsInitialized() const {
   return true;
 }
 
-void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::InternalSwap(FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings* other) {
+void FRootMotionSource_FRootMotionFinishVelocitySettings::InternalSwap(FRootMotionSource_FRootMotionFinishVelocitySettings* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings, _impl_.clampvelocity_)
-      + sizeof(FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::_impl_.clampvelocity_)
-      - PROTOBUF_FIELD_OFFSET(FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings, _impl_.setvelocity_)>(
+      PROTOBUF_FIELD_OFFSET(FRootMotionSource_FRootMotionFinishVelocitySettings, _impl_.clampvelocity_)
+      + sizeof(FRootMotionSource_FRootMotionFinishVelocitySettings::_impl_.clampvelocity_)
+      - PROTOBUF_FIELD_OFFSET(FRootMotionSource_FRootMotionFinishVelocitySettings, _impl_.setvelocity_)>(
           reinterpret_cast<char*>(&_impl_.setvelocity_),
           reinterpret_cast<char*>(&other->_impl_.setvelocity_));
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata FRootMotionSource_FRootMotionFinishVelocitySettings::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
       file_level_metadata_unreal_5fcommon_2eproto[13]);
@@ -6466,9 +6534,9 @@ void FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::
 
 // ===================================================================
 
-class FRepRootMotionMontage_FRootMotionSource::_Internal {
+class FRootMotionSource::_Internal {
  public:
-  using HasBits = decltype(std::declval<FRepRootMotionMontage_FRootMotionSource>()._impl_._has_bits_);
+  using HasBits = decltype(std::declval<FRootMotionSource>()._impl_._has_bits_);
   static void set_has_priority(HasBits* has_bits) {
     (*has_bits)[0] |= 4u;
   }
@@ -6514,25 +6582,25 @@ class FRepRootMotionMontage_FRootMotionSource::_Internal {
   static void set_has_blendweight(HasBits* has_bits) {
     (*has_bits)[0] |= 32768u;
   }
-  static const ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings& finishvelocityparams(const FRepRootMotionMontage_FRootMotionSource* msg);
+  static const ::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings& finishvelocityparams(const FRootMotionSource* msg);
   static void set_has_finishvelocityparams(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
   }
 };
 
-const ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings&
-FRepRootMotionMontage_FRootMotionSource::_Internal::finishvelocityparams(const FRepRootMotionMontage_FRootMotionSource* msg) {
+const ::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings&
+FRootMotionSource::_Internal::finishvelocityparams(const FRootMotionSource* msg) {
   return *msg->_impl_.finishvelocityparams_;
 }
-FRepRootMotionMontage_FRootMotionSource::FRepRootMotionMontage_FRootMotionSource(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+FRootMotionSource::FRootMotionSource(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:unrealpb.FRepRootMotionMontage.FRootMotionSource)
+  // @@protoc_insertion_point(arena_constructor:unrealpb.FRootMotionSource)
 }
-FRepRootMotionMontage_FRootMotionSource::FRepRootMotionMontage_FRootMotionSource(const FRepRootMotionMontage_FRootMotionSource& from)
+FRootMotionSource::FRootMotionSource(const FRootMotionSource& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
-  FRepRootMotionMontage_FRootMotionSource* const _this = this; (void)_this;
+  FRootMotionSource* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_._has_bits_){from._impl_._has_bits_}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -6563,15 +6631,15 @@ FRepRootMotionMontage_FRootMotionSource::FRepRootMotionMontage_FRootMotionSource
       _this->GetArenaForAllocation());
   }
   if (from._internal_has_finishvelocityparams()) {
-    _this->_impl_.finishvelocityparams_ = new ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings(*from._impl_.finishvelocityparams_);
+    _this->_impl_.finishvelocityparams_ = new ::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings(*from._impl_.finishvelocityparams_);
   }
   ::memcpy(&_impl_.priority_, &from._impl_.priority_,
     static_cast<size_t>(reinterpret_cast<char*>(&_impl_.blendweight_) -
     reinterpret_cast<char*>(&_impl_.priority_)) + sizeof(_impl_.blendweight_));
-  // @@protoc_insertion_point(copy_constructor:unrealpb.FRepRootMotionMontage.FRootMotionSource)
+  // @@protoc_insertion_point(copy_constructor:unrealpb.FRootMotionSource)
 }
 
-inline void FRepRootMotionMontage_FRootMotionSource::SharedCtor(
+inline void FRootMotionSource::SharedCtor(
     ::_pb::Arena* arena, bool is_message_owned) {
   (void)arena;
   (void)is_message_owned;
@@ -6601,8 +6669,8 @@ inline void FRepRootMotionMontage_FRootMotionSource::SharedCtor(
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
-FRepRootMotionMontage_FRootMotionSource::~FRepRootMotionMontage_FRootMotionSource() {
-  // @@protoc_insertion_point(destructor:unrealpb.FRepRootMotionMontage.FRootMotionSource)
+FRootMotionSource::~FRootMotionSource() {
+  // @@protoc_insertion_point(destructor:unrealpb.FRootMotionSource)
   if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
   (void)arena;
     return;
@@ -6610,18 +6678,18 @@ FRepRootMotionMontage_FRootMotionSource::~FRepRootMotionMontage_FRootMotionSourc
   SharedDtor();
 }
 
-inline void FRepRootMotionMontage_FRootMotionSource::SharedDtor() {
+inline void FRootMotionSource::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.instancename_.Destroy();
   if (this != internal_default_instance()) delete _impl_.finishvelocityparams_;
 }
 
-void FRepRootMotionMontage_FRootMotionSource::SetCachedSize(int size) const {
+void FRootMotionSource::SetCachedSize(int size) const {
   _impl_._cached_size_.Set(size);
 }
 
-void FRepRootMotionMontage_FRootMotionSource::Clear() {
-// @@protoc_insertion_point(message_clear_start:unrealpb.FRepRootMotionMontage.FRootMotionSource)
+void FRootMotionSource::Clear() {
+// @@protoc_insertion_point(message_clear_start:unrealpb.FRootMotionSource)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -6650,7 +6718,7 @@ void FRepRootMotionMontage_FRootMotionSource::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* FRepRootMotionMontage_FRootMotionSource::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+const char* FRootMotionSource::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
@@ -6690,7 +6758,7 @@ const char* FRepRootMotionMontage_FRootMotionSource::_InternalParse(const char* 
           auto str = _internal_mutable_instancename();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "unrealpb.FRepRootMotionMontage.FRootMotionSource.instanceName"));
+          CHK_(::_pbi::VerifyUTF8(str, "unrealpb.FRootMotionSource.instanceName"));
         } else
           goto handle_unusual;
         continue;
@@ -6793,7 +6861,7 @@ const char* FRepRootMotionMontage_FRootMotionSource::_InternalParse(const char* 
         } else
           goto handle_unusual;
         continue;
-      // optional .unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings finishVelocityParams = 16;
+      // optional .unrealpb.FRootMotionSource.FRootMotionFinishVelocitySettings finishVelocityParams = 16;
       case 16:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 130)) {
           ptr = ctx->ParseMessage(_internal_mutable_finishvelocityparams(), ptr);
@@ -6825,9 +6893,9 @@ failure:
 #undef CHK_
 }
 
-uint8_t* FRepRootMotionMontage_FRootMotionSource::_InternalSerialize(
+uint8_t* FRootMotionSource::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.FRepRootMotionMontage.FRootMotionSource)
+  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.FRootMotionSource)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -6854,7 +6922,7 @@ uint8_t* FRepRootMotionMontage_FRootMotionSource::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_instancename().data(), static_cast<int>(this->_internal_instancename().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "unrealpb.FRepRootMotionMontage.FRootMotionSource.instanceName");
+      "unrealpb.FRootMotionSource.instanceName");
     target = stream->WriteStringMaybeAliased(
         4, this->_internal_instancename(), target);
   }
@@ -6925,7 +6993,7 @@ uint8_t* FRepRootMotionMontage_FRootMotionSource::_InternalSerialize(
     target = ::_pbi::WireFormatLite::WriteFloatToArray(15, this->_internal_blendweight(), target);
   }
 
-  // optional .unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings finishVelocityParams = 16;
+  // optional .unrealpb.FRootMotionSource.FRootMotionFinishVelocitySettings finishVelocityParams = 16;
   if (_internal_has_finishvelocityparams()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(16, _Internal::finishvelocityparams(this),
@@ -6936,12 +7004,12 @@ uint8_t* FRepRootMotionMontage_FRootMotionSource::_InternalSerialize(
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.FRepRootMotionMontage.FRootMotionSource)
+  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.FRootMotionSource)
   return target;
 }
 
-size_t FRepRootMotionMontage_FRootMotionSource::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:unrealpb.FRepRootMotionMontage.FRootMotionSource)
+size_t FRootMotionSource::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:unrealpb.FRootMotionSource)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -6957,7 +7025,7 @@ size_t FRepRootMotionMontage_FRootMotionSource::ByteSizeLong() const {
           this->_internal_instancename());
     }
 
-    // optional .unrealpb.FRepRootMotionMontage.FRootMotionSource.FRootMotionFinishVelocitySettings finishVelocityParams = 16;
+    // optional .unrealpb.FRootMotionSource.FRootMotionFinishVelocitySettings finishVelocityParams = 16;
     if (cached_has_bits & 0x00000002u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -7040,17 +7108,17 @@ size_t FRepRootMotionMontage_FRootMotionSource::ByteSizeLong() const {
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FRepRootMotionMontage_FRootMotionSource::_class_data_ = {
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FRootMotionSource::_class_data_ = {
     ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    FRepRootMotionMontage_FRootMotionSource::MergeImpl
+    FRootMotionSource::MergeImpl
 };
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FRepRootMotionMontage_FRootMotionSource::GetClassData() const { return &_class_data_; }
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FRootMotionSource::GetClassData() const { return &_class_data_; }
 
 
-void FRepRootMotionMontage_FRootMotionSource::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
-  auto* const _this = static_cast<FRepRootMotionMontage_FRootMotionSource*>(&to_msg);
-  auto& from = static_cast<const FRepRootMotionMontage_FRootMotionSource&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.FRepRootMotionMontage.FRootMotionSource)
+void FRootMotionSource::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<FRootMotionSource*>(&to_msg);
+  auto& from = static_cast<const FRootMotionSource&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.FRootMotionSource)
   GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -7061,7 +7129,7 @@ void FRepRootMotionMontage_FRootMotionSource::MergeImpl(::PROTOBUF_NAMESPACE_ID:
       _this->_internal_set_instancename(from._internal_instancename());
     }
     if (cached_has_bits & 0x00000002u) {
-      _this->_internal_mutable_finishvelocityparams()->::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings::MergeFrom(
+      _this->_internal_mutable_finishvelocityparams()->::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings::MergeFrom(
           from._internal_finishvelocityparams());
     }
     if (cached_has_bits & 0x00000004u) {
@@ -7114,18 +7182,18 @@ void FRepRootMotionMontage_FRootMotionSource::MergeImpl(::PROTOBUF_NAMESPACE_ID:
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
-void FRepRootMotionMontage_FRootMotionSource::CopyFrom(const FRepRootMotionMontage_FRootMotionSource& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.FRepRootMotionMontage.FRootMotionSource)
+void FRootMotionSource::CopyFrom(const FRootMotionSource& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.FRootMotionSource)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool FRepRootMotionMontage_FRootMotionSource::IsInitialized() const {
+bool FRootMotionSource::IsInitialized() const {
   return true;
 }
 
-void FRepRootMotionMontage_FRootMotionSource::InternalSwap(FRepRootMotionMontage_FRootMotionSource* other) {
+void FRootMotionSource::InternalSwap(FRootMotionSource* other) {
   using std::swap;
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
@@ -7136,14 +7204,14 @@ void FRepRootMotionMontage_FRootMotionSource::InternalSwap(FRepRootMotionMontage
       &other->_impl_.instancename_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(FRepRootMotionMontage_FRootMotionSource, _impl_.blendweight_)
-      + sizeof(FRepRootMotionMontage_FRootMotionSource::_impl_.blendweight_)
-      - PROTOBUF_FIELD_OFFSET(FRepRootMotionMontage_FRootMotionSource, _impl_.finishvelocityparams_)>(
+      PROTOBUF_FIELD_OFFSET(FRootMotionSource, _impl_.blendweight_)
+      + sizeof(FRootMotionSource::_impl_.blendweight_)
+      - PROTOBUF_FIELD_OFFSET(FRootMotionSource, _impl_.finishvelocityparams_)>(
           reinterpret_cast<char*>(&_impl_.finishvelocityparams_),
           reinterpret_cast<char*>(&other->_impl_.finishvelocityparams_));
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata FRepRootMotionMontage_FRootMotionSource::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata FRootMotionSource::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
       file_level_metadata_unreal_5fcommon_2eproto[14]);
@@ -7151,9 +7219,9 @@ void FRepRootMotionMontage_FRootMotionSource::InternalSwap(FRepRootMotionMontage
 
 // ===================================================================
 
-class FRepRootMotionMontage_FRootMotionSourceGroup::_Internal {
+class FRootMotionSourceGroup::_Internal {
  public:
-  using HasBits = decltype(std::declval<FRepRootMotionMontage_FRootMotionSourceGroup>()._impl_._has_bits_);
+  using HasBits = decltype(std::declval<FRootMotionSourceGroup>()._impl_._has_bits_);
   static void set_has_bhasadditivesources(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
   }
@@ -7169,25 +7237,25 @@ class FRepRootMotionMontage_FRootMotionSourceGroup::_Internal {
   static void set_has_lastaccumulatedsettings(HasBits* has_bits) {
     (*has_bits)[0] |= 32u;
   }
-  static const ::unrealpb::FVector& lastpreadditivevelocity(const FRepRootMotionMontage_FRootMotionSourceGroup* msg);
+  static const ::unrealpb::FVector& lastpreadditivevelocity(const FRootMotionSourceGroup* msg);
   static void set_has_lastpreadditivevelocity(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
 };
 
 const ::unrealpb::FVector&
-FRepRootMotionMontage_FRootMotionSourceGroup::_Internal::lastpreadditivevelocity(const FRepRootMotionMontage_FRootMotionSourceGroup* msg) {
+FRootMotionSourceGroup::_Internal::lastpreadditivevelocity(const FRootMotionSourceGroup* msg) {
   return *msg->_impl_.lastpreadditivevelocity_;
 }
-FRepRootMotionMontage_FRootMotionSourceGroup::FRepRootMotionMontage_FRootMotionSourceGroup(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+FRootMotionSourceGroup::FRootMotionSourceGroup(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup)
+  // @@protoc_insertion_point(arena_constructor:unrealpb.FRootMotionSourceGroup)
 }
-FRepRootMotionMontage_FRootMotionSourceGroup::FRepRootMotionMontage_FRootMotionSourceGroup(const FRepRootMotionMontage_FRootMotionSourceGroup& from)
+FRootMotionSourceGroup::FRootMotionSourceGroup(const FRootMotionSourceGroup& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
-  FRepRootMotionMontage_FRootMotionSourceGroup* const _this = this; (void)_this;
+  FRootMotionSourceGroup* const _this = this; (void)_this;
   new (&_impl_) Impl_{
       decltype(_impl_._has_bits_){from._impl_._has_bits_}
     , /*decltype(_impl_._cached_size_)*/{}
@@ -7207,10 +7275,10 @@ FRepRootMotionMontage_FRootMotionSourceGroup::FRepRootMotionMontage_FRootMotionS
   ::memcpy(&_impl_.bhasadditivesources_, &from._impl_.bhasadditivesources_,
     static_cast<size_t>(reinterpret_cast<char*>(&_impl_.lastaccumulatedsettings_) -
     reinterpret_cast<char*>(&_impl_.bhasadditivesources_)) + sizeof(_impl_.lastaccumulatedsettings_));
-  // @@protoc_insertion_point(copy_constructor:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup)
+  // @@protoc_insertion_point(copy_constructor:unrealpb.FRootMotionSourceGroup)
 }
 
-inline void FRepRootMotionMontage_FRootMotionSourceGroup::SharedCtor(
+inline void FRootMotionSourceGroup::SharedCtor(
     ::_pb::Arena* arena, bool is_message_owned) {
   (void)arena;
   (void)is_message_owned;
@@ -7228,8 +7296,8 @@ inline void FRepRootMotionMontage_FRootMotionSourceGroup::SharedCtor(
   };
 }
 
-FRepRootMotionMontage_FRootMotionSourceGroup::~FRepRootMotionMontage_FRootMotionSourceGroup() {
-  // @@protoc_insertion_point(destructor:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup)
+FRootMotionSourceGroup::~FRootMotionSourceGroup() {
+  // @@protoc_insertion_point(destructor:unrealpb.FRootMotionSourceGroup)
   if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
   (void)arena;
     return;
@@ -7237,19 +7305,19 @@ FRepRootMotionMontage_FRootMotionSourceGroup::~FRepRootMotionMontage_FRootMotion
   SharedDtor();
 }
 
-inline void FRepRootMotionMontage_FRootMotionSourceGroup::SharedDtor() {
+inline void FRootMotionSourceGroup::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.rootmotionsources_.~RepeatedPtrField();
   _impl_.pendingaddrootmotionsources_.~RepeatedPtrField();
   if (this != internal_default_instance()) delete _impl_.lastpreadditivevelocity_;
 }
 
-void FRepRootMotionMontage_FRootMotionSourceGroup::SetCachedSize(int size) const {
+void FRootMotionSourceGroup::SetCachedSize(int size) const {
   _impl_._cached_size_.Set(size);
 }
 
-void FRepRootMotionMontage_FRootMotionSourceGroup::Clear() {
-// @@protoc_insertion_point(message_clear_start:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup)
+void FRootMotionSourceGroup::Clear() {
+// @@protoc_insertion_point(message_clear_start:unrealpb.FRootMotionSourceGroup)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -7270,14 +7338,14 @@ void FRepRootMotionMontage_FRootMotionSourceGroup::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* FRepRootMotionMontage_FRootMotionSourceGroup::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+const char* FRootMotionSourceGroup::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // repeated .unrealpb.FRepRootMotionMontage.FRootMotionSource rootMotionSources = 1;
+      // repeated .unrealpb.FRootMotionSource rootMotionSources = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           ptr -= 1;
@@ -7290,7 +7358,7 @@ const char* FRepRootMotionMontage_FRootMotionSourceGroup::_InternalParse(const c
         } else
           goto handle_unusual;
         continue;
-      // repeated .unrealpb.FRepRootMotionMontage.FRootMotionSource pendingAddRootMotionSources = 2;
+      // repeated .unrealpb.FRootMotionSource pendingAddRootMotionSources = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr -= 1;
@@ -7380,13 +7448,13 @@ failure:
 #undef CHK_
 }
 
-uint8_t* FRepRootMotionMontage_FRootMotionSourceGroup::_InternalSerialize(
+uint8_t* FRootMotionSourceGroup::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup)
+  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.FRootMotionSourceGroup)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // repeated .unrealpb.FRepRootMotionMontage.FRootMotionSource rootMotionSources = 1;
+  // repeated .unrealpb.FRootMotionSource rootMotionSources = 1;
   for (unsigned i = 0,
       n = static_cast<unsigned>(this->_internal_rootmotionsources_size()); i < n; i++) {
     const auto& repfield = this->_internal_rootmotionsources(i);
@@ -7394,7 +7462,7 @@ uint8_t* FRepRootMotionMontage_FRootMotionSourceGroup::_InternalSerialize(
         InternalWriteMessage(1, repfield, repfield.GetCachedSize(), target, stream);
   }
 
-  // repeated .unrealpb.FRepRootMotionMontage.FRootMotionSource pendingAddRootMotionSources = 2;
+  // repeated .unrealpb.FRootMotionSource pendingAddRootMotionSources = 2;
   for (unsigned i = 0,
       n = static_cast<unsigned>(this->_internal_pendingaddrootmotionsources_size()); i < n; i++) {
     const auto& repfield = this->_internal_pendingaddrootmotionsources(i);
@@ -7443,26 +7511,26 @@ uint8_t* FRepRootMotionMontage_FRootMotionSourceGroup::_InternalSerialize(
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup)
+  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.FRootMotionSourceGroup)
   return target;
 }
 
-size_t FRepRootMotionMontage_FRootMotionSourceGroup::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup)
+size_t FRootMotionSourceGroup::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:unrealpb.FRootMotionSourceGroup)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .unrealpb.FRepRootMotionMontage.FRootMotionSource rootMotionSources = 1;
+  // repeated .unrealpb.FRootMotionSource rootMotionSources = 1;
   total_size += 1UL * this->_internal_rootmotionsources_size();
   for (const auto& msg : this->_impl_.rootmotionsources_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  // repeated .unrealpb.FRepRootMotionMontage.FRootMotionSource pendingAddRootMotionSources = 2;
+  // repeated .unrealpb.FRootMotionSource pendingAddRootMotionSources = 2;
   total_size += 1UL * this->_internal_pendingaddrootmotionsources_size();
   for (const auto& msg : this->_impl_.pendingaddrootmotionsources_) {
     total_size +=
@@ -7507,17 +7575,17 @@ size_t FRepRootMotionMontage_FRootMotionSourceGroup::ByteSizeLong() const {
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FRepRootMotionMontage_FRootMotionSourceGroup::_class_data_ = {
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FRootMotionSourceGroup::_class_data_ = {
     ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    FRepRootMotionMontage_FRootMotionSourceGroup::MergeImpl
+    FRootMotionSourceGroup::MergeImpl
 };
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FRepRootMotionMontage_FRootMotionSourceGroup::GetClassData() const { return &_class_data_; }
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FRootMotionSourceGroup::GetClassData() const { return &_class_data_; }
 
 
-void FRepRootMotionMontage_FRootMotionSourceGroup::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
-  auto* const _this = static_cast<FRepRootMotionMontage_FRootMotionSourceGroup*>(&to_msg);
-  auto& from = static_cast<const FRepRootMotionMontage_FRootMotionSourceGroup&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup)
+void FRootMotionSourceGroup::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<FRootMotionSourceGroup*>(&to_msg);
+  auto& from = static_cast<const FRootMotionSourceGroup&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.FRootMotionSourceGroup)
   GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -7550,32 +7618,32 @@ void FRepRootMotionMontage_FRootMotionSourceGroup::MergeImpl(::PROTOBUF_NAMESPAC
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
-void FRepRootMotionMontage_FRootMotionSourceGroup::CopyFrom(const FRepRootMotionMontage_FRootMotionSourceGroup& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup)
+void FRootMotionSourceGroup::CopyFrom(const FRootMotionSourceGroup& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.FRootMotionSourceGroup)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool FRepRootMotionMontage_FRootMotionSourceGroup::IsInitialized() const {
+bool FRootMotionSourceGroup::IsInitialized() const {
   return true;
 }
 
-void FRepRootMotionMontage_FRootMotionSourceGroup::InternalSwap(FRepRootMotionMontage_FRootMotionSourceGroup* other) {
+void FRootMotionSourceGroup::InternalSwap(FRootMotionSourceGroup* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   _impl_.rootmotionsources_.InternalSwap(&other->_impl_.rootmotionsources_);
   _impl_.pendingaddrootmotionsources_.InternalSwap(&other->_impl_.pendingaddrootmotionsources_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(FRepRootMotionMontage_FRootMotionSourceGroup, _impl_.lastaccumulatedsettings_)
-      + sizeof(FRepRootMotionMontage_FRootMotionSourceGroup::_impl_.lastaccumulatedsettings_)
-      - PROTOBUF_FIELD_OFFSET(FRepRootMotionMontage_FRootMotionSourceGroup, _impl_.lastpreadditivevelocity_)>(
+      PROTOBUF_FIELD_OFFSET(FRootMotionSourceGroup, _impl_.lastaccumulatedsettings_)
+      + sizeof(FRootMotionSourceGroup::_impl_.lastaccumulatedsettings_)
+      - PROTOBUF_FIELD_OFFSET(FRootMotionSourceGroup, _impl_.lastpreadditivevelocity_)>(
           reinterpret_cast<char*>(&_impl_.lastpreadditivevelocity_),
           reinterpret_cast<char*>(&other->_impl_.lastpreadditivevelocity_));
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata FRepRootMotionMontage_FRootMotionSourceGroup::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata FRootMotionSourceGroup::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
       file_level_metadata_unreal_5fcommon_2eproto[15]);
@@ -7617,7 +7685,7 @@ class FRepRootMotionMontage::_Internal {
   static void set_has_brelativerotation(HasBits* has_bits) {
     (*has_bits)[0] |= 2048u;
   }
-  static const ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup& authoritativerootmotion(const FRepRootMotionMontage* msg);
+  static const ::unrealpb::FRootMotionSourceGroup& authoritativerootmotion(const FRepRootMotionMontage* msg);
   static void set_has_authoritativerootmotion(HasBits* has_bits) {
     (*has_bits)[0] |= 32u;
   }
@@ -7647,7 +7715,7 @@ const ::unrealpb::ActorComponentRef&
 FRepRootMotionMontage::_Internal::movementbase(const FRepRootMotionMontage* msg) {
   return *msg->_impl_.movementbase_;
 }
-const ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup&
+const ::unrealpb::FRootMotionSourceGroup&
 FRepRootMotionMontage::_Internal::authoritativerootmotion(const FRepRootMotionMontage* msg) {
   return *msg->_impl_.authoritativerootmotion_;
 }
@@ -7706,7 +7774,7 @@ FRepRootMotionMontage::FRepRootMotionMontage(const FRepRootMotionMontage& from)
     _this->_impl_.movementbase_ = new ::unrealpb::ActorComponentRef(*from._impl_.movementbase_);
   }
   if (from._internal_has_authoritativerootmotion()) {
-    _this->_impl_.authoritativerootmotion_ = new ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup(*from._impl_.authoritativerootmotion_);
+    _this->_impl_.authoritativerootmotion_ = new ::unrealpb::FRootMotionSourceGroup(*from._impl_.authoritativerootmotion_);
   }
   if (from._internal_has_acceleration()) {
     _this->_impl_.acceleration_ = new ::unrealpb::FVector(*from._impl_.acceleration_);
@@ -7905,7 +7973,7 @@ const char* FRepRootMotionMontage::_InternalParse(const char* ptr, ::_pbi::Parse
         } else
           goto handle_unusual;
         continue;
-      // optional .unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup authoritativeRootMotion = 10;
+      // optional .unrealpb.FRootMotionSourceGroup authoritativeRootMotion = 10;
       case 10:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 82)) {
           ptr = ctx->ParseMessage(_internal_mutable_authoritativerootmotion(), ptr);
@@ -8021,7 +8089,7 @@ uint8_t* FRepRootMotionMontage::_InternalSerialize(
     target = ::_pbi::WireFormatLite::WriteBoolToArray(9, this->_internal_brelativerotation(), target);
   }
 
-  // optional .unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup authoritativeRootMotion = 10;
+  // optional .unrealpb.FRootMotionSourceGroup authoritativeRootMotion = 10;
   if (_internal_has_authoritativerootmotion()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(10, _Internal::authoritativerootmotion(this),
@@ -8095,7 +8163,7 @@ size_t FRepRootMotionMontage::ByteSizeLong() const {
           *_impl_.movementbase_);
     }
 
-    // optional .unrealpb.FRepRootMotionMontage.FRootMotionSourceGroup authoritativeRootMotion = 10;
+    // optional .unrealpb.FRootMotionSourceGroup authoritativeRootMotion = 10;
     if (cached_has_bits & 0x00000020u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -8179,7 +8247,7 @@ void FRepRootMotionMontage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, 
           from._internal_movementbase());
     }
     if (cached_has_bits & 0x00000020u) {
-      _this->_internal_mutable_authoritativerootmotion()->::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup::MergeFrom(
+      _this->_internal_mutable_authoritativerootmotion()->::unrealpb::FRootMotionSourceGroup::MergeFrom(
           from._internal_authoritativerootmotion());
     }
     if (cached_has_bits & 0x00000040u) {
@@ -13481,6 +13549,627 @@ void GameStateBase::InternalSwap(GameStateBase* other) {
       file_level_metadata_unreal_5fcommon_2eproto[37]);
 }
 
+// ===================================================================
+
+class FClientAdjustment::_Internal {
+ public:
+  using HasBits = decltype(std::declval<FClientAdjustment>()._impl_._has_bits_);
+  static void set_has_backgoodmove(HasBits* has_bits) {
+    (*has_bits)[0] |= 256u;
+  }
+  static void set_has_timestamp(HasBits* has_bits) {
+    (*has_bits)[0] |= 128u;
+  }
+  static const ::unrealpb::FVector& newloc(const FClientAdjustment* msg);
+  static void set_has_newloc(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static const ::unrealpb::FVector& newvel(const FClientAdjustment* msg);
+  static void set_has_newvel(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static const ::unrealpb::FVector& newrot(const FClientAdjustment* msg);
+  static void set_has_newrot(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+  static const ::unrealpb::UnrealObjectRef& newbase(const FClientAdjustment* msg);
+  static void set_has_newbase(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
+  static void set_has_newbasebonename(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static void set_has_bbaserelativeposition(HasBits* has_bits) {
+    (*has_bits)[0] |= 512u;
+  }
+  static const ::unrealpb::FRootMotionSourceGroup& rootmotionsourcecorrection(const FClientAdjustment* msg);
+  static void set_has_rootmotionsourcecorrection(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
+  static const ::unrealpb::FVector& rootmotionrotation(const FClientAdjustment* msg);
+  static void set_has_rootmotionrotation(HasBits* has_bits) {
+    (*has_bits)[0] |= 64u;
+  }
+  static void set_has_movementmode(HasBits* has_bits) {
+    (*has_bits)[0] |= 1024u;
+  }
+};
+
+const ::unrealpb::FVector&
+FClientAdjustment::_Internal::newloc(const FClientAdjustment* msg) {
+  return *msg->_impl_.newloc_;
+}
+const ::unrealpb::FVector&
+FClientAdjustment::_Internal::newvel(const FClientAdjustment* msg) {
+  return *msg->_impl_.newvel_;
+}
+const ::unrealpb::FVector&
+FClientAdjustment::_Internal::newrot(const FClientAdjustment* msg) {
+  return *msg->_impl_.newrot_;
+}
+const ::unrealpb::UnrealObjectRef&
+FClientAdjustment::_Internal::newbase(const FClientAdjustment* msg) {
+  return *msg->_impl_.newbase_;
+}
+const ::unrealpb::FRootMotionSourceGroup&
+FClientAdjustment::_Internal::rootmotionsourcecorrection(const FClientAdjustment* msg) {
+  return *msg->_impl_.rootmotionsourcecorrection_;
+}
+const ::unrealpb::FVector&
+FClientAdjustment::_Internal::rootmotionrotation(const FClientAdjustment* msg) {
+  return *msg->_impl_.rootmotionrotation_;
+}
+FClientAdjustment::FClientAdjustment(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:unrealpb.FClientAdjustment)
+}
+FClientAdjustment::FClientAdjustment(const FClientAdjustment& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  FClientAdjustment* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_._has_bits_){from._impl_._has_bits_}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.newbasebonename_){}
+    , decltype(_impl_.newloc_){nullptr}
+    , decltype(_impl_.newvel_){nullptr}
+    , decltype(_impl_.newrot_){nullptr}
+    , decltype(_impl_.newbase_){nullptr}
+    , decltype(_impl_.rootmotionsourcecorrection_){nullptr}
+    , decltype(_impl_.rootmotionrotation_){nullptr}
+    , decltype(_impl_.timestamp_){}
+    , decltype(_impl_.backgoodmove_){}
+    , decltype(_impl_.bbaserelativeposition_){}
+    , decltype(_impl_.movementmode_){}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _impl_.newbasebonename_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.newbasebonename_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (from._internal_has_newbasebonename()) {
+    _this->_impl_.newbasebonename_.Set(from._internal_newbasebonename(), 
+      _this->GetArenaForAllocation());
+  }
+  if (from._internal_has_newloc()) {
+    _this->_impl_.newloc_ = new ::unrealpb::FVector(*from._impl_.newloc_);
+  }
+  if (from._internal_has_newvel()) {
+    _this->_impl_.newvel_ = new ::unrealpb::FVector(*from._impl_.newvel_);
+  }
+  if (from._internal_has_newrot()) {
+    _this->_impl_.newrot_ = new ::unrealpb::FVector(*from._impl_.newrot_);
+  }
+  if (from._internal_has_newbase()) {
+    _this->_impl_.newbase_ = new ::unrealpb::UnrealObjectRef(*from._impl_.newbase_);
+  }
+  if (from._internal_has_rootmotionsourcecorrection()) {
+    _this->_impl_.rootmotionsourcecorrection_ = new ::unrealpb::FRootMotionSourceGroup(*from._impl_.rootmotionsourcecorrection_);
+  }
+  if (from._internal_has_rootmotionrotation()) {
+    _this->_impl_.rootmotionrotation_ = new ::unrealpb::FVector(*from._impl_.rootmotionrotation_);
+  }
+  ::memcpy(&_impl_.timestamp_, &from._impl_.timestamp_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.movementmode_) -
+    reinterpret_cast<char*>(&_impl_.timestamp_)) + sizeof(_impl_.movementmode_));
+  // @@protoc_insertion_point(copy_constructor:unrealpb.FClientAdjustment)
+}
+
+inline void FClientAdjustment::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_._has_bits_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.newbasebonename_){}
+    , decltype(_impl_.newloc_){nullptr}
+    , decltype(_impl_.newvel_){nullptr}
+    , decltype(_impl_.newrot_){nullptr}
+    , decltype(_impl_.newbase_){nullptr}
+    , decltype(_impl_.rootmotionsourcecorrection_){nullptr}
+    , decltype(_impl_.rootmotionrotation_){nullptr}
+    , decltype(_impl_.timestamp_){0}
+    , decltype(_impl_.backgoodmove_){false}
+    , decltype(_impl_.bbaserelativeposition_){false}
+    , decltype(_impl_.movementmode_){0u}
+  };
+  _impl_.newbasebonename_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.newbasebonename_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+}
+
+FClientAdjustment::~FClientAdjustment() {
+  // @@protoc_insertion_point(destructor:unrealpb.FClientAdjustment)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void FClientAdjustment::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.newbasebonename_.Destroy();
+  if (this != internal_default_instance()) delete _impl_.newloc_;
+  if (this != internal_default_instance()) delete _impl_.newvel_;
+  if (this != internal_default_instance()) delete _impl_.newrot_;
+  if (this != internal_default_instance()) delete _impl_.newbase_;
+  if (this != internal_default_instance()) delete _impl_.rootmotionsourcecorrection_;
+  if (this != internal_default_instance()) delete _impl_.rootmotionrotation_;
+}
+
+void FClientAdjustment::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void FClientAdjustment::Clear() {
+// @@protoc_insertion_point(message_clear_start:unrealpb.FClientAdjustment)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x0000007fu) {
+    if (cached_has_bits & 0x00000001u) {
+      _impl_.newbasebonename_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      GOOGLE_DCHECK(_impl_.newloc_ != nullptr);
+      _impl_.newloc_->Clear();
+    }
+    if (cached_has_bits & 0x00000004u) {
+      GOOGLE_DCHECK(_impl_.newvel_ != nullptr);
+      _impl_.newvel_->Clear();
+    }
+    if (cached_has_bits & 0x00000008u) {
+      GOOGLE_DCHECK(_impl_.newrot_ != nullptr);
+      _impl_.newrot_->Clear();
+    }
+    if (cached_has_bits & 0x00000010u) {
+      GOOGLE_DCHECK(_impl_.newbase_ != nullptr);
+      _impl_.newbase_->Clear();
+    }
+    if (cached_has_bits & 0x00000020u) {
+      GOOGLE_DCHECK(_impl_.rootmotionsourcecorrection_ != nullptr);
+      _impl_.rootmotionsourcecorrection_->Clear();
+    }
+    if (cached_has_bits & 0x00000040u) {
+      GOOGLE_DCHECK(_impl_.rootmotionrotation_ != nullptr);
+      _impl_.rootmotionrotation_->Clear();
+    }
+  }
+  _impl_.timestamp_ = 0;
+  if (cached_has_bits & 0x00000700u) {
+    ::memset(&_impl_.backgoodmove_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&_impl_.movementmode_) -
+        reinterpret_cast<char*>(&_impl_.backgoodmove_)) + sizeof(_impl_.movementmode_));
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* FClientAdjustment::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // optional bool bAckGoodMove = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _Internal::set_has_backgoodmove(&has_bits);
+          _impl_.backgoodmove_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional float timeStamp = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 21)) {
+          _Internal::set_has_timestamp(&has_bits);
+          _impl_.timestamp_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+          ptr += sizeof(float);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .unrealpb.FVector newLoc = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_newloc(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .unrealpb.FVector newVel = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+          ptr = ctx->ParseMessage(_internal_mutable_newvel(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .unrealpb.FVector newRot = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
+          ptr = ctx->ParseMessage(_internal_mutable_newrot(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .unrealpb.UnrealObjectRef newBase = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
+          ptr = ctx->ParseMessage(_internal_mutable_newbase(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional string newBaseBoneName = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
+          auto str = _internal_mutable_newbasebonename();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "unrealpb.FClientAdjustment.newBaseBoneName"));
+        } else
+          goto handle_unusual;
+        continue;
+      // optional bool bBaseRelativePosition = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 64)) {
+          _Internal::set_has_bbaserelativeposition(&has_bits);
+          _impl_.bbaserelativeposition_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .unrealpb.FRootMotionSourceGroup rootMotionSourceCorrection = 9;
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 74)) {
+          ptr = ctx->ParseMessage(_internal_mutable_rootmotionsourcecorrection(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .unrealpb.FVector rootMotionRotation = 10;
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 82)) {
+          ptr = ctx->ParseMessage(_internal_mutable_rootmotionrotation(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional uint32 movementMode = 11;
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 88)) {
+          _Internal::set_has_movementmode(&has_bits);
+          _impl_.movementmode_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  _impl_._has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* FClientAdjustment::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.FClientAdjustment)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // optional bool bAckGoodMove = 1;
+  if (_internal_has_backgoodmove()) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(1, this->_internal_backgoodmove(), target);
+  }
+
+  // optional float timeStamp = 2;
+  if (_internal_has_timestamp()) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(2, this->_internal_timestamp(), target);
+  }
+
+  // optional .unrealpb.FVector newLoc = 3;
+  if (_internal_has_newloc()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(3, _Internal::newloc(this),
+        _Internal::newloc(this).GetCachedSize(), target, stream);
+  }
+
+  // optional .unrealpb.FVector newVel = 4;
+  if (_internal_has_newvel()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(4, _Internal::newvel(this),
+        _Internal::newvel(this).GetCachedSize(), target, stream);
+  }
+
+  // optional .unrealpb.FVector newRot = 5;
+  if (_internal_has_newrot()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(5, _Internal::newrot(this),
+        _Internal::newrot(this).GetCachedSize(), target, stream);
+  }
+
+  // optional .unrealpb.UnrealObjectRef newBase = 6;
+  if (_internal_has_newbase()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(6, _Internal::newbase(this),
+        _Internal::newbase(this).GetCachedSize(), target, stream);
+  }
+
+  // optional string newBaseBoneName = 7;
+  if (_internal_has_newbasebonename()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_newbasebonename().data(), static_cast<int>(this->_internal_newbasebonename().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "unrealpb.FClientAdjustment.newBaseBoneName");
+    target = stream->WriteStringMaybeAliased(
+        7, this->_internal_newbasebonename(), target);
+  }
+
+  // optional bool bBaseRelativePosition = 8;
+  if (_internal_has_bbaserelativeposition()) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(8, this->_internal_bbaserelativeposition(), target);
+  }
+
+  // optional .unrealpb.FRootMotionSourceGroup rootMotionSourceCorrection = 9;
+  if (_internal_has_rootmotionsourcecorrection()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(9, _Internal::rootmotionsourcecorrection(this),
+        _Internal::rootmotionsourcecorrection(this).GetCachedSize(), target, stream);
+  }
+
+  // optional .unrealpb.FVector rootMotionRotation = 10;
+  if (_internal_has_rootmotionrotation()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(10, _Internal::rootmotionrotation(this),
+        _Internal::rootmotionrotation(this).GetCachedSize(), target, stream);
+  }
+
+  // optional uint32 movementMode = 11;
+  if (_internal_has_movementmode()) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(11, this->_internal_movementmode(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.FClientAdjustment)
+  return target;
+}
+
+size_t FClientAdjustment::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:unrealpb.FClientAdjustment)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x000000ffu) {
+    // optional string newBaseBoneName = 7;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_newbasebonename());
+    }
+
+    // optional .unrealpb.FVector newLoc = 3;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.newloc_);
+    }
+
+    // optional .unrealpb.FVector newVel = 4;
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.newvel_);
+    }
+
+    // optional .unrealpb.FVector newRot = 5;
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.newrot_);
+    }
+
+    // optional .unrealpb.UnrealObjectRef newBase = 6;
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.newbase_);
+    }
+
+    // optional .unrealpb.FRootMotionSourceGroup rootMotionSourceCorrection = 9;
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.rootmotionsourcecorrection_);
+    }
+
+    // optional .unrealpb.FVector rootMotionRotation = 10;
+    if (cached_has_bits & 0x00000040u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.rootmotionrotation_);
+    }
+
+    // optional float timeStamp = 2;
+    if (cached_has_bits & 0x00000080u) {
+      total_size += 1 + 4;
+    }
+
+  }
+  if (cached_has_bits & 0x00000700u) {
+    // optional bool bAckGoodMove = 1;
+    if (cached_has_bits & 0x00000100u) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool bBaseRelativePosition = 8;
+    if (cached_has_bits & 0x00000200u) {
+      total_size += 1 + 1;
+    }
+
+    // optional uint32 movementMode = 11;
+    if (cached_has_bits & 0x00000400u) {
+      total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_movementmode());
+    }
+
+  }
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FClientAdjustment::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    FClientAdjustment::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FClientAdjustment::GetClassData() const { return &_class_data_; }
+
+
+void FClientAdjustment::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<FClientAdjustment*>(&to_msg);
+  auto& from = static_cast<const FClientAdjustment&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.FClientAdjustment)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (cached_has_bits & 0x000000ffu) {
+    if (cached_has_bits & 0x00000001u) {
+      _this->_internal_set_newbasebonename(from._internal_newbasebonename());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _this->_internal_mutable_newloc()->::unrealpb::FVector::MergeFrom(
+          from._internal_newloc());
+    }
+    if (cached_has_bits & 0x00000004u) {
+      _this->_internal_mutable_newvel()->::unrealpb::FVector::MergeFrom(
+          from._internal_newvel());
+    }
+    if (cached_has_bits & 0x00000008u) {
+      _this->_internal_mutable_newrot()->::unrealpb::FVector::MergeFrom(
+          from._internal_newrot());
+    }
+    if (cached_has_bits & 0x00000010u) {
+      _this->_internal_mutable_newbase()->::unrealpb::UnrealObjectRef::MergeFrom(
+          from._internal_newbase());
+    }
+    if (cached_has_bits & 0x00000020u) {
+      _this->_internal_mutable_rootmotionsourcecorrection()->::unrealpb::FRootMotionSourceGroup::MergeFrom(
+          from._internal_rootmotionsourcecorrection());
+    }
+    if (cached_has_bits & 0x00000040u) {
+      _this->_internal_mutable_rootmotionrotation()->::unrealpb::FVector::MergeFrom(
+          from._internal_rootmotionrotation());
+    }
+    if (cached_has_bits & 0x00000080u) {
+      _this->_impl_.timestamp_ = from._impl_.timestamp_;
+    }
+    _this->_impl_._has_bits_[0] |= cached_has_bits;
+  }
+  if (cached_has_bits & 0x00000700u) {
+    if (cached_has_bits & 0x00000100u) {
+      _this->_impl_.backgoodmove_ = from._impl_.backgoodmove_;
+    }
+    if (cached_has_bits & 0x00000200u) {
+      _this->_impl_.bbaserelativeposition_ = from._impl_.bbaserelativeposition_;
+    }
+    if (cached_has_bits & 0x00000400u) {
+      _this->_impl_.movementmode_ = from._impl_.movementmode_;
+    }
+    _this->_impl_._has_bits_[0] |= cached_has_bits;
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void FClientAdjustment::CopyFrom(const FClientAdjustment& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.FClientAdjustment)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool FClientAdjustment::IsInitialized() const {
+  return true;
+}
+
+void FClientAdjustment::InternalSwap(FClientAdjustment* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.newbasebonename_, lhs_arena,
+      &other->_impl_.newbasebonename_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(FClientAdjustment, _impl_.movementmode_)
+      + sizeof(FClientAdjustment::_impl_.movementmode_)
+      - PROTOBUF_FIELD_OFFSET(FClientAdjustment, _impl_.newloc_)>(
+          reinterpret_cast<char*>(&_impl_.newloc_),
+          reinterpret_cast<char*>(&other->_impl_.newloc_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata FClientAdjustment::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
+      file_level_metadata_unreal_5fcommon_2eproto[38]);
+}
+
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace unrealpb
 PROTOBUF_NAMESPACE_OPEN
@@ -13536,17 +14225,17 @@ template<> PROTOBUF_NOINLINE ::unrealpb::FBasedMovementInfo*
 Arena::CreateMaybeMessage< ::unrealpb::FBasedMovementInfo >(Arena* arena) {
   return Arena::CreateMessageInternal< ::unrealpb::FBasedMovementInfo >(arena);
 }
-template<> PROTOBUF_NOINLINE ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings*
-Arena::CreateMaybeMessage< ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::unrealpb::FRepRootMotionMontage_FRootMotionSource_FRootMotionFinishVelocitySettings >(arena);
+template<> PROTOBUF_NOINLINE ::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings*
+Arena::CreateMaybeMessage< ::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings >(arena);
 }
-template<> PROTOBUF_NOINLINE ::unrealpb::FRepRootMotionMontage_FRootMotionSource*
-Arena::CreateMaybeMessage< ::unrealpb::FRepRootMotionMontage_FRootMotionSource >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::unrealpb::FRepRootMotionMontage_FRootMotionSource >(arena);
+template<> PROTOBUF_NOINLINE ::unrealpb::FRootMotionSource*
+Arena::CreateMaybeMessage< ::unrealpb::FRootMotionSource >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::unrealpb::FRootMotionSource >(arena);
 }
-template<> PROTOBUF_NOINLINE ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup*
-Arena::CreateMaybeMessage< ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::unrealpb::FRepRootMotionMontage_FRootMotionSourceGroup >(arena);
+template<> PROTOBUF_NOINLINE ::unrealpb::FRootMotionSourceGroup*
+Arena::CreateMaybeMessage< ::unrealpb::FRootMotionSourceGroup >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::unrealpb::FRootMotionSourceGroup >(arena);
 }
 template<> PROTOBUF_NOINLINE ::unrealpb::FRepRootMotionMontage*
 Arena::CreateMaybeMessage< ::unrealpb::FRepRootMotionMontage >(Arena* arena) {
@@ -13635,6 +14324,10 @@ Arena::CreateMaybeMessage< ::unrealpb::PlayerController_ClientReceiveLocalizedMe
 template<> PROTOBUF_NOINLINE ::unrealpb::GameStateBase*
 Arena::CreateMaybeMessage< ::unrealpb::GameStateBase >(Arena* arena) {
   return Arena::CreateMessageInternal< ::unrealpb::GameStateBase >(arena);
+}
+template<> PROTOBUF_NOINLINE ::unrealpb::FClientAdjustment*
+Arena::CreateMaybeMessage< ::unrealpb::FClientAdjustment >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::unrealpb::FClientAdjustment >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

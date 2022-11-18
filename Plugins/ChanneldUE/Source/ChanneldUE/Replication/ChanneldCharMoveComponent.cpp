@@ -1,0 +1,92 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "ChanneldCharMoveComponent.h"
+
+#include "ChanneldUtils.h"
+
+UChanneldCharMoveComponent::UChanneldCharMoveComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	SetMoveResponseDataContainer(DefaultMoveResponseDataContainer);
+}
+
+
+bool FChanneldCharacterMoveResponseDataContainer::Serialize(
+	UCharacterMovementComponent& CharacterMovement, FArchive& Ar, UPackageMap* PackageMap)
+{
+	bool bLocalSuccess = true;
+	const bool bIsSaving = Ar.IsSaving();
+
+	Ar.SerializeBits(&ClientAdjustment.bAckGoodMove, 1);
+	Ar << ClientAdjustment.TimeStamp;
+
+	if (IsCorrection())
+	{
+		Ar.SerializeBits(&bHasBase, 1);
+		Ar.SerializeBits(&bHasRotation, 1);
+		Ar.SerializeBits(&bRootMotionMontageCorrection, 1);
+		Ar.SerializeBits(&bRootMotionSourceCorrection, 1);
+
+		ClientAdjustment.NewLoc.NetSerialize(Ar, PackageMap, bLocalSuccess);
+		ClientAdjustment.NewVel.NetSerialize(Ar, PackageMap, bLocalSuccess);
+
+		if (bHasRotation)
+		{
+			ClientAdjustment.NewRot.NetSerialize(Ar, PackageMap, bLocalSuccess);
+		}
+		else if (!bIsSaving)
+		{
+			ClientAdjustment.NewRot = FRotator::ZeroRotator;
+		}
+
+		/* Replace the NetworkGUID(InternalLoadObject) with ActorComponentRef
+		SerializeOptionalValue<UPrimitiveComponent*>(bIsSaving, Ar, ClientAdjustment.NewBase, nullptr);
+		*/
+		if (bIsSaving)
+		{
+			std::string NewBaseData = ChanneldUtils::GetRefOfActorComponent(ClientAdjustment.NewBase).SerializeAsString();
+			uint32 DataSize = NewBaseData.size();
+			Ar.SerializeIntPacked(DataSize);
+			Ar.Serialize((void*)NewBaseData.data(), DataSize);
+		}
+		else
+		{
+			uint32 DataSize;
+			Ar.SerializeIntPacked(DataSize);
+			uint8* NewBaseData = new uint8[DataSize];
+			Ar.Serialize(NewBaseData, DataSize);
+			unrealpb::ActorComponentRef ObjRef;
+			ObjRef.ParseFromArray(NewBaseData, DataSize);
+			delete NewBaseData;
+			ClientAdjustment.NewBase = ChanneldUtils::GetActorComponentByRef<UPrimitiveComponent>(&ObjRef, CharacterMovement.GetWorld());
+		}
+		SerializeOptionalValue<FName>(bIsSaving, Ar, ClientAdjustment.NewBaseBoneName, NAME_None);
+		SerializeOptionalValue<uint8>(bIsSaving, Ar, ClientAdjustment.MovementMode, MOVE_Walking);
+		Ar.SerializeBits(&ClientAdjustment.bBaseRelativePosition, 1);
+
+		if (bRootMotionMontageCorrection)
+		{
+			Ar << RootMotionTrackPosition;
+		}
+		else if (!bIsSaving)
+		{
+			RootMotionTrackPosition = -1.0f;
+		}
+
+		if (bRootMotionSourceCorrection)
+		{
+			if (FRootMotionSourceGroup* RootMotionSourceGroup = GetRootMotionSourceGroup(CharacterMovement))
+			{
+				RootMotionSourceGroup->NetSerialize(Ar, PackageMap, bLocalSuccess);
+			}
+		}
+
+		if (bRootMotionMontageCorrection || bRootMotionSourceCorrection)
+		{
+			RootMotionRotation.NetSerialize(Ar, PackageMap, bLocalSuccess);
+		}
+	}
+
+	return !Ar.IsError();
+}
