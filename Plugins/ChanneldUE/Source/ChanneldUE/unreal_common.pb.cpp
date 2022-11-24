@@ -135,6 +135,20 @@ struct ServerSpawnedPlayerMessageDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ServerSpawnedPlayerMessageDefaultTypeInternal _ServerSpawnedPlayerMessage_default_instance_;
+PROTOBUF_CONSTEXPR DestroyObjectMessage::DestroyObjectMessage(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.netid_)*/0u
+  , /*decltype(_impl_.reason_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct DestroyObjectMessageDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR DestroyObjectMessageDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~DestroyObjectMessageDefaultTypeInternal() {}
+  union {
+    DestroyObjectMessage _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DestroyObjectMessageDefaultTypeInternal _DestroyObjectMessage_default_instance_;
 PROTOBUF_CONSTEXPR FRepMovement::FRepMovement(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_._has_bits_)*/{}
@@ -683,7 +697,7 @@ struct FClientAdjustmentDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FClientAdjustmentDefaultTypeInternal _FClientAdjustment_default_instance_;
 }  // namespace unrealpb
-static ::_pb::Metadata file_level_metadata_unreal_5fcommon_2eproto[39];
+static ::_pb::Metadata file_level_metadata_unreal_5fcommon_2eproto[40];
 static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_unreal_5fcommon_2eproto = nullptr;
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_unreal_5fcommon_2eproto = nullptr;
 
@@ -762,6 +776,14 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::unrealpb::ServerSpawnedPlayerMessage, _impl_.clientconnid_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::ServerSpawnedPlayerMessage, _impl_.startpos_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::DestroyObjectMessage, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::DestroyObjectMessage, _impl_.netid_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::DestroyObjectMessage, _impl_.reason_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::FRepMovement, _impl_._has_bits_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::FRepMovement, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1221,38 +1243,39 @@ static const ::_pbi::MigrationSchema schemas_unreal_5fcommon_2eproto[] PROTOBUF_
   { 45, -1, -1, sizeof(::unrealpb::RemoteFunctionMessage)},
   { 54, 63, -1, sizeof(::unrealpb::SpawnObjectMessage)},
   { 66, -1, -1, sizeof(::unrealpb::ServerSpawnedPlayerMessage)},
-  { 74, 86, -1, sizeof(::unrealpb::FRepMovement)},
-  { 92, -1, -1, sizeof(::unrealpb::FRepAttachment)},
-  { 104, 122, -1, sizeof(::unrealpb::ActorState)},
-  { 134, 143, -1, sizeof(::unrealpb::ActorComponentState)},
-  { 146, 165, -1, sizeof(::unrealpb::SceneComponentState)},
-  { 178, 191, -1, sizeof(::unrealpb::FBasedMovementInfo)},
-  { 198, 207, -1, sizeof(::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings)},
-  { 210, 232, -1, sizeof(::unrealpb::FRootMotionSource)},
-  { 248, 262, -1, sizeof(::unrealpb::FRootMotionSourceGroup)},
-  { 270, 288, -1, sizeof(::unrealpb::FRepRootMotionMontage)},
-  { 300, 314, -1, sizeof(::unrealpb::CharacterState)},
-  { 322, -1, -1, sizeof(::unrealpb::Character_ServerMovePacked_Params)},
-  { 330, -1, -1, sizeof(::unrealpb::Character_ClientMoveResponsePacked_Params)},
-  { 338, 348, -1, sizeof(::unrealpb::PlayerState)},
-  { 352, -1, -1, sizeof(::unrealpb::ControllerState)},
-  { 360, -1, -1, sizeof(::unrealpb::Controller_ClientSetLocation_Params)},
-  { 368, -1, -1, sizeof(::unrealpb::Controller_ClientSetRotation_Params)},
-  { 376, 384, -1, sizeof(::unrealpb::PlayerControllerState)},
-  { 386, -1, -1, sizeof(::unrealpb::PlayerController_ServerUpdateCamera_Params)},
-  { 394, 401, -1, sizeof(::unrealpb::PlayerController_ClientSetHUD_Params)},
-  { 402, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetViewTarget_Params)},
-  { 413, 420, -1, sizeof(::unrealpb::PlayerController_ClientEnableNetworkVoice_Params)},
-  { 421, -1, -1, sizeof(::unrealpb::PlayerController_ClientCapBandwidth_Params)},
-  { 428, -1, -1, sizeof(::unrealpb::PlayerController_ClientRestart_Params)},
-  { 435, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetCameraMode_Params)},
-  { 442, -1, -1, sizeof(::unrealpb::PlayerController_ClientRetryClientRestart_Params)},
-  { 449, -1, -1, sizeof(::unrealpb::PlayerController_ServerSetSpectatorLocation_Params)},
-  { 457, -1, -1, sizeof(::unrealpb::PlayerController_ServerAcknowledgePossession_Params)},
-  { 464, -1, -1, sizeof(::unrealpb::PlayerController_ClientGotoState_Params)},
-  { 471, -1, -1, sizeof(::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params)},
-  { 482, 492, -1, sizeof(::unrealpb::GameStateBase)},
-  { 496, 513, -1, sizeof(::unrealpb::FClientAdjustment)},
+  { 74, -1, -1, sizeof(::unrealpb::DestroyObjectMessage)},
+  { 82, 94, -1, sizeof(::unrealpb::FRepMovement)},
+  { 100, -1, -1, sizeof(::unrealpb::FRepAttachment)},
+  { 112, 130, -1, sizeof(::unrealpb::ActorState)},
+  { 142, 151, -1, sizeof(::unrealpb::ActorComponentState)},
+  { 154, 173, -1, sizeof(::unrealpb::SceneComponentState)},
+  { 186, 199, -1, sizeof(::unrealpb::FBasedMovementInfo)},
+  { 206, 215, -1, sizeof(::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings)},
+  { 218, 240, -1, sizeof(::unrealpb::FRootMotionSource)},
+  { 256, 270, -1, sizeof(::unrealpb::FRootMotionSourceGroup)},
+  { 278, 296, -1, sizeof(::unrealpb::FRepRootMotionMontage)},
+  { 308, 322, -1, sizeof(::unrealpb::CharacterState)},
+  { 330, -1, -1, sizeof(::unrealpb::Character_ServerMovePacked_Params)},
+  { 338, -1, -1, sizeof(::unrealpb::Character_ClientMoveResponsePacked_Params)},
+  { 346, 356, -1, sizeof(::unrealpb::PlayerState)},
+  { 360, -1, -1, sizeof(::unrealpb::ControllerState)},
+  { 368, -1, -1, sizeof(::unrealpb::Controller_ClientSetLocation_Params)},
+  { 376, -1, -1, sizeof(::unrealpb::Controller_ClientSetRotation_Params)},
+  { 384, 392, -1, sizeof(::unrealpb::PlayerControllerState)},
+  { 394, -1, -1, sizeof(::unrealpb::PlayerController_ServerUpdateCamera_Params)},
+  { 402, 409, -1, sizeof(::unrealpb::PlayerController_ClientSetHUD_Params)},
+  { 410, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetViewTarget_Params)},
+  { 421, 428, -1, sizeof(::unrealpb::PlayerController_ClientEnableNetworkVoice_Params)},
+  { 429, -1, -1, sizeof(::unrealpb::PlayerController_ClientCapBandwidth_Params)},
+  { 436, -1, -1, sizeof(::unrealpb::PlayerController_ClientRestart_Params)},
+  { 443, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetCameraMode_Params)},
+  { 450, -1, -1, sizeof(::unrealpb::PlayerController_ClientRetryClientRestart_Params)},
+  { 457, -1, -1, sizeof(::unrealpb::PlayerController_ServerSetSpectatorLocation_Params)},
+  { 465, -1, -1, sizeof(::unrealpb::PlayerController_ServerAcknowledgePossession_Params)},
+  { 472, -1, -1, sizeof(::unrealpb::PlayerController_ClientGotoState_Params)},
+  { 479, -1, -1, sizeof(::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params)},
+  { 490, 500, -1, sizeof(::unrealpb::GameStateBase)},
+  { 504, 521, -1, sizeof(::unrealpb::FClientAdjustment)},
 };
 
 static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eproto[] = {
@@ -1263,6 +1286,7 @@ static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eprot
   &::unrealpb::_RemoteFunctionMessage_default_instance_._instance,
   &::unrealpb::_SpawnObjectMessage_default_instance_._instance,
   &::unrealpb::_ServerSpawnedPlayerMessage_default_instance_._instance,
+  &::unrealpb::_DestroyObjectMessage_default_instance_._instance,
   &::unrealpb::_FRepMovement_default_instance_._instance,
   &::unrealpb::_FRepAttachment_default_instance_._instance,
   &::unrealpb::_ActorState_default_instance_._instance,
@@ -1319,227 +1343,228 @@ const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_
   "\rH\001\210\001\001B\014\n\n_channelIdB\014\n\n_localRole\"W\n\032Se"
   "rverSpawnedPlayerMessage\022\024\n\014clientConnId"
   "\030\001 \001(\r\022#\n\010startPos\030\002 \001(\0132\021.unrealpb.FVec"
-  "tor\"\354\002\n\014FRepMovement\022.\n\016linearVelocity\030\001"
-  " \001(\0132\021.unrealpb.FVectorH\000\210\001\001\022/\n\017angularV"
-  "elocity\030\002 \001(\0132\021.unrealpb.FVectorH\001\210\001\001\022(\n"
-  "\010location\030\003 \001(\0132\021.unrealpb.FVectorH\002\210\001\001\022"
-  "(\n\010rotation\030\004 \001(\0132\021.unrealpb.FVectorH\003\210\001"
-  "\001\022\"\n\025bSimulatedPhysicSleep\030\005 \001(\010H\004\210\001\001\022\030\n"
-  "\013bRepPhysics\030\006 \001(\010H\005\210\001\001B\021\n\017_linearVeloci"
-  "tyB\022\n\020_angularVelocityB\013\n\t_locationB\013\n\t_"
-  "rotationB\030\n\026_bSimulatedPhysicSleepB\016\n\014_b"
-  "RepPhysics\"\215\002\n\016FRepAttachment\022/\n\014attachP"
-  "arent\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\022)"
-  "\n\016locationOffset\030\002 \001(\0132\021.unrealpb.FVecto"
-  "r\022(\n\rrelativeScale\030\003 \001(\0132\021.unrealpb.FVec"
-  "tor\022)\n\016rotationOffset\030\004 \001(\0132\021.unrealpb.F"
-  "Vector\022\024\n\014attachSocket\030\005 \001(\t\0224\n\017attachCo"
-  "mponent\030\006 \001(\0132\033.unrealpb.ActorComponentR"
-  "ef\"\347\004\n\nActorState\022\017\n\007removed\030\001 \001(\010\022\031\n\014ow"
-  "ningConnId\030\002 \001(\rH\000\210\001\001\022\037\n\022bReplicateMovem"
-  "ent\030\003 \001(\010H\001\210\001\001\022\026\n\tlocalRole\030\004 \001(\rH\002\210\001\001\022\027"
-  "\n\nremoteRole\030\005 \001(\rH\003\210\001\001\022-\n\005owner\030\006 \001(\0132\031"
-  ".unrealpb.UnrealObjectRefH\004\210\001\001\022\024\n\007bHidde"
-  "n\030\007 \001(\010H\005\210\001\001\022\025\n\010bTearOff\030\010 \001(\010H\006\210\001\001\022\032\n\rb"
-  "CanBeDamaged\030\t \001(\010H\007\210\001\001\0222\n\ninstigator\030\n "
-  "\001(\0132\031.unrealpb.UnrealObjectRefH\010\210\001\001\0227\n\022r"
-  "eplicatedMovement\030\013 \001(\0132\026.unrealpb.FRepM"
-  "ovementH\t\210\001\001\022<\n\025attachmentReplication\030\014 "
-  "\001(\0132\030.unrealpb.FRepAttachmentH\n\210\001\001B\017\n\r_o"
-  "wningConnIdB\025\n\023_bReplicateMovementB\014\n\n_l"
-  "ocalRoleB\r\n\013_remoteRoleB\010\n\006_ownerB\n\n\010_bH"
-  "iddenB\013\n\t_bTearOffB\020\n\016_bCanBeDamagedB\r\n\013"
-  "_instigatorB\025\n\023_replicatedMovementB\030\n\026_a"
-  "ttachmentReplication\"v\n\023ActorComponentSt"
-  "ate\022\017\n\007removed\030\001 \001(\010\022\026\n\tbIsActive\030\002 \001(\010H"
-  "\000\210\001\001\022\030\n\013bReplicated\030\003 \001(\010H\001\210\001\001B\014\n\n_bIsAc"
-  "tiveB\016\n\014_bReplicated\"\260\006\n\023SceneComponentS"
-  "tate\022\036\n\021bAbsoluteLocation\030\002 \001(\010H\000\210\001\001\022\036\n\021"
-  "bAbsoluteRotation\030\003 \001(\010H\001\210\001\001\022\033\n\016bAbsolut"
-  "eScale\030\004 \001(\010H\002\210\001\001\022\025\n\010bVisible\030\005 \001(\010H\003\210\001\001"
-  "\022\036\n\021bShouldBeAttached\030\006 \001(\010H\004\210\001\001\022,\n\037bSho"
-  "uldSnapLocationWhenAttached\030\007 \001(\010H\005\210\001\001\022,"
-  "\n\037bShouldSnapRotationWhenAttached\030\010 \001(\010H"
-  "\006\210\001\001\0226\n\014attachParent\030\t \001(\0132\033.unrealpb.Ac"
-  "torComponentRefH\007\210\001\001\0223\n\016attachChildren\030\n"
-  " \003(\0132\033.unrealpb.ActorComponentRef\022\035\n\020att"
-  "achSocketName\030\013 \001(\tH\010\210\001\001\0220\n\020relativeLoca"
-  "tion\030\014 \001(\0132\021.unrealpb.FVectorH\t\210\001\001\0220\n\020re"
-  "lativeRotation\030\r \001(\0132\021.unrealpb.FVectorH"
-  "\n\210\001\001\022-\n\rrelativeScale\030\016 \001(\0132\021.unrealpb.F"
-  "VectorH\013\210\001\001B\024\n\022_bAbsoluteLocationB\024\n\022_bA"
-  "bsoluteRotationB\021\n\017_bAbsoluteScaleB\013\n\t_b"
-  "VisibleB\024\n\022_bShouldBeAttachedB\"\n _bShoul"
-  "dSnapLocationWhenAttachedB\"\n _bShouldSna"
-  "pRotationWhenAttachedB\017\n\r_attachParentB\023"
-  "\n\021_attachSocketNameB\023\n\021_relativeLocation"
-  "B\023\n\021_relativeRotationB\020\n\016_relativeScale\""
-  "\237\003\n\022FBasedMovementInfo\0226\n\014movementBase\030\001"
-  " \001(\0132\033.unrealpb.ActorComponentRefH\000\210\001\001\022\025"
-  "\n\010boneName\030\002 \001(\tH\001\210\001\001\022(\n\010location\030\003 \001(\0132"
-  "\021.unrealpb.FVectorH\002\210\001\001\022(\n\010rotation\030\004 \001("
-  "\0132\021.unrealpb.FVectorH\003\210\001\001\022$\n\027bServerHasB"
-  "aseComponent\030\005 \001(\010H\004\210\001\001\022\036\n\021bRelativeRota"
-  "tion\030\006 \001(\010H\005\210\001\001\022\037\n\022bServerHasVelocity\030\007 "
-  "\001(\010H\006\210\001\001B\017\n\r_movementBaseB\013\n\t_boneNameB\013"
-  "\n\t_locationB\013\n\t_rotationB\032\n\030_bServerHasB"
-  "aseComponentB\024\n\022_bRelativeRotationB\025\n\023_b"
-  "ServerHasVelocity\"\317\007\n\021FRootMotionSource\022"
-  "\025\n\010priority\030\001 \001(\rH\000\210\001\001\022\024\n\007localId\030\002 \001(\rH"
-  "\001\210\001\001\022\034\n\017accumulatedMode\030\003 \001(\rH\002\210\001\001\022\031\n\014in"
-  "stanceName\030\004 \001(\tH\003\210\001\001\022\026\n\tstartTime\030\005 \001(\002"
-  "H\004\210\001\001\022\030\n\013currentTime\030\006 \001(\002H\005\210\001\001\022\031\n\014previ"
-  "ousTime\030\007 \001(\002H\006\210\001\001\022\025\n\010duration\030\010 \001(\002H\007\210\001"
-  "\001\022\023\n\006status\030\t \001(\rH\010\210\001\001\022\025\n\010settings\030\n \001(\r"
-  "H\t\210\001\001\022\032\n\rbInLocalSpace\030\013 \001(\010H\n\210\001\001\022#\n\026bNe"
-  "edsSimulatedCatchup\030\014 \001(\010H\013\210\001\001\022%\n\030bSimul"
-  "atedNeedsSmoothing\030\r \001(\010H\014\210\001\001\022\033\n\016bHasRoo"
-  "tMotion\030\016 \001(\010H\r\210\001\001\022\030\n\013blendWeight\030\017 \001(\002H"
-  "\016\210\001\001\022`\n\024finishVelocityParams\030\020 \001(\0132=.unr"
-  "ealpb.FRootMotionSource.FRootMotionFinis"
-  "hVelocitySettingsH\017\210\001\001\032\252\001\n!FRootMotionFi"
-  "nishVelocitySettings\022\021\n\004mode\030\001 \001(\rH\000\210\001\001\022"
-  "+\n\013setVelocity\030\002 \001(\0132\021.unrealpb.FVectorH"
-  "\001\210\001\001\022\032\n\rclampVelocity\030\003 \001(\002H\002\210\001\001B\007\n\005_mod"
-  "eB\016\n\014_setVelocityB\020\n\016_clampVelocityB\013\n\t_"
-  "priorityB\n\n\010_localIdB\022\n\020_accumulatedMode"
-  "B\017\n\r_instanceNameB\014\n\n_startTimeB\016\n\014_curr"
-  "entTimeB\017\n\r_previousTimeB\013\n\t_durationB\t\n"
-  "\007_statusB\013\n\t_settingsB\020\n\016_bInLocalSpaceB"
-  "\031\n\027_bNeedsSimulatedCatchupB\033\n\031_bSimulate"
-  "dNeedsSmoothingB\021\n\017_bHasRootMotionB\016\n\014_b"
-  "lendWeightB\027\n\025_finishVelocityParams\"\311\004\n\026"
-  "FRootMotionSourceGroup\0226\n\021rootMotionSour"
-  "ces\030\001 \003(\0132\033.unrealpb.FRootMotionSource\022@"
-  "\n\033pendingAddRootMotionSources\030\002 \003(\0132\033.un"
-  "realpb.FRootMotionSource\022 \n\023bHasAdditive"
-  "Sources\030\003 \001(\010H\000\210\001\001\022 \n\023bHasOverrideSource"
-  "s\030\004 \001(\010H\001\210\001\001\0225\n(bHasOverrideSourcesWithI"
-  "gnoreZAccumulate\030\005 \001(\010H\002\210\001\001\022\'\n\032bIsAdditi"
-  "veVelocityApplied\030\006 \001(\010H\003\210\001\001\022$\n\027lastAccu"
-  "mulatedSettings\030\007 \001(\rH\004\210\001\001\0227\n\027lastPreAdd"
-  "itiveVelocity\030\010 \001(\0132\021.unrealpb.FVectorH\005"
-  "\210\001\001B\026\n\024_bHasAdditiveSourcesB\026\n\024_bHasOver"
-  "rideSourcesB+\n)_bHasOverrideSourcesWithI"
-  "gnoreZAccumulateB\035\n\033_bIsAdditiveVelocity"
-  "AppliedB\032\n\030_lastAccumulatedSettingsB\032\n\030_"
-  "lastPreAdditiveVelocity\"\353\005\n\025FRepRootMoti"
-  "onMontage\022\026\n\tbIsActive\030\001 \001(\010H\000\210\001\001\0223\n\013ani"
-  "mMontage\030\002 \001(\0132\031.unrealpb.UnrealObjectRe"
-  "fH\001\210\001\001\022\025\n\010position\030\003 \001(\002H\002\210\001\001\022(\n\010locatio"
-  "n\030\004 \001(\0132\021.unrealpb.FVectorH\003\210\001\001\022(\n\010rotat"
-  "ion\030\005 \001(\0132\021.unrealpb.FVectorH\004\210\001\001\0226\n\014mov"
-  "ementBase\030\006 \001(\0132\033.unrealpb.ActorComponen"
-  "tRefH\005\210\001\001\022!\n\024movementBaseBoneName\030\007 \001(\tH"
-  "\006\210\001\001\022\036\n\021bRelativePosition\030\010 \001(\010H\007\210\001\001\022\036\n\021"
-  "bRelativeRotation\030\t \001(\010H\010\210\001\001\022F\n\027authorit"
-  "ativeRootMotion\030\n \001(\0132 .unrealpb.FRootMo"
-  "tionSourceGroupH\t\210\001\001\022,\n\014acceleration\030\013 \001"
-  "(\0132\021.unrealpb.FVectorH\n\210\001\001\022.\n\016linearVelo"
-  "city\030\014 \001(\0132\021.unrealpb.FVectorH\013\210\001\001B\014\n\n_b"
-  "IsActiveB\016\n\014_animMontageB\013\n\t_positionB\013\n"
-  "\t_locationB\013\n\t_rotationB\017\n\r_movementBase"
-  "B\027\n\025_movementBaseBoneNameB\024\n\022_bRelativeP"
-  "ositionB\024\n\022_bRelativeRotationB\032\n\030_author"
-  "itativeRootMotionB\017\n\r_accelerationB\021\n\017_l"
-  "inearVelocity\"\277\004\n\016CharacterState\0228\n\nroot"
-  "Motion\030\002 \001(\0132\037.unrealpb.FRepRootMotionMo"
-  "ntageH\000\210\001\001\0228\n\rbasedMovement\030\003 \001(\0132\034.unre"
-  "alpb.FBasedMovementInfoH\001\210\001\001\022/\n\"serverLa"
-  "stTransformUpdateTimeStamp\030\004 \001(\002H\002\210\001\001\022\031\n"
-  "\014movementMode\030\005 \001(\rH\003\210\001\001\022\030\n\013bIsCrouched\030"
-  "\006 \001(\010H\004\210\001\001\022%\n\030bProxyIsJumpForceApplied\030\007"
-  " \001(\010H\005\210\001\001\022+\n\036animRootMotionTranslationSc"
-  "ale\030\010 \001(\002H\006\210\001\001\022/\n\"replayLastTransformUpd"
-  "ateTimeStamp\030\t \001(\002H\007\210\001\001B\r\n\013_rootMotionB\020"
-  "\n\016_basedMovementB%\n#_serverLastTransform"
-  "UpdateTimeStampB\017\n\r_movementModeB\016\n\014_bIs"
-  "CrouchedB\033\n\031_bProxyIsJumpForceAppliedB!\n"
-  "\037_animRootMotionTranslationScaleB%\n#_rep"
-  "layLastTransformUpdateTimeStamp\"H\n!Chara"
-  "cter_ServerMovePacked_Params\022\017\n\007bitsNum\030"
-  "\001 \001(\r\022\022\n\npackedBits\030\002 \001(\014\"P\n)Character_C"
-  "lientMoveResponsePacked_Params\022\017\n\007bitsNu"
-  "m\030\001 \001(\r\022\022\n\npackedBits\030\002 \001(\014\"\223\001\n\013PlayerSt"
-  "ate\022\022\n\005score\030\002 \001(\002H\000\210\001\001\022\025\n\010playerId\030\003 \001("
-  "\005H\001\210\001\001\022\021\n\004ping\030\004 \001(\rH\002\210\001\001\022\027\n\nplayerName\030"
-  "\005 \001(\tH\003\210\001\001B\010\n\006_scoreB\013\n\t_playerIdB\007\n\005_pi"
-  "ngB\r\n\013_playerName\"j\n\017ControllerState\022.\n\013"
-  "playerState\030\002 \001(\0132\031.unrealpb.UnrealObjec"
-  "tRef\022\'\n\004pawn\030\003 \001(\0132\031.unrealpb.UnrealObje"
-  "ctRef\"u\n#Controller_ClientSetLocation_Pa"
-  "rams\022&\n\013newLocation\030\001 \001(\0132\021.unrealpb.FVe"
-  "ctor\022&\n\013newRotation\030\002 \001(\0132\021.unrealpb.FVe"
-  "ctor\"c\n#Controller_ClientSetRotation_Par"
-  "ams\022&\n\013newRotation\030\001 \001(\0132\021.unrealpb.FVec"
-  "tor\022\024\n\014bResetCamera\030\002 \001(\010\"\243\001\n\025PlayerCont"
-  "rollerState\0222\n\022targetViewRotation\030\002 \001(\0132"
-  "\021.unrealpb.FVectorH\000\210\001\001\022-\n\rspawnLocation"
-  "\030\003 \001(\0132\021.unrealpb.FVectorH\001\210\001\001B\025\n\023_targe"
-  "tViewRotationB\020\n\016_spawnLocation\"g\n*Playe"
-  "rController_ServerUpdateCamera_Params\022!\n"
-  "\006camLoc\030\001 \001(\0132\021.unrealpb.FVector\022\026\n\016camP"
-  "itchAndYaw\030\002 \001(\005\"R\n$PlayerController_Cli"
-  "entSetHUD_Params\022\031\n\014hudClassName\030\001 \001(\tH\000"
-  "\210\001\001B\017\n\r_hudClassName\"\252\001\n+PlayerControlle"
-  "r_ClientSetViewTarget_Params\022(\n\005actor\030\001 "
-  "\001(\0132\031.unrealpb.UnrealObjectRef\022\021\n\tblendT"
-  "ime\030\002 \001(\002\022\025\n\rblendFunction\030\003 \001(\r\022\020\n\010blen"
-  "dExp\030\004 \001(\002\022\025\n\rbLockOutgoing\030\005 \001(\010\"T\n0Pla"
-  "yerController_ClientEnableNetworkVoice_P"
-  "arams\022\024\n\007bEnable\030\001 \001(\010H\000\210\001\001B\n\n\010_bEnable\""
-  "9\n*PlayerController_ClientCapBandwidth_P"
-  "arams\022\013\n\003cap\030\001 \001(\005\"P\n%PlayerController_C"
-  "lientRestart_Params\022\'\n\004pawn\030\001 \001(\0132\031.unre"
-  "alpb.UnrealObjectRef\"A\n+PlayerController"
-  "_ClientSetCameraMode_Params\022\022\n\nnewCamMod"
-  "e\030\001 \001(\t\"[\n0PlayerController_ClientRetryC"
-  "lientRestart_Params\022\'\n\004pawn\030\001 \001(\0132\031.unre"
-  "alpb.UnrealObjectRef\"z\n2PlayerController"
-  "_ServerSetSpectatorLocation_Params\022!\n\006ne"
-  "wLoc\030\001 \001(\0132\021.unrealpb.FVector\022!\n\006newRot\030"
-  "\002 \001(\0132\021.unrealpb.FVector\"^\n3PlayerContro"
-  "ller_ServerAcknowledgePossession_Params\022"
-  "\'\n\004pawn\030\001 \001(\0132\031.unrealpb.UnrealObjectRef"
-  "\";\n\'PlayerController_ClientGotoState_Par"
-  "ams\022\020\n\010newState\030\001 \001(\t\"\375\001\n5PlayerControll"
-  "er_ClientReceiveLocalizedMessage_Params\022"
-  "\017\n\007message\030\001 \001(\t\022\016\n\006switch\030\002 \001(\005\0227\n\024rela"
-  "tedPlayerState_1\030\003 \001(\0132\031.unrealpb.Unreal"
-  "ObjectRef\0227\n\024relatedPlayerState_2\030\004 \001(\0132"
-  "\031.unrealpb.UnrealObjectRef\0221\n\016optionalOb"
-  "ject\030\005 \001(\0132\031.unrealpb.UnrealObjectRef\"\207\002"
-  "\n\rGameStateBase\022\037\n\022spectatorClassName\030\002 "
-  "\001(\tH\000\210\001\001\022\036\n\021gameModeClassName\030\003 \001(\tH\001\210\001\001"
-  "\022\'\n\032replicatedWorldTimeSeconds\030\004 \001(\002H\002\210\001"
-  "\001\022$\n\027bReplicatedHasBegunPlay\030\005 \001(\010H\003\210\001\001B"
-  "\025\n\023_spectatorClassNameB\024\n\022_gameModeClass"
-  "NameB\035\n\033_replicatedWorldTimeSecondsB\032\n\030_"
-  "bReplicatedHasBegunPlay\"\214\005\n\021FClientAdjus"
-  "tment\022\031\n\014bAckGoodMove\030\001 \001(\010H\000\210\001\001\022\026\n\ttime"
-  "Stamp\030\002 \001(\002H\001\210\001\001\022&\n\006newLoc\030\003 \001(\0132\021.unrea"
-  "lpb.FVectorH\002\210\001\001\022&\n\006newVel\030\004 \001(\0132\021.unrea"
-  "lpb.FVectorH\003\210\001\001\022&\n\006newRot\030\005 \001(\0132\021.unrea"
-  "lpb.FVectorH\004\210\001\001\022/\n\007newBase\030\006 \001(\0132\031.unre"
-  "alpb.UnrealObjectRefH\005\210\001\001\022\034\n\017newBaseBone"
-  "Name\030\007 \001(\tH\006\210\001\001\022\"\n\025bBaseRelativePosition"
-  "\030\010 \001(\010H\007\210\001\001\022I\n\032rootMotionSourceCorrectio"
-  "n\030\t \001(\0132 .unrealpb.FRootMotionSourceGrou"
-  "pH\010\210\001\001\0222\n\022rootMotionRotation\030\n \001(\0132\021.unr"
-  "ealpb.FVectorH\t\210\001\001\022\031\n\014movementMode\030\013 \001(\r"
-  "H\n\210\001\001B\017\n\r_bAckGoodMoveB\014\n\n_timeStampB\t\n\007"
-  "_newLocB\t\n\007_newVelB\t\n\007_newRotB\n\n\010_newBas"
-  "eB\022\n\020_newBaseBoneNameB\030\n\026_bBaseRelativeP"
-  "ositionB\035\n\033_rootMotionSourceCorrectionB\025"
-  "\n\023_rootMotionRotationB\017\n\r_movementModeB,"
-  "Z*channeld.clewcat.com/channeld/pkg/unre"
-  "alpbb\006proto3"
+  "tor\"5\n\024DestroyObjectMessage\022\r\n\005netId\030\001 \001"
+  "(\r\022\016\n\006reason\030\002 \001(\r\"\354\002\n\014FRepMovement\022.\n\016l"
+  "inearVelocity\030\001 \001(\0132\021.unrealpb.FVectorH\000"
+  "\210\001\001\022/\n\017angularVelocity\030\002 \001(\0132\021.unrealpb."
+  "FVectorH\001\210\001\001\022(\n\010location\030\003 \001(\0132\021.unrealp"
+  "b.FVectorH\002\210\001\001\022(\n\010rotation\030\004 \001(\0132\021.unrea"
+  "lpb.FVectorH\003\210\001\001\022\"\n\025bSimulatedPhysicSlee"
+  "p\030\005 \001(\010H\004\210\001\001\022\030\n\013bRepPhysics\030\006 \001(\010H\005\210\001\001B\021"
+  "\n\017_linearVelocityB\022\n\020_angularVelocityB\013\n"
+  "\t_locationB\013\n\t_rotationB\030\n\026_bSimulatedPh"
+  "ysicSleepB\016\n\014_bRepPhysics\"\215\002\n\016FRepAttach"
+  "ment\022/\n\014attachParent\030\001 \001(\0132\031.unrealpb.Un"
+  "realObjectRef\022)\n\016locationOffset\030\002 \001(\0132\021."
+  "unrealpb.FVector\022(\n\rrelativeScale\030\003 \001(\0132"
+  "\021.unrealpb.FVector\022)\n\016rotationOffset\030\004 \001"
+  "(\0132\021.unrealpb.FVector\022\024\n\014attachSocket\030\005 "
+  "\001(\t\0224\n\017attachComponent\030\006 \001(\0132\033.unrealpb."
+  "ActorComponentRef\"\347\004\n\nActorState\022\017\n\007remo"
+  "ved\030\001 \001(\010\022\031\n\014owningConnId\030\002 \001(\rH\000\210\001\001\022\037\n\022"
+  "bReplicateMovement\030\003 \001(\010H\001\210\001\001\022\026\n\tlocalRo"
+  "le\030\004 \001(\rH\002\210\001\001\022\027\n\nremoteRole\030\005 \001(\rH\003\210\001\001\022-"
+  "\n\005owner\030\006 \001(\0132\031.unrealpb.UnrealObjectRef"
+  "H\004\210\001\001\022\024\n\007bHidden\030\007 \001(\010H\005\210\001\001\022\025\n\010bTearOff\030"
+  "\010 \001(\010H\006\210\001\001\022\032\n\rbCanBeDamaged\030\t \001(\010H\007\210\001\001\0222"
+  "\n\ninstigator\030\n \001(\0132\031.unrealpb.UnrealObje"
+  "ctRefH\010\210\001\001\0227\n\022replicatedMovement\030\013 \001(\0132\026"
+  ".unrealpb.FRepMovementH\t\210\001\001\022<\n\025attachmen"
+  "tReplication\030\014 \001(\0132\030.unrealpb.FRepAttach"
+  "mentH\n\210\001\001B\017\n\r_owningConnIdB\025\n\023_bReplicat"
+  "eMovementB\014\n\n_localRoleB\r\n\013_remoteRoleB\010"
+  "\n\006_ownerB\n\n\010_bHiddenB\013\n\t_bTearOffB\020\n\016_bC"
+  "anBeDamagedB\r\n\013_instigatorB\025\n\023_replicate"
+  "dMovementB\030\n\026_attachmentReplication\"v\n\023A"
+  "ctorComponentState\022\017\n\007removed\030\001 \001(\010\022\026\n\tb"
+  "IsActive\030\002 \001(\010H\000\210\001\001\022\030\n\013bReplicated\030\003 \001(\010"
+  "H\001\210\001\001B\014\n\n_bIsActiveB\016\n\014_bReplicated\"\260\006\n\023"
+  "SceneComponentState\022\036\n\021bAbsoluteLocation"
+  "\030\002 \001(\010H\000\210\001\001\022\036\n\021bAbsoluteRotation\030\003 \001(\010H\001"
+  "\210\001\001\022\033\n\016bAbsoluteScale\030\004 \001(\010H\002\210\001\001\022\025\n\010bVis"
+  "ible\030\005 \001(\010H\003\210\001\001\022\036\n\021bShouldBeAttached\030\006 \001"
+  "(\010H\004\210\001\001\022,\n\037bShouldSnapLocationWhenAttach"
+  "ed\030\007 \001(\010H\005\210\001\001\022,\n\037bShouldSnapRotationWhen"
+  "Attached\030\010 \001(\010H\006\210\001\001\0226\n\014attachParent\030\t \001("
+  "\0132\033.unrealpb.ActorComponentRefH\007\210\001\001\0223\n\016a"
+  "ttachChildren\030\n \003(\0132\033.unrealpb.ActorComp"
+  "onentRef\022\035\n\020attachSocketName\030\013 \001(\tH\010\210\001\001\022"
+  "0\n\020relativeLocation\030\014 \001(\0132\021.unrealpb.FVe"
+  "ctorH\t\210\001\001\0220\n\020relativeRotation\030\r \001(\0132\021.un"
+  "realpb.FVectorH\n\210\001\001\022-\n\rrelativeScale\030\016 \001"
+  "(\0132\021.unrealpb.FVectorH\013\210\001\001B\024\n\022_bAbsolute"
+  "LocationB\024\n\022_bAbsoluteRotationB\021\n\017_bAbso"
+  "luteScaleB\013\n\t_bVisibleB\024\n\022_bShouldBeAtta"
+  "chedB\"\n _bShouldSnapLocationWhenAttached"
+  "B\"\n _bShouldSnapRotationWhenAttachedB\017\n\r"
+  "_attachParentB\023\n\021_attachSocketNameB\023\n\021_r"
+  "elativeLocationB\023\n\021_relativeRotationB\020\n\016"
+  "_relativeScale\"\237\003\n\022FBasedMovementInfo\0226\n"
+  "\014movementBase\030\001 \001(\0132\033.unrealpb.ActorComp"
+  "onentRefH\000\210\001\001\022\025\n\010boneName\030\002 \001(\tH\001\210\001\001\022(\n\010"
+  "location\030\003 \001(\0132\021.unrealpb.FVectorH\002\210\001\001\022("
+  "\n\010rotation\030\004 \001(\0132\021.unrealpb.FVectorH\003\210\001\001"
+  "\022$\n\027bServerHasBaseComponent\030\005 \001(\010H\004\210\001\001\022\036"
+  "\n\021bRelativeRotation\030\006 \001(\010H\005\210\001\001\022\037\n\022bServe"
+  "rHasVelocity\030\007 \001(\010H\006\210\001\001B\017\n\r_movementBase"
+  "B\013\n\t_boneNameB\013\n\t_locationB\013\n\t_rotationB"
+  "\032\n\030_bServerHasBaseComponentB\024\n\022_bRelativ"
+  "eRotationB\025\n\023_bServerHasVelocity\"\317\007\n\021FRo"
+  "otMotionSource\022\025\n\010priority\030\001 \001(\rH\000\210\001\001\022\024\n"
+  "\007localId\030\002 \001(\rH\001\210\001\001\022\034\n\017accumulatedMode\030\003"
+  " \001(\rH\002\210\001\001\022\031\n\014instanceName\030\004 \001(\tH\003\210\001\001\022\026\n\t"
+  "startTime\030\005 \001(\002H\004\210\001\001\022\030\n\013currentTime\030\006 \001("
+  "\002H\005\210\001\001\022\031\n\014previousTime\030\007 \001(\002H\006\210\001\001\022\025\n\010dur"
+  "ation\030\010 \001(\002H\007\210\001\001\022\023\n\006status\030\t \001(\rH\010\210\001\001\022\025\n"
+  "\010settings\030\n \001(\rH\t\210\001\001\022\032\n\rbInLocalSpace\030\013 "
+  "\001(\010H\n\210\001\001\022#\n\026bNeedsSimulatedCatchup\030\014 \001(\010"
+  "H\013\210\001\001\022%\n\030bSimulatedNeedsSmoothing\030\r \001(\010H"
+  "\014\210\001\001\022\033\n\016bHasRootMotion\030\016 \001(\010H\r\210\001\001\022\030\n\013ble"
+  "ndWeight\030\017 \001(\002H\016\210\001\001\022`\n\024finishVelocityPar"
+  "ams\030\020 \001(\0132=.unrealpb.FRootMotionSource.F"
+  "RootMotionFinishVelocitySettingsH\017\210\001\001\032\252\001"
+  "\n!FRootMotionFinishVelocitySettings\022\021\n\004m"
+  "ode\030\001 \001(\rH\000\210\001\001\022+\n\013setVelocity\030\002 \001(\0132\021.un"
+  "realpb.FVectorH\001\210\001\001\022\032\n\rclampVelocity\030\003 \001"
+  "(\002H\002\210\001\001B\007\n\005_modeB\016\n\014_setVelocityB\020\n\016_cla"
+  "mpVelocityB\013\n\t_priorityB\n\n\010_localIdB\022\n\020_"
+  "accumulatedModeB\017\n\r_instanceNameB\014\n\n_sta"
+  "rtTimeB\016\n\014_currentTimeB\017\n\r_previousTimeB"
+  "\013\n\t_durationB\t\n\007_statusB\013\n\t_settingsB\020\n\016"
+  "_bInLocalSpaceB\031\n\027_bNeedsSimulatedCatchu"
+  "pB\033\n\031_bSimulatedNeedsSmoothingB\021\n\017_bHasR"
+  "ootMotionB\016\n\014_blendWeightB\027\n\025_finishVelo"
+  "cityParams\"\311\004\n\026FRootMotionSourceGroup\0226\n"
+  "\021rootMotionSources\030\001 \003(\0132\033.unrealpb.FRoo"
+  "tMotionSource\022@\n\033pendingAddRootMotionSou"
+  "rces\030\002 \003(\0132\033.unrealpb.FRootMotionSource\022"
+  " \n\023bHasAdditiveSources\030\003 \001(\010H\000\210\001\001\022 \n\023bHa"
+  "sOverrideSources\030\004 \001(\010H\001\210\001\001\0225\n(bHasOverr"
+  "ideSourcesWithIgnoreZAccumulate\030\005 \001(\010H\002\210"
+  "\001\001\022\'\n\032bIsAdditiveVelocityApplied\030\006 \001(\010H\003"
+  "\210\001\001\022$\n\027lastAccumulatedSettings\030\007 \001(\rH\004\210\001"
+  "\001\0227\n\027lastPreAdditiveVelocity\030\010 \001(\0132\021.unr"
+  "ealpb.FVectorH\005\210\001\001B\026\n\024_bHasAdditiveSourc"
+  "esB\026\n\024_bHasOverrideSourcesB+\n)_bHasOverr"
+  "ideSourcesWithIgnoreZAccumulateB\035\n\033_bIsA"
+  "dditiveVelocityAppliedB\032\n\030_lastAccumulat"
+  "edSettingsB\032\n\030_lastPreAdditiveVelocity\"\353"
+  "\005\n\025FRepRootMotionMontage\022\026\n\tbIsActive\030\001 "
+  "\001(\010H\000\210\001\001\0223\n\013animMontage\030\002 \001(\0132\031.unrealpb"
+  ".UnrealObjectRefH\001\210\001\001\022\025\n\010position\030\003 \001(\002H"
+  "\002\210\001\001\022(\n\010location\030\004 \001(\0132\021.unrealpb.FVecto"
+  "rH\003\210\001\001\022(\n\010rotation\030\005 \001(\0132\021.unrealpb.FVec"
+  "torH\004\210\001\001\0226\n\014movementBase\030\006 \001(\0132\033.unrealp"
+  "b.ActorComponentRefH\005\210\001\001\022!\n\024movementBase"
+  "BoneName\030\007 \001(\tH\006\210\001\001\022\036\n\021bRelativePosition"
+  "\030\010 \001(\010H\007\210\001\001\022\036\n\021bRelativeRotation\030\t \001(\010H\010"
+  "\210\001\001\022F\n\027authoritativeRootMotion\030\n \001(\0132 .u"
+  "nrealpb.FRootMotionSourceGroupH\t\210\001\001\022,\n\014a"
+  "cceleration\030\013 \001(\0132\021.unrealpb.FVectorH\n\210\001"
+  "\001\022.\n\016linearVelocity\030\014 \001(\0132\021.unrealpb.FVe"
+  "ctorH\013\210\001\001B\014\n\n_bIsActiveB\016\n\014_animMontageB"
+  "\013\n\t_positionB\013\n\t_locationB\013\n\t_rotationB\017"
+  "\n\r_movementBaseB\027\n\025_movementBaseBoneName"
+  "B\024\n\022_bRelativePositionB\024\n\022_bRelativeRota"
+  "tionB\032\n\030_authoritativeRootMotionB\017\n\r_acc"
+  "elerationB\021\n\017_linearVelocity\"\277\004\n\016Charact"
+  "erState\0228\n\nrootMotion\030\002 \001(\0132\037.unrealpb.F"
+  "RepRootMotionMontageH\000\210\001\001\0228\n\rbasedMoveme"
+  "nt\030\003 \001(\0132\034.unrealpb.FBasedMovementInfoH\001"
+  "\210\001\001\022/\n\"serverLastTransformUpdateTimeStam"
+  "p\030\004 \001(\002H\002\210\001\001\022\031\n\014movementMode\030\005 \001(\rH\003\210\001\001\022"
+  "\030\n\013bIsCrouched\030\006 \001(\010H\004\210\001\001\022%\n\030bProxyIsJum"
+  "pForceApplied\030\007 \001(\010H\005\210\001\001\022+\n\036animRootMoti"
+  "onTranslationScale\030\010 \001(\002H\006\210\001\001\022/\n\"replayL"
+  "astTransformUpdateTimeStamp\030\t \001(\002H\007\210\001\001B\r"
+  "\n\013_rootMotionB\020\n\016_basedMovementB%\n#_serv"
+  "erLastTransformUpdateTimeStampB\017\n\r_movem"
+  "entModeB\016\n\014_bIsCrouchedB\033\n\031_bProxyIsJump"
+  "ForceAppliedB!\n\037_animRootMotionTranslati"
+  "onScaleB%\n#_replayLastTransformUpdateTim"
+  "eStamp\"H\n!Character_ServerMovePacked_Par"
+  "ams\022\017\n\007bitsNum\030\001 \001(\r\022\022\n\npackedBits\030\002 \001(\014"
+  "\"P\n)Character_ClientMoveResponsePacked_P"
+  "arams\022\017\n\007bitsNum\030\001 \001(\r\022\022\n\npackedBits\030\002 \001"
+  "(\014\"\223\001\n\013PlayerState\022\022\n\005score\030\002 \001(\002H\000\210\001\001\022\025"
+  "\n\010playerId\030\003 \001(\005H\001\210\001\001\022\021\n\004ping\030\004 \001(\rH\002\210\001\001"
+  "\022\027\n\nplayerName\030\005 \001(\tH\003\210\001\001B\010\n\006_scoreB\013\n\t_"
+  "playerIdB\007\n\005_pingB\r\n\013_playerName\"j\n\017Cont"
+  "rollerState\022.\n\013playerState\030\002 \001(\0132\031.unrea"
+  "lpb.UnrealObjectRef\022\'\n\004pawn\030\003 \001(\0132\031.unre"
+  "alpb.UnrealObjectRef\"u\n#Controller_Clien"
+  "tSetLocation_Params\022&\n\013newLocation\030\001 \001(\013"
+  "2\021.unrealpb.FVector\022&\n\013newRotation\030\002 \001(\013"
+  "2\021.unrealpb.FVector\"c\n#Controller_Client"
+  "SetRotation_Params\022&\n\013newRotation\030\001 \001(\0132"
+  "\021.unrealpb.FVector\022\024\n\014bResetCamera\030\002 \001(\010"
+  "\"\243\001\n\025PlayerControllerState\0222\n\022targetView"
+  "Rotation\030\002 \001(\0132\021.unrealpb.FVectorH\000\210\001\001\022-"
+  "\n\rspawnLocation\030\003 \001(\0132\021.unrealpb.FVector"
+  "H\001\210\001\001B\025\n\023_targetViewRotationB\020\n\016_spawnLo"
+  "cation\"g\n*PlayerController_ServerUpdateC"
+  "amera_Params\022!\n\006camLoc\030\001 \001(\0132\021.unrealpb."
+  "FVector\022\026\n\016camPitchAndYaw\030\002 \001(\005\"R\n$Playe"
+  "rController_ClientSetHUD_Params\022\031\n\014hudCl"
+  "assName\030\001 \001(\tH\000\210\001\001B\017\n\r_hudClassName\"\252\001\n+"
+  "PlayerController_ClientSetViewTarget_Par"
+  "ams\022(\n\005actor\030\001 \001(\0132\031.unrealpb.UnrealObje"
+  "ctRef\022\021\n\tblendTime\030\002 \001(\002\022\025\n\rblendFunctio"
+  "n\030\003 \001(\r\022\020\n\010blendExp\030\004 \001(\002\022\025\n\rbLockOutgoi"
+  "ng\030\005 \001(\010\"T\n0PlayerController_ClientEnabl"
+  "eNetworkVoice_Params\022\024\n\007bEnable\030\001 \001(\010H\000\210"
+  "\001\001B\n\n\010_bEnable\"9\n*PlayerController_Clien"
+  "tCapBandwidth_Params\022\013\n\003cap\030\001 \001(\005\"P\n%Pla"
+  "yerController_ClientRestart_Params\022\'\n\004pa"
+  "wn\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\"A\n+P"
+  "layerController_ClientSetCameraMode_Para"
+  "ms\022\022\n\nnewCamMode\030\001 \001(\t\"[\n0PlayerControll"
+  "er_ClientRetryClientRestart_Params\022\'\n\004pa"
+  "wn\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\"z\n2P"
+  "layerController_ServerSetSpectatorLocati"
+  "on_Params\022!\n\006newLoc\030\001 \001(\0132\021.unrealpb.FVe"
+  "ctor\022!\n\006newRot\030\002 \001(\0132\021.unrealpb.FVector\""
+  "^\n3PlayerController_ServerAcknowledgePos"
+  "session_Params\022\'\n\004pawn\030\001 \001(\0132\031.unrealpb."
+  "UnrealObjectRef\";\n\'PlayerController_Clie"
+  "ntGotoState_Params\022\020\n\010newState\030\001 \001(\t\"\375\001\n"
+  "5PlayerController_ClientReceiveLocalized"
+  "Message_Params\022\017\n\007message\030\001 \001(\t\022\016\n\006switc"
+  "h\030\002 \001(\005\0227\n\024relatedPlayerState_1\030\003 \001(\0132\031."
+  "unrealpb.UnrealObjectRef\0227\n\024relatedPlaye"
+  "rState_2\030\004 \001(\0132\031.unrealpb.UnrealObjectRe"
+  "f\0221\n\016optionalObject\030\005 \001(\0132\031.unrealpb.Unr"
+  "ealObjectRef\"\207\002\n\rGameStateBase\022\037\n\022specta"
+  "torClassName\030\002 \001(\tH\000\210\001\001\022\036\n\021gameModeClass"
+  "Name\030\003 \001(\tH\001\210\001\001\022\'\n\032replicatedWorldTimeSe"
+  "conds\030\004 \001(\002H\002\210\001\001\022$\n\027bReplicatedHasBegunP"
+  "lay\030\005 \001(\010H\003\210\001\001B\025\n\023_spectatorClassNameB\024\n"
+  "\022_gameModeClassNameB\035\n\033_replicatedWorldT"
+  "imeSecondsB\032\n\030_bReplicatedHasBegunPlay\"\214"
+  "\005\n\021FClientAdjustment\022\031\n\014bAckGoodMove\030\001 \001"
+  "(\010H\000\210\001\001\022\026\n\ttimeStamp\030\002 \001(\002H\001\210\001\001\022&\n\006newLo"
+  "c\030\003 \001(\0132\021.unrealpb.FVectorH\002\210\001\001\022&\n\006newVe"
+  "l\030\004 \001(\0132\021.unrealpb.FVectorH\003\210\001\001\022&\n\006newRo"
+  "t\030\005 \001(\0132\021.unrealpb.FVectorH\004\210\001\001\022/\n\007newBa"
+  "se\030\006 \001(\0132\031.unrealpb.UnrealObjectRefH\005\210\001\001"
+  "\022\034\n\017newBaseBoneName\030\007 \001(\tH\006\210\001\001\022\"\n\025bBaseR"
+  "elativePosition\030\010 \001(\010H\007\210\001\001\022I\n\032rootMotion"
+  "SourceCorrection\030\t \001(\0132 .unrealpb.FRootM"
+  "otionSourceGroupH\010\210\001\001\0222\n\022rootMotionRotat"
+  "ion\030\n \001(\0132\021.unrealpb.FVectorH\t\210\001\001\022\031\n\014mov"
+  "ementMode\030\013 \001(\rH\n\210\001\001B\017\n\r_bAckGoodMoveB\014\n"
+  "\n_timeStampB\t\n\007_newLocB\t\n\007_newVelB\t\n\007_ne"
+  "wRotB\n\n\010_newBaseB\022\n\020_newBaseBoneNameB\030\n\026"
+  "_bBaseRelativePositionB\035\n\033_rootMotionSou"
+  "rceCorrectionB\025\n\023_rootMotionRotationB\017\n\r"
+  "_movementModeB,Z*channeld.clewcat.com/ch"
+  "anneld/pkg/unrealpbb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_unreal_5fcommon_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_unreal_5fcommon_2eproto = {
-    false, false, 9412, descriptor_table_protodef_unreal_5fcommon_2eproto,
+    false, false, 9467, descriptor_table_protodef_unreal_5fcommon_2eproto,
     "unreal_common.proto",
-    &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 39,
+    &descriptor_table_unreal_5fcommon_2eproto_once, nullptr, 0, 40,
     schemas_unreal_5fcommon_2eproto, file_default_instances_unreal_5fcommon_2eproto, TableStruct_unreal_5fcommon_2eproto::offsets,
     file_level_metadata_unreal_5fcommon_2eproto, file_level_enum_descriptors_unreal_5fcommon_2eproto,
     file_level_service_descriptors_unreal_5fcommon_2eproto,
@@ -3463,6 +3488,217 @@ void ServerSpawnedPlayerMessage::InternalSwap(ServerSpawnedPlayerMessage* other)
 
 // ===================================================================
 
+class DestroyObjectMessage::_Internal {
+ public:
+};
+
+DestroyObjectMessage::DestroyObjectMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:unrealpb.DestroyObjectMessage)
+}
+DestroyObjectMessage::DestroyObjectMessage(const DestroyObjectMessage& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  DestroyObjectMessage* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.netid_){}
+    , decltype(_impl_.reason_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::memcpy(&_impl_.netid_, &from._impl_.netid_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.reason_) -
+    reinterpret_cast<char*>(&_impl_.netid_)) + sizeof(_impl_.reason_));
+  // @@protoc_insertion_point(copy_constructor:unrealpb.DestroyObjectMessage)
+}
+
+inline void DestroyObjectMessage::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.netid_){0u}
+    , decltype(_impl_.reason_){0u}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+}
+
+DestroyObjectMessage::~DestroyObjectMessage() {
+  // @@protoc_insertion_point(destructor:unrealpb.DestroyObjectMessage)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void DestroyObjectMessage::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+}
+
+void DestroyObjectMessage::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void DestroyObjectMessage::Clear() {
+// @@protoc_insertion_point(message_clear_start:unrealpb.DestroyObjectMessage)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::memset(&_impl_.netid_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.reason_) -
+      reinterpret_cast<char*>(&_impl_.netid_)) + sizeof(_impl_.reason_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* DestroyObjectMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // uint32 netId = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.netid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // uint32 reason = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _impl_.reason_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* DestroyObjectMessage::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.DestroyObjectMessage)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // uint32 netId = 1;
+  if (this->_internal_netid() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(1, this->_internal_netid(), target);
+  }
+
+  // uint32 reason = 2;
+  if (this->_internal_reason() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_reason(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.DestroyObjectMessage)
+  return target;
+}
+
+size_t DestroyObjectMessage::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:unrealpb.DestroyObjectMessage)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // uint32 netId = 1;
+  if (this->_internal_netid() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_netid());
+  }
+
+  // uint32 reason = 2;
+  if (this->_internal_reason() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_reason());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData DestroyObjectMessage::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    DestroyObjectMessage::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*DestroyObjectMessage::GetClassData() const { return &_class_data_; }
+
+
+void DestroyObjectMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<DestroyObjectMessage*>(&to_msg);
+  auto& from = static_cast<const DestroyObjectMessage&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.DestroyObjectMessage)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_netid() != 0) {
+    _this->_internal_set_netid(from._internal_netid());
+  }
+  if (from._internal_reason() != 0) {
+    _this->_internal_set_reason(from._internal_reason());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void DestroyObjectMessage::CopyFrom(const DestroyObjectMessage& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.DestroyObjectMessage)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool DestroyObjectMessage::IsInitialized() const {
+  return true;
+}
+
+void DestroyObjectMessage::InternalSwap(DestroyObjectMessage* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(DestroyObjectMessage, _impl_.reason_)
+      + sizeof(DestroyObjectMessage::_impl_.reason_)
+      - PROTOBUF_FIELD_OFFSET(DestroyObjectMessage, _impl_.netid_)>(
+          reinterpret_cast<char*>(&_impl_.netid_),
+          reinterpret_cast<char*>(&other->_impl_.netid_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata DestroyObjectMessage::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
+      file_level_metadata_unreal_5fcommon_2eproto[7]);
+}
+
+// ===================================================================
+
 class FRepMovement::_Internal {
  public:
   using HasBits = decltype(std::declval<FRepMovement>()._impl_._has_bits_);
@@ -3870,7 +4106,7 @@ void FRepMovement::InternalSwap(FRepMovement* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata FRepMovement::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[7]);
+      file_level_metadata_unreal_5fcommon_2eproto[8]);
 }
 
 // ===================================================================
@@ -4284,7 +4520,7 @@ void FRepAttachment::InternalSwap(FRepAttachment* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata FRepAttachment::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[8]);
+      file_level_metadata_unreal_5fcommon_2eproto[9]);
 }
 
 // ===================================================================
@@ -4883,7 +5119,7 @@ void ActorState::InternalSwap(ActorState* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata ActorState::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[9]);
+      file_level_metadata_unreal_5fcommon_2eproto[10]);
 }
 
 // ===================================================================
@@ -5141,7 +5377,7 @@ void ActorComponentState::InternalSwap(ActorComponentState* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata ActorComponentState::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[10]);
+      file_level_metadata_unreal_5fcommon_2eproto[11]);
 }
 
 // ===================================================================
@@ -5796,7 +6032,7 @@ void SceneComponentState::InternalSwap(SceneComponentState* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata SceneComponentState::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[11]);
+      file_level_metadata_unreal_5fcommon_2eproto[12]);
 }
 
 // ===================================================================
@@ -6249,7 +6485,7 @@ void FBasedMovementInfo::InternalSwap(FBasedMovementInfo* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata FBasedMovementInfo::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[12]);
+      file_level_metadata_unreal_5fcommon_2eproto[13]);
 }
 
 // ===================================================================
@@ -6529,7 +6765,7 @@ void FRootMotionSource_FRootMotionFinishVelocitySettings::InternalSwap(FRootMoti
 ::PROTOBUF_NAMESPACE_ID::Metadata FRootMotionSource_FRootMotionFinishVelocitySettings::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[13]);
+      file_level_metadata_unreal_5fcommon_2eproto[14]);
 }
 
 // ===================================================================
@@ -7214,7 +7450,7 @@ void FRootMotionSource::InternalSwap(FRootMotionSource* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata FRootMotionSource::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[14]);
+      file_level_metadata_unreal_5fcommon_2eproto[15]);
 }
 
 // ===================================================================
@@ -7646,7 +7882,7 @@ void FRootMotionSourceGroup::InternalSwap(FRootMotionSourceGroup* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata FRootMotionSourceGroup::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[15]);
+      file_level_metadata_unreal_5fcommon_2eproto[16]);
 }
 
 // ===================================================================
@@ -8309,7 +8545,7 @@ void FRepRootMotionMontage::InternalSwap(FRepRootMotionMontage* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata FRepRootMotionMontage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[16]);
+      file_level_metadata_unreal_5fcommon_2eproto[17]);
 }
 
 // ===================================================================
@@ -8747,7 +8983,7 @@ void CharacterState::InternalSwap(CharacterState* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata CharacterState::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[17]);
+      file_level_metadata_unreal_5fcommon_2eproto[18]);
 }
 
 // ===================================================================
@@ -8972,7 +9208,7 @@ void Character_ServerMovePacked_Params::InternalSwap(Character_ServerMovePacked_
 ::PROTOBUF_NAMESPACE_ID::Metadata Character_ServerMovePacked_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[18]);
+      file_level_metadata_unreal_5fcommon_2eproto[19]);
 }
 
 // ===================================================================
@@ -9197,7 +9433,7 @@ void Character_ClientMoveResponsePacked_Params::InternalSwap(Character_ClientMov
 ::PROTOBUF_NAMESPACE_ID::Metadata Character_ClientMoveResponsePacked_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[19]);
+      file_level_metadata_unreal_5fcommon_2eproto[20]);
 }
 
 // ===================================================================
@@ -9518,7 +9754,7 @@ void PlayerState::InternalSwap(PlayerState* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerState::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[20]);
+      file_level_metadata_unreal_5fcommon_2eproto[21]);
 }
 
 // ===================================================================
@@ -9757,7 +9993,7 @@ void ControllerState::InternalSwap(ControllerState* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata ControllerState::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[21]);
+      file_level_metadata_unreal_5fcommon_2eproto[22]);
 }
 
 // ===================================================================
@@ -9996,7 +10232,7 @@ void Controller_ClientSetLocation_Params::InternalSwap(Controller_ClientSetLocat
 ::PROTOBUF_NAMESPACE_ID::Metadata Controller_ClientSetLocation_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[22]);
+      file_level_metadata_unreal_5fcommon_2eproto[23]);
 }
 
 // ===================================================================
@@ -10220,7 +10456,7 @@ void Controller_ClientSetRotation_Params::InternalSwap(Controller_ClientSetRotat
 ::PROTOBUF_NAMESPACE_ID::Metadata Controller_ClientSetRotation_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[23]);
+      file_level_metadata_unreal_5fcommon_2eproto[24]);
 }
 
 // ===================================================================
@@ -10481,7 +10717,7 @@ void PlayerControllerState::InternalSwap(PlayerControllerState* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerControllerState::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[24]);
+      file_level_metadata_unreal_5fcommon_2eproto[25]);
 }
 
 // ===================================================================
@@ -10705,7 +10941,7 @@ void PlayerController_ServerUpdateCamera_Params::InternalSwap(PlayerController_S
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ServerUpdateCamera_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[25]);
+      file_level_metadata_unreal_5fcommon_2eproto[26]);
 }
 
 // ===================================================================
@@ -10922,7 +11158,7 @@ void PlayerController_ClientSetHUD_Params::InternalSwap(PlayerController_ClientS
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientSetHUD_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[26]);
+      file_level_metadata_unreal_5fcommon_2eproto[27]);
 }
 
 // ===================================================================
@@ -11246,7 +11482,7 @@ void PlayerController_ClientSetViewTarget_Params::InternalSwap(PlayerController_
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientSetViewTarget_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[27]);
+      file_level_metadata_unreal_5fcommon_2eproto[28]);
 }
 
 // ===================================================================
@@ -11436,7 +11672,7 @@ void PlayerController_ClientEnableNetworkVoice_Params::InternalSwap(PlayerContro
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientEnableNetworkVoice_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[28]);
+      file_level_metadata_unreal_5fcommon_2eproto[29]);
 }
 
 // ===================================================================
@@ -11614,7 +11850,7 @@ void PlayerController_ClientCapBandwidth_Params::InternalSwap(PlayerController_C
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientCapBandwidth_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[29]);
+      file_level_metadata_unreal_5fcommon_2eproto[30]);
 }
 
 // ===================================================================
@@ -11807,7 +12043,7 @@ void PlayerController_ClientRestart_Params::InternalSwap(PlayerController_Client
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientRestart_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[30]);
+      file_level_metadata_unreal_5fcommon_2eproto[31]);
 }
 
 // ===================================================================
@@ -12010,7 +12246,7 @@ void PlayerController_ClientSetCameraMode_Params::InternalSwap(PlayerController_
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientSetCameraMode_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[31]);
+      file_level_metadata_unreal_5fcommon_2eproto[32]);
 }
 
 // ===================================================================
@@ -12203,7 +12439,7 @@ void PlayerController_ClientRetryClientRestart_Params::InternalSwap(PlayerContro
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientRetryClientRestart_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[32]);
+      file_level_metadata_unreal_5fcommon_2eproto[33]);
 }
 
 // ===================================================================
@@ -12442,7 +12678,7 @@ void PlayerController_ServerSetSpectatorLocation_Params::InternalSwap(PlayerCont
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ServerSetSpectatorLocation_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[33]);
+      file_level_metadata_unreal_5fcommon_2eproto[34]);
 }
 
 // ===================================================================
@@ -12635,7 +12871,7 @@ void PlayerController_ServerAcknowledgePossession_Params::InternalSwap(PlayerCon
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ServerAcknowledgePossession_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[34]);
+      file_level_metadata_unreal_5fcommon_2eproto[35]);
 }
 
 // ===================================================================
@@ -12838,7 +13074,7 @@ void PlayerController_ClientGotoState_Params::InternalSwap(PlayerController_Clie
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientGotoState_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[35]);
+      file_level_metadata_unreal_5fcommon_2eproto[36]);
 }
 
 // ===================================================================
@@ -13196,7 +13432,7 @@ void PlayerController_ClientReceiveLocalizedMessage_Params::InternalSwap(PlayerC
 ::PROTOBUF_NAMESPACE_ID::Metadata PlayerController_ClientReceiveLocalizedMessage_Params::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[36]);
+      file_level_metadata_unreal_5fcommon_2eproto[37]);
 }
 
 // ===================================================================
@@ -13546,7 +13782,7 @@ void GameStateBase::InternalSwap(GameStateBase* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata GameStateBase::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[37]);
+      file_level_metadata_unreal_5fcommon_2eproto[38]);
 }
 
 // ===================================================================
@@ -14167,7 +14403,7 @@ void FClientAdjustment::InternalSwap(FClientAdjustment* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata FClientAdjustment::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[38]);
+      file_level_metadata_unreal_5fcommon_2eproto[39]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -14200,6 +14436,10 @@ Arena::CreateMaybeMessage< ::unrealpb::SpawnObjectMessage >(Arena* arena) {
 template<> PROTOBUF_NOINLINE ::unrealpb::ServerSpawnedPlayerMessage*
 Arena::CreateMaybeMessage< ::unrealpb::ServerSpawnedPlayerMessage >(Arena* arena) {
   return Arena::CreateMessageInternal< ::unrealpb::ServerSpawnedPlayerMessage >(arena);
+}
+template<> PROTOBUF_NOINLINE ::unrealpb::DestroyObjectMessage*
+Arena::CreateMaybeMessage< ::unrealpb::DestroyObjectMessage >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::unrealpb::DestroyObjectMessage >(arena);
 }
 template<> PROTOBUF_NOINLINE ::unrealpb::FRepMovement*
 Arena::CreateMaybeMessage< ::unrealpb::FRepMovement >(Arena* arena) {

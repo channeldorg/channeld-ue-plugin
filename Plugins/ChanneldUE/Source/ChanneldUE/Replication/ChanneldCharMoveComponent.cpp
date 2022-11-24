@@ -4,11 +4,22 @@
 #include "ChanneldCharMoveComponent.h"
 
 #include "ChanneldUtils.h"
+#include "GameFramework/Character.h"
 
 UChanneldCharMoveComponent::UChanneldCharMoveComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	SetMoveResponseDataContainer(DefaultMoveResponseDataContainer);
+}
+
+bool UChanneldCharMoveComponent::ForcePositionUpdate(float DeltaTime)
+{
+	// Don't update if the server no longer has authority over the character (mainly caused by the handover)
+	if (!CharacterOwner->HasAuthority())
+	{
+		return false;
+	}
+	return Super::ForcePositionUpdate(DeltaTime);
 }
 
 

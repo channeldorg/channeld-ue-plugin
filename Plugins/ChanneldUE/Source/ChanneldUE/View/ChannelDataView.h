@@ -42,10 +42,13 @@ public:
 	virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider);
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
+	virtual void MoveProvider(ChannelId OldChId, ChannelId NewChId, IChannelDataProvider* Provider);
 
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn);
+	virtual FNetworkGUID GetNetId(UObject* Obj) const;
 	virtual FNetworkGUID GetNetId(IChannelDataProvider* Provider) const;
-	void OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, ChannelId ChId);
+	virtual void OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, ChannelId ChId);
+	virtual void OnDestroyedObject(UObject* Obj, const FNetworkGUID NetId);
 	virtual void SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId);
 	virtual ChannelId GetOwningChannelId(const FNetworkGUID NetId) const;
 	virtual ChannelId GetOwningChannelId(const AActor* Actor) const;
@@ -82,6 +85,8 @@ protected:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure/*, meta=(CallableWithoutWorldContext)*/)
 	class UChanneldGameInstanceSubsystem* GetChanneldSubsystem() const;
+
+	UObject* GetObjectFromNetGUID(const FNetworkGUID& NetId);
 
 	virtual void InitServer();
 	virtual void InitClient();

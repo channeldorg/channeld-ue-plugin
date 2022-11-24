@@ -6,8 +6,10 @@
 #include "ChanneldGameInstanceSubsystem.h"
 #include "ChanneldNetConnection.h"
 #include "ChanneldUtils.h"
+#include "EngineUtils.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerStart.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Replication/ChanneldReplicationComponent.h"
 
@@ -18,29 +20,44 @@ USpatialMasterServerView::USpatialMasterServerView(const FObjectInitializer& Obj
 
 void USpatialMasterServerView::InitServer()
 {
+	// Master server won't create pawn for the players.
+	GetWorld()->GetAuthGameMode()->DefaultPawnClass = NULL;
+
+	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+	{
+		auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
+		// A client subs to GLOBAL - choose the start position and sub the client to corresponding spatial channels.
+		if (SubResultMsg->conntype() == channeldpb::CLIENT && SubResultMsg->channeltype() == channeldpb::GLOBAL)
+		{
+			FVector StartPos = FVector::ZeroVector;
+			if (auto Itr = TActorIterator<APlayerStart>(GetWorld()))
+			{
+				StartPos = Itr->GetActorLocation();
+			}
+
+			ConnectionId ClientConnId = SubResultMsg->connid();
+			
+			/*
+		}
+	});
+	
 	// The player joins Master server first, for mapping player start position -> spatial channel id.
 	// In order to spawn the player pawn at the same location in the spatial server as in Master server, some information should be shared between them.
 	// After Master server subscribes the player to corresponding spatial channels, the player leaves Master server and travels to the spatial server.
 	FGameModeEvents::GameModePostLoginEvent.AddLambda([&](AGameModeBase* GameMode, APlayerController* NewPlayer)
 	{
-		//APawn* NewPawn = NewPlayer->GetPawn();
-		//FVector StartPos = NewPawn->GetActorLocation();
+		ConnectionId ClientConnId = CastChecked<UChanneldNetConnection>(NewPlayer->GetNetConnection())->GetConnId();
+		
 		AActor* PlayerStart = GameMode->FindPlayerStart(NewPlayer);
 		check(PlayerStart);
 		FVector StartPos = PlayerStart->GetActorLocation();
-		
-	/*
-	// The spatial server has player pawn created. Master server decides which spatial channels the player subscribes based on the pawn's position.
-	Connection->RegisterMessageHandler(MessageType_SERVER_PLAYER_SPAWNED, new unrealpb::ServerSpawnedPlayerMessage,
-		[&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
-	{
-		const auto PlayerSpawnedMsg = static_cast<const unrealpb::ServerSpawnedPlayerMessage*>(Msg);
-		const FVector StartPos = ChanneldUtils::GetVector(PlayerSpawnedMsg->startpos());
-	*/
+		*/
 		TArray<FVector> Positions;
 		Positions.Add(StartPos);
+
+			
 		// Query the channels from channeld.
-		Connection->QuerySpatialChannel(Positions, [&, NewPlayer](const channeldpb::QuerySpatialChannelResultMessage* QueryResultMsg)
+		Connection->QuerySpatialChannel(Positions, [&, ClientConnId](const channeldpb::QuerySpatialChannelResultMessage* QueryResultMsg)
 		{
 			ChannelId StartChannelId = QueryResultMsg->channelid(0);
 			if (StartChannelId == 0)
@@ -49,29 +66,35 @@ void USpatialMasterServerView::InitServer()
 				return;
 			}
 
+			/*
 			channeldpb::ChannelSubscriptionOptions AuthoritySubOptions;
 			AuthoritySubOptions.set_dataaccess(channeldpb::WRITE_ACCESS);
 			AuthoritySubOptions.set_fanoutintervalms(ClientFanOutIntervalMs);
 			AuthoritySubOptions.set_fanoutdelayms(ClientFanOutDelayMs);
-
+			*/
 			channeldpb::ChannelSubscriptionOptions NonAuthoritySubOptions;
 			NonAuthoritySubOptions.set_dataaccess(channeldpb::READ_ACCESS);
 			NonAuthoritySubOptions.set_fanoutintervalms(ClientFanOutIntervalMs);
 			NonAuthoritySubOptions.set_fanoutdelayms(ClientFanOutDelayMs);
 
-			// uint32 ClientConnId = PlayerSpawnedMsg->clientconnid();
-			uint32 ClientConnId = CastChecked<UChanneldNetConnection>(NewPlayer->GetNetConnection())->GetConnId();
-			
-            // FIXME: should only sub to adjacent spatial channels. QuerySpatialChannelResultMessage should contains that information.
+			// FIXME: should only sub to adjacent spatial channels. QuerySpatialChannelResultMessage should contains that information.
 			for (const auto SpatialChId : AllSpatialChannelIds)
 			{
 				Connection->SubConnectionToChannel(ClientConnId, SpatialChId,
-					SpatialChId == StartChannelId ? &AuthoritySubOptions : &NonAuthoritySubOptions);
+					/*SpatialChId == StartChannelId ? &AuthoritySubOptions :*/ &NonAuthoritySubOptions);
 			}
-		});
 
-		// // No need to spawn or sync any states.
-		// GameMode->Logout((NewPlayer));
+			/*
+			// At this moment, the player Pawn and PlayerState should be removed on both sever and client sides as it will be re-created on the spatial server.
+			// The PlayerController should stay in the Master server for further RPC call.
+			if (APawn* Pawn = NewPlayer->GetPawn())
+			{
+				NewPlayer->UnPossess();
+				GetWorld()->DestroyActor(Pawn);
+			}
+			*/
+		});
+		}
 	});
 
 	Connection->AddMessageHandler(channeldpb::CREATE_SPATIAL_CHANNEL, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
@@ -104,6 +127,7 @@ void USpatialMasterServerView::InitServer()
 
 void USpatialMasterServerView::AddProvider(ChannelId ChId, IChannelDataProvider* Provider)
 {
+	/*
 	// Should only replicates the GameStateBase
 	if (!Provider->GetTargetObject()->IsA(AGameStateBase::StaticClass()))
 	{
@@ -111,6 +135,7 @@ void USpatialMasterServerView::AddProvider(ChannelId ChId, IChannelDataProvider*
 	}
 
 	Super::AddProvider(ChId, Provider);
+	*/
 }
 
 ChannelId USpatialMasterServerView::GetOwningChannelId(const FNetworkGUID NetId) const

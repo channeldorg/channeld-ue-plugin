@@ -178,6 +178,34 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 	(*ExportCount)++;
 }
 
+void UChanneldNetConnection::SendDestroyMessage(UObject* Object, EChannelCloseReason Reason)
+{
+	const FNetworkGUID NetId = Driver->GuidCache->GetNetGUID(Object);
+	if (!NetId.IsValid())
+	{
+		return;
+	}
+
+	UPackageMapClient* PackageMapClient = CastChecked<UPackageMapClient>(PackageMap);
+	int32* ExportCount = PackageMapClient->NetGUIDExportCountMap.Find(NetId);
+	if (ExportCount == nullptr || *ExportCount <= 0)
+	{
+		UE_LOG(LogChanneld, Verbose, TEXT("[Server] Skip sending destroy to conn %d, obj: %s"), GetConnId(), *GetNameSafe(Object));
+		return;
+	}
+
+	unrealpb::DestroyObjectMessage DestroyMsg;
+	DestroyMsg.set_netid(NetId.Value);
+	DestroyMsg.set_reason(static_cast<uint8>(EChannelCloseReason::Destroyed));
+	SendMessage(MessageType_DESTROY, DestroyMsg);
+	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Destroy message to conn: %d, obj: %s, netId: %d"), GetConnId(), *GetNameSafe(Object), NetId.Value);
+
+	if (ExportCount != nullptr)
+	{
+		(*ExportCount)--;
+	}
+}
+
 FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= false*/)
 {
 	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);

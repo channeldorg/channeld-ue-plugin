@@ -16,41 +16,61 @@ USpatialChannelDataView::USpatialChannelDataView(const FObjectInitializer& Objec
 {
 }
 
+UChanneldNetConnection* USpatialChannelDataView::CreateClientConnection(ConnectionId ConnId, ChannelId ChId)
+{
+	ensureMsgf(!ClientInChannels.Contains(ConnId), TEXT("Client conn %d had already been added to this server"), ConnId);
+
+	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())//NetDriver.IsValid())
+	{
+		UChanneldNetConnection* ClientConn = NetDriver->AddChanneldClientConnection(ConnId);
+		// Create the ControlChannel and set OpenAcked = 1
+		UChannel* ControlChannel = ClientConn->CreateChannelByName(NAME_Control, EChannelCreateFlags::OpenedLocally);
+		ControlChannel->OpenAcked = 1;
+		ControlChannel->OpenPacketId.First = 0;
+		ControlChannel->OpenPacketId.Last = 0;
+
+		//~ Begin copy of UWorld::NotifyControlMessage
+		FURL InURL( NULL, *ClientConn->RequestURL, TRAVEL_Absolute );
+		FString ErrorMsg;
+		ClientConn->PlayerController = GetWorld()->SpawnPlayActor( ClientConn, ROLE_AutonomousProxy, InURL, ClientConn->PlayerId, ErrorMsg );
+		ClientConn->SetClientLoginState(EClientLoginState::ReceivedJoin);
+		//~ End copy
+		
+		ClientInChannels.Add(ConnId, ChId);
+
+		return ClientConn;
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Spatial server failed to create client connection %d: NetDriver is not valid."), ConnId);
+	}
+	
+	return nullptr;
+}
+
 void USpatialChannelDataView::InitServer()
 {
 	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
 	{
 		auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
         // A client is subscribed to a spatial channel the server owns (Sub message is sent by Master server)
-		if (SubResultMsg->conntype() == channeldpb::CLIENT && SubResultMsg->channeltype() == channeldpb::SPATIAL && SubResultMsg->suboptions().dataaccess() == channeldpb::WRITE_ACCESS)
+		if (SubResultMsg->channeltype() == channeldpb::SPATIAL /*&& SubResultMsg->suboptions().dataaccess() == channeldpb::WRITE_ACCESS*/)
 		{
-			ensureMsgf(!ClientInChannels.Contains(SubResultMsg->connid()), TEXT("Client conn %d had already been added to this server"), SubResultMsg->connid());
-			
-			ClientInChannels.Add(SubResultMsg->connid(), ChId);
-
-			if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())//NetDriver.IsValid())
+			if (SubResultMsg->conntype() == channeldpb::CLIENT)
 			{
-				UChanneldNetConnection* ClientConn = NetDriver->AddChanneldClientConnection(SubResultMsg->connid());
-				// Create the ControlChannel and set OpenAcked = 1
-				UChannel* ControlChannel = ClientConn->CreateChannelByName(NAME_Control, EChannelCreateFlags::OpenedLocally);
-				ControlChannel->OpenAcked = 1;
-				ControlChannel->OpenPacketId.First = 0;
-				ControlChannel->OpenPacketId.Last = 0;
-
-				//~ Begin copy of UWorld::NotifyControlMessage
-				FURL InURL( NULL, *ClientConn->RequestURL, TRAVEL_Absolute );
-				FString ErrorMsg;
-				ClientConn->PlayerController = GetWorld()->SpawnPlayActor( ClientConn, ROLE_AutonomousProxy, InURL, ClientConn->PlayerId, ErrorMsg );
-				ClientConn->SetClientLoginState(EClientLoginState::ReceivedJoin);
-				//~ End copy
-
-				GetWorld()->GetAuthGameMode()->RestartPlayer(ClientConn->PlayerController);
+				/* Use the "standard" process for client travelling to the spatial server 
+				if (auto ClientConn = CreateClientConnection(SubResultMsg->connid(), ChId))
+				{
+					GetWorld()->GetAuthGameMode()->RestartPlayer(ClientConn->PlayerController);
+				}
+				*/
 			}
 			else
 			{
-				UE_LOG(LogChanneld, Error, TEXT("Spatial server failed to create client connection %d: NetDriver is not valid."), SubResultMsg->connid());
+				GetChanneldSubsystem()->SetLowLevelSendToChannelId(ChId);
 			}
 		}
+		
 	});
 	
 	Connection->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
@@ -63,6 +83,107 @@ void USpatialChannelDataView::InitServer()
 			
 			ClientInChannels.Remove(UnsubResultMsg->connid());
 		}
+	});
+
+	Connection->AddMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+	{
+		auto HandoverMsg = static_cast<const channeldpb::ChannelDataHandoverMessage*>(Msg);
+		UE_LOG(LogChanneld, Verbose, TEXT("ChannelDataHandover from channel %d to %d"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid());
+
+		unrealpb::UnrealObjectRef HandoverObjRef;
+		HandoverMsg->data().UnpackTo(&HandoverObjRef);
+		FNetworkGUID NetId(HandoverObjRef.netguid());
+		
+        // Source spatial server - the channel data is handed over from
+		if (Connection->SubscribedChannels.Contains(HandoverMsg->srcchannelid()))
+		{
+			AActor* HandoverActor = Cast<AActor>(GetObjectFromNetGUID(NetId));
+			
+			// If the handover actor is no longer in the interest area of current server, delete it.
+			if (!Connection->SubscribedChannels.Contains(HandoverMsg->dstchannelid()))
+			{
+				if (HandoverActor)
+				{
+					GetWorld()->DestroyActor(HandoverActor, true);
+                    // TODO: Remove the client connection if the object represents a player
+				}
+
+				NetIdOwningChannels.Remove(NetId);
+			}
+			// If the handover actor is no longer in the authority area of current server,
+			// make sure it no longer sends ChannelDataUpdate message.
+			else if (!Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid()))
+			{
+				if (HandoverActor)
+				{
+					HandoverActor->SetRole(ENetRole::ROLE_SimulatedProxy);
+				}
+			}
+
+			/*
+			// Update the client's data access in the srcChannel to READ
+			// FIXME: should we put this logic in channeld?
+			channeldpb::ChannelSubscriptionOptions NonAuthSubOptions;
+			NonAuthSubOptions.set_dataaccess(channeldpb::READ_ACCESS);
+			Connection->SubConnectionToChannel(HandoverMsg->contextconnid(), HandoverMsg->srcchannelid(), &NonAuthSubOptions);
+			*/
+		}
+		
+		
+        // Destination spatial server - the channel data is handed over to
+		if (Connection->SubscribedChannels.Contains(HandoverMsg->dstchannelid()))
+		{
+            // Spawn the handover object if it doesn't exist before
+			UObject* HandoverObj = ChanneldUtils::GetObjectByRef(&HandoverObjRef, GetWorld(), true);
+			
+			if (!Connection->SubscribedChannels.Contains(HandoverMsg->srcchannelid()))
+			{
+				if (HandoverMsg->contextconnid() > 0)
+				{
+					// Update the channelId for LowLevelSend()
+					ClientInChannels[HandoverMsg->contextconnid()] = HandoverMsg->dstchannelid();
+					UE_LOG(LogChanneld, Log, TEXT("[Server] Updated mapping of connId: %d -> channelId: %d"), HandoverMsg->contextconnid(), HandoverMsg->dstchannelid());
+				}
+				
+				if (HandoverObj)
+				{
+					OnSpawnedObject(HandoverObj, NetId, HandoverMsg->dstchannelid());
+					UE_LOG(LogChanneld, Log, TEXT("[Server] Spawned object from handover: %s, NetId: %d"), *HandoverObj->GetName(), NetId.Value);
+
+					// Create the client connection and player controller for the player
+					if (HandoverObj->IsA<APawn>())
+					{
+						if (auto ClientConn = CreateClientConnection(HandoverMsg->contextconnid(), HandoverMsg->dstchannelid()))
+						{
+							ClientConn->PlayerController->Possess(Cast<APawn>(HandoverObj));
+						}
+					}
+				}
+				else
+				{
+					UE_LOG(LogChanneld, Warning, TEXT("[Server] Failed to spawn object from handover, NetId: %d"), NetId.Value);
+				}
+			}
+
+			// If the handover actor falls into the authority area of current server,
+			// make sure it starts sending ChannelDataUpdate message.
+			if (Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid()))
+			{
+				if (HandoverObj && HandoverObj->IsA<AActor>())
+				{
+					Cast<AActor>(HandoverObj)->SetRole(ENetRole::ROLE_Authority);
+				}
+			}
+
+			/*
+			// Switch the client's data acess in the dstChannel to WRITE
+			// FIXME: should we put this logic in channeld?
+			channeldpb::ChannelSubscriptionOptions AuthSubOptions;
+			AuthSubOptions.set_dataaccess(channeldpb::WRITE_ACCESS);
+			Connection->SubConnectionToChannel(HandoverMsg->contextconnid(), HandoverMsg->dstchannelid(), &AuthSubOptions);
+			*/
+		}
+
 	});
 
 	
@@ -100,7 +221,7 @@ void USpatialChannelDataView::InitServer()
 void USpatialChannelDataView::ClientHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
-	if (SubResultMsg->channeltype() == channeldpb::SPATIAL && SubResultMsg->suboptions().dataaccess() == channeldpb::WRITE_ACCESS)
+	if (SubResultMsg->channeltype() == channeldpb::SPATIAL /*&& SubResultMsg->suboptions().dataaccess() == channeldpb::WRITE_ACCESS*/)
 	{
 		if (bClientInMasterServer)
 		{
@@ -108,11 +229,11 @@ void USpatialChannelDataView::ClientHandleSubToChannel(UChanneldConnection* _, C
 			UE_LOG(LogChanneld, Log, TEXT("==================== Client no longer in Master server ===================="));
 			
 			GetChanneldSubsystem()->SetLowLevelSendToChannelId(ChId);
-			// // Join the spatial server which Master server chooses for the player.
-			// GetChanneldSubsystem()->OpenLevel(FName("127.0.0.1"));
+			
+			// Join the spatial server which Master server chooses for the player.
+			GetChanneldSubsystem()->OpenLevel(FName("127.0.0.1"));
 
 			// Clear the actors (PlayerController, Pawn, PlayerState, etc.) spawned in master server.
-			
 		}
 	}
 }
@@ -120,7 +241,54 @@ void USpatialChannelDataView::ClientHandleSubToChannel(UChanneldConnection* _, C
 void USpatialChannelDataView::InitClient()
 {
 	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, this, &USpatialChannelDataView::ClientHandleSubToChannel);
+	
+	Connection->AddMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+	{
+		auto HandoverMsg = static_cast<const channeldpb::ChannelDataHandoverMessage*>(Msg);
+		UE_LOG(LogChanneld, Verbose, TEXT("ChannelDataHandover from channel %d to %d"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid());
 
+		unrealpb::UnrealObjectRef HandoverObjRef;
+		HandoverMsg->data().UnpackTo(&HandoverObjRef);
+		FNetworkGUID NetId(HandoverObjRef.netguid());
+
+		// Update NetId-ChannelId mapping
+		SetOwningChannelId(NetId, HandoverMsg->dstchannelid());
+
+		UObject* Obj = GetObjectFromNetGUID(NetId);
+		if (Obj)
+		{
+			// Move data provider to the new channel
+			if (Obj->Implements<UChannelDataProvider>())
+			{
+				MoveProvider(HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), Cast<IChannelDataProvider>(Obj));
+			}
+			else if (Obj->IsA<AActor>())
+			{
+				for (auto& Comp : Cast<AActor>(Obj)->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+				{
+					MoveProvider(HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), Cast<IChannelDataProvider>(Comp));
+				}
+			}
+
+			if (Obj->IsA<APawn>())
+			{
+				APawn* Pawn = Cast<APawn>(Obj);
+				if (Pawn->GetController())
+				{
+					// Update the channelId for LowLevelSend() if it's a player's pawn that been handed over.
+					GetChanneldSubsystem()->SetLowLevelSendToChannelId(HandoverMsg->dstchannelid());
+
+					// Also update the NetId-ChannelId mapping of the player controller (otherwise RPCs won't be processed properly)
+					SetOwningChannelId(GetNetId(Pawn->GetController()), HandoverMsg->dstchannelid());
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Unable to find data provider to move from channel %d to %d, NetId: %d"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), NetId.Value);
+		}
+	});
+	
 	channeldpb::ChannelSubscriptionOptions GlobalSubOptions;
 	GlobalSubOptions.set_dataaccess(channeldpb::READ_ACCESS);
 	GlobalSubOptions.set_fanoutintervalms(20);
@@ -150,6 +318,7 @@ bool USpatialChannelDataView::GetSendToChannelId(UChanneldNetConnection* NetConn
 
 void USpatialChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provider)
 {
+	/*
 	bool bIsGameStateBase = Provider->GetTargetObject()->IsA(AGameStateBase::StaticClass());
 	// Don't perform replication (except the GameStateBase) when the client is in Master server
 	if (bClientInMasterServer && !bIsGameStateBase)
@@ -165,6 +334,7 @@ void USpatialChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* 
 		AGameStateBase* GameStateBase = Cast<AGameStateBase>(Provider->GetTargetObject());
 		GameStateBase->SetRole(ENetRole::ROLE_SimulatedProxy);
 	}
+	*/
 	
 	Super::AddProvider(ChId, Provider);
 }
@@ -211,6 +381,9 @@ void USpatialChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvide
 
 void USpatialChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn)
 {
+	Super::OnClientPostLogin(GameMode, NewPlayer, NewPlayerConn);
+
+	/* Copied from Super::OnClientPostLogin - prevent from sending GameStateBase to the new player.
 	// Send the existing player pawns to the new player
 	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 	{
@@ -219,5 +392,15 @@ void USpatialChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayer
 		{
 			NewPlayerConn->SendSpawnMessage(PC->GetPawn(), ENetRole::ROLE_SimulatedProxy);
 		}
+	}
+	*/
+}
+
+void USpatialChannelDataView::OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, ChannelId ChId)
+{
+	Super::OnSpawnedObject(Obj, NetId, ChId);
+
+	if (Obj->IsA<APlayerController>())
+	{
 	}
 }

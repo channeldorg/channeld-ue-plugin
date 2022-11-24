@@ -19,7 +19,8 @@ enum MessageType : uint32 {
 	// Used by ReplicationDriver to send/receive UE's native RPC.
 	MessageType_RPC = 102,
 	MessageType_SPAWN = 103,
-	MessageType_SERVER_PLAYER_SPAWNED = 104,
+	MessageType_DESTROY = 104,
+	MessageType_SERVER_PLAYER_SPAWNED = 201,
 };
 
 /*

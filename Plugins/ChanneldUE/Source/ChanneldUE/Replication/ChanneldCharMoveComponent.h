@@ -18,7 +18,8 @@ class CHANNELDUE_API UChanneldCharMoveComponent : public UCharacterMovementCompo
 	
 public:
 	UChanneldCharMoveComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-
+	virtual bool ForcePositionUpdate(float DeltaTime) override;
+	
 protected:
 	FChanneldCharacterMoveResponseDataContainer DefaultMoveResponseDataContainer;
 };

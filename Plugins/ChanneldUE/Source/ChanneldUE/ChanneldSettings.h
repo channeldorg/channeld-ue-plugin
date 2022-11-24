@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS(config = ChanneldUE)
+UCLASS(BlueprintType, config = ChanneldUE)
 class CHANNELDUE_API UChanneldSettings : public UObject
 {
 	GENERATED_BODY()

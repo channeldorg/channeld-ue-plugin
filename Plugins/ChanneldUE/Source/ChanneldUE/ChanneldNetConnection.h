@@ -38,6 +38,7 @@ public:
 	void SendMessage(uint32 MsgType, const google::protobuf::Message& Msg, ChannelId ChId = InvalidChannelId);
 	bool HasSentSpawn(UObject* Object) const;
 	void SendSpawnMessage(UObject* Object, ENetRole Role = ENetRole::ROLE_None);
+	void SendDestroyMessage(UObject* Object, EChannelCloseReason Reason = EChannelCloseReason::Destroyed);
 	// Flush the handshake packets that are queued before received AuthResultMessage to the server.
 	void FlushUnauthData();
 

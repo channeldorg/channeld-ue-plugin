@@ -255,6 +255,15 @@ void UChannelDataView::RemoveProviderFromAllChannels(IChannelDataProvider* Provi
 	}
 }
 
+void UChannelDataView::MoveProvider(ChannelId OldChId, ChannelId NewChId, IChannelDataProvider* Provider)
+{
+	RemoveProvider(OldChId, Provider, false);
+	if (Connection->SubscribedChannels.Contains(NewChId))
+	{
+		AddProvider(NewChId, Provider);
+	}
+}
+
 void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn)
 {
 
@@ -287,20 +296,26 @@ void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerControl
 	}
 }
 
-FNetworkGUID UChannelDataView::GetNetId(IChannelDataProvider* Provider) const
+FNetworkGUID UChannelDataView::GetNetId(UObject* Obj) const
 {
 	if (const auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
 	{
+		// FIXME: should check the provider's authority instead.
 		if (NetDriver->IsServer())
 		{
-			return NetDriver->GuidCache->GetOrAssignNetGUID(Provider->GetTargetObject());
+			return NetDriver->GuidCache->GetOrAssignNetGUID(Obj);
 		}
 		else
 		{
-			return NetDriver->GuidCache->GetNetGUID(Provider->GetTargetObject());
+			return NetDriver->GuidCache->GetNetGUID(Obj);
 		}
 	}
 	return FNetworkGUID();
+}
+
+FNetworkGUID UChannelDataView::GetNetId(IChannelDataProvider* Provider) const
+{
+	return GetNetId(Provider->GetTargetObject());
 }
 
 void UChannelDataView::OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, ChannelId ChId)
@@ -318,6 +333,23 @@ void UChannelDataView::OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, C
 		for (const auto Provider : Providers)
 		{
 			AddProvider(ChId, Cast<IChannelDataProvider>(Provider));
+		}
+	}
+}
+
+void UChannelDataView::OnDestroyedObject(UObject* Obj, const FNetworkGUID NetId)
+{
+	if (!NetId.IsValid())
+		return;
+
+	NetIdOwningChannels.Remove(NetId);
+
+	if (Obj->IsA<AActor>())
+	{
+		auto Providers = Cast<AActor>(Obj)->GetComponentsByInterface(UChannelDataProvider::StaticClass());
+		for (const auto Provider : Providers)
+		{
+			RemoveProviderFromAllChannels(Cast<IChannelDataProvider>(Provider), false);
 		}
 	}
 }
@@ -481,6 +513,15 @@ UChanneldGameInstanceSubsystem* UChannelDataView::GetChanneldSubsystem() const
 	}
 	return nullptr;
 */
+}
+
+UObject* UChannelDataView::GetObjectFromNetGUID(const FNetworkGUID& NetId)
+{
+	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
+	{
+		return NetDriver->GuidCache->GetObjectFromNetGUID(NetId, true);
+	}
+	return nullptr;
 }
 
 void UChannelDataView::HandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)

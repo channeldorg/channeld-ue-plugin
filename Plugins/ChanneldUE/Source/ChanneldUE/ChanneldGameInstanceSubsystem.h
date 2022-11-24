@@ -8,6 +8,7 @@
 #include "Tickable.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "ChannelDataProvider.h"
+#include "ChanneldSettings.h"
 #include "UObject/WeakInterfacePtr.h"
 #include "View/ChannelDataView.h"
 #include "ChanneldGameInstanceSubsystem.generated.h"
@@ -130,6 +131,9 @@ public:
 	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "AuthCallback"), Category = "Channeld")
 		void ConnectToChanneld(bool& Success, FString& Error, FString Host, int32 Port, const FOnceOnAuth& AuthCallback, bool bInitAsClient = true);
 
+	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "AuthCallback"), Category = "Channeld")
+		void ConnectWithDefaultSettings(bool& Success, FString& Error, const FOnceOnAuth& AuthCallback, bool bInitAsClient = true);
+
 	UFUNCTION(BlueprintCallable, Category = "Channeld")
 		void DisconnectFromChanneld(bool bFlushAll = true);
 
@@ -184,7 +188,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Utility")
 		void OpenLevelByObjPtr(const TSoftObjectPtr<UWorld> Level, bool bAbsolute = true, FString Options = FString(TEXT("")));
 
-	UFUNCTION(BlueprintCallable, Category = "Channeld")
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Utility")
 		void SeamlessTravelToChannel(APlayerController* PlayerController, int32 ChId);
 
 	void RegisterDataProvider(IChannelDataProvider* Provider);

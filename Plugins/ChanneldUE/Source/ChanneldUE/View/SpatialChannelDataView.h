@@ -28,6 +28,7 @@ public:
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved) override;
 
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
+	virtual void OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, ChannelId ChId) override;
 	
 private:
 
@@ -37,4 +38,6 @@ private:
 	bool bClientInMasterServer = false;
 
 	void ClientHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
+
+	UChanneldNetConnection* CreateClientConnection(ConnectionId ConnId, ChannelId ChId);
 };

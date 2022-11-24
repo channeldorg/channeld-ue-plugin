@@ -233,6 +233,25 @@ void UChanneldGameInstanceSubsystem::ConnectToChanneld(bool& Success, FString& E
 	}
 }
 
+void UChanneldGameInstanceSubsystem::ConnectWithDefaultSettings(bool& Success, FString& Error, const FOnceOnAuth& AuthCallback, bool bInitAsClient)
+{
+	FString Host;
+	int Port;
+	auto Settings = GetMutableDefault<UChanneldSettings>();
+	if (bInitAsClient)
+	{
+		Host = Settings->ChanneldIpForClient;
+		Port = Settings->ChanneldPortForClient;
+	}
+	else
+	{
+		Host = Settings->ChanneldIpForServer;
+		Port = Settings->ChanneldPortForServer;
+	}
+
+	ConnectToChanneld(Success, Error, Host, Port, AuthCallback, bInitAsClient);
+}
+
 void UChanneldGameInstanceSubsystem::DisconnectFromChanneld(bool bFlushAll/* = true*/)
 {
 	if (ConnectionInstance)

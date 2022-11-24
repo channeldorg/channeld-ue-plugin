@@ -74,6 +74,11 @@ public:
 		return CastChecked<UChanneldNetConnection>(ServerConnection);
 	}
 
+	UChanneldNetConnection* GetClientConnection(ConnectionId ConnId) const
+	{
+		return ClientConnectionMap.FindRef(ConnId);
+	}
+
 	virtual ChannelId GetSendToChannelId(UChanneldNetConnection* NetConn) const;
 
 protected:
@@ -84,6 +89,7 @@ private:
 	
 	const FName ServerMovePackedFuncName = FName("ServerMovePacked");
 	const FName ClientMoveResponsePackedFuncName = FName("ClientMoveResponsePacked");
+	const FName ServerUpdateCameraFuncName = FName("ServerUpdateCamera");
 
 	// Prevent the engine from GC the connection
 	UPROPERTY()
