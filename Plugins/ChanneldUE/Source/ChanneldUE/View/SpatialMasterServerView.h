@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PlayerStartLocator.h"
 #include "View/ChannelDataView.h"
 #include "SpatialMasterServerView.generated.h"
 
@@ -31,4 +32,9 @@ private:
 
 	// Maintains all the channels Master server has created.
 	TSet<ChannelId> AllSpatialChannelIds;
+
+	// Use by the server to locate the player start position. In order to spawn the player's pawn in the right spatial channel,
+	// the Master server and spatial servers should have the EXACTLY SAME position for a player.
+	UPROPERTY()
+	UPlayerStartLocatorBase* PlayerStartLocator;
 };

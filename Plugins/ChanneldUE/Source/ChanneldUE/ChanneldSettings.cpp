@@ -23,7 +23,7 @@ void UChanneldSettings::PostInitProperties()
 	FString ViewClassName;
 	if (FParse::Value(CmdLine, TEXT("ViewClass="), ViewClassName))
 	{
-		UE_LOG(LogChanneld, Log, TEXT("Parsed View Class Name from CLI: %s"), *ViewClassName);
+		UE_LOG(LogChanneld, Log, TEXT("Parsed View class name from CLI: %s"), *ViewClassName);
 		ChannelDataViewClass = LoadClass<UChannelDataView>(NULL, *ViewClassName);
 	}
 	if (FParse::Value(CmdLine, TEXT("channeldClientIp="), ChanneldIpForClient))
@@ -59,6 +59,11 @@ void UChanneldSettings::PostInitProperties()
 		}
 	}
 
+	if (FParse::Bool(CmdLine, TEXT("UseReceiveThread="), bUseReceiveThread))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed bUseReceiveThread from CLI: %d"), bUseReceiveThread);
+	}
+
 	if (FParse::Bool(CmdLine, TEXT("DisableHandshaking="), bDisableHandshaking))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bDisableHandshaking from CLI: %d"), bDisableHandshaking);
@@ -72,6 +77,13 @@ void UChanneldSettings::PostInitProperties()
 	if (FParse::Bool(CmdLine, TEXT("SkipCustomRPC="), bSkipCustomRPC))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bSkipCustomRPC from CLI: %d"), bSkipCustomRPC);
+	}
+	
+	FString PlayerStartLocatorClassName;
+	if (FParse::Value(CmdLine, TEXT("PlayerStartLocatorClass="), PlayerStartLocatorClassName))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed PlayerStartLocator class name from CLI: %s"), *PlayerStartLocatorClassName);
+		PlayerStartLocatorClass = LoadClass<UChannelDataView>(NULL, *PlayerStartLocatorClassName);
 	}
 }
 

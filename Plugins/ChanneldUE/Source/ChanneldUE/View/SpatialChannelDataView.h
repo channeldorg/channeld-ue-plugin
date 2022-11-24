@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "View/ChannelDataView.h"
 #include "ChanneldNetConnection.h"
+#include "PlayerStartLocator.h"
 #include "SpatialChannelDataView.generated.h"
 
 /**
@@ -36,6 +37,11 @@ private:
 	TMap<uint32, ChannelId> ClientInChannels;
 	
 	bool bClientInMasterServer = false;
+
+	// Use by the server to locate the player start position. In order to spawn the player's pawn in the right spatial channel,
+	// the Master server and spatial servers should have the EXACTLY SAME position for a player.
+	UPROPERTY()
+	UPlayerStartLocatorBase* PlayerStartLocator;
 
 	void ClientHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 

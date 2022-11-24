@@ -10,6 +10,7 @@
 #include "Net/DataChannel.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerStart.h"
 
 USpatialChannelDataView::USpatialChannelDataView(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -50,6 +51,28 @@ UChanneldNetConnection* USpatialChannelDataView::CreateClientConnection(Connecti
 
 void USpatialChannelDataView::InitServer()
 {
+	if (UClass* PlayerStartLocatorClass = GetMutableDefault<UChanneldSettings>()->PlayerStartLocatorClass)
+	{
+		PlayerStartLocator = NewObject<UPlayerStartLocatorBase>(this, PlayerStartLocatorClass);
+	}
+	ensureAlwaysMsgf(PlayerStartLocator, TEXT("[Server] SpatialChannelDataView has not PlayerStartLocatorClass set."));
+
+	// Set the player's start position selected by the locator.
+	FGameModeEvents::GameModePostLoginEvent.AddLambda([&](AGameModeBase* GameMode, APlayerController* NewPlayer)
+	{
+		auto NetConn = Cast<UChanneldNetConnection>(NewPlayer->GetNetConnection());
+		AActor* StartSpot = nullptr;
+		FVector StartPos = PlayerStartLocator->GetPlayerStartPosition(NetConn->GetConnId(), StartSpot);
+		// Spawn a PlayerStart actor if it doesn't exist.
+		if (!StartSpot)
+		{
+			StartSpot = GetWorld()->SpawnActor<APlayerStart>();
+			StartSpot->SetActorLocation(StartPos);
+		}
+		NewPlayer->StartSpot = StartSpot;
+		UE_LOG(LogChanneld, Log, TEXT("%s selected %s for client %d"), *PlayerStartLocator->GetName(), *StartPos.ToCompactString(), NetConn->GetConnId());
+	});
+	
 	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
 	{
 		auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);

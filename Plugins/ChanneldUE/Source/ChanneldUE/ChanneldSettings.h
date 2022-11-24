@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldTypes.h"
+#include "View/PlayerStartLocator.h"
 #include "ChanneldSettings.generated.h"
 
 /**
@@ -40,6 +41,9 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Replication")
 	bool bSkipCustomRPC = true;
 
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial")
+	TSubclassOf<UPlayerStartLocatorBase> PlayerStartLocatorClass;
+	
 private:
 	bool ParseNetAddr(const FString& Addr, FString& OutIp, int32& OutPort);
 };

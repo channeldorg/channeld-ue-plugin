@@ -902,7 +902,7 @@ void UChanneldNetDriver::NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTrav
 		Pair.Value->NotifyActorDestroyed(Actor);
 	}
 
-	// TODO: send to nearby spatial servers (if exists)
+	// TODO: Use BroadcastType.ADJACENT_CHANNELS instead of sending to each connection.
 
 	if (ServerConnection)
 	{

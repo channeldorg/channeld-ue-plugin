@@ -20,6 +20,12 @@ USpatialMasterServerView::USpatialMasterServerView(const FObjectInitializer& Obj
 
 void USpatialMasterServerView::InitServer()
 {
+	if (UClass* PlayerStartLocatorClass = GetMutableDefault<UChanneldSettings>()->PlayerStartLocatorClass)
+	{
+		PlayerStartLocator = NewObject<UPlayerStartLocatorBase>(this, PlayerStartLocatorClass);
+	}
+	ensureAlwaysMsgf(PlayerStartLocator, TEXT("SpatialMasterServerView has not PlayerStartLocatorClass set."));
+	
 	// Master server won't create pawn for the players.
 	GetWorld()->GetAuthGameMode()->DefaultPawnClass = NULL;
 
@@ -29,13 +35,10 @@ void USpatialMasterServerView::InitServer()
 		// A client subs to GLOBAL - choose the start position and sub the client to corresponding spatial channels.
 		if (SubResultMsg->conntype() == channeldpb::CLIENT && SubResultMsg->channeltype() == channeldpb::GLOBAL)
 		{
-			FVector StartPos = FVector::ZeroVector;
-			if (auto Itr = TActorIterator<APlayerStart>(GetWorld()))
-			{
-				StartPos = Itr->GetActorLocation();
-			}
-
 			ConnectionId ClientConnId = SubResultMsg->connid();
+			AActor* StartSpot;
+			FVector StartPos = PlayerStartLocator->GetPlayerStartPosition(ClientConnId, StartSpot);
+			UE_LOG(LogChanneld, Log, TEXT("%s selected %s for client %d"), *PlayerStartLocator->GetName(), *StartPos.ToCompactString(), ClientConnId);
 			
 			/*
 		}
