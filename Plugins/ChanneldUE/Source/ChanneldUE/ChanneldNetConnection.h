@@ -37,6 +37,7 @@ public:
 	// Send message between UE client and sever via channeld. MsgType should be in user space (>= 100).
 	void SendMessage(uint32 MsgType, const google::protobuf::Message& Msg, ChannelId ChId = InvalidChannelId);
 	bool HasSentSpawn(UObject* Object) const;
+	void SetSentSpawned(const FNetworkGUID NetId);
 	void SendSpawnMessage(UObject* Object, ENetRole Role = ENetRole::ROLE_None);
 	void SendDestroyMessage(UObject* Object, EChannelCloseReason Reason = EChannelCloseReason::Destroyed);
 	// Flush the handshake packets that are queued before received AuthResultMessage to the server.
@@ -55,4 +56,6 @@ private:
 	// Queue the data from LowLevelSend() when the connection and authentication to channeld is not finished yet,
 	// and send them after the authentication is done.
 	TQueue<TTuple<std::string*, FOutPacketTraits*>> LowLevelSendDataBeforeAuth;
+
+	TArray<TTuple<TWeakObjectPtr<UObject>, ENetRole>> QueuedSpawnMessageTargets;
 };

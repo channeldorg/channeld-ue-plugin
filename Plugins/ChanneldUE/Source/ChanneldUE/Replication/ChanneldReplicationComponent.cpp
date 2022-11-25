@@ -91,6 +91,8 @@ void UChanneldReplicationComponent::InitOnce()
 		}
 	}
 
+	/* Server and client have different processes of adding the DataProvider.
+	*/
 	// Make sure the DataProvider is always registered
 	GameInstance->GetSubsystem<UChanneldGameInstanceSubsystem>()->RegisterDataProvider(this);
 	

@@ -40,6 +40,7 @@ public:
 
 	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider);
 	virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider);
+	void AddActorProvider(ChannelId ChId, AActor* Actor);
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void MoveProvider(ChannelId OldChId, ChannelId NewChId, IChannelDataProvider* Provider);
@@ -47,7 +48,8 @@ public:
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn);
 	virtual FNetworkGUID GetNetId(UObject* Obj) const;
 	virtual FNetworkGUID GetNetId(IChannelDataProvider* Provider) const;
-	virtual void OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, ChannelId ChId);
+	// If returns false, the NetDriver will not send the spawn message to the clients.
+	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId);
 	virtual void OnDestroyedObject(UObject* Obj, const FNetworkGUID NetId);
 	virtual void SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId);
 	virtual ChannelId GetOwningChannelId(const FNetworkGUID NetId) const;

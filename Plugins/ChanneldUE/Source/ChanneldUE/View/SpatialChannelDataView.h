@@ -29,7 +29,7 @@ public:
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved) override;
 
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
-	virtual void OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, ChannelId ChId) override;
+	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId) override;
 	
 private:
 
@@ -43,7 +43,11 @@ private:
 	UPROPERTY()
 	UPlayerStartLocatorBase* PlayerStartLocator;
 
+	void ServerHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
+	void ClientHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 
 	UChanneldNetConnection* CreateClientConnection(ConnectionId ConnId, ChannelId ChId);
+
+	void SendSpawnToAdjacentChannels(UObject* Obj, ChannelId SpatialChId);
 };

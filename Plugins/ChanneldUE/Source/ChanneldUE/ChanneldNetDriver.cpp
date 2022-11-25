@@ -125,6 +125,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 		{
 			// Set up the mapping before actually spawn it, so AddProvider() can find the mapping.
 			ChannelDataView->SetOwningChannelId(NetId, SpawnMsg->channelid());
+			
 			// Also add the mapping of all context NetGUIDs
 			for (auto& ContextObj : SpawnMsg->obj().context())
 			{
@@ -577,7 +578,7 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	{
 		return;
 	}
-	
+
 	/* Moved to UChanneldGameInstanceSubsystem::OnActorSpawned
 	UChanneldGameInstanceSubsystem* ChanneldSubsystem = GetSubsystem();
 	UChannelDataView* View = ChanneldSubsystem->GetChannelDataView();
@@ -595,6 +596,18 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		});
 	}
 	*/
+	if (ChannelDataView.IsValid())
+	{
+		FNetworkGUID NetId = GuidCache->GetNetGUID(Actor);
+		if (!ChannelDataView->OnServerSpawnedObject(Actor, NetId))
+		{
+			return;
+		}
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("ChannelDataView is not initialized yet. If the actor '%s' is a DataProvider, it will not be registered."), *Actor->GetName());
+	}
 
 	if (!Actor->GetIsReplicated())
 	{
@@ -645,6 +658,14 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		SentSpawnedNetGUIDs.Add(NetId);
 	}
 	*/
+}
+
+void UChanneldNetDriver::SetAllSentSpawn(const FNetworkGUID NetId)
+{
+	for (auto& Pair : ClientConnectionMap)
+	{
+		Pair.Value->SetSentSpawned(NetId);
+	}
 }
 
 void UChanneldNetDriver::NotifyActorChannelOpen(UActorChannel* Channel, AActor* Actor)
@@ -758,12 +779,17 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 				{
 					if (Actor->HasAuthority() && !NetConn->HasSentSpawn(Actor))
 					{
+						/* On server, the actor should be spawned to client via OnServerSpawnedObject.
 						// If the target object hasn't been spawned in the remote end yet, send the Spawn message before the RPC message.
 						NetConn->SendSpawnMessage(Actor, Actor->GetRemoteRole());
+						*/
+
 					}
 				
 					unrealpb::RemoteFunctionMessage RpcMsg;
-					RpcMsg.mutable_targetobj()->MergeFrom(ChanneldUtils::GetRefOfObject(Actor));
+					// Don't send the whole UnrealObjecRef to the other side - the object spawning process goes its own way!
+					// RpcMsg.mutable_targetobj()->MergeFrom(ChanneldUtils::GetRefOfObject(Actor));
+					RpcMsg.mutable_targetobj()->set_netguid(GuidCache->GetNetGUID(Actor).Value);
 					RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
 					if (ParamsMsg)
 					{

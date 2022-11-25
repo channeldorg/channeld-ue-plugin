@@ -186,6 +186,18 @@ void UChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* Provide
 	}
 }
 
+void UChannelDataView::AddActorProvider(ChannelId ChId, AActor* Actor)
+{
+	if (Actor->Implements<UChannelDataProvider>())
+	{
+		AddProvider(ChId, Cast<IChannelDataProvider>(Actor));
+	}
+	for (auto Comp : Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+	{
+		AddProvider(ChId, Cast<IChannelDataProvider>(Comp));
+	}
+}
+
 void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved)
 {
 	// ensureMsgf(Provider->GetChannelType() != channeldpb::UNKNOWN, TEXT("Invalid channel type of data provider: %s"), *IChannelDataProvider::GetName(Provider));
@@ -318,23 +330,22 @@ FNetworkGUID UChannelDataView::GetNetId(IChannelDataProvider* Provider) const
 	return GetNetId(Provider->GetTargetObject());
 }
 
-void UChannelDataView::OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, ChannelId ChId)
+bool UChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId)
 {
 	if (!NetId.IsValid())
-		return;
+		return false;
 
+	ChannelId ChId = GetChanneldSubsystem()->LowLevelSendToChannelId.Get();
 	SetOwningChannelId(NetId, ChId);
 	// NetIdOwningChannels.Add(NetId, ChId);
 	// UE_LOG(LogChanneld, Log, TEXT("Set up mapping of netId: %d -> channelId: %d, spawned: %s"), NetId.Value, ChId, *GetNameSafe(Obj));
 
 	if (Obj->IsA<AActor>())
 	{
-		auto Providers = Cast<AActor>(Obj)->GetComponentsByInterface(UChannelDataProvider::StaticClass());
-		for (const auto Provider : Providers)
-		{
-			AddProvider(ChId, Cast<IChannelDataProvider>(Provider));
-		}
+		AddActorProvider(ChId, Cast<AActor>(Obj));
 	}
+
+	return true;
 }
 
 void UChannelDataView::OnDestroyedObject(UObject* Obj, const FNetworkGUID NetId)
@@ -346,6 +357,10 @@ void UChannelDataView::OnDestroyedObject(UObject* Obj, const FNetworkGUID NetId)
 
 	if (Obj->IsA<AActor>())
 	{
+		if (Obj->Implements<UChannelDataProvider>())
+		{
+			RemoveProviderFromAllChannels(Cast<IChannelDataProvider>(Obj), false);
+		}
 		auto Providers = Cast<AActor>(Obj)->GetComponentsByInterface(UChannelDataProvider::StaticClass());
 		for (const auto Provider : Providers)
 		{

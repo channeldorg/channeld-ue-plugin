@@ -146,6 +146,15 @@ void UChanneldNetConnection::SendMessage(uint32 MsgType, const google::protobuf:
 
 bool UChanneldNetConnection::HasSentSpawn(UObject* Object) const
 {
+	// Already in the queue, don't send again
+	for (auto& Tuple : QueuedSpawnMessageTargets)
+	{
+		if (Tuple.Get<0>().Get() == Object)
+		{
+			return true;
+		}
+	}
+	
 	const FNetworkGUID NetId = Driver->GuidCache->GetOrAssignNetGUID(Object);
 	UPackageMapClient* PackageMapClient = CastChecked<UPackageMapClient>(PackageMap);
 	int32* ExportCount = PackageMapClient->NetGUIDExportCountMap.Find(NetId);
@@ -163,18 +172,35 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 		return;
 	}
 
+	// Check if the object has the owning ChannelId
+	ChannelId OwningChannelId = InvalidChannelId;
+	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
+	if (NetDriver->ChannelDataView.IsValid())
+	{
+		OwningChannelId = NetDriver->ChannelDataView->GetOwningChannelId(NetId);
+	}
+	if (OwningChannelId == InvalidChannelId)
+	{
+		QueuedSpawnMessageTargets.Add(MakeTuple(Object, Role));
+		UE_LOG(LogChanneld, Warning, TEXT("[Server] Unable to send Spawn message as there's no mapping of NetId %d -> ChannelId. Pushed to the next tick."), NetId.Value);
+		return;
+	}
+
 	unrealpb::SpawnObjectMessage SpawnMsg;
 	SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Object, this));
-	SpawnMsg.set_channelid( CastChecked<UChanneldNetDriver>(Driver)->GetSendToChannelId(this));
+	SpawnMsg.set_channelid(OwningChannelId);//CastChecked<UChanneldNetDriver>(Driver)->GetSendToChannelId(this));
 	if (Role > ENetRole::ROLE_None)
 		SpawnMsg.set_localrole(Role);
 	SendMessage(MessageType_SPAWN, SpawnMsg);
 	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %d, owning channel: %d, local role: %d"), GetConnId(), *GetNameSafe(Object), SpawnMsg.obj().netguid(), SpawnMsg.channelid(), SpawnMsg.localrole());
 
-	if (ExportCount == nullptr)
-	{
-		ExportCount = &PackageMapClient->NetGUIDExportCountMap.Add(NetId, 0);
-	}
+	SetSentSpawned(NetId);
+}
+
+void UChanneldNetConnection::SetSentSpawned(const FNetworkGUID NetId)
+{
+	UPackageMapClient* PackageMapClient = CastChecked<UPackageMapClient>(PackageMap);
+	int32* ExportCount = &PackageMapClient->NetGUIDExportCountMap.FindOrAdd(NetId, 0);
 	(*ExportCount)++;
 }
 
@@ -237,6 +263,17 @@ FString UChanneldNetConnection::LowLevelDescribe()
 void UChanneldNetConnection::Tick(float DeltaSeconds)
 {
 	UNetConnection::Tick(DeltaSeconds);
+
+	int Num = QueuedSpawnMessageTargets.Num();
+	for (int i = 0; i < Num; i++)
+	{
+		auto Params = QueuedSpawnMessageTargets[i];
+		if (Params.Get<0>().IsValid())
+		{
+			SendSpawnMessage(Params.Get<0>().Get(), Params.Get<1>());
+		}
+	}
+	QueuedSpawnMessageTargets.RemoveAt(0, Num);
 }
 
 void UChanneldNetConnection::FlushUnauthData()
