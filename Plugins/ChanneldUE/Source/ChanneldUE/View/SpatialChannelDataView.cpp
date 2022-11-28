@@ -491,12 +491,19 @@ void USpatialChannelDataView::SendSpawnToAdjacentChannels(UObject* Obj, ChannelI
 	unrealpb::SpawnObjectMessage SpawnMsg;
 	SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Obj));
 	if (Obj->IsA<AActor>())
-		SpawnMsg.set_localrole(Cast<AActor>(Obj)->GetRemoteRole());
+	{
+		AActor* Actor = Cast<AActor>(Obj);
+		SpawnMsg.set_localrole(Actor->GetRemoteRole());
+		if (auto NetConn = Cast<UChanneldNetConnection>(Actor->GetNetConnection()))
+		{
+			SpawnMsg.set_owningconnid(NetConn->GetConnId());
+		}
+	}
 	SpawnMsg.set_channelid(SpatialChId);
 	channeldpb::ServerForwardMessage ServerForwardMessage;
 	ServerForwardMessage.set_payload(SpawnMsg.SerializeAsString());
 	Connection->Send(SpatialChId, MessageType_SPAWN, ServerForwardMessage, static_cast<channeldpb::BroadcastType>(channeldpb::ADJACENT_CHANNELS | channeldpb::ALL_BUT_SENDER));
-	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Broadcasted Spawn message to spatial channels(%d), obj: %s"), SpatialChId, *Obj->GetName());
+	UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message to spatial channels(%d), obj: %s, netId: %d"), SpatialChId, *Obj->GetName(), SpawnMsg.mutable_obj()->netguid());
 
 	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
 	{

@@ -316,6 +316,14 @@ TSharedPtr<void> FChanneldCharacterReplicator::DeserializeFunctionParams(UFuncti
 	}
 	else if (Func->GetFName() == FName("ClientMoveResponsePacked"))
 	{
+		// The character doesn't have the owning NetConnection yet. Postpone the execution of the RPC.
+		UNetConnection* NetConn = Character->GetNetConnection();
+		if (!NetConn)
+		{
+			bDelayRPC = true;
+			return nullptr;
+		}
+		
 		unrealpb::Character_ClientMoveResponsePacked_Params Msg;
 		if (!Msg.ParseFromString(ParamsPayload))
 		{
@@ -327,7 +335,7 @@ TSharedPtr<void> FChanneldCharacterReplicator::DeserializeFunctionParams(UFuncti
 		bool bIDC;
 		FArchive EmptyArchive;
 		// Hack the package map into to the PackedBits for further deserialization. IDC = I don't care.
-		if (Params->PackedBits.NetSerialize(EmptyArchive, Character->GetNetConnection()->PackageMap, bIDC))
+		if (Params->PackedBits.NetSerialize(EmptyArchive, NetConn->PackageMap, bIDC))
 		{
 			// ----------------------------------------------------
 			// UCharacterMovementComponent::ServerSendMoveResponse

@@ -66,6 +66,11 @@ void FChanneldPlayerControllerReplicator::OnStateChanged(const google::protobuf:
 		return;
 	}
 
+	if (PC->HasAuthority())
+	{
+		return;
+	}
+	
 	//auto CharacterState = static_cast<const unrealpb::PlayerControllerState*>(NewState);
 
 	FullState->MergeFrom(*NewState);

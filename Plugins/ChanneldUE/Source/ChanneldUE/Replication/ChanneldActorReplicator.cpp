@@ -211,7 +211,8 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 		return;
 	}
 
-	if (Actor->GetLocalRole() > ENetRole::ROLE_SimulatedProxy)
+	// AutonomousProxy still applies the update, as it may downgrade to SimulatedProxy
+	if (Actor->GetLocalRole() > ENetRole::ROLE_AutonomousProxy)
 	{
 		return;
 	}
@@ -250,27 +251,11 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 			Actor->SetRole((ENetRole)NewState->remoterole());
 		}
 	}
-	/*
-	*/
+
+	// Update the NetRole based on the OwningConnId (the actor's owning NetConnection's ConnId)
 	if (NewState->has_owningconnid())
 	{
-		UChanneldConnection* ConnToChanneld = GEngine->GetEngineSubsystem<UChanneldConnection>();
-		if (ConnToChanneld->GetConnId() == NewState->owningconnid())
-		{
-			Actor->SetRole(ROLE_AutonomousProxy);
-		}
-		else if (Actor->GetLocalRole() == ROLE_AutonomousProxy)
-		{
-			Actor->SetRole(ROLE_SimulatedProxy);
-		}
-		const static UEnum* Enum = StaticEnum<ENetRole>();
-		UE_LOG(LogChanneld, Log, TEXT("[Client] Updated actor %s's role from %s to %s, local/remote owning connId: %d/%d"),
-			*Actor->GetName(),
-			*Enum->GetNameStringByValue(Actor->GetLocalRole()),
-			*Enum->GetNameStringByValue(Actor->GetLocalRole()),
-			ConnToChanneld->GetConnId(),
-			NewState->owningconnid()
-		);
+		ChanneldUtils::SetActorRoleByOwningConnId(Actor.Get(), NewState->owningconnid());
 	}
 
 	if (NewState->has_owner())

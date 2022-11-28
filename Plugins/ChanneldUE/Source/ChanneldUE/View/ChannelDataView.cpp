@@ -297,13 +297,17 @@ void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerControl
 
 	/* OnServerSpawnedActor() sends the spawning of the new player's pawn to other clients */
 
-	// Send the existing player pawns to the new player
+	// Send the existing player controllers and pawns to the new player
 	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 	{
 		APlayerController* PC = Iterator->Get();
-		if (PC && PC != NewPlayer && PC->GetPawn())
+		if (PC && PC != NewPlayer)
 		{
-			NewPlayerConn->SendSpawnMessage(PC->GetPawn(), ENetRole::ROLE_SimulatedProxy);
+			NewPlayerConn->SendSpawnMessage(PC, ROLE_SimulatedProxy);
+			if (PC->GetPawn())
+			{
+				NewPlayerConn->SendSpawnMessage(PC->GetPawn(), ENetRole::ROLE_SimulatedProxy);
+			}
 		}
 	}
 }
@@ -581,7 +585,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 		return;
 	}
 
-	UE_LOG(LogChanneld, Verbose, TEXT("Received %s channel update: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
+	UE_LOG(LogChanneld, Verbose, TEXT("Received %s channel %d update: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), ChId, UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
 
 	TSet<FProviderInternal>* Providers = ChannelDataProviders.Find(ChId);
 	if (Providers == nullptr || Providers->Num() == 0)

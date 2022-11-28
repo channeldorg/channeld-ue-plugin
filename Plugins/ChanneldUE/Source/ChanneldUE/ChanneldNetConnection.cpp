@@ -161,7 +161,7 @@ bool UChanneldNetConnection::HasSentSpawn(UObject* Object) const
 	return (ExportCount != nullptr && *ExportCount > 0);
 }
 
-void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*= ENetRole::None*/)
+void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*= ENetRole::None*/, uint32 OwningConnId /*= 0*/)
 {
 	const FNetworkGUID NetId = Driver->GuidCache->GetOrAssignNetGUID(Object);
 	UPackageMapClient* PackageMapClient = CastChecked<UPackageMapClient>(PackageMap);
@@ -190,7 +190,13 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 	SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Object, this));
 	SpawnMsg.set_channelid(OwningChannelId);//CastChecked<UChanneldNetDriver>(Driver)->GetSendToChannelId(this));
 	if (Role > ENetRole::ROLE_None)
+	{
 		SpawnMsg.set_localrole(Role);
+	}
+	if (OwningChannelId > 0)
+	{
+		SpawnMsg.set_owningconnid(OwningConnId);
+	}
 	SendMessage(MessageType_SPAWN, SpawnMsg);
 	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %d, owning channel: %d, local role: %d"), GetConnId(), *GetNameSafe(Object), SpawnMsg.obj().netguid(), SpawnMsg.channelid(), SpawnMsg.localrole());
 

@@ -350,4 +350,27 @@ public:
 	{
 		return UniqueNetId & ((1 << ConnectionIdBitOffset) - 1);
 	}
+
+	// Set the actor's NetRole on the client based on the NetConnection that owns the actor.
+	static void SetActorRoleByOwningConnId(AActor* Actor, ConnectionId OwningConnId)
+	{
+		UChanneldConnection* ConnToChanneld = GEngine->GetEngineSubsystem<UChanneldConnection>();
+		ENetRole OldRole = Actor->GetLocalRole();
+		if (ConnToChanneld->GetConnId() == OwningConnId)
+		{
+			Actor->SetRole(ROLE_AutonomousProxy);
+		}
+		else if (Actor->GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			Actor->SetRole(ROLE_SimulatedProxy);
+		}
+		const static UEnum* Enum = StaticEnum<ENetRole>();
+		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Updated actor %s's role from %s to %s, local/remote owning connId: %d/%d"),
+			*Actor->GetName(),
+			*Enum->GetNameStringByValue(OldRole),
+			*Enum->GetNameStringByValue(Actor->GetLocalRole()),
+			ConnToChanneld->GetConnId(),
+			OwningConnId
+		);
+	}
 };

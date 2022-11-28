@@ -50,6 +50,89 @@ UChanneldNetConnection* UChanneldNetDriver::AddChanneldClientConnection(Connecti
 	return ClientConnection;
 }
 
+void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg)
+{
+	FNetworkGUID NetId = FNetworkGUID(SpawnMsg->obj().netguid());
+		
+	// If the object with the same NetId exists, destroy it before spawning a new one.
+	UObject* OldObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld(), false);
+	if (OldObj)
+	{
+		UE_LOG(LogChanneld, Log, TEXT("[Client] Found spawned object %s of duplicated NetId: %d, will be destroyed."), *GetNameSafe(OldObj), SpawnMsg->obj().netguid());
+			
+		GuidCache->ObjectLookup.Remove(NetId);
+		GuidCache->NetGUIDLookup.Remove(OldObj);
+			
+		if (AActor* OldActor = Cast<AActor>(OldObj))
+		{
+			GetWorld()->DestroyActor(OldActor);
+		}
+	}
+
+	if (ChannelDataView.IsValid() && SpawnMsg->has_channelid())
+	{
+		// Set up the mapping before actually spawn it, so AddProvider() can find the mapping.
+		ChannelDataView->SetOwningChannelId(NetId, SpawnMsg->channelid());
+			
+		// Also add the mapping of all context NetGUIDs
+		for (auto& ContextObj : SpawnMsg->obj().context())
+		{
+			ChannelDataView->SetOwningChannelId(ContextObj.netguid(), SpawnMsg->channelid());
+		}
+	}
+		
+	UObject* NewObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld());
+	if (NewObj)
+	{
+		// if (SpawnMsg->has_channelid())
+		// {
+		// 	ChannelDataView->OnSpawnedObject(SpawnedObj, FNetworkGUID(SpawnMsg->obj().netguid()), SpawnMsg->channelid());
+		// }
+
+		ENetRole LocalRole = static_cast<ENetRole>(SpawnMsg->localrole());
+		if (AActor* NewActor = Cast<AActor>(NewObj))
+		{
+				/*
+			// The first PlayerController on client side is AutonomousProxy; others are SimulatedProxy.
+			if (NewActor->IsA<APlayerController>())
+			{
+				LocalRole = NewActor == GetWorld()->GetFirstPlayerController() ? ENetRole::ROLE_AutonomousProxy : ENetRole::ROLE_SimulatedProxy;
+				// TEST: don't spawn other PC!
+				if (LocalRole == ENetRole::ROLE_SimulatedProxy)
+				{
+					GetWorld()->DestroyActor(NewActor);
+					return;
+				}
+				NewActor->SetRole(LocalRole);
+			}
+			else*/ if (SpawnMsg->has_localrole())
+			{
+				NewActor->SetRole(LocalRole);
+			}
+
+			if (SpawnMsg->has_owningconnid())
+			{
+				ChanneldUtils::SetActorRoleByOwningConnId(NewActor, SpawnMsg->owningconnid());
+				LocalRole = NewActor->GetLocalRole();
+			}
+
+			// UChanneldNetDriver::NotifyActorChannelOpen doesn't always get called in ChanneldUtils::GetObjectByRef.
+			NotifyActorChannelOpen(nullptr, NewActor);
+		}
+
+		if (ChannelDataView.IsValid())
+		{
+			ChannelDataView->OnClientSpawnedObject(NewObj, SpawnMsg->channelid());
+		}
+
+		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %d, owning channel: %d, local role: %d"), *NewObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), LocalRole);
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("[Client] Failed to spawn object from msg: %s"), UTF8_TO_TCHAR(SpawnMsg->DebugString().c_str()));
+	}
+}
+
 void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload)
 {
 	if (MsgType == MessageType_LOW_LEVEL)
@@ -104,65 +187,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 			return;
 		}
 
-		FNetworkGUID NetId = FNetworkGUID(SpawnMsg->obj().netguid());
-		
-		// If the object with the same NetId exists, destroy it before spawning a new one.
-		UObject* OldObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld(), false);
-		if (OldObj)
-		{
-			UE_LOG(LogChanneld, Log, TEXT("[Client] Found spawned object %s of duplicated NetId: %d, will be destroyed."), *GetNameSafe(OldObj), SpawnMsg->obj().netguid());
-			
-			GuidCache->ObjectLookup.Remove(NetId);
-			GuidCache->NetGUIDLookup.Remove(OldObj);
-			
-			if (AActor* OldActor = Cast<AActor>(OldObj))
-			{
-				GetWorld()->DestroyActor(OldActor);
-			}
-		}
-
-		if (ChannelDataView.IsValid() && SpawnMsg->has_channelid())
-		{
-			// Set up the mapping before actually spawn it, so AddProvider() can find the mapping.
-			ChannelDataView->SetOwningChannelId(NetId, SpawnMsg->channelid());
-			
-			// Also add the mapping of all context NetGUIDs
-			for (auto& ContextObj : SpawnMsg->obj().context())
-			{
-				ChannelDataView->SetOwningChannelId(ContextObj.netguid(), SpawnMsg->channelid());
-			}
-		}
-		
-		UObject* NewObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld());
-		if (NewObj)
-		{
-			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %d, owning channel: %d, local role: %d"), *NewObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), SpawnMsg->localrole());
-
-			// if (SpawnMsg->has_channelid())
-			// {
-			// 	ChannelDataView->OnSpawnedObject(SpawnedObj, FNetworkGUID(SpawnMsg->obj().netguid()), SpawnMsg->channelid());
-			// }
-
-			if (AActor* NewActor = Cast<AActor>(NewObj))
-			{
-				// PlayerController on client side is always AutonomousProxy.
-				if (NewActor->IsA<APlayerController>() && NewActor == GetWorld()->GetFirstPlayerController())
-				{
-					NewActor->SetRole(ENetRole::ROLE_AutonomousProxy);
-				}
-				else if (SpawnMsg->has_localrole())
-				{
-					NewActor->SetRole(static_cast<ENetRole>(SpawnMsg->localrole()));
-				}
-
-				// UChanneldNetDriver::NotifyActorChannelOpen doesn't always get called in ChanneldUtils::GetObjectByRef.
-				NotifyActorChannelOpen(nullptr, NewActor);
-			}
-		}
-		else
-		{
-			UE_LOG(LogChanneld, Warning, TEXT("[Client] Failed to spawn object from msg: %s"), UTF8_TO_TCHAR(SpawnMsg->DebugString().c_str()));
-		}
+		OnClientSpawnObject(SpawnMsg);
 	}
 	else if (MsgType == MessageType_DESTROY)
 	{
@@ -644,7 +669,12 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	{
 		if (IsValid(Pair.Value))
 		{
-			Pair.Value->SendSpawnMessage(Actor, Actor->GetRemoteRole());
+			uint32 OwningConnId = 0;
+			if (auto NetConn = Cast<UChanneldNetConnection>(Actor->GetNetConnection()))
+			{
+				OwningConnId = NetConn->GetConnId();
+			}
+			Pair.Value->SendSpawnMessage(Actor, Actor->GetRemoteRole(), OwningConnId);
 		}
 	}
 
@@ -722,21 +752,6 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 		for (int32 i = 0; i < ClientConnections.Num(); i++)
 		{
 			UChanneldNetConnection* Connection = CastChecked<UChanneldNetConnection>(ClientConnections[i]);
-
-			/* Try to reproduce native UE's way of spawning new objects but didn't work
-			 * because there are a lot of unrelated objects in the ObjectLookup that failed to be spawned in the client.
-			auto PackageMap = CastChecked<UPackageMapClient>(Connection->PackageMap);
-			for (auto& Pair : GuidCache->ObjectLookup)
-			{
-				if (!PackageMap->NetGUIDExportCountMap.Contains(Pair.Key))
-				{
-					unrealpb::SpawnObjectMessage SpawnMsg;
-					SpawnMsg.mutable_obj()->MergeFrom(ChanneldUtils::GetRefOfObject(Pair.Value.Object.Get(), Connection));
-					Connection->SendMessage(MessageType_SPAWN, SpawnMsg);
-				}
-			}
-			*/
-
 			if (Connection->PlayerController && Connection->PlayerController->GetViewTarget())
 			{
 				// Trigger ClientMoveResponse RPC

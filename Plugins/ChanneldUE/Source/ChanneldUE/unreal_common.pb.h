@@ -105,6 +105,9 @@ CHANNELDUE_API extern FVectorDefaultTypeInternal _FVector_default_instance_;
 class GameStateBase;
 struct GameStateBaseDefaultTypeInternal;
 CHANNELDUE_API extern GameStateBaseDefaultTypeInternal _GameStateBase_default_instance_;
+class PawnState;
+struct PawnStateDefaultTypeInternal;
+CHANNELDUE_API extern PawnStateDefaultTypeInternal _PawnState_default_instance_;
 class PlayerControllerState;
 struct PlayerControllerStateDefaultTypeInternal;
 CHANNELDUE_API extern PlayerControllerStateDefaultTypeInternal _PlayerControllerState_default_instance_;
@@ -187,6 +190,7 @@ template<> CHANNELDUE_API ::unrealpb::FRootMotionSourceGroup* Arena::CreateMaybe
 template<> CHANNELDUE_API ::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings* Arena::CreateMaybeMessage<::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::FVector* Arena::CreateMaybeMessage<::unrealpb::FVector>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::GameStateBase* Arena::CreateMaybeMessage<::unrealpb::GameStateBase>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::PawnState* Arena::CreateMaybeMessage<::unrealpb::PawnState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::PlayerControllerState* Arena::CreateMaybeMessage<::unrealpb::PlayerControllerState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::PlayerController_ClientCapBandwidth_Params* Arena::CreateMaybeMessage<::unrealpb::PlayerController_ClientCapBandwidth_Params>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::PlayerController_ClientEnableNetworkVoice_Params* Arena::CreateMaybeMessage<::unrealpb::PlayerController_ClientEnableNetworkVoice_Params>(Arena*);
@@ -1271,6 +1275,7 @@ class CHANNELDUE_API SpawnObjectMessage final :
     kObjFieldNumber = 1,
     kChannelIdFieldNumber = 2,
     kLocalRoleFieldNumber = 3,
+    kOwningConnIdFieldNumber = 4,
   };
   // .unrealpb.UnrealObjectRef obj = 1;
   bool has_obj() const;
@@ -1316,6 +1321,19 @@ class CHANNELDUE_API SpawnObjectMessage final :
   void _internal_set_localrole(uint32_t value);
   public:
 
+  // optional uint32 owningConnId = 4;
+  bool has_owningconnid() const;
+  private:
+  bool _internal_has_owningconnid() const;
+  public:
+  void clear_owningconnid();
+  uint32_t owningconnid() const;
+  void set_owningconnid(uint32_t value);
+  private:
+  uint32_t _internal_owningconnid() const;
+  void _internal_set_owningconnid(uint32_t value);
+  public:
+
   // @@protoc_insertion_point(class_scope:unrealpb.SpawnObjectMessage)
  private:
   class _Internal;
@@ -1329,6 +1347,7 @@ class CHANNELDUE_API SpawnObjectMessage final :
     ::unrealpb::UnrealObjectRef* obj_;
     uint32_t channelid_;
     uint32_t localrole_;
+    uint32_t owningconnid_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -8224,6 +8243,199 @@ class CHANNELDUE_API GameStateBase final :
 };
 // -------------------------------------------------------------------
 
+class CHANNELDUE_API PawnState final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.PawnState) */ {
+ public:
+  inline PawnState() : PawnState(nullptr) {}
+  ~PawnState() override;
+  explicit PROTOBUF_CONSTEXPR PawnState(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  PawnState(const PawnState& from);
+  PawnState(PawnState&& from) noexcept
+    : PawnState() {
+    *this = ::std::move(from);
+  }
+
+  inline PawnState& operator=(const PawnState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline PawnState& operator=(PawnState&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const PawnState& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const PawnState* internal_default_instance() {
+    return reinterpret_cast<const PawnState*>(
+               &_PawnState_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    39;
+
+  friend void swap(PawnState& a, PawnState& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(PawnState* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(PawnState* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  PawnState* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<PawnState>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const PawnState& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const PawnState& from) {
+    PawnState::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(PawnState* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.PawnState";
+  }
+  protected:
+  explicit PawnState(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kPlayerStateFieldNumber = 1,
+    kControllerFieldNumber = 2,
+    kRemoteViewPitchFieldNumber = 3,
+  };
+  // .unrealpb.UnrealObjectRef playerState = 1;
+  bool has_playerstate() const;
+  private:
+  bool _internal_has_playerstate() const;
+  public:
+  void clear_playerstate();
+  const ::unrealpb::UnrealObjectRef& playerstate() const;
+  PROTOBUF_NODISCARD ::unrealpb::UnrealObjectRef* release_playerstate();
+  ::unrealpb::UnrealObjectRef* mutable_playerstate();
+  void set_allocated_playerstate(::unrealpb::UnrealObjectRef* playerstate);
+  private:
+  const ::unrealpb::UnrealObjectRef& _internal_playerstate() const;
+  ::unrealpb::UnrealObjectRef* _internal_mutable_playerstate();
+  public:
+  void unsafe_arena_set_allocated_playerstate(
+      ::unrealpb::UnrealObjectRef* playerstate);
+  ::unrealpb::UnrealObjectRef* unsafe_arena_release_playerstate();
+
+  // .unrealpb.UnrealObjectRef controller = 2;
+  bool has_controller() const;
+  private:
+  bool _internal_has_controller() const;
+  public:
+  void clear_controller();
+  const ::unrealpb::UnrealObjectRef& controller() const;
+  PROTOBUF_NODISCARD ::unrealpb::UnrealObjectRef* release_controller();
+  ::unrealpb::UnrealObjectRef* mutable_controller();
+  void set_allocated_controller(::unrealpb::UnrealObjectRef* controller);
+  private:
+  const ::unrealpb::UnrealObjectRef& _internal_controller() const;
+  ::unrealpb::UnrealObjectRef* _internal_mutable_controller();
+  public:
+  void unsafe_arena_set_allocated_controller(
+      ::unrealpb::UnrealObjectRef* controller);
+  ::unrealpb::UnrealObjectRef* unsafe_arena_release_controller();
+
+  // optional uint32 remoteViewPitch = 3;
+  bool has_remoteviewpitch() const;
+  private:
+  bool _internal_has_remoteviewpitch() const;
+  public:
+  void clear_remoteviewpitch();
+  uint32_t remoteviewpitch() const;
+  void set_remoteviewpitch(uint32_t value);
+  private:
+  uint32_t _internal_remoteviewpitch() const;
+  void _internal_set_remoteviewpitch(uint32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:unrealpb.PawnState)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+    ::unrealpb::UnrealObjectRef* playerstate_;
+    ::unrealpb::UnrealObjectRef* controller_;
+    uint32_t remoteviewpitch_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
 class CHANNELDUE_API FClientAdjustment final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.FClientAdjustment) */ {
  public:
@@ -8272,7 +8484,7 @@ class CHANNELDUE_API FClientAdjustment final :
                &_FClientAdjustment_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    40;
 
   friend void swap(FClientAdjustment& a, FClientAdjustment& b) {
     a.Swap(&b);
@@ -9421,6 +9633,34 @@ inline void SpawnObjectMessage::_internal_set_localrole(uint32_t value) {
 inline void SpawnObjectMessage::set_localrole(uint32_t value) {
   _internal_set_localrole(value);
   // @@protoc_insertion_point(field_set:unrealpb.SpawnObjectMessage.localRole)
+}
+
+// optional uint32 owningConnId = 4;
+inline bool SpawnObjectMessage::_internal_has_owningconnid() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool SpawnObjectMessage::has_owningconnid() const {
+  return _internal_has_owningconnid();
+}
+inline void SpawnObjectMessage::clear_owningconnid() {
+  _impl_.owningconnid_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000004u;
+}
+inline uint32_t SpawnObjectMessage::_internal_owningconnid() const {
+  return _impl_.owningconnid_;
+}
+inline uint32_t SpawnObjectMessage::owningconnid() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SpawnObjectMessage.owningConnId)
+  return _internal_owningconnid();
+}
+inline void SpawnObjectMessage::_internal_set_owningconnid(uint32_t value) {
+  _impl_._has_bits_[0] |= 0x00000004u;
+  _impl_.owningconnid_ = value;
+}
+inline void SpawnObjectMessage::set_owningconnid(uint32_t value) {
+  _internal_set_owningconnid(value);
+  // @@protoc_insertion_point(field_set:unrealpb.SpawnObjectMessage.owningConnId)
 }
 
 // -------------------------------------------------------------------
@@ -16945,6 +17185,218 @@ inline void GameStateBase::set_breplicatedhasbegunplay(bool value) {
 
 // -------------------------------------------------------------------
 
+// PawnState
+
+// .unrealpb.UnrealObjectRef playerState = 1;
+inline bool PawnState::_internal_has_playerstate() const {
+  return this != internal_default_instance() && _impl_.playerstate_ != nullptr;
+}
+inline bool PawnState::has_playerstate() const {
+  return _internal_has_playerstate();
+}
+inline void PawnState::clear_playerstate() {
+  if (GetArenaForAllocation() == nullptr && _impl_.playerstate_ != nullptr) {
+    delete _impl_.playerstate_;
+  }
+  _impl_.playerstate_ = nullptr;
+}
+inline const ::unrealpb::UnrealObjectRef& PawnState::_internal_playerstate() const {
+  const ::unrealpb::UnrealObjectRef* p = _impl_.playerstate_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::UnrealObjectRef&>(
+      ::unrealpb::_UnrealObjectRef_default_instance_);
+}
+inline const ::unrealpb::UnrealObjectRef& PawnState::playerstate() const {
+  // @@protoc_insertion_point(field_get:unrealpb.PawnState.playerState)
+  return _internal_playerstate();
+}
+inline void PawnState::unsafe_arena_set_allocated_playerstate(
+    ::unrealpb::UnrealObjectRef* playerstate) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.playerstate_);
+  }
+  _impl_.playerstate_ = playerstate;
+  if (playerstate) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.PawnState.playerState)
+}
+inline ::unrealpb::UnrealObjectRef* PawnState::release_playerstate() {
+  
+  ::unrealpb::UnrealObjectRef* temp = _impl_.playerstate_;
+  _impl_.playerstate_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* PawnState::unsafe_arena_release_playerstate() {
+  // @@protoc_insertion_point(field_release:unrealpb.PawnState.playerState)
+  
+  ::unrealpb::UnrealObjectRef* temp = _impl_.playerstate_;
+  _impl_.playerstate_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* PawnState::_internal_mutable_playerstate() {
+  
+  if (_impl_.playerstate_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::UnrealObjectRef>(GetArenaForAllocation());
+    _impl_.playerstate_ = p;
+  }
+  return _impl_.playerstate_;
+}
+inline ::unrealpb::UnrealObjectRef* PawnState::mutable_playerstate() {
+  ::unrealpb::UnrealObjectRef* _msg = _internal_mutable_playerstate();
+  // @@protoc_insertion_point(field_mutable:unrealpb.PawnState.playerState)
+  return _msg;
+}
+inline void PawnState::set_allocated_playerstate(::unrealpb::UnrealObjectRef* playerstate) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.playerstate_;
+  }
+  if (playerstate) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(playerstate);
+    if (message_arena != submessage_arena) {
+      playerstate = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, playerstate, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.playerstate_ = playerstate;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.PawnState.playerState)
+}
+
+// .unrealpb.UnrealObjectRef controller = 2;
+inline bool PawnState::_internal_has_controller() const {
+  return this != internal_default_instance() && _impl_.controller_ != nullptr;
+}
+inline bool PawnState::has_controller() const {
+  return _internal_has_controller();
+}
+inline void PawnState::clear_controller() {
+  if (GetArenaForAllocation() == nullptr && _impl_.controller_ != nullptr) {
+    delete _impl_.controller_;
+  }
+  _impl_.controller_ = nullptr;
+}
+inline const ::unrealpb::UnrealObjectRef& PawnState::_internal_controller() const {
+  const ::unrealpb::UnrealObjectRef* p = _impl_.controller_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::UnrealObjectRef&>(
+      ::unrealpb::_UnrealObjectRef_default_instance_);
+}
+inline const ::unrealpb::UnrealObjectRef& PawnState::controller() const {
+  // @@protoc_insertion_point(field_get:unrealpb.PawnState.controller)
+  return _internal_controller();
+}
+inline void PawnState::unsafe_arena_set_allocated_controller(
+    ::unrealpb::UnrealObjectRef* controller) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.controller_);
+  }
+  _impl_.controller_ = controller;
+  if (controller) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.PawnState.controller)
+}
+inline ::unrealpb::UnrealObjectRef* PawnState::release_controller() {
+  
+  ::unrealpb::UnrealObjectRef* temp = _impl_.controller_;
+  _impl_.controller_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* PawnState::unsafe_arena_release_controller() {
+  // @@protoc_insertion_point(field_release:unrealpb.PawnState.controller)
+  
+  ::unrealpb::UnrealObjectRef* temp = _impl_.controller_;
+  _impl_.controller_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* PawnState::_internal_mutable_controller() {
+  
+  if (_impl_.controller_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::UnrealObjectRef>(GetArenaForAllocation());
+    _impl_.controller_ = p;
+  }
+  return _impl_.controller_;
+}
+inline ::unrealpb::UnrealObjectRef* PawnState::mutable_controller() {
+  ::unrealpb::UnrealObjectRef* _msg = _internal_mutable_controller();
+  // @@protoc_insertion_point(field_mutable:unrealpb.PawnState.controller)
+  return _msg;
+}
+inline void PawnState::set_allocated_controller(::unrealpb::UnrealObjectRef* controller) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.controller_;
+  }
+  if (controller) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(controller);
+    if (message_arena != submessage_arena) {
+      controller = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, controller, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.controller_ = controller;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.PawnState.controller)
+}
+
+// optional uint32 remoteViewPitch = 3;
+inline bool PawnState::_internal_has_remoteviewpitch() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool PawnState::has_remoteviewpitch() const {
+  return _internal_has_remoteviewpitch();
+}
+inline void PawnState::clear_remoteviewpitch() {
+  _impl_.remoteviewpitch_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline uint32_t PawnState::_internal_remoteviewpitch() const {
+  return _impl_.remoteviewpitch_;
+}
+inline uint32_t PawnState::remoteviewpitch() const {
+  // @@protoc_insertion_point(field_get:unrealpb.PawnState.remoteViewPitch)
+  return _internal_remoteviewpitch();
+}
+inline void PawnState::_internal_set_remoteviewpitch(uint32_t value) {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.remoteviewpitch_ = value;
+}
+inline void PawnState::set_remoteviewpitch(uint32_t value) {
+  _internal_set_remoteviewpitch(value);
+  // @@protoc_insertion_point(field_set:unrealpb.PawnState.remoteViewPitch)
+}
+
+// -------------------------------------------------------------------
+
 // FClientAdjustment
 
 // optional bool bAckGoodMove = 1;
@@ -17670,6 +18122,8 @@ inline void FClientAdjustment::set_movementmode(uint32_t value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

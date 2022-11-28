@@ -67,6 +67,11 @@ void FChanneldControllerReplicator::OnStateChanged(const google::protobuf::Messa
 		return;
 	}
 
+	if (Controller->HasAuthority())
+	{
+		return;
+	}
+
 	auto NewState = static_cast<const unrealpb::ControllerState*>(InNewState);
 	FullState->MergeFrom(*NewState);
 	bStateChanged = false;
