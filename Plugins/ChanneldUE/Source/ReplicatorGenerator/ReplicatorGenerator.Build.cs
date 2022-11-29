@@ -10,6 +10,7 @@ public class ReplicatorGenerator : ModuleRules
             new string[]
             {
                 "Core",
+                "Json"
             }
         );
 

@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "PropertyDecorator.h"
 #include "RPCDecorator.h"
+#include "Manifest.h"
 
 static const TCHAR* ReplicatedActorDeco_ProtoStateMessageTemplate =
 	LR"EOF(
@@ -16,11 +17,15 @@ public:
 
 	TArray<TSharedPtr<FPropertyDecorator>>& GetPropertyDecorators() { return Properties; }
 
+	void Init(const FModuleInfo& InModuleBelongTo);
+
 	/**
 	 * Get target actor cpp class name
 	 */
 	FString GetActorCppClassName();
-	
+
+	FString GetActorHeaderIncludePath();
+
 	/**
 	 * Get class name of generated replicator
 	 * FChanneld[TargetActorName]Replicator
@@ -31,7 +36,7 @@ public:
 	 * Get protobuf package name
 	 */
 	FString GetProtoPackageName();
-	
+
 	/**
 	 * Get protobuf c++ code namespace
 	 */
@@ -51,7 +56,7 @@ public:
 	 * Get code that handles state changed
 	 */
 	FString GetCode_AllPropertiesOnStateChange(const FString& TargetInstanceRef, const FString& NewStateRef);
-	
+
 	/**
 	 * Get protobuf message definition
 	 *
@@ -62,9 +67,10 @@ public:
      *   
 	 */
 	FString GetDefinition_ProtoStateMessage();
-	
+
 protected:
 	const UClass* Target;
+	FModuleInfo ModuleBelongTo;
 	TArray<TSharedPtr<FPropertyDecorator>> Properties;
 	TArray<TSharedPtr<FRPCDecorator>> RPCs;
 };

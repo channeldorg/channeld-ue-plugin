@@ -22,10 +22,15 @@ FReplicatorGeneratorManager& FReplicatorGeneratorManager::Get()
 	return Singleton;
 }
 
+bool FReplicatorGeneratorManager::GenerateAllReplicator()
+{
+}
+
 bool FReplicatorGeneratorManager::GenerateReplicator(UClass* Target)
 {
 	FString ResultMessage;
 	FReplicatorCodeGroup ReplicatorCode;
+	CodeGenerator->RefreshModuleInfoByClassName();
 	const bool GetCodeSuccess = CodeGenerator->GenerateCode(Target, ReplicatorCode, ResultMessage);
 	if (!GetCodeSuccess)
 	{
@@ -53,7 +58,7 @@ bool FReplicatorGeneratorManager::WriteProtoFile(const FString& FilePath, const 
 	IModuleInterface* Module = FModuleManager::Get().GetModule(GenManager_ProtobufModuleName);
 	FProtobufEditorModule* ProtoModule = static_cast<FProtobufEditorModule*>(Module);
 	ProtoModule->PluginButtonClicked();
-	
+
 	return bSuccess;
 }
 

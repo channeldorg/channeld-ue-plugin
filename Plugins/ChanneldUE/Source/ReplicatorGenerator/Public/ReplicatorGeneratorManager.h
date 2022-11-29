@@ -15,6 +15,7 @@ public:
 
 	static FReplicatorGeneratorManager& Get();
 
+	bool GenerateAllReplicator();
 
 	bool GenerateReplicator(UClass* Target);
 

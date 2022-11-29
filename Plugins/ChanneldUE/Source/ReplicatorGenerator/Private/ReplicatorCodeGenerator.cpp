@@ -1,8 +1,48 @@
 ﻿#include "ReplicatorCodeGenerator.h"
 
+#include "Manifest.h"
+#include "ReplicatorGeneratorDefinition.h"
+
+bool FReplicatorCodeGenerator::RefreshModuleInfoByClassName()
+{
+#if defined(UE_BUILD_DEBUG) && UE_BUILD_DEBUG == 1
+	FString BuildConfiguration = TEXT("Debug");
+#elif defined(UE_BUILD_DEVELOPMENT) && UE_BUILD_DEVELOPMENT == 1
+	FString BuildConfiguration = TEXT("Development");
+#else
+	FString BuildConfiguration = TEXT("");
+#endif
+
+	const FString ManifestFilePath = FPaths::ProjectIntermediateDir() / TEXT("Build") / TEXT(CHANNELD_EXPAND_AND_QUOTE(UBT_COMPILED_PLATFORM)) / TEXT(CHANNELD_EXPAND_AND_QUOTE(UE_TARGET_NAME)) / BuildConfiguration / TEXT(CHANNELD_EXPAND_AND_QUOTE(UE_TARGET_NAME)) + TEXT(".uhtmanifest");
+
+	bool bManifestSuccessfullyLoaded;
+	FManifest Manifest = FManifest::LoadFromFile(ManifestFilePath, bManifestSuccessfullyLoaded);
+	if (!bManifestSuccessfullyLoaded)
+	{
+		return false;
+	}
+	for (FManifestModule& ManifestModule : Manifest.Modules)
+	{
+		ProcessHeaderFiles(ManifestModule.PublicUObjectClassesHeaders, ManifestModule);
+		ProcessHeaderFiles(ManifestModule.PublicUObjectHeaders, ManifestModule);
+		ProcessHeaderFiles(ManifestModule.PrivateUObjectHeaders, ManifestModule);
+	}
+
+	return true;
+}
+
 bool FReplicatorCodeGenerator::GenerateCode(UClass* TargetActor, FReplicatorCodeGroup& ReplicatorCodeGroup, FString& ResultMessage)
 {
 	const TSharedPtr<FReplicatedActorDecorator> Target = MakeShareable(new FReplicatedActorDecorator(TargetActor));
+
+	if (!ModuleInfoByClassName.Contains(Target->GetActorCppClassName()))
+	{
+		ResultMessage = FString::Printf(TEXT("Can not find the module %s belongs to"), *Target->GetActorCppClassName());
+		return false;
+	}
+
+	Target->Init(ModuleInfoByClassName.FindChecked(Target->GetActorCppClassName()));
+
 	ReplicatorCodeGroup.Target = Target;
 
 	const FString TargetInstanceRef = TEXT("Actor");
@@ -12,6 +52,7 @@ bool FReplicatorCodeGenerator::GenerateCode(UClass* TargetActor, FReplicatorCode
 	FormatArgs.Add(TEXT("Ref_TargetInstanceRef"), FStringFormatArg(TargetInstanceRef));
 	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), FStringFormatArg(Target->GetProtoNamespace()));
 	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), FStringFormatArg(Target->GetProtoStateMessageType()));
+	FormatArgs.Add(TEXT("File_ActorHeaderFile"), FStringFormatArg(Target->GetActorHeaderIncludePath()));
 	FormatArgs.Add(TEXT("File_ProtoPbHead"), FStringFormatArg(Target->GetReplicatorClassName(false) + CodeGen_ProtoPbHeadExtension));
 
 	// ---------- Head code ----------
@@ -52,4 +93,36 @@ bool FReplicatorCodeGenerator::GenerateCode(UClass* TargetActor, FReplicatorCode
 	// ---------- Protobuf ----------
 
 	return true;
+}
+
+void FReplicatorCodeGenerator::ProcessHeaderFiles(const TArray<FString>& Files, const FManifestModule& ManifestModule)
+{
+	FPlatformFileManager& FileManager = FPlatformFileManager::Get();
+	for (const FString& HeaderFilePath : Files)
+	{
+		if (!FileManager.GetPlatformFile().FileExists(*HeaderFilePath))
+		{
+			continue;
+		}
+		FString Code;
+		FFileHelper::LoadFileToString(Code, *HeaderFilePath);
+		FRegexPattern MatherPatter(FString(TEXT(R"EOF(UCLASS\(.*\)\s*class\s+(?:\w+_API\s+)?([\w_]+)\s+\:)EOF")));
+		FRegexMatcher Matcher(MatherPatter, Code);
+		while (Matcher.FindNext())
+		{
+			FString CaptureString = Matcher.GetCaptureGroup(1);
+
+			FModuleInfo ModuleInfo;
+			ModuleInfo.Name = ManifestModule.Name;
+			ModuleInfo.BaseDirectory = ManifestModule.BaseDirectory;
+			ModuleInfo.BaseDirectory.ReplaceInline(TEXT("\\"), TEXT("/"), ESearchCase::CaseSensitive);
+			ModuleInfo.IncludeBase = ManifestModule.IncludeBase;
+			ModuleInfo.IncludeBase.ReplaceInline(TEXT("\\"), TEXT("/"), ESearchCase::CaseSensitive);
+			FString RelativeToModule = HeaderFilePath;
+			RelativeToModule.ReplaceInline(TEXT("\\"), TEXT("/"), ESearchCase::CaseSensitive);
+			RelativeToModule = RelativeToModule.Replace(*ModuleInfo.IncludeBase, TEXT(""), ESearchCase::CaseSensitive);
+			ModuleInfo.RelativeToModule = RelativeToModule;
+			ModuleInfoByClassName.Add(CaptureString, ModuleInfo);
+		}
+	}
 }

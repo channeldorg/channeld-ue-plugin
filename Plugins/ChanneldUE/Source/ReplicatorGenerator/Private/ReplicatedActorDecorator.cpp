@@ -5,8 +5,14 @@
 FReplicatedActorDecorator::FReplicatedActorDecorator(const UClass* TargetActorClass)
 {
 	Target = TargetActorClass;
+}
+
+void FReplicatedActorDecorator::Init(const FModuleInfo& InModuleBelongTo)
+{
+	ModuleBelongTo = FModuleInfo(InModuleBelongTo);
+	
 	FPropertyDecoratorFactory& PropertyDecoratorFactory = FPropertyDecoratorFactory::Get();
-	for (TFieldIterator<FProperty> It(TargetActorClass); It; ++It)
+	for (TFieldIterator<FProperty> It(Target); It; ++It)
 	{
 		FProperty* Property = *It;
 		if (Property->HasAnyPropertyFlags(CPF_Net))
@@ -24,6 +30,11 @@ FReplicatedActorDecorator::FReplicatedActorDecorator(const UClass* TargetActorCl
 FString FReplicatedActorDecorator::GetActorCppClassName()
 {
 	return Target->GetPrefixCPP() + Target->GetName();
+}
+
+FString FReplicatedActorDecorator::GetActorHeaderIncludePath()
+{
+	return ModuleBelongTo.RelativeToModule;
 }
 
 FString FReplicatedActorDecorator::GetReplicatorClassName(bool WithPrefix /* = true */)

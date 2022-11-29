@@ -62,7 +62,7 @@ public:
 
 	virtual FString GetCode_HasProtoFieldValueIn(const FString& MessageRef) override
 	{
-		return FString::Printf(TEXT("%s->has_%s"), *MessageRef, *GetProtoFieldName());
+		return FString::Printf(TEXT("%s->has_%s()"), *MessageRef, *GetProtoFieldName());
 	}
 
 	virtual FString GetCode_SetDeltaState(const FString& TargetInstanceRef, const FString& FullStateRef, const FString& DeltaStateRef) override

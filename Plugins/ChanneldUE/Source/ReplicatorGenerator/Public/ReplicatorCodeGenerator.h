@@ -13,6 +13,7 @@ static const TCHAR* CodeGen_HeadCodeTemplate =
 #include "CoreMinimal.h"
 #include "Replication/ChanneldReplicatorBase.h"
 #include "Net/UnrealNetwork.h"
+#include "{File_ActorHeaderFile}"
 #include "{File_ProtoPbHead}"
 
 class {Declare_ReplicatorClassName} : public FChanneldReplicatorBase
@@ -95,7 +96,7 @@ static const TCHAR* CodeGen_OnStateChangedImplTemplate =
 	LR"EOF(
 void {Declare_ReplicatorClassName}::OnStateChanged(const google::protobuf::Message* InNewState)
 {
-  if (!{Ref_TargetInstanceRef}.Isvalid())
+  if (!{Ref_TargetInstanceRef}.IsValid())
   {
     return;
   }
@@ -124,13 +125,13 @@ package {Declare_ProtoPackageName};
 struct FReplicatorCodeGroup
 {
 	TSharedPtr<FReplicatedActorDecorator> Target;
-	
+
 	FString HeadFileName;
 	FString HeadCode;
-	
+
 	FString CppFileName;
 	FString CppCode;
-	
+
 	FString ProtoFileName;
 	FString ProtoDefinitions;
 };
@@ -138,6 +139,8 @@ struct FReplicatorCodeGroup
 class REPLICATORGENERATOR_API FReplicatorCodeGenerator
 {
 public:
+	bool RefreshModuleInfoByClassName();
+
 	bool GenerateCode(UClass* TargetActor, FReplicatorCodeGroup& ReplicatorCodeGroup, FString& ResultMessage);
 
 	bool IsReplicatedActor(UClass* TargetActor);
@@ -146,4 +149,8 @@ protected:
 	TArray<UClass*> GetAllUClass();
 
 	FString GetProtoMessageOfGlobalStruct();
+
+	TMap<FString, FModuleInfo> ModuleInfoByClassName;
+
+	inline void ProcessHeaderFiles(const TArray<FString>& Files, const FManifestModule& ManifestModule);
 };
