@@ -30,6 +30,7 @@ public:
 
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
 	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId) override;
+	virtual void SendSpawnToConn(AActor* Actor, UChanneldNetConnection* NetConn, uint32 OwningConnId) override;
 	
 private:
 

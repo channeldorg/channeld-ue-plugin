@@ -107,6 +107,7 @@ private:
 	UPROPERTY()
 	TMap<uint32, UChanneldNetConnection*> ClientConnectionMap;
 
+	// RPCs queued on the callee's side that dont' have the actor resolved yet.
 	TArray<TSharedPtr<unrealpb::RemoteFunctionMessage>> UnprocessedRPCs;
 
 	TSet<FNetworkGUID> SentSpawnedNetGUIDs;

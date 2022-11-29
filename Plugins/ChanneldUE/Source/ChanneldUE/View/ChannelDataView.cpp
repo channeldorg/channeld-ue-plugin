@@ -280,9 +280,10 @@ void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerControl
 {
 
 	/* Unfortunately, a couple of RPC on the PC is called in GameMode::PostLogin BEFORE invoking this event. So we need to handle the RPC properly.
-	// Send the PlayerController to the client (in case any RPC on the PC is called but it doesn't have the current channelId when spawned)
-	NewPlayerConn->SendSpawnMessage(NewPlayer, NewPlayer->GetRemoteRole());
-	*/
+	 * UPDATE: no need to worry - the client can queue unmapped RPC now!
+	 */
+	// Send the PC to the owning client after the PC and NetConn is mutually referenced.
+	SendSpawnToConn(NewPlayer, NewPlayerConn, NewPlayerConn->GetConnId());
 
 	// Send the GameStateBase to the new player
 	auto Comp = Cast<UChanneldReplicationComponent>(NewPlayer->GetComponentByClass(UChanneldReplicationComponent::StaticClass()));
@@ -297,13 +298,15 @@ void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerControl
 
 	/* OnServerSpawnedActor() sends the spawning of the new player's pawn to other clients */
 
-	// Send the existing player controllers and pawns to the new player
+	// Send the existing player pawns to the new player
 	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 	{
 		APlayerController* PC = Iterator->Get();
 		if (PC && PC != NewPlayer)
 		{
+			/* PC only exists in owning client as an AutonomousProxy!!!
 			NewPlayerConn->SendSpawnMessage(PC, ROLE_SimulatedProxy);
+			*/
 			if (PC->GetPawn())
 			{
 				NewPlayerConn->SendSpawnMessage(PC->GetPawn(), ENetRole::ROLE_SimulatedProxy);
@@ -350,6 +353,11 @@ bool UChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID Ne
 	}
 
 	return true;
+}
+
+void UChannelDataView::SendSpawnToConn(AActor* Actor, UChanneldNetConnection* NetConn, uint32 OwningConnId)
+{
+	NetConn->SendSpawnMessage(Actor, Actor->GetRemoteRole(), OwningConnId);
 }
 
 void UChannelDataView::OnDestroyedObject(UObject* Obj, const FNetworkGUID NetId)

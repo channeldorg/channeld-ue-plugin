@@ -1273,6 +1273,7 @@ class CHANNELDUE_API SpawnObjectMessage final :
 
   enum : int {
     kObjFieldNumber = 1,
+    kLocationFieldNumber = 5,
     kChannelIdFieldNumber = 2,
     kLocalRoleFieldNumber = 3,
     kOwningConnIdFieldNumber = 4,
@@ -1294,6 +1295,24 @@ class CHANNELDUE_API SpawnObjectMessage final :
   void unsafe_arena_set_allocated_obj(
       ::unrealpb::UnrealObjectRef* obj);
   ::unrealpb::UnrealObjectRef* unsafe_arena_release_obj();
+
+  // optional .unrealpb.FVector location = 5;
+  bool has_location() const;
+  private:
+  bool _internal_has_location() const;
+  public:
+  void clear_location();
+  const ::unrealpb::FVector& location() const;
+  PROTOBUF_NODISCARD ::unrealpb::FVector* release_location();
+  ::unrealpb::FVector* mutable_location();
+  void set_allocated_location(::unrealpb::FVector* location);
+  private:
+  const ::unrealpb::FVector& _internal_location() const;
+  ::unrealpb::FVector* _internal_mutable_location();
+  public:
+  void unsafe_arena_set_allocated_location(
+      ::unrealpb::FVector* location);
+  ::unrealpb::FVector* unsafe_arena_release_location();
 
   // optional uint32 channelId = 2;
   bool has_channelid() const;
@@ -1345,6 +1364,7 @@ class CHANNELDUE_API SpawnObjectMessage final :
     ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::unrealpb::UnrealObjectRef* obj_;
+    ::unrealpb::FVector* location_;
     uint32_t channelid_;
     uint32_t localrole_;
     uint32_t owningconnid_;
@@ -9581,7 +9601,7 @@ inline void SpawnObjectMessage::set_allocated_obj(::unrealpb::UnrealObjectRef* o
 
 // optional uint32 channelId = 2;
 inline bool SpawnObjectMessage::_internal_has_channelid() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool SpawnObjectMessage::has_channelid() const {
@@ -9589,7 +9609,7 @@ inline bool SpawnObjectMessage::has_channelid() const {
 }
 inline void SpawnObjectMessage::clear_channelid() {
   _impl_.channelid_ = 0u;
-  _impl_._has_bits_[0] &= ~0x00000001u;
+  _impl_._has_bits_[0] &= ~0x00000002u;
 }
 inline uint32_t SpawnObjectMessage::_internal_channelid() const {
   return _impl_.channelid_;
@@ -9599,7 +9619,7 @@ inline uint32_t SpawnObjectMessage::channelid() const {
   return _internal_channelid();
 }
 inline void SpawnObjectMessage::_internal_set_channelid(uint32_t value) {
-  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_._has_bits_[0] |= 0x00000002u;
   _impl_.channelid_ = value;
 }
 inline void SpawnObjectMessage::set_channelid(uint32_t value) {
@@ -9609,7 +9629,7 @@ inline void SpawnObjectMessage::set_channelid(uint32_t value) {
 
 // optional uint32 localRole = 3;
 inline bool SpawnObjectMessage::_internal_has_localrole() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
 inline bool SpawnObjectMessage::has_localrole() const {
@@ -9617,7 +9637,7 @@ inline bool SpawnObjectMessage::has_localrole() const {
 }
 inline void SpawnObjectMessage::clear_localrole() {
   _impl_.localrole_ = 0u;
-  _impl_._has_bits_[0] &= ~0x00000002u;
+  _impl_._has_bits_[0] &= ~0x00000004u;
 }
 inline uint32_t SpawnObjectMessage::_internal_localrole() const {
   return _impl_.localrole_;
@@ -9627,7 +9647,7 @@ inline uint32_t SpawnObjectMessage::localrole() const {
   return _internal_localrole();
 }
 inline void SpawnObjectMessage::_internal_set_localrole(uint32_t value) {
-  _impl_._has_bits_[0] |= 0x00000002u;
+  _impl_._has_bits_[0] |= 0x00000004u;
   _impl_.localrole_ = value;
 }
 inline void SpawnObjectMessage::set_localrole(uint32_t value) {
@@ -9637,7 +9657,7 @@ inline void SpawnObjectMessage::set_localrole(uint32_t value) {
 
 // optional uint32 owningConnId = 4;
 inline bool SpawnObjectMessage::_internal_has_owningconnid() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool SpawnObjectMessage::has_owningconnid() const {
@@ -9645,7 +9665,7 @@ inline bool SpawnObjectMessage::has_owningconnid() const {
 }
 inline void SpawnObjectMessage::clear_owningconnid() {
   _impl_.owningconnid_ = 0u;
-  _impl_._has_bits_[0] &= ~0x00000004u;
+  _impl_._has_bits_[0] &= ~0x00000008u;
 }
 inline uint32_t SpawnObjectMessage::_internal_owningconnid() const {
   return _impl_.owningconnid_;
@@ -9655,12 +9675,102 @@ inline uint32_t SpawnObjectMessage::owningconnid() const {
   return _internal_owningconnid();
 }
 inline void SpawnObjectMessage::_internal_set_owningconnid(uint32_t value) {
-  _impl_._has_bits_[0] |= 0x00000004u;
+  _impl_._has_bits_[0] |= 0x00000008u;
   _impl_.owningconnid_ = value;
 }
 inline void SpawnObjectMessage::set_owningconnid(uint32_t value) {
   _internal_set_owningconnid(value);
   // @@protoc_insertion_point(field_set:unrealpb.SpawnObjectMessage.owningConnId)
+}
+
+// optional .unrealpb.FVector location = 5;
+inline bool SpawnObjectMessage::_internal_has_location() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.location_ != nullptr);
+  return value;
+}
+inline bool SpawnObjectMessage::has_location() const {
+  return _internal_has_location();
+}
+inline void SpawnObjectMessage::clear_location() {
+  if (_impl_.location_ != nullptr) _impl_.location_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const ::unrealpb::FVector& SpawnObjectMessage::_internal_location() const {
+  const ::unrealpb::FVector* p = _impl_.location_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
+      ::unrealpb::_FVector_default_instance_);
+}
+inline const ::unrealpb::FVector& SpawnObjectMessage::location() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SpawnObjectMessage.location)
+  return _internal_location();
+}
+inline void SpawnObjectMessage::unsafe_arena_set_allocated_location(
+    ::unrealpb::FVector* location) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.location_);
+  }
+  _impl_.location_ = location;
+  if (location) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.SpawnObjectMessage.location)
+}
+inline ::unrealpb::FVector* SpawnObjectMessage::release_location() {
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::unrealpb::FVector* temp = _impl_.location_;
+  _impl_.location_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::FVector* SpawnObjectMessage::unsafe_arena_release_location() {
+  // @@protoc_insertion_point(field_release:unrealpb.SpawnObjectMessage.location)
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::unrealpb::FVector* temp = _impl_.location_;
+  _impl_.location_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::FVector* SpawnObjectMessage::_internal_mutable_location() {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  if (_impl_.location_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
+    _impl_.location_ = p;
+  }
+  return _impl_.location_;
+}
+inline ::unrealpb::FVector* SpawnObjectMessage::mutable_location() {
+  ::unrealpb::FVector* _msg = _internal_mutable_location();
+  // @@protoc_insertion_point(field_mutable:unrealpb.SpawnObjectMessage.location)
+  return _msg;
+}
+inline void SpawnObjectMessage::set_allocated_location(::unrealpb::FVector* location) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.location_;
+  }
+  if (location) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(location);
+    if (message_arena != submessage_arena) {
+      location = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, location, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  _impl_.location_ = location;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.SpawnObjectMessage.location)
 }
 
 // -------------------------------------------------------------------

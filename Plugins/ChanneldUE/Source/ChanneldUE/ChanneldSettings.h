@@ -43,6 +43,9 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial")
 	TSubclassOf<UPlayerStartLocatorBase> PlayerStartLocatorClass;
+
+	UPROPERTY(Config, EditAnywhere, Category = "Server")
+	bool bQueueUnexportedActorRPC = false;
 	
 private:
 	bool ParseNetAddr(const FString& Addr, FString& OutIp, int32& OutPort);

@@ -50,6 +50,7 @@ public:
 	virtual FNetworkGUID GetNetId(IChannelDataProvider* Provider) const;
 	// If returns false, the NetDriver will not send the spawn message to the clients.
 	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId);
+	virtual void SendSpawnToConn(AActor* Actor, UChanneldNetConnection* NetConn, uint32 OwningConnId);
 	virtual void OnClientSpawnedObject(UObject* Obj, const ChannelId ChId) {}
 	virtual void OnDestroyedObject(UObject* Obj, const FNetworkGUID NetId);
 	virtual void SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId);

@@ -60,7 +60,7 @@ void FChanneldPawnReplicator::Tick(float DeltaTime)
 	auto Controller = Cast<AController>(ChanneldUtils::GetObjectByRef(FullState->mutable_controller(), Pawn->GetWorld(), false));
 	if (Controller != Pawn->Controller)
 	{
-		DeltaState->mutable_playerstate()->CopyFrom(ChanneldUtils::GetRefOfObject(Pawn->Controller));
+		DeltaState->mutable_controller()->CopyFrom(ChanneldUtils::GetRefOfObject(Pawn->Controller));
 		bStateChanged = true;
 	}
 

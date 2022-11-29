@@ -38,8 +38,9 @@ public:
 	void SendMessage(uint32 MsgType, const google::protobuf::Message& Msg, ChannelId ChId = InvalidChannelId);
 	bool HasSentSpawn(UObject* Object) const;
 	void SetSentSpawned(const FNetworkGUID NetId);
-	void SendSpawnMessage(UObject* Object, ENetRole Role = ENetRole::ROLE_None, uint32 OwningConnId = 0);
+	void SendSpawnMessage(UObject* Object, ENetRole Role = ENetRole::ROLE_None, uint32 OwningChannelId = InvalidChannelId, uint32 OwningConnId = 0, FVector* Location = nullptr);
 	void SendDestroyMessage(UObject* Object, EChannelCloseReason Reason = EChannelCloseReason::Destroyed);
+	void SendRPCMessage(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg = nullptr, ChannelId ChId = InvalidChannelId);
 	// Flush the handshake packets that are queued before received AuthResultMessage to the server.
 	void FlushUnauthData();
 
@@ -57,5 +58,16 @@ private:
 	// and send them after the authentication is done.
 	TQueue<TTuple<std::string*, FOutPacketTraits*>> LowLevelSendDataBeforeAuth;
 
+	// Queued Spawn messages that don't have the object's NetId-ChannelId mapping set yet.
 	TArray<TTuple<TWeakObjectPtr<UObject>, ENetRole>> QueuedSpawnMessageTargets;
+
+	struct FOutgoingRPC
+	{
+		AActor* Actor;
+		FString FuncName;
+		TSharedPtr<google::protobuf::Message> ParamsMsg;
+		ChannelId ChId;
+	};
+	// RPCs queued on the caller's side that don't have the NetId exported yet.
+	TArray<FOutgoingRPC> UnexportedRPCs;
 };

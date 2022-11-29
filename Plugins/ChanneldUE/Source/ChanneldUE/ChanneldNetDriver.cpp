@@ -53,13 +53,13 @@ UChanneldNetConnection* UChanneldNetDriver::AddChanneldClientConnection(Connecti
 void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg)
 {
 	FNetworkGUID NetId = FNetworkGUID(SpawnMsg->obj().netguid());
-		
+	
 	// If the object with the same NetId exists, destroy it before spawning a new one.
 	UObject* OldObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld(), false);
 	if (OldObj)
 	{
 		UE_LOG(LogChanneld, Log, TEXT("[Client] Found spawned object %s of duplicated NetId: %d, will be destroyed."), *GetNameSafe(OldObj), SpawnMsg->obj().netguid());
-			
+
 		GuidCache->ObjectLookup.Remove(NetId);
 		GuidCache->NetGUIDLookup.Remove(OldObj);
 			
@@ -598,8 +598,16 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		return;
 	}
 
-	// FIXME: server-spawned actor always has LocalRole = Authority
+	/* Newly spawned actor always has LocalRole = Authority
 	if (!Actor->HasAuthority())
+	{
+		return;
+	}
+	*/
+
+	// Send the spawn of PC in OnClientPostLogin instead, because we only want to send PC to owning client,
+	// but at this moment, Actor doesn't have NetConnection set yet.
+	if (Actor->IsA<APlayerController>())
 	{
 		return;
 	}
@@ -623,7 +631,7 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	*/
 	if (ChannelDataView.IsValid())
 	{
-		FNetworkGUID NetId = GuidCache->GetNetGUID(Actor);
+		FNetworkGUID NetId = GuidCache->GetOrAssignNetGUID(Actor);
 		if (!ChannelDataView->OnServerSpawnedObject(Actor, NetId))
 		{
 			return;
@@ -674,20 +682,20 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 			{
 				OwningConnId = NetConn->GetConnId();
 			}
-			Pair.Value->SendSpawnMessage(Actor, Actor->GetRemoteRole(), OwningConnId);
+
+			if (ChannelDataView.IsValid())
+			{
+				ChannelDataView->SendSpawnToConn(Actor, Pair.Value, OwningConnId);
+			}
+			else
+			{
+				Pair.Value->SendSpawnMessage(Actor, Actor->GetRemoteRole(), OwningConnId);
+			}
 		}
 	}
 
 	// TODO: Send the spawning to nearby spatial servers that sub to the actor's spatial channel (if exist)
-
-	/*
-	// Get the NetGUID from the cache again, as it could be assigned during SendSpawnMessage()
-	NetId = GuidCache->GetNetGUID(Actor);
-	if (NetId.IsValid())
-	{
-		SentSpawnedNetGUIDs.Add(NetId);
-	}
-	*/
+	
 }
 
 void UChanneldNetDriver::SetAllSentSpawn(const FNetworkGUID NetId)
@@ -778,7 +786,13 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 	// {
 	// 	UE_DEBUG_BREAK();
 	// }
-
+	
+	if (Actor->IsActorBeingDestroyed())
+	{
+		UE_LOG(LogNet, Warning, TEXT("UNetDriver::ProcessRemoteFunction: Remote function %s called from actor %s while actor is being destroyed. Function will not be processed."), *Function->GetName(), *Actor->GetName());
+		return;
+	}
+	
 	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomRPC)
 	{
 		const FString FuncName = FuncFName.ToString();
@@ -792,35 +806,9 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 				auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters, bSuccess);
 				if (bSuccess)
 				{
-					if (Actor->HasAuthority() && !NetConn->HasSentSpawn(Actor))
-					{
-						/* On server, the actor should be spawned to client via OnServerSpawnedObject.
-						// If the target object hasn't been spawned in the remote end yet, send the Spawn message before the RPC message.
-						NetConn->SendSpawnMessage(Actor, Actor->GetRemoteRole());
-						*/
-
-					}
-				
-					unrealpb::RemoteFunctionMessage RpcMsg;
-					// Don't send the whole UnrealObjecRef to the other side - the object spawning process goes its own way!
-					// RpcMsg.mutable_targetobj()->MergeFrom(ChanneldUtils::GetRefOfObject(Actor));
-					RpcMsg.mutable_targetobj()->set_netguid(GuidCache->GetNetGUID(Actor).Value);
-					RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
-					if (ParamsMsg)
-					{
-						RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
-						UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %dB: %s"), RpcMsg.paramspayload().size(), UTF8_TO_TCHAR(ParamsMsg->DebugString().c_str()));
-					}
-					uint8* Data = new uint8[RpcMsg.ByteSizeLong()];
-					if (RpcMsg.SerializeToArray(Data, RpcMsg.GetCachedSize()))
-					{
-						NetConn->SendData(MessageType_RPC, Data, RpcMsg.GetCachedSize(), ChannelDataView->GetOwningChannelId(Actor));
-						OnSentRPC(Actor, FuncName);
-						return;
-					}
-
-					UE_LOG(LogChanneld, Warning, TEXT("Failed to serialize RPC proto message: %s::%s"), *Actor->GetName(), *FuncName);
-					// TODO: delete Data?
+					NetConn->SendRPCMessage(Actor, FuncName, ParamsMsg, ChannelDataView->GetOwningChannelId(Actor));
+					OnSentRPC(Actor, FuncName);
+					return;
 				}
 				else
 				{
@@ -856,6 +844,7 @@ void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, c
 
 	if (Actor->GetLocalRole() <= ENetRole::ROLE_SimulatedProxy)
 	{
+		bDelayRPC = true;
 		// TODO: if spatial server, forward the message to the server that has authority over the actor.
 		UE_LOG(LogChanneld, Warning, TEXT("Local role has no authroity to process RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
 		return;

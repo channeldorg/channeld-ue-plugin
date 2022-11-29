@@ -402,7 +402,7 @@ void USpatialChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* 
 				UE_LOG(LogChanneld, Log, TEXT("Queried spatial channelId %d for provider: %s"), SpatialChId, *IChannelDataProvider::GetName(Provider));
 				SetOwningChannelId(NetId, SpatialChId);
 				AddProvider(SpatialChId, Provider);
-				SendSpawnToAdjacentChannels(Provider->GetTargetObject(), SpatialChId);
+				//SendSpawnToAdjacentChannels(Provider->GetTargetObject(), SpatialChId);
 			});
 		}
 		else
@@ -444,50 +444,29 @@ void USpatialChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayer
 
 bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId)
 {
-	if (!NetId.IsValid())
-		return false;
+	// Don't set NetId-ChannelId mapping or add the provider, as we don't have the spatial channelId of the object yet.
+	// The spatial channelId will be queried in AddProviderToDefaultChannel()
+	return true;
+}
 
-	// Only actors have the location to query.
-	if (!Obj->IsA<AActor>())
-	{
-		return Super::OnServerSpawnedObject(Obj, NetId);
-	}
-
-	AActor* Actor = Cast<AActor>(Obj);
-	/*
-	if (Actor->GetNetConnection() && !Actor->IsA<APawn>())
-	{
-		// Wait until the player's pawn has been created.
-	}
-	*/
-	
-	if (ChannelId* ChId = NetIdOwningChannels.Find(NetId))
-	{
-		AddActorProvider(*ChId, Actor);
-		SendSpawnToAdjacentChannels(Actor, *ChId);
-	}
-	/* USpatialChannelDataView::AddProviderToDefaultChannel handles the same logic
-	else
-	{
-		TArray<FVector> Positions;
-		Positions.Add(Actor->GetActorLocation());
-		Connection->QuerySpatialChannel(Positions, [&, NetId, Actor](const channeldpb::QuerySpatialChannelResultMessage* ResultMsg)
-		{
-			const ChannelId SpatialChId = ResultMsg->channelid(0);
-			UE_LOG(LogChanneld, Log, TEXT("Queried spatial channelId %d for object: %s"), SpatialChId, *Actor->GetName());
-			SetOwningChannelId(NetId, SpatialChId);
-			AddActorProvider(SpatialChId, Actor);
-			SendSpawnToAdjacentChannels(Actor, SpatialChId);
-		});
-	}
-	*/
-
-	// Always skip the sending in ChanneldNetDriver, because we'll use channeld's broadcast.
-	return false;
+void USpatialChannelDataView::SendSpawnToConn(AActor* Actor, UChanneldNetConnection* NetConn, uint32 OwningConnId)
+{
+	// Location must be set for channeld to update the spatial channelId.
+	FVector Location = Actor->GetActorLocation();
+	NetConn->SendSpawnMessage(Actor, Actor->IsA<APlayerController>() ? ROLE_AutonomousProxy : Actor->GetRemoteRole(), GetChanneldSubsystem()->LowLevelSendToChannelId.Get(), OwningConnId, &Location);
 }
 
 void USpatialChannelDataView::SendSpawnToAdjacentChannels(UObject* Obj, ChannelId SpatialChId)
 {
+	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
+	if (!NetDriver)
+	{
+		UE_LOG(LogChanneld, Error, TEXT("USpatialChannelDataView::SendSpawnToAdjacentChannels: Unable to get ChanneldNetDriver"));
+		return;
+	}
+	
+	const FNetworkGUID NetId = NetDriver->GuidCache->GetOrAssignNetGUID(Obj);
+	
 	unrealpb::SpawnObjectMessage SpawnMsg;
 	SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Obj));
 	if (Obj->IsA<AActor>())
@@ -495,18 +474,17 @@ void USpatialChannelDataView::SendSpawnToAdjacentChannels(UObject* Obj, ChannelI
 		AActor* Actor = Cast<AActor>(Obj);
 		SpawnMsg.set_localrole(Actor->GetRemoteRole());
 		if (auto NetConn = Cast<UChanneldNetConnection>(Actor->GetNetConnection()))
-		{
+		{ 
 			SpawnMsg.set_owningconnid(NetConn->GetConnId());
 		}
+		// Also set the spatial info for channeld to update the spatial channelId
+		SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(Actor->GetActorLocation()));
 	}
 	SpawnMsg.set_channelid(SpatialChId);
 	channeldpb::ServerForwardMessage ServerForwardMessage;
 	ServerForwardMessage.set_payload(SpawnMsg.SerializeAsString());
 	Connection->Send(SpatialChId, MessageType_SPAWN, ServerForwardMessage, static_cast<channeldpb::BroadcastType>(channeldpb::ADJACENT_CHANNELS | channeldpb::ALL_BUT_SENDER));
-	UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message to spatial channels(%d), obj: %s, netId: %d"), SpatialChId, *Obj->GetName(), SpawnMsg.mutable_obj()->netguid());
+	UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message to spatial channels(%d), obj: %s, netId: %d"), SpatialChId, *Obj->GetName(), NetId.Value);
 
-	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
-	{
-		NetDriver->SetAllSentSpawn(FNetworkGUID(SpawnMsg.mutable_obj()->netguid()));
-	}
+	NetDriver->SetAllSentSpawn(NetId);
 }

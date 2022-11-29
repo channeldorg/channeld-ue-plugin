@@ -161,7 +161,7 @@ bool UChanneldNetConnection::HasSentSpawn(UObject* Object) const
 	return (ExportCount != nullptr && *ExportCount > 0);
 }
 
-void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*= ENetRole::None*/, uint32 OwningConnId /*= 0*/)
+void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*= ENetRole::None*/, uint32 OwningChannelId /*= InvalidChannelId*/, uint32 OwningConnId /*= 0*/, FVector* Location /*= nullptr*/)
 {
 	const FNetworkGUID NetId = Driver->GuidCache->GetOrAssignNetGUID(Object);
 	UPackageMapClient* PackageMapClient = CastChecked<UPackageMapClient>(PackageMap);
@@ -173,11 +173,13 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 	}
 
 	// Check if the object has the owning ChannelId
-	ChannelId OwningChannelId = InvalidChannelId;
-	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
-	if (NetDriver->ChannelDataView.IsValid())
+	if (OwningChannelId == InvalidChannelId)
 	{
-		OwningChannelId = NetDriver->ChannelDataView->GetOwningChannelId(NetId);
+		auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
+		if (NetDriver->ChannelDataView.IsValid())
+		{
+			OwningChannelId = NetDriver->ChannelDataView->GetOwningChannelId(NetId);
+		}
 	}
 	if (OwningChannelId == InvalidChannelId)
 	{
@@ -188,14 +190,18 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 
 	unrealpb::SpawnObjectMessage SpawnMsg;
 	SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Object, this));
-	SpawnMsg.set_channelid(OwningChannelId);//CastChecked<UChanneldNetDriver>(Driver)->GetSendToChannelId(this));
+	SpawnMsg.set_channelid(OwningChannelId);
 	if (Role > ENetRole::ROLE_None)
 	{
 		SpawnMsg.set_localrole(Role);
 	}
-	if (OwningChannelId > 0)
+	if (OwningConnId > 0)
 	{
 		SpawnMsg.set_owningconnid(OwningConnId);
+	}
+	if (Location)
+	{
+		SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(*Location));
 	}
 	SendMessage(MessageType_SPAWN, SpawnMsg);
 	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %d, owning channel: %d, local role: %d"), GetConnId(), *GetNameSafe(Object), SpawnMsg.obj().netguid(), SpawnMsg.channelid(), SpawnMsg.localrole());
@@ -238,6 +244,37 @@ void UChanneldNetConnection::SendDestroyMessage(UObject* Object, EChannelCloseRe
 	}
 }
 
+void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg, ChannelId ChId)
+{
+	if (GetMutableDefault<UChanneldSettings>()->bQueueUnexportedActorRPC)
+	{
+		if (Actor->HasAuthority() && !HasSentSpawn(Actor))
+		{
+			/* On server, the actor should be spawned to client via OnServerSpawnedObject.
+			// If the target object hasn't been spawned in the remote end yet, send the Spawn message before the RPC message.
+			NetConn->SendSpawnMessage(Actor, Actor->GetRemoteRole());
+			*/
+
+			UnexportedRPCs.Add(FOutgoingRPC{Actor, FuncName, ParamsMsg, ChId});
+			UE_LOG(LogChanneld, Log, TEXT("Calling RPC %s::%s while the NetConnection(%d) doesn't have the NetId exported yet. Pushed to the next tick."),
+				*Actor->GetName(), *FuncName, GetConnId());
+			return;
+		}
+	}
+	
+	unrealpb::RemoteFunctionMessage RpcMsg;
+	// Don't send the whole UnrealObjecRef to the other side - the object spawning process goes its own way!
+	// RpcMsg.mutable_targetobj()->MergeFrom(ChanneldUtils::GetRefOfObject(Actor));
+	RpcMsg.mutable_targetobj()->set_netguid(Driver->GuidCache->GetNetGUID(Actor).Value);
+	RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
+	if (ParamsMsg)
+	{
+		RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %dB: %s"), RpcMsg.paramspayload().size(), UTF8_TO_TCHAR(ParamsMsg->DebugString().c_str()));
+	}
+	SendMessage(MessageType_RPC, RpcMsg, ChId);
+}
+
 FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= false*/)
 {
 	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
@@ -269,17 +306,29 @@ FString UChanneldNetConnection::LowLevelDescribe()
 void UChanneldNetConnection::Tick(float DeltaSeconds)
 {
 	UNetConnection::Tick(DeltaSeconds);
-
-	int Num = QueuedSpawnMessageTargets.Num();
-	for (int i = 0; i < Num; i++)
+	
+	const int RpcNum = UnexportedRPCs.Num();
+	for (int i = 0; i < RpcNum; i++)
 	{
-		auto Params = QueuedSpawnMessageTargets[i];
+		FOutgoingRPC& RPC = UnexportedRPCs[i];
+		if (IsValid(RPC.Actor))
+		{
+			SendRPCMessage(RPC.Actor, RPC.FuncName, RPC.ParamsMsg, RPC.ChId);
+		}
+	}
+	UnexportedRPCs.RemoveAt(0, RpcNum);
+
+	const int SpawnMsgNum = QueuedSpawnMessageTargets.Num();
+	for (int i = 0; i < SpawnMsgNum; i++)
+	{
+		auto& Params = QueuedSpawnMessageTargets[i];
 		if (Params.Get<0>().IsValid())
 		{
 			SendSpawnMessage(Params.Get<0>().Get(), Params.Get<1>());
 		}
 	}
-	QueuedSpawnMessageTargets.RemoveAt(0, Num);
+	QueuedSpawnMessageTargets.RemoveAt(0, SpawnMsgNum);
+
 }
 
 void UChanneldNetConnection::FlushUnauthData()
