@@ -8,7 +8,7 @@ if ({Code_GetPropertyValue} != {Code_GetProtoFieldValue})
   {Code_SetProtoFieldValue};
   bStateChanged = true;
 }
-		)EOF";
+)EOF";
 
 const static TCHAR* PropertyDecorator_OnChangeStateTemplate =
 	LR"EOF(
@@ -16,7 +16,7 @@ if ({Code_HasProtoFieldValue} && {Code_GetPropertyValue} != {Code_GetProtoFieldV
 {
   {Code_SetPropertyValue};
 }
-		)EOF";
+)EOF";
 
 class FUInt32PropertyDecorator : public FPropertyDecorator
 {

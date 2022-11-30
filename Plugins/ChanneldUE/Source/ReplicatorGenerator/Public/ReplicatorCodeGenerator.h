@@ -13,7 +13,7 @@ static const TCHAR* CodeGen_HeadCodeTemplate =
 #include "CoreMinimal.h"
 #include "Replication/ChanneldReplicatorBase.h"
 #include "Net/UnrealNetwork.h"
-#include "{File_ActorHeaderFile}"
+{Code_IncludeActorHeader}
 #include "{File_ProtoPbHead}"
 
 class {Declare_ReplicatorClassName} : public FChanneldReplicatorBase
@@ -38,7 +38,7 @@ protected:
   // [Server] The accumulated delta change before next send
   {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* DeltaState;
 };
-	)EOF";
+)EOF";
 
 static const TCHAR* CodeGen_ConstructorImplTemplate =
 	LR"EOF(
@@ -52,7 +52,7 @@ static const TCHAR* CodeGen_ConstructorImplTemplate =
   FullState = new {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName};
   DeltaState = new {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName};
 }
-	)EOF";
+)EOF";
 
 static const TCHAR* CodeGen_DestructorImplTemplate =
 	LR"EOF(
@@ -61,7 +61,7 @@ static const TCHAR* CodeGen_DestructorImplTemplate =
   delete FullState;
   delete DeltaState;
 }
-	)EOF";
+)EOF";
 
 static const TCHAR* CodeGen_GetDeltaStateImplTemplate =
 	LR"EOF(
@@ -69,7 +69,7 @@ google::protobuf::Message* {Declare_ReplicatorClassName}::GetDeltaState()
 {
   return DeltaState;
 }
-	)EOF";
+)EOF";
 
 static const TCHAR* CodeGen_ClearStateImplTemplate =
 	LR"EOF(
@@ -78,7 +78,7 @@ void {Declare_ReplicatorClassName}::ClearState()
   DeltaState->Clear();
   bStateChanged = false;
 }
-	)EOF";
+)EOF";
 
 static const TCHAR* CodeGen_TickImplTemplate =
 	LR"EOF(
@@ -90,7 +90,7 @@ void {Declare_ReplicatorClassName}::Tick(float DeltaTime)
 
   FullState->MergeFrom(*DeltaState);
 }
-	)EOF";
+)EOF";
 
 static const TCHAR* CodeGen_OnStateChangedImplTemplate =
 	LR"EOF(
@@ -113,16 +113,38 @@ void {Declare_ReplicatorClassName}::OnStateChanged(const google::protobuf::Messa
 
   {Code_AllPropertyOnStateChanged}
 }
-	)EOF";
+)EOF";
 
 static const TCHAR* CodeGen_ProtoTemplate =
 	LR"EOF(
 syntax = "proto3";
 package {Declare_ProtoPackageName};
 {Definition_ProtoStateMsg}
-	)EOF";
+)EOF";
 
-struct FReplicatorCodeGroup
+static const FString CodeGen_RegisterReplicatorTemplate =
+	FString(LR"EOF(
+#pragma once
+#include "CoreMinimal.h"
+#include "Subsystems/EngineSubsystem.h"
+#include "Replication/ChanneldReplication.h"
+{Code_IncludeActorHeaders}
+#include "ChanneldReplicatorRegister.generated.h"
+)EOF")
+	+ TEXT("UCLASS()")
+	+ LR"EOF(
+class CHANNELDINTEGRATION_API UChanneldReplicatorRegister : public UEngineSubsystem
+{
+  GENERATED_BODY()
+  virtual void Initialize(FSubsystemCollectionBase& Collection) override
+  {
+{Code_ReplicatorRegister}
+  }
+};
+)EOF";
+
+
+struct FReplicatorCode
 {
 	TSharedPtr<FReplicatedActorDecorator> Target;
 
@@ -134,6 +156,16 @@ struct FReplicatorCodeGroup
 
 	FString ProtoFileName;
 	FString ProtoDefinitions;
+
+	FString IncludeActorCode;
+	FString RegisterReplicatorCode;
+};
+
+struct FReplicatorCodeBundle
+{
+	FString RegisterReplicatorFileCode;
+
+	TArray<FReplicatorCode> ReplicatorCodes;
 };
 
 class REPLICATORGENERATOR_API FReplicatorCodeGenerator
@@ -141,16 +173,17 @@ class REPLICATORGENERATOR_API FReplicatorCodeGenerator
 public:
 	bool RefreshModuleInfoByClassName();
 
-	bool GenerateCode(UClass* TargetActor, FReplicatorCodeGroup& ReplicatorCodeGroup, FString& ResultMessage);
+	bool Generate(TArray<UClass*> TargetActors, FReplicatorCodeBundle& ReplicatorCodeBundle);
+	bool GenerateActorCode(UClass* TargetActor, FReplicatorCode& ReplicatorCode, FString& ResultMessage);
 
-	bool IsReplicatedActor(UClass* TargetActor);
 
 protected:
-	TArray<UClass*> GetAllUClass();
-
 	FString GetProtoMessageOfGlobalStruct();
 
 	TMap<FString, FModuleInfo> ModuleInfoByClassName;
 
 	inline void ProcessHeaderFiles(const TArray<FString>& Files, const FManifestModule& ManifestModule);
+
+	bool GenerateCppActorCode(FReplicatorCode& ReplicatorCode);
+	bool GenerateBlueprintActorCode(FReplicatorCode& ReplicatorCode);
 };

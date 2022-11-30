@@ -68,9 +68,13 @@ public:
 	 */
 	FString GetDefinition_ProtoStateMessage();
 
+	bool IsBlueprintGenerated();
+
 protected:
 	const UClass* Target;
 	FModuleInfo ModuleBelongTo;
 	TArray<TSharedPtr<FPropertyDecorator>> Properties;
 	TArray<TSharedPtr<FRPCDecorator>> RPCs;
+
+	bool bIsBlueprintGenerated;
 };

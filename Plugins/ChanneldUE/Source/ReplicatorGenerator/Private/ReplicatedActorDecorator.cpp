@@ -5,6 +5,7 @@
 FReplicatedActorDecorator::FReplicatedActorDecorator(const UClass* TargetActorClass)
 {
 	Target = TargetActorClass;
+	bIsBlueprintGenerated = Target->GetClass()->IsChildOf(UBlueprintGeneratedClass::StaticClass());
 }
 
 void FReplicatedActorDecorator::Init(const FModuleInfo& InModuleBelongTo)
@@ -91,4 +92,9 @@ FString FReplicatedActorDecorator::GetDefinition_ProtoStateMessage()
 	FormatArgs.Add(TEXT("Declare_ProtoFields"), FieldDefinitions);
 
 	return FString::Format(ReplicatedActorDeco_ProtoStateMessageTemplate, FormatArgs);
+}
+
+bool FReplicatedActorDecorator::IsBlueprintGenerated()
+{
+	return  bIsBlueprintGenerated;
 }

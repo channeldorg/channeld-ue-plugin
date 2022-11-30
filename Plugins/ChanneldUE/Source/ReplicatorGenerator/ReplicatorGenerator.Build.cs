@@ -20,7 +20,9 @@ public class ReplicatorGenerator : ModuleRules
                 "CoreUObject",
                 "Engine",
                 "Slate",
-                "SlateCore", "ProtobufEditor"
+                "SlateCore", 
+                "ProtobufEditor", 
+                "ChanneldUE"
             }
         );
     }
