@@ -586,9 +586,10 @@ void UChanneldConnection::QuerySpatialChannel(const TArray<FVector>& Positions, 
 	for (auto& Pos : Positions)
 	{
 		channeldpb::SpatialInfo* SpatialInfo = Msg.add_spatialinfo();
+		// Swap the Y and Z as UE uses the Z-Up rule but channeld uses the Y-up rule.
 		SpatialInfo->set_x(Pos.X);
-		SpatialInfo->set_y(Pos.Y);
-		SpatialInfo->set_z(Pos.Z);
+		SpatialInfo->set_y(Pos.Z);
+		SpatialInfo->set_z(Pos.Y);
 	}
 	Send(GlobalChannelId, channeldpb::QUERY_SPATIAL_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }

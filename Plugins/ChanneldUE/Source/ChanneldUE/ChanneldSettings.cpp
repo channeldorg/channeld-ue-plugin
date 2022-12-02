@@ -8,9 +8,13 @@
 
 //DEFINE_LOG_CATEGORY(LogChanneld)
 
-UChanneldSettings::UChanneldSettings(const FObjectInitializer& obj)
+UChanneldSettings::UChanneldSettings(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer),
+	RegionBoxMinSize(1, 1, 1),
+	RegionBoxMaxSize(100000, 100000, 1000)
 {
 }
+
 
 void UChanneldSettings::PostInitProperties()
 {
@@ -84,6 +88,10 @@ void UChanneldSettings::PostInitProperties()
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed PlayerStartLocator class name from CLI: %s"), *PlayerStartLocatorClassName);
 		PlayerStartLocatorClass = LoadClass<UChannelDataView>(NULL, *PlayerStartLocatorClassName);
+	}
+	if (FParse::Bool(CmdLine, TEXT("EnableSpatialVisualizer="), bEnableSpatialVisualizer))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed bEnableSpatialVisualizer from CLI: %d"), bEnableSpatialVisualizer);
 	}
 }
 

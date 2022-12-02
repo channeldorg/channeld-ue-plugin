@@ -183,7 +183,7 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 	}
 	if (OwningChannelId == InvalidChannelId)
 	{
-		QueuedSpawnMessageTargets.Add(MakeTuple(Object, Role));
+		QueuedSpawnMessageTargets.Add(MakeTuple(Object, Role, OwningChannelId, OwningConnId, Location));
 		UE_LOG(LogChanneld, Warning, TEXT("[Server] Unable to send Spawn message as there's no mapping of NetId %d -> ChannelId. Pushed to the next tick."), NetId.Value);
 		return;
 	}
@@ -204,7 +204,8 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 		SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(*Location));
 	}
 	SendMessage(MessageType_SPAWN, SpawnMsg);
-	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %d, owning channel: %d, local role: %d"), GetConnId(), *GetNameSafe(Object), SpawnMsg.obj().netguid(), SpawnMsg.channelid(), SpawnMsg.localrole());
+	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %d, role: %d, owning channel: %d, owning connId: %d, location: %s"),
+		GetConnId(), *GetNameSafe(Object), SpawnMsg.obj().netguid(), SpawnMsg.localrole(), SpawnMsg.channelid(), SpawnMsg.owningconnid(), Location ? *Location->ToCompactString() : TEXT("NULL"));
 
 	SetSentSpawned(NetId);
 }
@@ -324,7 +325,7 @@ void UChanneldNetConnection::Tick(float DeltaSeconds)
 		auto& Params = QueuedSpawnMessageTargets[i];
 		if (Params.Get<0>().IsValid())
 		{
-			SendSpawnMessage(Params.Get<0>().Get(), Params.Get<1>());
+			SendSpawnMessage(Params.Get<0>().Get(), Params.Get<1>(), Params.Get<2>(), Params.Get<3>(), Params.Get<4>());
 		}
 	}
 	QueuedSpawnMessageTargets.RemoveAt(0, SpawnMsgNum);

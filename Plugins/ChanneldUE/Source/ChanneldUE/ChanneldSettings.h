@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldTypes.h"
+#include "Tools/ATintActor.h"
 #include "View/PlayerStartLocator.h"
 #include "ChanneldSettings.generated.h"
 
@@ -16,7 +17,7 @@ class CHANNELDUE_API UChanneldSettings : public UObject
 	GENERATED_BODY()
 	
 public:
-	UChanneldSettings(const FObjectInitializer& obj);
+	UChanneldSettings(const FObjectInitializer& ObjectInitializer);
 	virtual void PostInitProperties() override;
 
 	UPROPERTY(Config, EditAnywhere, Category="View")
@@ -43,6 +44,17 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial")
 	TSubclassOf<UPlayerStartLocatorBase> PlayerStartLocatorClass;
+
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial")
+	bool bEnableSpatialVisualizer = false;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	TSubclassOf<ATintActor> RegionBoxClass;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	FVector RegionBoxMinSize;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	FVector RegionBoxMaxSize;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	TSubclassOf<AActor> SubscriptionBoxClass;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Server")
 	bool bQueueUnexportedActorRPC = false;

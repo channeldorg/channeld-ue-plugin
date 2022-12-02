@@ -6,6 +6,7 @@
 #include "View/ChannelDataView.h"
 #include "ChanneldNetConnection.h"
 #include "PlayerStartLocator.h"
+#include "Tools/SpatialVisualizer.h"
 #include "SpatialChannelDataView.generated.h"
 
 /**
@@ -44,10 +45,19 @@ private:
 	UPROPERTY()
 	UPlayerStartLocatorBase* PlayerStartLocator;
 
+	UPROPERTY()
+	USpatialVisualizer* Visualizer;
+
 	void ServerHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 
+	/**
+	 * @brief Create the ChanneldNetConnection and the PlayerController for the client
+	 * @param ConnId The channeld connection ID of the client
+	 * @param ChId The spatial channel the client belongs to 
+	 * @return 
+	 */
 	UChanneldNetConnection* CreateClientConnection(ConnectionId ConnId, ChannelId ChId);
 
 	void SendSpawnToAdjacentChannels(UObject* Obj, ChannelId SpatialChId);

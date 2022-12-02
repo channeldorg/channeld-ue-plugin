@@ -83,13 +83,22 @@ public:
 		return bNotSame;
 	}
 
-	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool bCreateIfNotInCache = true)
+	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr)
 	{
 		bool bUnmapped;
-		return GetObjectByRef(Ref, World, bUnmapped, bCreateIfNotInCache);
+		return GetObjectByRef(Ref, World, bUnmapped, bCreateIfNotInCache, ClientConn);
 	}
 
-	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache = true)
+	/**
+	 * @brief Get the object in the GuidCache or create from the UnrealObjectRef.
+	 * @param Ref The UnrealObjectRef message that contains the NetworkGUID and other data needed to deserialize the object.
+	 * @param World Used for acquiring the NetDriver.
+	 * @param bNetGUIDUnmapped Set to true if the NetDriver does not exist or the object is not in the cache.
+	 * @param bCreateIfNotInCache Create the object if it's not in the cache.
+	 * @param ClientConn The client connection that causes the handover, and is responsible for deserializing the object. Only need in server, when the object is handed over from another server.
+	 * @return The object if it's in the GuidCache or deserialized successfully.
+	 */
+	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr)
 	{
 		if (!Ref || !World)
 		{
@@ -118,9 +127,9 @@ public:
 		auto Obj = GuidCache->GetObjectFromNetGUID(NetGUID, false);
 		if (Obj == nullptr && bCreateIfNotInCache)
 		{
-			if (!GuidCache->IsNetGUIDAuthority())
+			if (!GuidCache->IsNetGUIDAuthority() || ClientConn)
 			{
-				UNetConnection* Connection = World->GetNetDriver()->ServerConnection;
+				UNetConnection* Connection = ClientConn ? ClientConn : World->GetNetDriver()->ServerConnection;
 				TArray<const unrealpb::UnrealObjectRef_GuidCachedObject*> CachedObjs;
 				for (auto& Context : Ref->context())
 				{
@@ -146,15 +155,22 @@ public:
 					FString PathName = UTF8_TO_TCHAR(CachedObj->pathname().c_str());
 					// Remap name for PIE
 					GEngine->NetworkRemapPath(Connection, PathName, true);
-					GuidCache->RegisterNetGUIDFromPath_Client(NewGUID, PathName, CachedObj->outerguid(), 0, false, false);
+					if (ClientConn)
+					{
+						GuidCache->RegisterNetGUIDFromPath_Server(NewGUID, PathName, CachedObj->outerguid(), 0, false, false);
+					}
+					else
+					{
+						GuidCache->RegisterNetGUIDFromPath_Client(NewGUID, PathName, CachedObj->outerguid(), 0, false, false);
+					}
 					UObject* NewObj = GuidCache->GetObjectFromNetGUID(NewGUID, false);
 					UE_LOG(LogChanneld, Verbose, TEXT("[Client] Registered NetGUID %d (%d) from path: %s"), NewGUID.Value, ChanneldUtils::GetNativeNetId(NewGUID.Value), *PathName);
 				}
 
 				if (Ref->bunchbitsnum() > 0)
 				{
-					FInBunch InBunch(World->GetNetDriver()->ServerConnection, (uint8*)Ref->netguidbunch().data(), Ref->bunchbitsnum());
-					auto PackageMap = Cast<UPackageMapClient>(World->GetNetDriver()->ServerConnection->PackageMap);
+					FInBunch InBunch(Connection, (uint8*)Ref->netguidbunch().data(), Ref->bunchbitsnum());
+					auto PackageMap = CastChecked<UPackageMapClient>(Connection->PackageMap);
 
 					UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);
 					UE_LOG(LogChanneld, VeryVerbose, TEXT("[Client] ActorChannels: %d"), Connection->ActorChannelsNum());

@@ -767,8 +767,7 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 			}
 		}
 
-		auto Subsystem = GetSubsystem();
-		if (Subsystem && ChannelDataView.IsValid())
+		if (ChannelDataView.IsValid())
 		{
 			Result = ChannelDataView->SendAllChannelUpdates();
 		}
@@ -882,6 +881,15 @@ void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 {
 	// Trigger the callings of ServerReplicateActors() and LowLevelSend()
 	UNetDriver::TickFlush(DeltaSeconds);
+
+	// Send ChannelDataUpdate to channeld even if there's no client connection yet.
+	if (IsServer() && ClientConnections.Num() == 0 && !bSkipServerReplicateActors)
+	{
+		if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication && ChannelDataView.IsValid())
+		{
+			ChannelDataView->SendAllChannelUpdates();
+		}
+	}
 
 	if (ConnToChanneld && ConnToChanneld->IsConnected())
 	{

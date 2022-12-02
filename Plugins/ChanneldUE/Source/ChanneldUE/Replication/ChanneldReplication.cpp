@@ -4,6 +4,11 @@ TMap<const UClass*, const FReplicatorCreateFunc> ChanneldReplication::Replicator
 
 void ChanneldReplication::RegisterReplicator(const UClass* TargetClass, const FReplicatorCreateFunc& Func)
 {
+	if (ReplicatorRegistry.Contains(TargetClass))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("%s already exists in the replicator registry, will not be added."), *TargetClass->GetFullName());
+		return;
+	}
 	ReplicatorRegistry.Add(TargetClass, Func);
 	UE_LOG(LogChanneld, Log, TEXT("Registered replicator for %s, registry size: %d"), *TargetClass->GetFullName(), ReplicatorRegistry.Num());
 }

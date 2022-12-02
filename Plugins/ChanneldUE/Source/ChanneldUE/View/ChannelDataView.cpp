@@ -218,12 +218,15 @@ void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Prov
 				if (ChannelType == EChanneldChannelType::ECT_Unknown)
 				{
 					UE_LOG(LogChanneld, Error, TEXT("Can't map channel type from channel id: %d. Removed states won't be created for provider: %s"), ChId, *IChannelDataProvider::GetName(Provider));
+					Providers->Remove(Provider);
+					return;
 				}
 				else
 				{
 					const auto MsgTemplate = ChannelDataTemplates.FindRef(static_cast<channeldpb::ChannelType>(ChannelType));
 					if (!ensureMsgf(MsgTemplate, TEXT("Can't find channel data message template of channel type: %s"), *UEnum::GetValueAsString(ChannelType)))
 					{
+						Providers->Remove(Provider);
 						return;
 					}
 					RemovedData = MsgTemplate->New();
@@ -278,23 +281,16 @@ void UChannelDataView::MoveProvider(ChannelId OldChId, ChannelId NewChId, IChann
 
 void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn)
 {
-
+	ensureMsgf(NewPlayer->GetComponentByClass(UChanneldReplicationComponent::StaticClass()), TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn PC, GameStateBase, and other pawns in the client."));
+	
 	/* Unfortunately, a couple of RPC on the PC is called in GameMode::PostLogin BEFORE invoking this event. So we need to handle the RPC properly.
 	 * UPDATE: no need to worry - the client can queue unmapped RPC now!
 	 */
-	// Send the PC to the owning client after the PC and NetConn is mutually referenced.
+	// Send the PC to the owning client after the PC and NetConn are mutually referenced.
 	SendSpawnToConn(NewPlayer, NewPlayerConn, NewPlayerConn->GetConnId());
-
-	// Send the GameStateBase to the new player
-	auto Comp = Cast<UChanneldReplicationComponent>(NewPlayer->GetComponentByClass(UChanneldReplicationComponent::StaticClass()));
-	if (Comp)
-	{
-		NewPlayerConn->SendSpawnMessage(GameMode->GameState, ENetRole::ROLE_SimulatedProxy);
-	}
-	else
-	{
-		UE_LOG(LogChanneld, Warning, TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn the GameStateBase in the client."));
-	}
+	
+	// Send the GameStateBase to the new player. This is very important as later the GameStateBase will be fanned out to the client with bReplicatedHasBegunPlay=true, to trigger the client's BeginPlay().
+	NewPlayerConn->SendSpawnMessage(GameMode->GameState, ENetRole::ROLE_SimulatedProxy);
 
 	/* OnServerSpawnedActor() sends the spawning of the new player's pawn to other clients */
 

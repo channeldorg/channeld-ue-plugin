@@ -80,13 +80,24 @@ void USpatialMasterServerView::InitServer()
 			NonAuthoritySubOptions.set_fanoutintervalms(ClientFanOutIntervalMs);
 			NonAuthoritySubOptions.set_fanoutdelayms(ClientFanOutDelayMs);
 
-			// FIXME: should only sub to adjacent spatial channels. QuerySpatialChannelResultMessage should contains that information.
-			for (const auto SpatialChId : AllSpatialChannelIds)
-			{
-				Connection->SubConnectionToChannel(ClientConnId, SpatialChId,
-					/*SpatialChId == StartChannelId ? &AuthoritySubOptions :*/ &NonAuthoritySubOptions);
-			}
+			// The start spatial channelId MUST be sent at first.
+			Connection->SubConnectionToChannel(ClientConnId, StartChannelId, &NonAuthoritySubOptions);
 
+			// Delay the sub of other spatial channels, so the client can treat the first spatial channelId as the one to log in.
+			FTimerHandle Handle;
+			GetWorld()->GetTimerManager().SetTimer(Handle, [&, StartChannelId, ClientConnId, &NonAuthoritySubOptions]()
+			{
+				// FIXME: should only sub to adjacent spatial channels. QuerySpatialChannelResultMessage should contains that information.
+				for (const auto SpatialChId : AllSpatialChannelIds)
+				{
+					if (SpatialChId != StartChannelId)
+					{
+						Connection->SubConnectionToChannel(ClientConnId, SpatialChId,
+							/*SpatialChId == StartChannelId ? &AuthoritySubOptions :*/ &NonAuthoritySubOptions);
+					}
+				}
+			}, 1, false, 0.5f);
+			
 			/*
 			// At this moment, the player Pawn and PlayerState should be removed on both sever and client sides as it will be re-created on the spatial server.
 			// The PlayerController should stay in the Master server for further RPC call.
