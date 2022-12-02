@@ -46,7 +46,10 @@ protected:
 class CHANNELDUE_API FChanneldReplicatorBase_BP : public FChanneldReplicatorBase
 {
 public:
-    FChanneldReplicatorBase_BP(UObject* InTargetObj, UClass* InBpClass) : FChanneldReplicatorBase(InTargetObj), BpClass(InBpClass) {}
+    FChanneldReplicatorBase_BP(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
+    {
+        BpClass = InTargetObj->GetClass();
+    }
     virtual UClass* GetTargetClass() override { return BpClass; }
 
 protected:
