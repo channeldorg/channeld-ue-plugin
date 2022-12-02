@@ -10,7 +10,7 @@ TSharedPtr<FPropertyDecoratorBuilder> FPropertyDecoratorBuilder::SetNextBuilder(
 
 FPropertyDecorator* FPropertyDecoratorBuilder::GetPropertyDecorator(FProperty* Property)
 {
-	if (IsSpecialTarget(Property))
+	if (IsSpecialProperty(Property))
 	{
 		return ConstructPropertyDecorator(Property);
 	}
@@ -30,9 +30,4 @@ FPropertyDecorator* FPropertyDecoratorBuilder::DoNext(FProperty* Property)
 	{
 		return nullptr;
 	}
-}
-
-FPropertyDecorator* FPropertyDecoratorBuilder::ConstructPropertyDecorator(FProperty* Property)
-{
-	return new FPropertyDecorator();
 }

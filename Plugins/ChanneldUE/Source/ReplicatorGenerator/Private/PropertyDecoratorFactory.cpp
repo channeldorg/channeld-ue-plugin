@@ -1,6 +1,6 @@
 ﻿#include "PropertyDecoratorFactory.h"
 
-#include "PropertyDecoratorBuilder/BaseDataTypePropertyDecoratorBuilder.h"
+#include "PropertyDecorator/BaseDataTypePropertyDecorator.h"
 
 // Static Variables
 FPropertyDecoratorFactory* FPropertyDecoratorFactory::Singleton;
@@ -10,10 +10,15 @@ FPropertyDecoratorFactory& FPropertyDecoratorFactory::Get()
 	if (Singleton == nullptr)
 	{
 		Singleton = new FPropertyDecoratorFactory();
-		Singleton->HeadBuilder = MakeShared<FUInt32PropertyDecoratorBuilder>();
-		// HeadBuilder
-		// 	->SetNextBuilder(MakeShared<FUInt64PropertyDecoratorBuilder>())
-		// 	->SetNextBuilder(MakeShared<FFloatPropertyDecoratorBuilder>());
+		Singleton->HeadBuilder = MakeShared<FBytePropertyDecoratorBuilder>();
+		Singleton->HeadBuilder
+		         ->SetNextBuilder(MakeShared<FBoolPropertyDecoratorBuilder>())
+		         ->SetNextBuilder(MakeShared<FUInt32PropertyDecoratorBuilder>())
+		         ->SetNextBuilder(MakeShared<FIntPropertyDecoratorBuilder>())
+		         ->SetNextBuilder(MakeShared<FUInt64PropertyDecoratorBuilder>())
+		         ->SetNextBuilder(MakeShared<FInt64PropertyDecoratorBuilder>())
+		         ->SetNextBuilder(MakeShared<FFloatPropertyDecoratorBuilder>())
+		         ->SetNextBuilder(MakeShared<FDoublePropertyDecoratorBuilder>());
 	}
 	return *Singleton;
 }

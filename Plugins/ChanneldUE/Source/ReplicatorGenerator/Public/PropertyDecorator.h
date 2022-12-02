@@ -13,12 +13,32 @@ public:
 
 	virtual bool IsBlueprintType();
 
+	/**
+	 * If the access of the property is private or protect return false, else return true
+	 */
 	virtual bool IsExternallyAccessible();
 
 	/**
-	 * Get the name of property declare in outer actor
+	 * If the property is externally accessible and the owner is not a blueprint generated class return true, else return false
 	 */
+	virtual bool IsDirectlyAccessible();
+
 	virtual FString GetPropertyName();
+
+	/**
+ 	 * Get the class name of OriginalProperty
+ 	 */
+	virtual FString GetPropertyType();
+
+	/**
+     * Get pointer name
+     */
+	virtual FString GetPointerName();
+
+	/**
+ 	 * Get cpp type
+ 	 */
+	virtual FString GetCPPType();
 
 	/**
 	 * Get the protobuf field rule
@@ -61,15 +81,15 @@ public:
 	 * For example:
 	 *   Actor->bIsCrouched
 	 */
-	virtual FString GetCode_GetPropertyValueFrom(const FString& TargetInstanceRef);
+	virtual FString GetCode_GetPropertyValueFrom(const FString& TargetInstance);
 
 	/**
      * Code that getting property value from outer actor
      *
      * For example:
-     *   Actor->bIsCrouched
+     *   Actor->bIsCrouched = xxx
      */
-	virtual FString GetCode_SetPropertyValueTo(const FString& TargetInstanceRef, const FString& InValue);
+	virtual FString GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& GetValueCode);
 
 	/**
 	 * Code that get field value from protobuf message
@@ -77,7 +97,7 @@ public:
 	 * For example:
 	 *   FullState->biscrouched()
 	 */
-	virtual FString GetCode_GetProtoFieldValueFrom(const FString& MessageRef);
+	virtual FString GetCode_GetProtoFieldValueFrom(const FString& StateName);
 
 	/**
 	 * Code that set new value to protobuf message field
@@ -85,14 +105,14 @@ public:
 	 * For example:
 	 *   DeltaState->set_biscrouched(Character->bIsCrouched)
 	 */
-	virtual FString GetCode_SetProtoFieldValueTo(const FString& MessageRef, const FString& InValue);
+	virtual FString GetCode_SetProtoFieldValueTo(const FString& StateName, const FString& GetValueCode);
 
 	/**
 	 * Code that protobuf message has field value
 	 * For example:
 	 *   NewState->has_biscrouched()
 	 */
-	virtual FString GetCode_HasProtoFieldValueIn(const FString& MessageRef);
+	virtual FString GetCode_HasProtoFieldValueIn(const FString& StateName);
 
 	/**
 	 * Code that set delta state
@@ -103,7 +123,7 @@ public:
 	 *     bStateChanged = true;
 	 *   }
 	 */
-	virtual FString GetCode_SetDeltaState(const FString& TargetInstanceRef, const FString& FullStateRef, const FString& DeltaStateRef);
+	virtual FString GetCode_SetDeltaState(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName);
 
 	/**
 	 * Code that handle state changes
@@ -113,7 +133,7 @@ public:
 	 *     Character->bIsCrouched = NewState->biscrouched();
 	 *   }
 	 */
-	virtual FString GetCode_OnStateChange(const FString& TargetInstanceRef, const FString& NewStateRef);
+	virtual FString GetCode_OnStateChange(const FString& TargetInstance, const FString& NewStateName);
 
 protected:
 	FReplicatedActorDecorator* Owner = nullptr;

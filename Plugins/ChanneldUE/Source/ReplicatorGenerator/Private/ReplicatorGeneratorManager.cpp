@@ -72,7 +72,7 @@ TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(TArray
 		UClass* Class = CastChecked<UClass>(ClassObj);
 		if (IgnoreActorsSet.Contains(Class))
 		{
-			UE_LOG(LogChanneldReplicatorGenerator, Warning, TEXT("Ignore generating replicator for %s"), *Class->GetName());
+			UE_LOG(LogChanneldReplicatorGenerator, Log, TEXT("Ignore generating replicator for %s"), *Class->GetName());
 			continue;
 		}
 		if (!Class->IsChildOf(AActor::StaticClass()))
@@ -115,7 +115,7 @@ TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(TArray
 		}
 		if (IgnoreActorsSet.Contains(GeneratedClass))
 		{
-			UE_LOG(LogChanneldReplicatorGenerator, Warning, TEXT("Ignore generating replicator for %s"), *GeneratedClass->GetName());
+			UE_LOG(LogChanneldReplicatorGenerator, Log, TEXT("Ignore generating replicator for %s"), *GeneratedClass->GetName());
 			continue;
 		}
 		bool bOwnReplicationComponent = false;
@@ -166,16 +166,17 @@ TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(TArray
 			ParentClassesUnique.Add(ParentClass);
 		}
 	}
+	
 	for (int32 i = 0; i < ParentClasses.Num(); i++)
 	{
 		UClass* ThisClass = ParentClasses[i];
-		if (!ThisClass->IsChildOf(AActor::StaticClass()) && !HasReplicatedPropertyOrRPC(ThisClass))
+		if (!ThisClass->IsChildOf(AActor::StaticClass()))
 		{
 			continue;
 		}
 		if (IgnoreActorsSet.Contains(ThisClass))
 		{
-			UE_LOG(LogChanneldReplicatorGenerator, Warning, TEXT("Ignore generating replicator for %s"), *ThisClass->GetName());
+			UE_LOG(LogChanneldReplicatorGenerator, Log, TEXT("Ignore generating replicator for %s"), *ThisClass->GetName());
 			continue;
 		}
 		ActorsWithReplicationComp.Add(ThisClass);

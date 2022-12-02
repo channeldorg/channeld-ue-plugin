@@ -10,7 +10,7 @@ public:
 	virtual TSharedPtr<FPropertyDecoratorBuilder> SetNextBuilder(TSharedPtr<FPropertyDecoratorBuilder>);
 
 	
-	virtual bool IsSpecialTarget(FProperty*) = 0;
+	virtual bool IsSpecialProperty(FProperty*) = 0;
 	virtual FPropertyDecorator* GetPropertyDecorator(FProperty*);
 	
 	// template<typename PropertyType>
@@ -18,7 +18,7 @@ public:
 	//
 protected:
 	TSharedPtr<FPropertyDecoratorBuilder> NextBuilder;
-	virtual FPropertyDecorator* ConstructPropertyDecorator(FProperty*);
+	virtual FPropertyDecorator* ConstructPropertyDecorator(FProperty*) = 0;
 	virtual FPropertyDecorator* DoNext(FProperty*);
 
 };

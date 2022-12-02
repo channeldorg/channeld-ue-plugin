@@ -15,12 +15,32 @@ bool FPropertyDecorator::IsBlueprintType()
 
 bool FPropertyDecorator::IsExternallyAccessible()
 {
-	return false;
+	return OriginalProperty->HasAnyPropertyFlags(CPF_NativeAccessSpecifierPublic);
+}
+
+bool FPropertyDecorator::IsDirectlyAccessible()
+{
+	return IsExternallyAccessible() && !Owner->IsBlueprintGenerated();
 }
 
 FString FPropertyDecorator::GetPropertyName()
 {
 	return OriginalProperty->GetName();
+}
+
+FString FPropertyDecorator::GetPropertyType()
+{
+	return TEXT("");
+}
+
+FString FPropertyDecorator::GetPointerName()
+{
+	return GetPropertyName() + TEXT("Ptr");
+}
+
+FString FPropertyDecorator::GetCPPType()
+{
+	return OriginalProperty->GetCPPType();
 }
 
 FString FPropertyDecorator::GetProtoFieldName()
@@ -40,37 +60,44 @@ FString FPropertyDecorator::GetDefinition_ProtoField(int32 FieldNumber)
 	return GetDefinition_ProtoField() + TEXT(" = ") + FString::FromInt(FieldNumber);
 }
 
-FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetInstanceRef)
+FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetInstance)
+{
+	if(IsDirectlyAccessible())
+	{
+		return FString::Printf(TEXT("%s->%s"), *TargetInstance, *GetPropertyName());
+	}
+	else
+	{
+		return TEXT("*") + GetPointerName();
+	}
+}
+
+FString FPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& GetValueCode)
 {
 	return TEXT("");
 }
 
-FString FPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstanceRef, const FString& InValue)
+FString FPropertyDecorator::GetCode_GetProtoFieldValueFrom(const FString& StateName)
+{
+	return FString::Printf(TEXT("%s->%s()"), *StateName, *GetProtoFieldName());
+}
+
+FString FPropertyDecorator::GetCode_SetProtoFieldValueTo(const FString& StateName, const FString& GetValueCode)
+{
+	return FString::Printf(TEXT("%s->set_%s(%s)"), *StateName, *GetProtoFieldName(), *GetValueCode);
+}
+
+FString FPropertyDecorator::GetCode_HasProtoFieldValueIn(const FString& StateName)
+{
+	return FString::Printf(TEXT("%s->has_%s()"), *StateName, *GetProtoFieldName());
+}
+
+FString FPropertyDecorator::GetCode_SetDeltaState(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName)
 {
 	return TEXT("");
 }
 
-FString FPropertyDecorator::GetCode_GetProtoFieldValueFrom(const FString& MessageRef)
-{
-	return TEXT("");
-}
-
-FString FPropertyDecorator::GetCode_SetProtoFieldValueTo(const FString& MessageRef, const FString& InValue)
-{
-	return TEXT("");
-}
-
-FString FPropertyDecorator::GetCode_HasProtoFieldValueIn(const FString& MessageRef)
-{
-	return TEXT("");
-}
-
-FString FPropertyDecorator::GetCode_SetDeltaState(const FString& TargetInstanceRef, const FString& FullStateRef, const FString& DeltaStateRef)
-{
-	return TEXT("");
-}
-
-FString FPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceRef, const FString& NewStateRef)
+FString FPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstance, const FString& NewStateName)
 {
 	return TEXT("");
 }
