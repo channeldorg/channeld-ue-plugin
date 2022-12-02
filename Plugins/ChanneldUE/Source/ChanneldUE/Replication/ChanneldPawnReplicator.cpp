@@ -70,7 +70,10 @@ void FChanneldPawnReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	FullState->MergeFrom(*DeltaState);
+	if (bStateChanged)
+	{
+		FullState->MergeFrom(*DeltaState);
+	}
 }
 
 void FChanneldPawnReplicator::OnStateChanged(const google::protobuf::Message* InNewState)

@@ -94,7 +94,10 @@ void FChanneldGameStateBaseReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	FullState->MergeFrom(*DeltaState);
+	if (bStateChanged)
+	{
+		FullState->MergeFrom(*DeltaState);
+	}
 }
 
 void FChanneldGameStateBaseReplicator::OnStateChanged(const google::protobuf::Message* InNewState)

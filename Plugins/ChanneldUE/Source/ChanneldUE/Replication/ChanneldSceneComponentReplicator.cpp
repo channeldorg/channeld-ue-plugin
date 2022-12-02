@@ -165,8 +165,10 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 		DeltaState->mutable_relativescale()->MergeFrom(*FullState->mutable_relativescale());
 	}
 
-	// TODO: Optimization: Set the FullState as well as the DeltaState above
-	FullState->MergeFrom(*DeltaState);
+	if (bStateChanged)
+	{
+		FullState->MergeFrom(*DeltaState);
+	}
 }
 
 void FChanneldSceneComponentReplicator::ClearState()

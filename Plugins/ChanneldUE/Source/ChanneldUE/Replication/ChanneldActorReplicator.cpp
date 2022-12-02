@@ -201,7 +201,10 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 		}
 	}
 
-	FullState->MergeFrom(*DeltaState);
+	if (bStateChanged)
+	{
+		FullState->MergeFrom(*DeltaState);
+	}
 }
 
 void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* InNewState)

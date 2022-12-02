@@ -73,7 +73,10 @@ void FChanneldPlayerControllerReplicator::OnStateChanged(const google::protobuf:
 	
 	//auto CharacterState = static_cast<const unrealpb::PlayerControllerState*>(NewState);
 
-	FullState->MergeFrom(*NewState);
+	if (bStateChanged)
+	{
+		FullState->MergeFrom(*DeltaState);
+	}
 }
 
 TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess)

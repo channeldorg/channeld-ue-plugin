@@ -57,7 +57,10 @@ void FChanneldControllerReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	FullState->MergeFrom(*DeltaState);
+	if (bStateChanged)
+	{
+		FullState->MergeFrom(*DeltaState);
+	}
 }
 
 void FChanneldControllerReplicator::OnStateChanged(const google::protobuf::Message* InNewState)

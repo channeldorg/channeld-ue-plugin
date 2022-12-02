@@ -161,8 +161,10 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	// TODO: Optimization: Set the FullState as well as the DeltaState above
-	FullState->MergeFrom(*DeltaState);
+	if (bStateChanged)
+	{
+		FullState->MergeFrom(*DeltaState);
+	}
 }
 
 void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Message* InNewState)
