@@ -41,6 +41,7 @@ public:
 	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider);
 	virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider);
 	void AddActorProvider(ChannelId ChId, AActor* Actor);
+	void AddActorProvider(AActor* Actor);
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void MoveProvider(ChannelId OldChId, ChannelId NewChId, IChannelDataProvider* Provider);

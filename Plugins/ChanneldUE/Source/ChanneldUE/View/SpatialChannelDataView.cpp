@@ -595,8 +595,12 @@ void USpatialChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayer
 
 bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId)
 {
-	// Don't set NetId-ChannelId mapping or add the provider, as we don't have the spatial channelId of the object yet.
+	// Don't set the NetId-ChannelId mapping, as we don't have the spatial channelId of the object yet.
 	// The spatial channelId will be queried in AddProviderToDefaultChannel()
+	if (Obj->IsA<AActor>())
+	{
+		AddActorProvider(Cast<AActor>(Obj));
+	}
 	return true;
 }
 

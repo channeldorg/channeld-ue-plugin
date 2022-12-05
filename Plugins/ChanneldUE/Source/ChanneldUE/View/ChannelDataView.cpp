@@ -58,6 +58,10 @@ void UChannelDataView::Initialize(UChanneldConnection* InConn)
 
 void UChannelDataView::InitServer()
 {
+	// Add the GameStateBase (if it's a IChannelDataProvider).
+	// Missing this step will cause client failed to begin player.
+	AddActorProvider(GetWorld()->GetAuthGameMode()->GameState);
+	
 	ReceiveInitServer();
 }
 
@@ -195,6 +199,18 @@ void UChannelDataView::AddActorProvider(ChannelId ChId, AActor* Actor)
 	for (auto Comp : Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
 	{
 		AddProvider(ChId, Cast<IChannelDataProvider>(Comp));
+	}
+}
+
+void UChannelDataView::AddActorProvider(AActor* Actor)
+{
+	if (Actor->Implements<UChannelDataProvider>())
+	{
+		AddProviderToDefaultChannel(Cast<IChannelDataProvider>(Actor));
+	}
+	for (const auto Comp : Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+	{
+		AddProviderToDefaultChannel(Cast<IChannelDataProvider>(Comp));
 	}
 }
 

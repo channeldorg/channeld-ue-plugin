@@ -115,9 +115,11 @@ void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMes
 				ChanneldUtils::SetActorRoleByOwningConnId(NewActor, SpawnMsg->owningconnid());
 				LocalRole = NewActor->GetLocalRole();
 			}
-
-			// UChanneldNetDriver::NotifyActorChannelOpen doesn't always get called in ChanneldUtils::GetObjectByRef.
-			NotifyActorChannelOpen(nullptr, NewActor);
+			
+			if (ChannelDataView.IsValid())
+			{
+				ChannelDataView->AddActorProvider(NewActor);
+			}
 		}
 
 		if (ChannelDataView.IsValid())
@@ -598,6 +600,9 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		return;
 	}
 
+	// Make sure the NetGUID exists.
+	FNetworkGUID NetId = GuidCache->GetOrAssignNetGUID(Actor);
+	
 	/* Newly spawned actor always has LocalRole = Authority
 	if (!Actor->HasAuthority())
 	{
@@ -631,7 +636,6 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	*/
 	if (ChannelDataView.IsValid())
 	{
-		FNetworkGUID NetId = GuidCache->GetOrAssignNetGUID(Actor);
 		if (!ChannelDataView->OnServerSpawnedObject(Actor, NetId))
 		{
 			return;
@@ -709,6 +713,7 @@ void UChanneldNetDriver::SetAllSentSpawn(const FNetworkGUID NetId)
 void UChanneldNetDriver::NotifyActorChannelOpen(UActorChannel* Channel, AActor* Actor)
 {
 	UE_LOG(LogChanneld, Verbose, TEXT("ActorChannelOpen: %s"), *GetNameSafe(Actor));
+	// Actor's RPC can be invoked before BeginPlay(), so we need to make sure the replicators have been created at this moment.
 	if (auto Comp = Actor->GetComponentByClass(UChanneldReplicationComponent::StaticClass()))
 	{
 		auto RepComp = Cast<UChanneldReplicationComponent>(Comp);
