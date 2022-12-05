@@ -6,6 +6,7 @@
 #include "View/ChannelDataView.h"
 #include "ChanneldNetConnection.h"
 #include "PlayerStartLocator.h"
+#include "ProtoMessageObject.h"
 #include "Tools/SpatialVisualizer.h"
 #include "SpatialChannelDataView.generated.h"
 
@@ -19,7 +20,7 @@ class CHANNELDUE_API USpatialChannelDataView : public UChannelDataView
 
 public:
 	USpatialChannelDataView(const FObjectInitializer& ObjectInitializer);
-	
+
 	virtual void InitServer() override;
 	virtual void InitClient() override;
 
@@ -32,6 +33,9 @@ public:
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
 	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId) override;
 	virtual void SendSpawnToConn(AActor* Actor, UChanneldNetConnection* NetConn, uint32 OwningConnId) override;
+
+	UPROPERTY(EditAnywhere)
+	UProtoMessageObject* ChannelInitData;
 	
 private:
 
@@ -48,17 +52,22 @@ private:
 	UPROPERTY()
 	USpatialVisualizer* Visualizer;
 
+	// Object that are spawned in the server but don't need to send the spawn to the client connection.
+	// Common case: handover pawn should not be sent to the client that owns the pawn.
+	TMap<TWeakObjectPtr<UObject>, ConnectionId> ServerIgnoreSendSpawnObjects;
+
 	void ServerHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 
 	/**
-	 * @brief Create the ChanneldNetConnection and the PlayerController for the client
+	 * @brief Create the ChanneldNetConnection for the client. The PlayerController will not be created for the connection.
 	 * @param ConnId The channeld connection ID of the client
 	 * @param ChId The spatial channel the client belongs to 
 	 * @return 
 	 */
 	UChanneldNetConnection* CreateClientConnection(ConnectionId ConnId, ChannelId ChId);
+	void CreatePlayerController(UChanneldNetConnection* ClientConn);
 
 	void SendSpawnToAdjacentChannels(UObject* Obj, ChannelId SpatialChId);
 };

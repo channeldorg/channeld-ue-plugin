@@ -59,7 +59,7 @@ void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMes
 	if (OldObj)
 	{
 		UE_LOG(LogChanneld, Log, TEXT("[Client] Found spawned object %s of duplicated NetId: %d, will be destroyed."), *GetNameSafe(OldObj), SpawnMsg->obj().netguid());
-
+		
 		GuidCache->ObjectLookup.Remove(NetId);
 		GuidCache->NetGUIDLookup.Remove(OldObj);
 			

@@ -9,8 +9,11 @@
 #include "ChanneldUtils.h"
 #include "Net/DataChannel.h"
 #include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameSession.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerStart.h"
+#include "GameFramework/PlayerState.h"
+#include "Kismet/GameplayStatics.h"
 
 USpatialChannelDataView::USpatialChannelDataView(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -29,13 +32,6 @@ UChanneldNetConnection* USpatialChannelDataView::CreateClientConnection(Connecti
 		ControlChannel->OpenAcked = 1;
 		ControlChannel->OpenPacketId.First = 0;
 		ControlChannel->OpenPacketId.Last = 0;
-
-		//~ Begin copy of UWorld::NotifyControlMessage
-		FURL InURL( NULL, *ClientConn->RequestURL, TRAVEL_Absolute );
-		FString ErrorMsg;
-		ClientConn->PlayerController = GetWorld()->SpawnPlayActor( ClientConn, ROLE_AutonomousProxy, InURL, ClientConn->PlayerId, ErrorMsg );
-		ClientConn->SetClientLoginState(EClientLoginState::ReceivedJoin);
-		//~ End copy
 		
 		ClientInChannels.Add(ConnId, ChId);
 
@@ -47,6 +43,61 @@ UChanneldNetConnection* USpatialChannelDataView::CreateClientConnection(Connecti
 	}
 	
 	return nullptr;
+}
+
+void USpatialChannelDataView::CreatePlayerController(UChanneldNetConnection* ClientConn)
+{
+	//~ Begin copy of UWorld::NotifyControlMessage
+	FURL InURL( NULL, *ClientConn->RequestURL, TRAVEL_Absolute );
+	FString ErrorMsg;
+	/* SpawnPlayActor will create the PC AND the Pawn. We need to skip some process that involves player login.
+	ClientConn->PlayerController = GetWorld()->SpawnPlayActor( ClientConn, ROLE_AutonomousProxy, InURL, ClientConn->PlayerId, ErrorMsg );
+	*/
+
+	//~ Begin copy of UWorld::SpawnPlayActor
+	if (AGameModeBase* const GameMode = GetWorld()->GetAuthGameMode())
+	{
+		// Make the option string.
+		FString Options;
+		for (int32 i = 0; i < InURL.Op.Num(); i++)
+		{
+			Options += TEXT('?');
+			Options += InURL.Op[i];
+		}
+
+		// ~ Begin copy of AGameModeBase::Login
+		FString ErrorMessage = GameMode->GameSession->ApproveLogin(Options);
+		if (!ErrorMessage.IsEmpty())
+		{
+			UE_LOG(LogChanneld, Error, TEXT("Failed to create player controller for conn %d, error: %s"), ClientConn->GetConnId(), *ErrorMessage);
+			return;
+		}
+		
+		APlayerController* const NewPlayerController = GameMode->SpawnPlayerController(ENetRole::ROLE_AutonomousProxy, Options);
+		if (NewPlayerController == nullptr)
+		{
+			UE_LOG(LogGameMode, Log, TEXT("Login: Couldn't spawn player controller of class %s"), GameMode->PlayerControllerClass ? *GameMode->PlayerControllerClass->GetName() : TEXT("NULL"));
+			return;
+		}
+
+		// ~ Begin copy of AGameModeBase::InitNewPlayer
+		// Register the player with the session
+		GameMode->GameSession->RegisterPlayer(NewPlayerController, ClientConn->PlayerId.GetUniqueNetId(), UGameplayStatics::HasOption(Options, TEXT("bIsFromInvite")));
+		GameMode->ChangeName(NewPlayerController, FString::Printf(TEXT("Player_%d"), ClientConn->GetConnId()), false);
+		// ~ End copy of AGameModeBase::InitNewPlayer
+		
+		// ~ End copy of AGameModeBase::Login
+		
+		// Possess the newly-spawned player.
+		NewPlayerController->NetPlayerIndex = 0;
+		NewPlayerController->SetRole(ROLE_Authority);
+		NewPlayerController->SetReplicates(true);
+		NewPlayerController->SetPlayer(ClientConn);
+	}
+	//~ End copy of UWorld::SpawnPlayActor
+	
+	ClientConn->SetClientLoginState(EClientLoginState::ReceivedJoin);
+	//~ End copy of UWorld::NotifyControlMessage
 }
 
 void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
@@ -97,33 +148,61 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	// Destination spatial server - the channel data is handed over to
 	if (Connection->SubscribedChannels.Contains(HandoverMsg->dstchannelid()))
 	{
-		// Set the NetId-ChannelId mapping before spawn the object.
+		// Set the NetId-ChannelId mapping before spawn the object, so AddProviderToDefaultChannel won't have to query the spatial channel.
 		SetOwningChannelId(NetId, HandoverMsg->dstchannelid());
 		
 		UObject* HandoverObj = nullptr;
+		// Player enters the server - only Pawn has clientConnId > 0
 		if (HandoverData.clientconnid() > 0)
 		{
+			const ConnectionId ClientConnId = HandoverData.clientconnid();
 			UChanneldNetConnection* ClientConn;
-			if (ClientInChannels.Contains(HandoverData.clientconnid()))
+			if (ClientInChannels.Contains(ClientConnId))
 			{
-				ClientConn = GetChanneldSubsystem()->GetNetDriver()->GetClientConnection(HandoverData.clientconnid());
+				ClientConn = GetChanneldSubsystem()->GetNetDriver()->GetClientConnection(ClientConnId);
 			}
 			else
 			{
-				// Create the client connection if it doesn't exist yet
-				ClientConn = CreateClientConnection(HandoverData.clientconnid(), HandoverMsg->dstchannelid());
+				// Create the client connection if it doesn't exist yet. Don't create the PlayerController for now.
+				ClientConn = CreateClientConnection(ClientConnId, HandoverMsg->dstchannelid());
 			}
 			// Update the channelId for LowLevelSend()
-			ClientInChannels[HandoverData.clientconnid()] = HandoverMsg->dstchannelid();
-			UE_LOG(LogChanneld, Log, TEXT("[Server] Updated mapping of connId: %d -> channelId: %d"), HandoverMsg->contextconnid(), HandoverMsg->dstchannelid());
+			ClientInChannels[ClientConnId] = HandoverMsg->dstchannelid();
+			UE_LOG(LogChanneld, Log, TEXT("[Server] Updated mapping of connId: %d -> channelId: %d"), ClientConnId, HandoverMsg->dstchannelid());
 
-			HandoverObj = ChanneldUtils::GetObjectByRef(&HandoverObjRef, GetWorld(), true, ClientConn);
-			
-			if (HandoverObj && HandoverObj->IsA<APawn>())
+			const bool bHasAuthority = Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid());
+			// Set the NetId of the Pawn as exported, so it won't send the Spawn message of the Pawn to the client.
+			ClientConn->SetSentSpawned(NetId);
+			/*
+			FOnActorSpawned::FDelegate Delegate = FOnActorSpawned::FDelegate::CreateLambda([&, bHasAuthority, ClientConnId](AActor* Actor)
 			{
-				ClientConn->PlayerController->Possess(Cast<APawn>(HandoverObj));
+				// Actor->SetRole(bHasAuthority ? ROLE_Authority : ROLE_SimulatedProxy);
+				ServerIgnoreSendSpawnObjects[Actor] = ClientConnId;
+			});
+			GetWorld()->AddOnActorPreSpawnInitialization(Delegate);
+			*/
+			HandoverObj = ChanneldUtils::GetObjectByRef(&HandoverObjRef, GetWorld(), true, ClientConn);
+			/*
+			GetWorld()->RemoveOnActorPreSpawnInitialization(Delegate.GetHandle());
+			*/
+			
+			// When the pawn moves into the authority area of this server, create the PlayerController and posses the pawn.
+			if (HandoverObj && HandoverObj->IsA<APawn>() && bHasAuthority)
+			{
+				if (ClientConn->PlayerController == nullptr)
+				{
+					// FIXME: the NetId won't match the client's, causing RPC failure.
+					CreatePlayerController(ClientConn);
+					UE_LOG(LogChanneld, Log, TEXT("[Server] Create PlayerController for client conn %d"), ClientConn->GetConnId());
+				}
+				if (ClientConn->PlayerController)
+				{
+					ClientConn->PlayerController->Possess(Cast<APawn>(HandoverObj));
+					UE_LOG(LogChanneld, Log, TEXT("[Server] PlayerController possessed pawn %s"), *HandoverObj->GetName());
+				}
 			}
 		}
+		// Non-player object enters the server. Simply create it.
 		else
 		{
 			HandoverObj = ChanneldUtils::GetObjectByRef(&HandoverObjRef, GetWorld(), true);
@@ -292,7 +371,8 @@ void USpatialChannelDataView::InitServer()
 	
 	Connection->SubToChannel(GlobalChannelId, nullptr, [&](const channeldpb::SubscribedToChannelResultMessage* _)
 	{
-		Connection->CreateSpatialChannel(TEXT(""), nullptr, nullptr, nullptr, [](const channeldpb::CreateSpatialChannelsResultMessage* ResultMsg)
+		Connection->CreateSpatialChannel(TEXT(""), nullptr, ChannelInitData ? ChannelInitData->GetMessage() : nullptr, nullptr,
+			[](const channeldpb::CreateSpatialChannelsResultMessage* ResultMsg)
 		{
 			FString StrChIds;
 			for (int i = 0; i < ResultMsg->spatialchannelid_size(); i++)
@@ -524,8 +604,8 @@ void USpatialChannelDataView::SendSpawnToConn(AActor* Actor, UChanneldNetConnect
 {
 	// Location must be set for channeld to update the spatial channelId.
 	FVector Location = Actor->GetActorLocation();
-	// Set the PC's location to the start position, to make sure PC is in the same spatial channel as the pawn.
-	if (Actor->IsA<APlayerController>())
+	// Set the location of PlayerController or PlayerState to the start position, to make sure them are in the same spatial channel as the pawn.
+	if (Actor->IsA<APlayerController>() || Actor->IsA<APlayerState>())
 	{
 		AActor* StartSpot;
 		Location = PlayerStartLocator->GetPlayerStartPosition(OwningConnId, StartSpot);
