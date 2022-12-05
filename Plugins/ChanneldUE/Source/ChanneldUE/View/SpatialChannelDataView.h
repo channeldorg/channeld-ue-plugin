@@ -30,6 +30,7 @@ public:
 	virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider) override;
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved) override;
 
+	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, ChannelId ChId);
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
 	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId) override;
 	virtual void SendSpawnToConn(AActor* Actor, UChanneldNetConnection* NetConn, uint32 OwningConnId) override;

@@ -46,6 +46,7 @@ public:
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void MoveProvider(ChannelId OldChId, ChannelId NewChId, IChannelDataProvider* Provider);
 
+	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, ChannelId ChId){}
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn);
 	virtual FNetworkGUID GetNetId(UObject* Obj) const;
 	virtual FNetworkGUID GetNetId(IChannelDataProvider* Provider) const;

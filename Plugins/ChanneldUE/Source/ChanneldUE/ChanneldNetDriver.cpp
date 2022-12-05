@@ -28,7 +28,7 @@ UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializ
 {
 }
 
-UChanneldNetConnection* UChanneldNetDriver::AddChanneldClientConnection(ConnectionId ClientConnId)
+UChanneldNetConnection* UChanneldNetDriver::AddChanneldClientConnection(ConnectionId ClientConnId, ChannelId ChId)
 {
 	auto ClientConnection = NewObject<UChanneldNetConnection>(GetTransientPackage(), NetConnectionClass);
 	ClientConnection->bDisableHandshaking = GetMutableDefault<UChanneldSettings>()->bDisableHandshaking;
@@ -40,6 +40,11 @@ UChanneldNetConnection* UChanneldNetDriver::AddChanneldClientConnection(Connecti
 	AddClientConnection(ClientConnection);
 
 	ClientConnectionMap.Add(ClientConnId, ClientConnection);
+
+	if (ChannelDataView.IsValid())
+	{
+		ChannelDataView->OnAddClientConnection(ClientConnection, ChId);
+	}
 
 	UE_LOG(LogChanneld, Log, TEXT("Server added client connection %d, total connections: %d (%d)"), ClientConnId, ClientConnections.Num(), ClientConnectionMap.Num());
 
@@ -163,7 +168,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 			// Server's ClientConnection is created when the first packet (NMT_Hello) from client arrives.
 			if (ClientConnection == nullptr)
 			{
-				ClientConnection = AddChanneldClientConnection(ClientConnId);
+				ClientConnection = AddChanneldClientConnection(ClientConnId, ChId);
 			}
 			ClientConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
 		}

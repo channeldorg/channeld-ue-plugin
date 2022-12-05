@@ -60,7 +60,7 @@ public:
 	virtual void NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTravel) override;
 	//~ End UNetDriver Interface
 	
-	UChanneldNetConnection* AddChanneldClientConnection(ConnectionId ClientConnId);
+	UChanneldNetConnection* AddChanneldClientConnection(ConnectionId ClientConnId, ChannelId ChId);
 
 	void ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDelayRPC);
 
