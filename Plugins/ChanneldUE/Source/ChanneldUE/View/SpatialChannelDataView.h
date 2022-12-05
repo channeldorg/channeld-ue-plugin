@@ -52,9 +52,13 @@ private:
 	UPROPERTY()
 	USpatialVisualizer* Visualizer;
 
+	/* Implemented by UChanneldNetConnection::SetSentSpawned
 	// Object that are spawned in the server but don't need to send the spawn to the client connection.
 	// Common case: handover pawn should not be sent to the client that owns the pawn.
 	TMap<TWeakObjectPtr<UObject>, ConnectionId> ServerIgnoreSendSpawnObjects;
+	*/
+	
+	bool bSuppressAddProviderOnServerSpawn = false;
 
 	void ServerHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);

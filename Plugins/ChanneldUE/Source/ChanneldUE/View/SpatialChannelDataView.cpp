@@ -173,18 +173,12 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 			const bool bHasAuthority = Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid());
 			// Set the NetId of the Pawn as exported, so it won't send the Spawn message of the Pawn to the client.
 			ClientConn->SetSentSpawned(NetId);
-			/*
-			FOnActorSpawned::FDelegate Delegate = FOnActorSpawned::FDelegate::CreateLambda([&, bHasAuthority, ClientConnId](AActor* Actor)
-			{
-				// Actor->SetRole(bHasAuthority ? ROLE_Authority : ROLE_SimulatedProxy);
-				ServerIgnoreSendSpawnObjects[Actor] = ClientConnId;
-			});
-			GetWorld()->AddOnActorPreSpawnInitialization(Delegate);
-			*/
+
+			// HACK: turn off AddProviderToDefaultChannel() temporarily, as the NetId of the handover object may mismatch when just created. (ChanneldUtils@L656)
+			bSuppressAddProviderOnServerSpawn = true;
 			HandoverObj = ChanneldUtils::GetObjectByRef(&HandoverObjRef, GetWorld(), true, ClientConn);
-			/*
-			GetWorld()->RemoveOnActorPreSpawnInitialization(Delegate.GetHandle());
-			*/
+			bSuppressAddProviderOnServerSpawn = false;
+			OnServerSpawnedObject(HandoverObj, NetId);
 			
 			// When the pawn moves into the authority area of this server, create the PlayerController and posses the pawn.
 			if (HandoverObj && HandoverObj->IsA<APawn>() && bHasAuthority)
@@ -595,11 +589,14 @@ void USpatialChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayer
 
 bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId)
 {
-	// Don't set the NetId-ChannelId mapping, as we don't have the spatial channelId of the object yet.
-	// The spatial channelId will be queried in AddProviderToDefaultChannel()
-	if (Obj->IsA<AActor>())
+	if (!bSuppressAddProviderOnServerSpawn)
 	{
-		AddActorProvider(Cast<AActor>(Obj));
+		// Don't set the NetId-ChannelId mapping, as we don't have the spatial channelId of the object yet.
+		// The spatial channelId will be queried in AddProviderToDefaultChannel()
+		if (Obj->IsA<AActor>())
+		{
+			AddActorProvider(Cast<AActor>(Obj));
+		}
 	}
 	return true;
 }
