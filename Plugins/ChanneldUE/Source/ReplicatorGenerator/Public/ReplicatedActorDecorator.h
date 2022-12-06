@@ -1,29 +1,23 @@
 ﻿#pragma once
+#include "IPropertyDecoratorOwner.h"
 #include "PropertyDecorator.h"
 #include "RPCDecorator.h"
 #include "Manifest.h"
 
-static const TCHAR* ReplicatedActorDeco_ProtoStateMessageTemplate =
-	LR"EOF(
-message {Declare_StateMessageType} {
-  {Declare_ProtoFields}
-}
-)EOF";
-
 static const TCHAR* ReplicatedActorDeco_GetCode_AssignPropertyPointerTemplate =
 	LR"EOF(
   {
-    auto Property = CastFieldChecked<const {Declare_PropertyType}>({Ref_TargetInstanceRef}->GetClass()->FindPropertyByName(FName("{Declare_PropertyName}")));
-    {Declare_PropertyPointer} = Property->ContainerPtrToValuePtr<{Declare_PropertyCPPType}>({Ref_TargetInstanceRef}.Get());
-    check({Declare_PropertyPointer});
+    {Code_GetAssignPropertyPointer};
   }
 )EOF";
 
-class FReplicatedActorDecorator
+class FReplicatedActorDecorator : public IPropertyDecoratorOwner
 {
 public:
 	FReplicatedActorDecorator(const UClass*);
-
+	
+	virtual ~FReplicatedActorDecorator() = default;
+	
 	TArray<TSharedPtr<FPropertyDecorator>>& GetPropertyDecorators() { return Properties; }
 
 	void Init();
@@ -43,6 +37,11 @@ public:
 	 * Get code of include target actor header
 	 */
 	FString GetActorHeaderIncludePath();
+
+	/**
+     * Get code of additional include files 
+     */
+	FString GetAdditionalIncludeFiles();
 
 	/**
 	 * Get class name of generated replicator
@@ -96,7 +95,7 @@ public:
 	 */
 	FString GetDefinition_ProtoStateMessage();
 
-	bool IsBlueprintGenerated();
+	virtual bool IsBlueprintType() override;
 
 protected:
 	const UClass* Target;

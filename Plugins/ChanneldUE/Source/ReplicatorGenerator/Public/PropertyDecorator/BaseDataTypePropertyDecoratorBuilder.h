@@ -10,9 +10,9 @@ public: \
 	{ \
 		return Property->IsA<PropertyType>(); \
 	} \
-	virtual FPropertyDecorator* ConstructPropertyDecorator(FProperty* Property) override \
+	virtual FPropertyDecorator* ConstructPropertyDecorator(FProperty* Property, IPropertyDecoratorOwner* InOwner) override \
 	{ \
-		return new PropertyDecorator(); \
+		return new PropertyDecorator(Property, InOwner); \
 	} \
 }
 

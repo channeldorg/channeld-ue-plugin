@@ -4,8 +4,6 @@
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 
-static 
-
 class REPLICATORGENERATOR_API FReplicatorGeneratorManager
 {
 protected:

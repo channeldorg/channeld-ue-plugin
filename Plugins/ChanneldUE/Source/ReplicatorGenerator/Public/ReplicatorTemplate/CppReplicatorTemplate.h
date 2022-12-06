@@ -9,6 +9,7 @@ static const TCHAR* CodeGen_CPP_HeadCodeTemplate =
 #include "Net/UnrealNetwork.h"
 {Code_IncludeActorHeader}
 #include "{File_ProtoPbHead}"
+{Code_AdditionalInclude}
 
 class {Declare_ReplicatorClassName} : public FChanneldReplicatorBase
 {
@@ -117,11 +118,19 @@ void {Declare_ReplicatorClassName}::OnStateChanged(const google::protobuf::Messa
 }
 )EOF";
 
-static const TCHAR* CodeGen_CPP_ProtoTemplate =
+static const TCHAR* CodeGen_ProtoTemplate =
 	LR"EOF(
 syntax = "proto3";
+{Code_Import}
 package {Declare_ProtoPackageName};
 {Definition_ProtoStateMsg}
+)EOF";
+
+static const TCHAR* CodeGen_ProtoStateMessageTemplate =
+  LR"EOF(
+message {Declare_StateMessageType} {
+{Declare_ProtoFields}
+}
 )EOF";
 
 static const FString CodeGen_RegisterReplicatorTemplate =

@@ -8,7 +8,7 @@
 #include "GameFramework/Character.h"
 #include "Replication/ChanneldReplicationComponent.h"
 
-DEFINE_LOG_CATEGORY(LogChanneldReplicatorGenerator);
+DEFINE_LOG_CATEGORY(LogChanneldRepGenerator);
 
 FReplicatorGeneratorManager::FReplicatorGeneratorManager()
 {
@@ -72,7 +72,7 @@ TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(TArray
 		UClass* Class = CastChecked<UClass>(ClassObj);
 		if (IgnoreActorsSet.Contains(Class))
 		{
-			UE_LOG(LogChanneldReplicatorGenerator, Log, TEXT("Ignore generating replicator for %s"), *Class->GetName());
+			UE_LOG(LogChanneldRepGenerator, Log, TEXT("Ignore generating replicator for %s"), *Class->GetName());
 			continue;
 		}
 		if (!Class->IsChildOf(AActor::StaticClass()))
@@ -115,7 +115,7 @@ TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(TArray
 		}
 		if (IgnoreActorsSet.Contains(GeneratedClass))
 		{
-			UE_LOG(LogChanneldReplicatorGenerator, Log, TEXT("Ignore generating replicator for %s"), *GeneratedClass->GetName());
+			UE_LOG(LogChanneldRepGenerator, Log, TEXT("Ignore generating replicator for %s"), *GeneratedClass->GetName());
 			continue;
 		}
 		bool bOwnReplicationComponent = false;
@@ -176,7 +176,7 @@ TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(TArray
 		}
 		if (IgnoreActorsSet.Contains(ThisClass))
 		{
-			UE_LOG(LogChanneldReplicatorGenerator, Log, TEXT("Ignore generating replicator for %s"), *ThisClass->GetName());
+			UE_LOG(LogChanneldRepGenerator, Log, TEXT("Ignore generating replicator for %s"), *ThisClass->GetName());
 			continue;
 		}
 		ActorsWithReplicationComp.Add(ThisClass);
@@ -212,7 +212,10 @@ bool FReplicatorGeneratorManager::GeneratedAllReplicators()
 		WriteProtoFile(GeneratedDir / ReplicatorCode.ProtoFileName, ReplicatorCode.ProtoDefinitions, WriteCodeFileMessage);
 	}
 	// Generate replicator register code file
-	WriteCodeFile(GeneratedDir / TEXT("ChanneldReplicatorRegister.h"), ReplicatorCodeBundle.RegisterReplicatorFileCode, WriteCodeFileMessage);
+	WriteCodeFile(GeneratedDir / GenManager_RepRegisterFile, ReplicatorCodeBundle.RegisterReplicatorFileCode, WriteCodeFileMessage);
+
+	// Generate global struct declarations file
+	WriteCodeFile(GeneratedDir / GenManager_GlobalStructHeaderFile, ReplicatorCodeBundle.GlobalStructCodes, WriteCodeFileMessage);
 
 	return true;
 }
@@ -237,7 +240,12 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(UClass* Target)
 		WriteProtoFile(GeneratedDir / ReplicatorCode.ProtoFileName, ReplicatorCode.ProtoDefinitions, WriteCodeFileMessage);
 	}
 	// Generate replicator register code file
-	WriteCodeFile(GeneratedDir / TEXT("ChanneldReplicatorRegister.h"), ReplicatorCodeBundle.RegisterReplicatorFileCode, WriteCodeFileMessage);
+	WriteCodeFile(GeneratedDir / GenManager_RepRegisterFile, ReplicatorCodeBundle.RegisterReplicatorFileCode, WriteCodeFileMessage);
+
+	// Generate global struct declarations file
+	WriteCodeFile(GeneratedDir / GenManager_GlobalStructHeaderFile, ReplicatorCodeBundle.GlobalStructCodes, WriteCodeFileMessage);
+
+	WriteProtoFile(GeneratedDir / GenManager_GlobalStructProtoFile, ReplicatorCodeBundle.GlobalStructProtoDefinitions, WriteCodeFileMessage);
 
 	return true;
 }

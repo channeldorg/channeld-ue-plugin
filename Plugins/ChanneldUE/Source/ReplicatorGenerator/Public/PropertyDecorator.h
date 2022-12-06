@@ -1,17 +1,41 @@
 ﻿#pragma once
 
+#include "IPropertyDecoratorOwner.h"
+
+static const TCHAR* PropDecorator_GetCode_AssignPropertyPointerTemplate =
+	LR"EOF({Ref_AssignTo} = {Ref_ContainerTemplate}->FindPropertyByName(FName(TEXT("{Declare_PropertyName}")))->ContainerPtrToValuePtr<{Declare_PropertyCPPType}>({Ref_ContainerAddr}))EOF";
+
+const static TCHAR* PropertyDecorator_SetDeltaStateTemplate =
+	LR"EOF(
+if (!({Code_ActorPropEqualToProtoState}))
+{
+  {Code_SetProtoFieldValue};
+  bStateChanged = true;
+}
+)EOF";
+
+const static TCHAR* PropertyDecorator_OnChangeStateTemplate =
+	LR"EOF(
+if ({Code_HasProtoFieldValue} && !({Code_ActorPropEqualToProtoState}))
+{
+  {Code_SetPropertyValue}
+}
+)EOF";
+
 class FReplicatedActorDecorator;
 
-class FPropertyDecorator
+class FPropertyDecorator : public IPropertyDecoratorOwner
 {
 public:
-	FPropertyDecorator() = default;
+	FPropertyDecorator(FProperty* InProperty, IPropertyDecoratorOwner* InOwner): Owner(InOwner), OriginalProperty(InProperty)
+	{
+	}
 
 	virtual ~FPropertyDecorator() = default;
 
-	virtual bool Init(FProperty* Property, FReplicatedActorDecorator* InOwner);
-
-	virtual bool IsBlueprintType();
+	virtual bool Init();
+	
+	virtual bool IsBlueprintType() override;
 
 	/**
 	 * If the access of the property is private or protect return false, else return true
@@ -39,7 +63,11 @@ public:
  	 * Get cpp type
  	 */
 	virtual FString GetCPPType();
-
+	
+	virtual FString GetProtoPackageName() override;
+	virtual FString GetProtoNamespace() override;
+	virtual FString GetProtoStateMessageType() override;
+	
 	/**
 	 * Get the protobuf field rule
 	 */
@@ -63,6 +91,7 @@ public:
 
 	/**
 	 * Get the protobuf field definition
+	 * 
 	 * For example:
 	 *   optional bool bIsCrouched
 	 */
@@ -70,6 +99,7 @@ public:
 
 	/**
 	 * Get the protobuf field definition with field number
+	 * 
 	 * For example:
 	 *   optional bool bIsCrouched = 6
 	 */
@@ -82,14 +112,32 @@ public:
 	 *   Actor->bIsCrouched
 	 */
 	virtual FString GetCode_GetPropertyValueFrom(const FString& TargetInstance);
+	virtual FString GetCode_GetPropertyValueFrom(const FString& TargetInstance, bool ForceFromPointer);
 
+	
 	/**
      * Code that getting property value from outer actor
      *
      * For example:
      *   Actor->bIsCrouched = xxx
      */
-	virtual FString GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& GetValueCode);
+	virtual FString GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStataName, const FString& AfterSetValueCode);
+
+	/**
+      * Declaration of property pointer
+      *
+      * For example:
+      *   bool* bIsCrouched
+      */
+	virtual FString GetDeclaration_PropertyPtr();
+	
+	/**
+	 * Code of assign property pointer
+	 *
+	 * For example:
+	 *     CastFieldChecked<const FByteProperty>(Actor->GetClass()->FindPropertyByName(FName("ByteProperty01")))->Property->ContainerPtrToValuePtr<uint8>(Actor.Get())
+	 */
+	virtual FString GetCode_AssignPropertyPointer(const FString& Container, const FString& ContainerTemplate, const FString& AssignTo);
 
 	/**
 	 * Code that get field value from protobuf message
@@ -113,6 +161,15 @@ public:
 	 *   NewState->has_biscrouched()
 	 */
 	virtual FString GetCode_HasProtoFieldValueIn(const FString& StateName);
+	
+	/**
+	 * Code of actor property equal to protobuf state
+	 *
+	 * For example:
+	 *   *ByteProperty01Ptr != FullState->byteproperty01()
+	 */
+	virtual FString GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState);
+	virtual FString GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState, bool ForceFromPointer);
 
 	/**
 	 * Code that set delta state
@@ -135,13 +192,18 @@ public:
 	 */
 	virtual FString GetCode_OnStateChange(const FString& TargetInstance, const FString& NewStateName);
 
+	/*
+	 * Get addition include header file
+	 */
+	virtual TArray<FString> GetAdditionalIncludes();
+
 protected:
-	FReplicatedActorDecorator* Owner = nullptr;
+	IPropertyDecoratorOwner* Owner = nullptr;
 
 	FProperty* OriginalProperty = nullptr;
 
 	// protobuf field rule
-	FString ProtoFieldRule;
+	FString ProtoFieldRule = TEXT("optional");
 
 	// protobuf field type
 	FString ProtoFieldType;

@@ -21,4 +21,4 @@ namespace ChanneldReplication
 	ChanneldReplication::RegisterReplicator(TargetClass::StaticClass(), [](UObject* InTargetObj){ return new ReplicatorClass(CastChecked<TargetClass>(InTargetObj)); })
 
 #define REGISTER_REPLICATOR_BP(ReplicatorClass, BlueprintPathName) \
-	ChanneldReplication::RegisterReplicator(BlueprintPathName, [](UObject* InTargetObj){ return new ReplicatorClass(InTargetObj); }); \
+	ChanneldReplication::RegisterReplicator(BlueprintPathName, [](UObject* InTargetObj){ return new ReplicatorClass(InTargetObj, BlueprintPathName); }); \

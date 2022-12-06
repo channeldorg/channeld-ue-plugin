@@ -8,11 +8,12 @@ static const TCHAR* CodeGen_BP_HeadCodeTemplate =
 #include "Replication/ChanneldReplicatorBase.h"
 #include "Net/UnrealNetwork.h"
 #include "{File_ProtoPbHead}"
+{Code_AdditionalInclude}
 
 class {Declare_ReplicatorClassName} : public FChanneldReplicatorBase_BP
 {
 public:
-  {Declare_ReplicatorClassName}(UObject* InTargetObj);
+  {Declare_ReplicatorClassName}(UObject* InTargetObj, const FString& BlueprintPath);
   virtual ~{Declare_ReplicatorClassName}() override;
 
   //~Begin FChanneldReplicatorBase Interface
@@ -38,8 +39,8 @@ private:
 
 static const TCHAR* CodeGen_BP_ConstructorImplTemplate =
   LR"EOF(
-{Declare_ReplicatorClassName}::{Declare_ReplicatorClassName}(UObject* InTargetObj)
-	: FChanneldReplicatorBase_BP(InTargetObj)
+{Declare_ReplicatorClassName}::{Declare_ReplicatorClassName}(UObject* InTargetObj, const FString& BlueprintPath)
+	: FChanneldReplicatorBase_BP(InTargetObj, BlueprintPath)
 {
   {Ref_TargetInstanceRef} = CastChecked<AActor>(InTargetObj);
   // Remove the registered DOREP() properties in the Actor

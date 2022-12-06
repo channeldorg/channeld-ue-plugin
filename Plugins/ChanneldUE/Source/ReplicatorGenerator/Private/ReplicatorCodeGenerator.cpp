@@ -1,6 +1,7 @@
 ﻿#include "ReplicatorCodeGenerator.h"
 
 #include "Manifest.h"
+#include "PropertyDecoratorFactory.h"
 #include "ReplicatorGeneratorDefinition.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "ReplicatorTemplate/BlueprintActorTemplate.h"
@@ -54,6 +55,17 @@ bool FReplicatorCodeGenerator::Generate(TArray<UClass*> TargetActors, FReplicato
 	FormatArgs.Add(TEXT("Code_ReplicatorRegister"), FStringFormatArg(RegisterCode));
 	ReplicatorCodeBundle.RegisterReplicatorFileCode = FString::Format(*CodeGen_RegisterReplicatorTemplate, FormatArgs);
 
+	auto GlobalStructDecorators = FPropertyDecoratorFactory::Get().GetGlobalStructDecorators();
+	for (auto StructDecorator : GlobalStructDecorators)
+	{
+		ReplicatorCodeBundle.GlobalStructCodes += StructDecorator->GetDeclaration_PropPtrGroupStruct();
+		ReplicatorCodeBundle.GlobalStructProtoDefinitions += StructDecorator->GetDefinition_ProtoStateMessage();
+	}
+	FStringFormatNamedArguments ProtoFormatArgs;
+	ProtoFormatArgs.Add(TEXT("Declare_ProtoPackageName"), GenManager_GlobalStructProtoPackage);
+	ProtoFormatArgs.Add(TEXT("Code_Import"), TEXT(""));
+	ProtoFormatArgs.Add(TEXT("Definition_ProtoStateMsg"), ReplicatorCodeBundle.GlobalStructProtoDefinitions);
+	ReplicatorCodeBundle.GlobalStructProtoDefinitions = FString::Format(CodeGen_ProtoTemplate, ProtoFormatArgs);
 	return true;
 }
 
@@ -62,14 +74,14 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 {
 	const TSharedPtr<FReplicatedActorDecorator> Target = MakeShareable(new FReplicatedActorDecorator(TargetActor));
 
-	if (!Target->IsBlueprintGenerated() && !ModuleInfoByClassName.Contains(Target->GetActorCPPClassName()))
+	if (!Target->IsBlueprintType() && !ModuleInfoByClassName.Contains(Target->GetActorCPPClassName()))
 	{
 		ResultMessage = FString::Printf(TEXT("Can not find the module %s belongs to"), *Target->GetActorCPPClassName());
 		return false;
 	}
 
 	ReplicatorCode.Target = Target;
-	if (!Target->IsBlueprintGenerated())
+	if (!Target->IsBlueprintType())
 	{
 		Target->Init(ModuleInfoByClassName.FindChecked(Target->GetActorCPPClassName()));
 	}
@@ -78,22 +90,23 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 		Target->Init();
 	}
 
-	bool bIsBlueprint = Target->IsBlueprintGenerated();
+	bool bIsBlueprint = Target->IsBlueprintType();
 
-	ReplicatorCode.IncludeActorCode = bIsBlueprint ? TEXT("") : FString::Printf(TEXT("#include \"%s\""), *Target->GetActorHeaderIncludePath());
+	ReplicatorCode.IncludeActorCode = bIsBlueprint ? TEXT("") : FString::Printf(TEXT("#include \"%s\"\n"), *Target->GetActorHeaderIncludePath());
 
 	const FString TargetInstanceRef = TEXT("Actor");
 	FStringFormatNamedArguments FormatArgs;
-	FormatArgs.Add(TEXT("Declare_ReplicatorClassName"), FStringFormatArg(Target->GetReplicatorClassName()));
-	FormatArgs.Add(TEXT("Declare_TargetClassName"), FStringFormatArg(Target->GetActorCPPClassName()));
-	FormatArgs.Add(TEXT("Ref_TargetInstanceRef"), FStringFormatArg(TargetInstanceRef));
-	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), FStringFormatArg(Target->GetProtoNamespace()));
-	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), FStringFormatArg(Target->GetProtoStateMessageType()));
-	FormatArgs.Add(TEXT("Code_IncludeActorHeader"), FStringFormatArg(ReplicatorCode.IncludeActorCode));
+	FormatArgs.Add(TEXT("Declare_ReplicatorClassName"), Target->GetReplicatorClassName());
+	FormatArgs.Add(TEXT("Declare_TargetClassName"), Target->GetActorCPPClassName());
+	FormatArgs.Add(TEXT("Ref_TargetInstanceRef"), TargetInstanceRef);
+	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), Target->GetProtoNamespace());
+	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), Target->GetProtoStateMessageType());
 
 	// ---------- Head code ----------
-	FormatArgs.Add(TEXT("File_ProtoPbHead"), FStringFormatArg(Target->GetActorName() + CodeGen_ProtoPbHeadExtension));
-	FormatArgs.Add(TEXT("Declare_IndirectlyAccessiblePropertyPtrs"), FStringFormatArg(Target->GetCode_IndirectlyAccessiblePropertyPtrDeclarations()));
+	FormatArgs.Add(TEXT("Code_IncludeActorHeader"), ReplicatorCode.IncludeActorCode);
+	FormatArgs.Add(TEXT("File_ProtoPbHead"), Target->GetActorName() + CodeGen_ProtoPbHeadExtension);
+	FormatArgs.Add(TEXT("Code_AdditionalInclude"), Target->GetAdditionalIncludeFiles());
+	FormatArgs.Add(TEXT("Declare_IndirectlyAccessiblePropertyPtrs"), Target->GetCode_IndirectlyAccessiblePropertyPtrDeclarations());
 	ReplicatorCode.HeadCode = FString::Format(bIsBlueprint ? CodeGen_BP_HeadCodeTemplate : CodeGen_CPP_HeadCodeTemplate, FormatArgs);
 	ReplicatorCode.HeadFileName = Target->GetReplicatorClassName(false) + CodeGen_HeadFileExtension;
 	// ---------- Head code ----------
@@ -132,8 +145,9 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	// ---------- Protobuf ----------
 	FStringFormatNamedArguments ProtoFormatArgs;
 	ProtoFormatArgs.Add(TEXT("Declare_ProtoPackageName"), Target->GetProtoPackageName());
+	ProtoFormatArgs.Add(TEXT("Code_Import"), FString::Printf(TEXT("import \"%s\";"), *GenManager_GlobalStructProtoFile));
 	ProtoFormatArgs.Add(TEXT("Definition_ProtoStateMsg"), Target->GetDefinition_ProtoStateMessage());
-	ReplicatorCode.ProtoDefinitions = FString::Format(CodeGen_CPP_ProtoTemplate, ProtoFormatArgs);
+	ReplicatorCode.ProtoDefinitions = FString::Format(CodeGen_ProtoTemplate, ProtoFormatArgs);
 	ReplicatorCode.ProtoFileName = Target->GetActorName() + CodeGen_ProtoFileExtension;
 	// ---------- Protobuf ----------
 

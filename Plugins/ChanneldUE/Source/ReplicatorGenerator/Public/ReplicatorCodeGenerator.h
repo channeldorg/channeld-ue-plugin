@@ -23,6 +23,10 @@ struct FReplicatorCodeBundle
 	FString RegisterReplicatorFileCode;
 
 	TArray<FReplicatorCode> ReplicatorCodes;
+
+	FString GlobalStructCodes;
+
+	FString GlobalStructProtoDefinitions;
 };
 
 class REPLICATORGENERATOR_API FReplicatorCodeGenerator
@@ -35,8 +39,6 @@ public:
 
 
 protected:
-	FString GetProtoMessageOfGlobalStruct();
-
 	TMap<FString, FModuleInfo> ModuleInfoByClassName;
 
 	inline void ProcessHeaderFiles(const TArray<FString>& Files, const FManifestModule& ManifestModule);

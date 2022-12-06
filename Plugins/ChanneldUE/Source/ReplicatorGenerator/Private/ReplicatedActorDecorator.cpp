@@ -1,6 +1,7 @@
 ﻿#include "ReplicatedActorDecorator.h"
 
 #include "PropertyDecoratorFactory.h"
+#include "ReplicatorTemplate/CppActorTemplate.h"
 
 FReplicatedActorDecorator::FReplicatedActorDecorator(const UClass* TargetActorClass)
 {
@@ -14,18 +15,21 @@ void FReplicatedActorDecorator::Init()
 	for (TFieldIterator<FProperty> It(Target); It; ++It)
 	{
 		FProperty* Property = *It;
-		if(Property->Owner != Target)
+		if (Property->Owner != Target)
 		{
 			continue;
 		}
 		if (Property->HasAnyPropertyFlags(CPF_Net))
 		{
-			TSharedPtr<FPropertyDecorator> PropertyDecoratorPtr = PropertyDecoratorFactory.GetPropertyDecorator(Property);
+			TSharedPtr<FPropertyDecorator> PropertyDecoratorPtr = PropertyDecoratorFactory.GetPropertyDecorator(Property, this);
 			if (PropertyDecoratorPtr.IsValid())
 			{
 				Properties.Emplace(PropertyDecoratorPtr);
-				PropertyDecoratorPtr->Init(Property, this);
 			}
+		}
+		for (TSharedPtr<FPropertyDecorator> PropertyDecoratorPtr : Properties)
+		{
+			PropertyDecoratorPtr->Init();
 		}
 	}
 }
@@ -51,6 +55,22 @@ FString FReplicatedActorDecorator::GetActorHeaderIncludePath()
 	return ModuleBelongTo.RelativeToModule;
 }
 
+FString FReplicatedActorDecorator::GetAdditionalIncludeFiles()
+{
+	TSet<FString> IncludeFileSet;
+	for (auto PropDecorator : Properties)
+	{
+		IncludeFileSet.Append(PropDecorator->GetAdditionalIncludes());
+	}
+	TArray<FString> IncludeFiles = IncludeFileSet.Array();
+	FString Result;
+	for (FString IncludeFile : IncludeFiles)
+	{
+		Result += FString::Printf(TEXT("#include \"%s\"\n"), *IncludeFile);
+	}
+	return Result;
+}
+
 FString FReplicatedActorDecorator::GetReplicatorClassName(bool WithPrefix /* = true */)
 {
 	FString ClassName = TEXT("Channeld") + Target->GetName() + TEXT("Replicator");
@@ -64,7 +84,7 @@ FString FReplicatedActorDecorator::GetCode_IndirectlyAccessiblePropertyPtrDeclar
 	{
 		if (!Property->IsDirectlyAccessible())
 		{
-			Result += FString::Printf(TEXT("%s* %s;\n"), *Property->GetCPPType(), *Property->GetPointerName());
+			Result += Property->GetDeclaration_PropertyPtr() + TEXT(";\n");
 		}
 	}
 	return Result;
@@ -78,18 +98,22 @@ FString FReplicatedActorDecorator::GetCode_AssignPropertyPointers(const FString&
 		if (!Property->IsDirectlyAccessible())
 		{
 			FStringFormatNamedArguments FormatArgs;
-			FormatArgs.Add(TEXT("Ref_TargetInstanceRef"), FStringFormatArg(TargetInstance));
-			FormatArgs.Add(TEXT("Declare_PropertyType"), FStringFormatArg(Property->GetPropertyType()));
-			FormatArgs.Add(TEXT("Declare_PropertyName"), FStringFormatArg(Property->GetPropertyName()));
+
 			FormatArgs.Add(TEXT("Declare_PropertyPointer"), FStringFormatArg(Property->GetPointerName()));
-			FormatArgs.Add(TEXT("Declare_PropertyCPPType"), FStringFormatArg(Property->GetCPPType()));
-			
+			FormatArgs.Add(
+				TEXT("Code_GetAssignPropertyPointer"),
+				FStringFormatArg(Property->GetCode_AssignPropertyPointer(
+						FString::Printf(TEXT("%s.Get()"), *TargetInstance),
+						FString::Printf(TEXT("%s->GetClass()"), *TargetInstance),
+						Property->GetPointerName()
+					)
+				));
+
 			Result += FString::Format(ReplicatedActorDeco_GetCode_AssignPropertyPointerTemplate, FormatArgs);
 		}
 	}
 	return Result;
 }
-
 
 
 FString FReplicatedActorDecorator::GetProtoPackageName()
@@ -109,7 +133,7 @@ FString FReplicatedActorDecorator::GetProtoStateMessageType()
 
 FString FReplicatedActorDecorator::GetCode_AllPropertiesSetDeltaState(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName)
 {
-	if(Properties.Num() == 0)
+	if (Properties.Num() == 0)
 	{
 		return TEXT("");
 	}
@@ -123,7 +147,7 @@ FString FReplicatedActorDecorator::GetCode_AllPropertiesSetDeltaState(const FStr
 
 FString FReplicatedActorDecorator::GetCode_AllPropertiesOnStateChange(const FString& TargetInstance, const FString& NewStateName)
 {
-	if(Properties.Num() == 0)
+	if (Properties.Num() == 0)
 	{
 		return TEXT("");
 	}
@@ -147,10 +171,10 @@ FString FReplicatedActorDecorator::GetDefinition_ProtoStateMessage()
 	FormatArgs.Add(TEXT("Declare_StateMessageType"), GetProtoStateMessageType());
 	FormatArgs.Add(TEXT("Declare_ProtoFields"), FieldDefinitions);
 
-	return FString::Format(ReplicatedActorDeco_ProtoStateMessageTemplate, FormatArgs);
+	return FString::Format(CodeGen_ProtoStateMessageTemplate, FormatArgs);
 }
 
-bool FReplicatedActorDecorator::IsBlueprintGenerated()
+bool FReplicatedActorDecorator::IsBlueprintType()
 {
 	return bIsBlueprintGenerated;
 }

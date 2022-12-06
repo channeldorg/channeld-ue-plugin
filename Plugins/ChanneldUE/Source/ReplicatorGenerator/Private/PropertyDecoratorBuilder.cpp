@@ -8,23 +8,23 @@ TSharedPtr<FPropertyDecoratorBuilder> FPropertyDecoratorBuilder::SetNextBuilder(
 	return NextBuilder;
 }
 
-FPropertyDecorator* FPropertyDecoratorBuilder::GetPropertyDecorator(FProperty* Property)
+FPropertyDecorator* FPropertyDecoratorBuilder::GetPropertyDecorator(FProperty* Property, IPropertyDecoratorOwner* Owner)
 {
 	if (IsSpecialProperty(Property))
 	{
-		return ConstructPropertyDecorator(Property);
+		return ConstructPropertyDecorator(Property, Owner);
 	}
 	else
 	{
-		return DoNext(Property);
+		return DoNext(Property, Owner);
 	}
 }
 
-FPropertyDecorator* FPropertyDecoratorBuilder::DoNext(FProperty* Property)
+FPropertyDecorator* FPropertyDecoratorBuilder::DoNext(FProperty* Property, IPropertyDecoratorOwner* Owner)
 {
 	if (NextBuilder)
 	{
-		return NextBuilder->GetPropertyDecorator(Property);
+		return NextBuilder->GetPropertyDecorator(Property, Owner);
 	}
 	else
 	{

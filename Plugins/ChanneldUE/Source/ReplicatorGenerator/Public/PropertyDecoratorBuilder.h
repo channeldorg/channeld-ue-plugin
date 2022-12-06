@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "IPropertyDecoratorOwner.h"
 
 class FPropertyDecorator;
 
@@ -9,17 +10,14 @@ public:
 
 	virtual TSharedPtr<FPropertyDecoratorBuilder> SetNextBuilder(TSharedPtr<FPropertyDecoratorBuilder>);
 
-	
 	virtual bool IsSpecialProperty(FProperty*) = 0;
-	virtual FPropertyDecorator* GetPropertyDecorator(FProperty*);
 	
-	// template<typename PropertyType>
-	// bool HandleTypeOf<PropertyType>();
-	//
+	virtual FPropertyDecorator* GetPropertyDecorator(FProperty*, IPropertyDecoratorOwner*);
+
 protected:
 	TSharedPtr<FPropertyDecoratorBuilder> NextBuilder;
-	virtual FPropertyDecorator* ConstructPropertyDecorator(FProperty*) = 0;
-	virtual FPropertyDecorator* DoNext(FProperty*);
+	virtual FPropertyDecorator* ConstructPropertyDecorator(FProperty*, IPropertyDecoratorOwner*) = 0;
+	virtual FPropertyDecorator* DoNext(FProperty*, IPropertyDecoratorOwner*);
 
 };
 
