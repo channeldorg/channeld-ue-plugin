@@ -142,7 +142,7 @@ void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMes
 
 void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload)
 {
-	if (MsgType == MessageType_LOW_LEVEL)
+	if (MsgType == unrealpb::LOW_LEVEL)
 	{
 		if (Payload.size() == 0)
 		{
@@ -173,7 +173,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 			ClientConnection->ReceivedRawPacket((uint8*)Payload.data(), Payload.size());
 		}
 	}
-	else if (MsgType == MessageType_RPC)
+	else if (MsgType == unrealpb::RPC)
 	{
 		auto RpcMsg = MakeShared<unrealpb::RemoteFunctionMessage>();
 		if (!RpcMsg->ParseFromString(Payload))
@@ -185,7 +185,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 		HandleCustomRPC(RpcMsg);
 		return;
 	}
-	else if (MsgType == MessageType_SPAWN)
+	else if (MsgType == unrealpb::SPAWN)
 	{
 		auto SpawnMsg = MakeShared<unrealpb::SpawnObjectMessage>();
 		if (!SpawnMsg->ParseFromString(Payload))
@@ -196,7 +196,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 
 		OnClientSpawnObject(SpawnMsg);
 	}
-	else if (MsgType == MessageType_DESTROY)
+	else if (MsgType == unrealpb::DESTROY)
 	{
 		auto DestroyMsg = MakeShared<unrealpb::DestroyObjectMessage>();
 		if (!DestroyMsg->ParseFromString(Payload))
@@ -546,11 +546,11 @@ void UChanneldNetDriver::LowLevelSend(TSharedPtr<const FInternetAddr> Address, v
 		if (ConnToChanneld->IsServer())
 		{
 			ConnectionId ClientConnId = AddrToConnId(*Address);
-			ClientConnectionMap[ClientConnId]->SendData(MessageType_LOW_LEVEL, DataToSend, DataSize);
+			ClientConnectionMap[ClientConnId]->SendData(unrealpb::LOW_LEVEL, DataToSend, DataSize);
 		}
 		else
 		{
-			GetServerConnection()->SendData(MessageType_LOW_LEVEL, DataToSend, DataSize);
+			GetServerConnection()->SendData(unrealpb::LOW_LEVEL, DataToSend, DataSize);
 		}
 	}
 }
@@ -568,7 +568,7 @@ void UChanneldNetDriver::LowLevelDestroy()
 		ConnToChanneld->OnAuthenticated.RemoveAll(this);
 		ConnToChanneld->OnUserSpaceMessageReceived.RemoveAll(this);
 		ConnToChanneld->RemoveMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this);
-		//ConnToChanneld->RemoveMessageHandler(MessageType_LOW_LEVEL, this);
+		//ConnToChanneld->RemoveMessageHandler(unrealpb::LOW_LEVEL, this);
 		//ConnToChanneld->RemoveMessageHandler(MessageType_RPC, this);
 
 		/*

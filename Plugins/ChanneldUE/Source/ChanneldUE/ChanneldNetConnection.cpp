@@ -107,7 +107,7 @@ void UChanneldNetConnection::LowLevelSend(void* Data, int32 CountBits, FOutPacke
 
 		if (!bBlockSend && DataSize > 0)
 		{
-			SendData(MessageType_LOW_LEVEL, DataToSend, DataSize);
+			SendData(unrealpb::LOW_LEVEL, DataToSend, DataSize);
 		}
 	}
 }
@@ -203,7 +203,7 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 	{
 		SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(*Location));
 	}
-	SendMessage(MessageType_SPAWN, SpawnMsg, OwningChannelId);
+	SendMessage(unrealpb::SPAWN, SpawnMsg, OwningChannelId);
 	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %d, role: %d, owning channel: %d, owning connId: %d, location: %s"),
 		GetConnId(), *GetNameSafe(Object), SpawnMsg.obj().netguid(), SpawnMsg.localrole(), SpawnMsg.channelid(), SpawnMsg.owningconnid(), Location ? *Location->ToCompactString() : TEXT("NULL"));
 
@@ -236,7 +236,7 @@ void UChanneldNetConnection::SendDestroyMessage(UObject* Object, EChannelCloseRe
 	unrealpb::DestroyObjectMessage DestroyMsg;
 	DestroyMsg.set_netid(NetId.Value);
 	DestroyMsg.set_reason(static_cast<uint8>(EChannelCloseReason::Destroyed));
-	SendMessage(MessageType_DESTROY, DestroyMsg);
+	SendMessage(unrealpb::DESTROY, DestroyMsg);
 	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Destroy message to conn: %d, obj: %s, netId: %d"), GetConnId(), *GetNameSafe(Object), NetId.Value);
 
 	if (ExportCount != nullptr)
@@ -273,7 +273,7 @@ void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncNa
 		RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
 		UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %dB: %s"), RpcMsg.paramspayload().size(), UTF8_TO_TCHAR(ParamsMsg->DebugString().c_str()));
 	}
-	SendMessage(MessageType_RPC, RpcMsg, ChId);
+	SendMessage(unrealpb::RPC, RpcMsg, ChId);
 }
 
 FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= false*/)

@@ -10,6 +10,7 @@ typedef uint32 ConnectionId;
 
 typedef uint32 ChannelId;
 
+/* Moved the definitions to unreal_common.proto
 // User-space message types used in ChanneldUE
 enum MessageType : uint32 {
 	// Used by LowLevelSend in NetConnection/NetDriver.
@@ -22,6 +23,7 @@ enum MessageType : uint32 {
 	MessageType_DESTROY = 104,
 	MessageType_SERVER_PLAYER_SPAWNED = 201,
 };
+*/
 
 /*
 UENUM(BlueprintType)

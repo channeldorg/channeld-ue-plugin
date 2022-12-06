@@ -103,133 +103,136 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	auto HandoverMsg = static_cast<const channeldpb::ChannelDataHandoverMessage*>(Msg);
 	unrealpb::HandoverData HandoverData;
 	HandoverMsg->data().UnpackTo(&HandoverData);
-	const unrealpb::UnrealObjectRef HandoverObjRef = HandoverData.obj();
-	FNetworkGUID NetId(HandoverObjRef.netguid());
-	UE_LOG(LogChanneld, Verbose, TEXT("ChannelDataHandover from channel %d to %d, object NetId: %d"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), NetId.Value);
+	for (auto& HandoverContext : HandoverData.context())
+	{
+		const unrealpb::UnrealObjectRef HandoverObjRef = HandoverContext.obj();
+		FNetworkGUID NetId(HandoverObjRef.netguid());
+		UE_LOG(LogChanneld, Verbose, TEXT("ChannelDataHandover from channel %d to %d, object NetId: %d"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), NetId.Value);
 	
-	// Source spatial server - the channel data is handed over from
-	if (Connection->SubscribedChannels.Contains(HandoverMsg->srcchannelid()))
-	{
-		AActor* HandoverActor = Cast<AActor>(GetObjectFromNetGUID(NetId));
+		// Source spatial server - the channel data is handed over from
+		if (Connection->SubscribedChannels.Contains(HandoverMsg->srcchannelid()))
+		{
+			AActor* HandoverActor = Cast<AActor>(GetObjectFromNetGUID(NetId));
 			
-		// If the handover actor is no longer in the interest area of current server, delete it.
-		if (!Connection->SubscribedChannels.Contains(HandoverMsg->dstchannelid()))
-		{
-			if (HandoverActor)
+			// If the handover actor is no longer in the interest area of current server, delete it.
+			if (!Connection->SubscribedChannels.Contains(HandoverMsg->dstchannelid()))
 			{
-				GetWorld()->DestroyActor(HandoverActor, true);
-				// TODO: Remove the client connection if the object represents a player
-			}
-
-			NetIdOwningChannels.Remove(NetId);
-		}
-		// If the handover actor is no longer in the authority area of current server,
-		// make sure it no longer sends ChannelDataUpdate message.
-		else if (!Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid()))
-		{
-			if (HandoverActor)
-			{
-				HandoverActor->SetRole(ENetRole::ROLE_SimulatedProxy);
-			}
-		}
-	}
-		
-		
-	// Destination spatial server - the channel data is handed over to
-	if (Connection->SubscribedChannels.Contains(HandoverMsg->dstchannelid()))
-	{
-		// Set the NetId-ChannelId mapping before spawn the object, so AddProviderToDefaultChannel won't have to query the spatial channel.
-		SetOwningChannelId(NetId, HandoverMsg->dstchannelid());
-		
-		UObject* HandoverObj = GetObjectFromNetGUID(NetId);
-		// Player enters the server - only Pawn has clientConnId > 0
-		if (HandoverData.clientconnid() > 0)
-		{
-			const ConnectionId ClientConnId = HandoverData.clientconnid();
-			// Update the channelId for LowLevelSend()
-			ClientInChannels[ClientConnId] = HandoverMsg->dstchannelid();
-			UE_LOG(LogChanneld, Log, TEXT("[Server] Updated mapping of connId: %d -> channelId: %d"), ClientConnId, HandoverMsg->dstchannelid());
-			
-			// Try to spawn the object
-			if (HandoverObj == nullptr)
-			{
-				// We need to know which client connection causes the handover, in order to spawn the object. 
-				UChanneldNetConnection* ClientConn;
-				if (ClientInChannels.Contains(ClientConnId))
+				if (HandoverActor)
 				{
-					ClientConn = GetChanneldSubsystem()->GetNetDriver()->GetClientConnection(ClientConnId);
-				}
-				else
-				{
-					// Create the client connection if it doesn't exist yet. Don't create the PlayerController for now.
-					ClientConn = CreateClientConnection(ClientConnId, HandoverMsg->dstchannelid());
+					GetWorld()->DestroyActor(HandoverActor, true);
+					// TODO: Remove the client connection if the object represents a player
 				}
 
-				const bool bHasAuthority = Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid());
+				NetIdOwningChannels.Remove(NetId);
+			}
+			// If the handover actor is no longer in the authority area of current server,
+			// make sure it no longer sends ChannelDataUpdate message.
+			else if (!Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid()))
+			{
+				if (HandoverActor)
+				{
+					HandoverActor->SetRole(ENetRole::ROLE_SimulatedProxy);
+				}
+			}
+		}
+		
+		
+		// Destination spatial server - the channel data is handed over to
+		if (Connection->SubscribedChannels.Contains(HandoverMsg->dstchannelid()))
+		{
+			// Set the NetId-ChannelId mapping before spawn the object, so AddProviderToDefaultChannel won't have to query the spatial channel.
+			SetOwningChannelId(NetId, HandoverMsg->dstchannelid());
+		
+			UObject* HandoverObj = GetObjectFromNetGUID(NetId);
+			// Player enters the server - only Pawn has clientConnId > 0
+			if (HandoverContext.clientconnid() > 0)
+			{
+				const ConnectionId ClientConnId = HandoverContext.clientconnid();
+				// Update the channelId for LowLevelSend()
+				ClientInChannels[ClientConnId] = HandoverMsg->dstchannelid();
+				UE_LOG(LogChanneld, Log, TEXT("[Server] Updated mapping of connId: %d -> channelId: %d"), ClientConnId, HandoverMsg->dstchannelid());
+			
+				// Try to spawn the object
+				if (HandoverObj == nullptr)
+				{
+					// We need to know which client connection causes the handover, in order to spawn the object. 
+					UChanneldNetConnection* ClientConn;
+					if (ClientInChannels.Contains(ClientConnId))
+					{
+						ClientConn = GetChanneldSubsystem()->GetNetDriver()->GetClientConnection(ClientConnId);
+					}
+					else
+					{
+						// Create the client connection if it doesn't exist yet. Don't create the PlayerController for now.
+						ClientConn = CreateClientConnection(ClientConnId, HandoverMsg->dstchannelid());
+					}
+
+					const bool bHasAuthority = Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid());
 				
-				// Set the NetId of the Pawn as exported, so it won't send the Spawn message of the Pawn to the client.
-				ClientConn->SetSentSpawned(NetId);
+					// Set the NetId of the Pawn as exported, so it won't send the Spawn message of the Pawn to the client.
+					ClientConn->SetSentSpawned(NetId);
 
-				// HACK: turn off AddProviderToDefaultChannel() temporarily, as the NetId of the handover object may mismatch when just created. (ChanneldUtils@L656)
-				bSuppressAddProviderOnServerSpawn = true;
-				HandoverObj = ChanneldUtils::GetObjectByRef(&HandoverObjRef, GetWorld(), true, ClientConn);
-				bSuppressAddProviderOnServerSpawn = false;
-				// Now the NetId is properly set, call AddProviderToDefaultChannel().
-				OnServerSpawnedObject(HandoverObj, NetId);
+					// HACK: turn off AddProviderToDefaultChannel() temporarily, as the NetId of the handover object may mismatch when just created. (ChanneldUtils@L656)
+					bSuppressAddProviderOnServerSpawn = true;
+					HandoverObj = ChanneldUtils::GetObjectByRef(&HandoverObjRef, GetWorld(), true, ClientConn);
+					bSuppressAddProviderOnServerSpawn = false;
+					// Now the NetId is properly set, call AddProviderToDefaultChannel().
+					OnServerSpawnedObject(HandoverObj, NetId);
 			
-				// When the pawn moves into the authority area of this server, create the PlayerController and posses the pawn.
-				if (HandoverObj && HandoverObj->IsA<APawn>() && bHasAuthority)
-				{
-					if (ClientConn->PlayerController == nullptr)
+					// When the pawn moves into the authority area of this server, create the PlayerController and posses the pawn.
+					if (HandoverObj && HandoverObj->IsA<APawn>() && bHasAuthority)
 					{
-						// FIXME: the NetId won't match the client's, causing RPC failure.
-						CreatePlayerController(ClientConn);
-						UE_LOG(LogChanneld, Log, TEXT("[Server] Create PlayerController for client conn %d"), ClientConn->GetConnId());
-					}
-					if (ClientConn->PlayerController)
-					{
-						ClientConn->PlayerController->Possess(Cast<APawn>(HandoverObj));
-						UE_LOG(LogChanneld, Log, TEXT("[Server] PlayerController possessed pawn %s"), *HandoverObj->GetName());
+						if (ClientConn->PlayerController == nullptr)
+						{
+							// FIXME: the NetId won't match the client's, causing RPC failure.
+							CreatePlayerController(ClientConn);
+							UE_LOG(LogChanneld, Log, TEXT("[Server] Create PlayerController for client conn %d"), ClientConn->GetConnId());
+						}
+						if (ClientConn->PlayerController)
+						{
+							ClientConn->PlayerController->Possess(Cast<APawn>(HandoverObj));
+							UE_LOG(LogChanneld, Log, TEXT("[Server] PlayerController possessed pawn %s"), *HandoverObj->GetName());
+						}
 					}
 				}
 			}
-		}
-		// Non-player object enters the server. Simply create it.
-		else
-		{
-			HandoverObj = ChanneldUtils::GetObjectByRef(&HandoverObjRef, GetWorld(), true);
-		}
+			// Non-player object enters the server. Simply create it.
+			else
+			{
+				HandoverObj = ChanneldUtils::GetObjectByRef(&HandoverObjRef, GetWorld(), true);
+			}
 		
-		if (HandoverObj)
-		{
-			if (Connection->SubscribedChannels.Contains(HandoverMsg->srcchannelid()))
+			if (HandoverObj)
 			{
-				// Move data provider to the new channel
-				if (HandoverObj->Implements<UChannelDataProvider>())
+				if (Connection->SubscribedChannels.Contains(HandoverMsg->srcchannelid()))
 				{
-					MoveProvider(HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), Cast<IChannelDataProvider>(HandoverObj));
-				}
-				else if (HandoverObj->IsA<AActor>())
-				{
-					for (auto& Comp : Cast<AActor>(HandoverObj)->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+					// Move data provider to the new channel
+					if (HandoverObj->Implements<UChannelDataProvider>())
 					{
-						MoveProvider(HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), Cast<IChannelDataProvider>(Comp));
+						MoveProvider(HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), Cast<IChannelDataProvider>(HandoverObj));
 					}
-				}				
+					else if (HandoverObj->IsA<AActor>())
+					{
+						for (auto& Comp : Cast<AActor>(HandoverObj)->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+						{
+							MoveProvider(HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), Cast<IChannelDataProvider>(Comp));
+						}
+					}				
+				}
 			}
-		}
-		else
-		{
-			UE_LOG(LogChanneld, Warning, TEXT("[Server] Failed to spawn object from handover data: %s"), UTF8_TO_TCHAR(HandoverData.DebugString().c_str()));
-		}
-
-		// If the handover actor falls into the authority area of current server,
-		// make sure it starts sending ChannelDataUpdate message.
-		if (Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid()))
-		{
-			if (HandoverObj && HandoverObj->IsA<AActor>())
+			else
 			{
-				Cast<AActor>(HandoverObj)->SetRole(ENetRole::ROLE_Authority);
+				UE_LOG(LogChanneld, Warning, TEXT("[Server] Failed to spawn object from handover data: %s"), UTF8_TO_TCHAR(HandoverData.DebugString().c_str()));
+			}
+
+			// If the handover actor falls into the authority area of current server,
+			// make sure it starts sending ChannelDataUpdate message.
+			if (Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid()))
+			{
+				if (HandoverObj && HandoverObj->IsA<AActor>())
+				{
+					Cast<AActor>(HandoverObj)->SetRole(ENetRole::ROLE_Authority);
+				}
 			}
 		}
 	}
@@ -325,7 +328,7 @@ void USpatialChannelDataView::InitServer()
 		Msg.set_clientconnid(CastChecked<UChanneldNetConnection>(NewPlayer->GetNetConnection())->GetConnId());
 		Msg.mutable_startpos()->CopyFrom(ChanneldUtils::GetVectorPB(NewPawn->GetActorLocation()));
 		// Send to Master server
-		Connection->Send(GlobalChannelId, MessageType_SERVER_PLAYER_SPAWNED, Msg);
+		Connection->Send(GlobalChannelId, unrealpb::SERVER_PLAYER_SPAWNED, Msg);
 	});
 	*/
 }
@@ -369,43 +372,46 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 
 	unrealpb::HandoverData HandoverData;
 	HandoverMsg->data().UnpackTo(&HandoverData);
-	FNetworkGUID NetId(HandoverData.obj().netguid());
-
-	// Update NetId-ChannelId mapping
-	SetOwningChannelId(NetId, HandoverMsg->dstchannelid());
-
-	UObject* Obj = GetObjectFromNetGUID(NetId);
-	if (Obj)
+	for (auto& HandoverContext : HandoverData.context())
 	{
-		// Move data provider to the new channel
-		if (Obj->Implements<UChannelDataProvider>())
+		FNetworkGUID NetId(HandoverContext.obj().netguid());
+
+		// Update NetId-ChannelId mapping
+		SetOwningChannelId(NetId, HandoverMsg->dstchannelid());
+
+		UObject* Obj = GetObjectFromNetGUID(NetId);
+		if (Obj)
 		{
-			MoveProvider(HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), Cast<IChannelDataProvider>(Obj));
-		}
-		else if (Obj->IsA<AActor>())
-		{
-			for (auto& Comp : Cast<AActor>(Obj)->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+			// Move data provider to the new channel
+			if (Obj->Implements<UChannelDataProvider>())
 			{
-				MoveProvider(HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), Cast<IChannelDataProvider>(Comp));
+				MoveProvider(HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), Cast<IChannelDataProvider>(Obj));
+			}
+			else if (Obj->IsA<AActor>())
+			{
+				for (auto& Comp : Cast<AActor>(Obj)->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+				{
+					MoveProvider(HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), Cast<IChannelDataProvider>(Comp));
+				}
+			}
+
+			if (Obj->IsA<APawn>())
+			{
+				APawn* Pawn = Cast<APawn>(Obj);
+				if (Pawn->GetController())
+				{
+					// Update the channelId for LowLevelSend() if it's a player's pawn that been handed over.
+					GetChanneldSubsystem()->SetLowLevelSendToChannelId(HandoverMsg->dstchannelid());
+
+					// Also update the NetId-ChannelId mapping of the player controller (otherwise RPCs won't be processed properly)
+					SetOwningChannelId(GetNetId(Pawn->GetController()), HandoverMsg->dstchannelid());
+				}
 			}
 		}
-
-		if (Obj->IsA<APawn>())
+		else
 		{
-			APawn* Pawn = Cast<APawn>(Obj);
-			if (Pawn->GetController())
-			{
-				// Update the channelId for LowLevelSend() if it's a player's pawn that been handed over.
-				GetChanneldSubsystem()->SetLowLevelSendToChannelId(HandoverMsg->dstchannelid());
-
-				// Also update the NetId-ChannelId mapping of the player controller (otherwise RPCs won't be processed properly)
-				SetOwningChannelId(GetNetId(Pawn->GetController()), HandoverMsg->dstchannelid());
-			}
+			UE_LOG(LogChanneld, Warning, TEXT("Unable to find data provider to move from channel %d to %d, NetId: %d"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), NetId.Value);
 		}
-	}
-	else
-	{
-		UE_LOG(LogChanneld, Warning, TEXT("Unable to find data provider to move from channel %d to %d, NetId: %d"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), NetId.Value);
 	}
 }
 
@@ -584,7 +590,7 @@ void USpatialChannelDataView::SendSpawnToAdjacentChannels(UObject* Obj, ChannelI
 	SpawnMsg.set_channelid(SpatialChId);
 	channeldpb::ServerForwardMessage ServerForwardMessage;
 	ServerForwardMessage.set_payload(SpawnMsg.SerializeAsString());
-	Connection->Send(SpatialChId, MessageType_SPAWN, ServerForwardMessage, static_cast<channeldpb::BroadcastType>(channeldpb::ADJACENT_CHANNELS | channeldpb::ALL_BUT_SENDER));
+	Connection->Send(SpatialChId, unrealpb::SPAWN, ServerForwardMessage, static_cast<channeldpb::BroadcastType>(channeldpb::ADJACENT_CHANNELS | channeldpb::ALL_BUT_SENDER));
 	UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message to spatial channels(%d), obj: %s, netId: %d"), SpatialChId, *Obj->GetName(), NetId.Value);
 
 	NetDriver->SetAllSentSpawn(NetId);

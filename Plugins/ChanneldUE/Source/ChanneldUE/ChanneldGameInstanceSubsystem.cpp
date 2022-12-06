@@ -80,7 +80,7 @@ void UChanneldGameInstanceSubsystem::InitConnection()
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, this, &UChanneldGameInstanceSubsystem::HandleChannelDataUpdate);
 
 	//ConnectionInstance->OnUserSpaceMessageReceived.AddUObject(this, &UChanneldGameInstanceSubsystem::OnUserSpaceMessageReceived);
-	ConnectionInstance->RegisterMessageHandler(MessageType_ANY, new google::protobuf::Any, this, &UChanneldGameInstanceSubsystem::HandleUserSpaceAnyMessage);
+	ConnectionInstance->RegisterMessageHandler(unrealpb::ANY, new google::protobuf::Any, this, &UChanneldGameInstanceSubsystem::HandleUserSpaceAnyMessage);
 }
 
 bool UChanneldGameInstanceSubsystem::IsConnected()
@@ -388,7 +388,7 @@ void UChanneldGameInstanceSubsystem::ServerBroadcast(int32 ChId, int32 ClientCon
 	channeldpb::ServerForwardMessage MessageWrapper;
 	MessageWrapper.set_clientconnid(ClientConnId);
 	MessageWrapper.set_payload(MessageData, AnyData.GetCachedSize());
-	ConnectionInstance->Send(ChId, MessageType_ANY, MessageWrapper, static_cast<channeldpb::BroadcastType>(BroadcastType));
+	ConnectionInstance->Send(ChId, unrealpb::ANY, MessageWrapper, static_cast<channeldpb::BroadcastType>(BroadcastType));
 }
 
 void UChanneldGameInstanceSubsystem::RegisterChannelTypeByFullName(EChanneldChannelType ChannelType, FString ProtobufFullName)
