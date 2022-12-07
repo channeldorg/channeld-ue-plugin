@@ -2361,7 +2361,7 @@ class CHANNELDUE_API HandoverData final :
 
   enum : int {
     kContextFieldNumber = 1,
-    kDataFieldNumber = 2,
+    kChannelDataFieldNumber = 2,
   };
   // repeated .unrealpb.HandoverContext context = 1;
   int context_size() const;
@@ -2381,23 +2381,23 @@ class CHANNELDUE_API HandoverData final :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::HandoverContext >&
       context() const;
 
-  // optional .google.protobuf.Any data = 2;
-  bool has_data() const;
+  // optional .google.protobuf.Any channelData = 2;
+  bool has_channeldata() const;
   private:
-  bool _internal_has_data() const;
+  bool _internal_has_channeldata() const;
   public:
-  void clear_data();
-  const ::PROTOBUF_NAMESPACE_ID::Any& data() const;
-  PROTOBUF_NODISCARD ::PROTOBUF_NAMESPACE_ID::Any* release_data();
-  ::PROTOBUF_NAMESPACE_ID::Any* mutable_data();
-  void set_allocated_data(::PROTOBUF_NAMESPACE_ID::Any* data);
+  void clear_channeldata();
+  const ::PROTOBUF_NAMESPACE_ID::Any& channeldata() const;
+  PROTOBUF_NODISCARD ::PROTOBUF_NAMESPACE_ID::Any* release_channeldata();
+  ::PROTOBUF_NAMESPACE_ID::Any* mutable_channeldata();
+  void set_allocated_channeldata(::PROTOBUF_NAMESPACE_ID::Any* channeldata);
   private:
-  const ::PROTOBUF_NAMESPACE_ID::Any& _internal_data() const;
-  ::PROTOBUF_NAMESPACE_ID::Any* _internal_mutable_data();
+  const ::PROTOBUF_NAMESPACE_ID::Any& _internal_channeldata() const;
+  ::PROTOBUF_NAMESPACE_ID::Any* _internal_mutable_channeldata();
   public:
-  void unsafe_arena_set_allocated_data(
-      ::PROTOBUF_NAMESPACE_ID::Any* data);
-  ::PROTOBUF_NAMESPACE_ID::Any* unsafe_arena_release_data();
+  void unsafe_arena_set_allocated_channeldata(
+      ::PROTOBUF_NAMESPACE_ID::Any* channeldata);
+  ::PROTOBUF_NAMESPACE_ID::Any* unsafe_arena_release_channeldata();
 
   // @@protoc_insertion_point(class_scope:unrealpb.HandoverData)
  private:
@@ -2410,7 +2410,7 @@ class CHANNELDUE_API HandoverData final :
     ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::HandoverContext > context_;
-    ::PROTOBUF_NAMESPACE_ID::Any* data_;
+    ::PROTOBUF_NAMESPACE_ID::Any* channeldata_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -10901,41 +10901,41 @@ HandoverData::context() const {
   return _impl_.context_;
 }
 
-// optional .google.protobuf.Any data = 2;
-inline bool HandoverData::_internal_has_data() const {
+// optional .google.protobuf.Any channelData = 2;
+inline bool HandoverData::_internal_has_channeldata() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
-  PROTOBUF_ASSUME(!value || _impl_.data_ != nullptr);
+  PROTOBUF_ASSUME(!value || _impl_.channeldata_ != nullptr);
   return value;
 }
-inline bool HandoverData::has_data() const {
-  return _internal_has_data();
+inline bool HandoverData::has_channeldata() const {
+  return _internal_has_channeldata();
 }
-inline const ::PROTOBUF_NAMESPACE_ID::Any& HandoverData::_internal_data() const {
-  const ::PROTOBUF_NAMESPACE_ID::Any* p = _impl_.data_;
+inline const ::PROTOBUF_NAMESPACE_ID::Any& HandoverData::_internal_channeldata() const {
+  const ::PROTOBUF_NAMESPACE_ID::Any* p = _impl_.channeldata_;
   return p != nullptr ? *p : reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Any&>(
       ::PROTOBUF_NAMESPACE_ID::_Any_default_instance_);
 }
-inline const ::PROTOBUF_NAMESPACE_ID::Any& HandoverData::data() const {
-  // @@protoc_insertion_point(field_get:unrealpb.HandoverData.data)
-  return _internal_data();
+inline const ::PROTOBUF_NAMESPACE_ID::Any& HandoverData::channeldata() const {
+  // @@protoc_insertion_point(field_get:unrealpb.HandoverData.channelData)
+  return _internal_channeldata();
 }
-inline void HandoverData::unsafe_arena_set_allocated_data(
-    ::PROTOBUF_NAMESPACE_ID::Any* data) {
+inline void HandoverData::unsafe_arena_set_allocated_channeldata(
+    ::PROTOBUF_NAMESPACE_ID::Any* channeldata) {
   if (GetArenaForAllocation() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.data_);
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.channeldata_);
   }
-  _impl_.data_ = data;
-  if (data) {
+  _impl_.channeldata_ = channeldata;
+  if (channeldata) {
     _impl_._has_bits_[0] |= 0x00000001u;
   } else {
     _impl_._has_bits_[0] &= ~0x00000001u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.HandoverData.data)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.HandoverData.channelData)
 }
-inline ::PROTOBUF_NAMESPACE_ID::Any* HandoverData::release_data() {
+inline ::PROTOBUF_NAMESPACE_ID::Any* HandoverData::release_channeldata() {
   _impl_._has_bits_[0] &= ~0x00000001u;
-  ::PROTOBUF_NAMESPACE_ID::Any* temp = _impl_.data_;
-  _impl_.data_ = nullptr;
+  ::PROTOBUF_NAMESPACE_ID::Any* temp = _impl_.channeldata_;
+  _impl_.channeldata_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
   auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
   temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
@@ -10947,45 +10947,45 @@ inline ::PROTOBUF_NAMESPACE_ID::Any* HandoverData::release_data() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::PROTOBUF_NAMESPACE_ID::Any* HandoverData::unsafe_arena_release_data() {
-  // @@protoc_insertion_point(field_release:unrealpb.HandoverData.data)
+inline ::PROTOBUF_NAMESPACE_ID::Any* HandoverData::unsafe_arena_release_channeldata() {
+  // @@protoc_insertion_point(field_release:unrealpb.HandoverData.channelData)
   _impl_._has_bits_[0] &= ~0x00000001u;
-  ::PROTOBUF_NAMESPACE_ID::Any* temp = _impl_.data_;
-  _impl_.data_ = nullptr;
+  ::PROTOBUF_NAMESPACE_ID::Any* temp = _impl_.channeldata_;
+  _impl_.channeldata_ = nullptr;
   return temp;
 }
-inline ::PROTOBUF_NAMESPACE_ID::Any* HandoverData::_internal_mutable_data() {
+inline ::PROTOBUF_NAMESPACE_ID::Any* HandoverData::_internal_mutable_channeldata() {
   _impl_._has_bits_[0] |= 0x00000001u;
-  if (_impl_.data_ == nullptr) {
+  if (_impl_.channeldata_ == nullptr) {
     auto* p = CreateMaybeMessage<::PROTOBUF_NAMESPACE_ID::Any>(GetArenaForAllocation());
-    _impl_.data_ = p;
+    _impl_.channeldata_ = p;
   }
-  return _impl_.data_;
+  return _impl_.channeldata_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::Any* HandoverData::mutable_data() {
-  ::PROTOBUF_NAMESPACE_ID::Any* _msg = _internal_mutable_data();
-  // @@protoc_insertion_point(field_mutable:unrealpb.HandoverData.data)
+inline ::PROTOBUF_NAMESPACE_ID::Any* HandoverData::mutable_channeldata() {
+  ::PROTOBUF_NAMESPACE_ID::Any* _msg = _internal_mutable_channeldata();
+  // @@protoc_insertion_point(field_mutable:unrealpb.HandoverData.channelData)
   return _msg;
 }
-inline void HandoverData::set_allocated_data(::PROTOBUF_NAMESPACE_ID::Any* data) {
+inline void HandoverData::set_allocated_channeldata(::PROTOBUF_NAMESPACE_ID::Any* channeldata) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
-    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.data_);
+    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.channeldata_);
   }
-  if (data) {
+  if (channeldata) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
         ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(
-                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(data));
+                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(channeldata));
     if (message_arena != submessage_arena) {
-      data = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, data, submessage_arena);
+      channeldata = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, channeldata, submessage_arena);
     }
     _impl_._has_bits_[0] |= 0x00000001u;
   } else {
     _impl_._has_bits_[0] &= ~0x00000001u;
   }
-  _impl_.data_ = data;
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.HandoverData.data)
+  _impl_.channeldata_ = channeldata;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.HandoverData.channelData)
 }
 
 // -------------------------------------------------------------------

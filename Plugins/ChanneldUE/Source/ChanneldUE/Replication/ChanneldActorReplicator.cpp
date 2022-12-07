@@ -233,8 +233,7 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 	// Client reverses the local/remote role as the role in the dedicated server.
 	if (NewState->has_localrole())
 	{
-		// FIXME: handle the case of SimulatedProxy in DS
-		if (Actor->IsNetMode(NM_DedicatedServer))
+		if (Actor->IsNetMode(NM_DedicatedServer) && Actor->GetLocalRole() == ENetRole::ROLE_AutonomousProxy)
 		{
 			Actor->SetRole((ENetRole)NewState->localrole());
 		}
@@ -245,7 +244,7 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 	}
 	if (NewState->has_remoterole())
 	{
-		if (Actor->IsNetMode(NM_DedicatedServer))
+		if (Actor->IsNetMode(NM_DedicatedServer) && Actor->GetLocalRole() == ENetRole::ROLE_AutonomousProxy)
 		{
 			*RemoteRolePtr = (uint8)NewState->remoterole();
 		}

@@ -20,6 +20,8 @@ USpatialMasterServerView::USpatialMasterServerView(const FObjectInitializer& Obj
 
 void USpatialMasterServerView::InitServer()
 {
+	Super::InitServer();
+	
 	if (UClass* PlayerStartLocatorClass = GetMutableDefault<UChanneldSettings>()->PlayerStartLocatorClass)
 	{
 		PlayerStartLocator = NewObject<UPlayerStartLocatorBase>(this, PlayerStartLocatorClass);
@@ -135,13 +137,10 @@ void USpatialMasterServerView::InitServer()
 		{
 			GetChanneldSubsystem()->SetLowLevelSendToChannelId(GlobalChannelId);
 		});
-
-	Super::InitServer();
 }
 
 void USpatialMasterServerView::AddProvider(ChannelId ChId, IChannelDataProvider* Provider)
 {
-	/*
 	// Should only replicates the GameStateBase
 	if (!Provider->GetTargetObject()->IsA(AGameStateBase::StaticClass()))
 	{
@@ -149,7 +148,6 @@ void USpatialMasterServerView::AddProvider(ChannelId ChId, IChannelDataProvider*
 	}
 
 	Super::AddProvider(ChId, Provider);
-	*/
 }
 
 ChannelId USpatialMasterServerView::GetOwningChannelId(const FNetworkGUID NetId) const

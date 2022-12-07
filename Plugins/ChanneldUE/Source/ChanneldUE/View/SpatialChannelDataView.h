@@ -33,7 +33,7 @@ public:
 	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, ChannelId ChId);
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
 	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId) override;
-	virtual void SendSpawnToConn(AActor* Actor, UChanneldNetConnection* NetConn, uint32 OwningConnId) override;
+	virtual void SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId) override;
 
 	UPROPERTY(EditAnywhere)
 	UProtoMessageObject* ChannelInitData;
@@ -61,6 +61,7 @@ private:
 	
 	bool bSuppressAddProviderOnServerSpawn = false;
 
+	void ServerHandleGetHandoverContext(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
@@ -72,6 +73,7 @@ private:
 	 * @return 
 	 */
 	UChanneldNetConnection* CreateClientConnection(ConnectionId ConnId, ChannelId ChId);
+	void InitPlayerController(UChanneldNetConnection* ClientConn, APlayerController* NewPlayerController);
 	void CreatePlayerController(UChanneldNetConnection* ClientConn);
 
 	void SendSpawnToAdjacentChannels(UObject* Obj, ChannelId SpatialChId);

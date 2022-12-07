@@ -5,6 +5,7 @@
 #include "Metrics.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerState.h"
 #include "Replication/ChanneldReplicationComponent.h"
 
 UChannelDataView::UChannelDataView(const FObjectInitializer& ObjectInitializer)
@@ -40,7 +41,9 @@ void UChannelDataView::Initialize(UChanneldConnection* InConn)
 
 	if (Connection->IsServer())
 	{
-		InitServer();
+		FTimerHandle Handle;
+		GetWorld()->GetTimerManager().SetTimer(Handle, [&](){InitServer();}, 1, false, 5);
+		//InitServer();
 	}
 	else if (Connection->IsClient())
 	{
@@ -58,9 +61,9 @@ void UChannelDataView::Initialize(UChanneldConnection* InConn)
 
 void UChannelDataView::InitServer()
 {
-	// Add the GameStateBase (if it's a IChannelDataProvider).
-	// Missing this step will cause client failed to begin player.
-	AddActorProvider(GetWorld()->GetAuthGameMode()->GameState);
+	// Add the GameStateBase (if it's an IChannelDataProvider).
+	// Missing this step will cause client failing to begin play.
+	AddActorProvider(GlobalChannelId, GetWorld()->GetAuthGameMode()->GameState);
 	
 	ReceiveInitServer();
 }
@@ -163,10 +166,12 @@ void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provide
 	*/
 
 	TSet<FProviderInternal>& Providers = ChannelDataProviders.FindOrAdd(ChId);
-	Providers.Add(Provider);
+	if (!Providers.Contains(Provider))
+	{
+		Providers.Add(Provider);
+		UE_LOG(LogChanneld, Log, TEXT("Added channel data provider %s to channel %d"), *IChannelDataProvider::GetName(Provider), ChId);
+	}
 	ChannelDataProviders[ChId] = Providers;
-
-	UE_LOG(LogChanneld, Log, TEXT("Added channel data provider %s to channel %d"), *IChannelDataProvider::GetName(Provider), ChId);
 }
 
 void UChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* Provider)
@@ -192,6 +197,9 @@ void UChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* Provide
 
 void UChannelDataView::AddActorProvider(ChannelId ChId, AActor* Actor)
 {
+	if (Actor == nullptr)
+		return;
+	
 	if (Actor->Implements<UChannelDataProvider>())
 	{
 		AddProvider(ChId, Cast<IChannelDataProvider>(Actor));
@@ -298,16 +306,23 @@ void UChannelDataView::MoveProvider(ChannelId OldChId, ChannelId NewChId, IChann
 void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn)
 {
 	ensureMsgf(NewPlayer->GetComponentByClass(UChanneldReplicationComponent::StaticClass()), TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn PC, GameStateBase, and other pawns in the client."));
+	/*
+	// Actors may don't have UChanneldReplicationComponent created when OnServerSpawnedObject is called, so we should try to add the providers again.
+	AddActorProvider(GameMode->GameState);
+	AddActorProvider(NewPlayer);
+	AddActorProvider(NewPlayer->PlayerState);
+	*/
+	
+	// Send the GameStateBase to the new player. This is very important as later the GameStateBase will be fanned out to the client with bReplicatedHasBegunPlay=true, to trigger the client's BeginPlay().
+	SendSpawnToConn(GameMode->GameState, NewPlayerConn, 0);
 	
 	/* Unfortunately, a couple of RPC on the PC is called in GameMode::PostLogin BEFORE invoking this event. So we need to handle the RPC properly.
 	 * UPDATE: no need to worry - the client can queue unmapped RPC now!
 	 */
 	// Send the PC to the owning client after the PC and NetConn are mutually referenced.
 	SendSpawnToConn(NewPlayer, NewPlayerConn, NewPlayerConn->GetConnId());
+	SendSpawnToConn(NewPlayer->PlayerState, NewPlayerConn, NewPlayerConn->GetConnId());
 	
-	// Send the GameStateBase to the new player. This is very important as later the GameStateBase will be fanned out to the client with bReplicatedHasBegunPlay=true, to trigger the client's BeginPlay().
-	NewPlayerConn->SendSpawnMessage(GameMode->GameState, ENetRole::ROLE_SimulatedProxy);
-
 	/* OnServerSpawnedActor() sends the spawning of the new player's pawn to other clients */
 
 	// Send the existing player pawns to the new player
@@ -367,9 +382,14 @@ bool UChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID Ne
 	return true;
 }
 
-void UChannelDataView::SendSpawnToConn(AActor* Actor, UChanneldNetConnection* NetConn, uint32 OwningConnId)
+void UChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId)
 {
-	NetConn->SendSpawnMessage(Actor, Actor->GetRemoteRole(), OwningConnId);
+	ENetRole Role = ROLE_None;
+	if (const AActor* Actor = Cast<AActor>(Obj))
+	{
+		Role = Actor->GetRemoteRole();
+	}
+	NetConn->SendSpawnMessage(Obj, Role, OwningConnId);
 }
 
 void UChannelDataView::OnDestroyedObject(UObject* Obj, const FNetworkGUID NetId)

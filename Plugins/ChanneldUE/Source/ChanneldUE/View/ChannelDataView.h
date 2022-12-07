@@ -50,10 +50,17 @@ public:
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn);
 	virtual FNetworkGUID GetNetId(UObject* Obj) const;
 	virtual FNetworkGUID GetNetId(IChannelDataProvider* Provider) const;
-	// If returns false, the NetDriver will not send the spawn message to the clients.
+	
+	/**
+	 * @brief Added the object to the NetId-ChannelId mapping. If the object is an IChannelDataProvider, also add it to the providers set.\n
+	 * By default, the channelId used for adding is the LowLevelSendToChannelId in the UChanneldNetDriver / UChanneldGameInstanceSubsystem.
+	 * @param Obj The object just spawned on the server, passed from UChanneldNetDriver::OnServerSpawnedActor.
+	 * @param NetId The NetworkGUID assigned for the object.
+	 * @return Should the NetDriver send the spawn message to the clients?
+	 */
 	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId);
 	// Gives the view a chance to override the NetRole, OwningChannelId, OwningConnId, or the Location parameter.
-	virtual void SendSpawnToConn(AActor* Actor, UChanneldNetConnection* NetConn, uint32 OwningConnId);
+	virtual void SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId);
 	virtual void OnClientSpawnedObject(UObject* Obj, const ChannelId ChId) {}
 	virtual void OnDestroyedObject(UObject* Obj, const FNetworkGUID NetId);
 	virtual void SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId);
@@ -112,6 +119,8 @@ protected:
 	void ReceiveUninitClient();
 
 	virtual void OnUnsubFromChannel(ChannelId ChId, const TSet<FProviderInternal>& RemovedProviders) {}
+	
+	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 
 	UPROPERTY()
 	UChanneldConnection* Connection;
@@ -132,7 +141,4 @@ private:
 	TMap<ChannelId, google::protobuf::Message*> RemovedProvidersData;
 
 	void HandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-
-	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-
 };

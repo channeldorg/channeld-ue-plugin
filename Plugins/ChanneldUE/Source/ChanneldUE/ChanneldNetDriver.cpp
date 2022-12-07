@@ -615,13 +615,6 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	}
 	*/
 
-	// Send the spawn of PC in OnClientPostLogin instead, because we only want to send PC to owning client,
-	// but at this moment, Actor doesn't have NetConnection set yet.
-	if (Actor->IsA<APlayerController>())
-	{
-		return;
-	}
-
 	/* Moved to UChanneldGameInstanceSubsystem::OnActorSpawned
 	UChanneldGameInstanceSubsystem* ChanneldSubsystem = GetSubsystem();
 	UChannelDataView* View = ChanneldSubsystem->GetChannelDataView();
@@ -649,6 +642,14 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	else
 	{
 		UE_LOG(LogChanneld, Warning, TEXT("ChannelDataView is not initialized yet. If the actor '%s' is a DataProvider, it will not be registered."), *Actor->GetName());
+	}
+
+	// Send the spawn of PlayerController and PlayerState in OnClientPostLogin instead, because
+	// 1) we only want to send PC to owning client, but at this moment, Actor doesn't have NetConnection set yet;
+	// 2) NetConnection is not set up for the PlayerState yet, but we need it for setting the actor location in the spawn message.
+	if (Actor->IsA<APlayerController>() || Actor->IsA<APlayerState>())
+	{
+		return;
 	}
 
 	if (!Actor->GetIsReplicated())
@@ -698,7 +699,7 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 			}
 			else
 			{
-				Pair.Value->SendSpawnMessage(Actor, Actor->GetRemoteRole(), OwningConnId);
+				Pair.Value->SendSpawnMessage(Actor, Actor->GetRemoteRole(), InvalidChannelId, OwningConnId);
 			}
 		}
 	}
