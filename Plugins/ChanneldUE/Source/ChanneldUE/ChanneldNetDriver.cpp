@@ -55,6 +55,22 @@ UChanneldNetConnection* UChanneldNetDriver::AddChanneldClientConnection(Connecti
 	return ClientConnection;
 }
 
+void UChanneldNetDriver::RemoveChanneldClientConnection(ConnectionId ClientConnId)
+{
+	UChanneldNetConnection* ClientConn;
+	if (ClientConnectionMap.RemoveAndCopyValue(ClientConnId, ClientConn))
+	{
+		if (ChannelDataView.IsValid())
+		{
+			ChannelDataView->OnRemoveClientConnection(ClientConn);
+		}
+		// CleanUp will call Driver->RemoveClientConnection()
+		ClientConn->CleanUp();
+		
+		UE_LOG(LogChanneld, Log, TEXT("Server removed client connection %d, total connections: %d (%d)"), ClientConnId, ClientConnections.Num(), ClientConnectionMap.Num());
+	}
+}
+
 void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg)
 {
 	FNetworkGUID NetId = FNetworkGUID(SpawnMsg->obj().netguid());
@@ -486,7 +502,7 @@ bool UChanneldNetDriver::InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bo
 		InitConnectionlessHandler();
 	}
 
-	ConnToChanneld->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this, &UChanneldNetDriver::ServerHandleUnsub);
+	// ConnToChanneld->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this, &UChanneldNetDriver::ServerHandleUnsub);
 
 	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
 	{
@@ -567,7 +583,7 @@ void UChanneldNetDriver::LowLevelDestroy()
 	{
 		ConnToChanneld->OnAuthenticated.RemoveAll(this);
 		ConnToChanneld->OnUserSpaceMessageReceived.RemoveAll(this);
-		ConnToChanneld->RemoveMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this);
+		// ConnToChanneld->RemoveMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this);
 		//ConnToChanneld->RemoveMessageHandler(unrealpb::LOW_LEVEL, this);
 		//ConnToChanneld->RemoveMessageHandler(MessageType_RPC, this);
 

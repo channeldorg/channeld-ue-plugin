@@ -47,6 +47,7 @@ public:
 	virtual void MoveProvider(ChannelId OldChId, ChannelId NewChId, IChannelDataProvider* Provider);
 
 	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, ChannelId ChId){}
+	virtual void OnRemoveClientConnection(UChanneldNetConnection* ClientConn){}
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn);
 	virtual FNetworkGUID GetNetId(UObject* Obj) const;
 	virtual FNetworkGUID GetNetId(IChannelDataProvider* Provider) const;
@@ -117,10 +118,20 @@ protected:
 	void ReceiveUninitServer();
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BeginUninitClient"))
 	void ReceiveUninitClient();
-
-	virtual void OnUnsubFromChannel(ChannelId ChId, const TSet<FProviderInternal>& RemovedProviders) {}
+	/**
+	 * @brief Server's callback when receiving the unsub message of a client.
+	 * Default implementation: Destroy the Pawn related to the NetConn and close the NetConn.
+	 * @param ClientConnId 
+	 * @param ChId 
+	 */
+	virtual void OnClientUnsub(ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, ChannelId ChId);
 	
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	
+	void HandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+
+	// Give the subclass a chance to mess with the removed providers, e.g. add a provider back to a channel.
+	virtual void OnUnsubFromChannel(ChannelId ChId, const TSet<FProviderInternal>& RemovedProviders) {}
 
 	UPROPERTY()
 	UChanneldConnection* Connection;
@@ -140,5 +151,4 @@ private:
 	TMap<ChannelId, TSet<FProviderInternal>> ChannelDataProviders;
 	TMap<ChannelId, google::protobuf::Message*> RemovedProvidersData;
 
-	void HandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 };

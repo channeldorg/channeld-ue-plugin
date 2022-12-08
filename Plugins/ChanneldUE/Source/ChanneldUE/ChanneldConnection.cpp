@@ -470,6 +470,13 @@ void UChanneldConnection::SendRaw(ChannelId ChId, uint32 MsgType, const uint8* M
 		UE_LOG(LogChanneld, Verbose, TEXT("Send user-space message to channel %d, stubId=%d, type=%d, bodySize=%d)"), ChId, StubId, MsgType, BodySize);
 }
 
+void UChanneldConnection::Broadcast(ChannelId ChId, uint32 MsgType, const google::protobuf::Message& Msg, int BroadcastType)
+{
+	channeldpb::ServerForwardMessage ServerForwardMessage;
+	ServerForwardMessage.set_payload(Msg.SerializeAsString());
+	Send(ChId, MsgType, ServerForwardMessage, static_cast<channeldpb::BroadcastType>(BroadcastType));
+}
+
 void UChanneldConnection::HandleServerForwardMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg, uint32 MsgType)
 {
 	auto UserSpaceMsg = static_cast<const channeldpb::ServerForwardMessage*>(Msg);

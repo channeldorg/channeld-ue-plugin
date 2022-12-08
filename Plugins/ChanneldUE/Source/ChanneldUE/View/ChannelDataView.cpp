@@ -41,9 +41,16 @@ void UChannelDataView::Initialize(UChanneldConnection* InConn)
 
 	if (Connection->IsServer())
 	{
-		FTimerHandle Handle;
-		GetWorld()->GetTimerManager().SetTimer(Handle, [&](){InitServer();}, 1, false, 5);
-		//InitServer();
+		const float InitDelay = GetMutableDefault<UChanneldSettings>()->DelayViewInitInSeconds;
+		if (InitDelay > 0)
+		{
+			FTimerHandle Handle;
+			GetWorld()->GetTimerManager().SetTimer(Handle, [&](){InitServer();}, 1, false, InitDelay);
+		}
+		else
+		{
+			InitServer();
+		}
 	}
 	else if (Connection->IsClient())
 	{
@@ -583,9 +590,16 @@ UObject* UChannelDataView::GetObjectFromNetGUID(const FNetworkGUID& NetId)
 	return nullptr;
 }
 
-void UChannelDataView::HandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+void UChannelDataView::HandleUnsub(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto UnsubMsg = static_cast<const channeldpb::UnsubscribedFromChannelResultMessage*>(Msg);
+	UE_LOG(LogChanneld, Log, TEXT("Received unsub of conn(%d), connType=%s, channelType=%s, channelId=%d"),
+		UnsubMsg->connid(),
+		UTF8_TO_TCHAR(channeldpb::ConnectionType_Name(UnsubMsg->conntype()).c_str()),
+		UTF8_TO_TCHAR(channeldpb::ChannelType_Name(UnsubMsg->channeltype()).c_str()),
+		ChId);
+
+	// When current connection unsubs from a channel, remove all providers in that channel.
 	if (UnsubMsg->connid() == Connection->GetConnId())
 	{
 		TSet<FProviderInternal> Providers;
@@ -593,6 +607,38 @@ void UChannelDataView::HandleUnsub(UChanneldConnection* Conn, ChannelId ChId, co
 		{
 			UE_LOG(LogChanneld, Log, TEXT("Received Unsub message. Removed all data providers(%d) from channel %d"), Providers.Num(), ChId);
 			OnUnsubFromChannel(ChId, Providers);
+		}
+	}
+
+	if (Connection->IsServer())
+	{
+		if (UnsubMsg->conntype() == channeldpb::CLIENT && Connection->OwnedChannels.Contains(ChId))
+		{
+			OnClientUnsub(UnsubMsg->connid(), UnsubMsg->channeltype(), ChId);
+		}
+	}
+}
+
+void UChannelDataView::OnClientUnsub(ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, ChannelId ChId)
+{
+	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
+	{
+		if (auto ClientConnection = NetDriver->GetClientConnection(ClientConnId))
+		{
+			//~ Start copy from UNetDriver::Shutdown()
+			if (ClientConnection->PlayerController)
+			{
+				APawn* Pawn = ClientConnection->PlayerController->GetPawn();
+				if (Pawn)
+				{
+					Pawn->Destroy(true);
+				}
+			}
+
+			// Calls Close() internally and removes from ClientConnections
+			// Will also destroy the player controller.
+			ClientConnection->CleanUp();
+			//~ End copy
 		}
 	}
 }

@@ -187,8 +187,14 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 				if (HandoverActor)
 				{
 					UE_LOG(LogChanneld, Log, TEXT("[Server] Deleting actor %s as it leaves the interest area"), *HandoverActor->GetName());
+					if (auto HandoverPC = Cast<APlayerController>(HandoverActor))
+					{
+						HandoverPC->Player = nullptr;
+						// Don't remove the client connection for now - we don't want to send CloseBunch to the client.
+						// Keep the client connection until the client leaves the game, so we can reuse it for handover.
+						HandoverPC->NetConnection = nullptr;
+					}
 					GetWorld()->DestroyActor(HandoverActor, true);
-					// TODO: Remove the client connection if the object represents a player
 				}
 
 				NetIdOwningChannels.Remove(NetId);
@@ -317,13 +323,14 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 
 	// Applies the channel data update to the newly spawned objects.
 	// The references between the Pawn, PlayerController, and PlayerState should be set properly in this step.
-	if (HandoverData.has_channeldata())
+	if (HandoverActors.Num() > 0 && HandoverData.has_channeldata())
 	{
 		channeldpb::ChannelDataUpdateMessage UpdateMsg;
 		UpdateMsg.set_allocated_data(HandoverData.mutable_channeldata());
 		HandleChannelDataUpdate(_, ChId, &UpdateMsg);
 	}
 
+	// Post handover - set the actors' properties as same as they were in the source server.
 	for (auto HandoverActor : HandoverActors)
 	{
 		// If the handover actor falls into the authority area of current server,
@@ -331,6 +338,52 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 		if (Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid()))
 		{
 			HandoverActor->SetRole(ENetRole::ROLE_Authority);
+		}
+
+		if (auto HandoverPC = Cast<APlayerController>(HandoverActor))
+		{
+			HandoverPC->ServerAcknowledgePossession(HandoverPC->GetPawn());
+		}
+	}
+}
+
+void USpatialChannelDataView::ServerHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	const auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
+	if (SubResultMsg->channeltype() == channeldpb::SPATIAL /*&& SubResultMsg->suboptions().dataaccess() == channeldpb::WRITE_ACCESS*/)
+	{
+		// A client is subscribed to a spatial channel the server owns (Sub message is sent by Master server)
+		if (SubResultMsg->conntype() == channeldpb::CLIENT)
+		{
+			/* Use the "standard" process for client travelling to the spatial server 
+			if (auto ClientConn = CreateClientConnection(SubResultMsg->connid(), ChId))
+			{
+				GetWorld()->GetAuthGameMode()->RestartPlayer(ClientConn->PlayerController);
+			}
+			*/
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Log, TEXT("[Server] Sub to spatial channel %d"), ChId);
+			GetChanneldSubsystem()->SetLowLevelSendToChannelId(ChId);
+		}
+	}
+}
+
+void USpatialChannelDataView::OnClientUnsub(ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, ChannelId ChId)
+{
+	// A client leaves the spatial channel
+	if (ChannelType == channeldpb::SPATIAL)
+	{
+		ClientInChannels.Remove(ClientConnId);
+	}
+	// A client leaves the game - close and remove the client connection.
+	else if (ChannelType == channeldpb::GLOBAL)
+	{
+		if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
+		{
+			UE_LOG(LogChanneld, Log, TEXT("Client leaves the game, removing the connection: %d"), ClientConnId);
+			NetDriver->RemoveChanneldClientConnection(ClientConnId);
 		}
 	}
 }
@@ -363,46 +416,24 @@ void USpatialChannelDataView::InitServer()
 		UE_LOG(LogChanneld, Log, TEXT("%s selected %s for client %d"), *PlayerStartLocator->GetName(), *StartPos.ToCompactString(), NetConn->GetConnId());
 	});
 	
-	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
-	{
-		auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
-        // A client is subscribed to a spatial channel the server owns (Sub message is sent by Master server)
-		if (SubResultMsg->channeltype() == channeldpb::SPATIAL /*&& SubResultMsg->suboptions().dataaccess() == channeldpb::WRITE_ACCESS*/)
-		{
-			if (SubResultMsg->conntype() == channeldpb::CLIENT)
-			{
-				/* Use the "standard" process for client travelling to the spatial server 
-				if (auto ClientConn = CreateClientConnection(SubResultMsg->connid(), ChId))
-				{
-					GetWorld()->GetAuthGameMode()->RestartPlayer(ClientConn->PlayerController);
-				}
-				*/
-			}
-			else
-			{
-				UE_LOG(LogChanneld, Log, TEXT("[Server] Sub to spatial channel %d"), ChId);
-				GetChanneldSubsystem()->SetLowLevelSendToChannelId(ChId);
-			}
-		}
-		
-	});
-	
-	Connection->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
-	{
-		auto UnsubResultMsg = static_cast<const channeldpb::UnsubscribedFromChannelResultMessage*>(Msg);
-		// A client unsubscribed from the spatial channel
-		if (UnsubResultMsg->conntype() == channeldpb::CLIENT && UnsubResultMsg->channeltype() == channeldpb::SPATIAL)
-		{
-			// UChanneldNetDriver::ServerHandleUnsub will handle the player disconnection.
-			
-			ClientInChannels.Remove(UnsubResultMsg->connid());
-		}
-	});
+	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, this, &USpatialChannelDataView::ServerHandleSubToChannel);
 
 	Connection->RegisterMessageHandler(unrealpb::HANDOVER_CONTEXT, new unrealpb::GetHandoverContextMessage, this, &USpatialChannelDataView::ServerHandleGetHandoverContext);
 	
 	Connection->AddMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, this, &USpatialChannelDataView::ServerHandleHandover);
 
+	Connection->RegisterMessageHandler(unrealpb::SERVER_PLAYER_LEAVE, new channeldpb::ServerForwardMessage, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+	{
+		channeldpb::UnsubscribedFromChannelResultMessage UnsubMsg;
+		if (UnsubMsg.ParseFromString(static_cast<const channeldpb::ServerForwardMessage*>(Msg)->payload()))
+		{
+			OnClientUnsub(UnsubMsg.connid(), UnsubMsg.channeltype(), ChId);
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Error, TEXT("Failed to parse the payload of the SERVER_PLAYER_LEAVE message to UnsubscribedFromChannelResultMessage. ChannelId: %d"), ChId);
+		}
+	});
 	
 	Connection->SubToChannel(GlobalChannelId, nullptr, [&](const channeldpb::SubscribedToChannelResultMessage* _)
 	{
@@ -521,7 +552,6 @@ void USpatialChannelDataView::InitClient()
 	Super::InitClient();
 
 	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, this, &USpatialChannelDataView::ClientHandleSubToChannel);
-	
 	Connection->AddMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, this, &USpatialChannelDataView::ClientHandleHandover);
 	
 	channeldpb::ChannelSubscriptionOptions GlobalSubOptions;
@@ -632,6 +662,11 @@ void USpatialChannelDataView::OnAddClientConnection(UChanneldNetConnection* Clie
 	ClientInChannels.Add(ClientConnection->GetConnId(), ChId);
 }
 
+void USpatialChannelDataView::OnRemoveClientConnection(UChanneldNetConnection* ClientConn)
+{
+	ClientInChannels.Remove(ClientConn->GetConnId());
+}
+
 void USpatialChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn)
 {
 	Super::OnClientPostLogin(GameMode, NewPlayer, NewPlayerConn);
@@ -720,9 +755,7 @@ void USpatialChannelDataView::SendSpawnToAdjacentChannels(UObject* Obj, ChannelI
 		SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(Actor->GetActorLocation()));
 	}
 	SpawnMsg.set_channelid(SpatialChId);
-	channeldpb::ServerForwardMessage ServerForwardMessage;
-	ServerForwardMessage.set_payload(SpawnMsg.SerializeAsString());
-	Connection->Send(SpatialChId, unrealpb::SPAWN, ServerForwardMessage, static_cast<channeldpb::BroadcastType>(channeldpb::ADJACENT_CHANNELS | channeldpb::ALL_BUT_SENDER));
+	Connection->Broadcast(SpatialChId, unrealpb::SPAWN, SpawnMsg, channeldpb::ADJACENT_CHANNELS | channeldpb::ALL_BUT_SENDER);
 	UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message to spatial channels(%d), obj: %s, netId: %d"), SpatialChId, *Obj->GetName(), NetId.Value);
 
 	NetDriver->SetAllSentSpawn(NetId);

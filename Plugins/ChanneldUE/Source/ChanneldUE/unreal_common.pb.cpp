@@ -1709,19 +1709,19 @@ const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_
   "VelB\t\n\007_newRotB\n\n\010_newBaseB\022\n\020_newBaseBo"
   "neNameB\030\n\026_bBaseRelativePositionB\035\n\033_roo"
   "tMotionSourceCorrectionB\025\n\023_rootMotionRo"
-  "tationB\017\n\r_movementMode*\205\001\n\013MessageType\022"
+  "tationB\017\n\r_movementMode*\237\001\n\013MessageType\022"
   "\013\n\007INVALID\020\000\022\r\n\tLOW_LEVEL\020d\022\007\n\003ANY\020e\022\007\n\003"
   "RPC\020f\022\t\n\005SPAWN\020g\022\013\n\007DESTROY\020h\022\024\n\020HANDOVE"
-  "R_CONTEXT\020i\022\032\n\025SERVER_PLAYER_SPAWNED\020\311\001B"
-  ",Z*channeld.clewcat.com/channeld/pkg/unr"
-  "ealpbb\006proto3"
+  "R_CONTEXT\020i\022\032\n\025SERVER_PLAYER_SPAWNED\020\311\001\022"
+  "\030\n\023SERVER_PLAYER_LEAVE\020\312\001B,Z*channeld.cl"
+  "ewcat.com/channeld/pkg/unrealpbb\006proto3"
   ;
 static const ::_pbi::DescriptorTable* const descriptor_table_unreal_5fcommon_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fany_2eproto,
 };
 static ::_pbi::once_flag descriptor_table_unreal_5fcommon_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_unreal_5fcommon_2eproto = {
-    false, false, 10253, descriptor_table_protodef_unreal_5fcommon_2eproto,
+    false, false, 10279, descriptor_table_protodef_unreal_5fcommon_2eproto,
     "unreal_common.proto",
     &descriptor_table_unreal_5fcommon_2eproto_once, descriptor_table_unreal_5fcommon_2eproto_deps, 1, 45,
     schemas_unreal_5fcommon_2eproto, file_default_instances_unreal_5fcommon_2eproto, TableStruct_unreal_5fcommon_2eproto::offsets,
@@ -1749,6 +1749,7 @@ bool MessageType_IsValid(int value) {
     case 104:
     case 105:
     case 201:
+    case 202:
       return true;
     default:
       return false;

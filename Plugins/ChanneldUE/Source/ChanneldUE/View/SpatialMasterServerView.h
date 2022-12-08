@@ -27,7 +27,7 @@ public:
 	uint32 ClientFanOutIntervalMs = 20;
 	UPROPERTY(EditAnywhere)
 	uint32 ClientFanOutDelayMs = 3000;
-
+	
 private:
 
 	// Maintains all the channels Master server has created.

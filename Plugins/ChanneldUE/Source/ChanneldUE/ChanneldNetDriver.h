@@ -61,6 +61,7 @@ public:
 	//~ End UNetDriver Interface
 	
 	UChanneldNetConnection* AddChanneldClientConnection(ConnectionId ClientConnId, ChannelId ChId);
+	void RemoveChanneldClientConnection(ConnectionId ClientConnId);
 
 	void ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDelayRPC);
 

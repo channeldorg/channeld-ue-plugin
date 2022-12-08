@@ -241,12 +241,13 @@ enum MessageType : int {
   DESTROY = 104,
   HANDOVER_CONTEXT = 105,
   SERVER_PLAYER_SPAWNED = 201,
+  SERVER_PLAYER_LEAVE = 202,
   MessageType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   MessageType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
 CHANNELDUE_API bool MessageType_IsValid(int value);
 constexpr MessageType MessageType_MIN = INVALID;
-constexpr MessageType MessageType_MAX = SERVER_PLAYER_SPAWNED;
+constexpr MessageType MessageType_MAX = SERVER_PLAYER_LEAVE;
 constexpr int MessageType_ARRAYSIZE = MessageType_MAX + 1;
 
 CHANNELDUE_API const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* MessageType_descriptor();
