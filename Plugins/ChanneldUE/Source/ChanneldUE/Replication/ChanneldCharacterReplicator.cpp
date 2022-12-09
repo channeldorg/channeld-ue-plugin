@@ -192,7 +192,13 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 		FBasedMovementInfo BasedMovement = Character->GetBasedMovement();
 		if (NewState->basedmovement().has_movementbase())
 		{
-			BasedMovement.MovementBase = ChanneldUtils::GetActorComponentByRef<UPrimitiveComponent>(&NewState->basedmovement().movementbase(), Character->GetWorld());
+			UChanneldNetConnection* ClientConn = nullptr;
+			// Special case: server handover
+			if (Character->GetWorld()->IsServer())
+			{
+				ClientConn = Cast<UChanneldNetConnection>(Character->GetNetConnection());
+			}
+			BasedMovement.MovementBase = ChanneldUtils::GetActorComponentByRef<UPrimitiveComponent>(&NewState->basedmovement().movementbase(), Character->GetWorld(), true, ClientConn);
 		}
 		if (NewState->basedmovement().has_bonename())
 		{

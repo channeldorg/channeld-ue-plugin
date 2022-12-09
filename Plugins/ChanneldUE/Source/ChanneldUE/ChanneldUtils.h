@@ -266,8 +266,8 @@ public:
 
 					for (FNetworkGUID& NewGUID : NewGUIDs)
 					{
-						// Don't send the target NetGUID in the context
-						if (NewGUID == NetGUID)
+						// Don't send the target NetGUID in the context if it's dynamic
+						if (NewGUID == NetGUID && NetGUID.IsDynamic())
 							continue;
 
 						auto NewCachedObj = GuidCache->GetCacheObject(NewGUID);
@@ -298,16 +298,16 @@ public:
 		// ObjRef.set_connid(GEngine->GetEngineSubsystem<UChanneldConnection>()->GetConnId());
 		return ObjRef;
 	}
-
+	
 	template<class T>
-	static T* GetActorComponentByRef(const unrealpb::ActorComponentRef* Ref, UWorld* World)
+	static T* GetActorComponentByRef(const unrealpb::ActorComponentRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr)
 	{
 		if (!Ref || !World)
 		{
 			return nullptr;
 		}
 
-		AActor* Actor = Cast<AActor>(GetObjectByRef(&Ref->owner(), World));
+		AActor* Actor = Cast<AActor>(GetObjectByRef(&Ref->owner(), World, bCreateIfNotInCache, ClientConn));
 		if (!Actor)
 		{
 			return nullptr;

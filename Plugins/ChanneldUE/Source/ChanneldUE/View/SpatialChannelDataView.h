@@ -63,7 +63,7 @@ private:
 	TMap<TWeakObjectPtr<UObject>, ConnectionId> ServerIgnoreSendSpawnObjects;
 	*/
 	
-	bool bSuppressAddProviderOnServerSpawn = false;
+	bool bSuppressAddProviderAndSendOnServerSpawn = false;
 
 	void ServerHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleGetHandoverContext(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);

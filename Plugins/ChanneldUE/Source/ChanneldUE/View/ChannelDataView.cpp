@@ -229,6 +229,18 @@ void UChannelDataView::AddActorProvider(AActor* Actor)
 	}
 }
 
+void UChannelDataView::RemoveActorProvider(AActor* Actor, bool bSendRemoved)
+{
+	if (Actor->Implements<UChannelDataProvider>())
+	{
+		RemoveProviderFromAllChannels(Cast<IChannelDataProvider>(Actor), bSendRemoved);
+	}
+	for (const auto Comp : Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+	{
+		RemoveProviderFromAllChannels(Cast<IChannelDataProvider>(Comp), bSendRemoved);
+	}
+}
+
 void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved)
 {
 	// ensureMsgf(Provider->GetChannelType() != channeldpb::UNKNOWN, TEXT("Invalid channel type of data provider: %s"), *IChannelDataProvider::GetName(Provider));

@@ -78,26 +78,31 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 	{
 		return;
 	}
-
-	auto Connnection = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
-	if (IsValid(Connnection) && Connnection->GetConnId() != FullState->owningconnid())
-	{
-		DeltaState->set_owningconnid(Connnection->GetConnId());
-		bStateChanged = true;
-	}
 	if (Actor->IsReplicatingMovement() != FullState->breplicatemovement())
 	{
 		DeltaState->set_breplicatemovement(Actor->IsReplicatingMovement());
 		bStateChanged = true;
 	}
+
+	bool bRoleChanged = false;
 	if ((uint32)Actor->GetLocalRole() != FullState->localrole())
 	{
 		DeltaState->set_localrole(Actor->GetLocalRole());
 		bStateChanged = true;
+		bRoleChanged = true;
 	}
 	if ((uint32)Actor->GetRemoteRole() != FullState->remoterole())
 	{
 		DeltaState->set_remoterole(Actor->GetRemoteRole());
+		bStateChanged = true;
+		bRoleChanged = true;
+	}
+
+	auto Connnection = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
+	// If role changed, always send the owning connId for the client to adjust the role.
+	if (IsValid(Connnection) && (bRoleChanged || Connnection->GetConnId() != FullState->owningconnid()))
+	{
+		DeltaState->set_owningconnid(Connnection->GetConnId());
 		bStateChanged = true;
 	}
 
@@ -173,30 +178,30 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 	{
 		const FRepAttachment& RepAttachment = Actor->GetAttachmentReplication();
 		unrealpb::FRepAttachment* RepAttachmentFullState = FullState->mutable_attachmentreplication();
-		unrealpb::FRepAttachment* RepAttachmentDeltaState = DeltaState->mutable_attachmentreplication();
+		// unrealpb::FRepAttachment* RepAttachmentDeltaState = DeltaState->mutable_attachmentreplication();
 		if (RepAttachment.AttachParent != ChanneldUtils::GetObjectByRef(RepAttachmentFullState->mutable_attachparent(), Actor->GetWorld(), false))
 		{
-			RepAttachmentDeltaState->mutable_attachparent()->CopyFrom(ChanneldUtils::GetRefOfObject(RepAttachment.AttachParent, Actor->GetNetConnection()));
+			DeltaState->mutable_attachmentreplication()->mutable_attachparent()->CopyFrom(ChanneldUtils::GetRefOfObject(RepAttachment.AttachParent, Actor->GetNetConnection()));
 			bStateChanged = true;
 		}
 		if (RepAttachment.AttachComponent != ChanneldUtils::GetActorComponentByRef<USceneComponent>(RepAttachmentFullState->mutable_attachcomponent(), Actor->GetWorld()))
 		{
-			RepAttachmentDeltaState->mutable_attachcomponent()->CopyFrom(ChanneldUtils::GetRefOfActorComponent(RepAttachment.AttachComponent, Actor->GetNetConnection()));
+			DeltaState->mutable_attachmentreplication()->mutable_attachcomponent()->CopyFrom(ChanneldUtils::GetRefOfActorComponent(RepAttachment.AttachComponent, Actor->GetNetConnection()));
 			bStateChanged = true;
 		}
 		if (ChanneldUtils::SetIfNotSame(RepAttachmentFullState->mutable_locationoffset(), RepAttachment.LocationOffset))
 		{
-			ChanneldUtils::SetIfNotSame(RepAttachmentDeltaState->mutable_locationoffset(), RepAttachment.LocationOffset);
+			ChanneldUtils::SetIfNotSame(DeltaState->mutable_attachmentreplication()->mutable_locationoffset(), RepAttachment.LocationOffset);
 			bStateChanged = true;
 		}
 		if (ChanneldUtils::SetIfNotSame(RepAttachmentFullState->mutable_relativescale(), RepAttachment.RelativeScale3D))
 		{
-			ChanneldUtils::SetIfNotSame(RepAttachmentDeltaState->mutable_relativescale(), RepAttachment.RelativeScale3D);
+			ChanneldUtils::SetIfNotSame(DeltaState->mutable_attachmentreplication()->mutable_relativescale(), RepAttachment.RelativeScale3D);
 			bStateChanged = true;
 		}
 		if (ChanneldUtils::SetIfNotSame(RepAttachmentFullState->mutable_rotationoffset(), RepAttachment.RotationOffset))
 		{
-			ChanneldUtils::SetIfNotSame(RepAttachmentDeltaState->mutable_rotationoffset(), RepAttachment.RotationOffset);
+			ChanneldUtils::SetIfNotSame(DeltaState->mutable_attachmentreplication()->mutable_rotationoffset(), RepAttachment.RotationOffset);
 			bStateChanged = true;
 		}
 	}

@@ -59,6 +59,16 @@ void USpatialChannelDataView::InitPlayerController(UChanneldNetConnection* Clien
 		NewPlayerController->NetPlayerIndex = 0;
 		NewPlayerController->SetRole(ROLE_Authority);
 		NewPlayerController->SetReplicates(true);
+
+		// HACK: We need to set the private property bIsLocalPlayerController to false before calling SetPlayer(), so it won't create the spectator pawn for the PC.
+		static const FBoolProperty* Prop = CastFieldChecked<const FBoolProperty>(APlayerController::StaticClass()->FindPropertyByName("bIsLocalPlayerController"));
+		/* Won't work - causes error
+		Prop->SetPropertyValue(NewPlayerController, false);
+		*/
+		bool* Ptr = Prop->ContainerPtrToValuePtr<bool>(NewPlayerController);
+		*Ptr = false;
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Set bIsLocalPlayerController to %s"), NewPlayerController->IsLocalController() ? TEXT("true") : TEXT("false"));
+		
 		NewPlayerController->SetPlayer(ClientConn);
 
 		ClientConn->SetClientLoginState(EClientLoginState::ReceivedJoin);
@@ -194,6 +204,10 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 						// Keep the client connection until the client leaves the game, so we can reuse it for handover.
 						HandoverPC->NetConnection = nullptr;
 					}
+					
+					// Don't send "removed: true" update to the channel, because the state still exists.
+					RemoveActorProvider(HandoverActor, false);
+					
 					GetWorld()->DestroyActor(HandoverActor, true);
 				}
 
@@ -244,13 +258,14 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 
 					const bool bHasAuthority = Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid());
 				
-					// Set the NetId of the Pawn as exported, so it won't send the Spawn message of the Pawn to the client.
+					// Set the NetId of the handover object as exported, so the NetConn won't send the Spawn message to the client.
+					// FIXME: Won't work as the spawned object will have a different NetId!
 					ClientConn->SetSentSpawned(NetId);
 
 					// HACK: turn off AddProviderToDefaultChannel() temporarily, as the NetId of the handover object may mismatch when just created. (ChanneldUtils@L656)
-					bSuppressAddProviderOnServerSpawn = true;
+					bSuppressAddProviderAndSendOnServerSpawn = true;
 					HandoverObj = ChanneldUtils::GetObjectByRef(&HandoverObjRef, GetWorld(), true, ClientConn);
-					bSuppressAddProviderOnServerSpawn = false;
+					bSuppressAddProviderAndSendOnServerSpawn = false;
 					UE_LOG(LogChanneld, Log, TEXT("[Server] Spawned handover obj: %s, clientConnId: %d"), *GetNameSafe(HandoverObj), ClientConnId);
 
 					if (HandoverObj)
@@ -561,8 +576,9 @@ void USpatialChannelDataView::InitClient()
 	
 	channeldpb::ChannelSubscriptionOptions GlobalSubOptions;
 	GlobalSubOptions.set_dataaccess(channeldpb::READ_ACCESS);
-	GlobalSubOptions.set_fanoutintervalms(20);
-	GlobalSubOptions.set_fanoutdelayms(1000);
+	GlobalSubOptions.set_fanoutintervalms(50);
+	// Make the first fan-out of GLOBAL channel data update (GameStateBase) a bit slower, so the GameState is spawned from the spatial server and ready.
+	GlobalSubOptions.set_fanoutdelayms(2000);
 	Connection->SubToChannel(GlobalChannelId, &GlobalSubOptions, [&](const channeldpb::SubscribedToChannelResultMessage* Msg)
 	{
 		// GetChanneldSubsystem()->SetLowLevelSendToChannelId(GlobalChannelId);
@@ -696,16 +712,19 @@ bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetwork
 	{
 		SetOwningChannelId(NetId, GlobalChannelId);
 	}
-	
-	if (!bSuppressAddProviderOnServerSpawn)
+
+	if (bSuppressAddProviderAndSendOnServerSpawn)
 	{
-		// Don't set the NetId-ChannelId mapping, as we don't have the spatial channelId of the object yet.
-		// The spatial channelId will be queried in AddProviderToDefaultChannel()
-		if (Obj->IsA<AActor>())
-		{
-			AddActorProvider(Cast<AActor>(Obj));
-		}
+		return false;
 	}
+	
+	// Don't set the NetId-ChannelId mapping, as we don't have the spatial channelId of the object yet.
+	// The spatial channelId will be queried in AddProviderToDefaultChannel()
+	if (Obj->IsA<AActor>())
+	{
+		AddActorProvider(Cast<AActor>(Obj));
+	}
+	
 	return true;
 }
 

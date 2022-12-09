@@ -731,9 +731,10 @@ void UChanneldNetDriver::SetAllSentSpawn(const FNetworkGUID NetId)
 	}
 }
 
+// Called only on client or the destination server of a handover.
 void UChanneldNetDriver::NotifyActorChannelOpen(UActorChannel* Channel, AActor* Actor)
 {
-	UE_LOG(LogChanneld, Verbose, TEXT("ActorChannelOpen: %s"), *GetNameSafe(Actor));
+	UE_LOG(LogChanneld, Verbose, TEXT("[Client] ActorChannelOpen: %s"), *GetNameSafe(Actor));
 	// Actor's RPC can be invoked before BeginPlay(), so we need to make sure the replicators have been created at this moment.
 	if (auto Comp = Actor->GetComponentByClass(UChanneldReplicationComponent::StaticClass()))
 	{
