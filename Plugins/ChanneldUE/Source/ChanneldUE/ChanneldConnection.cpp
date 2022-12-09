@@ -420,31 +420,21 @@ void UChanneldConnection::TickOutgoing()
 	// Free send buffer
 	Packet.Clear();
 	delete[] PacketData;
-	if (!IsSent)
+	if (!IsSent || BytesSent != Size)
 	{
-		UE_LOG(LogChanneld, Error, TEXT("Failed to send packet to channeld, size: %d"), Size);
+		UE_LOG(LogChanneld, Error, TEXT("Failed to send packet to channeld, sent/full size: %d/%d"), BytesSent, Size);
 	}
 }
 
 void UChanneldConnection::Send(ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast/* = channeldpb::NO_BROADCAST*/, const FChanneldMessageHandlerFunc& HandlerFunc/* = nullptr*/)
 {
-	// TODO: use a serialization buffer as the member variable
-	uint8* MessageData = new uint8[Msg.ByteSizeLong()];
-	bool Serialized = Msg.SerializeToArray(MessageData, Msg.GetCachedSize());
-	if (!Serialized)
-	{
-		delete[] MessageData;
-		UE_LOG(LogChanneld, Error, TEXT("Failed to serialize message, type: %d"), MsgType);
-		return;
-	}
-
-	SendRaw(ChId, MsgType, MessageData, Msg.GetCachedSize(), Broadcast, HandlerFunc);
+	SendRaw(ChId, MsgType, Msg.SerializeAsString(), Broadcast, HandlerFunc);
 
 	if (MsgType < channeldpb::USER_SPACE_START)
 		UE_LOG(LogChanneld, Verbose, TEXT("Send message %s to channel %d"), UTF8_TO_TCHAR(channeldpb::MessageType_Name((channeldpb::MessageType)MsgType).c_str()), ChId);
 }
 
-void UChanneldConnection::SendRaw(ChannelId ChId, uint32 MsgType, const uint8* MsgBody, const int32 BodySize, channeldpb::BroadcastType Broadcast /*= channeldpb::NO_BROADCAST*/, const FChanneldMessageHandlerFunc& HandlerFunc /*= nullptr*/)
+void UChanneldConnection::SendRaw(ChannelId ChId, uint32 MsgType, const std::string& MsgBody, channeldpb::BroadcastType Broadcast /*= channeldpb::NO_BROADCAST*/, const FChanneldMessageHandlerFunc& HandlerFunc /*= nullptr*/)
 {
 	uint32 StubId = HandlerFunc != nullptr ? AddRpcCallback(HandlerFunc) : 0;
 
@@ -453,7 +443,7 @@ void UChanneldConnection::SendRaw(ChannelId ChId, uint32 MsgType, const uint8* M
 	MsgPack->set_broadcast(Broadcast);
 	MsgPack->set_stubid(StubId);
 	MsgPack->set_msgtype(MsgType);
-	MsgPack->set_msgbody(MsgBody, BodySize);
+	MsgPack->set_msgbody(MsgBody);
 	OutgoingQueue.Enqueue(MsgPack);
 
 	/*
@@ -462,12 +452,12 @@ void UChanneldConnection::SendRaw(ChannelId ChId, uint32 MsgType, const uint8* M
 	MsgPack.set_broadcast(Broadcast);
 	MsgPack.set_stubid(StubId);
 	MsgPack.set_msgtype(MsgType);
-	MsgPack.set_msgbody(MsgBody, BodySize);
+	MsgPack.set_msgbody(MsgBody);
 	OutgoingQueue.Enqueue(MsgPack);
 	*/
 
 	if (MsgType >= channeldpb::USER_SPACE_START && bShowUserSpaceMessageLog)
-		UE_LOG(LogChanneld, Verbose, TEXT("Send user-space message to channel %d, stubId=%d, type=%d, bodySize=%d)"), ChId, StubId, MsgType, BodySize);
+		UE_LOG(LogChanneld, Verbose, TEXT("Send user-space message to channel %d, stubId=%d, type=%d, bodySize=%d)"), ChId, StubId, MsgType, MsgBody.size());
 }
 
 void UChanneldConnection::Broadcast(ChannelId ChId, uint32 MsgType, const google::protobuf::Message& Msg, int BroadcastType)

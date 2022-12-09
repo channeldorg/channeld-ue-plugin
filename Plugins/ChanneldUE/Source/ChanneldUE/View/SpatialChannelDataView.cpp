@@ -326,7 +326,12 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	if (HandoverActors.Num() > 0 && HandoverData.has_channeldata())
 	{
 		channeldpb::ChannelDataUpdateMessage UpdateMsg;
+		/* DO NOT use set_allocated_data - the HandoverData is in the stack memory but set_allocated_data requires the data in the heap.
+		 * The following line will cause the Replicator's FullState merges the in-stack Arena which will be deallocated later,
+		 * then the Replicator's next Tick() would trigger "Access Violation" exception.
 		UpdateMsg.set_allocated_data(HandoverData.mutable_channeldata());
+		*/
+		UpdateMsg.mutable_data()->CopyFrom(HandoverData.channeldata());
 		HandleChannelDataUpdate(_, ChId, &UpdateMsg);
 	}
 

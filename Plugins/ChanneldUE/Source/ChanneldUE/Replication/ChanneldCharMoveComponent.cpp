@@ -69,7 +69,7 @@ bool FChanneldCharacterMoveResponseDataContainer::Serialize(
 			Ar.Serialize(NewBaseData, DataSize);
 			unrealpb::ActorComponentRef ObjRef;
 			ObjRef.ParseFromArray(NewBaseData, DataSize);
-			delete NewBaseData;
+			delete[] NewBaseData;
 			ClientAdjustment.NewBase = ChanneldUtils::GetActorComponentByRef<UPrimitiveComponent>(&ObjRef, CharacterMovement.GetWorld());
 		}
 		SerializeOptionalValue<FName>(bIsSaving, Ar, ClientAdjustment.NewBaseBoneName, NAME_None);

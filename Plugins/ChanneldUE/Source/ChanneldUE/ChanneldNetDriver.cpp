@@ -199,7 +199,6 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 		}
 
 		HandleCustomRPC(RpcMsg);
-		return;
 	}
 	else if (MsgType == unrealpb::SPAWN)
 	{

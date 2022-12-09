@@ -134,7 +134,7 @@ void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, i
 	}
 	else
 	{
-		ConnToChanneld->SendRaw(ChId, MsgType, DataToSend, DataSize);
+		ConnToChanneld->SendRaw(ChId, MsgType, std::string(reinterpret_cast<const char*>(DataToSend), DataSize));
 	}
 }
 

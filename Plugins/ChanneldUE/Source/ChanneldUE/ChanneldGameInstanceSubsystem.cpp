@@ -377,17 +377,10 @@ void UChanneldGameInstanceSubsystem::ServerBroadcast(int32 ChId, int32 ClientCon
 	google::protobuf::Message* PayloadMessage = MessageObject->GetMessage();
 	google::protobuf::Any AnyData;
 	AnyData.PackFrom(*PayloadMessage);
-	uint8* MessageData = new uint8[AnyData.ByteSizeLong()];
-	bool Serialized = AnyData.SerializeToArray(MessageData, AnyData.GetCachedSize());
-	if (!Serialized)
-	{
-		delete[] MessageData;
-		UE_LOG(LogChanneld, Error, TEXT("Failed to serialize broadcast payload, type: %d"), BroadcastType);
-		return;
-	}
+
 	channeldpb::ServerForwardMessage MessageWrapper;
 	MessageWrapper.set_clientconnid(ClientConnId);
-	MessageWrapper.set_payload(MessageData, AnyData.GetCachedSize());
+	MessageWrapper.set_payload(AnyData.SerializeAsString());
 	ConnectionInstance->Send(ChId, unrealpb::ANY, MessageWrapper, static_cast<channeldpb::BroadcastType>(BroadcastType));
 }
 

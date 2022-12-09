@@ -104,7 +104,7 @@ public:
 	// Send a message to channeld. Thread-safe.
 	void Send(ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const FChanneldMessageHandlerFunc& HandlerFunc = nullptr);
 	// Send with underlying bytes.
-	void SendRaw(ChannelId ChId, uint32 MsgType, const uint8* MsgBody, const int32 BodySize, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const FChanneldMessageHandlerFunc& HandlerFunc = nullptr);
+	void SendRaw(ChannelId ChId, uint32 MsgType, const std::string& MsgBody, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const FChanneldMessageHandlerFunc& HandlerFunc = nullptr);
 	// Send a message that wrapped by the ServerForwardMessage. This is mainly for using channeld for broadcasting.
 	void Broadcast(ChannelId ChId, uint32 MsgType, const google::protobuf::Message& Msg, int BroadcastType);
 	
