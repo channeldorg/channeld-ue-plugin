@@ -7,6 +7,8 @@
 #include "ChanneldNetConnection.h"
 #include "ChanneldNetDriver.h"
 #include "ChanneldUtils.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Net/DataChannel.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameSession.h"
@@ -178,8 +180,13 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	}
 	UE_LOG(LogChanneld, Log, TEXT("ChannelDataHandover from channel %d to %d, object netIds: %s"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), *FString::Join(NetIds, TEXT(",")));
 
+	// Does current server has interest over the handover objects?
+	const bool bHasInterest = Connection->SubscribedChannels.Contains(HandoverMsg->dstchannelid());
+	// Does current server has authority over the handover objects?
+	const bool bHasAuthority = Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid());
+
 	// The actors are handed over to current (destination) server.
-	TArray<AActor*> HandoverActors;
+	TArray<AActor*> CrossServerActors;
 	
 	for (auto& HandoverContext : HandoverData.context())
 	{
@@ -192,7 +199,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 			AActor* HandoverActor = Cast<AActor>(GetObjectFromNetGUID(NetId));
 			
 			// If the handover actor is no longer in the interest area of current server, delete it.
-			if (!Connection->SubscribedChannels.Contains(HandoverMsg->dstchannelid()))
+			if (!bHasInterest)
 			{
 				if (HandoverActor)
 				{
@@ -203,6 +210,11 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 						// Don't remove the client connection for now - we don't want to send CloseBunch to the client.
 						// Keep the client connection until the client leaves the game, so we can reuse it for handover.
 						HandoverPC->NetConnection = nullptr;
+					}
+					else if (auto HandoverPawn = Cast<APawn>(HandoverActor))
+					{
+						// Reset the pawn's controller so it won't send ClientSetViewTarget RPC in APawn::DetachFromControllerPendingDestroy
+						HandoverPawn->Controller = nullptr;
 					}
 					
 					// Don't send "removed: true" update to the channel, because the state still exists.
@@ -215,7 +227,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 			}
 			// If the handover actor is no longer in the authority area of current server,
 			// make sure it no longer sends ChannelDataUpdate message.
-			else if (!Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid()))
+			else if (!bHasAuthority)
 			{
 				if (HandoverActor)
 				{
@@ -226,7 +238,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 		
 		
 		// Destination spatial server - the channel data is handed over to
-		if (Connection->SubscribedChannels.Contains(HandoverMsg->dstchannelid()))
+		if (bHasInterest)
 		{
 			// Set the NetId-ChannelId mapping before spawn the object, so AddProviderToDefaultChannel won't have to query the spatial channel.
 			SetOwningChannelId(NetId, HandoverMsg->dstchannelid());
@@ -256,7 +268,6 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 						ClientConn = CreateClientConnection(ClientConnId, HandoverMsg->dstchannelid());
 					}
 
-					const bool bHasAuthority = Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid());
 				
 					// Set the NetId of the handover object as exported, so the NetConn won't send the Spawn message to the client.
 					// FIXME: Won't work as the spawned object will have a different NetId!
@@ -277,23 +288,6 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 						{
 							InitPlayerController(ClientConn, Cast<APlayerController>(HandoverObj));
 						}
-						/*
-						// When the pawn moves into the authority area of this server, create the PlayerController and posses the pawn.
-						if (HandoverObj->IsA<APawn>() && bHasAuthority)
-						{
-							if (ClientConn->PlayerController == nullptr)
-							{
-								// FIXME: the NetId won't match the client's, causing RPC failure.
-								CreatePlayerController(ClientConn);
-								UE_LOG(LogChanneld, Log, TEXT("[Server] Create PlayerController for client conn %d"), ClientConn->GetConnId());
-							}
-							if (ClientConn->PlayerController)
-							{
-								ClientConn->PlayerController->Possess(Cast<APawn>(HandoverObj));
-								UE_LOG(LogChanneld, Log, TEXT("[Server] PlayerController possessed pawn %s"), *HandoverObj->GetName());
-							}
-						}
-						*/
 					}
 				}
 			}
@@ -305,14 +299,9 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 		
 			if (HandoverObj)
 			{
-				if (AActor* HandoverActor = Cast<AActor>(HandoverObj))
-				{
-					// Set the role to SimulatedProxy so the actor can be updated by the handover channel data later.
-					HandoverActor->SetRole(ROLE_SimulatedProxy);
-					HandoverActors.Add(HandoverActor);
-				}
 				
-				// The srcChannel and dstChannel are in the same server
+				
+				// In-server handover - the srcChannel and dstChannel are in the same server
 				if (Connection->SubscribedChannels.Contains(HandoverMsg->srcchannelid()))
 				{
 					// Move data provider to the new channel
@@ -328,6 +317,13 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 						}
 					}				
 				}
+				// Cross-server handover
+				else if (AActor* HandoverActor = Cast<AActor>(HandoverObj))
+				{
+					// Set the role to SimulatedProxy so the actor can be updated by the handover channel data later.
+					HandoverActor->SetRole(ROLE_SimulatedProxy);
+					CrossServerActors.Add(HandoverActor);
+				}
 			}
 			else
 			{
@@ -338,7 +334,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 
 	// Applies the channel data update to the newly spawned objects.
 	// The references between the Pawn, PlayerController, and PlayerState should be set properly in this step.
-	if (HandoverActors.Num() > 0 && HandoverData.has_channeldata())
+	if (CrossServerActors.Num() > 0 && HandoverData.has_channeldata())
 	{
 		channeldpb::ChannelDataUpdateMessage UpdateMsg;
 		/* DO NOT use set_allocated_data - the HandoverData is in the stack memory but set_allocated_data requires the data in the heap.
@@ -351,7 +347,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	}
 
 	// Post handover - set the actors' properties as same as they were in the source server.
-	for (auto HandoverActor : HandoverActors)
+	for (auto HandoverActor : CrossServerActors)
 	{
 		// If the handover actor falls into the authority area of current server,
 		// make sure it starts sending ChannelDataUpdate message. It has to be done AFTER calling HandleChannelDataUpdate.
@@ -520,10 +516,16 @@ void USpatialChannelDataView::ClientHandleSubToChannel(UChanneldConnection* _, C
 void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto HandoverMsg = static_cast<const channeldpb::ChannelDataHandoverMessage*>(Msg);
-	UE_LOG(LogChanneld, Verbose, TEXT("ChannelDataHandover from channel %d to %d"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid());
-
 	unrealpb::HandoverData HandoverData;
 	HandoverMsg->data().UnpackTo(&HandoverData);
+
+	TArray<FString> NetIds;
+	for (auto& HandoverContext : HandoverData.context())
+	{
+		NetIds.Add(FString::FromInt(HandoverContext.obj().netguid()));
+	}
+	UE_LOG(LogChanneld, Log, TEXT("ChannelDataHandover from channel %d to %d, object netIds: %s"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), *FString::Join(NetIds, TEXT(",")));
+
 	for (auto& HandoverContext : HandoverData.context())
 	{
 		FNetworkGUID NetId(HandoverContext.obj().netguid());
@@ -550,8 +552,21 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 			if (Obj->IsA<APawn>())
 			{
 				APawn* Pawn = Cast<APawn>(Obj);
+				// Only the client's owning Pawn has the PlayerController
 				if (Pawn->GetController())
 				{
+					// Reset the movement data to avoid timestamp discrepancy on the dest server.
+					if (ACharacter* Char = Cast<ACharacter>(Pawn))
+					{
+						// has_channeldata = true means the handover is between spatial servers.
+						if (HandoverData.has_channeldata() && Char->GetCharacterMovement() != nullptr)
+						{
+							// Char->GetCharacterMovement()->StopMovementImmediately();
+							Char->GetCharacterMovement()->ResetPredictionData_Client();
+							UE_LOG(LogChanneld, Verbose, TEXT("Reset client's movement prediction data."));
+						}
+					}
+					
 					// Update the channelId for LowLevelSend() if it's a player's pawn that been handed over.
 					GetChanneldSubsystem()->SetLowLevelSendToChannelId(HandoverMsg->dstchannelid());
 

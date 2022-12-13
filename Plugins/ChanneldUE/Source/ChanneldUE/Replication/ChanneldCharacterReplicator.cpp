@@ -299,10 +299,19 @@ TSharedPtr<void> FChanneldCharacterReplicator::DeserializeFunctionParams(UFuncti
 	bSuccess = true;
 	if (Func->GetFName() == FName("ServerMovePacked"))
 	{
+		UNetConnection* NetConn = Character->GetNetConnection();
+		if (!NetConn)
+		{
+			UE_LOG(LogChanneld, Error, TEXT("ServerMovePacked: character doesn't have the NetConnection to deserialize the params. NetId: %d"), GetNetGUID());
+			bSuccess = false;
+			return nullptr;
+		}
+		
 		unrealpb::Character_ServerMovePacked_Params Msg;
 		if (!Msg.ParseFromString(ParamsPayload))
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Failed to parse Character_ServerMovePacked_Params"));
+			UE_LOG(LogChanneld, Error, TEXT("Failed to parse Character_ServerMovePacked_Params"));
+			bSuccess = false;
 			return nullptr;
 		}
 
@@ -310,7 +319,7 @@ TSharedPtr<void> FChanneldCharacterReplicator::DeserializeFunctionParams(UFuncti
 		bool bIDC;
 		FArchive EmptyArchive;
 		// Hack the package map into to the PackedBits for further deserialization. IDC = I don't care.
-		if (Params->PackedBits.NetSerialize(EmptyArchive, Character->GetNetConnection()->PackageMap, bIDC))
+		if (Params->PackedBits.NetSerialize(EmptyArchive, NetConn->PackageMap, bIDC))
 		{
 			// ----------------------------------------------------
 			// UCharacterMovementComponent::CallServerMovePacked
