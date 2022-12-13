@@ -4,8 +4,8 @@
 #include "PropertyDecoratorFactory.h"
 #include "ReplicatorGeneratorDefinition.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "ReplicatorTemplate/BlueprintActorTemplate.h"
-#include "ReplicatorTemplate/CppActorTemplate.h"
+#include "ReplicatorTemplate/BlueprintReplicatorTemplate.h"
+#include "ReplicatorTemplate/CppReplicatorTemplate.h"
 
 bool FReplicatorCodeGenerator::RefreshModuleInfoByClassName()
 {
@@ -94,13 +94,56 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 
 	ReplicatorCode.IncludeActorCode = bIsBlueprint ? TEXT("") : FString::Printf(TEXT("#include \"%s\"\n"), *Target->GetActorHeaderIncludePath());
 
-	const FString TargetInstanceRef = TEXT("Actor");
+	FString TargetInstanceRef = TEXT("Actor");
+	FString TargetBaseClassName;
+	FString OnStateChangedAdditionalCondition;
+	FString TickAdditionalCondition;
+	FString IsClientCode;
+	if (TargetActor->IsChildOf(USceneComponent::StaticClass()))
+	{
+		if (bIsBlueprint)
+		{
+			TargetBaseClassName = TEXT("USceneComponent");
+		}
+		TargetInstanceRef = TEXT("SenceComp");
+		OnStateChangedAdditionalCondition = FString::Printf(TEXT(" || !%s->GetOwner()"), *TargetInstanceRef);
+		TickAdditionalCondition = FString::Printf(TEXT(" || !%s->GetOwner()"), *TargetInstanceRef);
+		IsClientCode = FString::Printf(TEXT("%s->GetOwner()->HasAuthority()"), *TargetInstanceRef);
+	}
+	else if (TargetActor->IsChildOf(UActorComponent::StaticClass()))
+	{
+		if (bIsBlueprint)
+		{
+			TargetBaseClassName = TEXT("UActorComponent");
+		}
+		TargetInstanceRef = TEXT("ActorComp");
+		OnStateChangedAdditionalCondition = FString::Printf(TEXT(" || !%s->GetOwner()"), *TargetInstanceRef);
+		TickAdditionalCondition = FString::Printf(TEXT(" || !%s->GetOwner()"), *TargetInstanceRef);
+		IsClientCode = FString::Printf(TEXT("%s->GetOwner()->HasAuthority()"), *TargetInstanceRef);
+	}
+	else
+	{
+		if (bIsBlueprint)
+		{
+			TargetBaseClassName = TEXT("AActor");
+		}
+		IsClientCode = FString::Printf(TEXT("%s->HasAuthority()"), *TargetInstanceRef);
+	}
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_ReplicatorClassName"), Target->GetReplicatorClassName());
 	FormatArgs.Add(TEXT("Declare_TargetClassName"), Target->GetActorCPPClassName());
 	FormatArgs.Add(TEXT("Ref_TargetInstanceRef"), TargetInstanceRef);
 	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), Target->GetProtoNamespace());
 	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), Target->GetProtoStateMessageType());
+	FormatArgs.Add(TEXT("Code_OnStateChangedAdditionalCondition"), OnStateChangedAdditionalCondition);
+	FormatArgs.Add(TEXT("Code_TickAdditionalCondition"), TickAdditionalCondition);
+	FormatArgs.Add(TEXT("Code_IsClient"), IsClientCode);
+	FormatArgs.Add(TEXT("Declare_OverrideSerializeAndDeserializeFunctionParams"), Target->GetRPCNum() > 0 ? CodeGen_SerializeAndDeserializeFunctionParams : TEXT(""));
+
+	if (bIsBlueprint)
+	{
+		FormatArgs.Add(TEXT("Declare_TargetBaseClassName"), TargetBaseClassName);
+	}
 
 	// ---------- Head code ----------
 	FormatArgs.Add(TEXT("Code_IncludeActorHeader"), ReplicatorCode.IncludeActorCode);

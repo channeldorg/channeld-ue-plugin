@@ -1,7 +1,7 @@
 ﻿#include "ReplicatedActorDecorator.h"
 
 #include "PropertyDecoratorFactory.h"
-#include "ReplicatorTemplate/CppActorTemplate.h"
+#include "ReplicatorTemplate/CppReplicatorTemplate.h"
 
 FReplicatedActorDecorator::FReplicatedActorDecorator(const UClass* TargetActorClass)
 {
@@ -12,7 +12,8 @@ FReplicatedActorDecorator::FReplicatedActorDecorator(const UClass* TargetActorCl
 void FReplicatedActorDecorator::Init()
 {
 	FPropertyDecoratorFactory& PropertyDecoratorFactory = FPropertyDecoratorFactory::Get();
-	for (TFieldIterator<FProperty> It(Target); It; ++It)
+	// Construct all property decorator
+	for (TFieldIterator<FProperty> It(Target, EFieldIteratorFlags::ExcludeSuper); It; ++It)
 	{
 		FProperty* Property = *It;
 		if (Property->Owner != Target)
@@ -27,10 +28,20 @@ void FReplicatedActorDecorator::Init()
 				Properties.Emplace(PropertyDecoratorPtr);
 			}
 		}
-		for (TSharedPtr<FPropertyDecorator> PropertyDecoratorPtr : Properties)
-		{
-			PropertyDecoratorPtr->Init();
-		}
+	}
+	for (TSharedPtr<FPropertyDecorator> PropertyDecoratorPtr : Properties)
+	{
+		PropertyDecoratorPtr->Init();
+	}
+	// Construct all rpc func decorator
+	TArray<FName> FunctionNames;
+	Target->GenerateFunctionList(FunctionNames);
+	for (const FName FuncName : FunctionNames)
+	{
+		UFunction* Func = Target->FindFunctionByName(FuncName, EIncludeSuperFlag::ExcludeSuper);
+		if (!Func->HasAnyFunctionFlags(FUNC_Net)) { continue; }
+		
+		RPCs.Add(MakeShareable(new FRPCDecorator(Func, this)));
 	}
 }
 
@@ -97,19 +108,13 @@ FString FReplicatedActorDecorator::GetCode_AssignPropertyPointers(const FString&
 	{
 		if (!Property->IsDirectlyAccessible())
 		{
-			FStringFormatNamedArguments FormatArgs;
-
-			FormatArgs.Add(TEXT("Declare_PropertyPointer"), FStringFormatArg(Property->GetPointerName()));
-			FormatArgs.Add(
-				TEXT("Code_GetAssignPropertyPointer"),
-				FStringFormatArg(Property->GetCode_AssignPropertyPointer(
-						FString::Printf(TEXT("%s.Get()"), *TargetInstance),
-						FString::Printf(TEXT("%s->GetClass()"), *TargetInstance),
-						Property->GetPointerName()
-					)
-				));
-
-			Result += FString::Format(ReplicatedActorDeco_GetCode_AssignPropertyPointerTemplate, FormatArgs);
+			Result += FString::Printf(
+				TEXT("{ %s; }\n"),
+				*Property->GetCode_AssignPropPointer(
+					FString::Printf(TEXT("%s.Get()"), *TargetInstance),
+					Property->GetPointerName()
+				)
+			);
 		}
 	}
 	return Result;
@@ -177,4 +182,9 @@ FString FReplicatedActorDecorator::GetDefinition_ProtoStateMessage()
 bool FReplicatedActorDecorator::IsBlueprintType()
 {
 	return bIsBlueprintGenerated;
+}
+
+int32 FReplicatedActorDecorator::GetRPCNum()
+{
+	return RPCs.Num();
 }

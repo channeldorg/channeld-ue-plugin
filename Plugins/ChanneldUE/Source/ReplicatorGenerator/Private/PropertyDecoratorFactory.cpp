@@ -3,7 +3,7 @@
 #include "PropertyDecorator/BaseDataTypePropertyDecorator.h"
 #include "PropertyDecorator/StructPropertyDecoratorBuilder.h"
 
-// Static Variables
+// Static singleton
 FPropertyDecoratorFactory* FPropertyDecoratorFactory::Singleton;
 
 FPropertyDecoratorFactory& FPropertyDecoratorFactory::Get()
@@ -21,6 +21,7 @@ FPropertyDecoratorFactory& FPropertyDecoratorFactory::Get()
 		         ->SetNextBuilder(MakeShared<FInt64PropertyDecoratorBuilder>())
 		         ->SetNextBuilder(MakeShared<FFloatPropertyDecoratorBuilder>())
 		         ->SetNextBuilder(MakeShared<FDoublePropertyDecoratorBuilder>())
+		         ->SetNextBuilder(MakeShared<FArrayPropertyDecoratorBuilder>())
 		         ->SetNextBuilder(Singleton->StructBuilder);
 	}
 	return *Singleton;

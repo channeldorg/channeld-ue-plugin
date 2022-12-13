@@ -4,13 +4,6 @@
 #include "RPCDecorator.h"
 #include "Manifest.h"
 
-static const TCHAR* ReplicatedActorDeco_GetCode_AssignPropertyPointerTemplate =
-	LR"EOF(
-  {
-    {Code_GetAssignPropertyPointer};
-  }
-)EOF";
-
 class FReplicatedActorDecorator : public IPropertyDecoratorOwner
 {
 public:
@@ -62,17 +55,17 @@ public:
 	/**
 	 * Get protobuf package name
 	 */
-	FString GetProtoPackageName();
+	virtual FString GetProtoPackageName() override;
 
 	/**
 	 * Get protobuf c++ code namespace
 	 */
-	FString GetProtoNamespace();
+	virtual FString GetProtoNamespace() override;
 
 	/**
 	 * Get message type for replicated actor properties mapping
 	 */
-	FString GetProtoStateMessageType();
+	virtual FString GetProtoStateMessageType() override;
 
 	/**
 	 * Get code that sets whole delta state
@@ -96,6 +89,8 @@ public:
 	FString GetDefinition_ProtoStateMessage();
 
 	virtual bool IsBlueprintType() override;
+
+	int32 GetRPCNum();
 
 protected:
 	const UClass* Target;

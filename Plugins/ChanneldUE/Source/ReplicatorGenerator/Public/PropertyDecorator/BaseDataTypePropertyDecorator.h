@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "ArrayPropertyDecorator.h"
 #include "PropertyDecorator.h"
 #include "PropertyDecorator/BaseDataTypePropertyDecoratorBuilder.h"
 
@@ -20,24 +21,6 @@ public: \
 	} \
 }
 
-// virtual FString GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& InValue) override \
-// { \
-// 	return FString::Printf(TEXT("%s = %s"), *GetCode_GetPropertyValueFrom(TargetInstance), *InValue); \
-// } \
-// virtual FString GetCode_OnStateChange(const FString& TargetInstance, const FString& NewStateName) override \
-// { \
-// 	FStringFormatNamedArguments FormatArgs; \
-// 	const FString CodeOfGetProtoFieldValue = GetCode_GetProtoFieldValueFrom(NewStateName); \
-// 	FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), FStringFormatArg(GetCode_HasProtoFieldValueIn(NewStateName))); \
-// 	FormatArgs.Add(TEXT("Code_GetPropertyValue"), FStringFormatArg(GetCode_GetPropertyValueFrom(TargetInstance))); \
-// 	FormatArgs.Add(TEXT("Code_GetProtoFieldValue"), FStringFormatArg(CodeOfGetProtoFieldValue)); \
-// 	FormatArgs.Add( \
-// 		TEXT("Code_SetPropertyValue"), \
-// 		FStringFormatArg(GetCode_SetPropertyValueTo(TargetInstance, CodeOfGetProtoFieldValue)) \
-// 	); \
-// 	return FString::Format(PropertyDecorator_OnChangeStateTemplate, FormatArgs); \
-// } \
-
 #define BASE_DATA_TYPE_PROPERTY_DECORATOR(ClassName, PropertyType, CPPType) \
 	BASE_DATA_TYPE_PROPERTY_DECORATOR_BASE(ClassName, PropertyType, CPPType, CPPType)
 
@@ -49,15 +32,24 @@ public: \
 	BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER_BASE(BuilderClassName, DecoratorClassName, PropertyType, CPPType, CPPType)
 
 BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER_BASE(FBytePropertyDecoratorBuilder, FBytePropertyDecorator, FByteProperty, uint8, uint32);
+
 BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER(FBoolPropertyDecoratorBuilder, FBoolPropertyDecorator, FBoolProperty, bool);
+
 BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER(FUInt32PropertyDecoratorBuilder, FUInt32PropertyDecorator, FUInt32Property, uint32);
+
 BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER(FIntPropertyDecoratorBuilder, FIntPropertyDecorator, FIntProperty, int32);
+
 BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER(FUInt64PropertyDecoratorBuilder, FUInt64PropertyDecorator, FUInt64Property, uint64);
+
 BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER(FInt64PropertyDecoratorBuilder, FInt64PropertyDecorator, FInt64Property, int64);
+
 BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER(FFloatPropertyDecoratorBuilder, FFloatPropertyDecorator, FFloatProperty, float);
+
 BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER(FDoublePropertyDecoratorBuilder, FDoublePropertyDecorator, FDoubleProperty, double);
 
-//
+BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FArrayPropertyDecoratorBuilder, FArrayPropertyDecorator, FArrayProperty);
+// BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FStrPropertyDecoratorBuilder, FStrPropertyDecorator, FStrProperty);
+
 // class FUInt32PropertyDecorator : public FPropertyDecorator
 // {
 // public:

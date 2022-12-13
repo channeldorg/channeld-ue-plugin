@@ -32,7 +32,7 @@ FReplicatorGeneratorManager& FReplicatorGeneratorManager::Get()
 
 bool FReplicatorGeneratorManager::HasReplicatedPropertyOrRPC(UClass* TargetClass)
 {
-	for (TFieldIterator<FProperty> It(TargetClass); It; ++It)
+	for (TFieldIterator<FProperty> It(TargetClass, EFieldIteratorFlags::ExcludeSuper); It; ++It)
 	{
 		if ((*It)->HasAnyPropertyFlags(CPF_Net))
 		{
@@ -166,7 +166,7 @@ TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(TArray
 			ParentClassesUnique.Add(ParentClass);
 		}
 	}
-	
+
 	for (int32 i = 0; i < ParentClasses.Num(); i++)
 	{
 		UClass* ThisClass = ParentClasses[i];

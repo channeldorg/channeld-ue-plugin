@@ -7,7 +7,7 @@ public:
 
 	virtual FString GetProtoPackageName() = 0;
 
-	virtual FString GetProtoNamespace() =0;
+	virtual FString GetProtoNamespace() = 0;
 
 	virtual FString GetProtoStateMessageType() = 0;
 };

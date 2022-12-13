@@ -24,7 +24,7 @@ public:
   //~End FChanneldReplicatorBase Interface
 
 protected:
-  TWeakObjectPtr<AActor> {Ref_TargetInstanceRef};
+  TWeakObjectPtr<{Declare_TargetBaseClassName}> {Ref_TargetInstanceRef};
 
   // [Server+Client] The accumulated channel data of the target object
   {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* FullState;
@@ -42,7 +42,7 @@ static const TCHAR* CodeGen_BP_ConstructorImplTemplate =
 {Declare_ReplicatorClassName}::{Declare_ReplicatorClassName}(UObject* InTargetObj, const FString& BlueprintPath)
 	: FChanneldReplicatorBase_BP(InTargetObj, BlueprintPath)
 {
-  {Ref_TargetInstanceRef} = CastChecked<AActor>(InTargetObj);
+  {Ref_TargetInstanceRef} = CastChecked<{Declare_TargetBaseClassName}>(InTargetObj);
   // Remove the registered DOREP() properties in the Actor
   TArray<FLifetimeProperty> RepProps;
   DisableAllReplicatedPropertiesOfClass(InTargetObj->GetClass(), GetTargetClass(), EFieldIteratorFlags::ExcludeSuper, RepProps);

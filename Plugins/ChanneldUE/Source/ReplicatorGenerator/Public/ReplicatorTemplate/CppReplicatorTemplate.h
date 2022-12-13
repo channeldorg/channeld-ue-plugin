@@ -25,6 +25,8 @@ public:
   virtual void OnStateChanged(const google::protobuf::Message* NewState) override;
   //~End FChanneldReplicatorBase Interface
 
+{Declare_OverrideSerializeAndDeserializeFunctionParams}
+
 protected:
   TWeakObjectPtr<{Declare_TargetClassName}> {Ref_TargetInstanceRef};
 
@@ -37,6 +39,12 @@ private:
 {Declare_IndirectlyAccessiblePropertyPtrs}
 
 };
+)EOF";
+
+static const TCHAR* CodeGen_SerializeAndDeserializeFunctionParams =
+  LR"EOF(
+  virtual TSharedPtr<google::protobuf::Message> SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess) override;
+  virtual TSharedPtr<void> DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC) override;
 )EOF";
 
 static const TCHAR* CodeGen_CPP_ConstructorImplTemplate =
@@ -85,9 +93,9 @@ static const TCHAR* CodeGen_CPP_TickImplTemplate =
 	LR"EOF(
 void {Declare_ReplicatorClassName}::Tick(float DeltaTime)
 {
-  if (!{Ref_TargetInstanceRef}.IsValid()) { return; }
+  if (!{Ref_TargetInstanceRef}.IsValid(){Code_TickAdditionalCondition}) { return; }
 
-  {Code_AllPropertiesSetDeltaState}
+{Code_AllPropertiesSetDeltaState}
 
   if (bStateChanged) {
     FullState->MergeFrom(*DeltaState);
@@ -99,16 +107,10 @@ static const TCHAR* CodeGen_CPP_OnStateChangedImplTemplate =
 	LR"EOF(
 void {Declare_ReplicatorClassName}::OnStateChanged(const google::protobuf::Message* InNewState)
 {
-  if (!{Ref_TargetInstanceRef}.IsValid())
-  {
-    return;
-  }
+  if (!{Ref_TargetInstanceRef}.IsValid(){Code_OnStateChangedAdditionalCondition}) { return; }
 
   // Only client needs to apply the new state
-  if ({Ref_TargetInstanceRef}->HasAuthority())
-  {
-  	return;
-  }
+  if ({Code_IsClient}) { return; }
 
   const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* NewState = static_cast<const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}*>(InNewState);
   FullState->MergeFrom(*NewState);

@@ -20,14 +20,14 @@ bool FPropertyDecorator::IsDirectlyAccessible()
 	return IsExternallyAccessible() && !Owner->IsBlueprintType();
 }
 
+bool FPropertyDecorator::IsDeclaredInCPP()
+{
+	return true;
+}
+
 FString FPropertyDecorator::GetPropertyName()
 {
 	return OriginalProperty->GetName();
-}
-
-FString FPropertyDecorator::GetPropertyType()
-{
-	return TEXT("");
 }
 
 FString FPropertyDecorator::GetPointerName()
@@ -38,6 +38,16 @@ FString FPropertyDecorator::GetPointerName()
 FString FPropertyDecorator::GetCPPType()
 {
 	return OriginalProperty->GetCPPType();
+}
+
+FString FPropertyDecorator::GetCompilableCPPType()
+{
+	return GetCPPType();
+}
+
+int32 FPropertyDecorator::GetMemOffset()
+{
+	return OriginalProperty->GetOffset_ForInternal();
 }
 
 FString FPropertyDecorator::GetProtoPackageName()
@@ -79,7 +89,7 @@ FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetIn
 
 FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetInstance, bool ForceFromPointer/* = false */)
 {
-	if(!ForceFromPointer)
+	if (!ForceFromPointer)
 	{
 		return FString::Printf(TEXT("%s->%s"), *TargetInstance, *GetPropertyName());
 	}
@@ -91,7 +101,7 @@ FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetIn
 
 FString FPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStataName, const FString& AfterSetValueCode)
 {
-	return FString::Printf(TEXT("%s = %s;\n%s"), *GetCode_GetPropertyValueFrom(TargetInstance), *GetCode_GetProtoFieldValueFrom(NewStataName), *AfterSetValueCode);
+	return FString::Printf(TEXT("%s = %s;\nbStateChanged = true;\n%s"), *GetCode_GetPropertyValueFrom(TargetInstance), *GetCode_GetProtoFieldValueFrom(NewStataName), *AfterSetValueCode);
 }
 
 FString FPropertyDecorator::GetDeclaration_PropertyPtr()
@@ -99,16 +109,38 @@ FString FPropertyDecorator::GetDeclaration_PropertyPtr()
 	return FString::Printf(TEXT("%s* %s"), *this->GetCPPType(), *this->GetPointerName());
 }
 
-FString FPropertyDecorator::GetCode_AssignPropertyPointer(const FString& Container, const FString& ContainerTemplate, const FString& AssignTo)
+FString FPropertyDecorator::GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo)
 {
 	FStringFormatNamedArguments FormatArgs;
-	FormatArgs.Add(TEXT("Ref_AssignTo"), FStringFormatArg(AssignTo));
-	FormatArgs.Add(TEXT("Ref_ContainerAddr"), FStringFormatArg(Container));
-	FormatArgs.Add(TEXT("Ref_ContainerTemplate"), FStringFormatArg(ContainerTemplate));
-	FormatArgs.Add(TEXT("Declare_PropertyCPPType"), FStringFormatArg(GetCPPType()));
-	FormatArgs.Add(TEXT("Declare_PropertyName"), FStringFormatArg(GetPropertyName()));
-	
-	return FString::Format(PropDecorator_GetCode_AssignPropertyPointerTemplate, FormatArgs);
+	FormatArgs.Add(TEXT("Ref_AssignTo"), AssignTo);
+	FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
+	FormatArgs.Add(TEXT("Declare_PropertyCPPType"), GetCPPType());
+	FormatArgs.Add(TEXT("Num_PropMemOffset"), GetMemOffset());
+
+	return FString::Format(PropDecorator_AssignPropPtrTemp, FormatArgs);
+}
+
+FString FPropertyDecorator::GetCode_AssignPropPtrDispersedly(const FString& Container, const FString& ContainerTemplate, const FString& AssignTo)
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Ref_AssignTo"), AssignTo);
+	FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
+	FormatArgs.Add(TEXT("Ref_ContainerTemplate"), ContainerTemplate);
+	FormatArgs.Add(TEXT("Declare_PropertyCPPType"), GetCPPType());
+	FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
+
+	return FString::Format(PropDecorator_AssignPropPtrDispersedlyTemp, FormatArgs);
+}
+
+FString FPropertyDecorator::GetCode_AssignPropPtrOrderly(const FString& Container, const FString& ContainerTemplate, const FString& AssignTo)
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Ref_AssignTo"), AssignTo);
+	FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
+	FormatArgs.Add(TEXT("Ref_ContainerTemplate"), ContainerTemplate);
+	FormatArgs.Add(TEXT("Declare_PropertyCPPType"), GetCPPType());
+
+	return FString::Format(PropDecorator_AssignPropPtrOrderlyTemp, FormatArgs);
 }
 
 FString FPropertyDecorator::GetCode_GetProtoFieldValueFrom(const FString& StateName)
@@ -136,24 +168,76 @@ FString FPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FString& Fr
 	return FString::Printf(TEXT("%s == %s"), *GetCode_GetPropertyValueFrom(FromActor, ForceFromPointer), *GetCode_GetProtoFieldValueFrom(FromState));
 }
 
-FString FPropertyDecorator::GetCode_SetDeltaState(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName)
+FString FPropertyDecorator::GetCode_SetDeltaState(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
 {
-	FStringFormatNamedArguments FormatArgs; 
-	FormatArgs.Add(TEXT("Code_ActorPropEqualToProtoState"), GetCode_ActorPropEqualToProtoState(TargetInstance, FullStateName)); 
-	FormatArgs.Add(TEXT("Code_SetProtoFieldValue"), GetCode_SetProtoFieldValueTo(DeltaStateName, GetCode_GetPropertyValueFrom(TargetInstance))); 
-	return FString::Format(PropertyDecorator_SetDeltaStateTemplate, FormatArgs); 
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Code_BeforeCondition"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? true :") : TEXT(""));
+	FormatArgs.Add(TEXT("Code_ActorPropEqualToProtoState"), GetCode_ActorPropEqualToProtoState(TargetInstance, FullStateName));
+	FormatArgs.Add(TEXT("Code_SetProtoFieldValue"), GetCode_SetProtoFieldValueTo(DeltaStateName, GetCode_GetPropertyValueFrom(TargetInstance)));
+	return FString::Format(PropDecorator_SetDeltaStateTemplate, FormatArgs);
+}
+
+FString FPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString& ContainerName, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(
+		TEXT("Code_AssignPropPointers"),
+		GetCode_AssignPropPointer(
+			TEXT("Container"),
+			FString::Printf(TEXT("%s* PropAddr"), *GetCPPType())
+		)
+	);
+	FormatArgs.Add(TEXT("Code_BeforeCondition"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? true :") : TEXT(""));
+	FormatArgs.Add(TEXT("Declare_PropertyPtr"), TEXT("PropAddr"));
+	FormatArgs.Add(TEXT("Code_GetProtoFieldValue"), GetCode_GetProtoFieldValueFrom(FullStateName));
+	FormatArgs.Add(TEXT("Code_SetProtoFieldValue"), GetCode_SetProtoFieldValueTo(DeltaStateName, TEXT("*PropAddr")));
+	return FString::Format(PropDeco_SetDeltaStateByMemOffsetTemp, FormatArgs);
+}
+
+FString FPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
+{
+	FStringFormatNamedArguments FormatArgs;
+	// FormatArgs.Add(TEXT("Code_BeforeCondition"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? true :") : TEXT(""));
+	FormatArgs.Add(TEXT("Declare_DeltaStateName"), DeltaStateName);
+	FormatArgs.Add(TEXT("Declare_FullStateName"), FullStateName);
+	FormatArgs.Add(TEXT("Definition_ProtoName"), GetProtoFieldName());
+	FormatArgs.Add(TEXT("Declare_PropertyPtr"), GetPointerName());
+	return FString::Format(PropDeco_SetDeltaStateArrayInnerTemp, FormatArgs);
 }
 
 FString FPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstance, const FString& NewStateName)
 {
-	FStringFormatNamedArguments FormatArgs; 
-	FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName)); 
-	FormatArgs.Add(TEXT("Code_ActorPropEqualToProtoState"), GetCode_ActorPropEqualToProtoState(TargetInstance, NewStateName)); 
-	FormatArgs.Add( 
-		TEXT("Code_SetPropertyValue"), 
-		FStringFormatArg(GetCode_SetPropertyValueTo(TargetInstance, NewStateName, TEXT(""))) 
-	); 
-	return FString::Format(PropertyDecorator_OnChangeStateTemplate, FormatArgs); 
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName));
+	FormatArgs.Add(TEXT("Code_ActorPropEqualToProtoState"), GetCode_ActorPropEqualToProtoState(TargetInstance, NewStateName));
+	FormatArgs.Add(
+		TEXT("Code_SetPropertyValue"),
+		FStringFormatArg(GetCode_SetPropertyValueTo(TargetInstance, NewStateName, TEXT("")))
+	);
+	return FString::Format(PropDecorator_OnChangeStateTemplate, FormatArgs);
+}
+
+FString FPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName)
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(
+		TEXT("Code_AssignPropPointers"),
+		GetCode_AssignPropPointer(
+			TEXT("Container"),
+			FString::Printf(TEXT("%s* PropAddr"), *GetCPPType())
+		)
+	);
+	FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName));
+	FormatArgs.Add(TEXT("Declare_PropertyPtr"), TEXT("PropAddr"));
+	FormatArgs.Add(TEXT("Code_GetProtoFieldValue"), GetCode_GetProtoFieldValueFrom(NewStateName));
+	return FString::Format(PropDeco_OnChangeStateByMemOffsetTemp, FormatArgs);
+}
+
+FString FPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& TargetInstance, const FString& NewStateName)
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_PropertyPtr"), GetPointerName());
+	return FString::Format(PropDeco_OnChangeStateArrayInnerTemp, FormatArgs);
 }
 
 TArray<FString> FPropertyDecorator::GetAdditionalIncludes()
