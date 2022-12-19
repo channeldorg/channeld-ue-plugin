@@ -134,6 +134,10 @@ public:
 
 	virtual int32 GetMemOffset();
 
+	virtual int32 GetPropertySize();
+
+	virtual int32 GetPropertyMinAlignment();
+
 	virtual FString GetProtoPackageName() override;
 	virtual FString GetProtoNamespace() override;
 	virtual FString GetProtoStateMessageType() override;
@@ -191,7 +195,7 @@ public:
      * For example:
      *   Actor->bIsCrouched = xxx
      */
-	virtual FString GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStataName, const FString& AfterSetValueCode);
+	virtual FString GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode);
 
 	/**
       * Declaration of property pointer
@@ -265,7 +269,7 @@ public:
 
 	virtual FString GetCode_SetDeltaStateByMemOffset(const FString& ContainerName, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull = false);
 
-	virtual FString GetCode_SetDeltaStateArrayInner(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull = false);
+	virtual FString GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull = false);
 
 	/**
 	 * Code that handle state changes

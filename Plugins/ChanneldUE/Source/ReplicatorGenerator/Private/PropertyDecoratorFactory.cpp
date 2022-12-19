@@ -21,6 +21,9 @@ FPropertyDecoratorFactory& FPropertyDecoratorFactory::Get()
 		         ->SetNextBuilder(MakeShared<FInt64PropertyDecoratorBuilder>())
 		         ->SetNextBuilder(MakeShared<FFloatPropertyDecoratorBuilder>())
 		         ->SetNextBuilder(MakeShared<FDoublePropertyDecoratorBuilder>())
+		         ->SetNextBuilder(MakeShared<FStrPropertyDecoratorBuilder>())
+		         ->SetNextBuilder(MakeShared<FTextPropertyDecoratorBuilder>())
+		         ->SetNextBuilder(MakeShared<FNamePropertyDecoratorBuilder>())
 		         ->SetNextBuilder(MakeShared<FArrayPropertyDecoratorBuilder>())
 		         ->SetNextBuilder(Singleton->StructBuilder);
 	}

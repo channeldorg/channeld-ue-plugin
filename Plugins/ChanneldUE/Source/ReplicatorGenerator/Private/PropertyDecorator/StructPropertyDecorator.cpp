@@ -43,7 +43,7 @@ bool FStructPropertyDecorator::IsDeclaredInCPP()
 
 FString FStructPropertyDecorator::GetCompilableCPPType()
 {
-	return FString::Printf(TEXT("Copy_%s"), *GetCPPType());
+	return FString::Printf(TEXT("FCopy_%s"), *GetCPPType());
 }
 
 FString FStructPropertyDecorator::GetProtoFieldType()
@@ -147,11 +147,11 @@ FString FStructPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString
 	);
 }
 
-FString FStructPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString& ContainerName, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
+FString FStructPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
 {
 	FStringFormatNamedArguments FormatArgs;
 	// FormatArgs.Add(TEXT("Code_BeforeCondition"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? true :") : TEXT(""));
-	FormatArgs.Add(TEXT("Declare_PropertyPtr"), GetPointerName());
+	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	FormatArgs.Add(TEXT("Declare_DeltaStateName"), DeltaStateName);
 	FormatArgs.Add(TEXT("Declare_FullStateName"), FullStateName);
 	FormatArgs.Add(TEXT("Definition_ProtoName"), GetProtoFieldName());
@@ -173,10 +173,10 @@ FString FStructPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString
 	);
 }
 
-FString FStructPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& TargetInstance, const FString& NewStateName)
+FString FStructPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName)
 {
 	FStringFormatNamedArguments FormatArgs;
-	FormatArgs.Add(TEXT("Declare_PropertyPtr"), GetPointerName());
+	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
 	return FString::Format(StructPropDeco_SetPropertyValueArrayInnerTemp, FormatArgs);
 }
@@ -194,6 +194,9 @@ FString FStructPropertyDecorator::GetDeclaration_PropPtrGroupStruct()
 	FString StaticSetDeltaStateCodes;
 	FString OnStateChangeCodes;
 	FString StaticOnStateChangeCodes;
+	FString StructCopyCode;
+	int32 PrevPropMemEnd = 0;
+
 	bool bFirstProperty = true;
 	for (TSharedPtr<FPropertyDecorator> PropDecorator : Properties)
 	{
@@ -246,6 +249,19 @@ FString FStructPropertyDecorator::GetDeclaration_PropPtrGroupStruct()
 			)
 		);
 
+		// int32 ThisMemOffset = PropDecorator->GetMemOffset();
+		// int32 PropSize = PropDecorator->GetPropertySize();
+		// if (ThisMemOffset - PrevPropMemEnd != 0)
+		// {
+		// 	StructCopyCode.Append(
+		// 		FString::Printf(TEXT("uint8 byte[%d];\n"), ThisMemOffset - PrevPropMemEnd)
+		// 	);
+		// }
+		// PrevPropMemEnd = ThisMemOffset + PropSize;
+
+		StructCopyCode.Append(
+			FString::Printf(TEXT("%s %s;\n"), *PropDecorator->GetCompilableCPPType(), *PropDecorator->GetPropertyName())
+		);
 		if (bFirstProperty) { bFirstProperty = false; }
 	}
 	FormatArgs.Add(TEXT("Code_AssignPropPointers"), *AssignPropertyPointerCodes);
@@ -261,7 +277,7 @@ FString FStructPropertyDecorator::GetDeclaration_PropPtrGroupStruct()
 	FormatArgs.Add(TEXT("Code_StaticOnStateChange"), StaticOnStateChangeCodes);
 
 	FormatArgs.Add(TEXT("Declare_PropCompilableStructName"), GetCompilableCPPType());
-	FormatArgs.Add(TEXT("Num_PropertySize"), OriginalProperty->GetSize());
+	FormatArgs.Add(TEXT("Code_StructCopyProperties"), StructCopyCode);
 
 	return FString::Format(StructPropDeco_PropPtrGroupStructTemp, FormatArgs);
 }

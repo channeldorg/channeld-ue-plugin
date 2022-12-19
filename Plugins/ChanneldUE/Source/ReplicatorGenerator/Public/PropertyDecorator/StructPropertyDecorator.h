@@ -76,7 +76,7 @@ struct {Declare_PropPtrGroupStructName}
 
 struct {Declare_PropCompilableStructName}
 {
-	uint8 byte[{Num_PropertySize}];
+	{Code_StructCopyProperties}
 };
 )EOF";
 

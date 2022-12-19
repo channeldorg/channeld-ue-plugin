@@ -50,6 +50,16 @@ int32 FPropertyDecorator::GetMemOffset()
 	return OriginalProperty->GetOffset_ForInternal();
 }
 
+int32 FPropertyDecorator::GetPropertySize()
+{
+	return OriginalProperty->ElementSize;
+}
+
+int32 FPropertyDecorator::GetPropertyMinAlignment()
+{
+	return OriginalProperty->GetMinAlignment();
+}
+
 FString FPropertyDecorator::GetProtoPackageName()
 {
 	return Owner->GetProtoPackageName();
@@ -99,9 +109,9 @@ FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetIn
 	}
 }
 
-FString FPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStataName, const FString& AfterSetValueCode)
+FString FPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode)
 {
-	return FString::Printf(TEXT("%s = %s;\nbStateChanged = true;\n%s"), *GetCode_GetPropertyValueFrom(TargetInstance), *GetCode_GetProtoFieldValueFrom(NewStataName), *AfterSetValueCode);
+	return FString::Printf(TEXT("%s = %s;\nbStateChanged = true;\n%s"), *GetCode_GetPropertyValueFrom(TargetInstance), *GetCode_GetProtoFieldValueFrom(NewStateName), *AfterSetValueCode);
 }
 
 FString FPropertyDecorator::GetDeclaration_PropertyPtr()
@@ -183,7 +193,7 @@ FString FPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString& Cont
 	FormatArgs.Add(
 		TEXT("Code_AssignPropPointers"),
 		GetCode_AssignPropPointer(
-			TEXT("Container"),
+			ContainerName,
 			FString::Printf(TEXT("%s* PropAddr"), *GetCPPType())
 		)
 	);
@@ -194,14 +204,14 @@ FString FPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString& Cont
 	return FString::Format(PropDeco_SetDeltaStateByMemOffsetTemp, FormatArgs);
 }
 
-FString FPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
+FString FPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
 {
 	FStringFormatNamedArguments FormatArgs;
 	// FormatArgs.Add(TEXT("Code_BeforeCondition"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? true :") : TEXT(""));
 	FormatArgs.Add(TEXT("Declare_DeltaStateName"), DeltaStateName);
 	FormatArgs.Add(TEXT("Declare_FullStateName"), FullStateName);
 	FormatArgs.Add(TEXT("Definition_ProtoName"), GetProtoFieldName());
-	FormatArgs.Add(TEXT("Declare_PropertyPtr"), GetPointerName());
+	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	return FString::Format(PropDeco_SetDeltaStateArrayInnerTemp, FormatArgs);
 }
 
@@ -223,7 +233,7 @@ FString FPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString& Cont
 	FormatArgs.Add(
 		TEXT("Code_AssignPropPointers"),
 		GetCode_AssignPropPointer(
-			TEXT("Container"),
+			ContainerName,
 			FString::Printf(TEXT("%s* PropAddr"), *GetCPPType())
 		)
 	);
@@ -233,10 +243,10 @@ FString FPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString& Cont
 	return FString::Format(PropDeco_OnChangeStateByMemOffsetTemp, FormatArgs);
 }
 
-FString FPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& TargetInstance, const FString& NewStateName)
+FString FPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName)
 {
 	FStringFormatNamedArguments FormatArgs;
-	FormatArgs.Add(TEXT("Declare_PropertyPtr"), GetPointerName());
+	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	return FString::Format(PropDeco_OnChangeStateArrayInnerTemp, FormatArgs);
 }
 

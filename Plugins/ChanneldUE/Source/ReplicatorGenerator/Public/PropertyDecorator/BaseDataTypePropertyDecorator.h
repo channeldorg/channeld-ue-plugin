@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include "ArrayPropertyDecorator.h"
 #include "PropertyDecorator.h"
+#include "StringPropertyDecorator.h"
+#include "TextPropertyDecorator.h"
+#include "NamePropertyDecorator.h"
 #include "PropertyDecorator/BaseDataTypePropertyDecoratorBuilder.h"
 
 #define BASE_DATA_TYPE_PROPERTY_DECORATOR_BASE(ClassName, PropertyType, CPPType, ProtoType) \
@@ -48,7 +51,11 @@ BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER(FFloatPropertyDecoratorBuilder, F
 BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER(FDoublePropertyDecoratorBuilder, FDoublePropertyDecorator, FDoubleProperty, double);
 
 BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FArrayPropertyDecoratorBuilder, FArrayPropertyDecorator, FArrayProperty);
-// BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FStrPropertyDecoratorBuilder, FStrPropertyDecorator, FStrProperty);
+
+BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FStrPropertyDecoratorBuilder, FStringPropertyDecorator, FStrProperty);
+
+BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FTextPropertyDecoratorBuilder, FTextPropertyDecorator, FTextProperty);
+BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FNamePropertyDecoratorBuilder, FNamePropertyDecorator, FNameProperty);
 
 // class FUInt32PropertyDecorator : public FPropertyDecorator
 // {
