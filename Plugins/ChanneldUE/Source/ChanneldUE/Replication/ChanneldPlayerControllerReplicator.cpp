@@ -305,6 +305,8 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 			return nullptr;
 		}
 
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Deserialized RPC parameters of 'ServerAcknowledgePossession': %s"), *GetNameSafe(Pawn));
+		
 		auto Params = MakeShared<ClientRetryClientRestartParams>();
 		Params->Pawn = Pawn;
 		return Params;

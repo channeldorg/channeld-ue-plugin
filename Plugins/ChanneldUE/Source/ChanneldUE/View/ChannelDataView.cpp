@@ -503,8 +503,10 @@ int32 UChannelDataView::SendAllChannelUpdates()
 		{
 			ChannelId ChId = Pair.Key;
 			TSet<FProviderInternal>* Providers = ChannelDataProviders.Find(ChId);
-			if (Providers == nullptr)
+			if (Providers == nullptr || Providers->Num() == 0)
+			{
 				continue;
+			}
 
 			auto MsgTemplate = ChannelDataTemplates.FindRef(static_cast<channeldpb::ChannelType>(Pair.Value.ChannelType));
 			if (!ensureMsgf(MsgTemplate, TEXT("Can't find channel data message template of channel type: %d"), Pair.Value.ChannelType))
@@ -521,6 +523,9 @@ int32 UChannelDataView::SendAllChannelUpdates()
 				auto Provider = Itr.ElementIt->Value;
 				if (Provider.IsValid())
 				{
+					/* Pre-replication logic should be implemented in the replicator.
+					Provider->GetTargetObject()->CallPreReplication();
+					*/
 					if (Provider->UpdateChannelData(NewState))
 					{
 						UpdateCount++;
@@ -700,7 +705,9 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	{
 		if (Provider.IsValid() && !Provider->IsRemoved())
 		{
+			Provider->GetTargetObject()->PreNetReceive();
 			Provider->OnChannelDataUpdated(UpdateData);
+			Provider->GetTargetObject()->PostNetReceive();
 			bConsumed = true;
 		}
 	}

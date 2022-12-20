@@ -5,6 +5,7 @@
 #include "ChanneldUtils.h"
 #include "Components/PrimitiveComponent.h"
 #include "Engine/NetSerialization.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 FChanneldCharacterReplicator::FChanneldCharacterReplicator(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
 {
@@ -74,6 +75,68 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 		return;
 	}
 
+	
+	// ~Begin copy of ACharacter::PreReplication
+	if (Character->GetCharacterMovement()->CurrentRootMotion.HasActiveRootMotionSources() || Character->IsPlayingNetworkedRootMotionMontage())
+	{
+		const FAnimMontageInstance* RootMotionMontageInstance = Character->GetRootMotionAnimMontageInstance();
+
+		Character->RepRootMotion.bIsActive = true;
+		// Is position stored in local space?
+		Character->RepRootMotion.bRelativePosition = Character->GetBasedMovement().HasRelativeLocation();
+		Character->RepRootMotion.bRelativeRotation = Character->GetBasedMovement().HasRelativeRotation();
+		Character->RepRootMotion.Location			= Character->RepRootMotion.bRelativePosition ? Character->GetBasedMovement().Location : FRepMovement::RebaseOntoZeroOrigin(Character->GetActorLocation(), Character->GetWorld()->OriginLocation);
+		Character->RepRootMotion.Rotation			= Character->RepRootMotion.bRelativeRotation ? Character->GetBasedMovement().Rotation : Character->GetActorRotation();
+		Character->RepRootMotion.MovementBase		= Character->GetBasedMovement().MovementBase;
+		Character->RepRootMotion.MovementBaseBoneName = Character->GetBasedMovement().BoneName;
+		if (RootMotionMontageInstance)
+		{
+			Character->RepRootMotion.AnimMontage		= RootMotionMontageInstance->Montage;
+			Character->RepRootMotion.Position			= RootMotionMontageInstance->GetPosition();
+		}
+		else
+		{
+			Character->RepRootMotion.AnimMontage = nullptr;
+		}
+
+		Character->RepRootMotion.AuthoritativeRootMotion = Character->GetCharacterMovement()->CurrentRootMotion;
+		Character->RepRootMotion.Acceleration = Character->GetCharacterMovement()->GetCurrentAcceleration();
+		Character->RepRootMotion.LinearVelocity = Character->GetCharacterMovement()->Velocity;
+	}
+	else
+	{
+		Character->RepRootMotion.Clear();
+	}
+
+	Character->bProxyIsJumpForceApplied = (Character->JumpForceTimeRemaining > 0.0f);
+	*MovementModeValuePtr = Character->GetCharacterMovement()->PackNetworkMovementMode();	
+	*BasedMovementValuePtr = Character->GetBasedMovement();
+
+	// Optimization: only update and replicate these values if they are actually going to be used.
+	if (Character->GetBasedMovement().HasRelativeLocation())
+	{
+		// When velocity becomes zero, force replication so the position is updated to match the server (it may have moved due to simulation on the client).
+		BasedMovementValuePtr->bServerHasVelocity = !Character->GetCharacterMovement()->Velocity.IsZero();
+
+		// Make sure absolute rotations are updated in case rotation occurred after the base info was saved.
+		if (!Character->GetBasedMovement().HasRelativeRotation())
+		{
+			BasedMovementValuePtr->Rotation = Character->GetActorRotation();
+		}
+	}
+
+	// Save bandwidth by not replicating this value unless it is necessary, since it changes every update.
+	if ((Character->GetCharacterMovement()->NetworkSmoothingMode == ENetworkSmoothingMode::Linear) || Character->GetCharacterMovement()->bNetworkAlwaysReplicateTransformUpdateTimestamp)
+	{
+		*ServerLastTransformUpdateTimeStampValuePtr = Character->GetCharacterMovement()->GetServerLastTransformUpdateTimeStamp();
+	}
+	else
+	{
+		*ServerLastTransformUpdateTimeStampValuePtr = 0.f;
+	}
+	// ~End copy of ACharacter::PreReplication
+	
+	
 	// TODO: RootMotion
 
 	bool bMovementInfoChanged = false;
@@ -242,6 +305,9 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 	if (NewState->has_movementmode() && NewState->movementmode() != Character->GetReplicatedMovementMode())
 	{
 		*MovementModeValuePtr = (uint8)NewState->movementmode();
+		// Somehow, the new movement mode won' be applied after the handover (even we call ACharacter::PostNetReceive), and
+		// SimulateMovement or SimulateRootMotion won't trigger when MovementMode = 0. So we apply it manually!
+		Character->GetCharacterMovement()->ApplyNetworkMovementMode(*MovementModeValuePtr);
 	}
 
 	if (NewState->has_biscrouched() && NewState->biscrouched() != Character->bIsCrouched)

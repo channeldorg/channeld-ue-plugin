@@ -178,6 +178,7 @@ void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 
 void UChanneldConnection::Receive()
 {
+	// FIXME: single-thread receive can sometimes miss the data packet!
 	uint32 PendingDataSize;
 	if (!Socket->HasPendingData(PendingDataSize))
 		return;
@@ -189,6 +190,7 @@ void UChanneldConnection::Receive()
 		if (ReceiveBufferOffset < 5)
 		{
 			// Unfinished packet
+			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet header: %d"), BytesRead);
 			return;
 		}
 
@@ -208,6 +210,7 @@ void UChanneldConnection::Receive()
 		if (BytesRead < 5 + PacketSize)
 		{
 			// Unfinished packet
+			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet body: %d/%d"), BytesRead, 5 + PacketSize);
 			return;
 		}
 

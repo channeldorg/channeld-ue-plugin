@@ -271,7 +271,7 @@ void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncNa
 	if (ParamsMsg)
 	{
 		RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
-		UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %dB: %s"), RpcMsg.paramspayload().size(), UTF8_TO_TCHAR(ParamsMsg->DebugString().c_str()));
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %d bytes"), RpcMsg.paramspayload().size());
 	}
 	SendMessage(unrealpb::RPC, RpcMsg, ChId);
 }

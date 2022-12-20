@@ -298,9 +298,17 @@ public:
 		// ObjRef.set_connid(GEngine->GetEngineSubsystem<UChanneldConnection>()->GetConnId());
 		return ObjRef;
 	}
-	
+
+		
 	template<class T>
 	static T* GetActorComponentByRef(const unrealpb::ActorComponentRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr)
+	{
+		bool bNetGUIDUnmapped;
+		return GetActorComponentByRefChecked<T>(Ref, World, bNetGUIDUnmapped, bCreateIfNotInCache, ClientConn);
+	}
+	
+	template<class T>
+	static T* GetActorComponentByRefChecked(const unrealpb::ActorComponentRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr)
 	{
 		if (!Ref || !World)
 		{
@@ -674,6 +682,7 @@ public:
 
 								// Server may already has the actor spawned and cached. Remove it before registering.
 								GuidCache->NetGUIDLookup.Remove(Actor);
+								GuidCache->ObjectLookup.Remove(NetGUID);
 								
 								GuidCache->RegisterNetGUID_Server(NetGUID, Actor);
 

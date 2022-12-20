@@ -34,6 +34,12 @@ void USpatialMasterServerView::InitServer()
 	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
 	{
 		auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
+		UE_LOG(LogChanneld, Log, TEXT("[Server] Sub %s conn %d to %s channel %d"),
+			SubResultMsg->conntype() == channeldpb::CLIENT ? TEXT("client") : TEXT("server"),
+			SubResultMsg->connid(),
+			UTF8_TO_TCHAR(channeldpb::ChannelType_Name(SubResultMsg->channeltype()).c_str()),
+			ChId);
+		
 		// A client subs to GLOBAL - choose the start position and sub the client to corresponding spatial channels.
 		if (SubResultMsg->conntype() == channeldpb::CLIENT && SubResultMsg->channeltype() == channeldpb::GLOBAL)
 		{

@@ -172,18 +172,19 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	auto HandoverMsg = static_cast<const channeldpb::ChannelDataHandoverMessage*>(Msg);
 	unrealpb::HandoverData HandoverData;
 	HandoverMsg->data().UnpackTo(&HandoverData);
-	
-	TArray<FString> NetIds;
-	for (auto& HandoverContext : HandoverData.context())
-	{
-		NetIds.Add(FString::FromInt(HandoverContext.obj().netguid()));
-	}
-	UE_LOG(LogChanneld, Log, TEXT("ChannelDataHandover from channel %d to %d, object netIds: %s"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), *FString::Join(NetIds, TEXT(",")));
 
 	// Does current server has interest over the handover objects?
 	const bool bHasInterest = Connection->SubscribedChannels.Contains(HandoverMsg->dstchannelid());
 	// Does current server has authority over the handover objects?
 	const bool bHasAuthority = Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid());
+	
+	FString NetIds;
+	for (auto& HandoverContext : HandoverData.context())
+	{
+		NetIds.Appendf(TEXT("%d[%d], "), HandoverContext.obj().netguid(), HandoverContext.clientconnid());
+	}
+	UE_LOG(LogChanneld, Log, TEXT("ChannelDataHandover from channel %d to %d(%s), object netIds: %s"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(),
+		bHasAuthority ? TEXT("A") : (bHasInterest ? TEXT("I") : TEXT("")), *NetIds);
 
 	// The actors are handed over to current (destination) server.
 	TArray<AActor*> CrossServerActors;
@@ -287,6 +288,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 						if (HandoverObj->IsA<APlayerController>())
 						{
 							InitPlayerController(ClientConn, Cast<APlayerController>(HandoverObj));
+							UE_LOG(LogChanneld, Verbose, TEXT("[Server] Initialized PlayerController with client conn %d"), ClientConn->GetConnId());
 						}
 					}
 				}
@@ -299,8 +301,6 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 		
 			if (HandoverObj)
 			{
-				
-				
 				// In-server handover - the srcChannel and dstChannel are in the same server
 				if (Connection->SubscribedChannels.Contains(HandoverMsg->srcchannelid()))
 				{
@@ -320,9 +320,10 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 				// Cross-server handover
 				else if (AActor* HandoverActor = Cast<AActor>(HandoverObj))
 				{
+					CrossServerActors.Add(HandoverActor);
 					// Set the role to SimulatedProxy so the actor can be updated by the handover channel data later.
 					HandoverActor->SetRole(ROLE_SimulatedProxy);
-					CrossServerActors.Add(HandoverActor);
+					UE_LOG(LogChanneld, Verbose, TEXT("Set %s to ROLE_SimulatedProxy for ChannelDataUpdate"), *HandoverActor->GetName());
 				}
 			}
 			else
@@ -354,6 +355,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 		if (Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid()))
 		{
 			HandoverActor->SetRole(ENetRole::ROLE_Authority);
+			UE_LOG(LogChanneld, Verbose, TEXT("Set %s to back to ROLE_Authority after ChannelDataUpdate"), *HandoverActor->GetName());
 		}
 
 		if (auto HandoverPC = Cast<APlayerController>(HandoverActor))
@@ -366,6 +368,12 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 void USpatialChannelDataView::ServerHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	const auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
+	UE_LOG(LogChanneld, Log, TEXT("[Server] Sub %s conn %d to %s channel %d"),
+		SubResultMsg->conntype() == channeldpb::CLIENT ? TEXT("client") : TEXT("server"),
+		SubResultMsg->connid(),
+		UTF8_TO_TCHAR(channeldpb::ChannelType_Name(SubResultMsg->channeltype()).c_str()),
+		ChId);
+	
 	if (SubResultMsg->channeltype() == channeldpb::SPATIAL /*&& SubResultMsg->suboptions().dataaccess() == channeldpb::WRITE_ACCESS*/)
 	{
 		// A client is subscribed to a spatial channel the server owns (Sub message is sent by Master server)
@@ -380,7 +388,6 @@ void USpatialChannelDataView::ServerHandleSubToChannel(UChanneldConnection* _, C
 		}
 		else
 		{
-			UE_LOG(LogChanneld, Log, TEXT("[Server] Sub to spatial channel %d"), ChId);
 			GetChanneldSubsystem()->SetLowLevelSendToChannelId(ChId);
 		}
 	}
@@ -484,9 +491,9 @@ void USpatialChannelDataView::InitServer()
 void USpatialChannelDataView::ClientHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
+	UE_LOG(LogChanneld, Log, TEXT("[Client] Sub to %s channel %d"), UTF8_TO_TCHAR(channeldpb::ChannelType_Name(SubResultMsg->channeltype()).c_str()), ChId);
 	if (SubResultMsg->channeltype() == channeldpb::SPATIAL /*&& SubResultMsg->suboptions().dataaccess() == channeldpb::WRITE_ACCESS*/)
 	{
-		UE_LOG(LogChanneld, Log, TEXT("[Client] Sub to spatial channel %d"), ChId);
 		if (bClientInMasterServer)
 		{
 			bClientInMasterServer = false;

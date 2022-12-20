@@ -50,6 +50,13 @@ void FChanneldPawnReplicator::Tick(float DeltaTime)
 		return;
 	}
 
+	// ~Begin copy of APawn::PreReplication
+	if (Pawn->GetController())
+	{
+		Pawn->SetRemoteViewPitch(Pawn->GetController()->GetControlRotation().Pitch);
+	}	
+	// ~End copy of APawn::PreReplication
+
 	auto PlayerState = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(FullState->mutable_playerstate(), Pawn->GetWorld(), false));
 	if (PlayerState != *PlayerStatePtr)
 	{

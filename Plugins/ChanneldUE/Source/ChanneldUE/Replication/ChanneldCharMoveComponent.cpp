@@ -56,7 +56,8 @@ bool FChanneldCharacterMoveResponseDataContainer::Serialize(
 		*/
 		if (bIsSaving)
 		{
-			std::string NewBaseData = ChanneldUtils::GetRefOfActorComponent(ClientAdjustment.NewBase).SerializeAsString();
+			std::string NewBaseData = ChanneldUtils::GetRefOfActorComponent(ClientAdjustment.NewBase,
+				CharacterMovement.GetCharacterOwner()->GetNetConnection()).SerializeAsString();
 			uint32 DataSize = NewBaseData.size();
 			Ar.SerializeIntPacked(DataSize);
 			Ar.Serialize((void*)NewBaseData.data(), DataSize);
@@ -70,7 +71,12 @@ bool FChanneldCharacterMoveResponseDataContainer::Serialize(
 			unrealpb::ActorComponentRef ObjRef;
 			ObjRef.ParseFromArray(NewBaseData, DataSize);
 			delete[] NewBaseData;
-			ClientAdjustment.NewBase = ChanneldUtils::GetActorComponentByRef<UPrimitiveComponent>(&ObjRef, CharacterMovement.GetWorld());
+			bool bNetGUIDUnmapped;
+			ClientAdjustment.NewBase = ChanneldUtils::GetActorComponentByRefChecked<UPrimitiveComponent>(&ObjRef, CharacterMovement.GetWorld(), bNetGUIDUnmapped);
+			/* Maybe we don't need to fail
+			if (!bNetGUIDUnmapped)
+				return false;
+			*/
 		}
 		SerializeOptionalValue<FName>(bIsSaving, Ar, ClientAdjustment.NewBaseBoneName, NAME_None);
 		SerializeOptionalValue<uint8>(bIsSaving, Ar, ClientAdjustment.MovementMode, MOVE_Walking);

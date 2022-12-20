@@ -78,6 +78,13 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 	{
 		return;
 	}
+
+	// ~Begin copy of AActor::PreReplication
+	AttachmentReplicationPtr->AttachParent = nullptr;
+	AttachmentReplicationPtr->AttachComponent = nullptr;
+	Actor->GatherCurrentMovement();
+	// ~End copy of AActor::PreReplication
+	
 	if (Actor->IsReplicatingMovement() != FullState->breplicatemovement())
 	{
 		DeltaState->set_breplicatemovement(Actor->IsReplicatingMovement());
@@ -130,11 +137,6 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 		DeltaState->mutable_instigator()->CopyFrom(ChanneldUtils::GetRefOfObject(Actor->GetInstigator()));
 		bStateChanged = true;
 	}
-
-	//---------------------------------------------
-	// AActor::PreReplication
-	//---------------------------------------------
-	Actor->GatherCurrentMovement();
 
 	if (Actor->IsReplicatingMovement())
 	{
