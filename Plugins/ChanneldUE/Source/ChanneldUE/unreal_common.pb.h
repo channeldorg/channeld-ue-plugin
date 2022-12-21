@@ -2046,6 +2046,8 @@ class CHANNELDUE_API GetHandoverContextMessage final :
 
   enum : int {
     kNetIdFieldNumber = 1,
+    kSrcChannelIdFieldNumber = 2,
+    kDstChannelIdFieldNumber = 3,
   };
   // uint32 netId = 1;
   void clear_netid();
@@ -2054,6 +2056,24 @@ class CHANNELDUE_API GetHandoverContextMessage final :
   private:
   uint32_t _internal_netid() const;
   void _internal_set_netid(uint32_t value);
+  public:
+
+  // uint32 srcChannelId = 2;
+  void clear_srcchannelid();
+  uint32_t srcchannelid() const;
+  void set_srcchannelid(uint32_t value);
+  private:
+  uint32_t _internal_srcchannelid() const;
+  void _internal_set_srcchannelid(uint32_t value);
+  public:
+
+  // uint32 dstChannelId = 3;
+  void clear_dstchannelid();
+  uint32_t dstchannelid() const;
+  void set_dstchannelid(uint32_t value);
+  private:
+  uint32_t _internal_dstchannelid() const;
+  void _internal_set_dstchannelid(uint32_t value);
   public:
 
   // @@protoc_insertion_point(class_scope:unrealpb.GetHandoverContextMessage)
@@ -2065,6 +2085,8 @@ class CHANNELDUE_API GetHandoverContextMessage final :
   typedef void DestructorSkippable_;
   struct Impl_ {
     uint32_t netid_;
+    uint32_t srcchannelid_;
+    uint32_t dstchannelid_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -2193,10 +2215,12 @@ class CHANNELDUE_API GetHandoverContextResultMessage final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kContextFieldNumber = 2,
+    kContextFieldNumber = 4,
     kNetIdFieldNumber = 1,
+    kSrcChannelIdFieldNumber = 2,
+    kDstChannelIdFieldNumber = 3,
   };
-  // repeated .unrealpb.HandoverContext context = 2;
+  // repeated .unrealpb.HandoverContext context = 4;
   int context_size() const;
   private:
   int _internal_context_size() const;
@@ -2223,6 +2247,24 @@ class CHANNELDUE_API GetHandoverContextResultMessage final :
   void _internal_set_netid(uint32_t value);
   public:
 
+  // uint32 srcChannelId = 2;
+  void clear_srcchannelid();
+  uint32_t srcchannelid() const;
+  void set_srcchannelid(uint32_t value);
+  private:
+  uint32_t _internal_srcchannelid() const;
+  void _internal_set_srcchannelid(uint32_t value);
+  public:
+
+  // uint32 dstChannelId = 3;
+  void clear_dstchannelid();
+  uint32_t dstchannelid() const;
+  void set_dstchannelid(uint32_t value);
+  private:
+  uint32_t _internal_dstchannelid() const;
+  void _internal_set_dstchannelid(uint32_t value);
+  public:
+
   // @@protoc_insertion_point(class_scope:unrealpb.GetHandoverContextResultMessage)
  private:
   class _Internal;
@@ -2233,6 +2275,8 @@ class CHANNELDUE_API GetHandoverContextResultMessage final :
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::HandoverContext > context_;
     uint32_t netid_;
+    uint32_t srcchannelid_;
+    uint32_t dstchannelid_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -10794,6 +10838,46 @@ inline void GetHandoverContextMessage::set_netid(uint32_t value) {
   // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextMessage.netId)
 }
 
+// uint32 srcChannelId = 2;
+inline void GetHandoverContextMessage::clear_srcchannelid() {
+  _impl_.srcchannelid_ = 0u;
+}
+inline uint32_t GetHandoverContextMessage::_internal_srcchannelid() const {
+  return _impl_.srcchannelid_;
+}
+inline uint32_t GetHandoverContextMessage::srcchannelid() const {
+  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextMessage.srcChannelId)
+  return _internal_srcchannelid();
+}
+inline void GetHandoverContextMessage::_internal_set_srcchannelid(uint32_t value) {
+  
+  _impl_.srcchannelid_ = value;
+}
+inline void GetHandoverContextMessage::set_srcchannelid(uint32_t value) {
+  _internal_set_srcchannelid(value);
+  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextMessage.srcChannelId)
+}
+
+// uint32 dstChannelId = 3;
+inline void GetHandoverContextMessage::clear_dstchannelid() {
+  _impl_.dstchannelid_ = 0u;
+}
+inline uint32_t GetHandoverContextMessage::_internal_dstchannelid() const {
+  return _impl_.dstchannelid_;
+}
+inline uint32_t GetHandoverContextMessage::dstchannelid() const {
+  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextMessage.dstChannelId)
+  return _internal_dstchannelid();
+}
+inline void GetHandoverContextMessage::_internal_set_dstchannelid(uint32_t value) {
+  
+  _impl_.dstchannelid_ = value;
+}
+inline void GetHandoverContextMessage::set_dstchannelid(uint32_t value) {
+  _internal_set_dstchannelid(value);
+  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextMessage.dstChannelId)
+}
+
 // -------------------------------------------------------------------
 
 // GetHandoverContextResultMessage
@@ -10818,7 +10902,47 @@ inline void GetHandoverContextResultMessage::set_netid(uint32_t value) {
   // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextResultMessage.netId)
 }
 
-// repeated .unrealpb.HandoverContext context = 2;
+// uint32 srcChannelId = 2;
+inline void GetHandoverContextResultMessage::clear_srcchannelid() {
+  _impl_.srcchannelid_ = 0u;
+}
+inline uint32_t GetHandoverContextResultMessage::_internal_srcchannelid() const {
+  return _impl_.srcchannelid_;
+}
+inline uint32_t GetHandoverContextResultMessage::srcchannelid() const {
+  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextResultMessage.srcChannelId)
+  return _internal_srcchannelid();
+}
+inline void GetHandoverContextResultMessage::_internal_set_srcchannelid(uint32_t value) {
+  
+  _impl_.srcchannelid_ = value;
+}
+inline void GetHandoverContextResultMessage::set_srcchannelid(uint32_t value) {
+  _internal_set_srcchannelid(value);
+  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextResultMessage.srcChannelId)
+}
+
+// uint32 dstChannelId = 3;
+inline void GetHandoverContextResultMessage::clear_dstchannelid() {
+  _impl_.dstchannelid_ = 0u;
+}
+inline uint32_t GetHandoverContextResultMessage::_internal_dstchannelid() const {
+  return _impl_.dstchannelid_;
+}
+inline uint32_t GetHandoverContextResultMessage::dstchannelid() const {
+  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextResultMessage.dstChannelId)
+  return _internal_dstchannelid();
+}
+inline void GetHandoverContextResultMessage::_internal_set_dstchannelid(uint32_t value) {
+  
+  _impl_.dstchannelid_ = value;
+}
+inline void GetHandoverContextResultMessage::set_dstchannelid(uint32_t value) {
+  _internal_set_dstchannelid(value);
+  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextResultMessage.dstChannelId)
+}
+
+// repeated .unrealpb.HandoverContext context = 4;
 inline int GetHandoverContextResultMessage::_internal_context_size() const {
   return _impl_.context_.size();
 }

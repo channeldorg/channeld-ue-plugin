@@ -136,6 +136,7 @@ void USpatialMasterServerView::InitServer()
 		for (auto SpatialChId : ResultMsg->spatialchannelid())
 		{
 			AllSpatialChannelIds.Add(SpatialChId);
+			UE_LOG(LogChanneld, Verbose, TEXT("Added spatial channel %d"), SpatialChId);
 		}
 	});
 

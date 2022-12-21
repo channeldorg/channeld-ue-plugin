@@ -69,6 +69,10 @@ void UChanneldNetDriver::RemoveChanneldClientConnection(ConnectionId ClientConnI
 		
 		UE_LOG(LogChanneld, Log, TEXT("Server removed client connection %d, total connections: %d (%d)"), ClientConnId, ClientConnections.Num(), ClientConnectionMap.Num());
 	}
+	else
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Server failed to remove client connection %d, total connections: %d (%d)"), ClientConnId, ClientConnections.Num(), ClientConnectionMap.Num());
+	}
 }
 
 void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg)

@@ -42,6 +42,15 @@ public:
 protected:
 	virtual void OnClientUnsub(ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, ChannelId ChId) override;
 	
+	/**
+	 * @brief The source server decides which objects get handed over to the destination server.
+	 * @param Obj The object that just moved across the server boundary, normally a Pawn.
+	 * @param SrcChId  The channel the object was in, before the handover. Should be in the OwnedChannels of this server.
+	 * @param DstChId The channel the object is going to be handed over to. Should NOT be in the OwnedChannels of this server.
+	 * @return The group of objects that should be sent to channeld for handover. If empty, the handover will not happen.
+	 */
+	virtual TArray<UObject*> GetHandoverObjects(UObject* Obj, ChannelId SrcChId, ChannelId DstChId);
+	
 private:
 
     // Map the client to the channels, so the spatial server's LowLevelSend() can use the right channelId.

@@ -316,10 +316,11 @@ void UChannelDataView::RemoveProviderFromAllChannels(IChannelDataProvider* Provi
 void UChannelDataView::MoveProvider(ChannelId OldChId, ChannelId NewChId, IChannelDataProvider* Provider)
 {
 	RemoveProvider(OldChId, Provider, false);
-	if (Connection->SubscribedChannels.Contains(NewChId))
+	if (!Connection->SubscribedChannels.Contains(NewChId))
 	{
-		AddProvider(NewChId, Provider);
+		UE_LOG(LogChanneld, Warning, TEXT("Moving a provider '%s' to channel %d which hasn't been subscribed yet."), *IChannelDataProvider::GetName(Provider), NewChId);
 	}
+	AddProvider(NewChId, Provider);
 }
 
 void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn)
