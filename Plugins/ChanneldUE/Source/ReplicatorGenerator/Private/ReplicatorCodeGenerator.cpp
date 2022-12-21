@@ -51,8 +51,8 @@ bool FReplicatorCodeGenerator::Generate(TArray<UClass*> TargetActors, FReplicato
 		RegisterCode += ReplicatorCode.RegisterReplicatorCode + TEXT("\n");
 	}
 	FStringFormatNamedArguments FormatArgs;
-	FormatArgs.Add(TEXT("Code_IncludeActorHeaders"), FStringFormatArg(IncludeCode));
-	FormatArgs.Add(TEXT("Code_ReplicatorRegister"), FStringFormatArg(RegisterCode));
+	FormatArgs.Add(TEXT("Code_IncludeActorHeaders"), IncludeCode);
+	FormatArgs.Add(TEXT("Code_ReplicatorRegister"), RegisterCode);
 	ReplicatorCodeBundle.RegisterReplicatorFileCode = FString::Format(*CodeGen_RegisterReplicatorTemplate, FormatArgs);
 
 	auto GlobalStructDecorators = FPropertyDecoratorFactory::Get().GetGlobalStructDecorators();
@@ -138,7 +138,6 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	FormatArgs.Add(TEXT("Code_OnStateChangedAdditionalCondition"), OnStateChangedAdditionalCondition);
 	FormatArgs.Add(TEXT("Code_TickAdditionalCondition"), TickAdditionalCondition);
 	FormatArgs.Add(TEXT("Code_IsClient"), IsClientCode);
-	FormatArgs.Add(TEXT("Declare_OverrideSerializeAndDeserializeFunctionParams"), Target->GetRPCNum() > 0 ? CodeGen_SerializeAndDeserializeFunctionParams : TEXT(""));
 
 	if (bIsBlueprint)
 	{
@@ -150,6 +149,11 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	FormatArgs.Add(TEXT("File_ProtoPbHead"), Target->GetActorName() + CodeGen_ProtoPbHeadExtension);
 	FormatArgs.Add(TEXT("Code_AdditionalInclude"), Target->GetAdditionalIncludeFiles());
 	FormatArgs.Add(TEXT("Declare_IndirectlyAccessiblePropertyPtrs"), Target->GetCode_IndirectlyAccessiblePropertyPtrDeclarations());
+
+	// RPC
+	FormatArgs.Add(TEXT("Declare_OverrideSerializeAndDeserializeFunctionParams"), Target->GetRPCNum() > 0 ? CodeGen_SerializeAndDeserializeFunctionParams : TEXT(""));
+	FormatArgs.Add(TEXT("Declare_RPCParamStructs"), Target->GetDeclaration_RPCParamStructs());
+
 	ReplicatorCode.HeadCode = FString::Format(bIsBlueprint ? CodeGen_BP_HeadCodeTemplate : CodeGen_CPP_HeadCodeTemplate, FormatArgs);
 	ReplicatorCode.HeadFileName = Target->GetReplicatorClassName(false) + CodeGen_HeadFileExtension;
 	// ---------- Head code ----------
@@ -157,9 +161,13 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	// ---------- Cpp code ----------
 	FStringBuilderBase CppCodeBuilder;
 	CppCodeBuilder.Append(TEXT("#include \"") + ReplicatorCode.HeadFileName + TEXT("\"\n\n"));
+	if(Target->GetRPCNum() > 0)
+	{
+		CppCodeBuilder.Append(TEXT("DEFINE_LOG_CATEGORY(LogChanneld);\n"));
+	}
 	FormatArgs.Add(
 		TEXT("Code_AssignPropertyPointers"),
-		FStringFormatArg(Target->GetCode_AssignPropertyPointers(TargetInstanceRef))
+		Target->GetCode_AssignPropertyPointers(TargetInstanceRef)
 	);
 	CppCodeBuilder.Append(FString::Format(
 		bIsBlueprint ? CodeGen_BP_ConstructorImplTemplate : CodeGen_CPP_ConstructorImplTemplate,
@@ -181,6 +189,19 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	);
 	CppCodeBuilder.Append(FString::Format(CodeGen_CPP_OnStateChangedImplTemplate, FormatArgs));
 
+	if (Target->GetRPCNum() > 0)
+	{
+		FormatArgs.Add(
+			TEXT("Code_SerializeFunctionParams"),
+			Target->GetCode_SerializeFunctionParams()
+		);
+		FormatArgs.Add(
+			TEXT("Code_DeserializeFunctionParams"),
+			Target->GetCode_DeserializeFunctionParams()
+		);
+		CppCodeBuilder.Append(FString::Format(CodeGen_CPP_RPCTemplate, FormatArgs));
+	}
+
 	ReplicatorCode.CppCode = CppCodeBuilder.ToString();
 	ReplicatorCode.CppFileName = Target->GetReplicatorClassName(false) + CodeGen_CppFileExtension;
 	// ---------- Cpp code ----------
@@ -189,7 +210,10 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	FStringFormatNamedArguments ProtoFormatArgs;
 	ProtoFormatArgs.Add(TEXT("Declare_ProtoPackageName"), Target->GetProtoPackageName());
 	ProtoFormatArgs.Add(TEXT("Code_Import"), FString::Printf(TEXT("import \"%s\";"), *GenManager_GlobalStructProtoFile));
-	ProtoFormatArgs.Add(TEXT("Definition_ProtoStateMsg"), Target->GetDefinition_ProtoStateMessage());
+	ProtoFormatArgs.Add(
+		TEXT("Definition_ProtoStateMsg"),
+		Target->GetDefinition_ProtoStateMessage() + Target->GetDefinition_RPCParamsMessage()
+	);
 	ReplicatorCode.ProtoDefinitions = FString::Format(CodeGen_ProtoTemplate, ProtoFormatArgs);
 	ReplicatorCode.ProtoFileName = Target->GetActorName() + CodeGen_ProtoFileExtension;
 	// ---------- Protobuf ----------

@@ -23,6 +23,8 @@ public:
   virtual void OnStateChanged(const google::protobuf::Message* NewState) override;
   //~End FChanneldReplicatorBase Interface
 
+{Declare_OverrideSerializeAndDeserializeFunctionParams}
+
 protected:
   TWeakObjectPtr<{Declare_TargetBaseClassName}> {Ref_TargetInstanceRef};
 
@@ -35,6 +37,8 @@ private:
 {Declare_IndirectlyAccessiblePropertyPtrs}
 
 };
+
+{Declare_RPCParamStructs}
 )EOF";
 
 static const TCHAR* CodeGen_BP_ConstructorImplTemplate =

@@ -87,10 +87,17 @@ public:
      *   
 	 */
 	FString GetDefinition_ProtoStateMessage();
+	 
+	FString GetDefinition_RPCParamsMessage();
 
 	virtual bool IsBlueprintType() override;
 
 	int32 GetRPCNum();
+
+	FString GetCode_SerializeFunctionParams();
+	FString GetCode_DeserializeFunctionParams();
+	
+	FString GetDeclaration_RPCParamStructs();
 
 protected:
 	const UClass* Target;

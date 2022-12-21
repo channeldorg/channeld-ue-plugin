@@ -40,7 +40,7 @@ void FReplicatedActorDecorator::Init()
 	{
 		UFunction* Func = Target->FindFunctionByName(FuncName, EIncludeSuperFlag::ExcludeSuper);
 		if (!Func->HasAnyFunctionFlags(FUNC_Net)) { continue; }
-		
+
 		RPCs.Add(MakeShareable(new FRPCDecorator(Func, this)));
 	}
 }
@@ -179,6 +179,21 @@ FString FReplicatedActorDecorator::GetDefinition_ProtoStateMessage()
 	return FString::Format(CodeGen_ProtoStateMessageTemplate, FormatArgs);
 }
 
+FString FReplicatedActorDecorator::GetDefinition_RPCParamsMessage()
+{
+	FString RPCParamMessages;
+	for (int32 i = 0; i < RPCs.Num(); i++)
+	{
+		const TSharedPtr<FRPCDecorator> RPC = RPCs[i];
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("Declare_StateMessageType"), RPC->GetProtoStateMessageType());
+		FormatArgs.Add(TEXT("Declare_ProtoFields"), RPC->GetDeclaration_ProtoFields());
+
+		RPCParamMessages.Append(FString::Format(CodeGen_ProtoStateMessageTemplate, FormatArgs));
+	}
+	return RPCParamMessages;
+}
+
 bool FReplicatedActorDecorator::IsBlueprintType()
 {
 	return bIsBlueprintGenerated;
@@ -187,4 +202,53 @@ bool FReplicatedActorDecorator::IsBlueprintType()
 int32 FReplicatedActorDecorator::GetRPCNum()
 {
 	return RPCs.Num();
+}
+
+FString FReplicatedActorDecorator::GetCode_SerializeFunctionParams()
+{
+	FString SerializeParamCodes;
+	bool bIsFirst = true;
+	for (int32 i = 0; i < RPCs.Num(); i++)
+	{
+		const TSharedPtr<FRPCDecorator> RPC = RPCs[i];
+		if (!bIsFirst)
+		{
+			SerializeParamCodes.Append(TEXT("else "));
+		}
+		SerializeParamCodes.Append(RPC->GetCode_SerializeFunctionParams());
+		bIsFirst = false;
+	}
+	return SerializeParamCodes;
+}
+
+FString FReplicatedActorDecorator::GetCode_DeserializeFunctionParams()
+{
+	FString DeserializeParamCodes;
+	bool bIsFirst = true;
+	for (int32 i = 0; i < RPCs.Num(); i++)
+	{
+		const TSharedPtr<FRPCDecorator> RPC = RPCs[i];
+		if (!bIsFirst)
+		{
+			DeserializeParamCodes.Append(TEXT("else "));
+		}
+		DeserializeParamCodes.Append(RPC->GetCode_DeserializeFunctionParams());
+		bIsFirst = false;
+	}
+	return DeserializeParamCodes;
+}
+
+FString FReplicatedActorDecorator::GetDeclaration_RPCParamStructs()
+{
+	FString RPCParamStructsDeclarations = TEXT("");
+
+	if (GetRPCNum() > 0)
+	{
+		for (int32 i = 0; i < RPCs.Num(); i++)
+		{
+			const TSharedPtr<FRPCDecorator> RPC = RPCs[i];
+			RPCParamStructsDeclarations.Append(RPC->GetDeclaration_PropPtrGroupStruct());
+		}
+	}
+	return RPCParamStructsDeclarations;
 }

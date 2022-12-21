@@ -83,7 +83,7 @@ FString FStructPropertyDecorator::GetCode_AssignPropPointer(const FString& Conta
 	FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
 	FormatArgs.Add(TEXT("Declare_PropertyCPPType"), GetCPPType());
 	FormatArgs.Add(TEXT("Num_PropMemOffset"), GetMemOffset());
-	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), FStringFormatArg(GetDeclaration_PropPtrGroupStructName()));
+	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
 
 	return FString::Format(StructPropDeco_AssignPropPtrTemp, FormatArgs);
 }
@@ -91,11 +91,11 @@ FString FStructPropertyDecorator::GetCode_AssignPropPointer(const FString& Conta
 FString FStructPropertyDecorator::GetCode_AssignPropPtrDispersedly(const FString& Container, const FString& ContainerTemplate, const FString& AssignTo)
 {
 	FStringFormatNamedArguments FormatArgs;
-	FormatArgs.Add(TEXT("Ref_AssignTo"), FStringFormatArg(AssignTo));
-	FormatArgs.Add(TEXT("Ref_ContainerAddr"), FStringFormatArg(Container));
-	FormatArgs.Add(TEXT("Ref_ContainerTemplate"), FStringFormatArg(ContainerTemplate));
-	FormatArgs.Add(TEXT("Declare_PropertyName"), FStringFormatArg(GetPropertyName()));
-	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), FStringFormatArg(GetDeclaration_PropPtrGroupStructName()));
+	FormatArgs.Add(TEXT("Ref_AssignTo"), AssignTo);
+	FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
+	FormatArgs.Add(TEXT("Ref_ContainerTemplate"), ContainerTemplate);
+	FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
+	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
 
 	return FString::Format(StructPropDeco_AssignPropPtrDispersedlyTemp, FormatArgs);
 }
@@ -103,10 +103,10 @@ FString FStructPropertyDecorator::GetCode_AssignPropPtrDispersedly(const FString
 FString FStructPropertyDecorator::GetCode_AssignPropPtrOrderly(const FString& Container, const FString& ContainerTemplate, const FString& AssignTo)
 {
 	FStringFormatNamedArguments FormatArgs;
-	FormatArgs.Add(TEXT("Ref_AssignTo"), FStringFormatArg(AssignTo));
-	FormatArgs.Add(TEXT("Ref_ContainerAddr"), FStringFormatArg(Container));
-	FormatArgs.Add(TEXT("Ref_ContainerTemplate"), FStringFormatArg(ContainerTemplate));
-	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), FStringFormatArg(GetDeclaration_PropPtrGroupStructName()));
+	FormatArgs.Add(TEXT("Ref_AssignTo"), AssignTo);
+	FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
+	FormatArgs.Add(TEXT("Ref_ContainerTemplate"), ContainerTemplate);
+	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
 
 	return FString::Format(StructPropDeco_AssignPropPtrOrderlyTemp, FormatArgs);
 }

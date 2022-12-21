@@ -19,9 +19,14 @@ FRPCDecorator::FRPCDecorator(UFunction* InFunc, IPropertyDecoratorOwner* InOwner
 	}
 }
 
-bool FRPCDecorator::IsBlueprintType()
+bool FRPCDecorator::IsDirectlyAccessible()
 {
 	return false;
+}
+
+FString FRPCDecorator::GetCPPType()
+{
+	return FString::Printf(TEXT("%sParamStruct"), *OriginalFunction->GetName());
 }
 
 FString FRPCDecorator::GetProtoPackageName()
@@ -42,10 +47,33 @@ FString FRPCDecorator::GetProtoStateMessageType()
 FString FRPCDecorator::GetCode_SerializeFunctionParams()
 {
 	FStringFormatNamedArguments FormatArgs;
-	FormatArgs.Add(TEXT("Declare_Name"), OriginalFunction->GetName());
+	FormatArgs.Add(TEXT("Declare_FuncName"), OriginalFunction->GetName());
 	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
 	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), GetProtoNamespace());
 	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), GetProtoStateMessageType());
 
-	return FString::Format(StructPropDeco_AssignPropPtrOrderlyTemp, FormatArgs);
+	return FString::Format(RPC_SerializeFuncParamsTemp, FormatArgs);
+}
+
+FString FRPCDecorator::GetCode_DeserializeFunctionParams()
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_FuncName"), OriginalFunction->GetName());
+	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
+	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), GetProtoNamespace());
+	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), GetProtoStateMessageType());
+	FormatArgs.Add(TEXT("Declare_ParamStructCopy"), GetCompilableCPPType());
+
+	return FString::Format(RPC_DeserializeFuncParamsTemp, FormatArgs);
+}
+
+FString FRPCDecorator::GetDeclaration_ProtoFields()
+{
+	FString FieldDefinitions;
+	for (int32 i = 0; i < Properties.Num(); i++)
+	{
+		const TSharedPtr<FPropertyDecorator> Property = Properties[i];
+		FieldDefinitions += Property->GetDefinition_ProtoField(i + 1) + TEXT(";\n");
+	}
+	return FieldDefinitions;
 }

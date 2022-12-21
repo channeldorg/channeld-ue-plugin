@@ -39,6 +39,8 @@ private:
 {Declare_IndirectlyAccessiblePropertyPtrs}
 
 };
+
+{Declare_RPCParamStructs}
 )EOF";
 
 static const TCHAR* CodeGen_SerializeAndDeserializeFunctionParams =
@@ -120,6 +122,25 @@ void {Declare_ReplicatorClassName}::OnStateChanged(const google::protobuf::Messa
 }
 )EOF";
 
+static const TCHAR* CodeGen_CPP_RPCTemplate =
+	LR"EOF(
+TSharedPtr<google::protobuf::Message> {Declare_ReplicatorClassName}::SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess)
+{
+	bSuccess = true;
+{Code_SerializeFunctionParams}
+	bSuccess = false;
+	return nullptr;
+}
+
+TSharedPtr<void> {Declare_ReplicatorClassName}::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
+{
+	bSuccess = true;
+{Code_DeserializeFunctionParams}
+	bSuccess = false;
+	return nullptr;
+}
+)EOF";
+
 static const TCHAR* CodeGen_ProtoTemplate =
 	LR"EOF(
 syntax = "proto3";
@@ -154,4 +175,15 @@ class CHANNELDINTEGRATION_API UChanneldReplicatorRegister : public UEngineSubsys
 {Code_ReplicatorRegister}
   }
 };
+)EOF";
+
+static const FString CodeGen_SerializeFuncParamTemp =
+  LR"EOF(
+TSharedPtr<google::protobuf::Message> {Declare_ReplicatorClassName}::SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess)
+{
+	bSuccess = true;
+{Code_SerializeFuncParam}
+	bSuccess = false;
+	return nullptr;
+}
 )EOF";
