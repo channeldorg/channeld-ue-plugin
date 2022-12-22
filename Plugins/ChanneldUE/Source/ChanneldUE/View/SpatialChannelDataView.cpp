@@ -52,15 +52,13 @@ void USpatialChannelDataView::InitPlayerController(UChanneldNetConnection* Clien
 		// ~ Begin copy of AGameModeBase::InitNewPlayer
 		// Register the player with the session
 		GameMode->GameSession->RegisterPlayer(NewPlayerController, ClientConn->PlayerId.GetUniqueNetId(), false);
-		GameMode->ChangeName(NewPlayerController, FString::Printf(TEXT("Player_%d"), ClientConn->GetConnId()), false);
+		//GameMode->ChangeName(NewPlayerController, FString::Printf(TEXT("Player_%d"), ClientConn->GetConnId()), false);
 		// ~ End copy of AGameModeBase::InitNewPlayer
 		
 		// ~ End copy of AGameModeBase::Login
 		
 		// Possess the newly-spawned player.
 		NewPlayerController->NetPlayerIndex = 0;
-		// NewPlayerController->SetRole(ROLE_Authority);
-		NewPlayerController->SetReplicates(true);
 
 		// HACK: We need to set the private property bIsLocalPlayerController to false before calling SetPlayer(), so it won't create the spectator pawn for the PC.
 		static const FBoolProperty* Prop = CastFieldChecked<const FBoolProperty>(APlayerController::StaticClass()->FindPropertyByName("bIsLocalPlayerController"));
@@ -72,6 +70,10 @@ void USpatialChannelDataView::InitPlayerController(UChanneldNetConnection* Clien
 		UE_LOG(LogChanneld, VeryVerbose, TEXT("Set bIsLocalPlayerController to %s"), NewPlayerController->IsLocalController() ? TEXT("true") : TEXT("false"));
 		
 		NewPlayerController->SetPlayer(ClientConn);
+
+		// IMPORTANT: Set ROLE_Authority must be done after SetPlayer()!
+		NewPlayerController->SetRole(ROLE_Authority);
+		NewPlayerController->SetReplicates(true);
 
 		ClientConn->SetClientLoginState(EClientLoginState::ReceivedJoin);
 	}
@@ -136,18 +138,21 @@ void USpatialChannelDataView::ServerHandleGetHandoverContext(UChanneldConnection
 	auto GetContextMsg = static_cast<const unrealpb::GetHandoverContextMessage*>(Msg);
 	const auto NetId = FNetworkGUID(GetContextMsg->netid());
 	UObject* Obj = GetObjectFromNetGUID(NetId);
-	if (Obj == nullptr)
-	{
-		UE_LOG(LogChanneld, Error, TEXT("Unable to get handover context, netId: %d"), NetId.Value);
-		return;
-	}
-
-	TArray<UObject*> HandoverObjs = GetHandoverObjects(Obj, GetContextMsg->srcchannelid(), GetContextMsg->dstchannelid());
 
 	unrealpb::GetHandoverContextResultMessage ResultMsg;
 	ResultMsg.set_netid(NetId.Value);
 	ResultMsg.set_srcchannelid(GetContextMsg->srcchannelid());
 	ResultMsg.set_dstchannelid(GetContextMsg->dstchannelid());
+
+	if (Obj == nullptr)
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Unable to get handover context, netId: %d"), NetId.Value);
+		// Always send back the result message.
+		Connection->Send(ChId, unrealpb::HANDOVER_CONTEXT, ResultMsg);
+		return;
+	}
+
+	TArray<UObject*> HandoverObjs = GetHandoverObjects(Obj, GetContextMsg->srcchannelid(), GetContextMsg->dstchannelid());
 
 	for (UObject* HandoverObj : HandoverObjs)
 	{
@@ -238,42 +243,58 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 		// Source spatial server - the channel data is handed over from
 		if (Connection->SubscribedChannels.Contains(HandoverMsg->srcchannelid()))
 		{
-			AActor* HandoverActor = Cast<AActor>(GetObjectFromNetGUID(NetId));
-			
-			// If the handover actor is no longer in the interest area of current server, delete it.
-			if (!bHasInterest)
+			UObject* HandoverObj = GetObjectFromNetGUID(NetId);
+			// Check if object is already destroyed
+			if (IsValid(HandoverObj))
 			{
-				if (HandoverActor)
+				// If the handover actor is no longer in the interest area of current server, delete it.
+				if (!bHasInterest)
 				{
-					UE_LOG(LogChanneld, Log, TEXT("[Server] Deleting actor %s as it leaves the interest area"), *HandoverActor->GetName());
-					if (auto HandoverPC = Cast<APlayerController>(HandoverActor))
+					UE_LOG(LogChanneld, Log, TEXT("[Server] Deleting object %s as it leaves the interest area"), *HandoverObj->GetName());
+					if (AActor* HandoverActor = Cast<AActor>(HandoverObj))
 					{
-						HandoverPC->Player = nullptr;
-						// Don't remove the client connection for now - we don't want to send CloseBunch to the client.
-						// Keep the client connection until the client leaves the game, so we can reuse it for handover.
-						HandoverPC->NetConnection = nullptr;
+						if (auto HandoverPC = Cast<APlayerController>(HandoverActor))
+						{
+							HandoverPC->Player = nullptr;
+							
+							// Don't remove the client connection for now - we don't want to send CloseBunch to the client.
+							// Keep the client connection until the client leaves the game, so we can reuse it for handover.
+							HandoverPC->NetConnection = nullptr;
+							
+							// Make sure the PlayerState is not destroyed together - we will handle it in the following handover context loop
+							HandoverPC->PlayerState = nullptr;
+						}
+						else if (auto HandoverPawn = Cast<APawn>(HandoverActor))
+						{
+							// Reset the pawn's controller so it won't send ClientSetViewTarget RPC in APawn::DetachFromControllerPendingDestroy
+							HandoverPawn->Controller = nullptr;
+						}
+						
+						// Don't send "removed: true" update to the channel, because the state still exists.
+						RemoveActorProvider(HandoverActor, false);
+						
+						GetWorld()->DestroyActor(HandoverActor, true);
 					}
-					else if (auto HandoverPawn = Cast<APawn>(HandoverActor))
+					else
 					{
-						// Reset the pawn's controller so it won't send ClientSetViewTarget RPC in APawn::DetachFromControllerPendingDestroy
-						HandoverPawn->Controller = nullptr;
+						HandoverObj->ConditionalBeginDestroy();
 					}
-					
-					// Don't send "removed: true" update to the channel, because the state still exists.
-					RemoveActorProvider(HandoverActor, false);
-					
-					GetWorld()->DestroyActor(HandoverActor, true);
-				}
 
-				NetIdOwningChannels.Remove(NetId);
-			}
-			// If the handover actor is no longer in the authority area of current server,
-			// make sure it no longer sends ChannelDataUpdate message.
-			else if (!bHasAuthority)
-			{
-				if (HandoverActor)
+					NetIdOwningChannels.Remove(NetId);
+
+					// Remove from the NetGUIDCache
+					auto GuidCache = GetWorld()->NetDriver->GuidCache;
+					GuidCache->ObjectLookup.Remove(NetId);
+					GuidCache->NetGUIDLookup.Remove(HandoverObj);
+				}
+				// If the handover actor is no longer in the authority area of current server,
+				// make sure it no longer sends ChannelDataUpdate message.
+				else if (!bHasAuthority)
 				{
-					HandoverActor->SetRole(ENetRole::ROLE_SimulatedProxy);
+					if (AActor* HandoverActor = Cast<AActor>(HandoverObj))
+					{
+						HandoverActor->SetRole(ENetRole::ROLE_SimulatedProxy);
+					}
 				}
 			}
 		}
@@ -328,7 +349,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 				HandoverObj = ChanneldUtils::GetObjectByRef(&HandoverObjRef, GetWorld(), true);
 			}
 		
-			if (HandoverObj)
+			if (IsValid(HandoverObj))
 			{
 				// In-server handover - the srcChannel and dstChannel are in the same server
 				if (Connection->SubscribedChannels.Contains(HandoverMsg->srcchannelid()))
@@ -368,9 +389,13 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 					}
 				}
 			}
-			else
+			else if (HandoverObj == nullptr)
 			{
 				UE_LOG(LogChanneld, Warning, TEXT("[Server] Failed to spawn object from handover data: %s"), UTF8_TO_TCHAR(HandoverData.DebugString().c_str()));
+			}
+			else
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("[Server] Handover object '%s' is not valid, pending kill: %d"), *GetNameSafe(HandoverObj), HandoverObj->IsPendingKill());
 			}
 		}
 	}
@@ -396,6 +421,9 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	{
 		if (auto HandoverPC = Cast<APlayerController>(HandoverActor))
 		{
+			// ensureAlwaysMsgf(HandoverPC->GetPawn() != nullptr, TEXT("PlayerController doesn't have Pawn set properly"));
+			// ensureAlwaysMsgf(HandoverPC->PlayerState != nullptr, TEXT("PlayerController doesn't have PlayerState set properly"));
+			
 			if (auto ClientConn = Cast<UChanneldNetConnection>(HandoverPC->NetConnection))
 			{
 				// Set the role to SimulatedProxy so it won't unpossess the pawn in BeginSpectatingState()
@@ -650,6 +678,7 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 		else
 		{
 			// FIXME: We can't wait the server to send the Spawn messages as it's suppressed in the handover process.
+			// But we also don't want to spawn the PlayerState or PlayerController of other players.
 			
 			UE_LOG(LogChanneld, Warning, TEXT("Unable to find data provider to move from channel %d to %d, NetId: %d"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), NetId.Value);
 		}

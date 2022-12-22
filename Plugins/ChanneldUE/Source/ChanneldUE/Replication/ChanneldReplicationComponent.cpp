@@ -164,9 +164,9 @@ bool UChanneldReplicationComponent::IsRemoved()
 	return bRemoved;
 }
 
-void UChanneldReplicationComponent::SetRemoved()
+void UChanneldReplicationComponent::SetRemoved(bool bInRemoved)
 {
-	bRemoved = true;
+	bRemoved = bInRemoved;
 }
 
 bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message* ChannelData)

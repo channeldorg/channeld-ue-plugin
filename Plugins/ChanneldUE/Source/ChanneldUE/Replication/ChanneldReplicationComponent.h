@@ -52,7 +52,7 @@ public:
 	// ChannelId GetChannelId() override;
 	// void SetChannelId(ChannelId ChId) override;
 	virtual bool IsRemoved() override;
-	virtual void SetRemoved() override;
+	virtual void SetRemoved(bool bInRemoved) override;
 	virtual bool UpdateChannelData(google::protobuf::Message* ChannelData) override;
 	virtual void OnChannelDataUpdated(google::protobuf::Message* ChannelData) override;
 	//~ End IChannelDataProvider Interface.

@@ -172,6 +172,9 @@ void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provide
 	}
 	*/
 
+	// Make sure provider is not set as removed when adding to a channel.
+	Provider->SetRemoved(false);
+
 	TSet<FProviderInternal>& Providers = ChannelDataProviders.FindOrAdd(ChId);
 	if (!Providers.Contains(Provider))
 	{
@@ -251,7 +254,7 @@ void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Prov
 		
 		if (bSendRemoved)
 		{
-			Provider->SetRemoved();
+			Provider->SetRemoved(true);
 
 			// Collect the removed states immediately (before the provider gets destroyed completely)
 			google::protobuf::Message* RemovedData = RemovedProvidersData.FindRef(ChId);
@@ -481,7 +484,7 @@ void UChannelDataView::OnDisconnect()
 		{
 			if (Provider.IsValid())
 			{
-				Provider->SetRemoved();
+				Provider->SetRemoved(true);
 			}
 		}
 	}

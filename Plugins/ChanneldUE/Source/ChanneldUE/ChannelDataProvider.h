@@ -23,7 +23,7 @@ public:
 	//virtual ChannelId GetChannelId() = 0;
 	// virtual void SetChannelId(ChannelId ChId) = 0;
 	virtual bool IsRemoved() = 0;
-	virtual void SetRemoved() = 0;
+	virtual void SetRemoved(bool bInRemoved) = 0;
 	virtual bool UpdateChannelData(google::protobuf::Message* ChannelData) = 0;
 	virtual void OnChannelDataUpdated(google::protobuf::Message* ChannelData) = 0;
 	

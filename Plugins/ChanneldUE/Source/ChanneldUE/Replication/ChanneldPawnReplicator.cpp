@@ -90,6 +90,9 @@ void FChanneldPawnReplicator::OnStateChanged(const google::protobuf::Message* In
 		return;
 	}
 
+	/* Authority can be changed in the middle of a ChannelDataUpdate (in FChanneldActorReplicator::OnStateChanged),
+	* causing PlayerState and PlayerController failed to set.
+	*/
 	if (Pawn->HasAuthority())
 	{
 		return;
@@ -103,12 +106,14 @@ void FChanneldPawnReplicator::OnStateChanged(const google::protobuf::Message* In
 	{
 		*PlayerStatePtr = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(&NewState->playerstate(), Pawn->GetWorld()));
 		Pawn->OnRep_PlayerState();
+		UE_LOG(LogChanneld, Verbose, TEXT("Replicator set Pawn's PlayerState to %s"), *GetNameSafe(*PlayerStatePtr));
 	}
 
 	if (NewState->has_controller())
 	{
 		Pawn->Controller = Cast<AController>(ChanneldUtils::GetObjectByRef(&NewState->controller(), Pawn->GetWorld()));
 		Pawn->OnRep_Controller();
+		UE_LOG(LogChanneld, Verbose, TEXT("Replicator set Pawn's Controller to %s"), *GetNameSafe(Pawn->Controller));
 	}
 
 	if (NewState->has_remoteviewpitch())

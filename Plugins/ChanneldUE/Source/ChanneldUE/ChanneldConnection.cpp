@@ -311,7 +311,8 @@ uint32 UChanneldConnection::Run()
 	while (bReceiveThreadRunning)
 	{
 		Receive();
-		FPlatformProcess::Sleep(0.001f);
+		// FPlatformProcess::Sleep(0.001f);
+		Socket->Wait(ESocketWaitConditions::WaitForRead, FTimespan::FromMilliseconds(10));
 	}
 	return 0;
 }

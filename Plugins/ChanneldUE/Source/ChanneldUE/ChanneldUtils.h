@@ -385,7 +385,7 @@ public:
 		{
 			Actor->SetRole(ROLE_AutonomousProxy);
 		}
-		else if (Actor->GetLocalRole() == ROLE_AutonomousProxy)
+		else// if (Actor->GetLocalRole() == ROLE_AutonomousProxy)
 		{
 			Actor->SetRole(ROLE_SimulatedProxy);
 		}
