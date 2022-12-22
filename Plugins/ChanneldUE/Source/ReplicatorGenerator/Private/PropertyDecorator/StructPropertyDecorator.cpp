@@ -265,12 +265,12 @@ FString FStructPropertyDecorator::GetDeclaration_PropPtrGroupStruct()
 		if (bFirstProperty) { bFirstProperty = false; }
 	}
 	FormatArgs.Add(TEXT("Code_AssignPropPointers"), *AssignPropertyPointerCodes);
-	FormatArgs.Add(TEXT("Code_AssignPropPtrOrderly"), TEXT(""));
-	FormatArgs.Add(TEXT("Code_AssignPropPtrDispersedly"), TEXT(""));
+	// FormatArgs.Add(TEXT("Code_AssignPropPtrOrderly"), TEXT(""));
+	// FormatArgs.Add(TEXT("Code_AssignPropPtrDispersedly"), TEXT(""));
 	FormatArgs.Add(TEXT("Declare_PropertyPointers"), *DeclarePropPtrCodes);
 	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), GetProtoNamespace());
 	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), GetProtoStateMessageType());
-	FormatArgs.Add(TEXT("Code_PointerValuesEqualToStateValues"), PointerValueEqualToStateValueCodes);
+	// FormatArgs.Add(TEXT("Code_PointerValuesEqualToStateValues"), PointerValueEqualToStateValueCodes);
 	FormatArgs.Add(TEXT("Code_SetDeltaStates"), SetDeltaStateCodes);
 	FormatArgs.Add(TEXT("Code_StaticSetDeltaStates"), StaticSetDeltaStateCodes);
 	FormatArgs.Add(TEXT("Code_OnStateChange"), OnStateChangeCodes);

@@ -164,6 +164,9 @@ static const FString CodeGen_RegisterReplicatorTemplate =
 #include "Replication/ChanneldReplication.h"
 {Code_IncludeActorHeaders}
 #include "ChanneldReplicatorRegister.generated.h"
+
+DEFINE_LOG_CATEGORY(LogChanneld);
+
 )EOF")
 	+ TEXT("UCLASS()")
 	+ LR"EOF(

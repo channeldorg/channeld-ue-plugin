@@ -4,10 +4,16 @@
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 
+struct FPrevCodeGeneratedInfo
+{
+	FDateTime GeneratedTime;
+};
+
 class REPLICATORGENERATOR_API FReplicatorGeneratorManager
 {
 protected:
 	FReplicatorCodeGenerator* CodeGenerator;
+
 public:
 	FReplicatorGeneratorManager();
 	~FReplicatorGeneratorManager();
@@ -22,10 +28,10 @@ public:
 		APlayerController::StaticClass(),
 		APlayerState::StaticClass(),
 	};
-	
+
 	static bool HasReplicatedPropertyOrRPC(UClass* TargetClass);
 
-	TArray<UClass*> GetActorsWithReplicationComp(TArray<UClass*> IgnoreActors);
+	TArray<UClass*> GetActorsWithReplicationComp(const TArray<UClass*>& IgnoreActors, const FDateTime& AfterTime);
 
 	bool GeneratedAllReplicators();
 	bool GeneratedReplicators(UClass* Target);
@@ -38,4 +44,8 @@ public:
 	 * Get absolute dir path of default game module
 	 */
 	FString GetDefaultModuleDir();
+
+	FPrevCodeGeneratedInfo LoadPrevCodeGeneratedInfo(const FString& Filename, bool& Success);
+	
+	void SavePrevCodeGeneratedInfo(const FPrevCodeGeneratedInfo& Info, const FString& Filename, bool& Success);
 };

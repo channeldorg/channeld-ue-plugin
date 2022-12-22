@@ -6,6 +6,7 @@
 #include "Engine/AssetManager.h"
 #include "Engine/SCS_Node.h"
 #include "GameFramework/Character.h"
+#include "HAL/FileManagerGeneric.h"
 #include "Replication/ChanneldReplicationComponent.h"
 
 DEFINE_LOG_CATEGORY(LogChanneldRepGenerator);
@@ -52,8 +53,10 @@ bool FReplicatorGeneratorManager::HasReplicatedPropertyOrRPC(UClass* TargetClass
 	return false;
 }
 
-TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(TArray<UClass*> IgnoreActors)
+TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(const TArray<UClass*>& IgnoreActors, const FDateTime& AfterTime)
 {
+	FFileManagerGeneric FileManager;
+
 	TSet<UClass*> IgnoreActorsSet;
 	for (UClass* Class : IgnoreActors)
 	{
@@ -85,6 +88,11 @@ TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(TArray
 		{
 			continue;
 		}
+		FString TargetHeadFilePath = CodeGenerator->GetClassHeadFilePath(Class->GetPrefixCPP() + Class->GetName());
+		if(!TargetHeadFilePath.IsEmpty() && AfterTime >= FileManager.GetTimeStamp(*TargetHeadFilePath))
+		{
+			continue;
+		}
 		ActorsWithReplicationComp.Add(Class);
 	}
 
@@ -99,7 +107,21 @@ TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(TArray
 	TArray<UBlueprint*> AllBlueprints;
 	for (FAssetData AssetData : ArrayAssetData)
 	{
+		FString PackageFileName;
+		FString PackageFile;
+		if (FPackageName::TryConvertLongPackageNameToFilename(AssetData.PackageName.ToString(), PackageFileName) &&
+			FPackageName::FindPackageFileWithoutExtension(PackageFileName, PackageFile))
+		{
+			PackageFile = FPaths::ConvertRelativePathToFull(MoveTemp(PackageFile));
+		}
+
+		if (AfterTime >= FileManager.GetTimeStamp(*PackageFile))
+		{
+			continue;
+		}
+
 		UBlueprint* Asset = LoadObject<UBlueprint>(nullptr, *AssetData.ObjectPath.ToString());
+
 		if (Asset != nullptr)
 		{
 			AllBlueprints.Add(Asset);
@@ -193,7 +215,10 @@ TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(TArray
 
 bool FReplicatorGeneratorManager::GeneratedAllReplicators()
 {
-	TArray<UClass*> TargetActorClasses = GetActorsWithReplicationComp(IgnoreActorClasses);
+	CodeGenerator->RefreshModuleInfoByClassName();
+	bool Success = false;
+	const FPrevCodeGeneratedInfo PrevCodeGeneratedInfo = LoadPrevCodeGeneratedInfo(GenManager_PrevCodeGeneratedInfoPath, Success);
+	TArray<UClass*> TargetActorClasses = GetActorsWithReplicationComp(IgnoreActorClasses, PrevCodeGeneratedInfo.GeneratedTime);
 	const FString GeneratedDir = GetDefaultModuleDir() / GenManager_GeneratedCodeDir;
 
 	TArray<FString> IncludeActorCodes, RegisterReplicatorCodes;
@@ -217,6 +242,11 @@ bool FReplicatorGeneratorManager::GeneratedAllReplicators()
 	// Generate global struct declarations file
 	WriteCodeFile(GeneratedDir / GenManager_GlobalStructHeaderFile, ReplicatorCodeBundle.GlobalStructCodes, WriteCodeFileMessage);
 
+	WriteProtoFile(GeneratedDir / GenManager_GlobalStructProtoFile, ReplicatorCodeBundle.GlobalStructProtoDefinitions, WriteCodeFileMessage);
+
+	FPrevCodeGeneratedInfo ThisCodeGeneratedInfo;
+	ThisCodeGeneratedInfo.GeneratedTime = FDateTime::Now();
+	SavePrevCodeGeneratedInfo(ThisCodeGeneratedInfo, GenManager_PrevCodeGeneratedInfoPath, Success);
 	return true;
 }
 
@@ -329,4 +359,57 @@ FString FReplicatorGeneratorManager::GetDefaultModuleDir()
 		}
 	}
 	return DefaultModuleDir;
+}
+
+FPrevCodeGeneratedInfo FReplicatorGeneratorManager::LoadPrevCodeGeneratedInfo(const FString& Filename, bool& Success)
+{
+	FPrevCodeGeneratedInfo Result;
+	Result.GeneratedTime = FDateTime(1970, 1, 1);
+	Success = false;
+	FString Json;
+
+	if (!FFileHelper::LoadFileToString(Json, *Filename))
+	{
+		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Unable to load PrevCodeGeneratedInfo: %s"), *Filename);
+		return Result;
+	}
+
+	TSharedPtr<FJsonObject> RootObject = TSharedPtr<FJsonObject>();
+	TSharedRef<TJsonReader<TCHAR>> Reader = TJsonReaderFactory<TCHAR>::Create(Json);
+
+	if (!FJsonSerializer::Deserialize(Reader, RootObject))
+	{
+		UE_LOG(LogChanneldRepGenerator, Error, TEXT("PrevCodeGeneratedInfo is malformed: %s"), *Filename);
+		return Result;
+	}
+	TSharedPtr<FJsonValue>* JsonValue = RootObject->Values.Find(TEXT("GeneratedTime"));
+	if (!JsonValue)
+	{
+		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Unable to find field 'GeneratedTime'"));
+		return Result;
+	}
+	double GeneratedTime;
+	(*JsonValue)->AsArgumentType(GeneratedTime);
+	Result.GeneratedTime = FDateTime::FromUnixTimestamp(GeneratedTime);
+	Success = true;
+	return Result;
+}
+
+void FReplicatorGeneratorManager::SavePrevCodeGeneratedInfo(const FPrevCodeGeneratedInfo& Info, const FString& Filename, bool& Success)
+{
+	Success = false;
+	FString Json;
+	TSharedPtr<FJsonObject> RootObject = TSharedPtr<FJsonObject>();
+
+	TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&Json);
+	JsonWriter->WriteObjectStart();
+	JsonWriter->WriteValue(TEXT("GeneratedTime"), FString::Printf(TEXT("%lld"), Info.GeneratedTime.ToUnixTimestamp()));
+	JsonWriter->WriteObjectEnd();
+	JsonWriter->Close();
+	if (FFileHelper::SaveStringToFile(Json, *Filename))
+	{
+		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Unable to save PrevCodeGeneratedInfo: %s"), *Filename);
+		return;
+	}
+	Success = true;
 }

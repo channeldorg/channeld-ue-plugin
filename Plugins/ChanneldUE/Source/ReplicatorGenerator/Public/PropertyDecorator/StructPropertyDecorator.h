@@ -27,20 +27,8 @@ struct {Declare_PropPtrGroupStructName}
   {
 {Code_AssignPropPointers}
   }
-  {Declare_PropPtrGroupStructName}(FProperty* ContainerTemplate, void* Container)
-  {
-{Code_AssignPropPtrOrderly}
-  }
-  {Declare_PropPtrGroupStructName}(UStruct* ContainerTemplate, void* Container)
-  {
-{Code_AssignPropPtrDispersedly}
-  }
-{Declare_PropertyPointers}
 
-  bool IsSameAs(const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* InState)
-  {
-    return {Code_PointerValuesEqualToStateValues};
-  }
+{Declare_PropertyPointers}
   
   bool Merge(const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* FullState, {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* DeltaState)
   {

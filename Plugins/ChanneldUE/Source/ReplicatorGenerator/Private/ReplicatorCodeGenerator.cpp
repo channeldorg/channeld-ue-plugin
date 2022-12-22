@@ -35,9 +35,18 @@ bool FReplicatorCodeGenerator::RefreshModuleInfoByClassName()
 	return true;
 }
 
+FString FReplicatorCodeGenerator::GetClassHeadFilePath(const FString& ClassName)
+{
+	FCPPClassInfo* Result = CPPClassInfoMap.Find(ClassName);
+	if(Result != nullptr)
+	{
+		return Result->HeadFilePath;
+	}
+	return TEXT("");
+}
+
 bool FReplicatorCodeGenerator::Generate(TArray<UClass*> TargetActors, FReplicatorCodeBundle& ReplicatorCodeBundle)
 {
-	RefreshModuleInfoByClassName();
 	FString Message;
 	FString IncludeCode;
 	FString RegisterCode;
@@ -161,10 +170,10 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	// ---------- Cpp code ----------
 	FStringBuilderBase CppCodeBuilder;
 	CppCodeBuilder.Append(TEXT("#include \"") + ReplicatorCode.HeadFileName + TEXT("\"\n\n"));
-	if(Target->GetRPCNum() > 0)
-	{
-		CppCodeBuilder.Append(TEXT("DEFINE_LOG_CATEGORY(LogChanneld);\n"));
-	}
+	// if(Target->GetRPCNum() > 0)
+	// {
+	// 	CppCodeBuilder.Append(TEXT("DEFINE_LOG_CATEGORY(LogChanneld);\n"));
+	// }
 	FormatArgs.Add(
 		TEXT("Code_AssignPropertyPointers"),
 		Target->GetCode_AssignPropertyPointers(TargetInstanceRef)
@@ -268,6 +277,10 @@ void FReplicatorCodeGenerator::ProcessHeaderFiles(const TArray<FString>& Files, 
 			RelativeToModule = RelativeToModule.Replace(*ModuleInfo.IncludeBase, TEXT(""), ESearchCase::CaseSensitive);
 			ModuleInfo.RelativeToModule = RelativeToModule;
 			ModuleInfoByClassName.Add(CaptureString, ModuleInfo);
+			FCPPClassInfo CPPClassInfo;
+			CPPClassInfo.ModuleInfo = ModuleInfo;
+			CPPClassInfo.HeadFilePath = HeaderFilePath;
+			CPPClassInfoMap.Add(CaptureString, CPPClassInfo);
 		}
 	}
 }

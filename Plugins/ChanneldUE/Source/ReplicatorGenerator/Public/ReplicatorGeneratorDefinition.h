@@ -18,3 +18,5 @@ static const FString GenManager_GlobalStructProtoFile = TEXT("ChanneldGlobalStru
 static const FString GenManager_GlobalStructProtoHeaderFile = TEXT("ChanneldGlobalStruct") + CodeGen_ProtoPbHeadExtension;
 static const FString GenManager_GlobalStructProtoNamespace = TEXT("channeldglobalstructpb");
 static const FString GenManager_GlobalStructProtoPackage = GenManager_GlobalStructProtoNamespace;
+
+static const FString GenManager_PrevCodeGeneratedInfoPath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldPrevCodeGeneratedInfoPath.json");
