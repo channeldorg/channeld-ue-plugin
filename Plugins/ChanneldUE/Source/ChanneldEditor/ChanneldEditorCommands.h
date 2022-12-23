@@ -25,4 +25,5 @@ public:
 	TSharedPtr<FUICommandInfo> StopChanneldCommand;
 	TSharedPtr<FUICommandInfo> LaunchServersCommand;
 	TSharedPtr<FUICommandInfo> StopServersCommand;
+	TSharedPtr<FUICommandInfo> GenerateReplicatorCommand;
 };

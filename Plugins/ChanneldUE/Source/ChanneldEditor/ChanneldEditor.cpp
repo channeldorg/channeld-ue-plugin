@@ -4,6 +4,7 @@
 #include "Widgets/Input/SSpinBox.h"
 #include "ChanneldEditorSettings.h"
 #include "ChanneldEditorStyle.h"
+#include "ReplicatorGeneratorManager.h"
 
 #define LOCTEXT_NAMESPACE "FChanneldUEModule"
 
@@ -30,12 +31,15 @@ void FChanneldEditorModule::StartupModule()
 	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().StopServersCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::StopServersAction));
+	PluginCommands->MapAction(
+		FChanneldEditorCommands::Get().GenerateReplicatorCommand,
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::GenerateReplicatorAction));
 
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
-	
+
 	TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender());
 	ToolbarExtender->AddToolBarExtension("Compile", EExtensionHook::After, PluginCommands,
-		FToolBarExtensionDelegate::CreateRaw(this, &FChanneldEditorModule::AddToolbarButton));
+	                                     FToolBarExtensionDelegate::CreateRaw(this, &FChanneldEditorModule::AddToolbarButton));
 	LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
 
 	//TSharedPtr<FExtender> MenuExtender = MakeShareable(new FExtender());
@@ -44,11 +48,11 @@ void FChanneldEditorModule::StartupModule()
 	//LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(MenuExtender);
 
 	// Stop all services launched during the session 
-	FEditorDelegates::EditorModeIDExit.AddLambda([&](const FEditorModeID&) 
-		{
-			StopChanneldAction();
-			StopServersAction();
-		});
+	FEditorDelegates::EditorModeIDExit.AddLambda([&](const FEditorModeID&)
+	{
+		StopChanneldAction();
+		StopServersAction();
+	});
 }
 
 void FChanneldEditorModule::ShutdownModule()
@@ -64,11 +68,11 @@ void FChanneldEditorModule::AddToolbarButton(FToolBarBuilder& Builder)
 
 	FUIAction TempAction;
 	Builder.AddComboButton(TempAction,
-		FOnGetContent::CreateRaw(this, &FChanneldEditorModule::CreateMenuContent, PluginCommands),
-		LOCTEXT("ChanneldComboButton", "Channeld combo button"),
-		LOCTEXT("ChanneldComboButtonTootlip", "Channeld combo button tootltip"),
-		TAttribute<FSlateIcon>(),
-		true
+	                       FOnGetContent::CreateRaw(this, &FChanneldEditorModule::CreateMenuContent, PluginCommands),
+	                       LOCTEXT("ChanneldComboButton", "Channeld combo button"),
+	                       LOCTEXT("ChanneldComboButtonTootlip", "Channeld combo button tootltip"),
+	                       TAttribute<FSlateIcon>(),
+	                       true
 	);
 }
 
@@ -79,8 +83,8 @@ void FChanneldEditorModule::AddMenuEntry(FMenuBuilder& Builder)
 	auto Cmd = FChanneldEditorCommands::Get().LaunchChanneldCommand;
 	Builder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchChanneldCommand);
 	Builder.AddSubMenu(FText::FromString("Channeld submenu"),
-		FText::FromString("Channeld submenu tooltip"),
-		FNewMenuDelegate::CreateRaw(this, &FChanneldEditorModule::FillSubmenu));
+	                   FText::FromString("Channeld submenu tooltip"),
+	                   FNewMenuDelegate::CreateRaw(this, &FChanneldEditorModule::FillSubmenu));
 
 	Builder.EndSection();
 }
@@ -91,6 +95,7 @@ void FChanneldEditorModule::FillSubmenu(FMenuBuilder& Builder)
 	Builder.AddMenuEntry(FChanneldEditorCommands::Get().StopChanneldCommand);
 	Builder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchServersCommand);
 	Builder.AddMenuEntry(FChanneldEditorCommands::Get().StopServersCommand);
+	Builder.AddMenuEntry(FChanneldEditorCommands::Get().GenerateReplicatorCommand);
 }
 
 TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUICommandList> Commands)
@@ -132,6 +137,10 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchServersCommand);
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().StopServersCommand);
 
+	MenuBuilder.AddSeparator();
+
+	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().GenerateReplicatorCommand);
+
 	return MenuBuilder.MakeWidget();
 }
 
@@ -151,7 +160,7 @@ void FChanneldEditorModule::LaunchServersAction()
 	FString ProjectPath = FPaths::GetProjectFilePath();
 
 	int ServerNum = UChanneldEditorSettings::GetServerNum();
-	if (ServerNum <= 0)	ServerNum = 1;
+	if (ServerNum <= 0) ServerNum = 1;
 
 	FString MapName = UChanneldEditorSettings::GetServerMapName().ToString();
 	if (MapName.Len() == 0) MapName = GEditor->GetEditorWorldContext().World()->GetMapName();
@@ -177,6 +186,11 @@ void FChanneldEditorModule::StopServersAction()
 	ServerProcHandles.Reset();
 }
 
+void FChanneldEditorModule::GenerateReplicatorAction()
+{
+	FReplicatorGeneratorManager::Get().GenerateAllReplicators();
+}
+
 #undef LOCTEXT_NAMESPACE
-	
+
 IMPLEMENT_MODULE(FChanneldEditorModule, ChanneldEditor)

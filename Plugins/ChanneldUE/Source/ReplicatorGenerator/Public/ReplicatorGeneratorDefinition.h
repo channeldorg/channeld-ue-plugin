@@ -9,6 +9,7 @@ static const FString CodeGen_HeadFileExtension = TEXT(".h");
 static const FString CodeGen_CppFileExtension = TEXT(".cpp");
 static const FString CodeGen_ProtoFileExtension = TEXT(".proto");
 static const FString CodeGen_ProtoPbHeadExtension = TEXT(".pb.h");
+static const FString CodeGen_ProtoPbCPPExtension = TEXT(".pb.cpp");
 
 static const FString GenManager_GeneratedCodeDir = TEXT("ChanneldGenerated");
 static const FName GenManager_ProtobufModuleName = TEXT("ProtobufEditor");

@@ -42,7 +42,8 @@ public class ChanneldEditor : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
-                "EditorStyle",
+                "EditorStyle", 
+                "ReplicatorGenerator",
 				// ... add private dependencies that you statically link with here ...	
 			}
             );

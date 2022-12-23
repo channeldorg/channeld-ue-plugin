@@ -14,6 +14,8 @@ class REPLICATORGENERATOR_API FReplicatorGeneratorManager
 protected:
 	FReplicatorCodeGenerator* CodeGenerator;
 
+	FString DefaultModuleDirPath;
+
 public:
 	FReplicatorGeneratorManager();
 	~FReplicatorGeneratorManager();
@@ -31,9 +33,9 @@ public:
 
 	static bool HasReplicatedPropertyOrRPC(UClass* TargetClass);
 
-	TArray<UClass*> GetActorsWithReplicationComp(const TArray<UClass*>& IgnoreActors, const FDateTime& AfterTime);
+	TArray<UClass*> GetActorsWithReplicationComp(const TArray<UClass*>& IgnoreActors);
 
-	bool GeneratedAllReplicators();
+	bool GenerateAllReplicators();
 	bool GeneratedReplicators(UClass* Target);
 
 	bool WriteCodeFile(const FString& FilePath, const FString& Code, FString& ResultMessage);
@@ -44,6 +46,14 @@ public:
 	 * Get absolute dir path of default game module
 	 */
 	FString GetDefaultModuleDir();
+
+	TArray<FString> GetGeneratedTargetClass();
+
+	void RemoveGeneratedReplicator(const FString& ClassName);
+
+	void RemoveGeneratedReplicators(const TArray<FString>& ClassNames);
+
+	void RemoveGeneratedCode();
 
 	FPrevCodeGeneratedInfo LoadPrevCodeGeneratedInfo(const FString& Filename, bool& Success);
 	

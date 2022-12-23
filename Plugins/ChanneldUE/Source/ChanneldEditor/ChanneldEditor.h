@@ -26,6 +26,8 @@ private:
 	void LaunchServersAction();
 	void StopServersAction();
 
+	void GenerateReplicatorAction();
+
 	TSharedPtr<class FUICommandList> PluginCommands;
 	TSharedRef<SWidget> CreateMenuContent(TSharedPtr<FUICommandList> Commands);
 	TArray<FProcHandle> ServerProcHandles;
