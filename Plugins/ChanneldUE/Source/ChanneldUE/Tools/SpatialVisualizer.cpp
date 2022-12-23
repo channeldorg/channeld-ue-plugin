@@ -5,6 +5,7 @@
 
 #include "ChanneldConnection.h"
 #include "ChanneldSettings.h"
+#include "Engine/RendererSettings.h"
 
 USpatialVisualizer::USpatialVisualizer(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -12,6 +13,7 @@ USpatialVisualizer::USpatialVisualizer(const FObjectInitializer& ObjectInitializ
 
 void USpatialVisualizer::Initialize(UChanneldConnection* Conn)
 {
+	// The visualizer only runs in the client
 	if (IsRunningDedicatedServer())
 	{
 		return;
@@ -66,10 +68,62 @@ void USpatialVisualizer::HandleSpatialRegionsResult(UChanneldConnection* Conn, C
 		Box->SetActorScale3D(BoundsSize / BoxSize);
 		Box->SetColor(Colors[Region.serverindex()]);
 		RegionBoxes.Add(Box);
+
+		ColorsByChId.Add(Region.channelid(), Colors[Region.serverindex()]);
 	}
 }
 
 void USpatialVisualizer::UpdateSubBoxes(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 {
+}
+
+void USpatialVisualizer::OnSpawnedObject(UObject* Obj, ChannelId ChId)
+{
+	if (Outliners.Contains(Obj))
+	{
+		return;
+	}
+
+	// Only outline for actors that have locations
+	if (!Obj->IsA<AActor>() || Obj->IsA<AInfo>() || Obj->IsA<AController>() || Obj->GetClass()->GetFName() == FName("GameplayDebuggerCategoryReplicator"))
+	{
+		return;
+	}
+
+	AActor* Actor = Cast<AActor>(Obj);
+	
+	const auto Settings = GetMutableDefault<UChanneldSettings>();
+	if (Settings->SpatialOutlinerClass)
+	{
+		ensureMsgf(GetMutableDefault<URendererSettings>()->CustomDepthStencil == ECustomDepthStencil::EnabledWithStencil,
+			TEXT("To enable spatial outlining, CustomDepthStencil should be set to EnabledWithStencil (see Project Settings -> Render Settings)"));
+
+		const FVector Location = Actor->GetActorLocation();
+		AOutlinerActor* Outliner = Cast<AOutlinerActor>(GetWorld()->SpawnActor(Settings->SpatialOutlinerClass, &Location));
+		Outliner->SetFollowTarget(Actor);
+		Outliner->SetOutlineColor(ChId, GetColorByChannelId(ChId));
+		Outliners.Add(Obj, Outliner);
+		
+		UE_LOG(LogChanneld, Log, TEXT("Created spatial outliner for %s, size: %s"), *Actor->GetName(), *Actor->GetActorRelativeScale3D().ToCompactString());
+	}
+}
+
+void USpatialVisualizer::OnUpdateOwningChannel(UObject* Obj, ChannelId NewChId)
+{
+	AOutlinerActor* Outliner = Outliners.FindRef(Obj);
+	if (Outliner)
+	{
+		Outliner->SetOutlineColor(NewChId, GetColorByChannelId(NewChId));
+	}
+}
+
+const FLinearColor& USpatialVisualizer::GetColorByChannelId(ChannelId ChId)
+{
+	const FLinearColor* Color = ColorsByChId.Find(ChId);
+	if (Color)
+	{
+		return *Color;
+	}
+	return FLinearColor::White;
 }
 

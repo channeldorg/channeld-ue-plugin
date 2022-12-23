@@ -4,6 +4,7 @@
 #include "ATintActor.h"
 #include "channeld.pb.h"
 #include "ChanneldConnection.h"
+#include "OutlinerActor.h"
 #include "SpatialVisualizer.generated.h"
 
 UCLASS()
@@ -16,6 +17,9 @@ public:
 	void Initialize(UChanneldConnection* Conn);
 	void HandleSpatialRegionsResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	void UpdateSubBoxes(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	void OnSpawnedObject(UObject* Obj, ChannelId ChId);
+	void OnUpdateOwningChannel(UObject* Obj, ChannelId NewChId);
+	const FLinearColor& GetColorByChannelId(ChannelId ChId);
 
 private:
 	TArray<channeldpb::SpatialRegion> Regions;
@@ -24,4 +28,7 @@ private:
 	UPROPERTY()
 	TArray<AActor*> SubBoxes;
 	TArray<FLinearColor> Colors;
+	TMap<ChannelId, FLinearColor> ColorsByChId;
+	UPROPERTY()
+	TMap<TWeakObjectPtr<UObject>, AOutlinerActor*> Outliners;
 };

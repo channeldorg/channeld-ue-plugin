@@ -24,6 +24,7 @@ public:
 	virtual void InitServer() override;
 	virtual void InitClient() override;
 
+	virtual void SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId) override;
 	virtual bool GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const override;
 	
 	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider) override;
@@ -33,6 +34,8 @@ public:
 	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, ChannelId ChId);
 	virtual void OnRemoveClientConnection(UChanneldNetConnection* ClientConn) override;
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
+	virtual void OnClientSpawnedObject(UObject* Obj, const ChannelId ChId) override;
+	
 	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId) override;
 	virtual void SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId) override;
 

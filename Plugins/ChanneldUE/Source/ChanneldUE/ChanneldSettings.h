@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "ChanneldTypes.h"
 #include "Tools/ATintActor.h"
+#include "Tools/OutlinerActor.h"
 #include "View/PlayerStartLocator.h"
 #include "ChanneldSettings.generated.h"
 
@@ -55,6 +56,8 @@ public:
 	FVector RegionBoxMaxSize;
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
 	TSubclassOf<AActor> SubscriptionBoxClass;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	TSubclassOf<AOutlinerActor> SpatialOutlinerClass;
 
 	// If set to true, the RPC with the actor that hasn't been exported to the client will be postponed until being exported.
 	UPROPERTY(Config, EditAnywhere, Category = "Server")

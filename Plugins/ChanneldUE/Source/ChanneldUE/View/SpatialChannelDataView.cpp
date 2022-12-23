@@ -604,6 +604,7 @@ void USpatialChannelDataView::ClientHandleSubToChannel(UChanneldConnection* _, C
 			{
 				Visualizer = NewObject<USpatialVisualizer>(this, USpatialVisualizer::StaticClass());
 				FTimerHandle Handle;
+				// Wait a couple of seconds for the client travel to finish, otherwise the actors created by the visualizer will be removed.
 				GetWorld()->GetTimerManager().SetTimer(Handle, [&]()
 				{
 					Visualizer->Initialize(Connection);
@@ -705,6 +706,16 @@ void USpatialChannelDataView::InitClient()
 		bClientInMasterServer = true;
 		UE_LOG(LogChanneld, Log, TEXT("==================== Client starts in Master server ===================="));
 	});
+}
+
+void USpatialChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId)
+{
+	Super::SetOwningChannelId(NetId, ChId);
+
+	if (Visualizer)
+	{
+		Visualizer->OnUpdateOwningChannel(GetObjectFromNetGUID(NetId), ChId);
+	}
 }
 
 bool USpatialChannelDataView::GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const
@@ -821,6 +832,14 @@ void USpatialChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayer
 		}
 	}
 	*/
+}
+
+void USpatialChannelDataView::OnClientSpawnedObject(UObject* Obj, const ChannelId ChId)
+{
+	if (Visualizer)
+	{
+		Visualizer->OnSpawnedObject(Obj, ChId);
+	}
 }
 
 bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId)
