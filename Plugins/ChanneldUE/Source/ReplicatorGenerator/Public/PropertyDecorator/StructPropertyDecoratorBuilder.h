@@ -5,23 +5,18 @@
 class FStructPropertyDecoratorBuilder : public FPropertyDecoratorBuilder, public FGCObject
 {
 public:
-	virtual ~FStructPropertyDecoratorBuilder() override
-	{
-	}
+	virtual ~FStructPropertyDecoratorBuilder() override = default;
 
 	virtual bool IsSpecialProperty(FProperty* Property) override
 	{
 		return Property->IsA<FStructProperty>();
 	}
 
-	virtual void AddReferencedObjects(FReferenceCollector& Collector) override
-	{
-		TArray<UScriptStruct*> GlobalStructArray;
-		GlobalStructs.GetKeys(GlobalStructArray);
-		Collector.AddReferencedObjects(GlobalStructArray);
-	}
+	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 
 	TArray<TSharedPtr<FStructPropertyDecorator>> GetGlobalStructs();
+
+	void ClearGlobalStructs();
 
 protected:
 	TMap<UScriptStruct*, TSharedPtr<FStructPropertyDecorator>> GlobalStructs;

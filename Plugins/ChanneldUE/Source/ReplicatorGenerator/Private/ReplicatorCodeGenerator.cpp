@@ -47,9 +47,7 @@ FString FReplicatorCodeGenerator::GetClassHeadFilePath(const FString& ClassName)
 
 bool FReplicatorCodeGenerator::Generate(TArray<UClass*> TargetActors, FReplicatorCodeBundle& ReplicatorCodeBundle)
 {
-	FString Message;
-	FString IncludeCode;
-	FString RegisterCode;
+	FString Message, IncludeCode, RegisterCode;
 	for (UClass* TargetActor : TargetActors)
 	{
 		FReplicatorCode ReplicatorCode;
@@ -75,6 +73,9 @@ bool FReplicatorCodeGenerator::Generate(TArray<UClass*> TargetActors, FReplicato
 	ProtoFormatArgs.Add(TEXT("Code_Import"), TEXT(""));
 	ProtoFormatArgs.Add(TEXT("Definition_ProtoStateMsg"), ReplicatorCodeBundle.GlobalStructProtoDefinitions);
 	ReplicatorCodeBundle.GlobalStructProtoDefinitions = FString::Format(CodeGen_ProtoTemplate, ProtoFormatArgs);
+
+	// Clear global struct decorators
+	FPropertyDecoratorFactory::Get().ClearGlobalStruct();
 	return true;
 }
 

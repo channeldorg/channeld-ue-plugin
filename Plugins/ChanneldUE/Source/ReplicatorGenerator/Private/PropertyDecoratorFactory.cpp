@@ -39,3 +39,8 @@ TArray<TSharedPtr<FStructPropertyDecorator>> FPropertyDecoratorFactory::GetGloba
 {
 	return StructBuilder->GetGlobalStructs();
 }
+
+void FPropertyDecoratorFactory::ClearGlobalStruct()
+{
+	StructBuilder->ClearGlobalStructs();
+}

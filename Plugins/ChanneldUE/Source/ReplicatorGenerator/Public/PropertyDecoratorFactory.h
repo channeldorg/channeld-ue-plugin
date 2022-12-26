@@ -13,6 +13,8 @@ public:
 
 	TArray<TSharedPtr<FStructPropertyDecorator>> GetGlobalStructDecorators();
 
+	void ClearGlobalStruct();
+
 private:
 	static FPropertyDecoratorFactory* Singleton;
 

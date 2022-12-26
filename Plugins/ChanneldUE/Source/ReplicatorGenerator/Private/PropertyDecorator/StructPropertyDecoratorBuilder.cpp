@@ -1,10 +1,22 @@
 ﻿#include "PropertyDecorator/StructPropertyDecoratorBuilder.h"
 
+void FStructPropertyDecoratorBuilder::AddReferencedObjects(FReferenceCollector& Collector)
+{
+	TArray<UScriptStruct*> GlobalStructArray;
+	GlobalStructs.GetKeys(GlobalStructArray);
+	Collector.AddReferencedObjects(GlobalStructArray);
+}
+
 TArray<TSharedPtr<FStructPropertyDecorator>> FStructPropertyDecoratorBuilder::GetGlobalStructs()
 {
 	TArray<TSharedPtr<FStructPropertyDecorator>> Result;
 	GlobalStructs.GenerateValueArray(Result);
 	return Result;
+}
+
+void FStructPropertyDecoratorBuilder::ClearGlobalStructs()
+{
+	GlobalStructs.Empty();
 }
 
 FPropertyDecorator* FStructPropertyDecoratorBuilder::ConstructPropertyDecorator(FProperty* Property, IPropertyDecoratorOwner* InOwner)
