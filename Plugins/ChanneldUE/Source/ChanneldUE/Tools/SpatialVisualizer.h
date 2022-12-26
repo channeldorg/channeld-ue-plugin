@@ -22,6 +22,9 @@ public:
 	const FLinearColor& GetColorByChannelId(ChannelId ChId);
 
 private:
+
+	void SpawnRegionBoxes();
+
 	TArray<channeldpb::SpatialRegion> Regions;
 	UPROPERTY()
 	TArray<ATintActor*> RegionBoxes;

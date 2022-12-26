@@ -29,9 +29,6 @@ void USpatialVisualizer::Initialize(UChanneldConnection* Conn)
 
 void USpatialVisualizer::HandleSpatialRegionsResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
 {
-	const auto Settings = GetMutableDefault<UChanneldSettings>();
-	ensureMsgf(Settings->RegionBoxClass, TEXT("RegionBoxClass is not set!"));
-
 	const auto ResultMsg = static_cast<const channeldpb::SpatialRegionsUpdateMessage*>(Msg);
 	Regions.Empty();
 	uint32 MaxServerIndex = 0;
@@ -44,18 +41,37 @@ void USpatialVisualizer::HandleSpatialRegionsResult(UChanneldConnection* Conn, C
 		}
 	}
 
-	for (const auto Box : RegionBoxes)
-	{
-		GetWorld()->DestroyActor(Box);
-	}
-	RegionBoxes.Empty();
-
 	const uint32 ServerCount = MaxServerIndex + 1;
 	for (uint32 i = 0; i < ServerCount; i++)
 	{
 		Colors.Add(FLinearColor::MakeFromHSV8(256 * i / ServerCount, 128, 128));
 	}
 
+	for (auto Region : Regions)
+	{
+		ColorsByChId.Add(Region.channelid(), Colors[Region.serverindex()]);
+	}
+
+	FTimerHandle Handle;
+	// Wait a couple of seconds for the client travel to finish, otherwise the actors created by the visualizer will be removed.
+	GetWorld()->GetTimerManager().SetTimer(Handle, [&]()
+	{
+		SpawnRegionBoxes();
+	}, 1, false, 2.0f);
+
+}
+
+void USpatialVisualizer::SpawnRegionBoxes()
+{
+	const auto Settings = GetMutableDefault<UChanneldSettings>();
+	ensureMsgf(Settings->RegionBoxClass, TEXT("RegionBoxClass is not set!"));
+
+	for (const auto Box : RegionBoxes)
+	{
+		GetWorld()->DestroyActor(Box);
+	}
+	RegionBoxes.Empty();
+		
 	for (auto Region : Regions)
 	{
 		// Swap the Y and Z as UE uses the Z-Up rule but channeld uses the Y-up rule.
@@ -68,8 +84,6 @@ void USpatialVisualizer::HandleSpatialRegionsResult(UChanneldConnection* Conn, C
 		Box->SetActorScale3D(BoundsSize / BoxSize);
 		Box->SetColor(Colors[Region.serverindex()]);
 		RegionBoxes.Add(Box);
-
-		ColorsByChId.Add(Region.channelid(), Colors[Region.serverindex()]);
 	}
 }
 

@@ -603,12 +603,7 @@ void USpatialChannelDataView::ClientHandleSubToChannel(UChanneldConnection* _, C
 			if (GetMutableDefault<UChanneldSettings>()->bEnableSpatialVisualizer)
 			{
 				Visualizer = NewObject<USpatialVisualizer>(this, USpatialVisualizer::StaticClass());
-				FTimerHandle Handle;
-				// Wait a couple of seconds for the client travel to finish, otherwise the actors created by the visualizer will be removed.
-				GetWorld()->GetTimerManager().SetTimer(Handle, [&]()
-				{
-					Visualizer->Initialize(Connection);
-				}, 1, false, 2.0f);
+				Visualizer->Initialize(Connection);
 			}
 		}
 	}
