@@ -159,7 +159,6 @@ void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 	if (bFlushAll)
 	{
 		TickOutgoing();
-		// TODO: Flush?
 	}
 
 	OnDisconnected();
@@ -178,7 +177,6 @@ void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 
 void UChanneldConnection::Receive()
 {
-	// FIXME: single-thread receive can sometimes miss the data packet!
 	uint32 PendingDataSize;
 	if (!Socket->HasPendingData(PendingDataSize))
 		return;

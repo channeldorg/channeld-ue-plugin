@@ -239,6 +239,9 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	{
 		const unrealpb::UnrealObjectRef HandoverObjRef = HandoverContext.obj();
 		FNetworkGUID NetId(HandoverObjRef.netguid());
+		
+		// Set the NetId-ChannelId mapping before spawn the object, so AddProviderToDefaultChannel won't have to query the spatial channel.
+		SetOwningChannelId(NetId, HandoverMsg->dstchannelid());
 	
 		// Source spatial server - the channel data is handed over from
 		if (Connection->SubscribedChannels.Contains(HandoverMsg->srcchannelid()))
@@ -280,7 +283,9 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 						HandoverObj->ConditionalBeginDestroy();
 					}
 
+					/* Don't remove the mapping, as it may be used for getting the target channel of unresolvable RPC
 					NetIdOwningChannels.Remove(NetId);
+					*/
 
 					// Remove from the NetGUIDCache
 					auto GuidCache = GetWorld()->NetDriver->GuidCache;
@@ -303,9 +308,6 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 		// Destination spatial server - the channel data is handed over to
 		if (bHasInterest)
 		{
-			// Set the NetId-ChannelId mapping before spawn the object, so AddProviderToDefaultChannel won't have to query the spatial channel.
-			SetOwningChannelId(NetId, HandoverMsg->dstchannelid());
-		
 			UObject* HandoverObj = GetObjectFromNetGUID(NetId);
 			// We need to know which client connection causes the handover, in order to spawn the object. 
 			UChanneldNetConnection* ClientConn = nullptr;

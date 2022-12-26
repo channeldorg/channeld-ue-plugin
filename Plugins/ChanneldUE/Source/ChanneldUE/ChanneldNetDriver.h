@@ -85,6 +85,8 @@ public:
 	// Update the PackageMap of all connections that the specified NetId has been sent, so it's safe to send the actor's RPC message.
 	void SetAllSentSpawn(const FNetworkGUID NetId);
 	
+	void SendCrossServerRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
+	
 	TWeakObjectPtr<UChannelDataView> ChannelDataView;
 
 protected:

@@ -272,9 +272,17 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 		// Special case: the client won't create other player's controller. Pawn and PlayerState's owner is PlayerController.
 		if (Actor->HasAuthority() || (!Actor->IsA<APawn>() && !Actor->IsA<APlayerState>()))
 		{
-			// TODO: handle unmapped NetGUID
-			Actor->SetOwner(Cast<AActor>(ChanneldUtils::GetObjectByRef(&NewState->owner(), Actor->GetWorld())));
-			Actor->ProcessEvent(OnRep_OwnerFunc, NULL);
+			bool bNetGUIDUnmapped = false;
+			UObject* Owner = ChanneldUtils::GetObjectByRef(&NewState->owner(), Actor->GetWorld(), bNetGUIDUnmapped, true);
+			if (!bNetGUIDUnmapped)
+			{
+				Actor->SetOwner(Cast<AActor>(Owner));
+				Actor->ProcessEvent(OnRep_OwnerFunc, NULL);
+			}
+			else
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("ActorReplicator failed to set the owner of %s, NetId: %d"), *Actor->GetName(), NewState->owner().netguid());
+			}
 		}
 	}
 	if (NewState->has_bhidden())
@@ -291,9 +299,17 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 	}
 	if (NewState->has_instigator())
 	{
-		// TODO: handle unmapped NetGUID
-		Actor->SetInstigator(Cast<APawn>(ChanneldUtils::GetObjectByRef(&NewState->instigator(), Actor->GetWorld())));
-		Actor->OnRep_Instigator();
+		bool bNetGUIDUnmapped = false;
+		UObject* Instigator = ChanneldUtils::GetObjectByRef(&NewState->instigator(), Actor->GetWorld(), bNetGUIDUnmapped, true);
+		if (!bNetGUIDUnmapped)
+		{
+			Actor->SetInstigator(Cast<APawn>(Instigator));
+			Actor->OnRep_Instigator();
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("ActorReplicator failed to set the instigator of %s, NetId: %d"), *Actor->GetName(), NewState->instigator().netguid());
+		}
 	}
 
 	if (NewState->has_replicatedmovement())

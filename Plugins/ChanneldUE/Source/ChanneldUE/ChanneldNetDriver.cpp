@@ -245,24 +245,29 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 
 void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg)
 {
-	// FIXME: using IsServer() is not precise here. Should have ownerConnId in the message and use it to compare with local connId to see if local has authority over the actor.
-	bool bHasAuthority = IsServer();
-	AActor* Actor = Cast<AActor>(ChanneldUtils::GetObjectByRef(&Msg->targetobj(), GetWorld(), !bHasAuthority));
+	// We should NEVER creates the actor via RPC
+	AActor* Actor = Cast<AActor>(ChanneldUtils::GetObjectByRef(&Msg->targetobj(), GetWorld(), false));
 	if (!Actor)
 	{
-		UE_LOG(LogChanneld, Warning, TEXT("Cannot find actor to call remote function '%s', NetGUID: %d. %s"), UTF8_TO_TCHAR(Msg->functionname().c_str()), Msg->targetobj().netguid(), bHasAuthority ? TEXT("The message will be dropped.") : TEXT("Pushed to the next tick."));
-		if (!bHasAuthority)
+		// Case 1: the client receives the RPC before the spawn message. Should wait until the actor is spawned.
+		if (!IsServer())
 		{
 			UnprocessedRPCs.Add(Msg);
+			UE_LOG(LogChanneld, Warning, TEXT("Cannot find actor to call remote function '%s', NetGUID: %d. Pushed to the next tick."), UTF8_TO_TCHAR(Msg->functionname().c_str()), Msg->targetobj().netguid());
+		}
+		// Case 2: the server receives the client RPC, but the actor has just been handed over to another server (deleted).
+		else
+		{
+			SendCrossServerRPC(Msg);
 		}
 		return;
 	}
-	//if (!Actor->HasActorBegunPlay())
-	//{
-	//	UE_LOG(LogChanneld, Warning, TEXT("Actor hasn't begun play to call '%s::%s', NetGUID: %d. Pushed to the next tick."), *Actor->GetName(), UTF8_TO_TCHAR(Msg->functionname().c_str()), Msg->targetobj().netguid());
-	//	UnprocessedRPCs.Add(Msg);
-	//	return;
-	//}
+	// Case 3: the server receives the client RPC, but the actor has just been handed over to another server (became non-authoritative).
+	if (IsServer() && !Actor->HasAuthority())
+	{
+		SendCrossServerRPC(Msg);
+		return;
+	}
 
 	//TSet<FNetworkGUID> UnmappedGUID;
 	bool bDelayRPC = false;
@@ -735,6 +740,27 @@ void UChanneldNetDriver::SetAllSentSpawn(const FNetworkGUID NetId)
 	}
 }
 
+void UChanneldNetDriver::SendCrossServerRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg)
+{
+	if (ChannelDataView.IsValid())
+	{
+		ChannelId TargetChId = ChannelDataView->GetOwningChannelId(FNetworkGUID(Msg->targetobj().netguid()));
+		if (TargetChId != InvalidChannelId)
+		{
+			ConnToChanneld->Broadcast(TargetChId, unrealpb::RPC, *Msg, channeldpb::SINGLE_CONNECTION);
+			UE_LOG(LogChanneld, Verbose, TEXT("Sent cross-server RPC to channel %d, netId: %d, func: %s"), TargetChId, Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Unable to send cross-server RPC as the mapping to the target channel doesn't exists, netId: %d"), Msg->targetobj().netguid());
+		}
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Unable to send cross-server RPC as the view doesn't exist."));
+	}
+}
+
 // Called only on client or the destination server of a handover.
 void UChanneldNetDriver::NotifyActorChannelOpen(UActorChannel* Channel, AActor* Actor)
 {
@@ -875,8 +901,6 @@ void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, c
 
 	if (Actor->GetLocalRole() <= ENetRole::ROLE_SimulatedProxy)
 	{
-		bDelayRPC = true;
-		// TODO: if spatial server, forward the message to the server that has authority over the actor.
 		UE_LOG(LogChanneld, Warning, TEXT("Local role has no authroity to process RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
 		return;
 	}
@@ -966,13 +990,13 @@ void UChanneldNetDriver::NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTrav
 		return;
 	}
 	
+	// TODO: Use BroadcastType.ADJACENT_CHANNELS instead of sending to each connection.
 	for (auto& Pair : ClientConnectionMap)
 	{
 		Pair.Value->SendDestroyMessage(Actor);
 		Pair.Value->NotifyActorDestroyed(Actor);
 	}
 
-	// TODO: Use BroadcastType.ADJACENT_CHANNELS instead of sending to each connection.
 
 	if (ServerConnection)
 	{
