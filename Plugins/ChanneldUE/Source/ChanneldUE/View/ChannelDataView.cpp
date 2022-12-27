@@ -405,6 +405,24 @@ bool UChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID Ne
 	return true;
 }
 
+void UChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConnId)
+{
+	const auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
+	if (!NetDriver)
+	{
+		UE_LOG(LogChanneld, Error, TEXT("UChannelDataView::SendSpawnToClients: Unable to get ChanneldNetDriver"));
+		return;
+	}
+	
+	for (auto& Pair : NetDriver->GetClientConnectionMap())
+	{
+		if (IsValid(Pair.Value))
+		{
+			SendSpawnToConn(Obj, Pair.Value, OwningConnId);
+		}
+	}
+}
+
 void UChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId)
 {
 	ENetRole Role = ROLE_None;

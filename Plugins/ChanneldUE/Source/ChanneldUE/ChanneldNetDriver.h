@@ -80,6 +80,8 @@ public:
 		return ClientConnectionMap.FindRef(ConnId);
 	}
 
+	FORCEINLINE const TMap<uint32, UChanneldNetConnection*>& GetClientConnectionMap() {return ClientConnectionMap;}
+
 	virtual ChannelId GetSendToChannelId(UChanneldNetConnection* NetConn) const;
 
 	// Update the PackageMap of all connections that the specified NetId has been sent, so it's safe to send the actor's RPC message.

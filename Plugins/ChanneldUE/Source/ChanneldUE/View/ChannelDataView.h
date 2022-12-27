@@ -61,6 +61,9 @@ public:
 	 * @return Should the NetDriver send the spawn message to the clients?
 	 */
 	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId);
+	// Send the Spawn message to all interested clients.
+	virtual void SendSpawnToClients(UObject* Obj, uint32 OwningConnId);
+	// Send the Spawn message to a single client connection.
 	// Gives the view a chance to override the NetRole, OwningChannelId, OwningConnId, or the Location parameter.
 	virtual void SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId);
 	virtual void OnClientSpawnedObject(UObject* Obj, const ChannelId ChId) {}

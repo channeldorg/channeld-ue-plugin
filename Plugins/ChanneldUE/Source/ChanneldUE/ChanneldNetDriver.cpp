@@ -11,7 +11,6 @@
 #include "PacketHandler.h"
 #include "Net/Core/Misc/PacketAudit.h"
 #include "ChanneldGameInstanceSubsystem.h"
-#include "Replication/ChanneldReplicationDriver.h"
 #include "ChanneldUtils.h"
 #include "ChanneldSettings.h"
 #include "Metrics.h"
@@ -706,17 +705,18 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	}
 	*/
 
+	uint32 OwningConnId = 0;
+	if (auto NetConn = Cast<UChanneldNetConnection>(Actor->GetNetConnection()))
+	{
+		OwningConnId = NetConn->GetConnId();
+	}
+
 	// Send the spawning to the clients
+	/*
 	for (auto& Pair : ClientConnectionMap)
 	{
 		if (IsValid(Pair.Value))
 		{
-			uint32 OwningConnId = 0;
-			if (auto NetConn = Cast<UChanneldNetConnection>(Actor->GetNetConnection()))
-			{
-				OwningConnId = NetConn->GetConnId();
-			}
-
 			if (ChannelDataView.IsValid())
 			{
 				ChannelDataView->SendSpawnToConn(Actor, Pair.Value, OwningConnId);
@@ -727,9 +727,16 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 			}
 		}
 	}
+	*/
 
-	// TODO: Send the spawning to nearby spatial servers that sub to the actor's spatial channel (if exist)
-	
+	if (ChannelDataView.IsValid())
+	{
+		ChannelDataView->SendSpawnToClients(Actor, OwningConnId);
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Failed to send Spawn message to client as the view doesn't exist. Actor: %s"), *GetNameSafe(Actor));
+	}
 }
 
 void UChanneldNetDriver::SetAllSentSpawn(const FNetworkGUID NetId)

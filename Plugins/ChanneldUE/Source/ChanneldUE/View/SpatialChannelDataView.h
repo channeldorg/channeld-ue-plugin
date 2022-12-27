@@ -38,6 +38,7 @@ public:
 	
 	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId) override;
 	virtual void SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId) override;
+	virtual void SendSpawnToClients(UObject* Obj, uint32 OwningConnId) override;
 
 	UPROPERTY(EditAnywhere)
 	UProtoMessageObject* ChannelInitData;
@@ -77,6 +78,12 @@ private:
 	
 	bool bSuppressAddProviderAndSendOnServerSpawn = false;
 
+	// Virtual NetConnection for sending Spawn message to channeld to broadcast in spatial channels.
+	// Exporting the NetId of the spawned object requires a NetConnection, but we don't have a specific client when broadcasting.
+	// So we use a virtual NetConnection that doesn't belong to any client, and clear the export map everytime to make sure the NetId is fully exported.
+	UPROPERTY()
+	UChanneldNetConnection* NetConnForSpawn;
+
 	void ServerHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleGetHandoverContext(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
@@ -92,6 +99,4 @@ private:
 	UChanneldNetConnection* CreateClientConnection(ConnectionId ConnId, ChannelId ChId);
 	void InitPlayerController(UChanneldNetConnection* ClientConn, APlayerController* NewPlayerController);
 	void CreatePlayerController(UChanneldNetConnection* ClientConn);
-
-	void SendSpawnToAdjacentChannels(UObject* Obj, ChannelId SpatialChId);
 };

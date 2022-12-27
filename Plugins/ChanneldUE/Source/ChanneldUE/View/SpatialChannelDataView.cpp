@@ -512,6 +512,10 @@ void USpatialChannelDataView::InitServer()
 	GetWorld()->GetAuthGameMode()->GameState->SetRole(ENetRole::ROLE_SimulatedProxy);
 	Super::InitServer();
 
+	NetConnForSpawn = NewObject<UChanneldNetConnection>(GetTransientPackage(), UChanneldNetConnection::StaticClass());
+	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
+	NetConnForSpawn->InitBase(NetDriver, NetDriver->GetSocket(), FURL(), USOCK_Open);
+	
 	if (UClass* PlayerStartLocatorClass = GetMutableDefault<UChanneldSettings>()->PlayerStartLocatorClass)
 	{
 		PlayerStartLocator = NewObject<UPlayerStartLocatorBase>(this, PlayerStartLocatorClass);
@@ -841,6 +845,13 @@ void USpatialChannelDataView::OnClientSpawnedObject(UObject* Obj, const ChannelI
 
 bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId)
 {
+	static const FName GameplayerDebuggerClassName("GameplayDebuggerCategoryReplicator");
+	// Spatial channels don't support Gameplayer Debugger yet.
+	if (Obj->GetClass()->GetFName() == GameplayerDebuggerClassName)
+	{
+		return false;
+	}
+
 	// GameState is in GLOBAL channel
 	if (Obj->IsA<AGameStateBase>())
 	{
@@ -888,32 +899,49 @@ void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnecti
 	}
 }
 
-void USpatialChannelDataView::SendSpawnToAdjacentChannels(UObject* Obj, ChannelId SpatialChId)
+// Broadcast the spawning to all clients subscribed in the nearby spatial channels
+void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConnId)
 {
-	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
+	const auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
 	if (!NetDriver)
 	{
-		UE_LOG(LogChanneld, Error, TEXT("USpatialChannelDataView::SendSpawnToAdjacentChannels: Unable to get ChanneldNetDriver"));
+		UE_LOG(LogChanneld, Error, TEXT("USpatialChannelDataView::SendSpawnToClients: Unable to get ChanneldNetDriver"));
 		return;
 	}
 	
 	const FNetworkGUID NetId = NetDriver->GuidCache->GetOrAssignNetGUID(Obj);
+	// It doesn't matter if the spatial channelId is not right, as channeld will adjust it based on the location.
+	ChannelId SpatialChId = GetOwningChannelId(NetId);
+	if (SpatialChId == InvalidChannelId)
+	{
+		SpatialChId = GetChanneldSubsystem()->LowLevelSendToChannelId.Get();
+	}
 	
 	unrealpb::SpawnObjectMessage SpawnMsg;
-	SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Obj));
+	
+	// As we don't have any specific NetConnection to export the NetId, use a virtual one.
+	SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Obj, NetConnForSpawn));
+	// Clear the export map and ack state so everytime we can get a full export.
+	auto PacketMapClient = CastChecked<UPackageMapClient>(NetConnForSpawn->PackageMap);
+	PacketMapClient->NetGUIDExportCountMap.Empty();
+	const static FPackageMapAckState EmptyAckStatus;
+	PacketMapClient->RestorePackageMapExportAckStatus(EmptyAckStatus);
+	
 	if (Obj->IsA<AActor>())
 	{
 		AActor* Actor = Cast<AActor>(Obj);
 		SpawnMsg.set_localrole(Actor->GetRemoteRole());
-		if (auto NetConn = Cast<UChanneldNetConnection>(Actor->GetNetConnection()))
-		{ 
-			SpawnMsg.set_owningconnid(NetConn->GetConnId());
+		if (OwningConnId > 0)
+		{
+			SpawnMsg.set_owningconnid(OwningConnId);
 		}
-		// Also set the spatial info for channeld to update the spatial channelId
+		// The spatial info must be set for channeld to adjust the spatial channelId
 		SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(Actor->GetActorLocation()));
 	}
+	
 	SpawnMsg.set_channelid(SpatialChId);
-	Connection->Broadcast(SpatialChId, unrealpb::SPAWN, SpawnMsg, channeldpb::ADJACENT_CHANNELS | channeldpb::ALL_BUT_SENDER);
+	
+	Connection->Broadcast(SpatialChId, unrealpb::SPAWN, SpawnMsg, channeldpb::ADJACENT_CHANNELS | channeldpb::ALL_BUT_SERVER);
 	UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message to spatial channels(%d), obj: %s, netId: %d"), SpatialChId, *Obj->GetName(), NetId.Value);
 
 	NetDriver->SetAllSentSpawn(NetId);
