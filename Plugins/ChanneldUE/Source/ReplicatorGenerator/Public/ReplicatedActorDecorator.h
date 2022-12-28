@@ -7,6 +7,7 @@
 class FReplicatedActorDecorator : public IPropertyDecoratorOwner
 {
 public:
+
 	FReplicatedActorDecorator(const UClass*);
 	
 	virtual ~FReplicatedActorDecorator() = default;
@@ -35,6 +36,11 @@ public:
      * Get code of additional include files 
      */
 	FString GetAdditionalIncludeFiles();
+
+	virtual TArray<FString> GetAdditionalIncludes() override
+	{
+		return TArray<FString>();
+	}
 
 	/**
 	 * Get class name of generated replicator

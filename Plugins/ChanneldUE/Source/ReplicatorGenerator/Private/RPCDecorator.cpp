@@ -13,6 +13,7 @@ FRPCDecorator::FRPCDecorator(UFunction* InFunc, IPropertyDecoratorOwner* InOwner
 			TSharedPtr<FPropertyDecorator> PropertyDecoratorPtr = PropertyDecoratorFactory.GetPropertyDecorator(*SIt, this);
 			if (PropertyDecoratorPtr.IsValid())
 			{
+				PropertyDecoratorPtr->SetForceNotDirectlyAccessible(true);
 				Properties.Add(PropertyDecoratorPtr);
 			}
 		}
@@ -76,4 +77,14 @@ FString FRPCDecorator::GetDeclaration_ProtoFields()
 		FieldDefinitions += Property->GetDefinition_ProtoField(i + 1) + TEXT(";\n");
 	}
 	return FieldDefinitions;
+}
+
+TArray<FString> FRPCDecorator::GetAdditionalIncludes()
+{
+	TSet<FString> IncludeFileSet;
+	for (auto PropDecorator : Properties)
+	{
+		IncludeFileSet.Append(PropDecorator->GetAdditionalIncludes());
+	}
+	return IncludeFileSet.Array();
 }

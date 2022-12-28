@@ -1,7 +1,9 @@
 ﻿#include "PropertyDecoratorFactory.h"
 
 #include "PropertyDecorator/BaseDataTypePropertyDecorator.h"
+#include "PropertyDecorator/RotatorPropertyDecoratorBuilder.h"
 #include "PropertyDecorator/StructPropertyDecoratorBuilder.h"
+#include "PropertyDecorator/VectorPropertyDecoratorBuilder.h"
 
 // Static singleton
 FPropertyDecoratorFactory* FPropertyDecoratorFactory::Singleton;
@@ -25,6 +27,8 @@ FPropertyDecoratorFactory& FPropertyDecoratorFactory::Get()
 		         ->SetNextBuilder(MakeShared<FTextPropertyDecoratorBuilder>())
 		         ->SetNextBuilder(MakeShared<FNamePropertyDecoratorBuilder>())
 		         ->SetNextBuilder(MakeShared<FArrayPropertyDecoratorBuilder>())
+		         ->SetNextBuilder(MakeShared<FVectorPropertyDecoratorBuilder>())
+		         ->SetNextBuilder(MakeShared<FRotatorPropertyDecoratorBuilder>())
 		         ->SetNextBuilder(Singleton->StructBuilder);
 	}
 	return *Singleton;

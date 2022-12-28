@@ -99,6 +99,9 @@ public:
 	 */
 	virtual bool IsDirectlyAccessible();
 
+	bool IsForceNotDirectlyAccessible() const;
+	void SetForceNotDirectlyAccessible(bool bForceNotDirectlyAccessible);
+	
 	/**
 	 * If the property cpp type is declared in cpp (e.g. uint32, FString), return true.
 	 */
@@ -284,13 +287,8 @@ public:
 	virtual FString GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName);
 	
 	virtual FString GetCode_SetPropertyValueArrayInner(const FString& TargetInstance, const FString& NewStateName);
-
-
-	/*
-	 * Get addition include header file
-	 */
-	virtual TArray<FString> GetAdditionalIncludes();
-
+	
+	virtual TArray<FString> GetAdditionalIncludes() override;
 
 protected:
 	IPropertyDecoratorOwner* Owner = nullptr;
@@ -302,5 +300,8 @@ protected:
 
 	// protobuf field type
 	FString ProtoFieldType;
+
+	bool bForceNotDirectlyAccessible = false;
+
 };
 

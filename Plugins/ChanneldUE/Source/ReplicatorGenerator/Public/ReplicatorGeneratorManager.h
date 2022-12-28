@@ -32,6 +32,8 @@ public:
 	};
 
 	static bool HasReplicatedPropertyOrRPC(UClass* TargetClass);
+	
+	static bool HasRepComponent(UClass* TargetClass);
 
 	TArray<UClass*> GetActorsWithReplicationComp(const TArray<UClass*>& IgnoreActors);
 

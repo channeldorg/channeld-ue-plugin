@@ -17,7 +17,17 @@ bool FPropertyDecorator::IsExternallyAccessible()
 
 bool FPropertyDecorator::IsDirectlyAccessible()
 {
-	return IsExternallyAccessible() && !Owner->IsBlueprintType();
+	return !bForceNotDirectlyAccessible && IsExternallyAccessible() && !Owner->IsBlueprintType();
+}
+
+bool FPropertyDecorator::IsForceNotDirectlyAccessible() const
+{
+	return bForceNotDirectlyAccessible;
+}
+
+void FPropertyDecorator::SetForceNotDirectlyAccessible(bool ForceNotDirectlyAccessible)
+{
+	this->bForceNotDirectlyAccessible = ForceNotDirectlyAccessible;
 }
 
 bool FPropertyDecorator::IsDeclaredInCPP()

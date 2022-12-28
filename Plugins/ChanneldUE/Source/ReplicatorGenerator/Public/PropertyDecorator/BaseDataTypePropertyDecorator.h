@@ -4,7 +4,6 @@
 #include "StringPropertyDecorator.h"
 #include "TextPropertyDecorator.h"
 #include "NamePropertyDecorator.h"
-#include "PropertyDecorator/BaseDataTypePropertyDecoratorBuilder.h"
 
 #define BASE_DATA_TYPE_PROPERTY_DECORATOR_BASE(ClassName, PropertyType, CPPType, ProtoType) \
 class ClassName : public FPropertyDecorator \
@@ -22,6 +21,21 @@ public: \
 	{ \
 		return TEXT(#PropertyType); \
 	} \
+}
+
+#define BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(ClassName, PropertyDecorator, PropertyType) \
+class ClassName: public FPropertyDecoratorBuilder \
+{ \
+public: \
+virtual ~ClassName() override {}; \
+virtual bool IsSpecialProperty(FProperty* Property) override \
+{ \
+return Property->IsA<PropertyType>(); \
+} \
+virtual FPropertyDecorator* ConstructPropertyDecorator(FProperty* Property, IPropertyDecoratorOwner* InOwner) override \
+{ \
+return new PropertyDecorator(Property, InOwner); \
+} \
 }
 
 #define BASE_DATA_TYPE_PROPERTY_DECORATOR(ClassName, PropertyType, CPPType) \
@@ -53,59 +67,5 @@ BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER(FDoublePropertyDecoratorBuilder, 
 BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FArrayPropertyDecoratorBuilder, FArrayPropertyDecorator, FArrayProperty);
 
 BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FStrPropertyDecoratorBuilder, FStringPropertyDecorator, FStrProperty);
-
 BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FTextPropertyDecoratorBuilder, FTextPropertyDecorator, FTextProperty);
 BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FNamePropertyDecoratorBuilder, FNamePropertyDecorator, FNameProperty);
-
-// class FUInt32PropertyDecorator : public FPropertyDecorator
-// {
-// public:
-//
-//
-// 	FUInt32PropertyDecorator()
-// 	{
-// 		ProtoFieldRule = TEXT("optional");
-// 		ProtoFieldType = TEXT("uint32");
-// 	}
-//
-// 	virtual FString GetCPPType() override
-// 	{
-// 		return TEXT("uint32");
-// 	}
-//
-// 	virtual FString GetPropertyType() override
-// 	{
-// 		return TEXT("FUInt32Property");
-// 	}
-//
-// 	virtual FString GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& InValue) override
-// 	{
-// 		return FString::Printf(TEXT("%s = %s"), *GetCode_GetPropertyValueFrom(TargetInstance), *InValue);
-// 	}
-//
-// 	virtual FString GetCode_SetDeltaState(const FString& TargetInstance, const FString& FullStateRef, const FString& DeltaStateRef) override
-// 	{
-// 		FStringFormatNamedArguments FormatArgs;
-// 		const FString CodeOfGetPropertyValue = GetCode_GetPropertyValueFrom(TargetInstance);
-// 		FormatArgs.Add(TEXT("Code_GetPropertyValue"), FStringFormatArg(CodeOfGetPropertyValue));
-// 		FormatArgs.Add(TEXT("Code_GetProtoFieldValue"), FStringFormatArg(GetCode_GetProtoFieldValueFrom(FullStateRef)));
-// 		FormatArgs.Add(TEXT("Code_SetProtoFieldValue"), FStringFormatArg(GetCode_SetProtoFieldValueTo(DeltaStateRef, CodeOfGetPropertyValue)));
-//
-// 		return FString::Format(PropertyDecorator_SetDeltaStateTemplate, FormatArgs);
-// 	}
-//
-// 	virtual FString GetCode_OnStateChange(const FString& TargetInstance, const FString& NewStateName) override
-// 	{
-// 		FStringFormatNamedArguments FormatArgs;
-// 		const FString CodeOfGetProtoFieldValue = GetCode_GetProtoFieldValueFrom(NewStateName);
-// 		FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), FStringFormatArg(GetCode_HasProtoFieldValueIn(NewStateName)));
-// 		FormatArgs.Add(TEXT("Code_GetPropertyValue"), FStringFormatArg(GetCode_GetPropertyValueFrom(TargetInstance)));
-// 		FormatArgs.Add(TEXT("Code_GetProtoFieldValue"), FStringFormatArg(CodeOfGetProtoFieldValue));
-// 		FormatArgs.Add(
-// 			TEXT("Code_SetPropertyValue"),
-// 			FStringFormatArg(GetCode_SetPropertyValueTo(TargetInstance, CodeOfGetProtoFieldValue))
-// 		);
-//
-// 		return FString::Format(PropertyDecorator_OnChangeStateTemplate, FormatArgs);
-// 	}
-// };

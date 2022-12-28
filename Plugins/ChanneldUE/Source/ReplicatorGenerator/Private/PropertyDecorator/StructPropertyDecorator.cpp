@@ -16,6 +16,7 @@ FStructPropertyDecorator::FStructPropertyDecorator(FProperty* InProperty, IPrope
 			TSharedPtr<FPropertyDecorator> PropertyDecoratorPtr = PropertyDecoratorFactory.GetPropertyDecorator(*SIt, this);
 			if (PropertyDecoratorPtr.IsValid())
 			{
+				PropertyDecoratorPtr->SetForceNotDirectlyAccessible(true);
 				Properties.Add(PropertyDecoratorPtr);
 			}
 		}
@@ -189,7 +190,7 @@ FString FStructPropertyDecorator::GetDeclaration_PropPtrGroupStruct()
 	// FString AssignPropPtrOrderlyCodes;
 	// FString AssignPropPtrDispersedlyCodes;
 	FString DeclarePropPtrCodes;
-	FString PointerValueEqualToStateValueCodes;
+	// FString PointerValueEqualToStateValueCodes;
 	FString SetDeltaStateCodes;
 	FString StaticSetDeltaStateCodes;
 	FString OnStateChangeCodes;
@@ -223,8 +224,10 @@ FString FStructPropertyDecorator::GetDeclaration_PropPtrGroupStruct()
 		// 	)
 		// );
 
-		if (!bFirstProperty) { PointerValueEqualToStateValueCodes.Append(TEXT(" && ")); }
-		PointerValueEqualToStateValueCodes.Append(*PropDecorator->GetCode_ActorPropEqualToProtoState(TEXT("this"),TEXT("InState"), true));
+		// if (!bFirstProperty) { PointerValueEqualToStateValueCodes.Append(TEXT(" && ")); }
+		// PointerValueEqualToStateValueCodes.Append(
+		// 	*PropDecorator->GetCode_ActorPropEqualToProtoState(TEXT("this"),TEXT("InState"), true)
+		// );
 
 		SetDeltaStateCodes.Append(
 			PropDecorator->GetCode_SetDeltaState(

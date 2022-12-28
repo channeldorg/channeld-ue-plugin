@@ -54,6 +54,24 @@ bool FReplicatorGeneratorManager::HasReplicatedPropertyOrRPC(UClass* TargetClass
 	return false;
 }
 
+bool FReplicatorGeneratorManager::HasRepComponent(UClass* TargetClass)
+{
+	for (TFieldIterator<FProperty> It(TargetClass, EFieldIteratorFlags::ExcludeSuper); It; ++It)
+	{
+		FProperty* Property = *It;
+
+		if (Property->IsA<FObjectProperty>())
+		{
+			FObjectProperty* ObjProperty = CastFieldChecked<FObjectProperty>(Property);
+			if (ObjProperty->PropertyClass->IsChildOf(UChanneldReplicationComponent::StaticClass()))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(const TArray<UClass*>& IgnoreActors)
 {
 	FFileManagerGeneric FileManager;
@@ -71,6 +89,7 @@ TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(const 
 	// ignore UBlueprintGeneratedClass temporarily and process Cpp's UClass first.
 	TArray<UObject*> AllUClasses;
 	GetObjectsOfClass(UClass::StaticClass(), AllUClasses);
+	// AllUClasses.Add(ATRG_F005_CPP_Parent::StaticClass());
 	for (UObject* ClassObj : AllUClasses)
 	{
 		UClass* Class = CastChecked<UClass>(ClassObj);
@@ -83,14 +102,16 @@ TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(const 
 		{
 			continue;
 		}
-		AActor* DefaultActor = CastChecked<AActor>(Class->GetDefaultObject());
-		const UChanneldReplicationComponent* Comp = DefaultActor->FindComponentByClass<UChanneldReplicationComponent>();
-		if (Comp == nullptr)
+		if (Class->GetName().StartsWith(TEXT("SKEL_")) || Class->GetName().StartsWith(TEXT("REINST_")))
+		{
+			continue;
+		}
+		if (!HasRepComponent(Class))
 		{
 			continue;
 		}
 		FString TargetHeadFilePath = CodeGenerator->GetClassHeadFilePath(Class->GetPrefixCPP() + Class->GetName());
-		if (!TargetHeadFilePath.IsEmpty())
+		if (TargetHeadFilePath.IsEmpty())
 		{
 			continue;
 		}

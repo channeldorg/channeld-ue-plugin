@@ -10,4 +10,7 @@ public:
 	virtual FString GetProtoNamespace() = 0;
 
 	virtual FString GetProtoStateMessageType() = 0;
+
+	virtual TArray<FString> GetAdditionalIncludes() = 0;
+
 };

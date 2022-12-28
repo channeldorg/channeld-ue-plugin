@@ -48,6 +48,8 @@ public:
 	FString GetCode_SerializeFunctionParams();
 	FString GetCode_DeserializeFunctionParams();
 	FString GetDeclaration_ProtoFields();
+	
+	virtual TArray<FString> GetAdditionalIncludes() override;
 
 protected:
 	UFunction* OriginalFunction;

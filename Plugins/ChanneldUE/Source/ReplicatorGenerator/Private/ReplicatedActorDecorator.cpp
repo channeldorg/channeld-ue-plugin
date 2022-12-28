@@ -73,6 +73,10 @@ FString FReplicatedActorDecorator::GetAdditionalIncludeFiles()
 	{
 		IncludeFileSet.Append(PropDecorator->GetAdditionalIncludes());
 	}
+	for (auto RPCDecorator : RPCs)
+	{
+		IncludeFileSet.Append(RPCDecorator->GetAdditionalIncludes());
+	}
 	TArray<FString> IncludeFiles = IncludeFileSet.Array();
 	FString Result;
 	for (FString IncludeFile : IncludeFiles)

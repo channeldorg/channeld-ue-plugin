@@ -38,7 +38,7 @@ bool FReplicatorCodeGenerator::RefreshModuleInfoByClassName()
 FString FReplicatorCodeGenerator::GetClassHeadFilePath(const FString& ClassName)
 {
 	FCPPClassInfo* Result = CPPClassInfoMap.Find(ClassName);
-	if(Result != nullptr)
+	if (Result != nullptr)
 	{
 		return Result->HeadFilePath;
 	}
@@ -63,14 +63,17 @@ bool FReplicatorCodeGenerator::Generate(TArray<UClass*> TargetActors, FReplicato
 	ReplicatorCodeBundle.RegisterReplicatorFileCode = FString::Format(*CodeGen_RegisterReplicatorTemplate, FormatArgs);
 
 	auto GlobalStructDecorators = FPropertyDecoratorFactory::Get().GetGlobalStructDecorators();
+	ReplicatorCodeBundle.GlobalStructCodes.Append(TEXT("#pragma once\n"));
+	ReplicatorCodeBundle.GlobalStructCodes.Append(TEXT("#include \"ChanneldUtils.h\"\n"));
+	ReplicatorCodeBundle.GlobalStructCodes.Append(FString::Printf(TEXT("#include \"%s\"\n"), *GenManager_GlobalStructProtoHeaderFile));
 	for (auto StructDecorator : GlobalStructDecorators)
 	{
-		ReplicatorCodeBundle.GlobalStructCodes += StructDecorator->GetDeclaration_PropPtrGroupStruct();
-		ReplicatorCodeBundle.GlobalStructProtoDefinitions += StructDecorator->GetDefinition_ProtoStateMessage();
+		ReplicatorCodeBundle.GlobalStructCodes.Append(StructDecorator->GetDeclaration_PropPtrGroupStruct());
+		ReplicatorCodeBundle.GlobalStructProtoDefinitions.Append(StructDecorator->GetDefinition_ProtoStateMessage());
 	}
 	FStringFormatNamedArguments ProtoFormatArgs;
 	ProtoFormatArgs.Add(TEXT("Declare_ProtoPackageName"), GenManager_GlobalStructProtoPackage);
-	ProtoFormatArgs.Add(TEXT("Code_Import"), TEXT(""));
+	ProtoFormatArgs.Add(TEXT("Code_Import"), TEXT("import \"unreal_common.proto\";"));
 	ProtoFormatArgs.Add(TEXT("Definition_ProtoStateMsg"), ReplicatorCodeBundle.GlobalStructProtoDefinitions);
 	ReplicatorCodeBundle.GlobalStructProtoDefinitions = FString::Format(CodeGen_ProtoTemplate, ProtoFormatArgs);
 
@@ -219,7 +222,9 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	// ---------- Protobuf ----------
 	FStringFormatNamedArguments ProtoFormatArgs;
 	ProtoFormatArgs.Add(TEXT("Declare_ProtoPackageName"), Target->GetProtoPackageName());
-	ProtoFormatArgs.Add(TEXT("Code_Import"), FString::Printf(TEXT("import \"%s\";"), *GenManager_GlobalStructProtoFile));
+	ProtoFormatArgs.Add(TEXT("Code_Import"),
+	                    FString::Printf(TEXT("import \"%s\";\nimport \"%s\";"), *GenManager_GlobalStructProtoFile, *GenManager_UnrealCommonProtoFile)
+	);
 	ProtoFormatArgs.Add(
 		TEXT("Definition_ProtoStateMsg"),
 		Target->GetDefinition_ProtoStateMessage() + Target->GetDefinition_RPCParamsMessage()
