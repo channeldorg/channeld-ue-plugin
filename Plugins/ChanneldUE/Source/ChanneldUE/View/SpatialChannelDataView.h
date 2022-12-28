@@ -39,6 +39,7 @@ public:
 	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId) override;
 	virtual void SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId) override;
 	virtual void SendSpawnToClients(UObject* Obj, uint32 OwningConnId) override;
+	virtual void SendDestroyToClients(UObject* Obj, const FNetworkGUID NetId) override;
 
 	UPROPERTY(EditAnywhere)
 	UProtoMessageObject* ChannelInitData;
@@ -56,6 +57,7 @@ protected:
 	virtual TArray<UObject*> GetHandoverObjects(UObject* Obj, ChannelId SrcChId, ChannelId DstChId);
 	
 private:
+	static const FName GameplayerDebuggerClassName = FName("GameplayDebuggerCategoryReplicator");
 
     // Map the client to the channels, so the spatial server's LowLevelSend() can use the right channelId.
 	TMap<uint32, ChannelId> ClientInChannels;

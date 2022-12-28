@@ -89,7 +89,7 @@ void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMes
 			
 		if (AActor* OldActor = Cast<AActor>(OldObj))
 		{
-			GetWorld()->DestroyActor(OldActor);
+			GetWorld()->DestroyActor(OldActor, true);
 		}
 	}
 
@@ -226,9 +226,11 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId Ch
 		UObject* ObjToDestroy = GuidCache->GetObjectFromNetGUID(FNetworkGUID(DestroyMsg->netid()), true);
 		if (ObjToDestroy)
 		{
-			if (ObjToDestroy->IsA<AActor>())
+			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Destroying object from message: %s, NetId: %d"), *GetNameSafe(ObjToDestroy), DestroyMsg->netid());
+			
+			if (AActor* Actor = Cast<AActor>(ObjToDestroy))
 			{
-				GetWorld()->DestroyActor(Cast<AActor>(ObjToDestroy));
+				GetWorld()->DestroyActor(Actor, true);
 			}
 			else
 			{
@@ -978,6 +980,7 @@ void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 	}
 }
 
+// Triggered by UWorld::DestroyActor, for replicated actors only.
 void UChanneldNetDriver::NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTravel)
 {
 	if (GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
@@ -986,34 +989,42 @@ void UChanneldNetDriver::NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTrav
 		return;
 	}
 
-	if (!Actor->HasAuthority())
-	{
-		return;
-	}
-
 	FNetworkGUID NetId = GuidCache->GetNetGUID(Actor);
-	if (NetId.IsValid())
+	if (NetId.IsValid() && ChannelDataView.IsValid())
 	{
-		return;
+		if (IsServer() && Actor->GetIsReplicated())
+		{
+			ChannelDataView->SendDestroyToClients(Actor, NetId);
+		}
+		
+		ChannelDataView->OnDestroyedObject(Actor, NetId);
+	}
+	else
+	{
+		// UE_LOG(LogChanneld, Warning, TEXT("ChannelDataView failed to handle the destroy of %s, netId: %d"), *GetNameSafe(Actor), NetId.Value);
 	}
 	
-	// TODO: Use BroadcastType.ADJACENT_CHANNELS instead of sending to each connection.
-	for (auto& Pair : ClientConnectionMap)
-	{
-		Pair.Value->SendDestroyMessage(Actor);
-		Pair.Value->NotifyActorDestroyed(Actor);
-	}
-
-
+	//~ Begin copy of UNetDriver::NotifyActorDestroyed
 	if (ServerConnection)
 	{
 		ServerConnection->NotifyActorDestroyed(Actor);
 	}
-
-	RemoveNetworkActor(Actor);
-
-	if (ChannelDataView.IsValid())
+	else
 	{
-		ChannelDataView->OnDestroyedObject(Actor, NetId);
+		for( int32 i=ClientConnections.Num()-1; i>=0; i-- )
+		{
+			UNetConnection* Connection = ClientConnections[i];
+			UActorChannel* Channel = Connection->FindActorChannelRef(Actor);
+			if (Channel)
+			{
+				check(Channel->OpenedLocally);
+				Channel->bClearRecentActorRefs = false;
+				Channel->Close(EChannelCloseReason::Destroyed);
+			}
+			Connection->NotifyActorDestroyed(Actor);
+		}
 	}
+	
+	RemoveNetworkActor(Actor);
+	//~ End copy of UNetDriver::NotifyActorDestroyed
 }

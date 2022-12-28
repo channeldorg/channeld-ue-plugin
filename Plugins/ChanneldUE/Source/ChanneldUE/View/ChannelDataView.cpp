@@ -246,7 +246,13 @@ void UChannelDataView::RemoveActorProvider(AActor* Actor, bool bSendRemoved)
 
 void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved)
 {
-	// ensureMsgf(Provider->GetChannelType() != channeldpb::UNKNOWN, TEXT("Invalid channel type of data provider: %s"), *IChannelDataProvider::GetName(Provider));
+	if (Provider->IsRemoved())
+	{
+		return;
+	}
+	
+	Provider->SetRemoved(true);
+	
 	TSet<FProviderInternal>* Providers = ChannelDataProviders.Find(ChId);
 	if (Providers != nullptr)
 	{
@@ -254,8 +260,6 @@ void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Prov
 		
 		if (bSendRemoved)
 		{
-			Provider->SetRemoved(true);
-
 			// Collect the removed states immediately (before the provider gets destroyed completely)
 			google::protobuf::Message* RemovedData = RemovedProvidersData.FindRef(ChId);
 			if (!RemovedData)
@@ -369,7 +373,6 @@ FNetworkGUID UChannelDataView::GetNetId(UObject* Obj) const
 {
 	if (const auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
 	{
-		// FIXME: should check the provider's authority instead.
 		if (NetDriver->IsServer())
 		{
 			return NetDriver->GuidCache->GetOrAssignNetGUID(Obj);
@@ -419,6 +422,30 @@ void UChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConnId)
 		if (IsValid(Pair.Value))
 		{
 			SendSpawnToConn(Obj, Pair.Value, OwningConnId);
+		}
+	}
+}
+
+void UChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkGUID NetId)
+{
+	// Don't broadcast the destroy of objects that are only spawned in the owning client.
+	if (Obj->IsA<APlayerState>() || Obj->IsA<APlayerController>())
+	{
+		return;
+	}
+	
+	const auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
+	if (!NetDriver)
+	{
+		UE_LOG(LogChanneld, Error, TEXT("UChannelDataView::SendDestroyToClients: Unable to get ChanneldNetDriver"));
+		return;
+	}
+	
+	for (auto& Pair : NetDriver->GetClientConnectionMap())
+	{
+		if (IsValid(Pair.Value))
+		{
+			Pair.Value->SendDestroyMessage(Obj);
 		}
 	}
 }

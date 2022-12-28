@@ -173,41 +173,6 @@ void USpatialChannelDataView::ServerHandleGetHandoverContext(UChanneldConnection
 		}
 	}
 
-	/*
-	// Group Pawn, PlayerController, and PlayerState together to make them handover at the same time.
-	if (Obj->IsA<APawn>())
-	{
-		APawn* Pawn = Cast<APawn>(Obj);
-		auto NetConn = Cast<UChanneldNetConnection>(Pawn->GetNetConnection());
-		auto PawnContext = ResultMsg.add_context();
-		PawnContext->mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Pawn, NetConn));
-		if (NetConn)
-		{
-			PawnContext->set_clientconnid(NetConn->GetConnId());
-		}
-		
-		if (auto PC = Pawn->GetController())
-		{
-			auto PCContext = ResultMsg.add_context();
-			PCContext->mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(PC, NetConn));
-			if (NetConn)
-			{
-				PCContext->set_clientconnid(NetConn->GetConnId());
-			}
-		}
-
-		if (auto PS = Pawn->GetPlayerState())
-		{
-			auto PSContext = ResultMsg.add_context();
-			PSContext->mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(PS, NetConn));
-			if (NetConn)
-			{
-				PSContext->set_clientconnid(NetConn->GetConnId());
-			}
-		}
-	}
-	*/
-
 	UE_LOG(LogChanneld, Verbose, TEXT("[Server] GetHandoverContext for channeld: %s"), UTF8_TO_TCHAR(ResultMsg.DebugString().c_str()));
 	
 	Connection->Send(ChId, unrealpb::HANDOVER_CONTEXT, ResultMsg);
@@ -845,7 +810,6 @@ void USpatialChannelDataView::OnClientSpawnedObject(UObject* Obj, const ChannelI
 
 bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId)
 {
-	static const FName GameplayerDebuggerClassName("GameplayDebuggerCategoryReplicator");
 	// Spatial channels don't support Gameplayer Debugger yet.
 	if (Obj->GetClass()->GetFName() == GameplayerDebuggerClassName)
 	{
@@ -941,8 +905,38 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 	
 	SpawnMsg.set_channelid(SpatialChId);
 	
-	Connection->Broadcast(SpatialChId, unrealpb::SPAWN, SpawnMsg, channeldpb::ADJACENT_CHANNELS | channeldpb::ALL_BUT_SERVER);
-	UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message to spatial channels(%d), obj: %s, netId: %d"), SpatialChId, *Obj->GetName(), NetId.Value);
+	Connection->Broadcast(SpatialChId, unrealpb::SPAWN, SpawnMsg, /*channeldpb::ADJACENT_CHANNELS |*/ channeldpb::ALL_BUT_SENDER);
+	UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message to spatial channel %d, obj: %s, netId: %d"), SpatialChId, *Obj->GetName(), NetId.Value);
 
 	NetDriver->SetAllSentSpawn(NetId);
 }
+
+void USpatialChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkGUID NetId)
+{
+	// Don't broadcast the destroy of objects that are only spawned in the owning client.
+	// Spatial channels don't support Gameplayer Debugger yet.
+	if (Obj->IsA<APlayerState>() || Obj->IsA<APlayerController>() || Obj->GetClass()->GetFName() == GameplayerDebuggerClassName)
+	{
+		return;
+	}
+	
+	const auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
+	if (!NetDriver)
+	{
+		UE_LOG(LogChanneld, Error, TEXT("USpatialChannelDataView::SendDestroyToClients: Unable to get ChanneldNetDriver"));
+		return;
+	}
+	
+	ChannelId SpatialChId = GetOwningChannelId(NetId);
+	if (SpatialChId == InvalidChannelId)
+	{
+		SpatialChId = GetChanneldSubsystem()->LowLevelSendToChannelId.Get();
+	}
+	
+	unrealpb::DestroyObjectMessage DestroyMsg;
+	DestroyMsg.set_netid(NetId.Value);
+	DestroyMsg.set_reason(static_cast<uint8>(EChannelCloseReason::Destroyed));
+	Connection->Broadcast(SpatialChId, unrealpb::DESTROY, DestroyMsg, /*channeldpb::ADJACENT_CHANNELS |*/ channeldpb::ALL_BUT_SENDER);
+	UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Destroy message to spatial channel %d, obj: %s, netId: %d"), SpatialChId, *GetNameSafe(Obj), NetId.Value);
+}
+
