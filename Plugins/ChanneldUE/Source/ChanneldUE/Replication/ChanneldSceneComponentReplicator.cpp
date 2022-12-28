@@ -278,7 +278,19 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::M
 		*bShouldSnapRotationWhenAttachedPtr = NewState->bshouldsnaprotationwhenattached();
 	}
 
-	// TODO: attachChildren
+	if (NewState->attachchildren_size() > 0)
+	{
+		auto AttachChildren = SceneComp->GetAttachChildren();
+		AttachChildren.Empty();
+		for (auto ChildRef : NewState->attachchildren())
+		{
+			auto Child = ChanneldUtils::GetActorComponentByRef<USceneComponent>(&ChildRef, SceneComp->GetWorld());
+			if (Child)
+			{
+				AttachChildren.Add(Child);
+			}
+		}
+	}
 }
 
 EAttachmentRule FChanneldSceneComponentReplicator::GetAttachmentRule(bool bShouldSnapWhenAttached, bool bAbsolute)
