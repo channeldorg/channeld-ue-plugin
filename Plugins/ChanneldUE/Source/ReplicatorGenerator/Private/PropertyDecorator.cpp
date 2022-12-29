@@ -232,7 +232,7 @@ FString FPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstance,
 	FormatArgs.Add(TEXT("Code_ActorPropEqualToProtoState"), GetCode_ActorPropEqualToProtoState(TargetInstance, NewStateName));
 	FormatArgs.Add(
 		TEXT("Code_SetPropertyValue"),
-		FStringFormatArg(GetCode_SetPropertyValueTo(TargetInstance, NewStateName, TEXT("")))
+		GetCode_SetPropertyValueTo(TargetInstance, NewStateName, TEXT(""))
 	);
 	return FString::Format(PropDecorator_OnChangeStateTemplate, FormatArgs);
 }
@@ -263,4 +263,9 @@ FString FPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& Pr
 TArray<FString> FPropertyDecorator::GetAdditionalIncludes()
 {
 	return TArray<FString>();
+}
+
+FString FPropertyDecorator::GetCode_GetWorldRef()
+{
+	return TEXT("");
 }

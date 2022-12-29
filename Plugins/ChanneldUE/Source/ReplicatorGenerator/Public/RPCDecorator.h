@@ -8,7 +8,7 @@ if(Func->GetFName() == FName("{Declare_FuncName}"))
 {
   {Declare_PropPtrGroupStructName} ParamPointerGroup(Params);
   auto Msg = new {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}();
-  ParamPointerGroup.Merge(nullptr, Msg);
+  ParamPointerGroup.Merge(nullptr, Msg, {Code_GetWorldRef});
   return MakeShareable(Msg);
 }
 )EOF";
@@ -24,7 +24,7 @@ if(Func->GetFName() == FName("{Declare_FuncName}"))
     return nullptr;
   }
   {Declare_ParamStructCopy}* Params = new {Declare_ParamStructCopy}();
-  {Declare_PropPtrGroupStructName}::SetPropertyValue(Params, &Msg);
+  {Declare_PropPtrGroupStructName}::SetPropertyValue(Params, &Msg, {Code_GetWorldRef});
 
   return MakeShareable(Params);
 }
@@ -50,6 +50,8 @@ public:
 	FString GetDeclaration_ProtoFields();
 	
 	virtual TArray<FString> GetAdditionalIncludes() override;
+
+	virtual FString GetCode_GetWorldRef() override;
 
 protected:
 	UFunction* OriginalFunction;

@@ -124,23 +124,23 @@ FString FStructPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FStri
 
 FString FStructPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState, bool ForceFromPointer)
 {
-	return GetCode_ActorPropEqualToProtoState(FromActor, FromState);
+	return TEXT("false");
 }
 
 FString FStructPropertyDecorator::GetCode_SetDeltaState(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
 {
 	return FString::Printf(
-		TEXT("if (%s.Merge(%s&%s->%s(), %s->mutable_%s()))\n{\n  bStateChanged = true;\n}\n"),
+		TEXT("if (%s.Merge(%s&%s->%s(), %s->mutable_%s(), %s))\n{\n  bStateChanged = true;\n}\n"),
 		*GetPointerName(),
 		ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? nullptr : ") : TEXT(""),
-		*FullStateName, *GetProtoFieldName(), *DeltaStateName, *GetProtoFieldName()
+		*FullStateName, *GetProtoFieldName(), *DeltaStateName, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef()
 	);
 }
 
 FString FStructPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString& ContainerName, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
 {
 	return FString::Printf(
-		TEXT("{\nvoid* PropAddr = (uint8*)%s + %d; if (%s::Merge(PropAddr, %s&%s->%s(), %s->mutable_%s()))\n{\n  bStateChanged = true;\n}\n}\n"),
+		TEXT("{\nvoid* PropAddr = (uint8*)%s + %d; if (%s::Merge(PropAddr, %s&%s->%s(), %s->mutable_%s(), World))\n{\n  bStateChanged = true;\n}\n}\n"),
 		*ContainerName, GetMemOffset(),
 		*GetDeclaration_PropPtrGroupStructName(),
 		ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? nullptr : ") : TEXT(""),
@@ -157,20 +157,25 @@ FString FStructPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString&
 	FormatArgs.Add(TEXT("Declare_FullStateName"), FullStateName);
 	FormatArgs.Add(TEXT("Definition_ProtoName"), GetProtoFieldName());
 	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
+	FormatArgs.Add(TEXT("Code_GetWorldRef"), Owner->GetCode_GetWorldRef());
 	return FString::Format(StructPropDeco_SetDeltaStateArrayInnerTemp, FormatArgs);
 }
 
 FString FStructPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode)
 {
-	return FString::Printf(TEXT("if (%s.SetPropertyValue(&%s->%s()))\n{\nbStateChanged = true;\n%s\n}\n"), *GetPointerName(), *NewStateName, *GetProtoFieldName(), *AfterSetValueCode);
+	return FString::Printf(
+		TEXT("if (%s.SetPropertyValue(&%s->%s(), %s))\n{\nbStateChanged = true;\n%s\n}\n"),
+		*GetPointerName(), *NewStateName, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef(),
+		*AfterSetValueCode
+	);
 }
 
 FString FStructPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName)
 {
 	return FString::Printf(
-		TEXT("{\nvoid* PropAddr = (uint8*)%s + %d; if (%s::SetPropertyValue(PropAddr, &%s->%s()))\n{\n  bStateChanged = true;\n}\n}\n"),
+		TEXT("{\nvoid* PropAddr = (uint8*)%s + %d; if (%s::SetPropertyValue(PropAddr, &%s->%s(), %s))\n{\n  bStateChanged = true;\n}\n}\n"),
 		*ContainerName, GetMemOffset(),
-		*GetDeclaration_PropPtrGroupStructName(), *NewStateName, *GetProtoFieldName()
+		*GetDeclaration_PropPtrGroupStructName(), *NewStateName, *GetProtoFieldName(), *GetCode_GetWorldRef()
 	);
 }
 
@@ -179,6 +184,7 @@ FString FStructPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FStri
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
+	FormatArgs.Add(TEXT("Code_GetWorldRef"), Owner->GetCode_GetWorldRef());
 	return FString::Format(StructPropDeco_SetPropertyValueArrayInnerTemp, FormatArgs);
 }
 
@@ -311,4 +317,9 @@ FString FStructPropertyDecorator::GetDefinition_ProtoStateMessage()
 	FormatArgs.Add(TEXT("Declare_ProtoFields"), FieldDefinitionCodes);
 
 	return FString::Format(CodeGen_ProtoStateMessageTemplate, FormatArgs);
+}
+
+FString FStructPropertyDecorator::GetCode_GetWorldRef()
+{
+	return FString("World");
 }

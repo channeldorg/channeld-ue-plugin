@@ -33,6 +33,18 @@ const static TCHAR* ArrPropDeco_SetDeltaStateByMemOffsetTemp =
 }
 )EOF";
 
+const static TCHAR* ArrPropDecorator_OnChangeStateTemplate =
+	LR"EOF(
+if ({Code_HasProtoFieldValue})
+{
+  {Code_SetPropertyValue}
+}
+else 
+{
+  {Declare_PropPtrName}->Empty();
+}
+)EOF";
+
 const static TCHAR* ArrPropDecorator_SetPropertyValueTemp =
 	LR"EOF(
 const int32 ActorPropLength = {Declare_PropPtrName}->Num();
@@ -62,6 +74,7 @@ const static TCHAR* ArrPropDeco_SetPropertyValueByMemOffsetTemp =
 }
 )EOF";
 
+
 class FArrayPropertyDecorator : public FPropertyDecorator
 {
 public:
@@ -81,8 +94,13 @@ public:
 
 	virtual FString GetCode_HasProtoFieldValueIn(const FString& StateName) override;
 
+	virtual FString GetCode_OnStateChange(const FString& TargetInstance, const FString& NewStateName) override;
 	virtual FString GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode) override;
 	virtual FString GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName) override;
+
+	virtual TArray<FString> GetAdditionalIncludes() override;
+
+	virtual FString GetCode_GetWorldRef() override;
 
 protected:
 	TSharedPtr<FPropertyDecorator> InnerProperty;

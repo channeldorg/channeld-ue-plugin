@@ -56,7 +56,7 @@ public:
 	/**
 	 * Get all code of assign property pointer
 	 */
-	FString GetCode_AssignPropertyPointers(const FString& TargetInstance);
+	FString GetCode_AssignPropertyPointers();
 
 	/**
 	 * Get protobuf package name
@@ -76,12 +76,12 @@ public:
 	/**
 	 * Get code that sets whole delta state
 	 */
-	FString GetCode_AllPropertiesSetDeltaState(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName);
+	FString GetCode_AllPropertiesSetDeltaState(const FString& FullStateName, const FString& DeltaStateName);
 
 	/**
 	 * Get code that handles state changed
 	 */
-	FString GetCode_AllPropertiesOnStateChange(const FString& TargetInstance, const FString& NewStateName);
+	FString GetCode_AllPropertiesOnStateChange(const FString& NewStateName);
 
 	/**
 	 * Get protobuf message definition
@@ -105,11 +105,18 @@ public:
 	
 	FString GetDeclaration_RPCParamStructs();
 
+	FString GetInstanceRefName() const;
+	void SetInstanceRefName(const FString& InstanceRefName);
+	
+	virtual FString GetCode_GetWorldRef() override;
+
 protected:
 	const UClass* Target;
+	FString InstanceRefName;
 	FModuleInfo ModuleBelongTo;
 	TArray<TSharedPtr<FPropertyDecorator>> Properties;
 	TArray<TSharedPtr<FRPCDecorator>> RPCs;
 
 	bool bIsBlueprintGenerated;
+
 };

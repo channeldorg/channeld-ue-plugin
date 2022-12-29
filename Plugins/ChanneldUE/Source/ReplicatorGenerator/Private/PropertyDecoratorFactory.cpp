@@ -1,5 +1,6 @@
 ﻿#include "PropertyDecoratorFactory.h"
 
+#include "PropertyDecorator/ActorCompPropDecoratorBuilder.h"
 #include "PropertyDecorator/BaseDataTypePropertyDecorator.h"
 #include "PropertyDecorator/RotatorPropertyDecoratorBuilder.h"
 #include "PropertyDecorator/StructPropertyDecoratorBuilder.h"
@@ -28,6 +29,8 @@ FPropertyDecoratorFactory& FPropertyDecoratorFactory::Get()
 		         ->SetNextBuilder(MakeShared<FNamePropertyDecoratorBuilder>())
 		         ->SetNextBuilder(MakeShared<FArrayPropertyDecoratorBuilder>())
 		         ->SetNextBuilder(MakeShared<FVectorPropertyDecoratorBuilder>())
+		         ->SetNextBuilder(MakeShared<FActorCompPropDecoratorBuilder>())
+		         ->SetNextBuilder(MakeShared<FUObjPropertyDecoratorBuilder>())
 		         ->SetNextBuilder(MakeShared<FRotatorPropertyDecoratorBuilder>())
 		         ->SetNextBuilder(Singleton->StructBuilder);
 	}

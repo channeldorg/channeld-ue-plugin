@@ -142,6 +142,8 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 		}
 		IsClientCode = FString::Printf(TEXT("%s->HasAuthority()"), *TargetInstanceRef);
 	}
+	Target->SetInstanceRefName(TargetInstanceRef);
+
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_ReplicatorClassName"), Target->GetReplicatorClassName());
 	FormatArgs.Add(TEXT("Declare_TargetClassName"), Target->GetActorCPPClassName());
@@ -180,7 +182,7 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	// }
 	FormatArgs.Add(
 		TEXT("Code_AssignPropertyPointers"),
-		Target->GetCode_AssignPropertyPointers(TargetInstanceRef)
+		Target->GetCode_AssignPropertyPointers()
 	);
 	CppCodeBuilder.Append(FString::Format(
 		bIsBlueprint ? CodeGen_BP_ConstructorImplTemplate : CodeGen_CPP_ConstructorImplTemplate,
@@ -192,13 +194,13 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 
 	FormatArgs.Add(
 		TEXT("Code_AllPropertiesSetDeltaState"),
-		Target->GetCode_AllPropertiesSetDeltaState(TargetInstanceRef,TEXT("FullState"), TEXT("DeltaState"))
+		Target->GetCode_AllPropertiesSetDeltaState(TEXT("FullState"), TEXT("DeltaState"))
 	);
 	CppCodeBuilder.Append(FString::Format(CodeGen_CPP_TickImplTemplate, FormatArgs));
 
 	FormatArgs.Add(
 		TEXT("Code_AllPropertyOnStateChanged"),
-		Target->GetCode_AllPropertiesOnStateChange(TargetInstanceRef, TEXT("NewState"))
+		Target->GetCode_AllPropertiesOnStateChange(TEXT("NewState"))
 	);
 	CppCodeBuilder.Append(FString::Format(CodeGen_CPP_OnStateChangedImplTemplate, FormatArgs));
 

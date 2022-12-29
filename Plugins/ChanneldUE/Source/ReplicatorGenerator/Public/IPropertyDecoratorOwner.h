@@ -13,4 +13,6 @@ public:
 
 	virtual TArray<FString> GetAdditionalIncludes() = 0;
 
+	virtual FString GetCode_GetWorldRef() = 0;
+
 };

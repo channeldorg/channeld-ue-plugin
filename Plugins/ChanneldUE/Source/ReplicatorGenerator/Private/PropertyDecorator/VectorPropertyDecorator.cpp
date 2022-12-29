@@ -58,6 +58,23 @@ FString FVectorPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString
 	);
 }
 
+FString FVectorPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
+	FormatArgs.Add(TEXT("Declare_DeltaStateName"), DeltaStateName);
+	FormatArgs.Add(TEXT("Declare_FullStateName"), FullStateName);
+	FormatArgs.Add(TEXT("Definition_ProtoName"), GetProtoFieldName());
+	return FString::Format(VectorPropDeco_SetDeltaStateArrayInnerTemp, FormatArgs);
+}
+
+FString FVectorPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName)
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
+	return FString::Format(VectorPropDeco_OnChangeStateArrayInnerTemp, FormatArgs);
+}
+
 TArray<FString> FVectorPropertyDecorator::GetAdditionalIncludes()
 {
 	return TArray<FString>{TEXT("ChanneldUtils.h")};

@@ -286,9 +286,11 @@ public:
 
 	virtual FString GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName);
 	
-	virtual FString GetCode_SetPropertyValueArrayInner(const FString& TargetInstance, const FString& NewStateName);
+	virtual FString GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName);
 	
 	virtual TArray<FString> GetAdditionalIncludes() override;
+
+	virtual FString GetCode_GetWorldRef() override;
 
 protected:
 	IPropertyDecoratorOwner* Owner = nullptr;

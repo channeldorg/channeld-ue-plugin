@@ -105,7 +105,7 @@ FString FReplicatedActorDecorator::GetCode_IndirectlyAccessiblePropertyPtrDeclar
 	return Result;
 }
 
-FString FReplicatedActorDecorator::GetCode_AssignPropertyPointers(const FString& TargetInstance)
+FString FReplicatedActorDecorator::GetCode_AssignPropertyPointers()
 {
 	FString Result;
 	for (TSharedPtr<FPropertyDecorator> Property : Properties)
@@ -115,7 +115,7 @@ FString FReplicatedActorDecorator::GetCode_AssignPropertyPointers(const FString&
 			Result += FString::Printf(
 				TEXT("{ %s; }\n"),
 				*Property->GetCode_AssignPropPointer(
-					FString::Printf(TEXT("%s.Get()"), *TargetInstance),
+					FString::Printf(TEXT("%s.Get()"), *InstanceRefName),
 					Property->GetPointerName()
 				)
 			);
@@ -140,7 +140,7 @@ FString FReplicatedActorDecorator::GetProtoStateMessageType()
 	return Target->GetName() + TEXT("State");
 }
 
-FString FReplicatedActorDecorator::GetCode_AllPropertiesSetDeltaState(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName)
+FString FReplicatedActorDecorator::GetCode_AllPropertiesSetDeltaState(const FString& FullStateName, const FString& DeltaStateName)
 {
 	if (Properties.Num() == 0)
 	{
@@ -149,12 +149,12 @@ FString FReplicatedActorDecorator::GetCode_AllPropertiesSetDeltaState(const FStr
 	FStringBuilderBase SetDeltaStateCodeBuilder;
 	for (const TSharedPtr<FPropertyDecorator> Property : Properties)
 	{
-		SetDeltaStateCodeBuilder.Append(Property->GetCode_SetDeltaState(TargetInstance, FullStateName, DeltaStateName));
+		SetDeltaStateCodeBuilder.Append(Property->GetCode_SetDeltaState(InstanceRefName, FullStateName, DeltaStateName));
 	}
 	return SetDeltaStateCodeBuilder.ToString();
 }
 
-FString FReplicatedActorDecorator::GetCode_AllPropertiesOnStateChange(const FString& TargetInstance, const FString& NewStateName)
+FString FReplicatedActorDecorator::GetCode_AllPropertiesOnStateChange(const FString& NewStateName)
 {
 	if (Properties.Num() == 0)
 	{
@@ -163,7 +163,7 @@ FString FReplicatedActorDecorator::GetCode_AllPropertiesOnStateChange(const FStr
 	FStringBuilderBase OnChangeStateCodeBuilder;
 	for (const TSharedPtr<FPropertyDecorator> Property : Properties)
 	{
-		OnChangeStateCodeBuilder.Append(Property->GetCode_OnStateChange(TargetInstance, NewStateName));
+		OnChangeStateCodeBuilder.Append(Property->GetCode_OnStateChange(InstanceRefName, NewStateName));
 	}
 	return OnChangeStateCodeBuilder.ToString();
 }
@@ -255,4 +255,19 @@ FString FReplicatedActorDecorator::GetDeclaration_RPCParamStructs()
 		}
 	}
 	return RPCParamStructsDeclarations;
+}
+
+FString FReplicatedActorDecorator::GetInstanceRefName() const
+{
+	return InstanceRefName;
+}
+
+void FReplicatedActorDecorator::SetInstanceRefName(const FString& InInstanceRefName)
+{
+	this->InstanceRefName = InInstanceRefName;
+}
+
+FString FReplicatedActorDecorator::GetCode_GetWorldRef()
+{
+	return InstanceRefName + TEXT("->GetWorld()");
 }

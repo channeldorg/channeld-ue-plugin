@@ -4,6 +4,7 @@
 #include "StringPropertyDecorator.h"
 #include "TextPropertyDecorator.h"
 #include "NamePropertyDecorator.h"
+#include "UnrealObjectPropertyDecorator.h"
 
 #define BASE_DATA_TYPE_PROPERTY_DECORATOR_BASE(ClassName, PropertyType, CPPType, ProtoType) \
 class ClassName : public FPropertyDecorator \
@@ -69,3 +70,5 @@ BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FArrayPropertyDecoratorBuilder, FArray
 BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FStrPropertyDecoratorBuilder, FStringPropertyDecorator, FStrProperty);
 BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FTextPropertyDecoratorBuilder, FTextPropertyDecorator, FTextProperty);
 BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FNamePropertyDecoratorBuilder, FNamePropertyDecorator, FNameProperty);
+
+BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FUObjPropertyDecoratorBuilder, FUnrealObjectPropertyDecorator, FObjectProperty);

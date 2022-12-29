@@ -52,7 +52,7 @@ FString FRPCDecorator::GetCode_SerializeFunctionParams()
 	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
 	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), GetProtoNamespace());
 	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), GetProtoStateMessageType());
-
+	FormatArgs.Add(TEXT("Code_GetWorldRef"), Owner->GetCode_GetWorldRef());
 	return FString::Format(RPC_SerializeFuncParamsTemp, FormatArgs);
 }
 
@@ -64,7 +64,7 @@ FString FRPCDecorator::GetCode_DeserializeFunctionParams()
 	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), GetProtoNamespace());
 	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), GetProtoStateMessageType());
 	FormatArgs.Add(TEXT("Declare_ParamStructCopy"), GetCompilableCPPType());
-
+	FormatArgs.Add(TEXT("Code_GetWorldRef"), Owner->GetCode_GetWorldRef());
 	return FString::Format(RPC_DeserializeFuncParamsTemp, FormatArgs);
 }
 
@@ -87,4 +87,9 @@ TArray<FString> FRPCDecorator::GetAdditionalIncludes()
 		IncludeFileSet.Append(PropDecorator->GetAdditionalIncludes());
 	}
 	return IncludeFileSet.Array();
+}
+
+FString FRPCDecorator::GetCode_GetWorldRef()
+{
+	return TEXT("World");
 }

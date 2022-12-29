@@ -24,7 +24,7 @@ public:
 
 	TArray<UClass*> IgnoreActorClasses{
 		AActor::StaticClass(),
-		ACharacter::StaticClass(),
+		// ACharacter::StaticClass(),
 		AController::StaticClass(),
 		AGameStateBase::StaticClass(),
 		APlayerController::StaticClass(),

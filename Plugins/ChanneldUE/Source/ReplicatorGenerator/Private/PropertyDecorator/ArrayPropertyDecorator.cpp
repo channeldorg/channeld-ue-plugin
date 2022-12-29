@@ -70,6 +70,19 @@ FString FArrayPropertyDecorator::GetCode_HasProtoFieldValueIn(const FString& Sta
 	return FString::Printf(TEXT("%s.size() > 0"), *GetCode_GetProtoFieldValueFrom(StateName));
 }
 
+FString FArrayPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstance, const FString& NewStateName)
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName));
+	FormatArgs.Add(
+		TEXT("Code_SetPropertyValue"),
+		GetCode_SetPropertyValueTo(TargetInstance, NewStateName, TEXT(""))
+	);
+	FormatArgs.Add(TEXT("Declare_PropPtrName"), GetPointerName());
+
+	return FString::Format(ArrPropDecorator_OnChangeStateTemplate, FormatArgs);
+}
+
 FString FArrayPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode)
 {
 	FStringFormatNamedArguments FormatArgs;
@@ -95,4 +108,14 @@ FString FArrayPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString&
 	FormatArgs.Add(TEXT("Code_SetPropertyValueArrayInner"), InnerProperty->GetCode_SetPropertyValueArrayInner(TEXT("PropAddr"), NewStateName));
 
 	return FString::Format(ArrPropDeco_SetPropertyValueByMemOffsetTemp, FormatArgs);
+}
+
+TArray<FString> FArrayPropertyDecorator::GetAdditionalIncludes()
+{
+	return InnerProperty->GetAdditionalIncludes();
+}
+
+FString FArrayPropertyDecorator::GetCode_GetWorldRef()
+{
+	return Owner->GetCode_GetWorldRef();
 }

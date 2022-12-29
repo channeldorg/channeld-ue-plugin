@@ -1,6 +1,36 @@
 ﻿#pragma once
 #include "PropertyDecorator.h"
 
+const static TCHAR* VectorPropDeco_SetDeltaStateArrayInnerTemp =
+	LR"EOF(
+FVector& PropItem = (*{Declare_PropertyPtr})[i];
+unrealpb::FVector* NewOne = {Declare_DeltaStateName}->add_{Definition_ProtoName}();
+ChanneldUtils::SetIfNotSame(NewOne, PropItem);
+if (!bStateChanged)
+{
+  if(i > FullStateValueLength)
+  {
+    bStateChanged = true;
+  } else
+  {
+    bStateChanged = !(PropItem == ChanneldUtils::GetVector({Declare_FullStateName}->{Definition_ProtoName}()[i]));
+  }
+}
+)EOF";
+
+const static TCHAR* VectorPropDeco_OnChangeStateArrayInnerTemp =
+	LR"EOF(
+FVector NewVector = ChanneldUtils::GetVector(MessageArr[i]);
+if ((*{Declare_PropertyPtr})[i] != NewVector)
+{
+  (*{Declare_PropertyPtr})[i] = NewVector;
+  if (!bStateChanged)
+  {
+    bStateChanged = true;
+  }
+}
+)EOF";
+
 class FVectorPropertyDecorator : public FPropertyDecorator
 {
 public:
@@ -25,6 +55,9 @@ public:
 
 	virtual FString GetCode_SetDeltaState(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull) override;
 	virtual FString GetCode_SetDeltaStateByMemOffset(const FString& ContainerName, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull = false) override;
+	virtual FString GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull) override;
+
+	virtual FString GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName) override;
 
 	virtual TArray<FString> GetAdditionalIncludes() override;
 };

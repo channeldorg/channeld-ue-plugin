@@ -30,7 +30,7 @@ struct {Declare_PropPtrGroupStructName}
 
 {Declare_PropertyPointers}
   
-  bool Merge(const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* FullState, {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* DeltaState)
+  bool Merge(const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* FullState, {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* DeltaState, UWorld* World)
   {
     bool bIsFullStateNull = FullState == nullptr;
     bool bStateChanged = false;
@@ -38,7 +38,7 @@ struct {Declare_PropPtrGroupStructName}
     return bStateChanged;
   }
   
-  static bool Merge(void* Container, const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* FullState, {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* DeltaState)
+  static bool Merge(void* Container, const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* FullState, {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* DeltaState, UWorld* World)
   {
     bool bIsFullStateNull = FullState == nullptr;
     bool bStateChanged = false;
@@ -46,14 +46,14 @@ struct {Declare_PropPtrGroupStructName}
     return bStateChanged;
   }
   
-  bool SetPropertyValue(const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* NewState)
+  bool SetPropertyValue(const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* NewState, UWorld* World)
   {
     bool bStateChanged = false;
 {Code_OnStateChange}
     return bStateChanged;
   }
   
-  static bool SetPropertyValue(void* Container, const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* NewState)
+  static bool SetPropertyValue(void* Container, const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* NewState, UWorld* World)
   {
     bool bStateChanged = false;
 {Code_StaticOnStateChange}
@@ -91,7 +91,7 @@ const static TCHAR* StructPropDeco_SetDeltaStateArrayInnerTemp =
   auto PropItem = &(*{Declare_PropertyPtr})[i];
   auto FullStateValue = i <  FullStateValueLength ? &{Declare_FullStateName}->{Definition_ProtoName}()[i] : nullptr;
   auto NewOne = {Declare_DeltaStateName}->add_{Definition_ProtoName}();
-  bool bItemChanged = {Declare_PropPtrGroupStructName}::Merge(PropItem, FullStateValue, NewOne);
+  bool bItemChanged = {Declare_PropPtrGroupStructName}::Merge(PropItem, FullStateValue, NewOne, {Code_GetWorldRef});
   if (!bStateChanged && bItemChanged)
   {
   	bStateChanged = bItemChanged;
@@ -101,7 +101,7 @@ const static TCHAR* StructPropDeco_SetDeltaStateArrayInnerTemp =
 
 const static TCHAR* StructPropDeco_SetPropertyValueArrayInnerTemp =
 	LR"EOF(
-if ({Declare_PropPtrGroupStructName}::SetPropertyValue(&(*{Declare_PropertyPtr})[i], &MessageArr[i]) && !bStateChanged)
+if ({Declare_PropPtrGroupStructName}::SetPropertyValue(&(*{Declare_PropertyPtr})[i], &MessageArr[i], {Code_GetWorldRef}) && !bStateChanged)
 {
   bStateChanged = true;
 }
@@ -161,6 +161,8 @@ public:
 	FString GetDeclaration_PropPtrGroupStructName();
 
 	FString GetDefinition_ProtoStateMessage();
+
+	virtual FString GetCode_GetWorldRef() override;
 	
 protected:
 	TArray<TSharedPtr<FPropertyDecorator>> Properties;
