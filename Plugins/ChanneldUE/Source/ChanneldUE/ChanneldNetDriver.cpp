@@ -845,51 +845,73 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject /*= nullptr*/)
 {
 	const FName FuncFName = Function->GetFName();
+	const FString FuncName = FuncFName.ToString();
 	const bool bShouldLog = FuncFName != ServerMovePackedFuncName && FuncFName != ClientMoveResponsePackedFuncName && FuncFName != ServerUpdateCameraFuncName;
-	UE_CLOG(bShouldLog, LogChanneld, Verbose, TEXT("Sending RPC %s::%s, SubObject: %s"), *Actor->GetName(), *Function->GetName(), *GetNameSafe(SubObject));
-	// if (Function->GetFName() == FName("ClientSetHUD"))
-	// {
-	// 	UE_DEBUG_BREAK();
-	// }
+	UE_CLOG(bShouldLog, LogChanneld, Verbose, TEXT("Sending RPC %s::%s, SubObject: %s"), *Actor->GetName(), *FuncName, *GetNameSafe(SubObject));
+	if (Function->GetFName() == FName("AddJumps"))
+	{
+		UE_DEBUG_BREAK();
+	}
 	
 	if (Actor->IsActorBeingDestroyed())
 	{
-		UE_LOG(LogNet, Warning, TEXT("UNetDriver::ProcessRemoteFunction: Remote function %s called from actor %s while actor is being destroyed. Function will not be processed."), *Function->GetName(), *Actor->GetName());
+		UE_LOG(LogNet, Warning, TEXT("UNetDriver::ProcessRemoteFunction: Remote function %s called from actor %s while actor is being destroyed. Function will not be processed."), *FuncName, *Actor->GetName());
 		return;
 	}
 	
 	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomRPC)
 	{
-		const FString FuncName = FuncFName.ToString();
 		auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
 		if (RepComp)
 		{
-			UChanneldNetConnection* NetConn = ConnToChanneld->IsClient() ? GetServerConnection() : Cast<UChanneldNetConnection>(Actor->GetNetConnection());
-			if (NetConn)
+			bool bSuccess = true;
+			auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters, bSuccess);
+			if (bSuccess)
 			{
-				bool bSuccess = true;
-				auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters, bSuccess);
-				if (bSuccess)
+				UE_CLOG(bShouldLog && ParamsMsg.IsValid(), LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters: %s"), UTF8_TO_TCHAR(ParamsMsg->DebugString().c_str()));
+
+				// Client or authoritative server sends the RPC directly
+				if (ConnToChanneld->IsClient() || Actor->HasAuthority())
 				{
-					UE_CLOG(bShouldLog && ParamsMsg.IsValid(), LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters: %s"), UTF8_TO_TCHAR(ParamsMsg->DebugString().c_str()));
-					NetConn->SendRPCMessage(Actor, FuncName, ParamsMsg, ChannelDataView->GetOwningChannelId(Actor));
-					OnSentRPC(Actor, FuncName);
-					return;
+					UChanneldNetConnection* NetConn = ConnToChanneld->IsClient() ? GetServerConnection() : Cast<UChanneldNetConnection>(Actor->GetNetConnection());
+					if (NetConn)
+					{
+						NetConn->SendRPCMessage(Actor, FuncName, ParamsMsg, ChannelDataView->GetOwningChannelId(Actor));
+						OnSentRPC(Actor, FuncName);
+						return;
+					}
+					else
+					{
+						UE_LOG(LogChanneld, Warning, TEXT("Failed to send RPC %s::%s as the actor doesn't have any NetConn"), *Actor->GetName(), *FuncName);
+					}
 				}
+				// Non-authoritative server forwards the RPC to the server that has authority over the actor (channel owner)
 				else
 				{
-					UE_LOG(LogChanneld, Warning, TEXT("Failed to serialize RPC function params: %s::%s"), *Actor->GetName(), *FuncName);
+					unrealpb::RemoteFunctionMessage RpcMsg;
+					RpcMsg.mutable_targetobj()->set_netguid(GuidCache->GetNetGUID(Actor).Value);
+					RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
+					if (ParamsMsg)
+					{
+						RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
+						UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %d bytes"), RpcMsg.paramspayload().size());
+					}
+					ChannelId ForwardChId = ChannelDataView->GetOwningChannelId(Actor);
+					ConnToChanneld->Broadcast(ForwardChId, unrealpb::RPC, RpcMsg, channeldpb::SINGLE_CONNECTION);
+					UE_LOG(LogChanneld, Log, TEXT("Forwarded RPC %s::%s to the owner of channel %d"), *Actor->GetName(), *FuncName, ForwardChId);
+					OnSentRPC(Actor, FuncName);
+					return;
 				}
 			}
 			else
 			{
-				UE_LOG(LogChanneld, Warning, TEXT("Failed to send RPC %s::%s as the actor doesn't have any client connection"), *Actor->GetName(), *FuncName);
+				UE_LOG(LogChanneld, Warning, TEXT("Failed to serialize RPC function params: %s::%s"), *Actor->GetName(), *FuncName);
 			}
 		}
-		else
-		{
-			UE_LOG(LogChanneld, Warning, TEXT("Can't find the ReplicationComponent to serialize RPC: %s::%s"), *Actor->GetName(), *FuncName);
-		}
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Can't find the ReplicationComponent to serialize RPC: %s::%s"), *Actor->GetName(), *FuncName);
 	}
 
 	// Fallback to native RPC

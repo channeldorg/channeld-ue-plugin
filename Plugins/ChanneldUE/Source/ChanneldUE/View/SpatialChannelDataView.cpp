@@ -674,6 +674,16 @@ void USpatialChannelDataView::InitClient()
 	});
 }
 
+ChannelId USpatialChannelDataView::GetOwningChannelId(const AActor* Actor) const
+{
+	// GameState is owned by the Master server.
+	if (Actor->IsA<AGameStateBase>())
+	{
+		return GlobalChannelId;
+	}
+	return Super::GetOwningChannelId(Actor);
+}
+
 void USpatialChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId)
 {
 	Super::SetOwningChannelId(NetId, ChId);
@@ -875,7 +885,7 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 	
 	const FNetworkGUID NetId = NetDriver->GuidCache->GetOrAssignNetGUID(Obj);
 	// It doesn't matter if the spatial channelId is not right, as channeld will adjust it based on the location.
-	ChannelId SpatialChId = GetOwningChannelId(NetId);
+	ChannelId SpatialChId = Super::GetOwningChannelId(NetId);
 	if (SpatialChId == InvalidChannelId)
 	{
 		SpatialChId = GetChanneldSubsystem()->LowLevelSendToChannelId.Get();
@@ -927,7 +937,7 @@ void USpatialChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkG
 		return;
 	}
 	
-	ChannelId SpatialChId = GetOwningChannelId(NetId);
+	ChannelId SpatialChId = Super::GetOwningChannelId(NetId);
 	if (SpatialChId == InvalidChannelId)
 	{
 		SpatialChId = GetChanneldSubsystem()->LowLevelSendToChannelId.Get();

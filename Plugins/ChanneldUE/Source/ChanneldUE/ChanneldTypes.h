@@ -35,6 +35,8 @@ enum class EChannelId : ChannelId
 constexpr ChannelId GlobalChannelId = 0;
 constexpr ChannelId InvalidChannelId = 0xffffffff;
 
+constexpr uint32 GameStateNetId = 1;
+
 constexpr uint32 MaxPacketSize = 0x00ffff;
 constexpr uint32 MinPacketSize = 20;
 constexpr uint8 MaxConnectionIdBits = 13;

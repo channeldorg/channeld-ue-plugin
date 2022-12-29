@@ -24,6 +24,7 @@ public:
 	virtual void InitServer() override;
 	virtual void InitClient() override;
 
+	virtual ChannelId GetOwningChannelId(const AActor* Actor) const override;
 	virtual void SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId) override;
 	virtual bool GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const override;
 	
@@ -57,7 +58,7 @@ protected:
 	virtual TArray<UObject*> GetHandoverObjects(UObject* Obj, ChannelId SrcChId, ChannelId DstChId);
 	
 private:
-	static const FName GameplayerDebuggerClassName = FName("GameplayDebuggerCategoryReplicator");
+	const FName GameplayerDebuggerClassName = FName("GameplayDebuggerCategoryReplicator");
 
     // Map the client to the channels, so the spatial server's LowLevelSend() can use the right channelId.
 	TMap<uint32, ChannelId> ClientInChannels;

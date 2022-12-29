@@ -40,8 +40,8 @@ FChanneldGameStateBaseReplicator::~FChanneldGameStateBaseReplicator()
 
 uint32 FChanneldGameStateBaseReplicator::GetNetGUID()
 {
-	// GameStateBase doesn't have a valid NetGUID, so let's use a constant value.
-	return 1;
+	// GameState doesn't have a valid NetGUID, so let's use a constant value.
+	return GameStateNetId;
 }
 
 google::protobuf::Message* FChanneldGameStateBaseReplicator::GetDeltaState()
