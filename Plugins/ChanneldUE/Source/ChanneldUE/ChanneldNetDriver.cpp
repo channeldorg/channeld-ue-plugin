@@ -880,10 +880,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 						OnSentRPC(Actor, FuncName);
 						return;
 					}
-					else
-					{
-						UE_LOG(LogChanneld, Warning, TEXT("Failed to send RPC %s::%s as the actor doesn't have any NetConn"), *Actor->GetName(), *FuncName);
-					}
+					UE_LOG(LogChanneld, Warning, TEXT("Failed to send RPC %s::%s as the actor doesn't have any NetConn"), *Actor->GetName(), *FuncName);
 				}
 				// Non-authoritative server forwards the RPC to the server that has authority over the actor (channel owner)
 				else
