@@ -7,10 +7,20 @@ void FStructPropertyDecoratorBuilder::AddReferencedObjects(FReferenceCollector& 
 	Collector.AddReferencedObjects(GlobalStructArray);
 }
 
-TArray<TSharedPtr<FStructPropertyDecorator>> FStructPropertyDecoratorBuilder::GetGlobalStructs()
+TArray<TSharedPtr<FStructPropertyDecorator>> FStructPropertyDecoratorBuilder::GetAndInitGlobalStructs()
 {
 	TArray<TSharedPtr<FStructPropertyDecorator>> Result;
 	GlobalStructs.GenerateValueArray(Result);
+	int32 IllegalPropNameIndex = 0;
+	for (TSharedPtr<FStructPropertyDecorator> StructDecorator : Result)
+	{
+		StructDecorator->Init(
+			[&IllegalPropNameIndex]()
+			{
+				return FString::Printf(TEXT("_IllegalNameProp_%d_"), ++IllegalPropNameIndex);
+			}
+		);
+	}
 	return Result;
 }
 

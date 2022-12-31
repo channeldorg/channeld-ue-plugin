@@ -44,7 +44,7 @@ TSharedPtr<FPropertyDecorator> FPropertyDecoratorFactory::GetPropertyDecorator(F
 
 TArray<TSharedPtr<FStructPropertyDecorator>> FPropertyDecoratorFactory::GetGlobalStructDecorators()
 {
-	return StructBuilder->GetGlobalStructs();
+	return StructBuilder->GetAndInitGlobalStructs();
 }
 
 void FPropertyDecoratorFactory::ClearGlobalStruct()

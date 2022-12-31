@@ -18,9 +18,9 @@ FString NewString = UTF8_TO_TCHAR(MessageArr[i].c_str());
 if ((*{Declare_PropertyPtr})[i] != NewString)
 {
   (*{Declare_PropertyPtr})[i] = NewString;
-  if (!bStateChanged)
+  if (!bPropChanged)
   {
-    bStateChanged = true;
+    bPropChanged = true;
   }
 }
 )EOF";

@@ -1,8 +1,34 @@
 ﻿#include "PropertyDecorator.h"
 
-bool FPropertyDecorator::Init()
+FPropertyDecorator::FPropertyDecorator(FProperty* InProperty, IPropertyDecoratorOwner* InOwner)
+	: Owner(InOwner), OriginalProperty(InProperty)
 {
+}
+
+bool FPropertyDecorator::Init(const TFunction<FString()>& SetNameForIllegalPropName)
+{
+	if(bInitialized)
+	{
+		return false;
+	}
+	CompilablePropName = OriginalProperty->GetName();
+	if (Owner->IsBlueprintType())
+	{
+		FRegexPattern MatherPatter(TEXT("[^a-zA-Z0-9_]"));
+		FRegexMatcher Matcher(MatherPatter, CompilablePropName);
+		if (Matcher.FindNext())
+		{
+			CompilablePropName = *SetNameForIllegalPropName();
+		}
+	}
+
+	PostInit();
+	bInitialized = true;
 	return true;
+}
+
+void FPropertyDecorator::PostInit()
+{
 }
 
 bool FPropertyDecorator::IsBlueprintType()
@@ -37,12 +63,12 @@ bool FPropertyDecorator::IsDeclaredInCPP()
 
 FString FPropertyDecorator::GetPropertyName()
 {
-	return OriginalProperty->GetName();
+	return CompilablePropName;
 }
 
 FString FPropertyDecorator::GetPointerName()
 {
-	return GetPropertyName() + TEXT("Ptr");
+	return FString::Printf(TEXT("Prop%sPtr"), *GetPropertyName());
 }
 
 FString FPropertyDecorator::GetCPPType()
@@ -121,7 +147,7 @@ FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetIn
 
 FString FPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode)
 {
-	return FString::Printf(TEXT("%s = %s;\nbStateChanged = true;\n%s"), *GetCode_GetPropertyValueFrom(TargetInstance), *GetCode_GetProtoFieldValueFrom(NewStateName), *AfterSetValueCode);
+	return FString::Printf(TEXT("%s = %s;\nF = true;\n%s"), *GetCode_GetPropertyValueFrom(TargetInstance), *GetCode_GetProtoFieldValueFrom(NewStateName), *AfterSetValueCode);
 }
 
 FString FPropertyDecorator::GetDeclaration_PropertyPtr()
@@ -225,14 +251,29 @@ FString FPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString& Prope
 	return FString::Format(PropDeco_SetDeltaStateArrayInnerTemp, FormatArgs);
 }
 
-FString FPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstance, const FString& NewStateName)
+FString FPropertyDecorator::GetCode_CallRepNotify(const FString& TargetInstanceName)
+{
+	if (OriginalProperty->HasAnyPropertyFlags(CPF_RepNotify))
+	{
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("Declare_TargetInstance"), TargetInstanceName);
+		FormatArgs.Add(TEXT("Declare_FunctionName"), OriginalProperty->RepNotifyFunc.ToString());
+		return FString::Format(PropDecorator_CallRepNotifyTemplate, FormatArgs);
+	}
+	return TEXT("");
+}
+
+FString FPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, bool NeedCallRepNotify)
 {
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName));
-	FormatArgs.Add(TEXT("Code_ActorPropEqualToProtoState"), GetCode_ActorPropEqualToProtoState(TargetInstance, NewStateName));
+	FormatArgs.Add(TEXT("Code_ActorPropEqualToProtoState"), GetCode_ActorPropEqualToProtoState(TargetInstanceName, NewStateName));
 	FormatArgs.Add(
 		TEXT("Code_SetPropertyValue"),
-		GetCode_SetPropertyValueTo(TargetInstance, NewStateName, TEXT(""))
+		GetCode_SetPropertyValueTo(
+			TargetInstanceName, NewStateName,
+			NeedCallRepNotify ? GetCode_CallRepNotify(TargetInstanceName) : TEXT("")
+		)
 	);
 	return FString::Format(PropDecorator_OnChangeStateTemplate, FormatArgs);
 }

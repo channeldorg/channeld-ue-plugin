@@ -18,6 +18,7 @@ public:
   virtual ~{Declare_ReplicatorClassName}() override;
 
   //~Begin FChanneldReplicatorBase Interface
+{Code_OverrideGetNetGUID}
   virtual UClass* GetTargetClass() override { return {Declare_TargetClassName}::StaticClass(); }
   virtual google::protobuf::Message* GetDeltaState() override;
   virtual void ClearState() override;

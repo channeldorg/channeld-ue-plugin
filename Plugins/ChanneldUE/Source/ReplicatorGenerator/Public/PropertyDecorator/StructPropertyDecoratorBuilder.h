@@ -14,7 +14,7 @@ public:
 
 	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 
-	TArray<TSharedPtr<FStructPropertyDecorator>> GetGlobalStructs();
+	TArray<TSharedPtr<FStructPropertyDecorator>> GetAndInitGlobalStructs();
 
 	void ClearGlobalStructs();
 

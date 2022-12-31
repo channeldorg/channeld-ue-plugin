@@ -23,13 +23,18 @@ FStructPropertyDecorator::FStructPropertyDecorator(FProperty* InProperty, IPrope
 	}
 }
 
-bool FStructPropertyDecorator::Init()
+void FStructPropertyDecorator::PostInit()
 {
+	int32 IllegalPropNameIndex = 0;
 	for (TSharedPtr<FPropertyDecorator> PropertyDecorator : Properties)
 	{
-		PropertyDecorator->Init();
+		PropertyDecorator->Init(
+			[&IllegalPropNameIndex]()
+			{
+				return FString::Printf(TEXT("_IllegalNameProp_%d_"), ++IllegalPropNameIndex);
+			}
+		);
 	}
-	return true;
 }
 
 bool FStructPropertyDecorator::IsExternallyAccessible()

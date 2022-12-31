@@ -101,9 +101,9 @@ const static TCHAR* StructPropDeco_SetDeltaStateArrayInnerTemp =
 
 const static TCHAR* StructPropDeco_SetPropertyValueArrayInnerTemp =
 	LR"EOF(
-if ({Declare_PropPtrGroupStructName}::SetPropertyValue(&(*{Declare_PropertyPtr})[i], &MessageArr[i], {Code_GetWorldRef}) && !bStateChanged)
+if ({Declare_PropPtrGroupStructName}::SetPropertyValue(&(*{Declare_PropertyPtr})[i], &MessageArr[i], {Code_GetWorldRef}) && !bPropChanged)
 {
-  bStateChanged = true;
+  bPropChanged = true;
 }
 )EOF";
 
@@ -113,7 +113,7 @@ public:
 
 	FStructPropertyDecorator(FProperty* InProperty, IPropertyDecoratorOwner* InOwner);
 	
-	virtual bool Init() override;
+	virtual void PostInit() override;
 	
 	virtual bool IsExternallyAccessible() override;
 

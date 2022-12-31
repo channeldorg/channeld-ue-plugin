@@ -24,9 +24,9 @@ UActorComponent* NewCompRef = ChanneldUtils::GetActorComponentByRef<UActorCompon
 if ((*{Declare_PropertyPtr})[i] != NewCompRef)
 {
   (*{Declare_PropertyPtr})[i] = NewCompRef;
-  if (!bStateChanged)
+  if (!bPropChanged)
   {
-    bStateChanged = true;
+    bPropChanged = true;
   }
 }
 )EOF";

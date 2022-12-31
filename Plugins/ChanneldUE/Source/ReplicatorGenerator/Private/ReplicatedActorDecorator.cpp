@@ -3,15 +3,27 @@
 #include "PropertyDecoratorFactory.h"
 #include "ReplicatorTemplate/CppReplicatorTemplate.h"
 
-FReplicatedActorDecorator::FReplicatedActorDecorator(const UClass* TargetActorClass)
+FReplicatedActorDecorator::FReplicatedActorDecorator(const UClass* TargetActorClass, const TFunction<FString()>& SetBPTargetRepName)
 {
 	Target = TargetActorClass;
 	bIsBlueprintGenerated = Target->HasAnyClassFlags(CLASS_CompiledFromBlueprint);
+
+	TargetActorName = Target->GetName();
+	if (bIsBlueprintGenerated)
+	{
+		FRegexPattern MatherPatter(TEXT("[^a-zA-Z0-9_]"));
+		FRegexMatcher Matcher(MatherPatter, TargetActorName);
+		if (Matcher.FindNext())
+		{
+			TargetActorName = SetBPTargetRepName();
+		}
+	}
 }
 
 void FReplicatedActorDecorator::Init()
 {
 	FPropertyDecoratorFactory& PropertyDecoratorFactory = FPropertyDecoratorFactory::Get();
+
 	// Construct all property decorator
 	for (TFieldIterator<FProperty> It(Target, EFieldIteratorFlags::ExcludeSuper); It; ++It)
 	{
@@ -29,10 +41,17 @@ void FReplicatedActorDecorator::Init()
 			}
 		}
 	}
+	int32 IllegalPropNameIndex = 0;
 	for (TSharedPtr<FPropertyDecorator> PropertyDecoratorPtr : Properties)
 	{
-		PropertyDecoratorPtr->Init();
+		PropertyDecoratorPtr->Init(
+			[&IllegalPropNameIndex]()
+			{
+				return FString::Printf(TEXT("_IllegalNameProp_%d_"), ++IllegalPropNameIndex);
+			}
+		);
 	}
+	
 	// Construct all rpc func decorator
 	TArray<FName> FunctionNames;
 	Target->GenerateFunctionList(FunctionNames);
@@ -42,6 +61,16 @@ void FReplicatedActorDecorator::Init()
 		if (!Func->HasAnyFunctionFlags(FUNC_Net)) { continue; }
 
 		RPCs.Add(MakeShareable(new FRPCDecorator(Func, this)));
+	}
+	int32 IllegalParamNameIndex = 0;
+	for (TSharedPtr<FPropertyDecorator> RPCDecorator : RPCs)
+	{
+		RPCDecorator->Init(
+			[&IllegalParamNameIndex]()
+			{
+				return FString::Printf(TEXT("_IllegalNameParam_%d_"), ++IllegalParamNameIndex);
+			}
+		);
 	}
 }
 
@@ -53,12 +82,12 @@ void FReplicatedActorDecorator::Init(const FModuleInfo& InModuleBelongTo)
 
 FString FReplicatedActorDecorator::GetActorName()
 {
-	return Target->GetName();
+	return TargetActorName;
 }
 
 FString FReplicatedActorDecorator::GetActorCPPClassName()
 {
-	return Target->GetPrefixCPP() + Target->GetName();
+	return Target->GetPrefixCPP() + GetActorName();
 }
 
 FString FReplicatedActorDecorator::GetActorHeaderIncludePath()
@@ -88,7 +117,7 @@ FString FReplicatedActorDecorator::GetAdditionalIncludeFiles()
 
 FString FReplicatedActorDecorator::GetReplicatorClassName(bool WithPrefix /* = true */)
 {
-	FString ClassName = TEXT("Channeld") + Target->GetName() + TEXT("Replicator");
+	FString ClassName = TEXT("Channeld") + GetActorName() + TEXT("Replicator");
 	return WithPrefix ? TEXT("F") + ClassName : ClassName;
 }
 
@@ -127,7 +156,7 @@ FString FReplicatedActorDecorator::GetCode_AssignPropertyPointers()
 
 FString FReplicatedActorDecorator::GetProtoPackageName()
 {
-	return Target->GetName().ToLower() + "pb";
+	return GetActorName().ToLower() + "pb";
 }
 
 FString FReplicatedActorDecorator::GetProtoNamespace()
@@ -137,7 +166,7 @@ FString FReplicatedActorDecorator::GetProtoNamespace()
 
 FString FReplicatedActorDecorator::GetProtoStateMessageType()
 {
-	return Target->GetName() + TEXT("State");
+	return GetActorName() + TEXT("State");
 }
 
 FString FReplicatedActorDecorator::GetCode_AllPropertiesSetDeltaState(const FString& FullStateName, const FString& DeltaStateName)
@@ -163,7 +192,7 @@ FString FReplicatedActorDecorator::GetCode_AllPropertiesOnStateChange(const FStr
 	FStringBuilderBase OnChangeStateCodeBuilder;
 	for (const TSharedPtr<FPropertyDecorator> Property : Properties)
 	{
-		OnChangeStateCodeBuilder.Append(Property->GetCode_OnStateChange(InstanceRefName, NewStateName));
+		OnChangeStateCodeBuilder.Append(Property->GetCode_OnStateChange(InstanceRefName, NewStateName, true));
 	}
 	return OnChangeStateCodeBuilder.ToString();
 }

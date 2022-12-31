@@ -24,9 +24,9 @@ FVector NewVector = ChanneldUtils::GetVector(MessageArr[i]);
 if ((*{Declare_PropertyPtr})[i] != NewVector)
 {
   (*{Declare_PropertyPtr})[i] = NewVector;
-  if (!bStateChanged)
+  if (!bPropChanged)
   {
-    bStateChanged = true;
+    bPropChanged = true;
   }
 }
 )EOF";

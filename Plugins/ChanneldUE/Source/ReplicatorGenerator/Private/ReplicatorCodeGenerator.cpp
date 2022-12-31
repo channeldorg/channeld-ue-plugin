@@ -3,6 +3,7 @@
 #include "Manifest.h"
 #include "PropertyDecoratorFactory.h"
 #include "ReplicatorGeneratorDefinition.h"
+#include "GameFramework/GameStateBase.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "ReplicatorTemplate/BlueprintReplicatorTemplate.h"
 #include "ReplicatorTemplate/CppReplicatorTemplate.h"
@@ -85,7 +86,16 @@ bool FReplicatorCodeGenerator::Generate(TArray<UClass*> TargetActors, FReplicato
 
 bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicatorCode& ReplicatorCode, FString& ResultMessage)
 {
-	const TSharedPtr<FReplicatedActorDecorator> Target = MakeShareable(new FReplicatedActorDecorator(TargetActor));
+	int32 IllegalClassNameIndex = 0;
+	const TSharedPtr<FReplicatedActorDecorator> Target = MakeShareable(
+		new FReplicatedActorDecorator(
+			TargetActor,
+			[&IllegalClassNameIndex]()
+			{
+				return FString::Printf(TEXT("_IllegalNameClass_%d_"), ++IllegalClassNameIndex);
+			}
+		)
+	);
 
 	if (!Target->IsBlueprintType() && !ModuleInfoByClassName.Contains(Target->GetActorCPPClassName()))
 	{
@@ -164,6 +174,10 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	FormatArgs.Add(TEXT("File_ProtoPbHead"), Target->GetActorName() + CodeGen_ProtoPbHeadExtension);
 	FormatArgs.Add(TEXT("Code_AdditionalInclude"), Target->GetAdditionalIncludeFiles());
 	FormatArgs.Add(TEXT("Declare_IndirectlyAccessiblePropertyPtrs"), Target->GetCode_IndirectlyAccessiblePropertyPtrDeclarations());
+	FormatArgs.Add(
+		TEXT("Code_OverrideGetNetGUID"),
+		TargetActor->IsChildOf(AGameStateBase::StaticClass()) ? TEXT("virtual uint32 GetNetGUID() override { return 1; }") : TEXT("")
+	);
 
 	// RPC
 	FormatArgs.Add(TEXT("Declare_OverrideSerializeAndDeserializeFunctionParams"), Target->GetRPCNum() > 0 ? CodeGen_SerializeAndDeserializeFunctionParams : TEXT(""));

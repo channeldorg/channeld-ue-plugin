@@ -17,6 +17,7 @@ public:
   virtual ~{Declare_ReplicatorClassName}() override;
 
   //~Begin FChanneldReplicatorBase Interface
+{Code_OverrideGetNetGUID}
   virtual google::protobuf::Message* GetDeltaState() override;
   virtual void ClearState() override;
   virtual void Tick(float DeltaTime) override;

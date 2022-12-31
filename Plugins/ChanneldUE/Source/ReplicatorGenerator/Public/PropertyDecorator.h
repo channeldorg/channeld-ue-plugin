@@ -42,6 +42,12 @@ if (!bStateChanged)
 }
 )EOF";
 
+const static TCHAR* PropDecorator_CallRepNotifyTemplate =
+	LR"EOF(
+{Declare_TargetInstance}->ProcessEvent({Declare_TargetInstance}->GetClass()->FindFunctionByName(FName(TEXT("{Declare_FunctionName}"))), nullptr);
+)EOF";
+
+
 const static TCHAR* PropDecorator_OnChangeStateTemplate =
 	LR"EOF(
 if ({Code_HasProtoFieldValue} && !({Code_ActorPropEqualToProtoState}))
@@ -67,9 +73,9 @@ const static TCHAR* PropDeco_OnChangeStateArrayInnerTemp =
 if ((*{Declare_PropertyPtr})[i] != MessageArr[i])
 {
   (*{Declare_PropertyPtr})[i] = MessageArr[i];
-  if (!bStateChanged)
+  if (!bPropChanged)
   {
-    bStateChanged = true;
+    bPropChanged = true;
   }
 }
 )EOF";
@@ -79,13 +85,13 @@ class FReplicatedActorDecorator;
 class FPropertyDecorator : public IPropertyDecoratorOwner
 {
 public:
-	FPropertyDecorator(FProperty* InProperty, IPropertyDecoratorOwner* InOwner): Owner(InOwner), OriginalProperty(InProperty)
-	{
-	}
+	FPropertyDecorator(FProperty* InProperty, IPropertyDecoratorOwner* InOwner);
 
 	virtual ~FPropertyDecorator() = default;
 
-	virtual bool Init();
+	virtual bool Init(const TFunction<FString()>& SetNameForIllegalPropName);
+
+	virtual void PostInit();
 
 	virtual bool IsBlueprintType() override;
 
@@ -101,7 +107,7 @@ public:
 
 	bool IsForceNotDirectlyAccessible() const;
 	void SetForceNotDirectlyAccessible(bool bForceNotDirectlyAccessible);
-	
+
 	/**
 	 * If the property cpp type is declared in cpp (e.g. uint32, FString), return true.
 	 */
@@ -274,6 +280,8 @@ public:
 
 	virtual FString GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull = false);
 
+	virtual FString GetCode_CallRepNotify(const FString& TargetInstanceName);
+
 	/**
 	 * Code that handle state changes
 	 * For example:
@@ -282,20 +290,24 @@ public:
 	 *     Character->bIsCrouched = NewState->biscrouched();
 	 *   }
 	 */
-	virtual FString GetCode_OnStateChange(const FString& TargetInstance, const FString& NewStateName);
+	virtual FString GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, bool NeedCallRepNotify = false);
 
 	virtual FString GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName);
-	
+
 	virtual FString GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName);
-	
+
 	virtual TArray<FString> GetAdditionalIncludes() override;
 
 	virtual FString GetCode_GetWorldRef() override;
 
 protected:
+	bool bInitialized = false;
+	
 	IPropertyDecoratorOwner* Owner = nullptr;
 
 	FProperty* OriginalProperty = nullptr;
+
+	FString CompilablePropName;
 
 	// protobuf field rule
 	FString ProtoFieldRule = TEXT("optional");
@@ -304,6 +316,4 @@ protected:
 	FString ProtoFieldType;
 
 	bool bForceNotDirectlyAccessible = false;
-
 };
-

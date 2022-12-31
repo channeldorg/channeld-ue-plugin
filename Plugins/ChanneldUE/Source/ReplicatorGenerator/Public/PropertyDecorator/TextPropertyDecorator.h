@@ -42,9 +42,9 @@ FText NewText = FText::FromString(UTF8_TO_TCHAR(MessageArr[i].c_str()));
 if (!(*{Declare_PropertyPtr})[i].EqualTo(NewText))
 {
   (*{Declare_PropertyPtr})[i] = NewText;
-  if (!bStateChanged)
+  if (!bPropChanged)
   {
-    bStateChanged = true;
+    bPropChanged = true;
   }
 }
 )EOF";

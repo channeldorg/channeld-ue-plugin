@@ -18,9 +18,9 @@ FName NewName = FName(UTF8_TO_TCHAR(MessageArr[i].c_str()));
 if ((*{Declare_PropertyPtr})[i] != NewName)
 {
   (*{Declare_PropertyPtr})[i] = NewName;
-  if (!bStateChanged)
+  if (!bPropChanged)
   {
-    bStateChanged = true;
+    bPropChanged = true;
   }
 }
 )EOF";

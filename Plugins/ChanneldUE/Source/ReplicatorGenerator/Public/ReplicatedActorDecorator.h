@@ -7,11 +7,10 @@
 class FReplicatedActorDecorator : public IPropertyDecoratorOwner
 {
 public:
+	FReplicatedActorDecorator(const UClass*, const TFunction<FString()>& SetBPTargetRepName);
 
-	FReplicatedActorDecorator(const UClass*);
-	
 	virtual ~FReplicatedActorDecorator() = default;
-	
+
 	TArray<TSharedPtr<FPropertyDecorator>>& GetPropertyDecorators() { return Properties; }
 
 	void Init();
@@ -93,7 +92,7 @@ public:
      *   
 	 */
 	FString GetDefinition_ProtoStateMessage();
-	 
+
 	FString GetDefinition_RPCParamsMessage();
 
 	virtual bool IsBlueprintType() override;
@@ -102,21 +101,22 @@ public:
 
 	FString GetCode_SerializeFunctionParams();
 	FString GetCode_DeserializeFunctionParams();
-	
+
 	FString GetDeclaration_RPCParamStructs();
 
 	FString GetInstanceRefName() const;
 	void SetInstanceRefName(const FString& InstanceRefName);
-	
+
 	virtual FString GetCode_GetWorldRef() override;
 
 protected:
 	const UClass* Target;
+	FString TargetActorName;
 	FString InstanceRefName;
 	FModuleInfo ModuleBelongTo;
 	TArray<TSharedPtr<FPropertyDecorator>> Properties;
 	TArray<TSharedPtr<FRPCDecorator>> RPCs;
 
 	bool bIsBlueprintGenerated;
-
+	FString ReplicatorClassName;
 };

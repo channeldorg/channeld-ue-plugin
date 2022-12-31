@@ -82,15 +82,6 @@ FString FUnrealObjectPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FS
 	return FString::Format(UObjPropDeco_SetDeltaStateArrayInnerTemp, FormatArgs);
 }
 
-FString FUnrealObjectPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstance, const FString& NewStateName)
-{
-	return FString::Printf(
-		TEXT("if (%s)\n{\n%s\n}"),
-		*GetCode_HasProtoFieldValueIn(NewStateName),
-		*GetCode_SetPropertyValueTo(TargetInstance, NewStateName, TEXT(""))
-	);
-}
-
 FString FUnrealObjectPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName)
 {
 	FStringFormatNamedArguments FormatArgs;
