@@ -69,7 +69,7 @@ public:
 	// Gives the view a chance to override the NetRole, OwningChannelId, OwningConnId, or the Location parameter.
 	virtual void SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId);
 	virtual void OnClientSpawnedObject(UObject* Obj, const ChannelId ChId) {}
-	virtual void OnDestroyedObject(UObject* Obj, const FNetworkGUID NetId);
+	virtual void OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId);
 	virtual void SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId);
 	virtual ChannelId GetOwningChannelId(const FNetworkGUID NetId) const;
 	virtual ChannelId GetOwningChannelId(const AActor* Actor) const;

@@ -38,6 +38,7 @@ public:
 	virtual void OnClientSpawnedObject(UObject* Obj, const ChannelId ChId) override;
 	
 	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId) override;
+	virtual void OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId) override;
 	virtual void SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId) override;
 	virtual void SendSpawnToClients(UObject* Obj, uint32 OwningConnId) override;
 	virtual void SendDestroyToClients(UObject* Obj, const FNetworkGUID NetId) override;
@@ -80,6 +81,7 @@ private:
 	*/
 	
 	bool bSuppressAddProviderAndSendOnServerSpawn = false;
+	bool bSuppressSendOnServerDestroy = false;
 
 	// Virtual NetConnection for sending Spawn message to channeld to broadcast in spatial channels.
 	// Exporting the NetId of the spawned object requires a NetConnection, but we don't have a specific client when broadcasting.

@@ -460,25 +460,15 @@ void UChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnection* Net
 	NetConn->SendSpawnMessage(Obj, Role, OwningConnId);
 }
 
-void UChannelDataView::OnDestroyedObject(UObject* Obj, const FNetworkGUID NetId)
+void UChannelDataView::OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId)
 {
 	if (!NetId.IsValid())
 		return;
 
-	NetIdOwningChannels.Remove(NetId);
+	ChannelId RemovedChId = NetIdOwningChannels.Remove(NetId);
+	UE_LOG(LogChanneld, Log, TEXT("Removed mapping of netId: %d (%d) -> channelId: %d"), NetId.Value, ChanneldUtils::GetNativeNetId(NetId.Value), RemovedChId);
 
-	if (Obj->IsA<AActor>())
-	{
-		if (Obj->Implements<UChannelDataProvider>())
-		{
-			RemoveProviderFromAllChannels(Cast<IChannelDataProvider>(Obj), false);
-		}
-		auto Providers = Cast<AActor>(Obj)->GetComponentsByInterface(UChannelDataProvider::StaticClass());
-		for (const auto Provider : Providers)
-		{
-			RemoveProviderFromAllChannels(Cast<IChannelDataProvider>(Provider), false);
-		}
-	}
+	RemoveActorProvider(Actor, false);
 }
 
 void UChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId)

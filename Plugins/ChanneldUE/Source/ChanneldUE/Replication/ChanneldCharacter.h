@@ -12,4 +12,5 @@ class AChanneldCharacter : public ACharacter
 
 public:
 	AChanneldCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	virtual int32 GetFunctionCallspace(UFunction* Function, FFrame* Stack) override;
 };

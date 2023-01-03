@@ -237,11 +237,16 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 							// Reset the pawn's controller so it won't send ClientSetViewTarget RPC in APawn::DetachFromControllerPendingDestroy
 							HandoverPawn->Controller = nullptr;
 						}
-						
+
+						/* OnDestroyedActor() handles this
 						// Don't send "removed: true" update to the channel, because the state still exists.
 						RemoveActorProvider(HandoverActor, false);
-						
+						*/
+
+						// HACK: turn off SendDestroyToClients() temporarily - we don't want the actor to be destroyed in the clients.
+						bSuppressSendOnServerDestroy = true;
 						GetWorld()->DestroyActor(HandoverActor, true);
+						bSuppressSendOnServerDestroy = false;
 					}
 					else
 					{
@@ -847,6 +852,18 @@ bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetwork
 	return true;
 }
 
+void USpatialChannelDataView::OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId)
+{
+	// Server keeps the NetId-ChannelId mapping for cross-server RPC.
+	if (Connection->IsServer())
+	{
+		RemoveActorProvider(Actor, false);
+		return;
+	}
+	
+	Super::OnDestroyedActor(Actor, NetId);
+}
+
 void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId)
 {
 	// GameState is spawned via GLOBAL channel
@@ -923,6 +940,11 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 
 void USpatialChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkGUID NetId)
 {
+	if (bSuppressSendOnServerDestroy)
+	{
+		return;
+	}
+	
 	// Don't broadcast the destroy of objects that are only spawned in the owning client.
 	// Spatial channels don't support Gameplayer Debugger yet.
 	if (Obj->IsA<APlayerState>() || Obj->IsA<APlayerController>() || Obj->GetClass()->GetFName() == GameplayerDebuggerClassName)

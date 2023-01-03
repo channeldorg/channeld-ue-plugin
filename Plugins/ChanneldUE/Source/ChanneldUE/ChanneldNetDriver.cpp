@@ -1016,7 +1016,7 @@ void UChanneldNetDriver::NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTrav
 			ChannelDataView->SendDestroyToClients(Actor, NetId);
 		}
 		
-		ChannelDataView->OnDestroyedObject(Actor, NetId);
+		ChannelDataView->OnDestroyedActor(Actor, NetId);
 	}
 	else
 	{
@@ -1034,11 +1034,15 @@ void UChanneldNetDriver::NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTrav
 		{
 			UNetConnection* Connection = ClientConnections[i];
 			UActorChannel* Channel = Connection->FindActorChannelRef(Actor);
-			if (Channel)
+			if (Channel && Channel->OpenedLocally)
 			{
-				check(Channel->OpenedLocally);
+				// check(Channel->OpenedLocally);
 				Channel->bClearRecentActorRefs = false;
 				Channel->Close(EChannelCloseReason::Destroyed);
+			}
+			else
+			{
+				Connection->RemoveActorChannel(Actor);
 			}
 			Connection->NotifyActorDestroyed(Actor);
 		}
