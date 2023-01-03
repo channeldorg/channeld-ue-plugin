@@ -80,7 +80,7 @@ public:
 		return ClientConnectionMap.FindRef(ConnId);
 	}
 
-	FORCEINLINE const TMap<uint32, UChanneldNetConnection*>& GetClientConnectionMap() {return ClientConnectionMap;}
+	FORCEINLINE TMap<uint32, UChanneldNetConnection*>& GetClientConnectionMap() {return ClientConnectionMap;}
 
 	virtual ChannelId GetSendToChannelId(UChanneldNetConnection* NetConn) const;
 
@@ -89,6 +89,8 @@ public:
 	
 	void SendCrossServerRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
 	
+	void OnServerBeginPlay(AActor* Actor);
+
 	TWeakObjectPtr<UChannelDataView> ChannelDataView;
 
 protected:
@@ -117,13 +119,16 @@ private:
 
 	TSet<FNetworkGUID> SentSpawnedNetGUIDs;
 
+	// Actors that spawned in server using SpawnActorDeferred (mainly in Blueprints), which don't have ActorComponent registered.
+	// We need to skip these actors in OnServerSpawnedActor(), and actually handle them in their BeginPlay().
+	TSet<TWeakObjectPtr<AActor>> ServerDeferredSpawns;
+
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
 	void OnUserSpaceMessageReceived(uint32 MsgType, ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload);
 	void OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg);
 	void HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
 	void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer);
 	void OnServerSpawnedActor(AActor* Actor);
-	void ServerHandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 
 	void OnSentRPC(class AActor* Actor, FString FuncName);
 

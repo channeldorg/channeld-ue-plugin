@@ -457,7 +457,7 @@ void UChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnection* Net
 	{
 		Role = Actor->GetRemoteRole();
 	}
-	NetConn->SendSpawnMessage(Obj, Role, OwningConnId);
+	NetConn->SendSpawnMessage(Obj, Role, InvalidChannelId, OwningConnId);
 }
 
 void UChannelDataView::OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId)
@@ -679,12 +679,13 @@ void UChannelDataView::OnClientUnsub(ConnectionId ClientConnId, channeldpb::Chan
 {
 	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
 	{
-		if (auto ClientConnection = NetDriver->GetClientConnection(ClientConnId))
+		UChanneldNetConnection* ClientConn;
+		if (NetDriver->GetClientConnectionMap().RemoveAndCopyValue(ClientConnId, ClientConn))
 		{
 			//~ Start copy from UNetDriver::Shutdown()
-			if (ClientConnection->PlayerController)
+			if (ClientConn->PlayerController)
 			{
-				APawn* Pawn = ClientConnection->PlayerController->GetPawn();
+				APawn* Pawn = ClientConn->PlayerController->GetPawn();
 				if (Pawn)
 				{
 					Pawn->Destroy(true);
@@ -693,7 +694,7 @@ void UChannelDataView::OnClientUnsub(ConnectionId ClientConnId, channeldpb::Chan
 
 			// Calls Close() internally and removes from ClientConnections
 			// Will also destroy the player controller.
-			ClientConnection->CleanUp();
+			ClientConn->CleanUp();
 			//~ End copy
 		}
 	}

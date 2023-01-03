@@ -141,7 +141,7 @@ void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, i
 void UChanneldNetConnection::SendMessage(uint32 MsgType, const google::protobuf::Message& Msg, ChannelId ChId)
 {
 	const std::string StrData = Msg.SerializeAsString();
-	SendData(MsgType, reinterpret_cast<const uint8*>(StrData.data()), StrData.size());
+	SendData(MsgType, reinterpret_cast<const uint8*>(StrData.data()), StrData.size(), ChId);
 }
 
 bool UChanneldNetConnection::HasSentSpawn(UObject* Object) const

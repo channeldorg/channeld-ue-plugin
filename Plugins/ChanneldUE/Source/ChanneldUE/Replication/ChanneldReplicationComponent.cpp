@@ -104,6 +104,11 @@ void UChanneldReplicationComponent::BeginPlay()
 	Super::BeginPlay();
 
 	InitOnce();
+
+	if (auto NetDriver = Cast<UChanneldNetDriver>(GetWorld()->GetNetDriver()))
+	{
+		NetDriver->OnServerBeginPlay(GetOwner());
+	}
 }
 
 void UChanneldReplicationComponent::UninitOnce()

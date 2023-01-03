@@ -281,38 +281,6 @@ void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMess
 	}
 }
 
-void UChanneldNetDriver::ServerHandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
-{
-	auto ResultMsg = static_cast<const channeldpb::UnsubscribedFromChannelResultMessage*>(Msg);
-	UE_LOG(LogChanneld, Log, TEXT("Server received unsub of conn(%d), connType=%s, channelType=%s, channelId=%d"),
-		ResultMsg->connid(),
-		UTF8_TO_TCHAR(channeldpb::ConnectionType_Name(ResultMsg->conntype()).c_str()),
-		UTF8_TO_TCHAR(channeldpb::ChannelType_Name(ResultMsg->channeltype()).c_str()),
-		ChId);
-
-	if (ResultMsg->conntype() == channeldpb::CLIENT && Conn->OwnedChannels.Contains(ChId))
-	{
-		UChanneldNetConnection* ClientConnection;
-		if (ClientConnectionMap.RemoveAndCopyValue(ResultMsg->connid(), ClientConnection))
-		{
-			//~ Start copy from UNetDriver::Shutdown()
-			if (ClientConnection->PlayerController)
-			{
-				APawn* Pawn = ClientConnection->PlayerController->GetPawn();
-				if (Pawn)
-				{
-					Pawn->Destroy(true);
-				}
-			}
-
-			// Calls Close() internally and removes from ClientConnections
-			// Will also destroy the player controller.
-			ClientConnection->CleanUp();
-			//~ End copy
-		}
-	}
-}
-
 ConnectionId UChanneldNetDriver::AddrToConnId(const FInternetAddr& Addr)
 {
 	uint32 ConnId;
@@ -511,8 +479,6 @@ bool UChanneldNetDriver::InitListen(FNetworkNotify* InNotify, FURL& LocalURL, bo
 		InitConnectionlessHandler();
 	}
 
-	// ConnToChanneld->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this, &UChanneldNetDriver::ServerHandleUnsub);
-
 	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
 	{
 		FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &UChanneldNetDriver::OnClientPostLogin);
@@ -630,6 +596,12 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		return;
 	}
 
+	if (Actor->HasDeferredComponentRegistration())
+	{
+		ServerDeferredSpawns.Add(Actor);
+		return;
+	}
+
 	// Make sure the NetGUID exists.
 	FNetworkGUID NetId = GuidCache->GetOrAssignNetGUID(Actor);
 	
@@ -738,6 +710,15 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	else
 	{
 		UE_LOG(LogChanneld, Warning, TEXT("Failed to send Spawn message to client as the view doesn't exist. Actor: %s"), *GetNameSafe(Actor));
+	}
+}
+
+void UChanneldNetDriver::OnServerBeginPlay(AActor* Actor)
+{
+	if (ServerDeferredSpawns.Contains(Actor))
+	{
+		OnServerSpawnedActor(Actor);
+		ServerDeferredSpawns.Remove(Actor);
 	}
 }
 
