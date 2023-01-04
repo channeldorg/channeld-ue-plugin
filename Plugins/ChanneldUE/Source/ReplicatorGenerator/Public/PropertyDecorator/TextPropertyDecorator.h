@@ -5,9 +5,16 @@ const static TCHAR* TextPropDeco_SetDeltaStateByMemOffsetTemp =
 	LR"EOF(
 {
   {Code_AssignPropPointers};
-  if ({Code_BeforeCondition}{Declare_PropertyPtr}->EqualTo({Code_GetProtoFieldValue}))
+  if(ForceMarge)
   {
     {Code_SetProtoFieldValue};
+  }
+  if ({Code_BeforeCondition}{Declare_PropertyPtr}->EqualTo({Code_GetProtoFieldValue}))
+  {
+    if(!ForceMarge)
+    {
+      {Code_SetProtoFieldValue};
+    }
     bStateChanged = true;
   }
 }
@@ -18,9 +25,9 @@ const static TCHAR* TextPropDeco_SetDeltaStateArrayInnerTemp =
 std::string PropItem = std::string(TCHAR_TO_UTF8(*(*{Declare_PropertyPtr})[i].ToString()));
 std::string* NewOne = {Declare_DeltaStateName}->add_{Definition_ProtoName}();
 *NewOne = PropItem;
-if (!bStateChanged)
+if (!bPropChanged)
 {
-  bStateChanged = !(PropItem == {Declare_FullStateName}->{Definition_ProtoName}()[i]);
+  bPropChanged = !(PropItem == {Declare_FullStateName}->{Definition_ProtoName}()[i]);
 }
 )EOF";
 

@@ -6,15 +6,9 @@ const static TCHAR* ActorCompPropDeco_SetDeltaStateArrayInnerTemp =
 UObject * & PropItem = (*{Declare_PropertyPtr})[i];
 unrealpb::ActorComponentRef* NewOne = {Declare_DeltaStateName}->add_{Definition_ProtoName}();
 *NewOne = ChanneldUtils::GetRefOfActorComponent(PropItem);
-if (!bStateChanged)
+if (!bPropChanged)
 {
-  if(i > FullStateValueLength)
-  {
-    bStateChanged = true;
-  } else
-  {
-    bStateChanged = !(PropItem == ChanneldUtils::GetActorComponentByRef<UActorComponent>(&{Declare_FullStateName}->{Definition_ProtoName}()[i], {Code_GetWorldRef}));
-  }
+  bPropChanged = !(PropItem == ChanneldUtils::GetActorComponentByRef<UActorComponent>(&{Declare_FullStateName}->{Definition_ProtoName}()[i], {Code_GetWorldRef}));
 }
 )EOF";
 

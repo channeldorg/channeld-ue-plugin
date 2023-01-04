@@ -145,7 +145,7 @@ FString FStructPropertyDecorator::GetCode_SetDeltaState(const FString& TargetIns
 FString FStructPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString& ContainerName, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
 {
 	return FString::Printf(
-		TEXT("{\nvoid* PropAddr = (uint8*)%s + %d; if (%s::Merge(PropAddr, %s&%s->%s(), %s->mutable_%s(), World))\n{\n  bStateChanged = true;\n}\n}\n"),
+		TEXT("{\nvoid* PropAddr = (uint8*)%s + %d; if (%s::Merge(PropAddr, %s&%s->%s(), %s->mutable_%s(), World, ForceMarge))\n{\n  bStateChanged = true;\n}\n}\n"),
 		*ContainerName, GetMemOffset(),
 		*GetDeclaration_PropPtrGroupStructName(),
 		ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? nullptr : ") : TEXT(""),

@@ -38,7 +38,7 @@ struct {Declare_PropPtrGroupStructName}
     return bStateChanged;
   }
   
-  static bool Merge(void* Container, const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* FullState, {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* DeltaState, UWorld* World)
+  static bool Merge(void* Container, const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* FullState, {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* DeltaState, UWorld* World, bool ForceMarge)
   {
     bool bIsFullStateNull = FullState == nullptr;
     bool bStateChanged = false;
@@ -91,10 +91,10 @@ const static TCHAR* StructPropDeco_SetDeltaStateArrayInnerTemp =
   auto PropItem = &(*{Declare_PropertyPtr})[i];
   auto FullStateValue = i <  FullStateValueLength ? &{Declare_FullStateName}->{Definition_ProtoName}()[i] : nullptr;
   auto NewOne = {Declare_DeltaStateName}->add_{Definition_ProtoName}();
-  bool bItemChanged = {Declare_PropPtrGroupStructName}::Merge(PropItem, FullStateValue, NewOne, {Code_GetWorldRef});
-  if (!bStateChanged && bItemChanged)
+  bool bItemChanged = {Declare_PropPtrGroupStructName}::Merge(PropItem, FullStateValue, NewOne, {Code_GetWorldRef}, true);
+  if (!bPropChanged && bItemChanged)
   {
-  	bStateChanged = bItemChanged;
+  	bPropChanged = true;
   }
 }
 )EOF";

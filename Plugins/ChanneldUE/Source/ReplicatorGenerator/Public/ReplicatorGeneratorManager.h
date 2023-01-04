@@ -38,7 +38,7 @@ public:
 	TArray<UClass*> GetActorsWithReplicationComp(const TArray<UClass*>& IgnoreActors);
 
 	bool GenerateAllReplicators();
-	bool GeneratedReplicators(UClass* Target);
+	bool GeneratedReplicators(TArray<UClass*> Targets);
 
 	bool WriteCodeFile(const FString& FilePath, const FString& Code, FString& ResultMessage);
 

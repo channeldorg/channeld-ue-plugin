@@ -3,15 +3,28 @@
 const static TCHAR* ArrPropDeco_SetDeltaStateTemplate =
 	LR"EOF(
 {
+  bool bPropChanged = false;
   const int32 ActorPropLength = {Declare_PropPtrName}->Num();
   const int32 FullStateValueLength = {Code_ConditionFullStateIsNull}{Code_GetProtoFieldValueFrom}.size();
   if (ActorPropLength != FullStateValueLength)
   {
-    bStateChanged = true;
+    bPropChanged = true;
   }
   for (int32 i = 0; i < ActorPropLength; ++i)
   {
   {Code_SetDeltaStateArrayInner}
+  }
+  if (bPropChanged)
+  {
+    bStateChanged = true;
+    if({Declare_FullStateName} != nullptr && {Declare_FullStateName}->{Definition_ProtoName}_size() > 0)
+    {
+      const_cast<{Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}*>({Declare_FullStateName})->clear_{Definition_ProtoName}();
+    }
+  }
+  else
+  {
+    {Declare_DeltaStateName}->clear_{Definition_ProtoName}();
   }
 }
 )EOF";
@@ -19,16 +32,29 @@ const static TCHAR* ArrPropDeco_SetDeltaStateTemplate =
 const static TCHAR* ArrPropDeco_SetDeltaStateByMemOffsetTemp =
 	LR"EOF(
 {
+  bool bPropChanged = false;
   {Code_AssignPropPointers};
   const int32 ActorPropLength = PropAddr->Num();
   const int32 FullStateValueLength = {Code_ConditionFullStateIsNull}{Code_GetProtoFieldValueFrom}.size();
   if (ActorPropLength != FullStateValueLength)
   {
-    bStateChanged = true;
+    bPropChanged = true;
   }
   for (int32 i = 0; i < ActorPropLength; ++i)
   {
   {Code_SetDeltaStateArrayInner}
+  }
+  if(bPropChanged)
+  {
+    bStateChanged = true;
+    if({Declare_FullStateName} != nullptr && {Declare_FullStateName}->{Definition_ProtoName}_size() > 0)
+    {
+      const_cast<{Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}*>({Declare_FullStateName})->clear_{Definition_ProtoName}();
+    }
+  }
+  else if(!ForceMarge)
+  {
+    {Declare_DeltaStateName}->clear_{Definition_ProtoName}();
   }
 }
 )EOF";
@@ -48,8 +74,8 @@ const static TCHAR* ArrPropDeco_OnChangeStateTemp =
   }
   if(bPropChanged)
   {
-    {Code_CallRepNotify}
     bStateChanged = true;
+    {Code_CallRepNotify}
   }
 }
 )EOF";
@@ -59,7 +85,10 @@ const static TCHAR* ArrPropDeco_SetPropertyValueTemp =
 const int32 ActorPropLength = {Declare_PropPtrName}->Num();
 auto & MessageArr = {Code_GetProtoFieldValueFrom};
 const int32 NewStateValueLength = MessageArr.size();
-if (ActorPropLength != NewStateValueLength) { bPropChanged = true; }
+if (ActorPropLength != NewStateValueLength)
+{ 
+  bPropChanged = true; 
+}
 {Declare_PropPtrName}->SetNum(NewStateValueLength);
 for (int32 i = 0; i < NewStateValueLength; ++i)
 {
@@ -70,15 +99,23 @@ for (int32 i = 0; i < NewStateValueLength; ++i)
 const static TCHAR* ArrPropDeco_SetPropertyValueByMemOffsetTemp =
 	LR"EOF(
 {
+  bool bPropChanged = false;
   {Code_AssignPropPointers};
   const int32 ActorPropLength = {Declare_PropPtrName}->Num();
   auto & MessageArr = {Code_GetProtoFieldValueFrom};
   const int32 NewStateValueLength = MessageArr.size();
-  if (ActorPropLength != NewStateValueLength) { bStateChanged = true; }
+  if (ActorPropLength != NewStateValueLength)
+  { 
+    bPropChanged = true;
+  }
   {Declare_PropPtrName}->SetNum(NewStateValueLength);
   for (int32 i = 0; i < NewStateValueLength; ++i)
   {
   {Code_SetPropertyValueArrayInner}
+  }
+  if (bPropChanged)
+  {
+    bStateChanged = true;
   }
 }
 )EOF";

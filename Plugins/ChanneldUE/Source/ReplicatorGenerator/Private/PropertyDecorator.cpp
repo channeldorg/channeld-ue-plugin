@@ -147,7 +147,7 @@ FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetIn
 
 FString FPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode)
 {
-	return FString::Printf(TEXT("%s = %s;\nF = true;\n%s"), *GetCode_GetPropertyValueFrom(TargetInstance), *GetCode_GetProtoFieldValueFrom(NewStateName), *AfterSetValueCode);
+	return FString::Printf(TEXT("%s = %s;\nbStateChanged = true;\n%s"), *GetCode_GetPropertyValueFrom(TargetInstance), *GetCode_GetProtoFieldValueFrom(NewStateName), *AfterSetValueCode);
 }
 
 FString FPropertyDecorator::GetDeclaration_PropertyPtr()

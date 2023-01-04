@@ -6,15 +6,9 @@ const static TCHAR* RotatorPropDeco_SetDeltaStateArrayInnerTemp =
 FRotator& PropItem = (*{Declare_PropertyPtr})[i];
 unrealpb::FVector* NewOne = {Declare_DeltaStateName}->add_{Definition_ProtoName}();
 ChanneldUtils::SetIfNotSame(NewOne, PropItem);
-if (!bStateChanged)
+if (!bPropChanged)
 {
-  if(i > FullStateValueLength)
-  {
-    bStateChanged = true;
-  } else
-  {
-    bStateChanged = !(PropItem == ChanneldUtils::GetRotator({Declare_FullStateName}->{Definition_ProtoName}()[i]));
-  }
+  bPropChanged = !(PropItem == ChanneldUtils::GetRotator({Declare_FullStateName}->{Definition_ProtoName}()[i]));
 }
 )EOF";
 

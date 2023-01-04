@@ -274,13 +274,13 @@ bool FReplicatorGeneratorManager::GenerateAllReplicators()
 	return true;
 }
 
-bool FReplicatorGeneratorManager::GeneratedReplicators(UClass* Target)
+bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<UClass*> Targets)
 {
 	TArray<FString> IncludeActorCodes, RegisterReplicatorCodes;
 
 	FReplicatorCodeBundle ReplicatorCodeBundle;
 
-	CodeGenerator->Generate(TArray<UClass*>{Target}, ReplicatorCodeBundle);
+	CodeGenerator->Generate(Targets, ReplicatorCodeBundle);
 	FString WriteCodeFileMessage;
 
 	// Generate replicator code file

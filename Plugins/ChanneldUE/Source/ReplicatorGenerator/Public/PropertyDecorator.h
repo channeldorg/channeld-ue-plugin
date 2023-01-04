@@ -25,9 +25,16 @@ const static TCHAR* PropDeco_SetDeltaStateByMemOffsetTemp =
 	LR"EOF(
 {
   {Code_AssignPropPointers};
-  if ({Code_BeforeCondition}*{Declare_PropertyPtr} != {Code_GetProtoFieldValue})
+  if(ForceMarge)
   {
     {Code_SetProtoFieldValue};
+  }
+  if ({Code_BeforeCondition}*{Declare_PropertyPtr} != {Code_GetProtoFieldValue})
+  {
+    if(!ForceMarge)
+    {
+      {Code_SetProtoFieldValue};
+    }
     bStateChanged = true;
   }
 }

@@ -6,9 +6,9 @@ const static TCHAR* NamePropDeco_SetDeltaStateArrayInnerTemp =
 std::string PropItem = std::string(TCHAR_TO_UTF8(*(*{Declare_PropertyPtr})[i].ToString()));
 std::string* NewOne = {Declare_DeltaStateName}->add_{Definition_ProtoName}();
 *NewOne = PropItem;
-if (!bStateChanged)
+if (!bPropChanged)
 {
-  bStateChanged = !(PropItem == {Declare_FullStateName}->{Definition_ProtoName}()[i]);
+  bPropChanged = !(PropItem == {Declare_FullStateName}->{Definition_ProtoName}()[i]);
 }
 )EOF";
 
