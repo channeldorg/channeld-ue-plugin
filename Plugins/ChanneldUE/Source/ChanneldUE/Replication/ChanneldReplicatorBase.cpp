@@ -35,3 +35,19 @@ uint32 FChanneldReplicatorBase::GetNetGUID()
 	}
 	return NetGUID.Value;
 }
+
+uint32 FChanneldReplicatorBase_AC::GetNetGUID()
+{
+	if (!NetGUID.IsValid())
+	{
+		if (TargetObject.IsValid())
+		{
+			UWorld* World = TargetObject->GetWorld();
+			if (World && World->GetNetDriver())
+			{
+				NetGUID = World->GetNetDriver()->GuidCache->GetNetGUID(CastChecked<UActorComponent>(TargetObject.Get())->GetOwner());
+			}
+		}
+	}
+	return NetGUID.Value;
+}

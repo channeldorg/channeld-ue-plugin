@@ -3,7 +3,7 @@
 #include "ChanneldUtils.h"
 #include "Net/UnrealNetwork.h"
 
-FChanneldSceneComponentReplicator::FChanneldSceneComponentReplicator(USceneComponent* InSceneComp) : FChanneldReplicatorBase(InSceneComp)
+FChanneldSceneComponentReplicator::FChanneldSceneComponentReplicator(USceneComponent* InSceneComp) : FChanneldReplicatorBase_AC(InSceneComp)
 {
 	SceneComp = InSceneComp;
 
@@ -30,22 +30,6 @@ FChanneldSceneComponentReplicator::FChanneldSceneComponentReplicator(USceneCompo
 		bShouldSnapRotationWhenAttachedPtr = Property->ContainerPtrToValuePtr<uint8>(SceneComp.Get());
 		check(bShouldSnapRotationWhenAttachedPtr);
 	}
-}
-
-uint32 FChanneldSceneComponentReplicator::GetNetGUID()
-{
-	if (!NetGUID.IsValid())
-	{
-		if (SceneComp.IsValid())
-		{
-			UWorld* World = SceneComp->GetWorld();
-			if (World && World->GetNetDriver())
-			{
-				NetGUID = World->GetNetDriver()->GuidCache->GetNetGUID(SceneComp->GetOwner());
-			}
-		}
-	}
-	return NetGUID.Value;
 }
 
 FChanneldSceneComponentReplicator::~FChanneldSceneComponentReplicator()
@@ -114,8 +98,7 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	USceneComponent* AttachParent = ChanneldUtils::GetActorComponentByRef<USceneComponent>(FullState->mutable_attachparent(), SceneComp->GetWorld());
-	if (AttachParent != SceneComp->GetAttachParent())
+	if (ChanneldUtils::GetActorComponentByRef(FullState->mutable_attachparent(), SceneComp->GetWorld()) != SceneComp->GetAttachParent())
 	{
 		if (SceneComp->GetAttachParent() == nullptr)
 		{
@@ -184,12 +167,6 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::M
 		return;
 	}
 
-	// Only simulated proxy need to update from the channel data
-	if (SceneComp->GetOwnerRole() > ENetRole::ROLE_SimulatedProxy)
-	{
-		return;
-	}
-
 	auto NewState = static_cast<const unrealpb::SceneComponentState*>(InNewState);
 	FullState->MergeFrom(*NewState);
 	bStateChanged = false;
@@ -239,7 +216,7 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::M
 
 	if (NewState->has_attachparent())
 	{
-		USceneComponent* AttachParent = ChanneldUtils::GetActorComponentByRef<USceneComponent>(&NewState->attachparent(), SceneComp->GetWorld());
+		USceneComponent* AttachParent = Cast<USceneComponent>(ChanneldUtils::GetActorComponentByRef(&NewState->attachparent(), SceneComp->GetWorld()));
 		if (AttachParent && AttachParent != SceneComp->GetAttachParent())
 		{
 			FName AttachSocketName; 
@@ -284,7 +261,7 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::M
 		AttachChildren.Empty();
 		for (auto ChildRef : NewState->attachchildren())
 		{
-			auto Child = ChanneldUtils::GetActorComponentByRef<USceneComponent>(&ChildRef, SceneComp->GetWorld());
+			auto Child = Cast<USceneComponent>(ChanneldUtils::GetActorComponentByRef(&ChildRef, SceneComp->GetWorld()));
 			if (Child)
 			{
 				AttachChildren.Add(Child);
