@@ -118,7 +118,7 @@ void USpatialChannelDataView::CreatePlayerController(UChanneldNetConnection* Cli
 	//~ End copy of UWorld::SpawnPlayActor
 }
 
-TArray<UObject*> USpatialChannelDataView::GetHandoverObjects(UObject* Obj, ChannelId SrcChId, ChannelId DstChId)
+TArray<UObject*> USpatialChannelDataView::GetHandoverObjects_Implementation(UObject* Obj, int32 SrcChId, int32 DstChId)
 {
 	TArray<UObject*> Result;
 	Result.Add(Obj);

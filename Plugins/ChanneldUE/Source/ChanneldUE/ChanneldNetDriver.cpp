@@ -829,10 +829,13 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 	const FString FuncName = FuncFName.ToString();
 	const bool bShouldLog = FuncFName != ServerMovePackedFuncName && FuncFName != ClientMoveResponsePackedFuncName && FuncFName != ServerUpdateCameraFuncName;
 	UE_CLOG(bShouldLog, LogChanneld, Verbose, TEXT("Sending RPC %s::%s, SubObject: %s"), *Actor->GetName(), *FuncName, *GetNameSafe(SubObject));
-	if (Function->GetFName() == FName("AddJumps"))
+	/*
+	if (Function->GetFName() == FName("ServerToggleRotation"))
 	{
-		UE_DEBUG_BREAK();
+		//UE_DEBUG_BREAK();
+		UE_LOG(LogChanneld, VeryVerbose, TEXT(""));
 	}
+	*/
 	
 	if (Actor->IsActorBeingDestroyed())
 	{

@@ -186,7 +186,7 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 			DeltaState->mutable_attachmentreplication()->mutable_attachparent()->CopyFrom(ChanneldUtils::GetRefOfObject(RepAttachment.AttachParent, Actor->GetNetConnection()));
 			bStateChanged = true;
 		}
-		if (RepAttachment.AttachComponent != ChanneldUtils::GetActorComponentByRef<USceneComponent>(RepAttachmentFullState->mutable_attachcomponent(), Actor->GetWorld()))
+		if (RepAttachment.AttachComponent != Cast<USceneComponent>(ChanneldUtils::GetActorComponentByRef(RepAttachmentFullState->mutable_attachcomponent(), Actor->GetWorld())))
 		{
 			DeltaState->mutable_attachmentreplication()->mutable_attachcomponent()->CopyFrom(ChanneldUtils::GetRefOfActorComponent(RepAttachment.AttachComponent, Actor->GetNetConnection()));
 			bStateChanged = true;

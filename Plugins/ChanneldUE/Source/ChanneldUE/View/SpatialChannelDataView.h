@@ -56,7 +56,8 @@ protected:
 	 * @param DstChId The channel the object is going to be handed over to. Should NOT be in the OwnedChannels of this server.
 	 * @return The group of objects that should be sent to channeld for handover. If empty, the handover will not happen.
 	 */
-	virtual TArray<UObject*> GetHandoverObjects(UObject* Obj, ChannelId SrcChId, ChannelId DstChId);
+	UFUNCTION(BlueprintNativeEvent, Category="Spatial")
+	TArray<UObject*> GetHandoverObjects(UObject* Obj, int32 SrcChId, int32 DstChId);
 	
 private:
 	const FName GameplayerDebuggerClassName = FName("GameplayDebuggerCategoryReplicator");

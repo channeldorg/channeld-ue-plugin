@@ -72,7 +72,7 @@ bool FChanneldCharacterMoveResponseDataContainer::Serialize(
 			ObjRef.ParseFromArray(NewBaseData, DataSize);
 			delete[] NewBaseData;
 			bool bNetGUIDUnmapped;
-			ClientAdjustment.NewBase = ChanneldUtils::GetActorComponentByRefChecked<UPrimitiveComponent>(&ObjRef, CharacterMovement.GetWorld(), bNetGUIDUnmapped);
+			ClientAdjustment.NewBase = Cast<UPrimitiveComponent>(ChanneldUtils::GetActorComponentByRefChecked(&ObjRef, CharacterMovement.GetWorld(), bNetGUIDUnmapped));
 			/* Maybe we don't need to fail
 			if (!bNetGUIDUnmapped)
 				return false;

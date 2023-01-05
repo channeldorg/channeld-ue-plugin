@@ -142,7 +142,7 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 	bool bMovementInfoChanged = false;
 	unrealpb::FBasedMovementInfo* MovementInfo = FullState->mutable_basedmovement();
 	unrealpb::FBasedMovementInfo* MovementInfoDelta = DeltaState->mutable_basedmovement();
-	auto OldMovementBase = ChanneldUtils::GetActorComponentByRef<UPrimitiveComponent>(MovementInfo->mutable_movementbase(), Character->GetWorld());
+	auto OldMovementBase = Cast<UPrimitiveComponent>(ChanneldUtils::GetActorComponentByRef(MovementInfo->mutable_movementbase(), Character->GetWorld()));
 	if (OldMovementBase != Character->GetMovementBase())
 	{
 		uint32 OldNetGUID = MovementInfoDelta->mutable_movementbase()->mutable_owner()->netguid();
@@ -261,7 +261,7 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 			{
 				ClientConn = Cast<UChanneldNetConnection>(Character->GetNetConnection());
 			}
-			BasedMovement.MovementBase = ChanneldUtils::GetActorComponentByRef<UPrimitiveComponent>(&NewState->basedmovement().movementbase(), Character->GetWorld(), true, ClientConn);
+			BasedMovement.MovementBase = Cast<UPrimitiveComponent>(ChanneldUtils::GetActorComponentByRef(&NewState->basedmovement().movementbase(), Character->GetWorld(), true, ClientConn));
 		}
 		if (NewState->basedmovement().has_bonename())
 		{
