@@ -632,7 +632,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 		if (RepComp)
 		{
 			bool bSuccess = true;
-			auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters, bSuccess);
+			auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters, OutParms, bSuccess);
 			if (bSuccess)
 			{
 				auto ChanneldConn = GEngine->GetEngineSubsystem<UChanneldConnection>();

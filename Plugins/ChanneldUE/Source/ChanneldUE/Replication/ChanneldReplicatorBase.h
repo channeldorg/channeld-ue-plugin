@@ -31,7 +31,7 @@ public:
 	// [Client] Apply ChannelDataUpdate received from channeld
     virtual void OnStateChanged(const google::protobuf::Message* NewState) = 0;
 
-    virtual TSharedPtr<google::protobuf::Message> SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess) { bSuccess = false; return nullptr; }
+    virtual TSharedPtr<google::protobuf::Message> SerializeFunctionParams(UFunction* Func, void* Params, FOutParmRec* OutParams, bool& bSuccess) { bSuccess = false; return nullptr; }
     virtual TSharedPtr<void> DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC) { bSuccess = false; return nullptr; }
 
 protected:

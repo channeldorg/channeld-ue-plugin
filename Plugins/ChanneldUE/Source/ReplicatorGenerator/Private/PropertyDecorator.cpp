@@ -7,7 +7,7 @@ FPropertyDecorator::FPropertyDecorator(FProperty* InProperty, IPropertyDecorator
 
 bool FPropertyDecorator::Init(const TFunction<FString()>& SetNameForIllegalPropName)
 {
-	if(bInitialized)
+	if (bInitialized)
 	{
 		return false;
 	}
@@ -59,6 +59,15 @@ void FPropertyDecorator::SetForceNotDirectlyAccessible(bool ForceNotDirectlyAcce
 bool FPropertyDecorator::IsDeclaredInCPP()
 {
 	return true;
+}
+
+bool FPropertyDecorator::HasAnyPropertyFlags(EPropertyFlags PropertyFlags)
+{
+	if (OriginalProperty == nullptr)
+	{
+		return false;
+	}
+	return (OriginalProperty->PropertyFlags & PropertyFlags) != 0;
 }
 
 FString FPropertyDecorator::GetPropertyName()
@@ -157,36 +166,18 @@ FString FPropertyDecorator::GetDeclaration_PropertyPtr()
 
 FString FPropertyDecorator::GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo)
 {
+	return GetCode_AssignPropPointer(Container, AssignTo, GetMemOffset());
+}
+
+FString FPropertyDecorator::GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset)
+{
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Ref_AssignTo"), AssignTo);
 	FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
 	FormatArgs.Add(TEXT("Declare_PropertyCPPType"), GetCPPType());
-	FormatArgs.Add(TEXT("Num_PropMemOffset"), GetMemOffset());
+	FormatArgs.Add(TEXT("Num_PropMemOffset"), MemOffset);
 
 	return FString::Format(PropDecorator_AssignPropPtrTemp, FormatArgs);
-}
-
-FString FPropertyDecorator::GetCode_AssignPropPtrDispersedly(const FString& Container, const FString& ContainerTemplate, const FString& AssignTo)
-{
-	FStringFormatNamedArguments FormatArgs;
-	FormatArgs.Add(TEXT("Ref_AssignTo"), AssignTo);
-	FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
-	FormatArgs.Add(TEXT("Ref_ContainerTemplate"), ContainerTemplate);
-	FormatArgs.Add(TEXT("Declare_PropertyCPPType"), GetCPPType());
-	FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
-
-	return FString::Format(PropDecorator_AssignPropPtrDispersedlyTemp, FormatArgs);
-}
-
-FString FPropertyDecorator::GetCode_AssignPropPtrOrderly(const FString& Container, const FString& ContainerTemplate, const FString& AssignTo)
-{
-	FStringFormatNamedArguments FormatArgs;
-	FormatArgs.Add(TEXT("Ref_AssignTo"), AssignTo);
-	FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
-	FormatArgs.Add(TEXT("Ref_ContainerTemplate"), ContainerTemplate);
-	FormatArgs.Add(TEXT("Declare_PropertyCPPType"), GetCPPType());
-
-	return FString::Format(PropDecorator_AssignPropPtrOrderlyTemp, FormatArgs);
 }
 
 FString FPropertyDecorator::GetCode_GetProtoFieldValueFrom(const FString& StateName)

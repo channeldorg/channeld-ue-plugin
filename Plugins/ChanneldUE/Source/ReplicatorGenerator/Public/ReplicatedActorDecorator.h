@@ -4,6 +4,33 @@
 #include "RPCDecorator.h"
 #include "Manifest.h"
 
+static const TCHAR* ActorComp_GetNetGUIDTemplate =
+	LR"EOF(
+uint32 {Declare_ReplicatorClassName}::GetNetGUID()
+{
+  if (!NetGUID.IsValid())
+  {
+    if ({Ref_TargetInstanceRef}.IsValid())
+    {
+      UWorld* World = {Ref_TargetInstanceRef}->GetWorld();
+      if (World && World->GetNetDriver())
+      {
+        NetGUID = World->GetNetDriver()->GuidCache->GetNetGUID({Ref_TargetInstanceRef}->GetOwner());
+      }
+    }
+  }
+  return NetGUID.Value;
+}
+)EOF";
+
+static const TCHAR* GameState_GetNetGUIDTemplate =
+	LR"EOF(
+uint32 {Declare_ReplicatorClassName}::GetNetGUID()
+{
+  return 1;
+}
+)EOF";
+
 class FReplicatedActorDecorator : public IPropertyDecoratorOwner
 {
 public:
@@ -101,6 +128,8 @@ public:
 
 	FString GetCode_SerializeFunctionParams();
 	FString GetCode_DeserializeFunctionParams();
+	
+	FString GetDeclaration_RPCParamStructNamespace();
 
 	FString GetDeclaration_RPCParamStructs();
 
@@ -108,6 +137,8 @@ public:
 	void SetInstanceRefName(const FString& InstanceRefName);
 
 	virtual FString GetCode_GetWorldRef() override;
+
+	virtual FString GetCode_OverrideGetNetGUID();
 
 protected:
 	const UClass* Target;

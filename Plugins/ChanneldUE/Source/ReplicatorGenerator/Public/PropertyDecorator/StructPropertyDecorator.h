@@ -1,23 +1,6 @@
 ﻿#pragma once
 #include "PropertyDecorator.h"
 
-// const static TCHAR* StructPropertyDeco_SetDeltaStateTemplate =
-// 	LR"EOF(
-// if ({Code_GetPropertyValue} != {Code_GetProtoFieldValue})
-// {
-//   {Code_SetProtoFieldValue};
-//   bStateChanged = true;
-// }
-// )EOF";
-//
-// const static TCHAR* StructPropDeco_OnChangeStateTemplate =
-// 	LR"EOF(
-// if ({Code_HasProtoFieldValue} && {Code_GetPropertyValue} != {Code_GetProtoFieldValue})
-// {
-//   {Code_SetPropertyValue};
-// }
-// )EOF";
-
 const static TCHAR* StructPropDeco_PropPtrGroupStructTemp =
 	LR"EOF(
 struct {Declare_PropPtrGroupStructName}
@@ -26,6 +9,11 @@ struct {Declare_PropPtrGroupStructName}
   {Declare_PropPtrGroupStructName}(void* Container)
   {
 {Code_AssignPropPointers}
+  }
+
+  {Declare_PropPtrGroupStructName}(void* Params, FOutParmRec* OutParams)
+  {
+{Code_AssignPropPointersForRPC}
   }
 
 {Declare_PropertyPointers}
@@ -72,18 +60,6 @@ const static TCHAR* StructPropDeco_AssignPropPtrTemp =
 	LR"EOF(
 void* PropertyAddr = (uint8*){Ref_ContainerAddr} + {Num_PropMemOffset};
 {Ref_AssignTo} = {Declare_PropPtrGroupStructName}(PropertyAddr))EOF";
-
-const static TCHAR* StructPropDeco_AssignPropPtrDispersedlyTemp =
-	LR"EOF(
-FStructProperty* StructProperty = CastFieldChecked<FStructProperty>({Ref_ContainerTemplate}->FindPropertyByName(TEXT("{Declare_PropertyName}")));
-void* PropertyAddr = StructProperty->ContainerPtrToValuePtr<void>({Ref_ContainerAddr});
-{Ref_AssignTo} = {Declare_PropPtrGroupStructName}(StructProperty->Struct, PropertyAddr))EOF";
-
-const static TCHAR* StructPropDeco_AssignPropPtrOrderlyTemp =
-	LR"EOF(
-FStructProperty* StructProperty = CastFieldChecked<FStructProperty>({Ref_ContainerTemplate});
-void* PropertyAddr = StructProperty->ContainerPtrToValuePtr<void>({Ref_ContainerAddr});
-{Ref_AssignTo} = {Declare_PropPtrGroupStructName}(StructProperty->Struct, PropertyAddr))EOF";
 
 const static TCHAR* StructPropDeco_SetDeltaStateArrayInnerTemp =
 	LR"EOF(
@@ -133,11 +109,7 @@ public:
 	
 	virtual FString GetDeclaration_PropertyPtr() override;
 	
-	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo) override;
-
-	virtual FString GetCode_AssignPropPtrDispersedly(const FString& Container, const FString& ContainerTemplate, const FString& AssignTo) override;
-	
-	virtual FString GetCode_AssignPropPtrOrderly(const FString& Container, const FString& ContainerTemplate, const FString& AssignTo) override;
+	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset) override;
 	
 	virtual TArray<FString> GetAdditionalIncludes() override;
 	

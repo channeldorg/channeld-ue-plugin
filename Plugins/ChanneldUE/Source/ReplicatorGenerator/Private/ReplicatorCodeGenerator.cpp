@@ -3,7 +3,6 @@
 #include "Manifest.h"
 #include "PropertyDecoratorFactory.h"
 #include "ReplicatorGeneratorDefinition.h"
-#include "GameFramework/GameStateBase.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "ReplicatorTemplate/BlueprintReplicatorTemplate.h"
 #include "ReplicatorTemplate/CppReplicatorTemplate.h"
@@ -169,6 +168,8 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 		FormatArgs.Add(TEXT("Declare_TargetBaseClassName"), TargetBaseClassName);
 	}
 
+	FString OverrideGetNetGUIDImplCode = Target->GetCode_OverrideGetNetGUID();
+
 	// ---------- Head code ----------
 	FormatArgs.Add(TEXT("Code_IncludeActorHeader"), ReplicatorCode.IncludeActorCode);
 	FormatArgs.Add(TEXT("File_ProtoPbHead"), Target->GetActorName() + CodeGen_ProtoPbHeadExtension);
@@ -176,11 +177,12 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	FormatArgs.Add(TEXT("Declare_IndirectlyAccessiblePropertyPtrs"), Target->GetCode_IndirectlyAccessiblePropertyPtrDeclarations());
 	FormatArgs.Add(
 		TEXT("Code_OverrideGetNetGUID"),
-		TargetActor->IsChildOf(AGameStateBase::StaticClass()) ? TEXT("virtual uint32 GetNetGUID() override { return 1; }") : TEXT("")
+		OverrideGetNetGUIDImplCode.IsEmpty() ? TEXT("") : TEXT("virtual uint32 GetNetGUID() override;")
 	);
 
 	// RPC
 	FormatArgs.Add(TEXT("Declare_OverrideSerializeAndDeserializeFunctionParams"), Target->GetRPCNum() > 0 ? CodeGen_SerializeAndDeserializeFunctionParams : TEXT(""));
+	FormatArgs.Add(TEXT("Declare_RPCParamStructNamespace"), Target->GetDeclaration_RPCParamStructNamespace());
 	FormatArgs.Add(TEXT("Declare_RPCParamStructs"), Target->GetDeclaration_RPCParamStructs());
 
 	ReplicatorCode.HeadCode = FString::Format(bIsBlueprint ? CodeGen_BP_HeadCodeTemplate : CodeGen_CPP_HeadCodeTemplate, FormatArgs);
@@ -190,10 +192,10 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	// ---------- Cpp code ----------
 	FStringBuilderBase CppCodeBuilder;
 	CppCodeBuilder.Append(TEXT("#include \"") + ReplicatorCode.HeadFileName + TEXT("\"\n\n"));
-	// if(Target->GetRPCNum() > 0)
-	// {
-	// 	CppCodeBuilder.Append(TEXT("DEFINE_LOG_CATEGORY(LogChanneld);\n"));
-	// }
+	if (Target->GetRPCNum() > 0)
+	{
+		CppCodeBuilder.Append(FString::Printf(TEXT("using namespace %s;"), *Target->GetDeclaration_RPCParamStructNamespace()));
+	}
 	FormatArgs.Add(
 		TEXT("Code_AssignPropertyPointers"),
 		Target->GetCode_AssignPropertyPointers()
@@ -205,6 +207,10 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	CppCodeBuilder.Append(FString::Format(CodeGen_CPP_DestructorImplTemplate, FormatArgs));
 	CppCodeBuilder.Append(FString::Format(CodeGen_CPP_GetDeltaStateImplTemplate, FormatArgs));
 	CppCodeBuilder.Append(FString::Format(CodeGen_CPP_ClearStateImplTemplate, FormatArgs));
+	if (!OverrideGetNetGUIDImplCode.IsEmpty())
+	{
+		CppCodeBuilder.Append(OverrideGetNetGUIDImplCode);
+	}
 
 	FormatArgs.Add(
 		TEXT("Code_AllPropertiesSetDeltaState"),

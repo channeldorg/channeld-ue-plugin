@@ -83,7 +83,7 @@ void FChanneldControllerReplicator::OnStateChanged(const google::protobuf::Messa
 	}
 }
 
-TSharedPtr<google::protobuf::Message> FChanneldControllerReplicator::SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess)
+TSharedPtr<google::protobuf::Message> FChanneldControllerReplicator::SerializeFunctionParams(UFunction* Func, void* Params, FOutParmRec* OutParams, bool& bSuccess)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ClientSetLocation"))

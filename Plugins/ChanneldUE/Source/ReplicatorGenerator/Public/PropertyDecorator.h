@@ -43,9 +43,9 @@ const static TCHAR* PropDeco_SetDeltaStateByMemOffsetTemp =
 const static TCHAR* PropDeco_SetDeltaStateArrayInnerTemp =
 	LR"EOF(
 {Declare_DeltaStateName}->add_{Definition_ProtoName}((*{Declare_PropertyPtr})[i]);
-if (!bStateChanged)
+if (!bPropChanged)
 {
-  bStateChanged = !((*{Declare_PropertyPtr})[i] == {Declare_FullStateName}->{Definition_ProtoName}()[i]);
+  bPropChanged = !((*{Declare_PropertyPtr})[i] == {Declare_FullStateName}->{Definition_ProtoName}()[i]);
 }
 )EOF";
 
@@ -119,6 +119,8 @@ public:
 	 * If the property cpp type is declared in cpp (e.g. uint32, FString), return true.
 	 */
 	virtual bool IsDeclaredInCPP();
+	
+	virtual bool HasAnyPropertyFlags(EPropertyFlags PropertyFlags);
 
 	/**
   	  * Get the name of field
@@ -222,22 +224,7 @@ public:
 	virtual FString GetDeclaration_PropertyPtr();
 
 	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo);
-
-	/**
-	 * Code of assign property pointer by result FProperty of FindPropertyByName
-	 *
-	 * For example:
-	 *     CastFieldChecked<const FByteProperty>(ContainerTemplate->FindPropertyByName(FName("ByteProperty01")))->ContainerPtrToValuePtr<uint8>(Container)
-	 */
-	virtual FString GetCode_AssignPropPtrDispersedly(const FString& Container, const FString& ContainerTemplate, const FString& AssignTo);
-
-	/**
-     * Code of assign property pointer by FProperty
-     *
-     * For example:
-     *     CastFieldChecked<const FByteProperty>(ContainerTemplate->ContainerPtrToValuePtr<uint8>(Container)
-     */
-	virtual FString GetCode_AssignPropPtrOrderly(const FString& Container, const FString& ContainerTemplate, const FString& AssignTo);
+	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset);
 
 	/**
 	 * Code that get field value from protobuf message
@@ -270,7 +257,6 @@ public:
 	 */
 	virtual FString GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState);
 	virtual FString GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState, bool ForceFromPointer);
-
 
 	/**
 	 * Code that set delta state

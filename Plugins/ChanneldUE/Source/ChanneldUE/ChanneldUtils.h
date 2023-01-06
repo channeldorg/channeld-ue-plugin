@@ -31,6 +31,46 @@ public:
 		return FRotator(InVec.x(), InVec.y(), InVec.z());
 	}
 
+	static bool IsSame(const unrealpb::FVector* VectorToSet, const FVector& VectorToCheck)
+	{
+		if(VectorToSet == nullptr)
+			return false;
+		if (!FMath::IsNearlyEqual(VectorToSet->x(), VectorToCheck.X))
+		{
+			return false;
+		}
+		if (!FMath::IsNearlyEqual(VectorToSet->y(), VectorToCheck.Y))
+		{
+			return false;
+		}
+		if (!FMath::IsNearlyEqual(VectorToSet->z(), VectorToCheck.Z))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	static bool IsSame(const unrealpb::FVector* RotatorToSet, const FRotator& RotatorToCheck)
+	{
+		if(RotatorToSet == nullptr)
+		{
+			return  false;
+		}
+		if (!FMath::IsNearlyEqual(RotatorToSet->x(), RotatorToCheck.Pitch))
+		{
+			return false;
+		}
+		if (!FMath::IsNearlyEqual(RotatorToSet->y(), RotatorToCheck.Yaw))
+		{
+			return false;
+		}
+		if (!FMath::IsNearlyEqual(RotatorToSet->z(), RotatorToCheck.Roll))
+		{
+			return false;
+		}
+		return true;
+	}
+
 	static bool SetIfNotSame(unrealpb::FVector* VectorToSet, const FVector& VectorToCheck)
 	{
 		bool bNotSame = false;

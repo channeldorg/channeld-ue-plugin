@@ -71,7 +71,7 @@ void FChanneldPlayerControllerReplicator::OnStateChanged(const google::protobuf:
 	FullState->MergeFrom(*NewState);
 }
 
-TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess)
+TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::SerializeFunctionParams(UFunction* Func, void* Params, FOutParmRec* OutParams, bool& bSuccess)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ServerUpdateCamera"))

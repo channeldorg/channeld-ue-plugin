@@ -276,6 +276,8 @@ bool FReplicatorGeneratorManager::GenerateAllReplicators()
 
 bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<UClass*> Targets)
 {
+	CodeGenerator->RefreshModuleInfoByClassName();
+
 	TArray<FString> IncludeActorCodes, RegisterReplicatorCodes;
 
 	FReplicatorCodeBundle ReplicatorCodeBundle;

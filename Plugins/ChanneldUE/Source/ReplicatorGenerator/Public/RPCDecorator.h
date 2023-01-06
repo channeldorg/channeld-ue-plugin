@@ -6,7 +6,7 @@ static const TCHAR* RPC_SerializeFuncParamsTemp =
 	LR"EOF(
 if(Func->GetFName() == FName("{Declare_FuncName}"))
 {
-  {Declare_PropPtrGroupStructName} ParamPointerGroup(Params);
+  {Declare_PropPtrGroupStructName} ParamPointerGroup(Params, OutParams);
   auto Msg = new {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}();
   ParamPointerGroup.Merge(nullptr, Msg, {Code_GetWorldRef});
   return MakeShareable(Msg);

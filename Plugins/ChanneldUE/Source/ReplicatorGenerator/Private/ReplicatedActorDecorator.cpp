@@ -1,6 +1,7 @@
 ﻿#include "ReplicatedActorDecorator.h"
 
 #include "PropertyDecoratorFactory.h"
+#include "GameFramework/GameStateBase.h"
 #include "ReplicatorTemplate/CppReplicatorTemplate.h"
 
 FReplicatedActorDecorator::FReplicatedActorDecorator(const UClass* TargetActorClass, const TFunction<FString()>& SetBPTargetRepName)
@@ -51,7 +52,7 @@ void FReplicatedActorDecorator::Init()
 			}
 		);
 	}
-	
+
 	// Construct all rpc func decorator
 	TArray<FName> FunctionNames;
 	Target->GenerateFunctionList(FunctionNames);
@@ -107,10 +108,14 @@ FString FReplicatedActorDecorator::GetAdditionalIncludeFiles()
 		IncludeFileSet.Append(RPCDecorator->GetAdditionalIncludes());
 	}
 	TArray<FString> IncludeFiles = IncludeFileSet.Array();
+	if (Target->IsChildOf(UActorComponent::StaticClass()))
+	{
+		IncludeFiles.Add(TEXT("Engine/PackageMapClient.h"));
+	}
 	FString Result;
 	for (FString IncludeFile : IncludeFiles)
 	{
-		Result += FString::Printf(TEXT("#include \"%s\"\n"), *IncludeFile);
+		Result.Append(FString::Printf(TEXT("#include \"%s\"\n"), *IncludeFile));
 	}
 	return Result;
 }
@@ -271,6 +276,11 @@ FString FReplicatedActorDecorator::GetCode_DeserializeFunctionParams()
 	return DeserializeParamCodes;
 }
 
+FString FReplicatedActorDecorator::GetDeclaration_RPCParamStructNamespace()
+{
+	return (GetReplicatorClassName(false) + TEXT("_rpcparamstruct")).ToLower();
+}
+
 FString FReplicatedActorDecorator::GetDeclaration_RPCParamStructs()
 {
 	FString RPCParamStructsDeclarations = TEXT("");
@@ -299,4 +309,20 @@ void FReplicatedActorDecorator::SetInstanceRefName(const FString& InInstanceRefN
 FString FReplicatedActorDecorator::GetCode_GetWorldRef()
 {
 	return InstanceRefName + TEXT("->GetWorld()");
+}
+
+FString FReplicatedActorDecorator::GetCode_OverrideGetNetGUID()
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_ReplicatorClassName"), GetReplicatorClassName());
+	if (Target->IsChildOf(AGameStateBase::StaticClass()))
+	{
+		return FString::Format(GameState_GetNetGUIDTemplate, FormatArgs);
+	}
+	else if (Target->IsChildOf(UActorComponent::StaticClass()))
+	{
+		FormatArgs.Add(TEXT("Ref_TargetInstanceRef"), InstanceRefName);
+		return FString::Format(ActorComp_GetNetGUIDTemplate, FormatArgs);
+	}
+	return TEXT("");
 }
