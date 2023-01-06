@@ -28,11 +28,9 @@ public:
 	virtual void SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId) override;
 	virtual bool GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const override;
 	
-	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider) override;
 	virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider) override;
-	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved) override;
 
-	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, ChannelId ChId);
+	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, ChannelId ChId) override;
 	virtual void OnRemoveClientConnection(UChanneldNetConnection* ClientConn) override;
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
 	virtual void OnClientSpawnedObject(UObject* Obj, const ChannelId ChId) override;

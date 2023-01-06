@@ -3,6 +3,7 @@
 #include "LevelEditor.h"
 #include "Widgets/Input/SSpinBox.h"
 #include "ChanneldEditorStyle.h"
+#include "ChanneldSettings.h"
 #include "ISettingsModule.h"
 
 #define LOCTEXT_NAMESPACE "FChanneldUEModule"
@@ -208,7 +209,7 @@ void FChanneldEditorModule::LaunchServerGroup(const FServerGroup& ServerGroup)
 		
 	// If server map is not set, use current level.
 	FString MapName = ServerGroup.ServerMap.IsValid() ? ServerGroup.ServerMap.GetAssetName() : GEditor->GetEditorWorldContext().World()->GetMapName();
-	FString ViewClassName = ServerGroup.ServerViewClass->GetPathName();
+	FString ViewClassName = ServerGroup.ServerViewClass ? ServerGroup.ServerViewClass->GetPathName() : GetMutableDefault<UChanneldSettings>()->ChannelDataViewClass;
 		
 	for (int i = 0; i < ServerGroup.ServerNum; i++)
 	{

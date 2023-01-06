@@ -179,7 +179,7 @@ void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provide
 	if (!Providers.Contains(Provider))
 	{
 		Providers.Add(Provider);
-		UE_LOG(LogChanneld, Log, TEXT("Added channel data provider %s to channel %d"), *IChannelDataProvider::GetName(Provider), ChId);
+		UE_LOG(LogChanneld, Verbose, TEXT("Added channel data provider %s to channel %d"), *IChannelDataProvider::GetName(Provider), ChId);
 	}
 	ChannelDataProviders[ChId] = Providers;
 }
@@ -256,7 +256,7 @@ void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Prov
 	TSet<FProviderInternal>* Providers = ChannelDataProviders.Find(ChId);
 	if (Providers != nullptr)
 	{
-		UE_LOG(LogChanneld, Log, TEXT("Removing channel data provider %s from channel %d"), *IChannelDataProvider::GetName(Provider), ChId);
+		UE_LOG(LogChanneld, Verbose, TEXT("Removing channel data provider %s from channel %d"), *IChannelDataProvider::GetName(Provider), ChId);
 		
 		if (bSendRemoved)
 		{
@@ -328,6 +328,22 @@ void UChannelDataView::MoveProvider(ChannelId OldChId, ChannelId NewChId, IChann
 		UE_LOG(LogChanneld, Warning, TEXT("Moving a provider '%s' to channel %d which hasn't been subscribed yet."), *IChannelDataProvider::GetName(Provider), NewChId);
 	}
 	AddProvider(NewChId, Provider);
+}
+
+void UChannelDataView::MoveObjectProvider(ChannelId OldChId, ChannelId NewChId, UObject* Provider)
+{
+	if (Provider->Implements<UChannelDataProvider>())
+	{
+		MoveProvider(OldChId, NewChId, Cast<IChannelDataProvider>(Provider));
+	}
+	if (AActor* Actor = Cast<AActor>(Provider))
+	{
+		for (const auto Comp : Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+		{
+			RemoveProvider(OldChId, Cast<IChannelDataProvider>(Comp), false);
+			AddProvider(NewChId, Cast<IChannelDataProvider>(Comp));
+		}
+	}
 }
 
 void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn)

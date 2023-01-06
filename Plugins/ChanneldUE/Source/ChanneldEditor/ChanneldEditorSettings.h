@@ -16,16 +16,15 @@ struct FServerGroup
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "1", ClampMax = "16"))
 	int32 ServerNum;
 
+	// How long to wait before launching the servers (in seconds)
 	UPROPERTY(EditAnywhere)
 	float DelayTime;
 
+	// If not set, the open map in the Editor will be used.
 	UPROPERTY(EditAnywhere, meta=(AllowedClasses="World"))
-	//FText ServerMapName;
-	// TSoftObjectPtr<UWorld> ServerMap;
-	/** The map that will be loaded by default when no other map is loaded (DEDICATED SERVER). */
-	// UPROPERTY(config, EditAnywhere, Category=DefaultMaps, AdvancedDisplay, meta=(AllowedClasses="World"))
 	FSoftObjectPath ServerMap;
 
+	// If not set, the ChannelDataViewClass in the UChanneldSettings will be used.
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UChannelDataView> ServerViewClass;
 	

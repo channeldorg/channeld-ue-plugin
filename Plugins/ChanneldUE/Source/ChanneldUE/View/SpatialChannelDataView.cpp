@@ -195,9 +195,9 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 		NetIds.Appendf(TEXT("%d[%d], "), HandoverContext.obj().netguid(), HandoverContext.clientconnid());
 	}
 	UE_LOG(LogChanneld, Log, TEXT("ChannelDataHandover from channel %d to %d(%s), object netIds: %s"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(),
-		bHasAuthority ? TEXT("A") : (bHasInterest ? TEXT("I") : TEXT("")), *NetIds);
+		bHasAuthority ? TEXT("A") : (bHasInterest ? TEXT("I") : TEXT("N")), *NetIds);
 
-	// The actors are handed over to current (destination) server.
+	// The actors that moved across the servers and are authorized by current (destination) server.
 	TArray<AActor*> CrossServerActors;
 	
 	for (auto& HandoverContext : HandoverData.context())
@@ -323,41 +323,40 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 		
 			if (IsValid(HandoverObj))
 			{
-				// In-server handover - the srcChannel and dstChannel are in the same server
-				if (Connection->SubscribedChannels.Contains(HandoverMsg->srcchannelid()))
+				// Now the NetId is properly set, call AddProviderToDefaultChannel().
+				MoveObjectProvider(HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), HandoverObj);
+				
+				if (bHasAuthority)
 				{
-					// Move data provider to the new channel
-					if (HandoverObj->Implements<UChannelDataProvider>())
+					// In-server handover - the srcChannel and dstChannel are in the same server
+					if (Connection->OwnedChannels.Contains(HandoverMsg->srcchannelid()))
 					{
-						MoveProvider(HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), Cast<IChannelDataProvider>(HandoverObj));
 					}
-					else if (HandoverObj->IsA<AActor>())
+					// Cross-server handover
+					else
 					{
-						for (auto& Comp : Cast<AActor>(HandoverObj)->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+						if (AActor* HandoverActor = Cast<AActor>(HandoverObj))
 						{
-							MoveProvider(HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), Cast<IChannelDataProvider>(Comp));
+							CrossServerActors.Add(HandoverActor);
+
+							// Associate the NetConn with the PlayerController
+							if (APlayerController* HandoverPC = Cast<APlayerController>(HandoverObj))
+							{
+								HandoverPC->NetConnection = ClientConn;
+							}
+						
+							// Set the role to SimulatedProxy so the actor can be updated by the handover channel data later.
+							HandoverActor->SetRole(ROLE_SimulatedProxy);
+							UE_LOG(LogChanneld, Verbose, TEXT("Set %s to ROLE_SimulatedProxy for ChannelDataUpdate"), *HandoverActor->GetName());
 						}
-					}				
+					}
 				}
-				// Cross-server handover
 				else
 				{
-					// Now the NetId is properly set, call AddProviderToDefaultChannel().
-					OnServerSpawnedObject(HandoverObj, NetId);
-
 					if (AActor* HandoverActor = Cast<AActor>(HandoverObj))
 					{
-						CrossServerActors.Add(HandoverActor);
-
-						// Associate the NetConn with the PlayerController
-						if (APlayerController* HandoverPC = Cast<APlayerController>(HandoverObj))
-						{
-							HandoverPC->NetConnection = ClientConn;
-						}
-						
-						// Set the role to SimulatedProxy so the actor can be updated by the handover channel data later.
+						// Set the role to SimulatedProxy
 						HandoverActor->SetRole(ROLE_SimulatedProxy);
-						UE_LOG(LogChanneld, Verbose, TEXT("Set %s to ROLE_SimulatedProxy for ChannelDataUpdate"), *HandoverActor->GetName());
 					}
 				}
 			}
@@ -383,6 +382,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 		UpdateMsg.set_allocated_data(HandoverData.mutable_channeldata());
 		*/
 		UpdateMsg.mutable_data()->CopyFrom(HandoverData.channeldata());
+		UE_LOG(LogChanneld, Verbose, TEXT("Applying handover channel data to %d cross-server actors"), CrossServerActors.Num());
 		HandleChannelDataUpdate(_, ChId, &UpdateMsg);
 	}
 
@@ -710,29 +710,6 @@ bool USpatialChannelDataView::GetSendToChannelId(UChanneldNetConnection* NetConn
 	return false;
 }
 
-void USpatialChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provider)
-{
-	/*
-	bool bIsGameStateBase = Provider->GetTargetObject()->IsA(AGameStateBase::StaticClass());
-	// Don't perform replication (except the GameStateBase) when the client is in Master server
-	if (bClientInMasterServer && !bIsGameStateBase)
-	{
-		UE_LOG(LogChanneld, Log, TEXT("[Client] Ignore adding provider %s while in Master server"), *IChannelDataProvider::GetName(Provider));
-		return;
-	}
-
-	// GameStateBase is owned by Master server and replicated in Global channel. Read only to spatial servers.
-	if (bIsGameStateBase)
-	{
-		ChId = GlobalChannelId;
-		AGameStateBase* GameStateBase = Cast<AGameStateBase>(Provider->GetTargetObject());
-		GameStateBase->SetRole(ENetRole::ROLE_SimulatedProxy);
-	}
-	*/
-	
-	Super::AddProvider(ChId, Provider);
-}
-
 void USpatialChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* Provider)
 {
 	if (Connection->IsServer())
@@ -779,15 +756,6 @@ void USpatialChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* 
 	}
 }
 
-void USpatialChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved)
-{
-	// // Don't perform replication when the client is in Master server
-	// if (bClientInMasterServer)
-	// 	return;
-	
-	Super::RemoveProvider(ChId, Provider, bSendRemoved);
-}
-
 void USpatialChannelDataView::OnAddClientConnection(UChanneldNetConnection* ClientConnection, ChannelId ChId)
 {
 	ClientInChannels.Add(ClientConnection->GetConnId(), ChId);
@@ -825,7 +793,7 @@ void USpatialChannelDataView::OnClientSpawnedObject(UObject* Obj, const ChannelI
 
 bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId)
 {
-	// Spatial channels don't support Gameplayer Debugger yet.
+	// Spatial channels don't support Gameplay Debugger yet.
 	if (Obj->GetClass()->GetFName() == GameplayerDebuggerClassName)
 	{
 		return false;

@@ -46,6 +46,7 @@ public:
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void MoveProvider(ChannelId OldChId, ChannelId NewChId, IChannelDataProvider* Provider);
+	void MoveObjectProvider(ChannelId OldChId, ChannelId NewChId, UObject* Provider);
 
 	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, ChannelId ChId){}
 	virtual void OnRemoveClientConnection(UChanneldNetConnection* ClientConn){}
