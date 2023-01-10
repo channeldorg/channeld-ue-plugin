@@ -209,7 +209,7 @@ void FChanneldEditorModule::LaunchServerGroup(const FServerGroup& ServerGroup)
 		
 	// If server map is not set, use current level.
 	FString MapName = ServerGroup.ServerMap.IsValid() ? ServerGroup.ServerMap.GetAssetName() : GEditor->GetEditorWorldContext().World()->GetMapName();
-	FString ViewClassName = ServerGroup.ServerViewClass ? ServerGroup.ServerViewClass->GetPathName() : GetMutableDefault<UChanneldSettings>()->ChannelDataViewClass;
+	FString ViewClassName = ServerGroup.ServerViewClass ? ServerGroup.ServerViewClass->GetPathName() : GetMutableDefault<UChanneldSettings>()->ChannelDataViewClass->GetPathName();
 		
 	for (int i = 0; i < ServerGroup.ServerNum; i++)
 	{
