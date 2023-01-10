@@ -220,15 +220,18 @@ void UChannelDataView::AddActorProvider(ChannelId ChId, AActor* Actor)
 	}
 }
 
-void UChannelDataView::AddActorProvider(AActor* Actor)
+void UChannelDataView::AddObjectProvider(UObject* Obj)
 {
-	if (Actor->Implements<UChannelDataProvider>())
+	if (Obj->Implements<UChannelDataProvider>())
 	{
-		AddProviderToDefaultChannel(Cast<IChannelDataProvider>(Actor));
+		AddProviderToDefaultChannel(Cast<IChannelDataProvider>(Obj));
 	}
-	for (const auto Comp : Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+	if (AActor* Actor = Cast<AActor>(Obj))
 	{
-		AddProviderToDefaultChannel(Cast<IChannelDataProvider>(Comp));
+		for (const auto Comp : Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+		{
+			AddProviderToDefaultChannel(Cast<IChannelDataProvider>(Comp));
+		}
 	}
 }
 
@@ -746,6 +749,11 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 
 	UE_LOG(LogChanneld, Verbose, TEXT("Received %s channel %d update: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), ChId, UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
 
+	if (CheckUnspawnedObject(ChId, UpdateData))
+	{
+		return;
+	}
+	
 	TSet<FProviderInternal>* Providers = ChannelDataProviders.Find(ChId);
 	if (Providers == nullptr || Providers->Num() == 0)
 	{
@@ -768,7 +776,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 		}
 	}
 
-	// All new states are consumed, now we reset the cached object for next parse.
+	// All new states are consumed, now we reset the cached object for the next parse.
 	if (bConsumed)
 	{
 		UpdateData->Clear();

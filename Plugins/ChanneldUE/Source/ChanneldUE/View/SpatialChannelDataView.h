@@ -46,6 +46,11 @@ public:
 
 protected:
 	virtual void OnClientUnsub(ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, ChannelId ChId) override;
+
+	// The client may have subscribed to the spatial channels that go beyond the interest area of the client's authoritative server.
+	// In that case, the client may receive ChannelDataUpdate that contains unresolved NetworkGUIDs, so it needs to spawn the objects before applying the update.
+	virtual bool CheckUnspawnedObject(ChannelId ChId, const google::protobuf::Message* ChannelData) override;
+	virtual TArray<uint32> GetNetGUIDsFromChannelData(const google::protobuf::Message* Message) {return TArray<uint32>();}
 	
 	/**
 	 * @brief The source server decides which objects get handed over to the destination server.
@@ -56,6 +61,8 @@ protected:
 	 */
 	UFUNCTION(BlueprintNativeEvent, Category="Spatial")
 	TArray<UObject*> GetHandoverObjects(UObject* Obj, int32 SrcChId, int32 DstChId);
+
+	TSet<uint32> ResolvingNetGUIDs;
 	
 private:
 	const FName GameplayerDebuggerClassName = FName("GameplayDebuggerCategoryReplicator");
@@ -93,7 +100,8 @@ private:
 	void ServerHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
-
+	void ClientHandleGetUnrealObjectRef(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
+	
 	/**
 	 * @brief Create the ChanneldNetConnection for the client. The PlayerController will not be created for the connection.
 	 * @param ConnId The channeld connection ID of the client

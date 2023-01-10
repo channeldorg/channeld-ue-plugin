@@ -41,7 +41,7 @@ public:
 	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider);
 	virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider);
 	void AddActorProvider(ChannelId ChId, AActor* Actor);
-	void AddActorProvider(AActor* Actor);
+	void AddObjectProvider(UObject* Obj);
 	void RemoveActorProvider(AActor* Actor, bool bSendRemoved);
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
@@ -132,13 +132,21 @@ protected:
 	 * @param ChId 
 	 */
 	virtual void OnClientUnsub(ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, ChannelId ChId);
-	
+
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 	
 	void HandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 
 	// Give the subclass a chance to mess with the removed providers, e.g. add a provider back to a channel.
 	virtual void OnUnsubFromChannel(ChannelId ChId, const TSet<FProviderInternal>& RemovedProviders) {}
+
+	/**
+	 * @brief Checks if the channel data contains any unsolved NetworkGUID.
+	 * @param ChId The channel that the data belongs to.
+	 * @param ChannelData The data field in the ChannelDataUpdateMessage.
+	 * @return If true, the ChannelDataUpdate should not be applied until the objects are spawned.
+	 */
+	virtual bool CheckUnspawnedObject(ChannelId ChId, const google::protobuf::Message* ChannelData) {return false;}
 
 	UPROPERTY()
 	UChanneldConnection* Connection;
@@ -157,5 +165,4 @@ private:
 
 	TMap<ChannelId, TSet<FProviderInternal>> ChannelDataProviders;
 	TMap<ChannelId, google::protobuf::Message*> RemovedProvidersData;
-
 };

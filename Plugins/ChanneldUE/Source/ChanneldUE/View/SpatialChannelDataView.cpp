@@ -476,6 +476,80 @@ void USpatialChannelDataView::OnClientUnsub(ConnectionId ClientConnId, channeldp
 	}
 }
 
+bool USpatialChannelDataView::CheckUnspawnedObject(ChannelId ChId, const google::protobuf::Message* ChannelData)
+{
+	// Only client needs to spawn the objects.
+	if (Connection->IsServer())
+	{
+		return false;
+	}
+
+	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
+	if (!NetDriver)
+	{
+		return false;
+	}
+
+	TArray<uint32> NetGUIDs = GetNetGUIDsFromChannelData(ChannelData);
+	if (NetGUIDs.Num() == 0)
+	{
+		return false;
+	}
+
+	TArray<uint32> UnresolvedNetGUIDs;
+	for (uint32 NetGUID : NetGUIDs)
+	{
+		if (!ResolvingNetGUIDs.Contains(NetGUID) && !NetDriver->GuidCache->IsGUIDRegistered(FNetworkGUID(NetGUID)))
+		{
+			UnresolvedNetGUIDs.Add(NetGUID);
+		}
+	}
+
+	if (UnresolvedNetGUIDs.Num() == 0)
+	{
+		return false;
+	}
+
+	unrealpb::GetUnrealObjectRefMessage Msg;
+	FString LogStr;
+	for (uint32 NetGUID : UnresolvedNetGUIDs)
+	{
+		Msg.add_netguid(NetGUID);
+		ResolvingNetGUIDs.Add(NetGUID);
+		LogStr.Appendf(TEXT("%d, "), NetGUID);
+	}
+	
+	Connection->Send(ChId, unrealpb::GET_UNREAL_OBJECT_REF, Msg);
+	UE_LOG(LogChanneld, Verbose, TEXT("Sent GetUnrealObjectRefMessage to channel %d, NetIds: %s"), ChId, *LogStr);
+	
+	return true;
+}
+
+void USpatialChannelDataView::ClientHandleGetUnrealObjectRef(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	auto ResultMsg = static_cast<const unrealpb::GetUnrealObjectRefResultMessage*>(Msg);
+	for (auto& ObjRef : ResultMsg->objref())
+	{
+		// Set up the mapping before actually spawn it, so AddProvider() can find the mapping.
+		SetOwningChannelId(ObjRef.netguid(), ChId);
+			
+		// Also add the mapping of all context NetGUIDs
+		for (auto& ContextObj : ObjRef.context())
+		{
+			SetOwningChannelId(ContextObj.netguid(), ChId);
+		}
+
+		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from GetUnrealObjectRefResultMessage, NetId: %d"), ObjRef.netguid());
+		UObject* NewObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld());
+		if (NewObj)
+		{
+			AddObjectProvider(NewObj);
+			OnClientSpawnedObject(NewObj, ChId);
+		}
+		ResolvingNetGUIDs.Remove(ObjRef.netguid());
+	}
+}
+
 void USpatialChannelDataView::InitServer()
 {
 	// Spatial server has no authority over the GameState.
@@ -663,6 +737,7 @@ void USpatialChannelDataView::InitClient()
 
 	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, this, &USpatialChannelDataView::ClientHandleSubToChannel);
 	Connection->AddMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, this, &USpatialChannelDataView::ClientHandleHandover);
+	Connection->RegisterMessageHandler(unrealpb::GET_UNREAL_OBJECT_REF, new unrealpb::GetUnrealObjectRefResultMessage, this, &USpatialChannelDataView::ClientHandleGetUnrealObjectRef);
 	
 	channeldpb::ChannelSubscriptionOptions GlobalSubOptions;
 	GlobalSubOptions.set_dataaccess(channeldpb::READ_ACCESS);
@@ -812,10 +887,7 @@ bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetwork
 	
 	// Don't set the NetId-ChannelId mapping, as we don't have the spatial channelId of the object yet.
 	// The spatial channelId will be queried in AddProviderToDefaultChannel()
-	if (Obj->IsA<AActor>())
-	{
-		AddActorProvider(Cast<AActor>(Obj));
-	}
+	AddObjectProvider(Obj);
 	
 	return true;
 }

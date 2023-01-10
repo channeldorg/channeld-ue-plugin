@@ -139,15 +139,11 @@ void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMes
 				ChanneldUtils::SetActorRoleByOwningConnId(NewActor, SpawnMsg->owningconnid());
 				LocalRole = NewActor->GetLocalRole();
 			}
-			
-			if (ChannelDataView.IsValid())
-			{
-				ChannelDataView->AddActorProvider(NewActor);
-			}
 		}
 
 		if (ChannelDataView.IsValid())
 		{
+			ChannelDataView->AddObjectProvider(NewObj);
 			ChannelDataView->OnClientSpawnedObject(NewObj, SpawnMsg->channelid());
 		}
 

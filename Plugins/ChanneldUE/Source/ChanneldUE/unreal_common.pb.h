@@ -113,6 +113,12 @@ CHANNELDUE_API extern GetHandoverContextMessageDefaultTypeInternal _GetHandoverC
 class GetHandoverContextResultMessage;
 struct GetHandoverContextResultMessageDefaultTypeInternal;
 CHANNELDUE_API extern GetHandoverContextResultMessageDefaultTypeInternal _GetHandoverContextResultMessage_default_instance_;
+class GetUnrealObjectRefMessage;
+struct GetUnrealObjectRefMessageDefaultTypeInternal;
+CHANNELDUE_API extern GetUnrealObjectRefMessageDefaultTypeInternal _GetUnrealObjectRefMessage_default_instance_;
+class GetUnrealObjectRefResultMessage;
+struct GetUnrealObjectRefResultMessageDefaultTypeInternal;
+CHANNELDUE_API extern GetUnrealObjectRefResultMessageDefaultTypeInternal _GetUnrealObjectRefResultMessage_default_instance_;
 class HandoverContext;
 struct HandoverContextDefaultTypeInternal;
 CHANNELDUE_API extern HandoverContextDefaultTypeInternal _HandoverContext_default_instance_;
@@ -206,6 +212,8 @@ template<> CHANNELDUE_API ::unrealpb::FVector* Arena::CreateMaybeMessage<::unrea
 template<> CHANNELDUE_API ::unrealpb::GameStateBase* Arena::CreateMaybeMessage<::unrealpb::GameStateBase>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::GetHandoverContextMessage* Arena::CreateMaybeMessage<::unrealpb::GetHandoverContextMessage>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::GetHandoverContextResultMessage* Arena::CreateMaybeMessage<::unrealpb::GetHandoverContextResultMessage>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::GetUnrealObjectRefMessage* Arena::CreateMaybeMessage<::unrealpb::GetUnrealObjectRefMessage>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::GetUnrealObjectRefResultMessage* Arena::CreateMaybeMessage<::unrealpb::GetUnrealObjectRefResultMessage>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::HandoverContext* Arena::CreateMaybeMessage<::unrealpb::HandoverContext>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::HandoverData* Arena::CreateMaybeMessage<::unrealpb::HandoverData>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::PawnState* Arena::CreateMaybeMessage<::unrealpb::PawnState>(Arena*);
@@ -240,6 +248,7 @@ enum MessageType : int {
   SPAWN = 103,
   DESTROY = 104,
   HANDOVER_CONTEXT = 105,
+  GET_UNREAL_OBJECT_REF = 106,
   SERVER_PLAYER_SPAWNED = 201,
   SERVER_PLAYER_LEAVE = 202,
   MessageType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
@@ -2462,6 +2471,325 @@ class CHANNELDUE_API HandoverData final :
 };
 // -------------------------------------------------------------------
 
+class CHANNELDUE_API GetUnrealObjectRefMessage final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.GetUnrealObjectRefMessage) */ {
+ public:
+  inline GetUnrealObjectRefMessage() : GetUnrealObjectRefMessage(nullptr) {}
+  ~GetUnrealObjectRefMessage() override;
+  explicit PROTOBUF_CONSTEXPR GetUnrealObjectRefMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  GetUnrealObjectRefMessage(const GetUnrealObjectRefMessage& from);
+  GetUnrealObjectRefMessage(GetUnrealObjectRefMessage&& from) noexcept
+    : GetUnrealObjectRefMessage() {
+    *this = ::std::move(from);
+  }
+
+  inline GetUnrealObjectRefMessage& operator=(const GetUnrealObjectRefMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline GetUnrealObjectRefMessage& operator=(GetUnrealObjectRefMessage&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const GetUnrealObjectRefMessage& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const GetUnrealObjectRefMessage* internal_default_instance() {
+    return reinterpret_cast<const GetUnrealObjectRefMessage*>(
+               &_GetUnrealObjectRefMessage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    12;
+
+  friend void swap(GetUnrealObjectRefMessage& a, GetUnrealObjectRefMessage& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(GetUnrealObjectRefMessage* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(GetUnrealObjectRefMessage* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  GetUnrealObjectRefMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<GetUnrealObjectRefMessage>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const GetUnrealObjectRefMessage& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const GetUnrealObjectRefMessage& from) {
+    GetUnrealObjectRefMessage::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(GetUnrealObjectRefMessage* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.GetUnrealObjectRefMessage";
+  }
+  protected:
+  explicit GetUnrealObjectRefMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kNetGUIDFieldNumber = 1,
+  };
+  // repeated uint32 netGUID = 1;
+  int netguid_size() const;
+  private:
+  int _internal_netguid_size() const;
+  public:
+  void clear_netguid();
+  private:
+  uint32_t _internal_netguid(int index) const;
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >&
+      _internal_netguid() const;
+  void _internal_add_netguid(uint32_t value);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >*
+      _internal_mutable_netguid();
+  public:
+  uint32_t netguid(int index) const;
+  void set_netguid(int index, uint32_t value);
+  void add_netguid(uint32_t value);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >&
+      netguid() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >*
+      mutable_netguid();
+
+  // @@protoc_insertion_point(class_scope:unrealpb.GetUnrealObjectRefMessage)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t > netguid_;
+    mutable std::atomic<int> _netguid_cached_byte_size_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API GetUnrealObjectRefResultMessage final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.GetUnrealObjectRefResultMessage) */ {
+ public:
+  inline GetUnrealObjectRefResultMessage() : GetUnrealObjectRefResultMessage(nullptr) {}
+  ~GetUnrealObjectRefResultMessage() override;
+  explicit PROTOBUF_CONSTEXPR GetUnrealObjectRefResultMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  GetUnrealObjectRefResultMessage(const GetUnrealObjectRefResultMessage& from);
+  GetUnrealObjectRefResultMessage(GetUnrealObjectRefResultMessage&& from) noexcept
+    : GetUnrealObjectRefResultMessage() {
+    *this = ::std::move(from);
+  }
+
+  inline GetUnrealObjectRefResultMessage& operator=(const GetUnrealObjectRefResultMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline GetUnrealObjectRefResultMessage& operator=(GetUnrealObjectRefResultMessage&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const GetUnrealObjectRefResultMessage& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const GetUnrealObjectRefResultMessage* internal_default_instance() {
+    return reinterpret_cast<const GetUnrealObjectRefResultMessage*>(
+               &_GetUnrealObjectRefResultMessage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    13;
+
+  friend void swap(GetUnrealObjectRefResultMessage& a, GetUnrealObjectRefResultMessage& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(GetUnrealObjectRefResultMessage* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(GetUnrealObjectRefResultMessage* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  GetUnrealObjectRefResultMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<GetUnrealObjectRefResultMessage>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const GetUnrealObjectRefResultMessage& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const GetUnrealObjectRefResultMessage& from) {
+    GetUnrealObjectRefResultMessage::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(GetUnrealObjectRefResultMessage* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.GetUnrealObjectRefResultMessage";
+  }
+  protected:
+  explicit GetUnrealObjectRefResultMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kObjRefFieldNumber = 1,
+  };
+  // repeated .unrealpb.UnrealObjectRef objRef = 1;
+  int objref_size() const;
+  private:
+  int _internal_objref_size() const;
+  public:
+  void clear_objref();
+  ::unrealpb::UnrealObjectRef* mutable_objref(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef >*
+      mutable_objref();
+  private:
+  const ::unrealpb::UnrealObjectRef& _internal_objref(int index) const;
+  ::unrealpb::UnrealObjectRef* _internal_add_objref();
+  public:
+  const ::unrealpb::UnrealObjectRef& objref(int index) const;
+  ::unrealpb::UnrealObjectRef* add_objref();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef >&
+      objref() const;
+
+  // @@protoc_insertion_point(class_scope:unrealpb.GetUnrealObjectRefResultMessage)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef > objref_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
 class CHANNELDUE_API FRepMovement final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.FRepMovement) */ {
  public:
@@ -2510,7 +2838,7 @@ class CHANNELDUE_API FRepMovement final :
                &_FRepMovement_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    14;
 
   friend void swap(FRepMovement& a, FRepMovement& b) {
     a.Swap(&b);
@@ -2758,7 +3086,7 @@ class CHANNELDUE_API FRepAttachment final :
                &_FRepAttachment_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    15;
 
   friend void swap(FRepAttachment& a, FRepAttachment& b) {
     a.Swap(&b);
@@ -3011,7 +3339,7 @@ class CHANNELDUE_API ActorState final :
                &_ActorState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    14;
+    16;
 
   friend void swap(ActorState& a, ActorState& b) {
     a.Swap(&b);
@@ -3345,7 +3673,7 @@ class CHANNELDUE_API ActorComponentState final :
                &_ActorComponentState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    17;
 
   friend void swap(ActorComponentState& a, ActorComponentState& b) {
     a.Swap(&b);
@@ -3524,7 +3852,7 @@ class CHANNELDUE_API SceneComponentState final :
                &_SceneComponentState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    18;
 
   friend void swap(SceneComponentState& a, SceneComponentState& b) {
     a.Swap(&b);
@@ -3887,7 +4215,7 @@ class CHANNELDUE_API FBasedMovementInfo final :
                &_FBasedMovementInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    19;
 
   friend void swap(FBasedMovementInfo& a, FBasedMovementInfo& b) {
     a.Swap(&b);
@@ -4150,7 +4478,7 @@ class CHANNELDUE_API FRootMotionSource_FRootMotionFinishVelocitySettings final :
                &_FRootMotionSource_FRootMotionFinishVelocitySettings_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    20;
 
   friend void swap(FRootMotionSource_FRootMotionFinishVelocitySettings& a, FRootMotionSource_FRootMotionFinishVelocitySettings& b) {
     a.Swap(&b);
@@ -4338,7 +4666,7 @@ class CHANNELDUE_API FRootMotionSource final :
                &_FRootMotionSource_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    19;
+    21;
 
   friend void swap(FRootMotionSource& a, FRootMotionSource& b) {
     a.Swap(&b);
@@ -4728,7 +5056,7 @@ class CHANNELDUE_API FRootMotionSourceGroup final :
                &_FRootMotionSourceGroup_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    20;
+    22;
 
   friend void swap(FRootMotionSourceGroup& a, FRootMotionSourceGroup& b) {
     a.Swap(&b);
@@ -5001,7 +5329,7 @@ class CHANNELDUE_API FRepRootMotionMontage final :
                &_FRepRootMotionMontage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    23;
 
   friend void swap(FRepRootMotionMontage& a, FRepRootMotionMontage& b) {
     a.Swap(&b);
@@ -5359,7 +5687,7 @@ class CHANNELDUE_API CharacterState final :
                &_CharacterState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    24;
 
   friend void swap(CharacterState& a, CharacterState& b) {
     a.Swap(&b);
@@ -5627,7 +5955,7 @@ class CHANNELDUE_API Character_ServerMovePacked_Params final :
                &_Character_ServerMovePacked_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    25;
 
   friend void swap(Character_ServerMovePacked_Params& a, Character_ServerMovePacked_Params& b) {
     a.Swap(&b);
@@ -5791,7 +6119,7 @@ class CHANNELDUE_API Character_ClientMoveResponsePacked_Params final :
                &_Character_ClientMoveResponsePacked_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    26;
 
   friend void swap(Character_ClientMoveResponsePacked_Params& a, Character_ClientMoveResponsePacked_Params& b) {
     a.Swap(&b);
@@ -5955,7 +6283,7 @@ class CHANNELDUE_API PlayerState final :
                &_PlayerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    27;
 
   friend void swap(PlayerState& a, PlayerState& b) {
     a.Swap(&b);
@@ -6158,7 +6486,7 @@ class CHANNELDUE_API ControllerState final :
                &_ControllerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    28;
 
   friend void swap(ControllerState& a, ControllerState& b) {
     a.Swap(&b);
@@ -6335,7 +6663,7 @@ class CHANNELDUE_API Controller_ClientSetLocation_Params final :
                &_Controller_ClientSetLocation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    29;
 
   friend void swap(Controller_ClientSetLocation_Params& a, Controller_ClientSetLocation_Params& b) {
     a.Swap(&b);
@@ -6512,7 +6840,7 @@ class CHANNELDUE_API Controller_ClientSetRotation_Params final :
                &_Controller_ClientSetRotation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    30;
 
   friend void swap(Controller_ClientSetRotation_Params& a, Controller_ClientSetRotation_Params& b) {
     a.Swap(&b);
@@ -6680,7 +7008,7 @@ class CHANNELDUE_API PlayerControllerState final :
                &_PlayerControllerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    31;
 
   friend void swap(PlayerControllerState& a, PlayerControllerState& b) {
     a.Swap(&b);
@@ -6858,7 +7186,7 @@ class CHANNELDUE_API PlayerController_ServerUpdateCamera_Params final :
                &_PlayerController_ServerUpdateCamera_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    32;
 
   friend void swap(PlayerController_ServerUpdateCamera_Params& a, PlayerController_ServerUpdateCamera_Params& b) {
     a.Swap(&b);
@@ -7026,7 +7354,7 @@ class CHANNELDUE_API PlayerController_ClientSetHUD_Params final :
                &_PlayerController_ClientSetHUD_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    33;
 
   friend void swap(PlayerController_ClientSetHUD_Params& a, PlayerController_ClientSetHUD_Params& b) {
     a.Swap(&b);
@@ -7184,7 +7512,7 @@ class CHANNELDUE_API PlayerController_ClientSetViewTarget_Params final :
                &_PlayerController_ClientSetViewTarget_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    34;
 
   friend void swap(PlayerController_ClientSetViewTarget_Params& a, PlayerController_ClientSetViewTarget_Params& b) {
     a.Swap(&b);
@@ -7385,7 +7713,7 @@ class CHANNELDUE_API PlayerController_ClientEnableNetworkVoice_Params final :
                &_PlayerController_ClientEnableNetworkVoice_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    35;
 
   friend void swap(PlayerController_ClientEnableNetworkVoice_Params& a, PlayerController_ClientEnableNetworkVoice_Params& b) {
     a.Swap(&b);
@@ -7538,7 +7866,7 @@ class CHANNELDUE_API PlayerController_ClientCapBandwidth_Params final :
                &_PlayerController_ClientCapBandwidth_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    36;
 
   friend void swap(PlayerController_ClientCapBandwidth_Params& a, PlayerController_ClientCapBandwidth_Params& b) {
     a.Swap(&b);
@@ -7686,7 +8014,7 @@ class CHANNELDUE_API PlayerController_ClientRestart_Params final :
                &_PlayerController_ClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    37;
 
   friend void swap(PlayerController_ClientRestart_Params& a, PlayerController_ClientRestart_Params& b) {
     a.Swap(&b);
@@ -7843,7 +8171,7 @@ class CHANNELDUE_API PlayerController_ClientSetCameraMode_Params final :
                &_PlayerController_ClientSetCameraMode_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    38;
 
   friend void swap(PlayerController_ClientSetCameraMode_Params& a, PlayerController_ClientSetCameraMode_Params& b) {
     a.Swap(&b);
@@ -7996,7 +8324,7 @@ class CHANNELDUE_API PlayerController_ClientRetryClientRestart_Params final :
                &_PlayerController_ClientRetryClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    39;
 
   friend void swap(PlayerController_ClientRetryClientRestart_Params& a, PlayerController_ClientRetryClientRestart_Params& b) {
     a.Swap(&b);
@@ -8153,7 +8481,7 @@ class CHANNELDUE_API PlayerController_ServerSetSpectatorLocation_Params final :
                &_PlayerController_ServerSetSpectatorLocation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    38;
+    40;
 
   friend void swap(PlayerController_ServerSetSpectatorLocation_Params& a, PlayerController_ServerSetSpectatorLocation_Params& b) {
     a.Swap(&b);
@@ -8330,7 +8658,7 @@ class CHANNELDUE_API PlayerController_ServerAcknowledgePossession_Params final :
                &_PlayerController_ServerAcknowledgePossession_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    41;
 
   friend void swap(PlayerController_ServerAcknowledgePossession_Params& a, PlayerController_ServerAcknowledgePossession_Params& b) {
     a.Swap(&b);
@@ -8487,7 +8815,7 @@ class CHANNELDUE_API PlayerController_ClientGotoState_Params final :
                &_PlayerController_ClientGotoState_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    40;
+    42;
 
   friend void swap(PlayerController_ClientGotoState_Params& a, PlayerController_ClientGotoState_Params& b) {
     a.Swap(&b);
@@ -8640,7 +8968,7 @@ class CHANNELDUE_API PlayerController_ClientReceiveLocalizedMessage_Params final
                &_PlayerController_ClientReceiveLocalizedMessage_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    41;
+    43;
 
   friend void swap(PlayerController_ClientReceiveLocalizedMessage_Params& a, PlayerController_ClientReceiveLocalizedMessage_Params& b) {
     a.Swap(&b);
@@ -8864,7 +9192,7 @@ class CHANNELDUE_API GameStateBase final :
                &_GameStateBase_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    42;
+    44;
 
   friend void swap(GameStateBase& a, GameStateBase& b) {
     a.Swap(&b);
@@ -9072,7 +9400,7 @@ class CHANNELDUE_API PawnState final :
                &_PawnState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    43;
+    45;
 
   friend void swap(PawnState& a, PawnState& b) {
     a.Swap(&b);
@@ -9265,7 +9593,7 @@ class CHANNELDUE_API FClientAdjustment final :
                &_FClientAdjustment_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    44;
+    46;
 
   friend void swap(FClientAdjustment& a, FClientAdjustment& b) {
     a.Swap(&b);
@@ -11111,6 +11439,101 @@ inline void HandoverData::set_allocated_channeldata(::PROTOBUF_NAMESPACE_ID::Any
   }
   _impl_.channeldata_ = channeldata;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.HandoverData.channelData)
+}
+
+// -------------------------------------------------------------------
+
+// GetUnrealObjectRefMessage
+
+// repeated uint32 netGUID = 1;
+inline int GetUnrealObjectRefMessage::_internal_netguid_size() const {
+  return _impl_.netguid_.size();
+}
+inline int GetUnrealObjectRefMessage::netguid_size() const {
+  return _internal_netguid_size();
+}
+inline void GetUnrealObjectRefMessage::clear_netguid() {
+  _impl_.netguid_.Clear();
+}
+inline uint32_t GetUnrealObjectRefMessage::_internal_netguid(int index) const {
+  return _impl_.netguid_.Get(index);
+}
+inline uint32_t GetUnrealObjectRefMessage::netguid(int index) const {
+  // @@protoc_insertion_point(field_get:unrealpb.GetUnrealObjectRefMessage.netGUID)
+  return _internal_netguid(index);
+}
+inline void GetUnrealObjectRefMessage::set_netguid(int index, uint32_t value) {
+  _impl_.netguid_.Set(index, value);
+  // @@protoc_insertion_point(field_set:unrealpb.GetUnrealObjectRefMessage.netGUID)
+}
+inline void GetUnrealObjectRefMessage::_internal_add_netguid(uint32_t value) {
+  _impl_.netguid_.Add(value);
+}
+inline void GetUnrealObjectRefMessage::add_netguid(uint32_t value) {
+  _internal_add_netguid(value);
+  // @@protoc_insertion_point(field_add:unrealpb.GetUnrealObjectRefMessage.netGUID)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >&
+GetUnrealObjectRefMessage::_internal_netguid() const {
+  return _impl_.netguid_;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >&
+GetUnrealObjectRefMessage::netguid() const {
+  // @@protoc_insertion_point(field_list:unrealpb.GetUnrealObjectRefMessage.netGUID)
+  return _internal_netguid();
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >*
+GetUnrealObjectRefMessage::_internal_mutable_netguid() {
+  return &_impl_.netguid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >*
+GetUnrealObjectRefMessage::mutable_netguid() {
+  // @@protoc_insertion_point(field_mutable_list:unrealpb.GetUnrealObjectRefMessage.netGUID)
+  return _internal_mutable_netguid();
+}
+
+// -------------------------------------------------------------------
+
+// GetUnrealObjectRefResultMessage
+
+// repeated .unrealpb.UnrealObjectRef objRef = 1;
+inline int GetUnrealObjectRefResultMessage::_internal_objref_size() const {
+  return _impl_.objref_.size();
+}
+inline int GetUnrealObjectRefResultMessage::objref_size() const {
+  return _internal_objref_size();
+}
+inline void GetUnrealObjectRefResultMessage::clear_objref() {
+  _impl_.objref_.Clear();
+}
+inline ::unrealpb::UnrealObjectRef* GetUnrealObjectRefResultMessage::mutable_objref(int index) {
+  // @@protoc_insertion_point(field_mutable:unrealpb.GetUnrealObjectRefResultMessage.objRef)
+  return _impl_.objref_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef >*
+GetUnrealObjectRefResultMessage::mutable_objref() {
+  // @@protoc_insertion_point(field_mutable_list:unrealpb.GetUnrealObjectRefResultMessage.objRef)
+  return &_impl_.objref_;
+}
+inline const ::unrealpb::UnrealObjectRef& GetUnrealObjectRefResultMessage::_internal_objref(int index) const {
+  return _impl_.objref_.Get(index);
+}
+inline const ::unrealpb::UnrealObjectRef& GetUnrealObjectRefResultMessage::objref(int index) const {
+  // @@protoc_insertion_point(field_get:unrealpb.GetUnrealObjectRefResultMessage.objRef)
+  return _internal_objref(index);
+}
+inline ::unrealpb::UnrealObjectRef* GetUnrealObjectRefResultMessage::_internal_add_objref() {
+  return _impl_.objref_.Add();
+}
+inline ::unrealpb::UnrealObjectRef* GetUnrealObjectRefResultMessage::add_objref() {
+  ::unrealpb::UnrealObjectRef* _add = _internal_add_objref();
+  // @@protoc_insertion_point(field_add:unrealpb.GetUnrealObjectRefResultMessage.objRef)
+  return _add;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef >&
+GetUnrealObjectRefResultMessage::objref() const {
+  // @@protoc_insertion_point(field_list:unrealpb.GetUnrealObjectRefResultMessage.objRef)
+  return _impl_.objref_;
 }
 
 // -------------------------------------------------------------------
@@ -19414,6 +19837,10 @@ inline void FClientAdjustment::set_movementmode(uint32_t value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
