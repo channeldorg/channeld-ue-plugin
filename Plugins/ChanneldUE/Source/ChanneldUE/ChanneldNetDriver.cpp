@@ -250,7 +250,7 @@ void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMess
 		if (!IsServer())
 		{
 			UnprocessedRPCs.Add(Msg);
-			UE_LOG(LogChanneld, Warning, TEXT("Cannot find actor to call remote function '%s', NetGUID: %d. Pushed to the next tick."), UTF8_TO_TCHAR(Msg->functionname().c_str()), Msg->targetobj().netguid());
+			UE_LOG(LogChanneld, Log, TEXT("Cannot find actor to call remote function '%s', NetGUID: %d. Pushed to the next tick."), UTF8_TO_TCHAR(Msg->functionname().c_str()), Msg->targetobj().netguid());
 		}
 		// Case 2: the server receives the client RPC, but the actor has just been handed over to another server (deleted).
 		else
@@ -272,7 +272,7 @@ void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMess
 	ReceivedRPC(Actor, FuncName, Msg->paramspayload(), bDelayRPC);
 	if (bDelayRPC)
 	{
-		UE_LOG(LogChanneld, Log, TEXT("Delayed RPC '%s::%s' due to unmapped NetGUID."), *Actor->GetName(), *FuncName.ToString());
+		UE_LOG(LogChanneld, Log, TEXT("Delayed RPC '%s::%s' due to unmapped NetGUID: %d"), *Actor->GetName(), *FuncName.ToString(), Msg->targetobj().netguid());
 		UnprocessedRPCs.Add(Msg);
 	}
 }
@@ -902,7 +902,7 @@ void UChanneldNetDriver::OnSentRPC(class AActor* Actor, FString FuncName)
 	Metrics->AddConnTypeLabel(*Metrics->SentRPCs).Increment();
 }
 
-void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDelayRPC)
+void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDeferredRPC)
 {
 	const bool bShouldLog = FunctionName != ServerMovePackedFuncName && FunctionName != ClientMoveResponsePackedFuncName && FunctionName != ServerUpdateCameraFuncName;
 	UE_CLOG(bShouldLog,	LogChanneld, Verbose, TEXT("Received RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
@@ -924,8 +924,8 @@ void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, c
 	if (RepComp)
 	{
 		bool bSuccess = true;
-		TSharedPtr<void> Params = RepComp->DeserializeFunctionParams(Actor, Function, ParamsPayload, bSuccess, bDelayRPC);
-		if (bDelayRPC)
+		TSharedPtr<void> Params = RepComp->DeserializeFunctionParams(Actor, Function, ParamsPayload, bSuccess, bDeferredRPC);
+		if (bDeferredRPC)
 		{
 			return;
 		}

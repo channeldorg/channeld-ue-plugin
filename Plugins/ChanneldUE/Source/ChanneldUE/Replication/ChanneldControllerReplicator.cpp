@@ -44,14 +44,17 @@ void FChanneldControllerReplicator::Tick(float DeltaTime)
 		return;
 	}
 
-	auto PlayerState = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(FullState->mutable_playerstate(), Controller->GetWorld(), false));
-	if (PlayerState != Controller->PlayerState)
+	bool bUnmapped = false;
+	auto PlayerState = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(FullState->mutable_playerstate(), Controller->GetWorld(), bUnmapped, false));
+	if (!bUnmapped && PlayerState != Controller->PlayerState)
 	{
 		DeltaState->mutable_playerstate()->CopyFrom(ChanneldUtils::GetRefOfObject(Controller->PlayerState));
 		bStateChanged = true;
 	}
-	auto Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(FullState->mutable_pawn(), Controller->GetWorld(), false));
-	if (Pawn != Controller->GetPawn())
+
+	bUnmapped = false;
+	auto Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(FullState->mutable_pawn(), Controller->GetWorld(), bUnmapped, false));
+	if (!bUnmapped && Pawn != Controller->GetPawn())
 	{
 		DeltaState->mutable_pawn()->CopyFrom(ChanneldUtils::GetRefOfObject(Controller->GetPawn()));
 		bStateChanged = true;
@@ -120,7 +123,7 @@ TSharedPtr<google::protobuf::Message> FChanneldControllerReplicator::SerializeFu
 	return nullptr;
 }
 
-TSharedPtr<void> FChanneldControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
+TSharedPtr<void> FChanneldControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ClientSetLocation"))

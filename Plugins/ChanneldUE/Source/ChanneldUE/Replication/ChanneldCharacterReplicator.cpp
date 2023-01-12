@@ -142,8 +142,9 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 	bool bMovementInfoChanged = false;
 	unrealpb::FBasedMovementInfo* MovementInfo = FullState->mutable_basedmovement();
 	unrealpb::FBasedMovementInfo* MovementInfoDelta = DeltaState->mutable_basedmovement();
-	auto OldMovementBase = Cast<UPrimitiveComponent>(ChanneldUtils::GetActorComponentByRef(MovementInfo->mutable_movementbase(), Character->GetWorld()));
-	if (OldMovementBase != Character->GetMovementBase())
+	bool bUnmapped = false;
+	auto OldMovementBase = Cast<UPrimitiveComponent>(ChanneldUtils::GetActorComponentByRefChecked(MovementInfo->mutable_movementbase(), Character->GetWorld(), bUnmapped, false));
+	if (!bUnmapped && OldMovementBase != Character->GetMovementBase())
 	{
 		uint32 OldNetGUID = MovementInfoDelta->mutable_movementbase()->mutable_owner()->netguid();
 		// The movement base's Actor (e.g. the 'Floor') normally doesn't have a NetConnection. In that case, we use the character's NetConnection.
@@ -255,13 +256,20 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 		FBasedMovementInfo BasedMovement = Character->GetBasedMovement();
 		if (NewState->basedmovement().has_movementbase())
 		{
+			/* We should not create the movement base here
 			UChanneldNetConnection* ClientConn = nullptr;
 			// Special case: server handover
 			if (Character->GetWorld()->IsServer())
 			{
 				ClientConn = Cast<UChanneldNetConnection>(Character->GetNetConnection());
 			}
-			BasedMovement.MovementBase = Cast<UPrimitiveComponent>(ChanneldUtils::GetActorComponentByRef(&NewState->basedmovement().movementbase(), Character->GetWorld(), true, ClientConn));
+			*/
+			bool bUnmapped = false;
+			auto NewBase = ChanneldUtils::GetActorComponentByRefChecked(&NewState->basedmovement().movementbase(), Character->GetWorld(), bUnmapped, false);
+			if (!bUnmapped)
+			{
+				BasedMovement.MovementBase = Cast<UPrimitiveComponent>(NewBase);
+			}
 		}
 		if (NewState->basedmovement().has_bonename())
 		{
@@ -360,7 +368,7 @@ TSharedPtr<google::protobuf::Message> FChanneldCharacterReplicator::SerializeFun
 	return nullptr;
 }
 
-TSharedPtr<void> FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
+TSharedPtr<void> FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ServerMovePacked"))
@@ -403,7 +411,8 @@ TSharedPtr<void> FChanneldCharacterReplicator::DeserializeFunctionParams(UFuncti
 		UNetConnection* NetConn = Character->GetNetConnection();
 		if (!NetConn)
 		{
-			bDelayRPC = true;
+			UE_LOG(LogChanneld, Verbose, TEXT("Character doesn't have the NetConn to handle RPC 'ClientMoveResponsePacked'"));
+			bDeferredRPC = true;
 			return nullptr;
 		}
 		

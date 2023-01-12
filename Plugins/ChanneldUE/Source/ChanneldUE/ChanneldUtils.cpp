@@ -24,6 +24,7 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 	bNetGUIDUnmapped = (World->GetNetDriver() == nullptr);
 	if (bNetGUIDUnmapped)
 	{
+		UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Unable to get the NetDriver, NetGUID: %d (%d)"), NetGUID.Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
 		return nullptr;
 	}
 	auto GuidCache = World->GetNetDriver()->GuidCache;
@@ -96,13 +97,18 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 				}
 			}
 		}
+	}
 
-		if (Obj == nullptr)
+	if (Obj == nullptr)
+	{
+		bNetGUIDUnmapped = true;
+		// Only throw warning when failed to create the object.
+		if (bCreateIfNotInCache)
 		{
-			bNetGUIDUnmapped = true;
-			UE_LOG(LogChanneld, Warning, TEXT("[Client] Unable to create object from NetGUID: %d (%d)"), NetGUID.Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
+			UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Unable to create object from NetGUID: %d (%d)"), NetGUID.Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
 		}
 	}
+	
 	return Obj;
 }
 
@@ -133,7 +139,7 @@ const unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNet
 		}
 		if (!IsValid(Connection))
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Failed to get the ref of %s: the NetConnection is not valid"), *Obj->GetName());
+			UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetRefOfObject: Failed to get the ref of %s: the NetConnection is not valid"), *Obj->GetName());
 			ObjRef.set_netguid(NetGUID.Value);
 			return ObjRef;
 		}
@@ -193,7 +199,7 @@ const unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNet
 		}
 		else
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Failed to get the ref of %s: the Actor's NetConnection has no PackageMapClient"), *Obj->GetName());
+			UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetRefOfObject: Failed to get the ref of %s: the Actor's NetConnection has no PackageMapClient"), *Obj->GetName());
 		}
 	}
 

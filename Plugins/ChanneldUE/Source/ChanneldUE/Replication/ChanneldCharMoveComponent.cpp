@@ -72,11 +72,19 @@ bool FChanneldCharacterMoveResponseDataContainer::Serialize(
 			ObjRef.ParseFromArray(NewBaseData, DataSize);
 			delete[] NewBaseData;
 			bool bNetGUIDUnmapped;
-			ClientAdjustment.NewBase = Cast<UPrimitiveComponent>(ChanneldUtils::GetActorComponentByRefChecked(&ObjRef, CharacterMovement.GetWorld(), bNetGUIDUnmapped));
-			/* Maybe we don't need to fail
+			auto NewBase = ChanneldUtils::GetActorComponentByRefChecked(&ObjRef, CharacterMovement.GetWorld(), bNetGUIDUnmapped, false);
 			if (!bNetGUIDUnmapped)
+			{
+				ClientAdjustment.NewBase = Cast<UPrimitiveComponent>(NewBase);
+			}
+			else
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("Failed to set the NewBase for the CharacterMovement of %s, unmapped NetGUID: %d"),
+					*GetNameSafe(CharacterMovement.GetOwner()), ObjRef.owner().netguid());
+				/* Maybe we don't need to fail
 				return false;
-			*/
+				*/
+			}
 		}
 		SerializeOptionalValue<FName>(bIsSaving, Ar, ClientAdjustment.NewBaseBoneName, NAME_None);
 		SerializeOptionalValue<uint8>(bIsSaving, Ar, ClientAdjustment.MovementMode, MOVE_Walking);

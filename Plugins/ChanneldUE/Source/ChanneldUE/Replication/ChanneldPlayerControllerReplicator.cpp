@@ -189,7 +189,7 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	return nullptr;
 }
 
-TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
+TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ServerUpdateCamera"))
@@ -216,8 +216,8 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 	{
 		unrealpb::PlayerController_ClientSetViewTarget_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
-		AActor* ViewTarget = Cast<AActor>(ChanneldUtils::GetObjectByRef(&Msg.actor(), PC->GetWorld(), bDelayRPC, true));
-		if (bDelayRPC)
+		AActor* ViewTarget = Cast<AActor>(ChanneldUtils::GetObjectByRef(&Msg.actor(), PC->GetWorld(), bDeferredRPC, true));
+		if (bDeferredRPC)
 		{
 			return nullptr;
 		}
@@ -250,8 +250,8 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 	{
 		unrealpb::PlayerController_ClientRestart_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
-		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDelayRPC, true));
-		if (bDelayRPC)
+		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDeferredRPC, true));
+		if (bDeferredRPC)
 		{
 			return nullptr;
 		}
@@ -272,8 +272,8 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 	{
 		unrealpb::PlayerController_ClientRetryClientRestart_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
-		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDelayRPC, true));
-		if (bDelayRPC)
+		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDeferredRPC, true));
+		if (bDeferredRPC)
 		{
 			return nullptr;
 		}

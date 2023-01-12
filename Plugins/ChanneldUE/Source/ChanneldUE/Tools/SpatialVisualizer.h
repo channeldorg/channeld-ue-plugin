@@ -30,7 +30,7 @@ private:
 	TArray<ATintActor*> RegionBoxes;
 	UPROPERTY()
 	TArray<AActor*> SubBoxes;
-	TArray<FLinearColor> Colors;
+	TArray<FLinearColor> RegionColors;
 	TMap<ChannelId, FLinearColor> ColorsByChId;
 	UPROPERTY()
 	TMap<TWeakObjectPtr<UObject>, AOutlinerActor*> Outliners;

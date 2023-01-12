@@ -113,8 +113,9 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	AActor* Owner = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_owner(), Actor->GetWorld(), false));
-	if (Actor->GetOwner() != Owner)
+	bool bOwnerUnmapped = false;
+	AActor* Owner = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_owner(), Actor->GetWorld(), bOwnerUnmapped, false));
+	if (!bOwnerUnmapped && Actor->GetOwner() != Owner)
 	{
 		DeltaState->mutable_owner()->CopyFrom(ChanneldUtils::GetRefOfObject(Actor->GetOwner()));
 		bStateChanged = true;
@@ -131,8 +132,9 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	AActor* Instigator = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_instigator(), Actor->GetWorld(), false));
-	if (Actor->GetInstigator() != Instigator)
+	bool bInstigatorUnmapped = false;
+	AActor* Instigator = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_instigator(), Actor->GetWorld(), bInstigatorUnmapped, false));
+	if (!bInstigatorUnmapped && Actor->GetInstigator() != Instigator)
 	{
 		DeltaState->mutable_instigator()->CopyFrom(ChanneldUtils::GetRefOfObject(Actor->GetInstigator()));
 		bStateChanged = true;
@@ -186,7 +188,8 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 			DeltaState->mutable_attachmentreplication()->mutable_attachparent()->CopyFrom(ChanneldUtils::GetRefOfObject(RepAttachment.AttachParent, Actor->GetNetConnection()));
 			bStateChanged = true;
 		}
-		if (RepAttachment.AttachComponent != Cast<USceneComponent>(ChanneldUtils::GetActorComponentByRef(RepAttachmentFullState->mutable_attachcomponent(), Actor->GetWorld())))
+		bool bUnmapped = false;
+		if (RepAttachment.AttachComponent != Cast<USceneComponent>(ChanneldUtils::GetActorComponentByRefChecked(RepAttachmentFullState->mutable_attachcomponent(), Actor->GetWorld(), bUnmapped, false)) && !bUnmapped)
 		{
 			DeltaState->mutable_attachmentreplication()->mutable_attachcomponent()->CopyFrom(ChanneldUtils::GetRefOfActorComponent(RepAttachment.AttachComponent, Actor->GetNetConnection()));
 			bStateChanged = true;
@@ -269,15 +272,19 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 
 	if (NewState->has_owner())
 	{
-		// Special case: the client won't create other player's controller. Pawn and PlayerState's owner is PlayerController.
-		if (Actor->HasAuthority() || (!Actor->IsA<APawn>() && !Actor->IsA<APlayerState>()))
+		// if (Actor->HasAuthority())
 		{
 			bool bNetGUIDUnmapped = false;
-			UObject* Owner = ChanneldUtils::GetObjectByRef(&NewState->owner(), Actor->GetWorld(), bNetGUIDUnmapped, true);
+			/* Actor's owner should always be created before this moment.
+			// Special case: the client won't create other player's controller. Pawn and PlayerState's owner is PlayerController.
+			bool bCreateIfNotInCache = !Actor->IsA<APawn>() && !Actor->IsA<APlayerState>();
+			*/
+			UObject* Owner = ChanneldUtils::GetObjectByRef(&NewState->owner(), Actor->GetWorld(), bNetGUIDUnmapped, false);
 			if (!bNetGUIDUnmapped)
 			{
 				Actor->SetOwner(Cast<AActor>(Owner));
 				Actor->ProcessEvent(OnRep_OwnerFunc, NULL);
+				UE_LOG(LogChanneld, Verbose, TEXT("Replicator set Actor's Owner to %s"), *GetNameSafe(Owner));
 			}
 			else
 			{

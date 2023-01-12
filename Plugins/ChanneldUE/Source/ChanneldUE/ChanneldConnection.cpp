@@ -136,7 +136,8 @@ void UChanneldConnection::OnDisconnected()
 	ConnId = 0;
 	ConnectionType = channeldpb::NO_CONNECTION;
 	RemoteAddr = nullptr;
-
+		
+	ReceiveBufferOffset = 0;
 	IncomingQueue.Empty();
 	OutgoingQueue.Empty();
 	RpcCallbacks.Empty();
@@ -208,7 +209,7 @@ void UChanneldConnection::Receive()
 		if (BytesRead < 5 + PacketSize)
 		{
 			// Unfinished packet
-			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet body: %d/%d"), BytesRead, 5 + PacketSize);
+			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet body, read: %d, pos: %d/%d"), BytesRead, ReceiveBufferOffset, 5 + PacketSize);
 			return;
 		}
 

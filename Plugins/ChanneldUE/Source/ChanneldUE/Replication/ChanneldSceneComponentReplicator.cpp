@@ -98,7 +98,7 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	if (ChanneldUtils::GetActorComponentByRef(FullState->mutable_attachparent(), SceneComp->GetWorld()) != SceneComp->GetAttachParent())
+	if (ChanneldUtils::GetActorComponentByRef(FullState->mutable_attachparent(), SceneComp->GetWorld()) != SceneComp->GetAttachParent(), false)
 	{
 		if (SceneComp->GetAttachParent() == nullptr)
 		{
@@ -216,8 +216,9 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::M
 
 	if (NewState->has_attachparent())
 	{
-		USceneComponent* AttachParent = Cast<USceneComponent>(ChanneldUtils::GetActorComponentByRef(&NewState->attachparent(), SceneComp->GetWorld()));
-		if (AttachParent && AttachParent != SceneComp->GetAttachParent())
+		bool bUnmapped = false;
+		USceneComponent* AttachParent = Cast<USceneComponent>(ChanneldUtils::GetActorComponentByRefChecked(&NewState->attachparent(), SceneComp->GetWorld(), bUnmapped, false));
+		if (!bUnmapped && AttachParent != SceneComp->GetAttachParent())
 		{
 			FName AttachSocketName; 
 			if (NewState->has_attachsocketname())
@@ -257,15 +258,31 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::M
 
 	if (NewState->attachchildren_size() > 0)
 	{
-		auto AttachChildren = SceneComp->GetAttachChildren();
-		AttachChildren.Empty();
+		TArray<USceneComponent*> NewChildren;
+		bool bSuccess = true;
 		for (auto ChildRef : NewState->attachchildren())
 		{
-			auto Child = Cast<USceneComponent>(ChanneldUtils::GetActorComponentByRef(&ChildRef, SceneComp->GetWorld()));
+			auto Child = Cast<USceneComponent>(ChanneldUtils::GetActorComponentByRef(&ChildRef, SceneComp->GetWorld(), false));
 			if (Child)
 			{
-				AttachChildren.Add(Child);
+				NewChildren.Add(Child);
 			}
+			else
+			{
+				bSuccess = false;
+				break;
+			}
+		}
+
+		if (bSuccess)
+		{
+			auto AttachChildren = SceneComp->GetAttachChildren();
+			AttachChildren.Empty();
+			AttachChildren.Append(NewChildren);
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to replicate USceneComponent::AttachChildren"));
 		}
 	}
 }

@@ -44,12 +44,12 @@ void USpatialVisualizer::HandleSpatialRegionsResult(UChanneldConnection* Conn, C
 	const uint32 ServerCount = MaxServerIndex + 1;
 	for (uint32 i = 0; i < ServerCount; i++)
 	{
-		Colors.Add(FLinearColor::MakeFromHSV8(256 * i / ServerCount, 128, 128));
+		RegionColors.Add(FLinearColor::MakeFromHSV8(256 * i / ServerCount, 0x80, 0x80));
 	}
 
 	for (auto Region : Regions)
 	{
-		ColorsByChId.Add(Region.channelid(), Colors[Region.serverindex()]);
+		ColorsByChId.Add(Region.channelid(), FLinearColor::MakeFromHSV8(256 * Region.serverindex() / ServerCount, 0xcc, 0xff));
 	}
 
 	FTimerHandle Handle;
@@ -82,7 +82,7 @@ void USpatialVisualizer::SpawnRegionBoxes()
 		FVector BoundsSize = ClampVector(BoundsMax - BoundsMin, Settings->RegionBoxMinSize, Settings->RegionBoxMaxSize);
 		FVector BoxSize = Box->GetRootComponent()->Bounds.BoxExtent * 2;
 		Box->SetActorScale3D(BoundsSize / BoxSize);
-		Box->SetColor(Colors[Region.serverindex()]);
+		Box->SetColor(RegionColors[Region.serverindex()]);
 		RegionBoxes.Add(Box);
 	}
 }
