@@ -10,7 +10,7 @@
 
 UChanneldSettings::UChanneldSettings(const FObjectInitializer& ObjectInitializer) :
 	Super(ObjectInitializer),
-	RegionBoxMinSize(1, 1, 1),
+	RegionBoxMinSize(10, 10, 20),
 	RegionBoxMaxSize(100000, 100000, 1000)
 {
 }

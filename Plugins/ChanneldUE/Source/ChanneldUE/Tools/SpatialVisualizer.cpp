@@ -44,7 +44,7 @@ void USpatialVisualizer::HandleSpatialRegionsResult(UChanneldConnection* Conn, C
 	const uint32 ServerCount = MaxServerIndex + 1;
 	for (uint32 i = 0; i < ServerCount; i++)
 	{
-		RegionColors.Add(FLinearColor::MakeFromHSV8(256 * i / ServerCount, 0x80, 0x40));
+		RegionColors.Add(FLinearColor::MakeFromHSV8(256 * i / ServerCount, 0x60, 0x80));
 	}
 
 	for (auto Region : Regions)
@@ -75,8 +75,8 @@ void USpatialVisualizer::SpawnRegionBoxes()
 	for (auto Region : Regions)
 	{
 		// Swap the Y and Z as UE uses the Z-Up rule but channeld uses the Y-up rule.
-		FVector BoundsMin = FVector(Region.min().x(), Region.min().z(), Region.min().y());
-		FVector BoundsMax = FVector(Region.max().x(), Region.max().z(), Region.max().y());
+		FVector BoundsMin = FVector(Region.min().x(), Region.min().z(), Settings->RegionBoxMinSize.Z);
+		FVector BoundsMax = FVector(Region.max().x(), Region.max().z(), Settings->RegionBoxMinSize.Z);
 		FVector Location = 0.5f * (BoundsMin + BoundsMax);
 		ATintActor* Box = CastChecked<ATintActor>(GetWorld()->SpawnActor(Settings->RegionBoxClass, &Location));
 		FVector BoundsSize = ClampVector(BoundsMax - BoundsMin, Settings->RegionBoxMinSize, Settings->RegionBoxMaxSize);
