@@ -490,7 +490,7 @@ bool USpatialChannelDataView::CheckUnspawnedObject(ChannelId ChId, const google:
 		return false;
 	}
 
-	TArray<uint32> NetGUIDs = GetNetGUIDsFromChannelData(ChannelData);
+	TSet<uint32> NetGUIDs = GetNetGUIDsFromChannelData(ChannelData);
 	if (NetGUIDs.Num() == 0)
 	{
 		return false;

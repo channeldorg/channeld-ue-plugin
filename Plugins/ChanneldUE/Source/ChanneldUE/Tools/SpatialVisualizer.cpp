@@ -44,7 +44,7 @@ void USpatialVisualizer::HandleSpatialRegionsResult(UChanneldConnection* Conn, C
 	const uint32 ServerCount = MaxServerIndex + 1;
 	for (uint32 i = 0; i < ServerCount; i++)
 	{
-		RegionColors.Add(FLinearColor::MakeFromHSV8(256 * i / ServerCount, 0x80, 0x80));
+		RegionColors.Add(FLinearColor::MakeFromHSV8(256 * i / ServerCount, 0x80, 0x40));
 	}
 
 	for (auto Region : Regions)
