@@ -787,35 +787,36 @@ const char descriptor_table_protodef_channeld_2eproto[] PROTOBUF_SECTION_VARIABL
   "\013serverIndex\030\004 \001(\r\"I\n\033SpatialRegionsUpda"
   "teMessage\022*\n\007regions\030\001 \003(\0132\031.channeldpb."
   "SpatialRegion\"\037\n\035DebugGetSpatialRegionsM"
-  "essage*\177\n\rBroadcastType\022\020\n\014NO_BROADCAST\020"
-  "\000\022\007\n\003ALL\020\001\022\022\n\016ALL_BUT_SENDER\020\002\022\021\n\rALL_BU"
-  "T_OWNER\020\004\022\025\n\021SINGLE_CONNECTION\020\010\022\025\n\021ADJA"
-  "CENT_CHANNELS\020\020*;\n\016ConnectionType\022\021\n\rNO_"
-  "CONNECTION\020\000\022\n\n\006SERVER\020\001\022\n\n\006CLIENT\020\002*\204\001\n"
-  "\013ChannelType\022\013\n\007UNKNOWN\020\000\022\n\n\006GLOBAL\020\001\022\013\n"
-  "\007PRIVATE\020\002\022\014\n\010SUBWORLD\020\003\022\013\n\007SPATIAL\020\004\022\010\n"
-  "\004TEST\020d\022\t\n\005TEST1\020e\022\t\n\005TEST2\020f\022\t\n\005TEST3\020g"
-  "\022\t\n\005TEST4\020h*\326\002\n\013MessageType\022\013\n\007INVALID\020\000"
-  "\022\010\n\004AUTH\020\001\022\022\n\016CREATE_CHANNEL\020\003\022\022\n\016REMOVE"
-  "_CHANNEL\020\004\022\020\n\014LIST_CHANNEL\020\005\022\022\n\016SUB_TO_C"
-  "HANNEL\020\006\022\026\n\022UNSUB_FROM_CHANNEL\020\007\022\027\n\023CHAN"
-  "NEL_DATA_UPDATE\020\010\022\016\n\nDISCONNECT\020\t\022\032\n\026CRE"
-  "ATE_SPATIAL_CHANNEL\020\n\022\031\n\025QUERY_SPATIAL_C"
-  "HANNEL\020\013\022\031\n\025CHANNEL_DATA_HANDOVER\020\014\022\032\n\026S"
-  "PATIAL_REGIONS_UPDATE\020\r\022\035\n\031DEBUG_GET_SPA"
-  "TIAL_REGIONS\020c\022\024\n\020USER_SPACE_START\020d*1\n\017"
-  "CompressionType\022\022\n\016NO_COMPRESSION\020\000\022\n\n\006S"
-  "NAPPY\020\001*E\n\021ChannelDataAccess\022\r\n\tNO_ACCES"
-  "S\020\000\022\017\n\013READ_ACCESS\020\001\022\020\n\014WRITE_ACCESS\020\002B."
-  "Z,channeld.clewcat.com/channeld/pkg/chan"
-  "neldpbb\006proto3"
+  "essage*\247\001\n\rBroadcastType\022\020\n\014NO_BROADCAST"
+  "\020\000\022\025\n\021SINGLE_CONNECTION\020\001\022\007\n\003ALL\020\002\022\022\n\016AL"
+  "L_BUT_SENDER\020\004\022\021\n\rALL_BUT_OWNER\020\006\022\022\n\016ALL"
+  "_BUT_CLIENT\020\010\022\022\n\016ALL_BUT_SERVER\020\020\022\025\n\021ADJ"
+  "ACENT_CHANNELS\020 *;\n\016ConnectionType\022\021\n\rNO"
+  "_CONNECTION\020\000\022\n\n\006SERVER\020\001\022\n\n\006CLIENT\020\002*\204\001"
+  "\n\013ChannelType\022\013\n\007UNKNOWN\020\000\022\n\n\006GLOBAL\020\001\022\013"
+  "\n\007PRIVATE\020\002\022\014\n\010SUBWORLD\020\003\022\013\n\007SPATIAL\020\004\022\010"
+  "\n\004TEST\020d\022\t\n\005TEST1\020e\022\t\n\005TEST2\020f\022\t\n\005TEST3\020"
+  "g\022\t\n\005TEST4\020h*\326\002\n\013MessageType\022\013\n\007INVALID\020"
+  "\000\022\010\n\004AUTH\020\001\022\022\n\016CREATE_CHANNEL\020\003\022\022\n\016REMOV"
+  "E_CHANNEL\020\004\022\020\n\014LIST_CHANNEL\020\005\022\022\n\016SUB_TO_"
+  "CHANNEL\020\006\022\026\n\022UNSUB_FROM_CHANNEL\020\007\022\027\n\023CHA"
+  "NNEL_DATA_UPDATE\020\010\022\016\n\nDISCONNECT\020\t\022\032\n\026CR"
+  "EATE_SPATIAL_CHANNEL\020\n\022\031\n\025QUERY_SPATIAL_"
+  "CHANNEL\020\013\022\031\n\025CHANNEL_DATA_HANDOVER\020\014\022\032\n\026"
+  "SPATIAL_REGIONS_UPDATE\020\r\022\035\n\031DEBUG_GET_SP"
+  "ATIAL_REGIONS\020c\022\024\n\020USER_SPACE_START\020d*1\n"
+  "\017CompressionType\022\022\n\016NO_COMPRESSION\020\000\022\n\n\006"
+  "SNAPPY\020\001*E\n\021ChannelDataAccess\022\r\n\tNO_ACCE"
+  "SS\020\000\022\017\n\013READ_ACCESS\020\001\022\020\n\014WRITE_ACCESS\020\002B"
+  ".Z,channeld.clewcat.com/channeld/pkg/cha"
+  "nneldpbb\006proto3"
   ;
 static const ::_pbi::DescriptorTable* const descriptor_table_channeld_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fany_2eproto,
 };
 static ::_pbi::once_flag descriptor_table_channeld_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_channeld_2eproto = {
-    false, false, 3694, descriptor_table_protodef_channeld_2eproto,
+    false, false, 3735, descriptor_table_protodef_channeld_2eproto,
     "channeld.proto",
     &descriptor_table_channeld_2eproto_once, descriptor_table_channeld_2eproto_deps, 1, 27,
     schemas_channeld_2eproto, file_default_instances_channeld_2eproto, TableStruct_channeld_2eproto::offsets,
@@ -862,8 +863,10 @@ bool BroadcastType_IsValid(int value) {
     case 1:
     case 2:
     case 4:
+    case 6:
     case 8:
     case 16:
+    case 32:
       return true;
     default:
       return false;

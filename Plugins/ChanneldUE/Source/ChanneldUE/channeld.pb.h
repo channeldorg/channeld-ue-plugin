@@ -189,11 +189,13 @@ inline bool AuthResultMessage_AuthResult_Parse(
 }
 enum BroadcastType : int {
   NO_BROADCAST = 0,
-  ALL = 1,
-  ALL_BUT_SENDER = 2,
-  ALL_BUT_OWNER = 4,
-  SINGLE_CONNECTION = 8,
-  ADJACENT_CHANNELS = 16,
+  SINGLE_CONNECTION = 1,
+  ALL = 2,
+  ALL_BUT_SENDER = 4,
+  ALL_BUT_OWNER = 6,
+  ALL_BUT_CLIENT = 8,
+  ALL_BUT_SERVER = 16,
+  ADJACENT_CHANNELS = 32,
   BroadcastType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   BroadcastType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };

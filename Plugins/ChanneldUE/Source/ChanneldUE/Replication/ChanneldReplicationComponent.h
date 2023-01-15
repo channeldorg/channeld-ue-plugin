@@ -46,16 +46,17 @@ public:
 	*/
 	
 	//~ Begin IChannelDataProvider Interface.
+	virtual UObject* GetTargetObject() override {return GetOwner();}
 	// channeldpb::ChannelType GetChannelType() override;
 	// virtual google::protobuf::Message* GetChannelDataTemplate() const override;
 	// ChannelId GetChannelId() override;
 	// void SetChannelId(ChannelId ChId) override;
-	bool IsRemoved() override;
-	void SetRemoved() override;
-	bool UpdateChannelData(google::protobuf::Message* ChannelData) override;
-	void OnChannelDataUpdated(google::protobuf::Message* ChannelData) override;
+	virtual bool IsRemoved() override;
+	virtual void SetRemoved(bool bInRemoved) override;
+	virtual bool UpdateChannelData(google::protobuf::Message* ChannelData) override;
+	virtual void OnChannelDataUpdated(google::protobuf::Message* ChannelData) override;
 	//~ End IChannelDataProvider Interface.
 
 	TSharedPtr<google::protobuf::Message> SerializeFunctionParams(AActor* Actor, UFunction* Func, void* Params, bool& bSuccess);
-	TSharedPtr<void> DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC);
+	TSharedPtr<void> DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC);
 };

@@ -44,25 +44,39 @@ void FChanneldControllerReplicator::Tick(float DeltaTime)
 		return;
 	}
 
-	auto PlayerState = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(FullState->mutable_playerstate(), Controller->GetWorld()));
-	if (PlayerState != Controller->PlayerState)
+	bool bUnmapped = false;
+	auto PlayerState = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(FullState->mutable_playerstate(), Controller->GetWorld(), bUnmapped, false));
+	if (!bUnmapped && PlayerState != Controller->PlayerState)
 	{
 		DeltaState->mutable_playerstate()->CopyFrom(ChanneldUtils::GetRefOfObject(Controller->PlayerState));
 		bStateChanged = true;
 	}
-	auto Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(FullState->mutable_pawn(), Controller->GetWorld()));
-	if (Pawn != Controller->GetPawn())
+
+	bUnmapped = false;
+	auto Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(FullState->mutable_pawn(), Controller->GetWorld(), bUnmapped, false));
+	if (!bUnmapped && Pawn != Controller->GetPawn())
 	{
 		DeltaState->mutable_pawn()->CopyFrom(ChanneldUtils::GetRefOfObject(Controller->GetPawn()));
 		bStateChanged = true;
 	}
 
-	FullState->MergeFrom(*DeltaState);
+	if (bStateChanged)
+	{
+		FullState->MergeFrom(*DeltaState);
+	}
 }
 
 void FChanneldControllerReplicator::OnStateChanged(const google::protobuf::Message* InNewState)
 {
 	if (!Controller.IsValid())
+	{
+		return;
+	}
+
+	/* Authority can be changed in the middle of a ChannelDataUpdate (in FChanneldActorReplicator::OnStateChanged),
+	 * causing PlayerState and Pawn failed to set.
+	*/
+	if (Controller->HasAuthority())
 	{
 		return;
 	}
@@ -75,11 +89,13 @@ void FChanneldControllerReplicator::OnStateChanged(const google::protobuf::Messa
 	{
 		Controller->PlayerState = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(&NewState->playerstate(), Controller->GetWorld()));
 		Controller->OnRep_PlayerState();
+		UE_LOG(LogChanneld, Verbose, TEXT("Replicator set Controller's PlayerState to %s"), *GetNameSafe(Controller->PlayerState));
 	}
 
 	if (NewState->has_pawn())
 	{
 		Controller->SetPawnFromRep(Cast<APawn>(ChanneldUtils::GetObjectByRef(&NewState->pawn(), Controller->GetWorld())));
+		UE_LOG(LogChanneld, Verbose, TEXT("Replicator set Controller's Pawn to %s"), *GetNameSafe(Controller->GetPawn()));
 	}
 }
 
@@ -107,7 +123,7 @@ TSharedPtr<google::protobuf::Message> FChanneldControllerReplicator::SerializeFu
 	return nullptr;
 }
 
-TSharedPtr<void> FChanneldControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
+TSharedPtr<void> FChanneldControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ClientSetLocation"))

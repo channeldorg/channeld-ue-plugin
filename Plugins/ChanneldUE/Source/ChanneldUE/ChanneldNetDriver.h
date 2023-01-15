@@ -59,22 +59,48 @@ public:
 	virtual void ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject = nullptr) override;
 	virtual void NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTravel) override;
 	//~ End UNetDriver Interface
+	
+	UChanneldNetConnection* AddChanneldClientConnection(ConnectionId ClientConnId, ChannelId ChId);
+	void RemoveChanneldClientConnection(ConnectionId ClientConnId);
 
-	void ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDelayRPC);
+	void ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDeferredRPC);
 
-	UChanneldConnection* GetConnToChanneld() { return ConnToChanneld; }
+	UChanneldConnection* GetConnToChanneld() const { return ConnToChanneld; }
 
 	ConnectionId AddrToConnId(const FInternetAddr& Addr);
 	TSharedRef<FInternetAddr> ConnIdToAddr(ConnectionId ConnId);
 
-	UChanneldNetConnection* GetServerConnection()
+	UChanneldNetConnection* GetServerConnection() const
 	{
 		return CastChecked<UChanneldNetConnection>(ServerConnection);
 	}
 
+	UChanneldNetConnection* GetClientConnection(ConnectionId ConnId) const
+	{
+		return ClientConnectionMap.FindRef(ConnId);
+	}
+
+	FORCEINLINE TMap<uint32, UChanneldNetConnection*>& GetClientConnectionMap() {return ClientConnectionMap;}
+
+	virtual ChannelId GetSendToChannelId(UChanneldNetConnection* NetConn) const;
+
+	// Update the PackageMap of all connections that the specified NetId has been sent, so it's safe to send the actor's RPC message.
+	void SetAllSentSpawn(const FNetworkGUID NetId);
+	
+	void SendCrossServerRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
+	
+	void OnServerBeginPlay(AActor* Actor);
+
+	TWeakObjectPtr<UChannelDataView> ChannelDataView;
+
+protected:
 	TSharedRef<ChannelId> LowLevelSendToChannelId = MakeShared<ChannelId>(GlobalChannelId);
 
 private:
+	
+	const FName ServerMovePackedFuncName = FName("ServerMovePacked");
+	const FName ClientMoveResponsePackedFuncName = FName("ClientMoveResponsePacked");
+	const FName ServerUpdateCameraFuncName = FName("ServerUpdateCamera");
 
 	// Prevent the engine from GC the connection
 	UPROPERTY()
@@ -85,25 +111,26 @@ private:
 	// Cache the FInternetAddr so it won't be created again every time when mapping from ConnectionId.
 	TMap<ConnectionId, TSharedRef<FInternetAddr>> CachedAddr;
 
-	TMap<ConnectionId, UChanneldNetConnection*> ClientConnectionMap;
+	UPROPERTY()
+	TMap<uint32, UChanneldNetConnection*> ClientConnectionMap;
 
+	// RPCs queued on the callee's side that dont' have the actor resolved yet.
 	TArray<TSharedPtr<unrealpb::RemoteFunctionMessage>> UnprocessedRPCs;
 
-	UChanneldNetConnection* OnClientConnected(ConnectionId ClientConnId);
+	TSet<FNetworkGUID> SentSpawnedNetGUIDs;
+
+	// Actors that spawned in server using SpawnActorDeferred (mainly in Blueprints), which don't have ActorComponent registered.
+	// We need to skip these actors in OnServerSpawnedActor(), and actually handle them in their BeginPlay().
+	TSet<TWeakObjectPtr<AActor>> ServerDeferredSpawns;
+
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
 	void OnUserSpaceMessageReceived(uint32 MsgType, ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload);
+	void OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg);
 	void HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
 	void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer);
 	void OnServerSpawnedActor(AActor* Actor);
-	void HandleLowLevelMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-	void HandleRemoteFunctionMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-	void ServerHandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-
-	void SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, uint8* DataToSend, int32 DataSize);
-	void SendDataToClient(uint32 MsgType, ConnectionId ClientConnId, const google::protobuf::Message& Msg);
-	void SendDataToServer(uint32 MsgType, uint8* DataToSend, int32 DataSize);
 
 	void OnSentRPC(class AActor* Actor, FString FuncName);
 
-	UChanneldGameInstanceSubsystem* GetSubsystem();
+	UChanneldGameInstanceSubsystem* GetSubsystem() const;
 };

@@ -39,14 +39,20 @@ void UChanneldReplicationComponent::PostInitProperties()
 void UChanneldReplicationComponent::InitOnce()
 {
 	if (!GetOwner())
+	{
 		return;
+	}
 
 	if (bInitialized)
+	{
 		return;
+	}
 
 	UGameInstance* GameInstance = GetOwner()->GetGameInstance();
 	if (!GameInstance)
+	{
 		return;
+	}
 
 	auto Settings = GetMutableDefault<UChanneldSettings>();
 	if (Settings->bSkipCustomReplication && Settings->bSkipCustomRPC)
@@ -85,8 +91,10 @@ void UChanneldReplicationComponent::InitOnce()
 		}
 	}
 
+	/* Server and client have different processes of adding the DataProvider.
 	// Make sure the DataProvider is always registered
 	GameInstance->GetSubsystem<UChanneldGameInstanceSubsystem>()->RegisterDataProvider(this);
+	*/
 	
 	bInitialized = true;
 }
@@ -96,6 +104,11 @@ void UChanneldReplicationComponent::BeginPlay()
 	Super::BeginPlay();
 
 	InitOnce();
+
+	if (auto NetDriver = Cast<UChanneldNetDriver>(GetWorld()->GetNetDriver()))
+	{
+		NetDriver->OnServerBeginPlay(GetOwner());
+	}
 }
 
 void UChanneldReplicationComponent::UninitOnce()
@@ -103,7 +116,7 @@ void UChanneldReplicationComponent::UninitOnce()
 	if (bUninitialized)
 		return;
 
-	UChannelDataView* View = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
+	auto View = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
 	if (View)
 	{
 		View->RemoveProviderFromAllChannels(this, GetNetMode() == ENetMode::NM_DedicatedServer);
@@ -156,9 +169,9 @@ bool UChanneldReplicationComponent::IsRemoved()
 	return bRemoved;
 }
 
-void UChanneldReplicationComponent::SetRemoved()
+void UChanneldReplicationComponent::SetRemoved(bool bInRemoved)
 {
-	bRemoved = true;
+	bRemoved = bInRemoved;
 }
 
 bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message* ChannelData)
@@ -268,13 +281,13 @@ TSharedPtr<google::protobuf::Message> UChanneldReplicationComponent::SerializeFu
 	return nullptr;
 }
 
-TSharedPtr<void> UChanneldReplicationComponent::DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
+TSharedPtr<void> UChanneldReplicationComponent::DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC)
 {
 	for (auto& Replicator : Replicators)
 	{
 		if (Replicator->GetTargetObject() == Actor)
 		{
-			TSharedPtr<void> Params = Replicator->DeserializeFunctionParams(Func, ParamsPayload, bSuccess, bDelayRPC);
+			TSharedPtr<void> Params = Replicator->DeserializeFunctionParams(Func, ParamsPayload, bSuccess, bDeferredRPC);
 			if (bSuccess)
 			{
 				return Params;

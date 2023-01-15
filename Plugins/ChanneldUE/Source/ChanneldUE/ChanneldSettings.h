@@ -4,18 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldTypes.h"
+#include "Tools/ATintActor.h"
+#include "Tools/OutlinerActor.h"
+#include "View/PlayerStartLocator.h"
 #include "ChanneldSettings.generated.h"
 
 /**
  * 
  */
-UCLASS(config = ChanneldUE)
+UCLASS(BlueprintType, config = ChanneldUE)
 class CHANNELDUE_API UChanneldSettings : public UObject
 {
 	GENERATED_BODY()
 	
 public:
-	UChanneldSettings(const FObjectInitializer& obj);
+	UChanneldSettings(const FObjectInitializer& ObjectInitializer);
 	virtual void PostInitProperties() override;
 
 	UPROPERTY(Config, EditAnywhere, Category="View")
@@ -29,6 +32,8 @@ public:
 	FString ChanneldIpForServer = "127.0.0.1";
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	int32 ChanneldPortForServer = 11288;
+	UPROPERTY(Config, EditAnywhere, Category = "Transport")
+	bool bUseReceiveThread = false;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	bool bDisableHandshaking = true;
@@ -38,6 +43,29 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Replication")
 	bool bSkipCustomRPC = true;
 
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial")
+	TSubclassOf<UPlayerStartLocatorBase> PlayerStartLocatorClass;
+
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial")
+	bool bEnableSpatialVisualizer = false;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	TSubclassOf<ATintActor> RegionBoxClass;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	FVector RegionBoxMinSize;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	FVector RegionBoxMaxSize;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	TSubclassOf<AActor> SubscriptionBoxClass;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	TSubclassOf<AOutlinerActor> SpatialOutlinerClass;
+
+	// If set to true, the RPC with the actor that hasn't been exported to the client will be postponed until being exported.
+	UPROPERTY(Config, EditAnywhere, Category = "Server")
+	bool bQueueUnexportedActorRPC = false;
+	// Delay the calling of InitServer() for attaching the debugger or other purpose.
+	UPROPERTY(Config, EditAnywhere, Category = "Server|Debug")
+	float DelayViewInitInSeconds = 0;
+	
 private:
 	bool ParseNetAddr(const FString& Addr, FString& OutIp, int32& OutPort);
 };

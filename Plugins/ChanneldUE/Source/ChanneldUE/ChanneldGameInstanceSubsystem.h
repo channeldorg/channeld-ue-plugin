@@ -8,6 +8,7 @@
 #include "Tickable.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "ChannelDataProvider.h"
+#include "ChanneldSettings.h"
 #include "UObject/WeakInterfacePtr.h"
 #include "View/ChannelDataView.h"
 #include "ChanneldGameInstanceSubsystem.generated.h"
@@ -30,6 +31,7 @@ DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnceOnRemoveChannel, int32, ChId, int32, Rem
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnceOnListChannel, const TArray<FListedChannelInfo>&, Channels);
 DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnSubToChannel, int32, ChId, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
 DECLARE_DYNAMIC_DELEGATE_FourParams(FOnceOnUnsubFromChannel, int32, ChId, EChanneldChannelType, ChannelType, int32, ConnId, EChanneldConnectionType, ConnType);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnceOnQuerySpatialChannel, int64, SpatialChId);
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnViewInitialized, UChannelDataView*);
 DECLARE_MULTICAST_DELEGATE(FOnSetLowLevelSendChannelId);
@@ -129,6 +131,9 @@ public:
 	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "AuthCallback"), Category = "Channeld")
 		void ConnectToChanneld(bool& Success, FString& Error, FString Host, int32 Port, const FOnceOnAuth& AuthCallback, bool bInitAsClient = true);
 
+	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "AuthCallback"), Category = "Channeld")
+		void ConnectWithDefaultSettings(bool& Success, FString& Error, const FOnceOnAuth& AuthCallback, bool bInitAsClient = true);
+
 	UFUNCTION(BlueprintCallable, Category = "Channeld")
 		void DisconnectFromChanneld(bool bFlushAll = true);
 
@@ -156,6 +161,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Channeld")
 		void SendDataUpdate(int32 ChId, UProtoMessageObject* MessageObject);
 
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Spatial")
+	void QuerySpatialChannel(const AActor* Actor, const FOnceOnQuerySpatialChannel& Callback);
+
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Net", Meta = (ToolTip = "Only run on server"))
 		void ServerBroadcast(int32 ChId, int32 ClientConnId, UProtoMessageObject* MessageObject, EChanneldBroadcastType BroadcastType);
 
@@ -180,17 +188,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Utility")
 		void OpenLevelByObjPtr(const TSoftObjectPtr<UWorld> Level, bool bAbsolute = true, FString Options = FString(TEXT("")));
 
-	UFUNCTION(BlueprintCallable, Category = "Channeld")
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Utility")
 		void SeamlessTravelToChannel(APlayerController* PlayerController, int32 ChId);
 
 	void RegisterDataProvider(IChannelDataProvider* Provider);
 
+	class UChanneldNetDriver* GetNetDriver();
+
 protected:
+	
 	UPROPERTY()
-		UChanneldConnection* ConnectionInstance = nullptr;
+	UChanneldConnection* ConnectionInstance = nullptr;
 
 	UPROPERTY()
-		UChannelDataView* ChannelDataView;
+	UChannelDataView* ChannelDataView;
 
 	TMap<EChanneldChannelType, FString> ChannelTypeToProtoFullNameMapping;
 
@@ -205,8 +216,6 @@ protected:
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
 
 	void HandleUserSpaceAnyMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-
-	class UChanneldNetDriver* GetNetDriver();
 
 	void InitChannelDataView();
 };

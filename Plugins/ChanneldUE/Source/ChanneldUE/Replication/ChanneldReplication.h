@@ -19,5 +19,7 @@ namespace ChanneldReplication
 	ChanneldReplication::RegisterReplicator(TargetClass::StaticClass(), [](UObject* InTargetObj){ return new ReplicatorClass(CastChecked<TargetClass>(InTargetObj)); })
 
 #define REGISTER_REPLICATOR_BP(ReplicatorClass, BlueprintClassName) \
+	{ \
 	UClass* TargetClass = TSoftClassPtr<UObject>(FSoftObjectPath(TEXT(BlueprintClassName))).LoadSynchronous(); \
-	ChanneldReplication::RegisterReplicator(TargetClass, [TargetClass](UObject* InTargetObj){ return new ReplicatorClass(InTargetObj, TargetClass); })
+	ChanneldReplication::RegisterReplicator(TargetClass, [TargetClass](UObject* InTargetObj){ return new ReplicatorClass(InTargetObj, TargetClass); }); \
+	} \

@@ -11,7 +11,7 @@ FChanneldActorReplicator::FChanneldActorReplicator(UObject* InTargetObj) : FChan
 	Actor = CastChecked<AActor>(InTargetObj);
 	if (Actor->IsA<AGameStateBase>())
 	{
-		NetGUID = 1;
+		NetGUID = GameStateNetId;
 	}
 
 	// Remove the registered DOREP() properties in the Character
@@ -79,30 +79,43 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 		return;
 	}
 
-	auto Connnection = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
-	if (IsValid(Connnection) && Connnection->GetConnId() != FullState->owningconnid())
-	{
-		DeltaState->set_owningconnid(Connnection->GetConnId());
-		bStateChanged = true;
-	}
+	// ~Begin copy of AActor::PreReplication
+	AttachmentReplicationPtr->AttachParent = nullptr;
+	AttachmentReplicationPtr->AttachComponent = nullptr;
+	Actor->GatherCurrentMovement();
+	// ~End copy of AActor::PreReplication
+	
 	if (Actor->IsReplicatingMovement() != FullState->breplicatemovement())
 	{
 		DeltaState->set_breplicatemovement(Actor->IsReplicatingMovement());
 		bStateChanged = true;
 	}
+
+	bool bRoleChanged = false;
 	if ((uint32)Actor->GetLocalRole() != FullState->localrole())
 	{
 		DeltaState->set_localrole(Actor->GetLocalRole());
 		bStateChanged = true;
+		bRoleChanged = true;
 	}
 	if ((uint32)Actor->GetRemoteRole() != FullState->remoterole())
 	{
 		DeltaState->set_remoterole(Actor->GetRemoteRole());
 		bStateChanged = true;
+		bRoleChanged = true;
 	}
 
-	AActor* Owner = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_owner(), Actor->GetWorld()));
-	if (Actor->GetOwner() != Owner)
+	auto Connnection = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
+	// If role changed, always send the owning connId for the client to adjust the role.
+	if (IsValid(Connnection) && (bRoleChanged || Connnection->GetConnId() != FullState->owningconnid()))
+	{
+		DeltaState->set_owningconnid(Connnection->GetConnId());
+		bStateChanged = true;
+	}
+
+	bool bOwnerUnmapped = false;
+	AActor* Owner = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_owner(), Actor->GetWorld(), bOwnerUnmapped, false));
+	if (!bOwnerUnmapped && Actor->GetOwner() != Owner)
 	{
 		DeltaState->mutable_owner()->CopyFrom(ChanneldUtils::GetRefOfObject(Actor->GetOwner()));
 		bStateChanged = true;
@@ -119,17 +132,13 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	AActor* Instigator = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_instigator(), Actor->GetWorld()));
-	if (Actor->GetInstigator() != Instigator)
+	bool bInstigatorUnmapped = false;
+	AActor* Instigator = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_instigator(), Actor->GetWorld(), bInstigatorUnmapped, false));
+	if (!bInstigatorUnmapped && Actor->GetInstigator() != Instigator)
 	{
 		DeltaState->mutable_instigator()->CopyFrom(ChanneldUtils::GetRefOfObject(Actor->GetInstigator()));
 		bStateChanged = true;
 	}
-
-	//---------------------------------------------
-	// AActor::PreReplication
-	//---------------------------------------------
-	Actor->GatherCurrentMovement();
 
 	if (Actor->IsReplicatingMovement())
 	{
@@ -173,35 +182,39 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 	{
 		const FRepAttachment& RepAttachment = Actor->GetAttachmentReplication();
 		unrealpb::FRepAttachment* RepAttachmentFullState = FullState->mutable_attachmentreplication();
-		unrealpb::FRepAttachment* RepAttachmentDeltaState = DeltaState->mutable_attachmentreplication();
-		if (RepAttachment.AttachParent != ChanneldUtils::GetObjectByRef(RepAttachmentFullState->mutable_attachparent(), Actor->GetWorld()))
+		// unrealpb::FRepAttachment* RepAttachmentDeltaState = DeltaState->mutable_attachmentreplication();
+		if (RepAttachment.AttachParent != ChanneldUtils::GetObjectByRef(RepAttachmentFullState->mutable_attachparent(), Actor->GetWorld(), false))
 		{
-			RepAttachmentDeltaState->mutable_attachparent()->CopyFrom(ChanneldUtils::GetRefOfObject(RepAttachment.AttachParent, Actor->GetNetConnection()));
+			DeltaState->mutable_attachmentreplication()->mutable_attachparent()->CopyFrom(ChanneldUtils::GetRefOfObject(RepAttachment.AttachParent, Actor->GetNetConnection()));
 			bStateChanged = true;
 		}
-		if (RepAttachment.AttachComponent != ChanneldUtils::GetActorComponentByRef<USceneComponent>(RepAttachmentFullState->mutable_attachcomponent(), Actor->GetWorld()))
+		bool bUnmapped = false;
+		if (RepAttachment.AttachComponent != Cast<USceneComponent>(ChanneldUtils::GetActorComponentByRefChecked(RepAttachmentFullState->mutable_attachcomponent(), Actor->GetWorld(), bUnmapped, false)) && !bUnmapped)
 		{
-			RepAttachmentDeltaState->mutable_attachcomponent()->CopyFrom(ChanneldUtils::GetRefOfActorComponent(RepAttachment.AttachComponent, Actor->GetNetConnection()));
+			DeltaState->mutable_attachmentreplication()->mutable_attachcomponent()->CopyFrom(ChanneldUtils::GetRefOfActorComponent(RepAttachment.AttachComponent, Actor->GetNetConnection()));
 			bStateChanged = true;
 		}
 		if (ChanneldUtils::SetIfNotSame(RepAttachmentFullState->mutable_locationoffset(), RepAttachment.LocationOffset))
 		{
-			ChanneldUtils::SetIfNotSame(RepAttachmentDeltaState->mutable_locationoffset(), RepAttachment.LocationOffset);
+			ChanneldUtils::SetIfNotSame(DeltaState->mutable_attachmentreplication()->mutable_locationoffset(), RepAttachment.LocationOffset);
 			bStateChanged = true;
 		}
 		if (ChanneldUtils::SetIfNotSame(RepAttachmentFullState->mutable_relativescale(), RepAttachment.RelativeScale3D))
 		{
-			ChanneldUtils::SetIfNotSame(RepAttachmentDeltaState->mutable_relativescale(), RepAttachment.RelativeScale3D);
+			ChanneldUtils::SetIfNotSame(DeltaState->mutable_attachmentreplication()->mutable_relativescale(), RepAttachment.RelativeScale3D);
 			bStateChanged = true;
 		}
 		if (ChanneldUtils::SetIfNotSame(RepAttachmentFullState->mutable_rotationoffset(), RepAttachment.RotationOffset))
 		{
-			ChanneldUtils::SetIfNotSame(RepAttachmentDeltaState->mutable_rotationoffset(), RepAttachment.RotationOffset);
+			ChanneldUtils::SetIfNotSame(DeltaState->mutable_attachmentreplication()->mutable_rotationoffset(), RepAttachment.RotationOffset);
 			bStateChanged = true;
 		}
 	}
 
-	FullState->MergeFrom(*DeltaState);
+	if (bStateChanged)
+	{
+		FullState->MergeFrom(*DeltaState);
+	}
 }
 
 void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* InNewState)
@@ -211,7 +224,8 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 		return;
 	}
 
-	if (Actor->GetLocalRole() > ENetRole::ROLE_SimulatedProxy)
+	// AutonomousProxy still applies the update, as it may downgrade to SimulatedProxy
+	if (Actor->GetLocalRole() > ENetRole::ROLE_AutonomousProxy)
 	{
 		return;
 	}
@@ -229,8 +243,7 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 	// Client reverses the local/remote role as the role in the dedicated server.
 	if (NewState->has_localrole())
 	{
-		// FIXME: handle the case of SimulatedProxy in DS
-		if (Actor->IsNetMode(NM_DedicatedServer))
+		if (Actor->IsNetMode(NM_DedicatedServer) && Actor->GetLocalRole() == ENetRole::ROLE_AutonomousProxy)
 		{
 			Actor->SetRole((ENetRole)NewState->localrole());
 		}
@@ -241,7 +254,7 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 	}
 	if (NewState->has_remoterole())
 	{
-		if (Actor->IsNetMode(NM_DedicatedServer))
+		if (Actor->IsNetMode(NM_DedicatedServer) && Actor->GetLocalRole() == ENetRole::ROLE_AutonomousProxy)
 		{
 			*RemoteRolePtr = (uint8)NewState->remoterole();
 		}
@@ -250,37 +263,33 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 			Actor->SetRole((ENetRole)NewState->remoterole());
 		}
 	}
-	/*
-	*/
+
+	// Update the NetRole based on the OwningConnId (the actor's owning NetConnection's ConnId)
 	if (NewState->has_owningconnid())
 	{
-		UChanneldConnection* ConnToChanneld = GEngine->GetEngineSubsystem<UChanneldConnection>();
-		if (ConnToChanneld->GetConnId() == NewState->owningconnid())
-		{
-			Actor->SetRole(ROLE_AutonomousProxy);
-		}
-		else if (Actor->GetLocalRole() == ROLE_AutonomousProxy)
-		{
-			Actor->SetRole(ROLE_SimulatedProxy);
-		}
-		const static UEnum* Enum = StaticEnum<ENetRole>();
-		UE_LOG(LogChanneld, Log, TEXT("[Client] Updated actor %s's role from %s to %s, local/remote owning connId: %d/%d"),
-			*Actor->GetName(),
-			*Enum->GetNameStringByValue(Actor->GetLocalRole()),
-			*Enum->GetNameStringByValue(Actor->GetLocalRole()),
-			ConnToChanneld->GetConnId(),
-			NewState->owningconnid()
-		);
+		ChanneldUtils::SetActorRoleByOwningConnId(Actor.Get(), NewState->owningconnid());
 	}
 
 	if (NewState->has_owner())
 	{
-		// Special case: the client won't create other player's controller. Pawn and PlayerState's owner is PlayerController.
-		if (Actor->HasAuthority() || (!Actor->IsA<APawn>() && !Actor->IsA<APlayerState>()))
+		// if (Actor->HasAuthority())
 		{
-			// TODO: handle unmapped NetGUID
-			Actor->SetOwner(Cast<AActor>(ChanneldUtils::GetObjectByRef(&NewState->owner(), Actor->GetWorld())));
-			Actor->ProcessEvent(OnRep_OwnerFunc, NULL);
+			bool bNetGUIDUnmapped = false;
+			/* Actor's owner should always be created before this moment.
+			// Special case: the client won't create other player's controller. Pawn and PlayerState's owner is PlayerController.
+			bool bCreateIfNotInCache = !Actor->IsA<APawn>() && !Actor->IsA<APlayerState>();
+			*/
+			UObject* Owner = ChanneldUtils::GetObjectByRef(&NewState->owner(), Actor->GetWorld(), bNetGUIDUnmapped, false);
+			if (!bNetGUIDUnmapped)
+			{
+				Actor->SetOwner(Cast<AActor>(Owner));
+				Actor->ProcessEvent(OnRep_OwnerFunc, NULL);
+				UE_LOG(LogChanneld, Verbose, TEXT("Replicator set Actor's Owner to %s"), *GetNameSafe(Owner));
+			}
+			else
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("ActorReplicator failed to set the owner of %s, NetId: %d"), *Actor->GetName(), NewState->owner().netguid());
+			}
 		}
 	}
 	if (NewState->has_bhidden())
@@ -297,9 +306,17 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 	}
 	if (NewState->has_instigator())
 	{
-		// TODO: handle unmapped NetGUID
-		Actor->SetInstigator(Cast<APawn>(ChanneldUtils::GetObjectByRef(&NewState->instigator(), Actor->GetWorld())));
-		Actor->OnRep_Instigator();
+		bool bNetGUIDUnmapped = false;
+		UObject* Instigator = ChanneldUtils::GetObjectByRef(&NewState->instigator(), Actor->GetWorld(), bNetGUIDUnmapped, true);
+		if (!bNetGUIDUnmapped)
+		{
+			Actor->SetInstigator(Cast<APawn>(Instigator));
+			Actor->OnRep_Instigator();
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("ActorReplicator failed to set the instigator of %s, NetId: %d"), *Actor->GetName(), NewState->instigator().netguid());
+		}
 	}
 
 	if (NewState->has_replicatedmovement())

@@ -3,7 +3,7 @@
 #include "ChanneldUtils.h"
 #include "Net/UnrealNetwork.h"
 
-FChanneldSceneComponentReplicator::FChanneldSceneComponentReplicator(USceneComponent* InSceneComp) : FChanneldReplicatorBase(InSceneComp)
+FChanneldSceneComponentReplicator::FChanneldSceneComponentReplicator(USceneComponent* InSceneComp) : FChanneldReplicatorBase_AC(InSceneComp)
 {
 	SceneComp = InSceneComp;
 
@@ -30,22 +30,6 @@ FChanneldSceneComponentReplicator::FChanneldSceneComponentReplicator(USceneCompo
 		bShouldSnapRotationWhenAttachedPtr = Property->ContainerPtrToValuePtr<uint8>(SceneComp.Get());
 		check(bShouldSnapRotationWhenAttachedPtr);
 	}
-}
-
-uint32 FChanneldSceneComponentReplicator::GetNetGUID()
-{
-	if (!NetGUID.IsValid())
-	{
-		if (SceneComp.IsValid())
-		{
-			UWorld* World = SceneComp->GetWorld();
-			if (World && World->GetNetDriver())
-			{
-				NetGUID = World->GetNetDriver()->GuidCache->GetNetGUID(SceneComp->GetOwner());
-			}
-		}
-	}
-	return NetGUID.Value;
 }
 
 FChanneldSceneComponentReplicator::~FChanneldSceneComponentReplicator()
@@ -114,8 +98,7 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	USceneComponent* AttachParent = ChanneldUtils::GetActorComponentByRef<USceneComponent>(FullState->mutable_attachparent(), SceneComp->GetWorld());
-	if (AttachParent != SceneComp->GetAttachParent())
+	if (ChanneldUtils::GetActorComponentByRef(FullState->mutable_attachparent(), SceneComp->GetWorld()) != SceneComp->GetAttachParent(), false)
 	{
 		if (SceneComp->GetAttachParent() == nullptr)
 		{
@@ -165,8 +148,10 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 		DeltaState->mutable_relativescale()->MergeFrom(*FullState->mutable_relativescale());
 	}
 
-	// TODO: Optimization: Set the FullState as well as the DeltaState above
-	FullState->MergeFrom(*DeltaState);
+	if (bStateChanged)
+	{
+		FullState->MergeFrom(*DeltaState);
+	}
 }
 
 void FChanneldSceneComponentReplicator::ClearState()
@@ -178,12 +163,6 @@ void FChanneldSceneComponentReplicator::ClearState()
 void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::Message* InNewState)
 {
 	if (!SceneComp.IsValid() || !SceneComp->GetOwner())
-	{
-		return;
-	}
-
-	// Only simulated proxy need to update from the channel data
-	if (SceneComp->GetOwnerRole() > ENetRole::ROLE_SimulatedProxy)
 	{
 		return;
 	}
@@ -237,8 +216,9 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::M
 
 	if (NewState->has_attachparent())
 	{
-		USceneComponent* AttachParent = ChanneldUtils::GetActorComponentByRef<USceneComponent>(&NewState->attachparent(), SceneComp->GetWorld());
-		if (AttachParent && AttachParent != SceneComp->GetAttachParent())
+		bool bUnmapped = false;
+		USceneComponent* AttachParent = Cast<USceneComponent>(ChanneldUtils::GetActorComponentByRefChecked(&NewState->attachparent(), SceneComp->GetWorld(), bUnmapped, false));
+		if (!bUnmapped && AttachParent != SceneComp->GetAttachParent())
 		{
 			FName AttachSocketName; 
 			if (NewState->has_attachsocketname())
@@ -276,7 +256,35 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::M
 		*bShouldSnapRotationWhenAttachedPtr = NewState->bshouldsnaprotationwhenattached();
 	}
 
-	// TODO: attachChildren
+	if (NewState->attachchildren_size() > 0)
+	{
+		TArray<USceneComponent*> NewChildren;
+		bool bSuccess = true;
+		for (auto ChildRef : NewState->attachchildren())
+		{
+			auto Child = Cast<USceneComponent>(ChanneldUtils::GetActorComponentByRef(&ChildRef, SceneComp->GetWorld(), false));
+			if (Child)
+			{
+				NewChildren.Add(Child);
+			}
+			else
+			{
+				bSuccess = false;
+				break;
+			}
+		}
+
+		if (bSuccess)
+		{
+			auto AttachChildren = SceneComp->GetAttachChildren();
+			AttachChildren.Empty();
+			AttachChildren.Append(NewChildren);
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to replicate USceneComponent::AttachChildren"));
+		}
+	}
 }
 
 EAttachmentRule FChanneldSceneComponentReplicator::GetAttachmentRule(bool bShouldSnapWhenAttached, bool bAbsolute)

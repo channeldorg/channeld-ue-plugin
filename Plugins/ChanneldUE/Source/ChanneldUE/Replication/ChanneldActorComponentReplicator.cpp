@@ -2,7 +2,7 @@
 #include "Net/UnrealNetwork.h"
 #include "ChanneldUtils.h"
 
-FChanneldActorComponentReplicator::FChanneldActorComponentReplicator(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
+FChanneldActorComponentReplicator::FChanneldActorComponentReplicator(UObject* InTargetObj) : FChanneldReplicatorBase_AC(InTargetObj)
 {
 	ActorComponent = CastChecked<UActorComponent>(InTargetObj);
 	// Remove the registered DOREP() properties in the Character
@@ -11,22 +11,6 @@ FChanneldActorComponentReplicator::FChanneldActorComponentReplicator(UObject* In
 
 	FullState = new unrealpb::ActorComponentState;
 	DeltaState = new unrealpb::ActorComponentState;
-}
-
-uint32 FChanneldActorComponentReplicator::GetNetGUID()
-{
-	if (!NetGUID.IsValid())
-	{
-		if (ActorComponent.IsValid())
-		{
-			UWorld* World = ActorComponent->GetWorld();
-			if (World && World->GetNetDriver())
-			{
-				NetGUID = World->GetNetDriver()->GuidCache->GetNetGUID(ActorComponent->GetOwner());
-			}
-		}
-	}
-	return NetGUID.Value;
 }
 
 FChanneldActorComponentReplicator::~FChanneldActorComponentReplicator()
@@ -53,12 +37,6 @@ void FChanneldActorComponentReplicator::Tick(float DeltaTime)
 		return;
 	}
 
-	// Only server can update channel data
-	if (!ActorComponent->GetOwner()->HasAuthority())
-	{
-		return;
-	}
-
 	if (ActorComponent->IsActive() != FullState->bisactive())
 	{
 		DeltaState->set_bisactive(ActorComponent->IsActive());
@@ -70,7 +48,10 @@ void FChanneldActorComponentReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	FullState->MergeFrom(*DeltaState);
+	if (bStateChanged)
+	{
+		FullState->MergeFrom(*DeltaState);
+	}
 }
 
 void FChanneldActorComponentReplicator::OnStateChanged(const google::protobuf::Message* InNewState)

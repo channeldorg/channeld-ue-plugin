@@ -10,6 +10,7 @@ typedef uint32 ConnectionId;
 
 typedef uint32 ChannelId;
 
+/* Moved the definitions to unreal_common.proto
 // User-space message types used in ChanneldUE
 enum MessageType : uint32 {
 	// Used by LowLevelSend in NetConnection/NetDriver.
@@ -19,7 +20,10 @@ enum MessageType : uint32 {
 	// Used by ReplicationDriver to send/receive UE's native RPC.
 	MessageType_RPC = 102,
 	MessageType_SPAWN = 103,
+	MessageType_DESTROY = 104,
+	MessageType_SERVER_PLAYER_SPAWNED = 201,
 };
+*/
 
 /*
 UENUM(BlueprintType)
@@ -28,11 +32,15 @@ enum class EChannelId : ChannelId
 	Global = 0
 };
 */
-const ChannelId GlobalChannelId = 0;
+constexpr ChannelId GlobalChannelId = 0;
+constexpr ChannelId InvalidChannelId = 0xffffffff;
 
-const uint32 MaxPacketSize = 0x00ffff;
-const uint32 MinPacketSize = 20;
+constexpr uint32 GameStateNetId = 1;
 
+constexpr uint32 MaxPacketSize = 0x00ffff;
+constexpr uint32 MinPacketSize = 20;
+constexpr uint8 MaxConnectionIdBits = 13;
+constexpr uint8 ConnectionIdBitOffset = (31 - MaxConnectionIdBits);
 
 UENUM(BlueprintType)
 enum class EChanneldChannelType : uint8
@@ -194,25 +202,24 @@ struct CHANNELDUE_API FOwnedChannelInfo
 {
 	GENERATED_BODY()
 
-		/*
-		 * Key: Connection id of subscriber
-		 * Value: Sub to channel result
-		 */
-		UPROPERTY(BlueprintReadWrite)
-		TMap<int32, FSubscribedChannelInfo> Subscribeds;
+	/*
+	 * Key: Connection id of subscriber
+	 * Value: Sub to channel result
+	 */
+	UPROPERTY(BlueprintReadWrite)
+	TMap<int32, FSubscribedChannelInfo> Subscribeds;
 
 	UPROPERTY(BlueprintReadWrite)
-		EChanneldChannelType ChannelType;
+	EChanneldChannelType ChannelType;
 
 	UPROPERTY(BlueprintReadWrite)
-		int32 ChannelId;
+	int32 ChannelId;
 
 	UPROPERTY(BlueprintReadWrite)
-		FString Metadata;
+	FString Metadata;
 
 	UPROPERTY(BlueprintReadWrite)
-		int32 OwnerConnId;
-
+	int32 OwnerConnId;
 };
 
 USTRUCT(BlueprintType)
@@ -220,12 +227,13 @@ struct CHANNELDUE_API FListedChannelInfo
 {
 	GENERATED_BODY()
 
-		UPROPERTY(BlueprintReadWrite)
-		EChanneldChannelType ChannelType;
+	UPROPERTY(BlueprintReadWrite)
+	EChanneldChannelType ChannelType;
 
 	UPROPERTY(BlueprintReadWrite)
-		int32 ChannelId;
+	int32 ChannelId;
 
 	UPROPERTY(BlueprintReadWrite)
-		FString Metadata;
+	FString Metadata;
 };
+
