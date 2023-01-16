@@ -9,7 +9,7 @@
 UChanneldCharMoveComponent::UChanneldCharMoveComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	SetMoveResponseDataContainer(DefaultMoveResponseDataContainer);
+	// SetMoveResponseDataContainer(DefaultMoveResponseDataContainer);
 }
 
 bool UChanneldCharMoveComponent::ForcePositionUpdate(float DeltaTime)

@@ -22,6 +22,13 @@ public:
 
 protected:
 	virtual const google::protobuf::Message* GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved);
+	/**
+	 * @brief Set a replicator's state to the channel data. UChanneldReplicationComponent doesn't know what states are defined in the channel data, or how are they organized. So the child class should implement this logic.
+	 * @param State The delta state of a replicator, collected during Tick(). If null, removed = true will be set for the state.
+	 * @param ChannelData The data field in the ChannelDataUpdate message which will be sent to channeld.
+	 * @param TargetClass The class associated with the replicator. E.g. AActor for FChanneldActorReplicator, and ACharacter for FChanneldCharacterReplicator.
+	 * @param NetGUID The NetworkGUID used for looking up the state in the channel data. Generally the key of the state map.
+	 */
 	virtual void SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID);
 
 	bool bInitialized = false;
