@@ -85,7 +85,7 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 		// Is position stored in local space?
 		Character->RepRootMotion.bRelativePosition = Character->GetBasedMovement().HasRelativeLocation();
 		Character->RepRootMotion.bRelativeRotation = Character->GetBasedMovement().HasRelativeRotation();
-		Character->RepRootMotion.Location			= Character->RepRootMotion.bRelativePosition ? Character->GetBasedMovement().Location : FRepMovement::RebaseOntoZeroOrigin(Character->GetActorLocation(), Character->GetWorld()->OriginLocation);
+		Character->RepRootMotion.Location			= Character->RepRootMotion.bRelativePosition ? Character->GetBasedMovement().Location : FVector_NetQuantize100(FRepMovement::RebaseOntoZeroOrigin(Character->GetActorLocation(), Character->GetWorld()->OriginLocation));
 		Character->RepRootMotion.Rotation			= Character->RepRootMotion.bRelativeRotation ? Character->GetBasedMovement().Rotation : Character->GetActorRotation();
 		Character->RepRootMotion.MovementBase		= Character->GetBasedMovement().MovementBase;
 		Character->RepRootMotion.MovementBaseBoneName = Character->GetBasedMovement().BoneName;

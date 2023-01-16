@@ -25,7 +25,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void ReceivedRawPacket(void* Data, int32 Count) override;
 
-	FORCEINLINE uint32 GetConnId()
+	FORCEINLINE uint32 GetConnId() const
 	{
 		uint32 ConnId;
 		RemoteAddr->GetIp(ConnId);

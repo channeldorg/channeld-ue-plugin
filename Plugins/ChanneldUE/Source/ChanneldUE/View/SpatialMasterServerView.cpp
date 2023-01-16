@@ -93,7 +93,7 @@ void USpatialMasterServerView::InitServer()
 
 			// Delay the sub of other spatial channels, so the client can treat the first spatial channelId as the one to log in.
 			FTimerHandle Handle;
-			GetWorld()->GetTimerManager().SetTimer(Handle, [&, StartChannelId, ClientConnId, &NonAuthoritySubOptions]()
+			GetWorld()->GetTimerManager().SetTimer(Handle, [&, StartChannelId, ClientConnId, NonAuthoritySubOptions]()
 			{
 				// FIXME: should only sub to adjacent spatial channels. QuerySpatialChannelResultMessage should contains that information.
 				for (const auto SpatialChId : AllSpatialChannelIds)

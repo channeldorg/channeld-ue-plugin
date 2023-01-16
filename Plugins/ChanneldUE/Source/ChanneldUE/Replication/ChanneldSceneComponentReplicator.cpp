@@ -98,7 +98,7 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	if (ChanneldUtils::GetActorComponentByRef(FullState->mutable_attachparent(), SceneComp->GetWorld()) != SceneComp->GetAttachParent(), false)
+	if (ChanneldUtils::GetActorComponentByRef(FullState->mutable_attachparent(), SceneComp->GetWorld(), false) != SceneComp->GetAttachParent())
 	{
 		if (SceneComp->GetAttachParent() == nullptr)
 		{

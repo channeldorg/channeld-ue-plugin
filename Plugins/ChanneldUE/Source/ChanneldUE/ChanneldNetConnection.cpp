@@ -287,7 +287,7 @@ FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= fa
 	}
 	else
 	{
-		return FString::Printf(TEXT("0.0.0.0%s"), bAppendPort ? TEXT(":" + NetDriver->GetSendToChannelId(this)) : TEXT(""));
+		return bAppendPort ? FString::Printf(TEXT("0.0.0.0:d"), NetDriver->GetSendToChannelId(this)) : TEXT("0.0.0.0");
 	}
 }
 
