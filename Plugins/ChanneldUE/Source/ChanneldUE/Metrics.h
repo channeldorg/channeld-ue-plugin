@@ -36,8 +36,14 @@ public:
 	int32 ExposerPort = 8081;
 
 	Family<Gauge>* FPS;
+	Family<Gauge>* CPU;
+	Family<Gauge>* Memory;
+	Family<Counter>* UnfinishedPacket;
+	Family<Counter>* DroppedPacket;
 	Family<Counter>* ReplicatedProviders;
 	Family<Counter>* SentRPCs;
+	Family<Counter>* GetHandoverContexts;
+	Family<Counter>* Handovers;
 
 private:
 

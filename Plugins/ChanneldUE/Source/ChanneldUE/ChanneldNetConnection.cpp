@@ -115,8 +115,16 @@ void UChanneldNetConnection::LowLevelSend(void* Data, int32 CountBits, FOutPacke
 void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, int32 DataSize, ChannelId ChId)
 {
 	if (DataSize <= 0)
+	{
 		return;
+	}
 
+	if (!Driver)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("SendData failed as the NetConn %d has no NetDriver"), GetConnId());
+		return;
+	}
+	
 	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
 	auto ConnToChanneld = NetDriver->GetConnToChanneld();
 	
@@ -146,6 +154,12 @@ void UChanneldNetConnection::SendMessage(uint32 MsgType, const google::protobuf:
 
 bool UChanneldNetConnection::HasSentSpawn(UObject* Object) const
 {
+	if (!Driver)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Failed to check HasSentSpawn as the NetConn %d has no NetDriver"), GetConnId());
+		return false;
+	}
+	
 	// Already in the queue, don't send again
 	for (auto& Tuple : QueuedSpawnMessageTargets)
 	{
@@ -163,6 +177,12 @@ bool UChanneldNetConnection::HasSentSpawn(UObject* Object) const
 
 void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*= ENetRole::None*/, uint32 OwningChannelId /*= InvalidChannelId*/, uint32 OwningConnId /*= 0*/, FVector* Location /*= nullptr*/)
 {
+	if (!Driver)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("SendSpawnMessage failed as the NetConn %d has no NetDriver"), GetConnId());
+		return;
+	}
+	
 	const FNetworkGUID NetId = Driver->GuidCache->GetOrAssignNetGUID(Object);
 	UPackageMapClient* PackageMapClient = CastChecked<UPackageMapClient>(PackageMap);
 	int32* ExportCount = PackageMapClient->NetGUIDExportCountMap.Find(NetId);
@@ -219,6 +239,12 @@ void UChanneldNetConnection::SetSentSpawned(const FNetworkGUID NetId)
 
 void UChanneldNetConnection::SendDestroyMessage(UObject* Object, EChannelCloseReason Reason)
 {
+	if (!Driver)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("SendDestroyMessage failed as the NetConn %d has no NetDriver"), GetConnId());
+		return;
+	}
+	
 	const FNetworkGUID NetId = Driver->GuidCache->GetNetGUID(Object);
 	if (!NetId.IsValid())
 	{
@@ -278,6 +304,12 @@ void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncNa
 
 FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= false*/)
 {
+	if (!Driver)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("LowLevelGetRemoteAddress failed as the NetConn %d has no NetDriver"), GetConnId());
+		return TEXT("");
+	}
+	
 	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
 	if (RemoteAddr)
 	{

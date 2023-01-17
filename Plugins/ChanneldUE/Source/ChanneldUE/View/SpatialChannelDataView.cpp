@@ -7,6 +7,7 @@
 #include "ChanneldNetConnection.h"
 #include "ChanneldNetDriver.h"
 #include "ChanneldUtils.h"
+#include "Metrics.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/DataChannel.h"
@@ -176,6 +177,8 @@ void USpatialChannelDataView::ServerHandleGetHandoverContext(UChanneldConnection
 	UE_LOG(LogChanneld, Verbose, TEXT("[Server] GetHandoverContext for channeld: %s"), UTF8_TO_TCHAR(ResultMsg.DebugString().c_str()));
 	
 	Connection->Send(ChId, unrealpb::HANDOVER_CONTEXT, ResultMsg);
+
+	GEngine->GetEngineSubsystem<UMetrics>()->GetHandoverContexts->Add({{"objNum", std::to_string(ResultMsg.context_size())}}).Increment();
 }
 
 void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
@@ -428,6 +431,8 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 			UE_LOG(LogChanneld, Verbose, TEXT("Set %s to back to ROLE_Authority after ChannelDataUpdate"), *HandoverActor->GetName());
 		}
 	}
+
+	GEngine->GetEngineSubsystem<UMetrics>()->Handovers->Add({{"objNum", std::to_string(HandoverData.context_size())}, {"hasData", std::to_string(HandoverData.has_channeldata())}}).Increment();
 }
 
 void USpatialChannelDataView::ServerHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)

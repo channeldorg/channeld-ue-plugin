@@ -25,8 +25,14 @@ void UMetrics::Initialize(FSubsystemCollectionBase& Collection)
 	}
 
 	FPS = &AddGauge(FName("ue_server_fps"), TEXT("Framerate of the UE server"));
+	CPU = &AddGauge(FName("ue_server_cpu"), TEXT("CPU usage of the UE server in percentage"));
+	Memory = &AddGauge(FName("ue_server_mem"), TEXT("Memory usage of the UE server in MB"));
+	UnfinishedPacket = &AddCounter(FName("ue_packets_frag"), TEXT("Number of fragmented packets received"));
+	DroppedPacket = &AddCounter(FName("ue_packets_drop"), TEXT("Number of dropped packets received"));
 	ReplicatedProviders = &AddCounter(FName("ue_provider_reps"), TEXT("Number of the replicated data providers"));
 	SentRPCs = &AddCounter(FName("ue_sent_rpcs"), TEXT("Number of the RPCs sent via channeld"));
+	GetHandoverContexts = &AddCounter(FName("ue_handover_ctx"), TEXT("Number of getting handover context"));
+	Handovers = &AddCounter(FName("ue_handovers"), TEXT("Number of handovers"));
 }
 
 void UMetrics::Deinitialize()
@@ -39,7 +45,10 @@ void UMetrics::Deinitialize()
 
 void UMetrics::Tick(float DeltaTime)
 {
-	AddConnTypeLabel(*FPS).Set(1.0 / DeltaTime);
+	// AddConnTypeLabel(*FPS).Set(1.0 / DeltaTime);
+	FPS->Add({}).Set(1.0 / DeltaTime);
+	CPU->Add({}).Set(FPlatformTime::GetCPUTime().CPUTimePct);
+	Memory->Add({}).Set(FPlatformMemory::GetStats().UsedPhysical >> 20);
 }
 
 Family<Counter>& UMetrics::AddCounter(const FName& Name, const FString& Help)

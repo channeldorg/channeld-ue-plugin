@@ -2,6 +2,7 @@
 
 #include "ChanneldNetDriver.h"
 #include "ChanneldSettings.h"
+#include "Metrics.h"
 #include "SocketSubsystem.h"
 
 //DEFINE_LOG_CATEGORY(LogChanneld);
@@ -190,6 +191,8 @@ void UChanneldConnection::Receive()
 		{
 			// Unfinished packet
 			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet header: %d"), BytesRead);
+			UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
+			Metrics->AddConnTypeLabel(*Metrics->UnfinishedPacket).Increment();
 			return;
 		}
 
@@ -197,6 +200,8 @@ void UChanneldConnection::Receive()
 		{
 			ReceiveBufferOffset = 0;
 			UE_LOG(LogChanneld, Error, TEXT("Invalid tag: %d, the packet will be dropped"), ReceiveBuffer[0]);
+			UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
+			Metrics->AddConnTypeLabel(*Metrics->DroppedPacket).Increment();
 			return;
 		}
 
@@ -205,11 +210,13 @@ void UChanneldConnection::Receive()
 			PacketSize = PacketSize | (ReceiveBuffer[1] << 16) | (ReceiveBuffer[2] << 8);
 		else if (ReceiveBuffer[2] != 78)
 			PacketSize = PacketSize | (ReceiveBuffer[2] << 8);
-
-		if (BytesRead < 5 + PacketSize)
+		
+		if (ReceiveBufferOffset < 5 + PacketSize)
 		{
 			// Unfinished packet
 			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet body, read: %d, pos: %d/%d"), BytesRead, ReceiveBufferOffset, 5 + PacketSize);
+			UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
+			Metrics->AddConnTypeLabel(*Metrics->UnfinishedPacket).Increment();
 			return;
 		}
 
@@ -219,7 +226,9 @@ void UChanneldConnection::Receive()
 		if (!Packet.ParseFromArray(ReceiveBuffer + 5, PacketSize))
 		{
 			ReceiveBufferOffset = 0;
-			UE_LOG(LogChanneld, Error, TEXT("Failed to parse packet"));
+			UE_LOG(LogChanneld, Error, TEXT("UChanneldConnection::Receive: Failed to parse packet, size: %d"), PacketSize);
+			UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
+			Metrics->AddConnTypeLabel(*Metrics->DroppedPacket).Increment();
 			return;
 		}
 
