@@ -130,22 +130,22 @@ void FChanneldSceneComponentReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	if (ChanneldUtils::SetIfNotSame(FullState->mutable_relativelocation(), SceneComp->GetRelativeLocation()))
+	if (ChanneldUtils::CheckDifference(SceneComp->GetRelativeLocation(), FullState->mutable_relativelocation()))
 	{
+		ChanneldUtils::SetVectorToPB(DeltaState->mutable_relativelocation(), SceneComp->GetRelativeLocation(), FullState->mutable_relativelocation());
 		bStateChanged = true;
-		DeltaState->mutable_relativelocation()->MergeFrom(*FullState->mutable_relativelocation());
 	}
 
-	if (ChanneldUtils::SetIfNotSame(FullState->mutable_relativerotation(), SceneComp->GetRelativeRotation()))
+	if (ChanneldUtils::CheckDifference(SceneComp->GetRelativeRotation(), FullState->mutable_relativerotation()))
 	{
+		ChanneldUtils::SetRotatorToPB(DeltaState->mutable_relativerotation(), SceneComp->GetRelativeRotation(), FullState->mutable_relativerotation());
 		bStateChanged = true;
-		DeltaState->mutable_relativerotation()->MergeFrom(*FullState->mutable_relativerotation());
 	}
 
-	if (ChanneldUtils::SetIfNotSame(FullState->mutable_relativescale(), SceneComp->GetRelativeScale3D()))
+	if (ChanneldUtils::CheckDifference(SceneComp->GetRelativeScale3D(), FullState->mutable_relativescale()))
 	{
+		ChanneldUtils::SetVectorToPB(DeltaState->mutable_relativescale(), SceneComp->GetRelativeScale3D(), FullState->mutable_relativescale());
 		bStateChanged = true;
-		DeltaState->mutable_relativescale()->MergeFrom(*FullState->mutable_relativescale());
 	}
 
 	if (bStateChanged)
@@ -174,19 +174,19 @@ void FChanneldSceneComponentReplicator::OnStateChanged(const google::protobuf::M
 	bool bTransformChanged = false;
 	if (NewState->has_relativelocation())
 	{
-		SceneComp->SetRelativeLocation_Direct(ChanneldUtils::GetVector(NewState->relativelocation()));
+		ChanneldUtils::SetVectorFromPB(SceneComp->GetRelativeLocation_DirectMutable(), NewState->relativelocation());
 		bTransformChanged = true;
 	}
 
 	if (NewState->has_relativerotation())
 	{
-		SceneComp->SetRelativeRotation_Direct(ChanneldUtils::GetRotator(NewState->relativerotation()));
+		ChanneldUtils::SetRotatorFromPB(SceneComp->GetRelativeRotation_DirectMutable(), NewState->relativerotation());
 		bTransformChanged = true;
 	}
 
 	if (NewState->has_relativescale())
 	{
-		SceneComp->SetRelativeScale3D_Direct(ChanneldUtils::GetVector(NewState->relativescale()));
+		ChanneldUtils::SetVectorFromPB(SceneComp->GetRelativeScale3D_DirectMutable(), NewState->relativescale());
 		bTransformChanged = true;
 	}
 

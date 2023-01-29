@@ -22,6 +22,39 @@ public:
 		return nullptr;
 	}
 
+	static void SetVectorFromPB(FVector& VectorToSet, const unrealpb::FVector& VectorToCheck)
+	{
+		if (VectorToCheck.has_x())
+		{
+			VectorToSet.X = VectorToCheck.x();
+		}
+		if (VectorToCheck.has_y())
+		{
+			VectorToSet.Y = VectorToCheck.y();
+		}
+		if (VectorToCheck.has_z())
+		{
+			VectorToSet.Z = VectorToCheck.z();
+		}
+	}
+
+	static void SetRotatorFromPB(FRotator& RotatorToSet, const unrealpb::FVector& RotatorToCheck)
+	{
+		if (RotatorToCheck.has_x())
+		{
+			RotatorToSet.Pitch = RotatorToCheck.x();
+		}
+		if (RotatorToCheck.has_y())
+		{
+			RotatorToSet.Yaw = RotatorToCheck.y();
+		}
+		if (RotatorToCheck.has_z())
+		{
+			RotatorToSet.Roll = RotatorToCheck.z();
+		}
+	}
+
+	[[deprecated("Use SetVectorFromPB instead. Use GetVector can cause the value of x/y/z to be 0 if the it is not set.")]]
 	static FVector GetVector(const unrealpb::FVector& InVec)
 	{
 		return FVector(InVec.x(), InVec.y(), InVec.z());
@@ -36,46 +69,95 @@ public:
 		return Vec;
 	}
 
+	[[deprecated("Use SetRotatorFromPB instead. Use GetRotator can cause the value of pitch/yaw/roll to be 0 if the it is not set.")]]
 	static FRotator GetRotator(const unrealpb::FVector& InVec)
 	{
 		return FRotator(InVec.x(), InVec.y(), InVec.z());
 	}
 
-	static bool SetIfNotSame(unrealpb::FVector* VectorToSet, const FVector& VectorToCheck)
+	static bool CheckDifference(const FVector& VectorToCheck, const unrealpb::FVector* VectorPBToCheck)
 	{
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X))
+		{
+			return true;
+		}
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y))
+		{
+			return true;
+		}
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	static bool CheckDifference(const FRotator& RotatorToCheck, const unrealpb::FVector* RotatorPBToCheck)
+	{
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch))
+		{
+			return true;
+		}
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw))
+		{
+			return true;
+		}
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * @brief Check if the VectorToCheck is different from VectorPBToCheck and set the difference to VectorToSet
+	 * @param VectorToSet The Protobuf vector to set the difference to
+	 * @param VectorToCheck The UE vector to check the difference from
+	 * @param VectorPBToCheck The Protobuf vector to compare with the UE vector. If nullptr, VectorToSet will be used
+	 * @return True if any component(x/y/z) in the VectorToCheck is different from VectorPBToCheck
+	 */
+	static bool SetVectorToPB(unrealpb::FVector* VectorToSet, const FVector& VectorToCheck, const unrealpb::FVector* VectorPBToCheck = nullptr)
+	{
+		if (VectorPBToCheck == nullptr)
+			VectorPBToCheck = VectorToSet;
+		
 		bool bNotSame = false;
-		if (!FMath::IsNearlyEqual(VectorToSet->x(), VectorToCheck.X))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X))
 		{
 			VectorToSet->set_x(VectorToCheck.X);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(VectorToSet->y(), VectorToCheck.Y))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y))
 		{
 			VectorToSet->set_y(VectorToCheck.Y);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(VectorToSet->z(), VectorToCheck.Z))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z))
 		{
 			VectorToSet->set_z(VectorToCheck.Z);
 			bNotSame = true;
 		}
+		
 		return bNotSame;
 	}
 
-	static bool SetIfNotSame(unrealpb::FVector* RotatorToSet, const FRotator& RotatorToCheck)
+	static bool SetRotatorToPB(unrealpb::FVector* RotatorToSet, const FRotator& RotatorToCheck, const unrealpb::FVector* RotatorPBToCheck = nullptr)
 	{
+		if (RotatorPBToCheck == nullptr)
+			RotatorPBToCheck = RotatorToSet;
+		
 		bool bNotSame = false;
-		if (!FMath::IsNearlyEqual(RotatorToSet->x(), RotatorToCheck.Pitch))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch))
 		{
 			RotatorToSet->set_x(RotatorToCheck.Pitch);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorToSet->y(), RotatorToCheck.Yaw))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw))
 		{
 			RotatorToSet->set_y(RotatorToCheck.Yaw);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorToSet->z(), RotatorToCheck.Roll))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll))
 		{
 			RotatorToSet->set_z(RotatorToCheck.Roll);
 			bNotSame = true;

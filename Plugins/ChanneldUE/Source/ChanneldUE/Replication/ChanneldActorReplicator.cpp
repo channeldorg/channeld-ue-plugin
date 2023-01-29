@@ -144,35 +144,37 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 	{
 		FRepMovement& RepMovement = *ReplicatedMovementPtr;
 		unrealpb::FRepMovement* RepMovementFullState = FullState->mutable_replicatedmovement();
+		/* Optimization: Don't create the delta state until there's a change
 		unrealpb::FRepMovement* RepMovementDeltaState = DeltaState->mutable_replicatedmovement();
-		if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_linearvelocity(), RepMovement.LinearVelocity))
+		*/
+		if (ChanneldUtils::CheckDifference(RepMovement.LinearVelocity, RepMovementFullState->mutable_linearvelocity()))
 		{
-			ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_linearvelocity(), RepMovement.LinearVelocity);
+			ChanneldUtils::SetVectorToPB(DeltaState->mutable_replicatedmovement()->mutable_linearvelocity(), RepMovement.LinearVelocity, RepMovementFullState->mutable_linearvelocity());
 			bStateChanged = true;
 		}
-		if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_angularvelocity(), RepMovement.AngularVelocity))
+		if (ChanneldUtils::CheckDifference(RepMovement.AngularVelocity, RepMovementFullState->mutable_angularvelocity()))
 		{
-			ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_angularvelocity(), RepMovement.AngularVelocity);
+			ChanneldUtils::SetVectorToPB(DeltaState->mutable_replicatedmovement()->mutable_angularvelocity(), RepMovement.AngularVelocity, RepMovementFullState->mutable_angularvelocity());
 			bStateChanged = true;
 		}
-		if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_location(), RepMovement.Location))
+		if (ChanneldUtils::CheckDifference(RepMovement.Location, RepMovementFullState->mutable_location()))
 		{
-			ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_location(), RepMovement.Location);
+			ChanneldUtils::SetVectorToPB(DeltaState->mutable_replicatedmovement()->mutable_location(), RepMovement.Location, RepMovementFullState->mutable_location());
 			bStateChanged = true;
 		}
-		if (ChanneldUtils::SetIfNotSame(RepMovementFullState->mutable_rotation(), RepMovement.Rotation))
+		if (ChanneldUtils::CheckDifference(RepMovement.Rotation, RepMovementFullState->mutable_rotation()))
 		{
-			ChanneldUtils::SetIfNotSame(RepMovementDeltaState->mutable_rotation(), RepMovement.Rotation);
+			ChanneldUtils::SetRotatorToPB(DeltaState->mutable_replicatedmovement()->mutable_rotation(), RepMovement.Rotation, RepMovementFullState->mutable_rotation());
 			bStateChanged = true;
 		}
 		if (RepMovement.bSimulatedPhysicSleep != RepMovementFullState->bsimulatedphysicsleep())
 		{
-			RepMovementDeltaState->set_bsimulatedphysicsleep(RepMovement.bSimulatedPhysicSleep);
+			DeltaState->mutable_replicatedmovement()->set_bsimulatedphysicsleep(RepMovement.bSimulatedPhysicSleep);
 			bStateChanged = true;
 		}
 		if (RepMovement.bRepPhysics != RepMovementFullState->brepphysics())
 		{
-			RepMovementDeltaState->set_brepphysics(RepMovement.bRepPhysics);
+			DeltaState->mutable_replicatedmovement()->set_brepphysics(RepMovement.bRepPhysics);
 			bStateChanged = true;
 		}
 	}
@@ -182,7 +184,9 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 	{
 		const FRepAttachment& RepAttachment = Actor->GetAttachmentReplication();
 		unrealpb::FRepAttachment* RepAttachmentFullState = FullState->mutable_attachmentreplication();
-		// unrealpb::FRepAttachment* RepAttachmentDeltaState = DeltaState->mutable_attachmentreplication();
+		/* Optimization: Don't create the delta state until there's a change
+		unrealpb::FRepAttachment* RepAttachmentDeltaState = DeltaState->mutable_attachmentreplication();
+		*/
 		if (RepAttachment.AttachParent != ChanneldUtils::GetObjectByRef(RepAttachmentFullState->mutable_attachparent(), Actor->GetWorld(), false))
 		{
 			DeltaState->mutable_attachmentreplication()->mutable_attachparent()->CopyFrom(ChanneldUtils::GetRefOfObject(RepAttachment.AttachParent, Actor->GetNetConnection()));
@@ -194,20 +198,24 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 			DeltaState->mutable_attachmentreplication()->mutable_attachcomponent()->CopyFrom(ChanneldUtils::GetRefOfActorComponent(RepAttachment.AttachComponent, Actor->GetNetConnection()));
 			bStateChanged = true;
 		}
-		if (ChanneldUtils::SetIfNotSame(RepAttachmentFullState->mutable_locationoffset(), RepAttachment.LocationOffset))
+		
+		if (RepAttachment.AttachParent)
 		{
-			ChanneldUtils::SetIfNotSame(DeltaState->mutable_attachmentreplication()->mutable_locationoffset(), RepAttachment.LocationOffset);
-			bStateChanged = true;
-		}
-		if (ChanneldUtils::SetIfNotSame(RepAttachmentFullState->mutable_relativescale(), RepAttachment.RelativeScale3D))
-		{
-			ChanneldUtils::SetIfNotSame(DeltaState->mutable_attachmentreplication()->mutable_relativescale(), RepAttachment.RelativeScale3D);
-			bStateChanged = true;
-		}
-		if (ChanneldUtils::SetIfNotSame(RepAttachmentFullState->mutable_rotationoffset(), RepAttachment.RotationOffset))
-		{
-			ChanneldUtils::SetIfNotSame(DeltaState->mutable_attachmentreplication()->mutable_rotationoffset(), RepAttachment.RotationOffset);
-			bStateChanged = true;
+			if (ChanneldUtils::CheckDifference(RepAttachment.LocationOffset, RepAttachmentFullState->mutable_locationoffset()))
+			{
+				ChanneldUtils::SetVectorToPB(DeltaState->mutable_attachmentreplication()->mutable_locationoffset(), RepAttachment.LocationOffset, RepAttachmentFullState->mutable_locationoffset());
+				bStateChanged = true;
+			}
+			if (ChanneldUtils::CheckDifference(RepAttachment.RelativeScale3D, RepAttachmentFullState->mutable_relativescale()))
+			{
+				ChanneldUtils::SetVectorToPB(DeltaState->mutable_attachmentreplication()->mutable_relativescale(), RepAttachment.RelativeScale3D, RepAttachmentFullState->mutable_relativescale());
+				bStateChanged = true;
+			}
+			if (ChanneldUtils::CheckDifference(RepAttachment.RotationOffset, RepAttachmentFullState->mutable_rotationoffset()))
+			{
+				ChanneldUtils::SetRotatorToPB(DeltaState->mutable_attachmentreplication()->mutable_rotationoffset(), RepAttachment.RotationOffset, RepAttachmentFullState->mutable_rotationoffset());
+				bStateChanged = true;
+			}
 		}
 	}
 
@@ -323,19 +331,19 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 	{
 		if (NewState->replicatedmovement().has_linearvelocity())
 		{
-			ReplicatedMovementPtr->LinearVelocity = ChanneldUtils::GetVector(NewState->replicatedmovement().linearvelocity());
+			ChanneldUtils::SetVectorFromPB(ReplicatedMovementPtr->LinearVelocity, NewState->replicatedmovement().linearvelocity());
 		}
 		if (NewState->replicatedmovement().has_angularvelocity())
 		{
-			ReplicatedMovementPtr->AngularVelocity = ChanneldUtils::GetVector(NewState->replicatedmovement().angularvelocity());
+			ChanneldUtils::SetVectorFromPB(ReplicatedMovementPtr->AngularVelocity, NewState->replicatedmovement().angularvelocity());
 		}
 		if (NewState->replicatedmovement().has_location())
 		{
-			ReplicatedMovementPtr->Location = ChanneldUtils::GetVector(NewState->replicatedmovement().location());
+			ChanneldUtils::SetVectorFromPB(ReplicatedMovementPtr->Location, NewState->replicatedmovement().location());
 		}
 		if (NewState->replicatedmovement().has_rotation())
 		{
-			ReplicatedMovementPtr->Rotation = ChanneldUtils::GetRotator(NewState->replicatedmovement().rotation());
+			ChanneldUtils::SetRotatorFromPB(ReplicatedMovementPtr->Rotation, NewState->replicatedmovement().rotation());
 		}
 		if (NewState->replicatedmovement().has_bsimulatedphysicsleep())
 		{

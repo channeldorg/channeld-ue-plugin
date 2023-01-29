@@ -134,6 +134,19 @@ void UChanneldReplicationComponent::EndPlay(EEndPlayReason::Type Reason)
 		UninitOnce();
 	}
 }
+
+void UChanneldReplicationComponent::OnAddedToChannel(ChannelId ChId)
+{
+	AddedToChannelIds.Add(ChId);
+	OnComponentAddedToChannel.Broadcast(ChId);
+}
+
+void UChanneldReplicationComponent::OnRemovedFromChannel(ChannelId ChId)
+{
+	AddedToChannelIds.Remove(ChId);
+	OnComponentRemovedFromChannel.Broadcast(ChId);
+}
+
 /*
 channeldpb::ChannelType UChanneldReplicationComponent::GetChannelType()
 {

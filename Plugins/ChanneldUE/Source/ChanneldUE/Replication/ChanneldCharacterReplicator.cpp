@@ -159,15 +159,15 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	if (ChanneldUtils::SetIfNotSame(MovementInfo->mutable_location(), Character->GetBasedMovement().Location))
+	if (ChanneldUtils::CheckDifference(Character->GetBasedMovement().Location, MovementInfo->mutable_location()))
 	{
-		ChanneldUtils::SetIfNotSame(MovementInfoDelta->mutable_location(), Character->GetBasedMovement().Location);
+		ChanneldUtils::SetVectorToPB(MovementInfoDelta->mutable_location(), Character->GetBasedMovement().Location, MovementInfo->mutable_location());
 		bStateChanged = true;
 	}
 
-	if (ChanneldUtils::SetIfNotSame(MovementInfo->mutable_rotation(), Character->GetBasedMovement().Rotation))
+	if (ChanneldUtils::CheckDifference(Character->GetBasedMovement().Rotation, MovementInfo->mutable_rotation()))
 	{
-		ChanneldUtils::SetIfNotSame(MovementInfoDelta->mutable_rotation(), Character->GetBasedMovement().Rotation);
+		ChanneldUtils::SetRotatorToPB(MovementInfoDelta->mutable_rotation(), Character->GetBasedMovement().Rotation, MovementInfo->mutable_rotation());
 		bStateChanged = true;
 	}
 
@@ -277,11 +277,11 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 		}
 		if (NewState->basedmovement().has_location())
 		{
-			BasedMovement.Location = FVector_NetQuantize100(ChanneldUtils::GetVector(NewState->basedmovement().location()));
+			ChanneldUtils::SetVectorFromPB(BasedMovement.Location, NewState->basedmovement().location());
 		}
 		if (NewState->basedmovement().has_rotation())
 		{
-			BasedMovement.Rotation = ChanneldUtils::GetRotator(NewState->basedmovement().rotation());
+			ChanneldUtils::SetRotatorFromPB(BasedMovement.Rotation, NewState->basedmovement().rotation());
 		}
 		if (NewState->basedmovement().has_bserverhasbasecomponent() && NewState->basedmovement().bserverhasbasecomponent() != BasedMovement.bServerHasBaseComponent)
 		{

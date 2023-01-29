@@ -11,6 +11,10 @@
 #include "google/protobuf/message.h"
 #include "ChanneldReplicationComponent.generated.h"
 
+class UChanneldReplicationComponent;
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FComponentAddedToChannelSignature, UChanneldReplicationComponent, OnComponentAddedToChannel, int64, ChId);
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FComponentRemovedFromChannelSignature, UChanneldReplicationComponent, OnComponentRemovedFromChannel, int64, ChId);
+
 // Responsible for replicating the owning Actor and its replicated components via ChannelDataUpdate
 UCLASS(Abstract, ClassGroup = "Channeld")
 class CHANNELDUE_API UChanneldReplicationComponent : public UActorComponent, public IChannelDataProvider
@@ -20,11 +24,11 @@ class CHANNELDUE_API UChanneldReplicationComponent : public UActorComponent, pub
 public:	
 	UChanneldReplicationComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnAddedToChannel"))
-	void ReceiveOnAddedToChannel(int64 ChannelId);
+	UPROPERTY(BlueprintAssignable, Category = "Components|Channeld")
+	FComponentAddedToChannelSignature OnComponentAddedToChannel;
 
-	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnRemovedFromChannel"))
-	void ReceiveOnRemovedFromChannel(int64 ChannelId);
+	UPROPERTY(BlueprintAssignable, Category = "Components|Channeld")
+	FComponentRemovedFromChannelSignature OnComponentRemovedFromChannel;
 	
 	TSet<ChannelId> AddedToChannelIds;
 	
@@ -62,8 +66,8 @@ public:
 	
 	//~ Begin IChannelDataProvider Interface.
 	virtual UObject* GetTargetObject() override {return GetOwner();}
-	virtual void OnAddedToChannel(ChannelId ChId) override {AddedToChannelIds.Add(ChId);}
-	virtual void OnRemovedFromChannel(ChannelId ChId) override {AddedToChannelIds.Remove(ChId);}
+	virtual void OnAddedToChannel(ChannelId ChId) override;
+	virtual void OnRemovedFromChannel(ChannelId ChId) override;
 	virtual bool IsRemoved() override;
 	virtual void SetRemoved(bool bInRemoved) override;
 	virtual bool UpdateChannelData(google::protobuf::Message* ChannelData) override;

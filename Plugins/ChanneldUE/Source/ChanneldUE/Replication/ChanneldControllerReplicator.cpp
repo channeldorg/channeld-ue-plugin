@@ -106,15 +106,15 @@ TSharedPtr<google::protobuf::Message> FChanneldControllerReplicator::SerializeFu
 	{
 		ClientSetLocationParams* TypedParams = (ClientSetLocationParams*)Params;
 		auto Msg = MakeShared<unrealpb::Controller_ClientSetLocation_Params>();
-		ChanneldUtils::SetIfNotSame(Msg->mutable_newlocation(), TypedParams->NewLocation);
-		ChanneldUtils::SetIfNotSame(Msg->mutable_newrotation(), TypedParams->NewRotation);
+		ChanneldUtils::SetVectorToPB(Msg->mutable_newlocation(), TypedParams->NewLocation);
+		ChanneldUtils::SetRotatorToPB(Msg->mutable_newrotation(), TypedParams->NewRotation);
 		return Msg;
 	}
 	else if (Func->GetFName() == FName("ClientSetRotation"))
 	{
 		ClientSetRotationParams* TypedParams = (ClientSetRotationParams*)Params;
 		auto Msg = MakeShared<unrealpb::Controller_ClientSetRotation_Params>();
-		ChanneldUtils::SetIfNotSame(Msg->mutable_newrotation(), TypedParams->NewRotation);
+		ChanneldUtils::SetRotatorToPB(Msg->mutable_newrotation(), TypedParams->NewRotation);
 		Msg->set_bresetcamera(TypedParams->bResetCamera);
 		return Msg;
 	}
@@ -131,8 +131,8 @@ TSharedPtr<void> FChanneldControllerReplicator::DeserializeFunctionParams(UFunct
 		unrealpb::Controller_ClientSetLocation_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ClientSetLocationParams>();
-		Params->NewLocation = ChanneldUtils::GetVector(Msg.newlocation());
-		Params->NewRotation = ChanneldUtils::GetRotator(Msg.newrotation());
+		ChanneldUtils::SetVectorFromPB(Params->NewLocation, Msg.newlocation());
+		ChanneldUtils::SetRotatorFromPB(Params->NewRotation, Msg.newrotation());
 		return Params;
 	}
 	else if (Func->GetFName() == FName("ClientSetRotation"))
@@ -140,7 +140,7 @@ TSharedPtr<void> FChanneldControllerReplicator::DeserializeFunctionParams(UFunct
 		unrealpb::Controller_ClientSetRotation_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ClientSetRotationParams>();
-		Params->NewRotation = ChanneldUtils::GetRotator(Msg.newrotation());
+		ChanneldUtils::SetRotatorFromPB(Params->NewRotation, Msg.newrotation());
 		Params->bResetCamera = Msg.bresetcamera();
 		return Params;
 	}

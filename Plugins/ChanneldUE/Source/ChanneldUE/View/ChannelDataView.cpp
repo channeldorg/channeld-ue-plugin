@@ -767,7 +767,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 		return;
 	}
 
-	UE_LOG(LogChanneld, Verbose, TEXT("Received %s channel %d update: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), ChId, UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
+	UE_LOG(LogChanneld, Verbose, TEXT("Received %s channel %d update(%d B): %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), ChId, UpdateData->ByteSizeLong(), UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
 
 	if (CheckUnspawnedObject(ChId, UpdateData))
 	{

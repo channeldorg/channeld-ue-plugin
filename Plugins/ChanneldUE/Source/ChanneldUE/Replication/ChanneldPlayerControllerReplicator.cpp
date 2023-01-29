@@ -86,7 +86,7 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	{
 		ServerUpdateCameraParams* TypedParams = (ServerUpdateCameraParams*)Params;
 		auto Msg = MakeShared<unrealpb::PlayerController_ServerUpdateCamera_Params>();
-		ChanneldUtils::SetIfNotSame(Msg->mutable_camloc(), TypedParams->CamLoc);
+		ChanneldUtils::SetVectorToPB(Msg->mutable_camloc(), TypedParams->CamLoc);
 		Msg->set_campitchandyaw(TypedParams->CamPitchAndYaw);
 		return Msg;
 	}
@@ -150,8 +150,8 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	{
 		ServerSetSpectatorLocationParams* TypedParams = (ServerSetSpectatorLocationParams*)Params;
 		auto Msg = MakeShared<unrealpb::PlayerController_ServerSetSpectatorLocation_Params>();
-		ChanneldUtils::SetIfNotSame(Msg->mutable_newloc(), TypedParams->NewLoc);
-		ChanneldUtils::SetIfNotSame(Msg->mutable_newrot(), TypedParams->NewRot);
+		ChanneldUtils::SetVectorToPB(Msg->mutable_newloc(), TypedParams->NewLoc);
+		ChanneldUtils::SetRotatorToPB(Msg->mutable_newrot(), TypedParams->NewRot);
 		return Msg;
 	}
 	else if (Func->GetFName() == FName("ServerAcknowledgePossession"))
@@ -197,7 +197,7 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 		unrealpb::PlayerController_ServerUpdateCamera_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ServerUpdateCameraParams>();
-		Params->CamLoc = FVector_NetQuantize(ChanneldUtils::GetVector(Msg.camloc()));
+		ChanneldUtils::SetVectorFromPB(Params->CamLoc, Msg.camloc());
 		Params->CamPitchAndYaw = Msg.campitchandyaw();
 		return Params;
 	}
@@ -287,8 +287,8 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 		unrealpb::PlayerController_ServerSetSpectatorLocation_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ServerSetSpectatorLocationParams>();
-		Params->NewLoc = ChanneldUtils::GetVector(Msg.newloc());
-		Params->NewRot = ChanneldUtils::GetRotator(Msg.newrot());
+		ChanneldUtils::SetVectorFromPB(Params->NewLoc, Msg.newloc());
+		ChanneldUtils::SetRotatorFromPB(Params->NewRot, Msg.newrot());
 		return Params;
 	}
 	else if (Func->GetFName() == FName("ServerAcknowledgePossession"))

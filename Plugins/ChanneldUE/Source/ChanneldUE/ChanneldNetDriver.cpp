@@ -980,7 +980,8 @@ void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 	// IMPORTANT: offset with the ConnId to avoid NetworkGUID conflicts
 	const uint32 UniqueNetIdOffset = ConnToChanneld->GetConnId() << ConnectionIdBitOffset;
 	GuidCache->UniqueNetIDs[0] = UniqueNetIdOffset;
-	//GuidCache->UniqueNetIDs[1] = UniqueNetIdOffset;
+	// Static NetIDs may conflict on the spatial servers, so we need to offset them as well.
+	GuidCache->UniqueNetIDs[1] = UniqueNetIdOffset;
 
 	if (ConnToChanneld->IsClient())
 	{
