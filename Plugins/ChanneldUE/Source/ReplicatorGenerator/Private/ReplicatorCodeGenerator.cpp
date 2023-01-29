@@ -3,20 +3,14 @@
 #include "Manifest.h"
 #include "PropertyDecoratorFactory.h"
 #include "ReplicatorGeneratorDefinition.h"
-#include "Kismet/KismetSystemLibrary.h"
+#include "Internationalization/Regex.h"
+#include "Misc/FileHelper.h"
 #include "ReplicatorTemplate/BlueprintReplicatorTemplate.h"
 #include "ReplicatorTemplate/CppReplicatorTemplate.h"
 
 bool FReplicatorCodeGenerator::RefreshModuleInfoByClassName()
 {
-#if defined(UE_BUILD_DEBUG) && UE_BUILD_DEBUG == 1
-	FString BuildConfiguration = TEXT("Debug");
-#elif defined(UE_BUILD_DEVELOPMENT) && UE_BUILD_DEVELOPMENT == 1
-	FString BuildConfiguration = TEXT("Development");
-#else
-	FString BuildConfiguration = TEXT("");
-#endif
-
+	FString BuildConfiguration = ANSI_TO_TCHAR(COMPILER_CONFIGURATION_NAME);
 	const FString ManifestFilePath = FPaths::ProjectIntermediateDir() / TEXT("Build") / TEXT(CHANNELD_EXPAND_AND_QUOTE(UBT_COMPILED_PLATFORM)) / TEXT(CHANNELD_EXPAND_AND_QUOTE(UE_TARGET_NAME)) / BuildConfiguration / TEXT(CHANNELD_EXPAND_AND_QUOTE(UE_TARGET_NAME)) + TEXT(".uhtmanifest");
 
 	bool bManifestSuccessfullyLoaded;
@@ -190,12 +184,9 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	// ---------- Head code ----------
 
 	// ---------- Cpp code ----------
-	FStringBuilderBase CppCodeBuilder;
-	CppCodeBuilder.Append(TEXT("#include \"") + ReplicatorCode.HeadFileName + TEXT("\"\n\n"));
-	if (Target->GetRPCNum() > 0)
-	{
-		CppCodeBuilder.Append(FString::Printf(TEXT("using namespace %s;"), *Target->GetDeclaration_RPCParamStructNamespace()));
-	}
+	FString CppCodeBuilder;
+	CppCodeBuilder.Append(FString::Printf(TEXT("#include \"%s\"\n\n"), *ReplicatorCode.HeadFileName));
+
 	FormatArgs.Add(
 		TEXT("Code_AssignPropertyPointers"),
 		Target->GetCode_AssignPropertyPointers()
@@ -237,7 +228,7 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 		CppCodeBuilder.Append(FString::Format(CodeGen_CPP_RPCTemplate, FormatArgs));
 	}
 
-	ReplicatorCode.CppCode = CppCodeBuilder.ToString();
+	ReplicatorCode.CppCode = CppCodeBuilder;
 	ReplicatorCode.CppFileName = Target->GetReplicatorClassName(false) + CodeGen_CppFileExtension;
 	// ---------- Cpp code ----------
 

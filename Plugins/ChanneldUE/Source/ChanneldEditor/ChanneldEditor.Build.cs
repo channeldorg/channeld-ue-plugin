@@ -44,6 +44,8 @@ public class ChanneldEditor : ModuleRules
                 "SlateCore",
                 "EditorStyle", 
                 "ReplicatorGenerator",
+                "UATHelper",
+                "Kismet"
 				// ... add private dependencies that you statically link with here ...	
 			}
             );

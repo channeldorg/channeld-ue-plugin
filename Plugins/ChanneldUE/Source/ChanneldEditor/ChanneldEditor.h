@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
+class FChanneldProcWorkerThread;
+class UChanneldMissionNotiProxy;
 class FToolBarBuilder;
 class FMenuBuilder;
 class SWidget;
@@ -27,8 +29,12 @@ private:
 	void StopServersAction();
 
 	void GenerateReplicatorAction();
+	void AddRepCompToBPAction();
 
 	TSharedPtr<class FUICommandList> PluginCommands;
 	TSharedRef<SWidget> CreateMenuContent(TSharedPtr<FUICommandList> Commands);
 	TArray<FProcHandle> ServerProcHandles;
+
+	mutable TSharedPtr<FChanneldProcWorkerThread> GenRepWorkThread;
+	UChanneldMissionNotiProxy* GenRepMissionNotifyProxy;
 };

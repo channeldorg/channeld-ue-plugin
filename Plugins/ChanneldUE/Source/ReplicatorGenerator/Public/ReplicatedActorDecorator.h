@@ -47,6 +47,16 @@ public:
       * Get target actor name
       */
 	FString GetActorName();
+	
+	/**
+      * Get target origin actor name
+      */
+	FString GetOriginActorName();
+
+	/**
+      * Get target outer package path name
+      */
+	FString GetPackagePathName();
 
 	/**
 	 * Get target actor cpp class name

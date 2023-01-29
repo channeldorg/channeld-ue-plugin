@@ -1,10 +1,20 @@
 #include "ChanneldEditor.h"
+
+#include "BlueprintCompilationManager.h"
 #include "ChanneldEditorCommands.h"
-#include "LevelEditor.h"
-#include "Widgets/Input/SSpinBox.h"
 #include "ChanneldEditorSettings.h"
 #include "ChanneldEditorStyle.h"
+#include "ChanneldMissionNotiProxy.h"
+#include "AddCompToBPSubsystem.h"
+#include "ChanneldSettings.h"
+#include "LevelEditor.h"
 #include "ReplicatorGeneratorManager.h"
+#include "ReplicatorGeneratorUtils.h"
+#include "ChanneldUE/Replication/ChanneldReplicationComponent.h"
+#include "Commandlets/CommandletHelpers.h"
+#include "Widgets/Input/SSpinBox.h"
+#include "ThreadUtils/FChanneldProcWorkerThread.h"
+
 
 #define LOCTEXT_NAMESPACE "FChanneldUEModule"
 
@@ -23,7 +33,7 @@ void FChanneldEditorModule::StartupModule()
 		FChanneldEditorCommands::Get().LaunchChanneldCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::LaunchChanneldAction));
 	PluginCommands->MapAction(
-		FChanneldEditorCommands::Get().LaunchChanneldCommand,
+		FChanneldEditorCommands::Get().StopChanneldCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::StopChanneldAction));
 	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().LaunchServersCommand,
@@ -34,6 +44,9 @@ void FChanneldEditorModule::StartupModule()
 	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().GenerateReplicatorCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::GenerateReplicatorAction));
+	PluginCommands->MapAction(
+		FChanneldEditorCommands::Get().AddReplicationComponentCommand,
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::AddRepCompToBPAction));
 
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
@@ -53,6 +66,9 @@ void FChanneldEditorModule::StartupModule()
 		StopChanneldAction();
 		StopServersAction();
 	});
+
+	GenRepMissionNotifyProxy = NewObject<UChanneldMissionNotiProxy>();
+	GenRepMissionNotifyProxy->AddToRoot();
 }
 
 void FChanneldEditorModule::ShutdownModule()
@@ -139,6 +155,10 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 
 	MenuBuilder.AddSeparator();
 
+	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddReplicationComponentCommand);
+
+	MenuBuilder.AddSeparator();
+
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().GenerateReplicatorCommand);
 
 	return MenuBuilder.MakeWidget();
@@ -188,9 +208,38 @@ void FChanneldEditorModule::StopServersAction()
 
 void FChanneldEditorModule::GenerateReplicatorAction()
 {
-	FReplicatorGeneratorManager::Get().GenerateAllReplicators();
+	FString MissionName = TEXT("CookAndGenRep");
+	FString Command = CommandletHelpers::BuildCommandletProcessArguments(*MissionName, *FPaths::GetProjectFilePath(), TEXT(" -targetplatform=WindowsServer -skipcompile -SkipShaderCompile -nop4 -cook -skipstage -utf8output -stdout"));
+	FString Cmd = ChanneldReplicatorGeneratorUtils::GetUECmdBinary();
+	GenRepWorkThread = MakeShareable(new FChanneldProcWorkerThread(TEXT("CookAndGenRepThread"), Cmd, Command));
+	GenRepWorkThread->ProcOutputMsgDelegate.BindUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
+	GenRepWorkThread->ProcBeginDelegate.AddUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::SpawnRuningMissionNotification);
+	GenRepWorkThread->ProcSuccessedDelegate.AddUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::SpawnMissionSuccessedNotification);
+	GenRepWorkThread->ProcFaildDelegate.AddUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::SpawnMissionFaildNotification);
+	GenRepMissionNotifyProxy->SetMissionName(*FString::Printf(TEXT("%s"), *MissionName));
+	GenRepMissionNotifyProxy->SetMissionNotifyText(
+		FText::FromString(FString::Printf(TEXT("%s in progress"), *MissionName)),
+		LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),
+		FText::FromString(FString::Printf(TEXT("%s Mission Finished!"), *MissionName)),
+		FText::FromString(FString::Printf(TEXT("%s Failed!"), *MissionName))
+	);
+	GenRepMissionNotifyProxy->MissionCanceled.AddLambda([this]()
+	{
+		if (GenRepWorkThread.IsValid() && GenRepWorkThread->GetThreadStatus() == EChanneldThreadStatus::Busy)
+		{
+			GenRepWorkThread->Cancel();
+		}
+	});
+	
+	GenRepWorkThread->Execute();
 }
 
-#undef LOCTEXT_NAMESPACE
+void FChanneldEditorModule::AddRepCompToBPAction()
+{
+	TSubclassOf<class UChanneldReplicationComponent> CompClass = GetMutableDefault<UChanneldSettings>()->DefaultReplicationComponent;
+	GEditor->GetEditorSubsystem<UAddCompToBPSubsystem>()->AddComponentToActorBlueprint(CompClass, FName(TEXT("ChanneldRepComp")));
+}
 
 IMPLEMENT_MODULE(FChanneldEditorModule, ChanneldEditor)
+
+#undef LOCTEXT_NAMESPACE

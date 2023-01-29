@@ -1,6 +1,6 @@
 #pragma once
 
-DECLARE_LOG_CATEGORY_EXTERN(LogChanneldRepGenerator, Warning, All);
+REPLICATORGENERATOR_API DECLARE_LOG_CATEGORY_EXTERN(LogChanneldRepGenerator, Log, All);
 
 #define CHANNELD_QUOTE(str) #str
 #define CHANNELD_EXPAND_AND_QUOTE(str) CHANNELD_QUOTE(str)
@@ -21,4 +21,6 @@ static const FString GenManager_GlobalStructProtoHeaderFile = TEXT("ChanneldGlob
 static const FString GenManager_GlobalStructProtoNamespace = TEXT("channeldglobalstructpb");
 static const FString GenManager_GlobalStructProtoPackage = GenManager_GlobalStructProtoNamespace;
 
-static const FString GenManager_PrevCodeGeneratedInfoPath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldPrevCodeGeneratedInfoPath.json");
+static const FString GenManager_IntermediateDir = FPaths::ProjectIntermediateDir() / TEXT("ChanneldReplicatorGenerator");
+static const FString GenManager_PrevCodeGeneratedInfoPath = GenManager_IntermediateDir / TEXT("PrevCodeGeneratedInfoPath.json");
+static const FString GenManager_RepClassInfoPath = GenManager_IntermediateDir / TEXT("RepAssetInfoPath.json");

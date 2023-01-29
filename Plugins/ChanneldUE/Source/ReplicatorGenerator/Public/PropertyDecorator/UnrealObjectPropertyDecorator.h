@@ -31,6 +31,7 @@ public:
 	FUnrealObjectPropertyDecorator(FProperty* InProperty, IPropertyDecoratorOwner* InOwner)
 		: FPropertyDecorator(InProperty, InOwner)
 	{
+		bForceNotDirectlyAccessible = true;
 	}
 	virtual FString GetCPPType() override;
 

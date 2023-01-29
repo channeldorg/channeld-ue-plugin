@@ -17,7 +17,7 @@ void FArrayPropertyDecorator::PostInit()
 	InnerProperty->Init(
 		[this]()
 		{
-			return GetPropertyName() + TEXT("_InnerProp");
+			return CompilablePropName + TEXT("_InnerProp");
 		}
 	);
 }

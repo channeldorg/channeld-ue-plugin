@@ -6,7 +6,7 @@ static const TCHAR* RPC_SerializeFuncParamsTemp =
 	LR"EOF(
 if(Func->GetFName() == FName("{Declare_FuncName}"))
 {
-  {Declare_PropPtrGroupStructName} ParamPointerGroup(Params, OutParams);
+  {Declare_ParamStructNamespace}::{Declare_PropPtrGroupStructName} ParamPointerGroup(Params, OutParams);
   auto Msg = new {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}();
   ParamPointerGroup.Merge(nullptr, Msg, {Code_GetWorldRef});
   return MakeShareable(Msg);
@@ -23,8 +23,8 @@ if(Func->GetFName() == FName("{Declare_FuncName}"))
     UE_LOG(LogChanneld, Warning, TEXT("Failed to parse {Declare_FuncName} Params"));
     return nullptr;
   }
-  {Declare_ParamStructCopy}* Params = new {Declare_ParamStructCopy}();
-  {Declare_PropPtrGroupStructName}::SetPropertyValue(Params, &Msg, {Code_GetWorldRef});
+  {Declare_ParamStructNamespace}::{Declare_ParamStructCopy}* Params = new {Declare_ParamStructNamespace}::{Declare_ParamStructCopy}();
+  {Declare_ParamStructNamespace}::{Declare_PropPtrGroupStructName}::SetPropertyValue(Params, &Msg, {Code_GetWorldRef});
 
   return MakeShareable(Params);
 }
@@ -37,6 +37,8 @@ public:
 
 	virtual ~FRPCDecorator() = default;
 
+	virtual bool Init(const TFunction<FString()>& SetNameForIllegalPropName) override;
+	
 	virtual bool IsDirectlyAccessible() override;
 
 	virtual FString GetCPPType() override;
@@ -54,6 +56,7 @@ public:
 	virtual FString GetCode_GetWorldRef() override;
 
 protected:
+	FReplicatedActorDecorator* OwnerActor;
 	UFunction* OriginalFunction;
 	FName FunctionName;
 };

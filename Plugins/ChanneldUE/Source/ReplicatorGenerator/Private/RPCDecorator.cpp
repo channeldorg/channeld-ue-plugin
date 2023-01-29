@@ -1,6 +1,8 @@
 ﻿#include "RPCDecorator.h"
 
 #include "PropertyDecoratorFactory.h"
+#include "ReplicatedActorDecorator.h"
+#include "ReplicatorGeneratorUtils.h"
 
 FRPCDecorator::FRPCDecorator(UFunction* InFunc, IPropertyDecoratorOwner* InOwner)
 	: FStructPropertyDecorator(nullptr, InOwner), OriginalFunction(InFunc)
@@ -18,6 +20,25 @@ FRPCDecorator::FRPCDecorator(UFunction* InFunc, IPropertyDecoratorOwner* InOwner
 			}
 		}
 	}
+	OwnerActor = static_cast<FReplicatedActorDecorator*>(InOwner);
+}
+
+bool FRPCDecorator::Init(const TFunction<FString()>& SetNameForIllegalPropName)
+{
+	if (bInitialized)
+	{
+		return false;
+	}
+
+	CompilablePropName = OriginalFunction->GetName();
+	if (ChanneldReplicatorGeneratorUtils::IsCompilableClassName(CompilablePropName))
+	{
+		CompilablePropName = *SetNameForIllegalPropName();
+	}
+
+	PostInit();
+	bInitialized = true;
+	return true;
 }
 
 bool FRPCDecorator::IsDirectlyAccessible()
@@ -27,7 +48,7 @@ bool FRPCDecorator::IsDirectlyAccessible()
 
 FString FRPCDecorator::GetCPPType()
 {
-	return FString::Printf(TEXT("%sParamStruct"), *OriginalFunction->GetName());
+	return FString::Printf(TEXT("%sParamStruct"), *GetPropertyName());
 }
 
 FString FRPCDecorator::GetProtoPackageName()
@@ -42,13 +63,14 @@ FString FRPCDecorator::GetProtoNamespace()
 
 FString FRPCDecorator::GetProtoStateMessageType()
 {
-	return FString::Printf(TEXT("Func%sParams"), *OriginalFunction->GetName());
+	return FString::Printf(TEXT("Func%sParams"), *GetPropertyName());
 }
 
 FString FRPCDecorator::GetCode_SerializeFunctionParams()
 {
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_FuncName"), OriginalFunction->GetName());
+	FormatArgs.Add(TEXT("Declare_ParamStructNamespace"), OwnerActor->GetDeclaration_RPCParamStructNamespace());
 	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
 	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), GetProtoNamespace());
 	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), GetProtoStateMessageType());
@@ -60,6 +82,7 @@ FString FRPCDecorator::GetCode_DeserializeFunctionParams()
 {
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_FuncName"), OriginalFunction->GetName());
+	FormatArgs.Add(TEXT("Declare_ParamStructNamespace"), OwnerActor->GetDeclaration_RPCParamStructNamespace());
 	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
 	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), GetProtoNamespace());
 	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), GetProtoStateMessageType());

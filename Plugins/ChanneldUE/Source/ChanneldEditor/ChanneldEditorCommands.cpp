@@ -12,6 +12,7 @@ void FChanneldEditorCommands::RegisterCommands()
 	UI_COMMAND(LaunchServersCommand, "Launch Servers", "Launch PIE servers using current map in separate processes", EUserInterfaceActionType::Button, FInputGesture());
 	UI_COMMAND(StopServersCommand, "Stop Servers", "Stop launched PIE servers", EUserInterfaceActionType::Button, FInputGesture());
 	UI_COMMAND(GenerateReplicatorCommand, "Generate Replicator", "Generate all replicators", EUserInterfaceActionType::Button, FInputGesture());
+	UI_COMMAND(AddReplicationComponentCommand, "Add replication component to blueprint actor", "Add replication component to blueprint actor", EUserInterfaceActionType::Button, FInputGesture());
 }
 
 #undef LOCTEXT_NAMESPACE

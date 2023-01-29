@@ -1,5 +1,7 @@
 ﻿#include "PropertyDecorator.h"
 
+#include "ReplicatorGeneratorUtils.h"
+
 FPropertyDecorator::FPropertyDecorator(FProperty* InProperty, IPropertyDecoratorOwner* InOwner)
 	: Owner(InOwner), OriginalProperty(InProperty)
 {
@@ -11,12 +13,11 @@ bool FPropertyDecorator::Init(const TFunction<FString()>& SetNameForIllegalPropN
 	{
 		return false;
 	}
-	CompilablePropName = OriginalProperty->GetName();
-	if (Owner->IsBlueprintType())
+	
+	if (OriginalProperty != nullptr)
 	{
-		FRegexPattern MatherPatter(TEXT("[^a-zA-Z0-9_]"));
-		FRegexMatcher Matcher(MatherPatter, CompilablePropName);
-		if (Matcher.FindNext())
+		CompilablePropName = OriginalProperty->GetName();
+		if (ChanneldReplicatorGeneratorUtils::IsCompilableClassName(CompilablePropName))
 		{
 			CompilablePropName = *SetNameForIllegalPropName();
 		}
@@ -77,7 +78,7 @@ FString FPropertyDecorator::GetPropertyName()
 
 FString FPropertyDecorator::GetPointerName()
 {
-	return FString::Printf(TEXT("Prop%sPtr"), *GetPropertyName());
+	return FString::Printf(TEXT("Prop_%s_Ptr"), *GetPropertyName());
 }
 
 FString FPropertyDecorator::GetCPPType()
@@ -122,7 +123,7 @@ FString FPropertyDecorator::GetProtoStateMessageType()
 
 FString FPropertyDecorator::GetProtoFieldName()
 {
-	return GetPropertyName().ToLower();
+	return FString::Printf(TEXT("prop_%s"), *GetPropertyName().ToLower());
 }
 
 FString FPropertyDecorator::GetDefinition_ProtoField()

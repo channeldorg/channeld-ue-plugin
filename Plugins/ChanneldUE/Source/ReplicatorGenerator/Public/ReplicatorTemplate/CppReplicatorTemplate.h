@@ -174,7 +174,7 @@ DEFINE_LOG_CATEGORY(LogChanneld);
 )EOF")
 	+ TEXT("UCLASS()")
 	+ LR"EOF(
-class CHANNELDINTEGRATION_API UChanneldReplicatorRegister : public UEngineSubsystem
+class UChanneldReplicatorRegister : public UEngineSubsystem
 {
   GENERATED_BODY()
   virtual void Initialize(FSubsystemCollectionBase& Collection) override

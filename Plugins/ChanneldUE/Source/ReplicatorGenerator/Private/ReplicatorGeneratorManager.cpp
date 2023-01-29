@@ -1,13 +1,16 @@
 ﻿#include "ReplicatorGeneratorManager.h"
 
 #include "ReplicatorGeneratorDefinition.h"
-#include "ProtobufEditor.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/AssetManager.h"
 #include "Engine/SCS_Node.h"
 #include "GameFramework/Character.h"
 #include "HAL/FileManagerGeneric.h"
+#include "Internationalization/Regex.h"
+#include "Misc/FileHelper.h"
 #include "Replication/ChanneldReplicationComponent.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
 
 DEFINE_LOG_CATEGORY(LogChanneldRepGenerator);
 
@@ -32,251 +35,29 @@ FReplicatorGeneratorManager& FReplicatorGeneratorManager::Get()
 	return Singleton;
 }
 
-bool FReplicatorGeneratorManager::HasReplicatedPropertyOrRPC(UClass* TargetClass)
+bool FReplicatorGeneratorManager::HeaderFilesCanBeFound(UClass* TargetClass)
 {
-	for (TFieldIterator<FProperty> It(TargetClass, EFieldIteratorFlags::ExcludeSuper); It; ++It)
-	{
-		if ((*It)->HasAnyPropertyFlags(CPF_Net))
-		{
-			return true;
-		}
-	}
-	TArray<FName> FunctionNames;
-	TargetClass->GenerateFunctionList(FunctionNames);
-	for (const FName FuncName : FunctionNames)
-	{
-		const UFunction* Func = TargetClass->FindFunctionByName(FuncName, EIncludeSuperFlag::IncludeSuper);
-		if (Func->HasAnyFunctionFlags(FUNC_Net))
-		{
-			return true;
-		}
-	}
-	return false;
+	FString TargetHeadFilePath = CodeGenerator->GetClassHeadFilePath(TargetClass->GetPrefixCPP() + TargetClass->GetName());
+	return !TargetHeadFilePath.IsEmpty();
 }
 
-bool FReplicatorGeneratorManager::HasRepComponent(UClass* TargetClass)
+bool FReplicatorGeneratorManager::IsIgnoredActor(UClass* TargetClass)
 {
-	for (TFieldIterator<FProperty> It(TargetClass, EFieldIteratorFlags::ExcludeSuper); It; ++It)
-	{
-		FProperty* Property = *It;
-
-		if (Property->IsA<FObjectProperty>())
-		{
-			FObjectProperty* ObjProperty = CastFieldChecked<FObjectProperty>(Property);
-			if (ObjProperty->PropertyClass->IsChildOf(UChanneldReplicationComponent::StaticClass()))
-			{
-				return true;
-			}
-		}
-	}
-	return false;
+	return IgnoreActorClasses.Contains(TargetClass) || IgnoreActorClassPaths.Contains(TargetClass->GetPathName());
 }
 
-TArray<UClass*> FReplicatorGeneratorManager::GetActorsWithReplicationComp(const TArray<UClass*>& IgnoreActors)
+void FReplicatorGeneratorManager::StartGenerateReplicator()
 {
-	FFileManagerGeneric FileManager;
-
-	TSet<UClass*> IgnoreActorsSet;
-	for (UClass* Class : IgnoreActors)
-	{
-		IgnoreActorsSet.Add(Class);
-	}
-
-	TArray<UClass*> ModifiedClasses;
-
-	// This array contains loaded UBlueprintGeneratedClass and Cpp's UClass,
-	// but FindComponentByClass cannot find components added from component panel or ConstructionScript,
-	// ignore UBlueprintGeneratedClass temporarily and process Cpp's UClass first.
-	TArray<UObject*> AllUClasses;
-	GetObjectsOfClass(UClass::StaticClass(), AllUClasses);
-	// AllUClasses.Add(ATRG_F005_CPP_Parent::StaticClass());
-	for (UObject* ClassObj : AllUClasses)
-	{
-		UClass* Class = CastChecked<UClass>(ClassObj);
-		if (IgnoreActorsSet.Contains(Class))
-		{
-			UE_LOG(LogChanneldRepGenerator, Log, TEXT("Ignore generating replicator for %s"), *Class->GetName());
-			continue;
-		}
-		if (!Class->IsChildOf(AActor::StaticClass()))
-		{
-			continue;
-		}
-		if (Class->GetName().StartsWith(TEXT("SKEL_")) || Class->GetName().StartsWith(TEXT("REINST_")))
-		{
-			continue;
-		}
-		if (!HasRepComponent(Class))
-		{
-			continue;
-		}
-		FString TargetHeadFilePath = CodeGenerator->GetClassHeadFilePath(Class->GetPrefixCPP() + Class->GetName());
-		if (TargetHeadFilePath.IsEmpty())
-		{
-			continue;
-		}
-		ModifiedClasses.Add(Class);
-	}
-
-	// Load all blueprint assets
-	TArray<FAssetData> ArrayAssetData;
-	const FAssetRegistryModule& AssetRegistryModule = FModuleManager::GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
-	FARFilter filter;
-	filter.ClassNames.Add(UBlueprint::StaticClass()->GetFName());
-	filter.bRecursiveClasses = true;
-	AssetRegistryModule.Get().GetAssets(filter, ArrayAssetData);
-
-	TArray<UBlueprint*> AllBlueprints;
-	for (FAssetData AssetData : ArrayAssetData)
-	{
-		FString PackageFileName;
-		FString PackageFile;
-		if (FPackageName::TryConvertLongPackageNameToFilename(AssetData.PackageName.ToString(), PackageFileName) &&
-			FPackageName::FindPackageFileWithoutExtension(PackageFileName, PackageFile))
-		{
-			PackageFile = FPaths::ConvertRelativePathToFull(MoveTemp(PackageFile));
-		}
-
-		UBlueprint* Asset = LoadObject<UBlueprint>(nullptr, *AssetData.ObjectPath.ToString());
-
-		if (Asset != nullptr)
-		{
-			AllBlueprints.Add(Asset);
-		}
-	}
-
-	for (UBlueprint* Blueprint : AllBlueprints)
-	{
-		UClass* GeneratedClass = Blueprint->GeneratedClass;
-		if (!GeneratedClass->IsChildOf(AActor::StaticClass()))
-		{
-			continue;
-		}
-		if (IgnoreActorsSet.Contains(GeneratedClass))
-		{
-			UE_LOG(LogChanneldRepGenerator, Log, TEXT("Ignore generating replicator for %s"), *GeneratedClass->GetName());
-			continue;
-		}
-		bool bOwnReplicationComponent = false;
-		TArray<UActorComponent*> CompTemplates = Blueprint->ComponentTemplates;
-		if (CompTemplates.Num() > 0)
-		{
-			for (const UActorComponent* CompTemplate : CompTemplates)
-			{
-				if (CompTemplate->GetClass()->IsChildOf(UChanneldReplicationComponent::StaticClass()))
-				{
-					bOwnReplicationComponent = true;
-					break;
-				}
-			}
-		}
-
-		if (!bOwnReplicationComponent)
-		{
-			// Find UChanneldReplicationComponent added from component panel
-			const USimpleConstructionScript* CtorScript = Blueprint->SimpleConstructionScript;
-			if (CtorScript == nullptr) { continue; }
-			TArray<USCS_Node*> Nodes = CtorScript->GetAllNodes();
-			for (const USCS_Node* Node : Nodes)
-			{
-				if (Node->ComponentClass->IsChildOf(UChanneldReplicationComponent::StaticClass()))
-				{
-					bOwnReplicationComponent = true;
-					break;;
-				}
-			}
-		}
-
-		if (bOwnReplicationComponent)
-		{
-			ModifiedClasses.Add(GeneratedClass);
-		}
-	}
-
-	TArray<UClass*> ParentClasses;
-	TSet<UClass*> ParentClassesUnique;
-	for (UClass* ActorClass : ModifiedClasses)
-	{
-		ParentClassesUnique.Add(ActorClass);
-		UClass* ParentClass = ActorClass->GetSuperClass();
-		if (ParentClass != nullptr && !ParentClassesUnique.Contains(ParentClass))
-		{
-			ParentClasses.Add(ParentClass);
-			ParentClassesUnique.Add(ParentClass);
-		}
-	}
-
-	for (int32 i = 0; i < ParentClasses.Num(); i++)
-	{
-		UClass* ThisClass = ParentClasses[i];
-		if (!ThisClass->IsChildOf(AActor::StaticClass()))
-		{
-			continue;
-		}
-		if (IgnoreActorsSet.Contains(ThisClass))
-		{
-			UE_LOG(LogChanneldRepGenerator, Log, TEXT("Ignore generating replicator for %s"), *ThisClass->GetName());
-			continue;
-		}
-		ModifiedClasses.Add(ThisClass);
-		UClass* ParentClass = ThisClass->GetSuperClass();
-		if (ParentClass != nullptr && !ParentClassesUnique.Contains(ParentClass))
-		{
-			ParentClasses.Add(ParentClass);
-			ParentClassesUnique.Add(ParentClass);
-		}
-	}
-
-	return ModifiedClasses;
-}
-
-bool FReplicatorGeneratorManager::GenerateAllReplicators()
-{
-	RemoveGeneratedCode();
 	CodeGenerator->RefreshModuleInfoByClassName();
-	// bool Success = false;
-	// const FPrevCodeGeneratedInfo PrevCodeGeneratedInfo = LoadPrevCodeGeneratedInfo(GenManager_PrevCodeGeneratedInfoPath, Success);
-	TArray<UClass*> TargetActorClasses = GetActorsWithReplicationComp(IgnoreActorClasses);
+}
 
-	TSet<FString> GeneratedClassNameSet(GetGeneratedTargetClass());
-	TSet<FString> TargetClassNameSet;
-	TargetClassNameSet.Reserve(TargetActorClasses.Num());
-	for (const UClass* ActorClass : TargetActorClasses)
-	{
-		TargetClassNameSet.Add(ActorClass->GetName());
-	}
-	RemoveGeneratedReplicators(GeneratedClassNameSet.Difference(TargetClassNameSet).Array());
-
-	TArray<FString> IncludeActorCodes, RegisterReplicatorCodes;
-
-	FReplicatorCodeBundle ReplicatorCodeBundle;
-
-	CodeGenerator->Generate(TargetActorClasses, ReplicatorCodeBundle);
-	FString WriteCodeFileMessage;
-
-	// Generate replicator code file
-	for (FReplicatorCode& ReplicatorCode : ReplicatorCodeBundle.ReplicatorCodes)
-	{
-		WriteCodeFile(DefaultModuleDirPath / ReplicatorCode.HeadFileName, ReplicatorCode.HeadCode, WriteCodeFileMessage);
-		WriteCodeFile(DefaultModuleDirPath / ReplicatorCode.CppFileName, ReplicatorCode.CppCode, WriteCodeFileMessage);
-		WriteProtoFile(DefaultModuleDirPath / ReplicatorCode.ProtoFileName, ReplicatorCode.ProtoDefinitions, WriteCodeFileMessage);
-	}
-	// Generate replicator register code file
-	WriteCodeFile(DefaultModuleDirPath / GenManager_RepRegisterFile, ReplicatorCodeBundle.RegisterReplicatorFileCode, WriteCodeFileMessage);
-
-	// Generate global struct declarations file
-	WriteCodeFile(DefaultModuleDirPath / GenManager_GlobalStructHeaderFile, ReplicatorCodeBundle.GlobalStructCodes, WriteCodeFileMessage);
-	WriteProtoFile(DefaultModuleDirPath / GenManager_GlobalStructProtoFile, ReplicatorCodeBundle.GlobalStructProtoDefinitions, WriteCodeFileMessage);
-
-	// FPrevCodeGeneratedInfo ThisCodeGeneratedInfo;
-	// ThisCodeGeneratedInfo.GeneratedTime = FDateTime::Now();
-	// SavePrevCodeGeneratedInfo(ThisCodeGeneratedInfo, GenManager_PrevCodeGeneratedInfoPath, Success);
-	return true;
+void FReplicatorGeneratorManager::StopGenerateReplicator()
+{
 }
 
 bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<UClass*> Targets)
 {
-	CodeGenerator->RefreshModuleInfoByClassName();
+	UE_LOG(LogChanneldRepGenerator, Display, TEXT("Start generating %d replicators"), Targets.Num());
 
 	TArray<FString> IncludeActorCodes, RegisterReplicatorCodes;
 
@@ -291,6 +72,16 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<UClass*> Targets)
 		WriteCodeFile(DefaultModuleDirPath / ReplicatorCode.HeadFileName, ReplicatorCode.HeadCode, WriteCodeFileMessage);
 		WriteCodeFile(DefaultModuleDirPath / ReplicatorCode.CppFileName, ReplicatorCode.CppCode, WriteCodeFileMessage);
 		WriteProtoFile(DefaultModuleDirPath / ReplicatorCode.ProtoFileName, ReplicatorCode.ProtoDefinitions, WriteCodeFileMessage);
+		UE_LOG(
+			LogChanneldRepGenerator,
+			Verbose,
+			TEXT("The replicator for the target class [%s] was generated successfully.\n    Package path: %s\n    Head file: %s\n    CPP file: %s\n    Proto file: %s\n"),
+			*ReplicatorCode.Target->GetOriginActorName(),
+			*ReplicatorCode.Target->GetPackagePathName(),
+			*ReplicatorCode.HeadFileName,
+			*ReplicatorCode.CppFileName,
+			*ReplicatorCode.ProtoFileName
+		);
 	}
 	// Generate replicator register code file
 	WriteCodeFile(DefaultModuleDirPath / GenManager_RepRegisterFile, ReplicatorCodeBundle.RegisterReplicatorFileCode, WriteCodeFileMessage);
@@ -299,6 +90,13 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<UClass*> Targets)
 	WriteCodeFile(DefaultModuleDirPath / GenManager_GlobalStructHeaderFile, ReplicatorCodeBundle.GlobalStructCodes, WriteCodeFileMessage);
 
 	WriteProtoFile(DefaultModuleDirPath / GenManager_GlobalStructProtoFile, ReplicatorCodeBundle.GlobalStructProtoDefinitions, WriteCodeFileMessage);
+
+	UE_LOG(
+		LogChanneldRepGenerator,
+		Display,
+		TEXT("The generation of replicators is completed, %d replicators need to be generated, a total of %d replicators are generated"),
+		Targets.Num(), ReplicatorCodeBundle.ReplicatorCodes.Num()
+	);
 
 	return true;
 }
@@ -318,8 +116,8 @@ bool FReplicatorGeneratorManager::WriteProtoFile(const FString& FilePath, const 
 		ResultMessage = TEXT("\"ue4-protobuf\" plugin not found");
 		return false;
 	}
-	FProtobufEditorModule* ProtoModule = static_cast<FProtobufEditorModule*>(Module);
-	ProtoModule->PluginButtonClicked();
+	// FProtobufEditorModule* ProtoModule = static_cast<FProtobufEditorModule*>(Module);
+	// ProtoModule->PluginButtonClicked();
 
 	return bSuccess;
 }
@@ -482,4 +280,11 @@ void FReplicatorGeneratorManager::SavePrevCodeGeneratedInfo(const FPrevCodeGener
 		return;
 	}
 	Success = true;
+}
+
+TArray<FString> FReplicatorGeneratorManager::GetAllGeneratedProtoFilePath()
+{
+	TArray<FString> AllCodeFiles;
+	IFileManager::Get().FindFiles(AllCodeFiles, *DefaultModuleDirPath, *CodeGen_ProtoFileExtension);
+	return AllCodeFiles;
 }

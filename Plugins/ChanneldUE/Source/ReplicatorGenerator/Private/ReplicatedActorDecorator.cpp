@@ -1,6 +1,7 @@
 ﻿#include "ReplicatedActorDecorator.h"
 
 #include "PropertyDecoratorFactory.h"
+#include "ReplicatorGeneratorUtils.h"
 #include "GameFramework/GameStateBase.h"
 #include "ReplicatorTemplate/CppReplicatorTemplate.h"
 
@@ -12,9 +13,7 @@ FReplicatedActorDecorator::FReplicatedActorDecorator(const UClass* TargetActorCl
 	TargetActorName = Target->GetName();
 	if (bIsBlueprintGenerated)
 	{
-		FRegexPattern MatherPatter(TEXT("[^a-zA-Z0-9_]"));
-		FRegexMatcher Matcher(MatherPatter, TargetActorName);
-		if (Matcher.FindNext())
+		if (ChanneldReplicatorGeneratorUtils::IsCompilableClassName(TargetActorName))
 		{
 			TargetActorName = SetBPTargetRepName();
 		}
@@ -84,6 +83,16 @@ void FReplicatedActorDecorator::Init(const FModuleInfo& InModuleBelongTo)
 FString FReplicatedActorDecorator::GetActorName()
 {
 	return TargetActorName;
+}
+
+FString FReplicatedActorDecorator::GetOriginActorName()
+{
+	return Target->GetName();
+}
+
+FString FReplicatedActorDecorator::GetPackagePathName()
+{
+	return Target->GetPackage()->GetPathName();
 }
 
 FString FReplicatedActorDecorator::GetActorCPPClassName()
@@ -180,12 +189,12 @@ FString FReplicatedActorDecorator::GetCode_AllPropertiesSetDeltaState(const FStr
 	{
 		return TEXT("");
 	}
-	FStringBuilderBase SetDeltaStateCodeBuilder;
+	FString SetDeltaStateCodeBuilder;
 	for (const TSharedPtr<FPropertyDecorator> Property : Properties)
 	{
 		SetDeltaStateCodeBuilder.Append(Property->GetCode_SetDeltaState(InstanceRefName, FullStateName, DeltaStateName));
 	}
-	return SetDeltaStateCodeBuilder.ToString();
+	return SetDeltaStateCodeBuilder;
 }
 
 FString FReplicatedActorDecorator::GetCode_AllPropertiesOnStateChange(const FString& NewStateName)
@@ -194,12 +203,12 @@ FString FReplicatedActorDecorator::GetCode_AllPropertiesOnStateChange(const FStr
 	{
 		return TEXT("");
 	}
-	FStringBuilderBase OnChangeStateCodeBuilder;
+	FString OnChangeStateCodeBuilder;
 	for (const TSharedPtr<FPropertyDecorator> Property : Properties)
 	{
 		OnChangeStateCodeBuilder.Append(Property->GetCode_OnStateChange(InstanceRefName, NewStateName, true));
 	}
-	return OnChangeStateCodeBuilder.ToString();
+	return OnChangeStateCodeBuilder;
 }
 
 FString FReplicatedActorDecorator::GetDefinition_ProtoStateMessage()
