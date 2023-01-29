@@ -11,6 +11,7 @@
 #include "Sockets.h"
 #include "SocketSubsystem.h"
 #include "google/protobuf/message.h"
+#include "Replication/ChanneldReplicationComponent.h"
 #include "View/ChannelDataView.h"
 #include "ChanneldNetDriver.generated.h"
 
@@ -89,9 +90,10 @@ public:
 	
 	void SendCrossServerRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
 	
-	void OnServerBeginPlay(AActor* Actor);
+	void OnServerBeginPlay(UChanneldReplicationComponent* RepComp);
 
 	TWeakObjectPtr<UChannelDataView> ChannelDataView;
+	void OnServerSpawnedActor(AActor* Actor);
 
 protected:
 	TSharedRef<ChannelId> LowLevelSendToChannelId = MakeShared<ChannelId>(GlobalChannelId);
@@ -128,7 +130,6 @@ private:
 	void OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg);
 	void HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
 	void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer);
-	void OnServerSpawnedActor(AActor* Actor);
 
 	void OnSentRPC(class AActor* Actor, FString FuncName);
 

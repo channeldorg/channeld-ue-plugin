@@ -20,6 +20,14 @@ class CHANNELDUE_API UChanneldReplicationComponent : public UActorComponent, pub
 public:	
 	UChanneldReplicationComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnAddedToChannel"))
+	void ReceiveOnAddedToChannel(int64 ChannelId);
+
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "OnRemovedFromChannel"))
+	void ReceiveOnRemovedFromChannel(int64 ChannelId);
+	
+	TSet<ChannelId> AddedToChannelIds;
+	
 protected:
 	virtual const google::protobuf::Message* GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved);
 	/**
@@ -54,10 +62,8 @@ public:
 	
 	//~ Begin IChannelDataProvider Interface.
 	virtual UObject* GetTargetObject() override {return GetOwner();}
-	// channeldpb::ChannelType GetChannelType() override;
-	// virtual google::protobuf::Message* GetChannelDataTemplate() const override;
-	// ChannelId GetChannelId() override;
-	// void SetChannelId(ChannelId ChId) override;
+	virtual void OnAddedToChannel(ChannelId ChId) override {AddedToChannelIds.Add(ChId);}
+	virtual void OnRemovedFromChannel(ChannelId ChId) override {AddedToChannelIds.Remove(ChId);}
 	virtual bool IsRemoved() override;
 	virtual void SetRemoved(bool bInRemoved) override;
 	virtual bool UpdateChannelData(google::protobuf::Message* ChannelData) override;

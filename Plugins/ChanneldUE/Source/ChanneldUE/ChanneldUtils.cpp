@@ -68,10 +68,17 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 					GuidCache->RegisterNetGUIDFromPath_Client(NewGUID, PathName, CachedObj->outerguid(), 0, false, false);
 				}
 				UObject* NewObj = GuidCache->GetObjectFromNetGUID(NewGUID, false);
+				// Only happens to static objects
+				if (NewGUID == NetGUID)
+				{
+					check(NetGUID.IsStatic());
+					Obj = NewObj;
+				}
 				UE_LOG(LogChanneld, Verbose, TEXT("[Client] Registered NetGUID %d (%d) from path: %s"), NewGUID.Value, ChanneldUtils::GetNativeNetId(NewGUID.Value), *PathName);
 			}
 
-			if (Ref->bunchbitsnum() > 0)
+			// Use the bunch to deserialize the object
+			if (Obj == nullptr && Ref->bunchbitsnum() > 0)
 			{
 				FInBunch InBunch(Connection, (uint8*)Ref->netguidbunch().data(), Ref->bunchbitsnum());
 				auto PackageMap = CastChecked<UPackageMapClient>(Connection->PackageMap);

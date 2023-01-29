@@ -22,6 +22,8 @@ public:
 	// virtual google::protobuf::Message* GetChannelDataTemplate() const = 0;
 	//virtual ChannelId GetChannelId() = 0;
 	// virtual void SetChannelId(ChannelId ChId) = 0;
+	virtual void OnAddedToChannel(ChannelId ChId) {}
+	virtual void OnRemovedFromChannel(ChannelId ChId) {}
 	virtual bool IsRemoved() = 0;
 	virtual void SetRemoved(bool bInRemoved) = 0;
 	virtual bool UpdateChannelData(google::protobuf::Message* ChannelData) = 0;

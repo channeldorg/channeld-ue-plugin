@@ -594,6 +594,7 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 
 	if (Actor->HasDeferredComponentRegistration())
 	{
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("[Server] Actor %s has deferred component registration. The spawn logic will be deferred to BeginPlay()."), *Actor->GetName());
 		ServerDeferredSpawns.Add(Actor);
 		return;
 	}
@@ -709,12 +710,23 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	}
 }
 
-void UChanneldNetDriver::OnServerBeginPlay(AActor* Actor)
+void UChanneldNetDriver::OnServerBeginPlay(UChanneldReplicationComponent* RepComp)
 {
+	AActor* Actor = RepComp->GetOwner();
+	// Actor has deferred component registration, so we need to wait for BeginPlay to perform the spawn logic. E.g. BP_TestCube.
 	if (ServerDeferredSpawns.Contains(Actor))
 	{
 		OnServerSpawnedActor(Actor);
 		ServerDeferredSpawns.Remove(Actor);
+	}
+	// Actor's ChanneldReplicationComponent is not registered when spawned, so we need to wait for BeginPlay to perform the spawn logic. E.g. BP_NPC.
+	else if (RepComp->AddedToChannelIds.Num() == 0)
+	{
+		if (ChannelDataView.IsValid())
+		{
+			UE_LOG(LogChanneld, VeryVerbose, TEXT("[Server] Actor %s has deferred ChanneldReplicationComponent registration. Adding it to default channel."), *Actor->GetName());
+			ChannelDataView->AddProviderToDefaultChannel(RepComp);
+		}
 	}
 }
 
@@ -968,7 +980,7 @@ void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 	// IMPORTANT: offset with the ConnId to avoid NetworkGUID conflicts
 	const uint32 UniqueNetIdOffset = ConnToChanneld->GetConnId() << ConnectionIdBitOffset;
 	GuidCache->UniqueNetIDs[0] = UniqueNetIdOffset;
-	GuidCache->UniqueNetIDs[1] = UniqueNetIdOffset;
+	//GuidCache->UniqueNetIDs[1] = UniqueNetIdOffset;
 
 	if (ConnToChanneld->IsClient())
 	{

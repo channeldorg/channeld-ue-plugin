@@ -2,6 +2,7 @@
 #include "ChanneldGameInstanceSubsystem.h"
 #include "ChanneldNetDriver.h"
 #include "ChanneldUtils.h"
+#include "EngineUtils.h"
 #include "Metrics.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameStateBase.h"
@@ -182,6 +183,8 @@ void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provide
 		UE_LOG(LogChanneld, Verbose, TEXT("Added channel data provider %s to channel %d"), *IChannelDataProvider::GetName(Provider), ChId);
 	}
 	ChannelDataProviders[ChId] = Providers;
+	
+	Provider->OnAddedToChannel(ChId);
 }
 
 void UChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* Provider)
@@ -272,6 +275,7 @@ void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Prov
 				{
 					UE_LOG(LogChanneld, Error, TEXT("Can't map channel type from channel id: %d. Removed states won't be created for provider: %s"), ChId, *IChannelDataProvider::GetName(Provider));
 					Providers->Remove(Provider);
+					Provider->OnRemovedFromChannel(ChId);
 					return;
 				}
 				else
@@ -280,6 +284,7 @@ void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Prov
 					if (!ensureMsgf(MsgTemplate, TEXT("Can't find channel data message template of channel type: %s"), *UEnum::GetValueAsString(ChannelType)))
 					{
 						Providers->Remove(Provider);
+						Provider->OnRemovedFromChannel(ChId);
 						return;
 					}
 					RemovedData = MsgTemplate->New();
@@ -291,6 +296,7 @@ void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Prov
 		else
 		{
 			Providers->Remove(Provider);
+			Provider->OnRemovedFromChannel(ChId);
 		}
 	}
 }
@@ -371,18 +377,31 @@ void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerControl
 	
 	/* OnServerSpawnedActor() sends the spawning of the new player's pawn to other clients */
 
-	// Send the existing player pawns to the new player
+	/*
+	// Send the existing player pawns to the new player.
+	// PC only exists in owning client as an AutonomousProxy, so we don't send it.
 	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 	{
 		APlayerController* PC = Iterator->Get();
 		if (PC && PC != NewPlayer)
 		{
-			/* PC only exists in owning client as an AutonomousProxy!!!
-			NewPlayerConn->SendSpawnMessage(PC, ROLE_SimulatedProxy);
-			*/
 			if (PC->GetPawn())
 			{
 				NewPlayerConn->SendSpawnMessage(PC->GetPawn(), ENetRole::ROLE_SimulatedProxy);
+			}
+		}
+	}
+	*/
+
+	// Send all the existing actors to the new player, including the static level actors.
+	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
+	{
+		for(TActorIterator<AActor> It(GetWorld(), AActor::StaticClass()); It; ++It)
+		{
+			AActor* Actor = *It;
+			if (Actor != GameMode->GameState && Actor != NewPlayer && Actor != NewPlayer->PlayerState)
+			{
+				NetDriver->OnServerSpawnedActor(Actor);
 			}
 		}
 	}
@@ -592,6 +611,7 @@ int32 UChannelDataView::SendAllChannelUpdates()
 					{
 						Itr.RemoveCurrent();
 						RemovedCount++;
+						Provider->OnRemovedFromChannel(ChId);
 					}
 				}
 				else
