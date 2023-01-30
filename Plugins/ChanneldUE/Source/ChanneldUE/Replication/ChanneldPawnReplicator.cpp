@@ -57,18 +57,28 @@ void FChanneldPawnReplicator::Tick(float DeltaTime)
 	}	
 	// ~End copy of APawn::PreReplication
 
-	auto PlayerState = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(FullState->mutable_playerstate(), Pawn->GetWorld(), false));
-	if (PlayerState != *PlayerStatePtr)
+	bool bUnmapped = false;
+	auto PlayerState = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(FullState->mutable_playerstate(), Pawn->GetWorld(), bUnmapped, false));
+	if (!bUnmapped && PlayerState != *PlayerStatePtr)
 	{
-		DeltaState->mutable_playerstate()->CopyFrom(ChanneldUtils::GetRefOfObject(*PlayerStatePtr));
-		bStateChanged = true;
+		// Only set the PlayerState if it is replicated
+		if (*PlayerStatePtr == nullptr || (*PlayerStatePtr)->GetIsReplicated())
+		{
+			DeltaState->mutable_playerstate()->CopyFrom(ChanneldUtils::GetRefOfObject(*PlayerStatePtr));
+			bStateChanged = true;
+		}
 	}
 
-	auto Controller = Cast<AController>(ChanneldUtils::GetObjectByRef(FullState->mutable_controller(), Pawn->GetWorld(), false));
-	if (Controller != Pawn->Controller)
+	bUnmapped = false;
+	auto Controller = Cast<AController>(ChanneldUtils::GetObjectByRef(FullState->mutable_controller(), Pawn->GetWorld(), bUnmapped, false));
+	if (!bUnmapped && Controller != Pawn->Controller)
 	{
-		DeltaState->mutable_controller()->CopyFrom(ChanneldUtils::GetRefOfObject(Pawn->Controller));
-		bStateChanged = true;
+		// Only set the Controller if it is replicated
+		if (Pawn->Controller == nullptr || Pawn->Controller->GetIsReplicated())
+		{
+			DeltaState->mutable_controller()->CopyFrom(ChanneldUtils::GetRefOfObject(Pawn->Controller));
+			bStateChanged = true;
+		}
 	}
 
 	if (FullState->remoteviewpitch() != Pawn->RemoteViewPitch)

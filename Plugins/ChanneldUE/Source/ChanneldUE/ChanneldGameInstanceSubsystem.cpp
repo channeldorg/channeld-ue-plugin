@@ -261,15 +261,16 @@ void UChanneldGameInstanceSubsystem::DisconnectFromChanneld(bool bFlushAll/* = t
 }
 
 void UChanneldGameInstanceSubsystem::CreateChannel(EChanneldChannelType ChannelType, FString Metadata, UProtoMessageObject* InitData,
-	const FOnceOnCreateChannel& Callback)
+	bool bHasSubOptions, const FChannelSubscriptionOptions& SubOptions,	const FOnceOnCreateChannel& Callback)
 {
 	InitConnection();
 
 	ConnectionInstance->CreateChannel(
 		static_cast<channeldpb::ChannelType>(ChannelType),
 		Metadata,
-		nullptr,
+		bHasSubOptions ? SubOptions.ToMessage().Get() : nullptr,
 		InitData == nullptr ? nullptr : InitData->GetMessage(),
+		// TODO: support the merge options in Blueprint
 		nullptr,
 		[=](const channeldpb::CreateChannelResultMessage* Message)
 		{

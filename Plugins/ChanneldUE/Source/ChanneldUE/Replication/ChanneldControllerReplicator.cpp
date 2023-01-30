@@ -48,16 +48,24 @@ void FChanneldControllerReplicator::Tick(float DeltaTime)
 	auto PlayerState = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(FullState->mutable_playerstate(), Controller->GetWorld(), bUnmapped, false));
 	if (!bUnmapped && PlayerState != Controller->PlayerState)
 	{
-		DeltaState->mutable_playerstate()->CopyFrom(ChanneldUtils::GetRefOfObject(Controller->PlayerState));
-		bStateChanged = true;
+		// Only set the PlayerState if it's replicated
+		if (Controller->PlayerState == nullptr || Controller->PlayerState->GetIsReplicated())
+		{
+			DeltaState->mutable_playerstate()->CopyFrom(ChanneldUtils::GetRefOfObject(Controller->PlayerState));
+			bStateChanged = true;
+		}
 	}
 
 	bUnmapped = false;
 	auto Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(FullState->mutable_pawn(), Controller->GetWorld(), bUnmapped, false));
 	if (!bUnmapped && Pawn != Controller->GetPawn())
 	{
-		DeltaState->mutable_pawn()->CopyFrom(ChanneldUtils::GetRefOfObject(Controller->GetPawn()));
-		bStateChanged = true;
+		// Only set the Pawn if it's replicated
+		if (Controller->GetPawn() == nullptr || Controller->GetPawn()->GetIsReplicated())
+		{
+			DeltaState->mutable_pawn()->CopyFrom(ChanneldUtils::GetRefOfObject(Controller->GetPawn()));
+			bStateChanged = true;
+		}
 	}
 
 	if (bStateChanged)

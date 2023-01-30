@@ -616,7 +616,9 @@ void USpatialChannelDataView::InitServer()
 	
 	Connection->SubToChannel(GlobalChannelId, nullptr, [&](const channeldpb::SubscribedToChannelResultMessage* _)
 	{
-		Connection->CreateSpatialChannel(TEXT(""), nullptr, ChannelInitData ? ChannelInitData->GetMessage() : nullptr, nullptr,
+		channeldpb::ChannelSubscriptionOptions SpatialSubOptions;
+		SpatialSubOptions.set_skipselfupdatefanout(true);
+		Connection->CreateSpatialChannel(TEXT(""), &SpatialSubOptions, ChannelInitData ? ChannelInitData->GetMessage() : nullptr, nullptr,
 			[](const channeldpb::CreateSpatialChannelsResultMessage* ResultMsg)
 		{
 			FString StrChIds;
@@ -800,6 +802,11 @@ bool USpatialChannelDataView::GetSendToChannelId(UChanneldNetConnection* NetConn
 
 void USpatialChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* Provider)
 {
+	if (bSuppressAddProviderAndSendOnServerSpawn)
+	{
+		return;
+	}
+	
 	if (Connection->IsServer())
 	{
 		FNetworkGUID NetId = GetNetId(Provider);

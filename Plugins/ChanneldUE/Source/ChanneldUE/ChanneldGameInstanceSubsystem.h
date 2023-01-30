@@ -137,8 +137,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Channeld")
 		void DisconnectFromChanneld(bool bFlushAll = true);
 
-	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld")
-		void CreateChannel(EChanneldChannelType ChannelType, FString Metadata, UProtoMessageObject* InitData, const FOnceOnCreateChannel& Callback);
+	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "SubOptions, Callback"), Category = "Channeld")
+		void CreateChannel(EChanneldChannelType ChannelType, FString Metadata, UProtoMessageObject* InitData, bool bHasSubOptions, const FChannelSubscriptionOptions& SubOptions, const FOnceOnCreateChannel& Callback);
 
 	UFUNCTION(BlueprintCallable, Meta = (AutoCreateRefTerm = "Callback"), Category = "Channeld")
 		void RemoveChannel(int32 ChannelToRemove, const FOnceOnRemoveChannel& Callback);

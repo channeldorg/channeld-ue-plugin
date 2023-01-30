@@ -110,10 +110,14 @@ struct CHANNELDUE_API FChannelSubscriptionOptions
 	UPROPERTY(BlueprintReadWrite)
 		int32 FanOutDelayMs;
 
+	UPROPERTY(BlueprintReadWrite)
+		bool bSkipSelfUpdateFanOut;
+
 	FChannelSubscriptionOptions() :
 		DataAccess(EChannelDataAccess::EDA_WRITE_ACCESS),
 		FanOutIntervalMs(20),
-		FanOutDelayMs(0)
+		FanOutDelayMs(0),
+		bSkipSelfUpdateFanOut(false)
 	{}
 
 	void MergeFromMessage(const channeldpb::ChannelSubscriptionOptions& Target)
@@ -121,27 +125,42 @@ struct CHANNELDUE_API FChannelSubscriptionOptions
 		const google::protobuf::Reflection* MsgReflection = Target.GetReflection();
 		const google::protobuf::Descriptor* MsgDescriptor = Target.GetDescriptor();
 
-		if (MsgReflection->HasField(Target, MsgDescriptor->FindFieldByNumber(Target.kDataAccessFieldNumber)))
+		if (Target.has_dataaccess())
+		{
 			DataAccess = static_cast<EChannelDataAccess>(Target.dataaccess());
+		}
 
 		if (Target.datafieldmasks_size() > 0)
 		{
 			TSet<FString> DataFieldMaskSet;
 
 			for (FString DataFieldMask : DataFieldMasks)
+			{
 				DataFieldMaskSet.Add(DataFieldMask);
-
+			}
+			
 			for (std::string TargetDataFieldMask : Target.datafieldmasks())
+			{
 				DataFieldMaskSet.Add(FString(UTF8_TO_TCHAR(TargetDataFieldMask.c_str())));
-
+			}
+			
 			DataFieldMasks = DataFieldMaskSet.Array();
 		}
 
-		if (MsgReflection->HasField(Target, MsgDescriptor->FindFieldByNumber(Target.kFanOutIntervalMsFieldNumber)))
+		if (Target.has_fanoutintervalms())
+		{
 			FanOutIntervalMs = Target.fanoutintervalms();
-
-		if (MsgReflection->HasField(Target, MsgDescriptor->FindFieldByNumber(Target.kFanOutDelayMsFieldNumber)))
+		}
+		
+		if (Target.has_fanoutdelayms())
+		{
 			FanOutDelayMs = Target.fanoutdelayms();
+		}
+		
+		if (Target.has_skipselfupdatefanout())
+		{
+			bSkipSelfUpdateFanOut = Target.skipselfupdatefanout();
+		}
 	}
 
 	const TSharedPtr<channeldpb::ChannelSubscriptionOptions> ToMessage() const
@@ -154,6 +173,7 @@ struct CHANNELDUE_API FChannelSubscriptionOptions
 		}
 		SubOptionsMsg->set_fanoutintervalms(FanOutIntervalMs);
 		SubOptionsMsg->set_fanoutdelayms(FanOutDelayMs);
+		SubOptionsMsg->set_skipselfupdatefanout(bSkipSelfUpdateFanOut);
 		return SubOptionsMsg;
 	}
 };
