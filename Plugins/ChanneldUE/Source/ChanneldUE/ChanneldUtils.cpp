@@ -112,14 +112,14 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 		// Only throw warning when failed to create the object.
 		if (bCreateIfNotInCache)
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Unable to create object from NetGUID: %d (%d)"), NetGUID.Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
+			UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Failed to create object from NetGUID: %d (%d)"), NetGUID.Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
 		}
 	}
 	
 	return Obj;
 }
 
-const unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnection* Connection)
+const unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnection* Connection /* = nullptr*/)
 {
 	unrealpb::UnrealObjectRef ObjRef;
 	ObjRef.set_netguid(0);
@@ -146,7 +146,7 @@ const unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNet
 		}
 		if (!IsValid(Connection))
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetRefOfObject: Failed to get the ref of %s: the NetConnection is not valid"), *Obj->GetName());
+			UE_LOG(LogChanneld, Log, TEXT("ChanneldUtils::GetRefOfObject: Unable to full-export '%s' as it doesn't have valid NetConnection"), *Obj->GetName());
 			ObjRef.set_netguid(NetGUID.Value);
 			return ObjRef;
 		}

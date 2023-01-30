@@ -237,7 +237,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 						}
 						else if (auto HandoverPawn = Cast<APawn>(HandoverActor))
 						{
-							// Reset the pawn's controller so it won't send ClientSetViewTarget RPC in APawn::DetachFromControllerPendingDestroy
+							// Reset the pawn's controller (don't call UnPossess!) so it won't send ClientSetViewTarget RPC in APawn::DetachFromControllerPendingDestroy.
 							HandoverPawn->Controller = nullptr;
 						}
 
@@ -304,8 +304,8 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 					{
 						// Create the client connection if it doesn't exist yet. Don't create the PlayerController for now.
 						ClientConn = CreateClientConnection(ClientConnId, HandoverMsg->dstchannelid());
+						UE_LOG(LogChanneld, Log, TEXT("[Server] Create client connection %d during handover, context obj: %d"), ClientConnId, NetId.Value);
 					}
-
 				
 					// Set the NetId of the handover object as exported, so the NetConn won't send the Spawn message to the client.
 					// FIXME: Won't work as the spawned object will have a different NetId!
@@ -319,9 +319,16 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 				}
 			}
 			// Non-player object enters the server. Simply create it.
-			else
+			else if (HandoverObj == nullptr)
 			{
-				HandoverObj = ChanneldUtils::GetObjectByRef(&HandoverObjRef, GetWorld(), true);
+				bSuppressAddProviderAndSendOnServerSpawn = true;
+				// ClientConn should be assigned in order to spawn properly.
+				HandoverObj = ChanneldUtils::GetObjectByRef(&HandoverObjRef, GetWorld(), true, NetConnForSpawn);
+				bSuppressAddProviderAndSendOnServerSpawn = false;
+				UE_LOG(LogChanneld, Log, TEXT("[Server] Spawned handover obj: %s"), *GetNameSafe(HandoverObj));
+
+				// Always remember to reset the NetConnForSpawn after using it.
+				ResetNetConnForSpawn();
 			}
 		
 			if (IsValid(HandoverObj))
@@ -365,7 +372,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 			}
 			else if (HandoverObj == nullptr)
 			{
-				UE_LOG(LogChanneld, Warning, TEXT("[Server] Failed to spawn object from handover data: %s"), UTF8_TO_TCHAR(HandoverData.DebugString().c_str()));
+				UE_LOG(LogChanneld, Warning, TEXT("[Server] Failed to spawn object of netId %d from handover context: %s"), NetId.Value, UTF8_TO_TCHAR(HandoverContext.DebugString().c_str()));
 			}
 			else
 			{
@@ -422,13 +429,14 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	// Pass 2
 	for (auto HandoverActor : CrossServerActors)
 	{
-		// If the handover actor falls into the authority area of current server,
-		// make sure it starts sending ChannelDataUpdate message. It has to be done AFTER calling HandleChannelDataUpdate.
-		if (Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid()))
+		// Make sure the handover actors that fall into the authority area of current server start sending ChannelDataUpdate message. It has to be done AFTER calling HandleChannelDataUpdate.
+		// NOTE: Setting to ROLE_Authority should be performed at last, as many UE code assume it's in the client.
+		HandoverActor->SetRole(ENetRole::ROLE_Authority);
+		UE_LOG(LogChanneld, Verbose, TEXT("Set %s to back to ROLE_Authority after ChannelDataUpdate"), *HandoverActor->GetName());
+
+		if (auto RepComp = Cast<UChanneldReplicationComponent>(HandoverActor->GetComponentByClass(UChanneldReplicationComponent::StaticClass())))
 		{
-			// CAUTION: Setting to ROLE_Authority should be performed at last, as many UE code assume it's in the client.
-			HandoverActor->SetRole(ENetRole::ROLE_Authority);
-			UE_LOG(LogChanneld, Verbose, TEXT("Set %s to back to ROLE_Authority after ChannelDataUpdate"), *HandoverActor->GetName());
+			RepComp->OnCrossServerHandover.Broadcast();
 		}
 	}
 
@@ -935,6 +943,14 @@ void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnecti
 	}
 }
 
+void USpatialChannelDataView::ResetNetConnForSpawn()
+{
+	auto PacketMapClient = CastChecked<UPackageMapClient>(NetConnForSpawn->PackageMap);
+	PacketMapClient->NetGUIDExportCountMap.Empty();
+	const static FPackageMapAckState EmptyAckStatus;
+	PacketMapClient->RestorePackageMapExportAckStatus(EmptyAckStatus);
+}
+
 // Broadcast the spawning to all clients subscribed in the nearby spatial channels
 void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConnId)
 {
@@ -958,10 +974,7 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 	// As we don't have any specific NetConnection to export the NetId, use a virtual one.
 	SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Obj, NetConnForSpawn));
 	// Clear the export map and ack state so everytime we can get a full export.
-	auto PacketMapClient = CastChecked<UPackageMapClient>(NetConnForSpawn->PackageMap);
-	PacketMapClient->NetGUIDExportCountMap.Empty();
-	const static FPackageMapAckState EmptyAckStatus;
-	PacketMapClient->RestorePackageMapExportAckStatus(EmptyAckStatus);
+	ResetNetConnForSpawn();
 	
 	if (Obj->IsA<AActor>())
 	{

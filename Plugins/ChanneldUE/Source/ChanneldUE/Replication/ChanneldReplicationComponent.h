@@ -14,6 +14,7 @@
 class UChanneldReplicationComponent;
 DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FComponentAddedToChannelSignature, UChanneldReplicationComponent, OnComponentAddedToChannel, int64, ChId);
 DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FComponentRemovedFromChannelSignature, UChanneldReplicationComponent, OnComponentRemovedFromChannel, int64, ChId);
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE(FCrossServerHandoverSignature, UChanneldReplicationComponent, OnCrossServerHandover);
 
 // Responsible for replicating the owning Actor and its replicated components via ChannelDataUpdate
 UCLASS(Abstract, ClassGroup = "Channeld")
@@ -29,6 +30,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Components|Channeld")
 	FComponentRemovedFromChannelSignature OnComponentRemovedFromChannel;
+
+	UPROPERTY(BlueprintAssignable, Category = "Components|Channeld")
+	FCrossServerHandoverSignature OnCrossServerHandover;
 	
 	TSet<ChannelId> AddedToChannelIds;
 	
