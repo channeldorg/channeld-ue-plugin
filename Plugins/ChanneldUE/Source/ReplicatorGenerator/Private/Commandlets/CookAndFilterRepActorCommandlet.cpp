@@ -21,7 +21,6 @@ UCookAndFilterRepActorCommandlet::UCookAndFilterRepActorCommandlet()
 
 int32 UCookAndFilterRepActorCommandlet::Main(const FString& CmdLineParams)
 {
-	// return 0;
 	FReplicatorGeneratorManager& GeneratorManager = FReplicatorGeneratorManager::Get();
 	GeneratorManager.StartGenerateReplicator();
 	

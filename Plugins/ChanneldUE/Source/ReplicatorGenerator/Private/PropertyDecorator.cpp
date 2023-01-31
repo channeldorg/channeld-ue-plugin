@@ -17,7 +17,7 @@ bool FPropertyDecorator::Init(const TFunction<FString()>& SetNameForIllegalPropN
 	if (OriginalProperty != nullptr)
 	{
 		CompilablePropName = OriginalProperty->GetName();
-		if (ChanneldReplicatorGeneratorUtils::IsCompilableClassName(CompilablePropName))
+		if (!ChanneldReplicatorGeneratorUtils::IsCompilableClassName(CompilablePropName))
 		{
 			CompilablePropName = *SetNameForIllegalPropName();
 		}

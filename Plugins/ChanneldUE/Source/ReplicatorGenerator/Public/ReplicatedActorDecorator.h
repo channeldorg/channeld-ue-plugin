@@ -34,7 +34,7 @@ uint32 {Declare_ReplicatorClassName}::GetNetGUID()
 class FReplicatedActorDecorator : public IPropertyDecoratorOwner
 {
 public:
-	FReplicatedActorDecorator(const UClass*, const TFunction<FString()>& SetBPTargetRepName);
+	FReplicatedActorDecorator(const UClass* TargetActorClass, const TFunction<void(FString& TargetActorName, bool IsActorNameCompilable)>& SetCompilableName);
 
 	virtual ~FReplicatedActorDecorator() = default;
 
@@ -47,7 +47,7 @@ public:
       * Get target actor name
       */
 	FString GetActorName();
-	
+
 	/**
       * Get target origin actor name
       */
@@ -138,7 +138,7 @@ public:
 
 	FString GetCode_SerializeFunctionParams();
 	FString GetCode_DeserializeFunctionParams();
-	
+
 	FString GetDeclaration_RPCParamStructNamespace();
 
 	FString GetDeclaration_RPCParamStructs();
@@ -152,7 +152,7 @@ public:
 
 protected:
 	const UClass* Target;
-	FString TargetActorName;
+	FString TargetActorCompilableName;
 	FString InstanceRefName;
 	FModuleInfo ModuleBelongTo;
 	TArray<TSharedPtr<FPropertyDecorator>> Properties;

@@ -5,18 +5,18 @@
 #include "GameFramework/GameStateBase.h"
 #include "ReplicatorTemplate/CppReplicatorTemplate.h"
 
-FReplicatedActorDecorator::FReplicatedActorDecorator(const UClass* TargetActorClass, const TFunction<FString()>& SetBPTargetRepName)
+FReplicatedActorDecorator::FReplicatedActorDecorator(const UClass* TargetActorClass, const TFunction<void(FString&, bool)>& SetCompilableName)
 {
 	Target = TargetActorClass;
 	bIsBlueprintGenerated = Target->HasAnyClassFlags(CLASS_CompiledFromBlueprint);
 
-	TargetActorName = Target->GetName();
-	if (bIsBlueprintGenerated)
+	TargetActorCompilableName = Target->GetName();
+	if (SetCompilableName != nullptr)
 	{
-		if (ChanneldReplicatorGeneratorUtils::IsCompilableClassName(TargetActorName))
-		{
-			TargetActorName = SetBPTargetRepName();
-		}
+		SetCompilableName(
+			TargetActorCompilableName,
+			bIsBlueprintGenerated ? ChanneldReplicatorGeneratorUtils::IsCompilableClassName(TargetActorCompilableName) : true
+		);
 	}
 }
 
@@ -82,7 +82,7 @@ void FReplicatedActorDecorator::Init(const FModuleInfo& InModuleBelongTo)
 
 FString FReplicatedActorDecorator::GetActorName()
 {
-	return TargetActorName;
+	return TargetActorCompilableName;
 }
 
 FString FReplicatedActorDecorator::GetOriginActorName()

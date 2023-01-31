@@ -31,7 +31,7 @@ bool FRPCDecorator::Init(const TFunction<FString()>& SetNameForIllegalPropName)
 	}
 
 	CompilablePropName = OriginalFunction->GetName();
-	if (ChanneldReplicatorGeneratorUtils::IsCompilableClassName(CompilablePropName))
+	if (!ChanneldReplicatorGeneratorUtils::IsCompilableClassName(CompilablePropName))
 	{
 		CompilablePropName = *SetNameForIllegalPropName();
 	}

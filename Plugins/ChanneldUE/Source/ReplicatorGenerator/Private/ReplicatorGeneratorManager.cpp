@@ -1,6 +1,7 @@
 ﻿#include "ReplicatorGeneratorManager.h"
 
 #include "ReplicatorGeneratorDefinition.h"
+#include "ReplicatorGeneratorUtils.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/AssetManager.h"
 #include "Engine/SCS_Node.h"
@@ -17,7 +18,8 @@ DEFINE_LOG_CATEGORY(LogChanneldRepGenerator);
 FReplicatorGeneratorManager::FReplicatorGeneratorManager()
 {
 	CodeGenerator = new FReplicatorCodeGenerator();
-	DefaultModuleDirPath = GetDefaultModuleDir() / GenManager_GeneratedCodeDir;
+	ReplicatorStorageDir = ChanneldReplicatorGeneratorUtils::GetDefaultModuleDir() / GenManager_GeneratedCodeDir;
+	FPaths::NormalizeDirectoryName(ReplicatorStorageDir);
 }
 
 FReplicatorGeneratorManager::~FReplicatorGeneratorManager()
@@ -33,6 +35,11 @@ FReplicatorGeneratorManager& FReplicatorGeneratorManager::Get()
 {
 	static FReplicatorGeneratorManager Singleton;
 	return Singleton;
+}
+
+FString FReplicatorGeneratorManager::GetReplicatorStorageDir()
+{
+	return ReplicatorStorageDir;
 }
 
 bool FReplicatorGeneratorManager::HeaderFilesCanBeFound(UClass* TargetClass)
@@ -69,9 +76,9 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<UClass*> Targets)
 	// Generate replicator code file
 	for (FReplicatorCode& ReplicatorCode : ReplicatorCodeBundle.ReplicatorCodes)
 	{
-		WriteCodeFile(DefaultModuleDirPath / ReplicatorCode.HeadFileName, ReplicatorCode.HeadCode, WriteCodeFileMessage);
-		WriteCodeFile(DefaultModuleDirPath / ReplicatorCode.CppFileName, ReplicatorCode.CppCode, WriteCodeFileMessage);
-		WriteProtoFile(DefaultModuleDirPath / ReplicatorCode.ProtoFileName, ReplicatorCode.ProtoDefinitions, WriteCodeFileMessage);
+		WriteCodeFile(ReplicatorStorageDir / ReplicatorCode.HeadFileName, ReplicatorCode.HeadCode, WriteCodeFileMessage);
+		WriteCodeFile(ReplicatorStorageDir / ReplicatorCode.CppFileName, ReplicatorCode.CppCode, WriteCodeFileMessage);
+		WriteProtoFile(ReplicatorStorageDir / ReplicatorCode.ProtoFileName, ReplicatorCode.ProtoDefinitions, WriteCodeFileMessage);
 		UE_LOG(
 			LogChanneldRepGenerator,
 			Verbose,
@@ -84,12 +91,12 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<UClass*> Targets)
 		);
 	}
 	// Generate replicator register code file
-	WriteCodeFile(DefaultModuleDirPath / GenManager_RepRegisterFile, ReplicatorCodeBundle.RegisterReplicatorFileCode, WriteCodeFileMessage);
+	WriteCodeFile(ReplicatorStorageDir / GenManager_RepRegisterFile, ReplicatorCodeBundle.RegisterReplicatorFileCode, WriteCodeFileMessage);
 
 	// Generate global struct declarations file
-	WriteCodeFile(DefaultModuleDirPath / GenManager_GlobalStructHeaderFile, ReplicatorCodeBundle.GlobalStructCodes, WriteCodeFileMessage);
+	WriteCodeFile(ReplicatorStorageDir / GenManager_GlobalStructHeaderFile, ReplicatorCodeBundle.GlobalStructCodes, WriteCodeFileMessage);
 
-	WriteProtoFile(DefaultModuleDirPath / GenManager_GlobalStructProtoFile, ReplicatorCodeBundle.GlobalStructProtoDefinitions, WriteCodeFileMessage);
+	WriteProtoFile(ReplicatorStorageDir / GenManager_GlobalStructProtoFile, ReplicatorCodeBundle.GlobalStructProtoDefinitions, WriteCodeFileMessage);
 
 	UE_LOG(
 		LogChanneldRepGenerator,
@@ -122,70 +129,10 @@ bool FReplicatorGeneratorManager::WriteProtoFile(const FString& FilePath, const 
 	return bSuccess;
 }
 
-FString FReplicatorGeneratorManager::GetDefaultModuleDir()
-{
-	TArray<FString> FoundModuleBuildFilePaths;
-	IFileManager::Get().FindFilesRecursive(
-		FoundModuleBuildFilePaths,
-		*FPaths::GameSourceDir(),
-		TEXT("*.Build.cs"),
-		true, false, false
-	);
-
-	// Find all module build file under game source dir
-	TMap<FString, FString> ModuleBuildFilePathMapping;
-	TMap<FString, int32> ModulePathDepthMapping;
-	for (FString BuildFilePath : FoundModuleBuildFilePaths)
-	{
-		FString ModuleBaseName = FPaths::GetCleanFilename(BuildFilePath);
-		// Remove the extension
-		const int32 ExtPos = ModuleBaseName.Find(TEXT("."), ESearchCase::CaseSensitive);
-		if (ExtPos != INDEX_NONE)
-		{
-			ModuleBaseName.LeftInline(ExtPos);
-		}
-		ModuleBuildFilePathMapping.Add(ModuleBaseName, BuildFilePath);
-
-		// Get parent dir count of the module
-		int32 ModulePathDepth = 0;
-		TCHAR* Start = const_cast<TCHAR*>(*BuildFilePath);
-		for (TCHAR* Data = Start + BuildFilePath.Len(); Data != Start;)
-		{
-			--Data;
-			if (*Data == TEXT('/') || *Data == TEXT('\\'))
-			{
-				++ModulePathDepth;
-			}
-		}
-		ModulePathDepthMapping.Add(ModuleBaseName, ModulePathDepth);
-	}
-
-	// If a module is not included in .uproject->Modules, the module will be unavailable at runtime.
-	// Modules will be available at runtime when they were registered to FModuleManager.
-	TArray<FModuleStatus> ModuleStatuses;
-	FModuleManager::Get().QueryModules(ModuleStatuses);
-	FString DefaultModuleDir;
-	int32 MinimalPathDepth = INT32_MAX;
-	for (FModuleStatus ModuleStatus : ModuleStatuses)
-	{
-		if (ModuleBuildFilePathMapping.Contains(ModuleStatus.Name))
-		{
-			// Get the 1st minimal path depth module in FModuleManager as the default module
-			const int32 Depth = ModulePathDepthMapping.FindChecked(ModuleStatus.Name);
-			if (Depth < MinimalPathDepth)
-			{
-				DefaultModuleDir = FPaths::GetPath(ModuleBuildFilePathMapping.FindChecked(ModuleStatus.Name));
-				MinimalPathDepth = Depth;
-			}
-		}
-	}
-	return DefaultModuleDir;
-}
-
-TArray<FString> FReplicatorGeneratorManager::GetGeneratedTargetClass()
+TArray<FString> FReplicatorGeneratorManager::GetGeneratedTargetClasses()
 {
 	TArray<FString> HeadFiles;
-	IFileManager::Get().FindFiles(HeadFiles, *DefaultModuleDirPath, *CodeGen_HeadFileExtension);
+	IFileManager::Get().FindFiles(HeadFiles, *ReplicatorStorageDir, *CodeGen_HeadFileExtension);
 
 	TArray<FString> Result;
 	for (const FString& HeadFile : HeadFiles)
@@ -199,6 +146,13 @@ TArray<FString> FReplicatorGeneratorManager::GetGeneratedTargetClass()
 		}
 	}
 	return Result;
+}
+
+TArray<FString> FReplicatorGeneratorManager::GetGeneratedProtoFiles()
+{
+	TArray<FString> AllCodeFiles;
+	IFileManager::Get().FindFiles(AllCodeFiles, *ReplicatorStorageDir, *CodeGen_ProtoFileExtension);
+	return AllCodeFiles;
 }
 
 void FReplicatorGeneratorManager::RemoveGeneratedReplicator(const FString& ClassName)
@@ -222,10 +176,10 @@ void FReplicatorGeneratorManager::RemoveGeneratedReplicators(const TArray<FStrin
 void FReplicatorGeneratorManager::RemoveGeneratedCode()
 {
 	TArray<FString> AllCodeFiles;
-	IFileManager::Get().FindFiles(AllCodeFiles, *DefaultModuleDirPath);
+	IFileManager::Get().FindFiles(AllCodeFiles, *ReplicatorStorageDir);
 	for (const FString& FilePath : AllCodeFiles)
 	{
-		IFileManager::Get().Delete(*(DefaultModuleDirPath / FilePath));
+		IFileManager::Get().Delete(*(ReplicatorStorageDir / FilePath));
 	}
 }
 
@@ -280,11 +234,4 @@ void FReplicatorGeneratorManager::SavePrevCodeGeneratedInfo(const FPrevCodeGener
 		return;
 	}
 	Success = true;
-}
-
-TArray<FString> FReplicatorGeneratorManager::GetAllGeneratedProtoFilePath()
-{
-	TArray<FString> AllCodeFiles;
-	IFileManager::Get().FindFiles(AllCodeFiles, *DefaultModuleDirPath, *CodeGen_ProtoFileExtension);
-	return AllCodeFiles;
 }

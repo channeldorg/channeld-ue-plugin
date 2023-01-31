@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
 
 class FChanneldProcWorkerThread;
 class UChanneldMissionNotiProxy;
@@ -9,6 +8,8 @@ class FToolBarBuilder;
 class FMenuBuilder;
 class SWidget;
 class FUICommandList;
+
+DECLARE_LOG_CATEGORY_EXTERN(LogChanneldEditor, Log, All);
 
 class FChanneldEditorModule : public IModuleInterface
 {
@@ -31,10 +32,17 @@ private:
 	void GenerateReplicatorAction();
 	void AddRepCompToBPAction();
 
+	void GenReplicatorProto(FChanneldProcWorkerThread* ProcWorker);
+
 	TSharedPtr<class FUICommandList> PluginCommands;
 	TSharedRef<SWidget> CreateMenuContent(TSharedPtr<FUICommandList> Commands);
 	TArray<FProcHandle> ServerProcHandles;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenRepWorkThread;
+	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoWorkThread;
 	UChanneldMissionNotiProxy* GenRepMissionNotifyProxy;
+
+	mutable TSharedPtr<FChanneldProcWorkerThread> AddRepCompWorkThread;
+	UChanneldMissionNotiProxy* AddRepCompMissionNotifyProxy;
+
 };

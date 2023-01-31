@@ -16,13 +16,16 @@ class REPLICATORGENERATOR_API FReplicatorGeneratorManager
 protected:
 	FReplicatorCodeGenerator* CodeGenerator;
 
-	FString DefaultModuleDirPath;
+	FString ReplicatorStorageDir;
 
 public:
+
 	FReplicatorGeneratorManager();
 	~FReplicatorGeneratorManager();
 
 	static FReplicatorGeneratorManager& Get();
+	
+	FString GetReplicatorStorageDir();
 
 	bool HeaderFilesCanBeFound(UClass* TargetClass);
 
@@ -37,12 +40,9 @@ public:
 
 	bool WriteProtoFile(const FString& FilePath, const FString& ProtoContent, FString& ResultMessage);
 
-	/**
-	 * Get absolute dir path of default game module
-	 */
-	FString GetDefaultModuleDir();
+	TArray<FString> GetGeneratedTargetClasses();
 
-	TArray<FString> GetGeneratedTargetClass();
+	TArray<FString> GetGeneratedProtoFiles();
 
 	void RemoveGeneratedReplicator(const FString& ClassName);
 
@@ -53,10 +53,6 @@ public:
 	FPrevCodeGeneratedInfo LoadPrevCodeGeneratedInfo(const FString& Filename, bool& Success);
 
 	void SavePrevCodeGeneratedInfo(const FPrevCodeGeneratedInfo& Info, const FString& Filename, bool& Success);
-
-	TArray<FString> GetAllGeneratedProtoFilePath();
-
-	void AddComponentToActorBlueprint(UClass* CompClass, FName CompName);
 
 private:
 	

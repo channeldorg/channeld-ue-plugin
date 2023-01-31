@@ -41,6 +41,10 @@ FString FReplicatorCodeGenerator::GetClassHeadFilePath(const FString& ClassName)
 
 bool FReplicatorCodeGenerator::Generate(TArray<UClass*> TargetActors, FReplicatorCodeBundle& ReplicatorCodeBundle)
 {
+	// Clean global variables
+	IllegalClassNameIndex = 0;
+	TargetActorSameNameCounter.Empty(TargetActors.Num());
+
 	FString Message, IncludeCode, RegisterCode;
 	for (UClass* TargetActor : TargetActors)
 	{
@@ -79,13 +83,27 @@ bool FReplicatorCodeGenerator::Generate(TArray<UClass*> TargetActors, FReplicato
 
 bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicatorCode& ReplicatorCode, FString& ResultMessage)
 {
-	int32 IllegalClassNameIndex = 0;
 	const TSharedPtr<FReplicatedActorDecorator> Target = MakeShareable(
 		new FReplicatedActorDecorator(
 			TargetActor,
-			[&IllegalClassNameIndex]()
+			[this](FString& TargetActorName, bool IsActorNameCompilable)
 			{
-				return FString::Printf(TEXT("_IllegalNameClass_%d_"), ++IllegalClassNameIndex);
+				if (!IsActorNameCompilable)
+				{
+					TargetActorName = FString::Printf(TEXT("_IllegalNameClass_%d_"), ++IllegalClassNameIndex);
+				}
+				else
+				{
+					int32* SameNameCount;
+					if ((SameNameCount = TargetActorSameNameCounter.Find(TargetActorName)) != nullptr)
+					{
+						TargetActorName = FString::Printf(TEXT("%s_%d"), *TargetActorName, (*SameNameCount)++);
+					}
+					else
+					{
+						TargetActorSameNameCounter.Add(TargetActorName, 1);
+					}
+				}
 			}
 		)
 	);

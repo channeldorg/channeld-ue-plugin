@@ -20,16 +20,61 @@ void UChanneldMissionNotiProxy::SetMissionName(FName NewMissionName)
 }
 
 void UChanneldMissionNotiProxy::SetMissionNotifyText(const FText& RunningText, const FText& CancelText,
-    const FText& SuccessedText, const FText& FaildText)
+    const FText& SucceedText, const FText& FailedText)
 {
 	// running
 	RunningNotifyText = RunningText; // LOCTEXT("CookNotificationInProgress", "Cook in progress");
 	// running cancel
-	RunningNofityCancelText = CancelText; // LOCTEXT("RunningCookNotificationCancelButton", "Cancel");
-	// mission successed
-	MissionSuccessedNotifyText = SuccessedText; // LOCTEXT("CookSuccessedNotification", "Cook Finished!");
+	RunningNotifyCancelText = CancelText; // LOCTEXT("RunningCookNotificationCancelButton", "Cancel");
+	// mission succeed
+	MissionSucceedNotifyText = SucceedText; // LOCTEXT("CookSuccessedNotification", "Cook Finished!");
 	// mission failed
-	MissionFailedNotifyText = FaildText; // LOCTEXT("CookFaildNotification", "Cook Faild!");
+	MissionFailedNotifyText = FailedText; // LOCTEXT("CookFaildNotification", "Cook Faild!");
+}
+
+FText UChanneldMissionNotiProxy::GetRunningNotifyText() const
+{
+	return RunningNotifyText;
+}
+
+void UChanneldMissionNotiProxy::SetRunningNotifyText(const FText& InRunningNotifyText)
+{
+	this->RunningNotifyText = InRunningNotifyText;
+}
+
+FText UChanneldMissionNotiProxy::GetRunningNotifyCancelText() const
+{
+	return RunningNotifyCancelText;
+}
+
+void UChanneldMissionNotiProxy::SetRunningNotifyCancelText(const FText& InRunningNotifyCancelText)
+{
+	this->RunningNotifyCancelText = InRunningNotifyCancelText;
+}
+
+FText UChanneldMissionNotiProxy::GetMissionSucceedNotifyText() const
+{
+	return MissionSucceedNotifyText;
+}
+
+void UChanneldMissionNotiProxy::SetMissionSucceedNotifyText(const FText& InMissionSucceedNotifyText)
+{
+	this->MissionSucceedNotifyText = InMissionSucceedNotifyText;
+}
+
+FText UChanneldMissionNotiProxy::GetMissionFailedNotifyText() const
+{
+	return MissionFailedNotifyText;
+}
+
+void UChanneldMissionNotiProxy::SetMissionFailedNotifyText(const FText& InMissionFailedNotifyText)
+{
+	this->MissionFailedNotifyText = InMissionFailedNotifyText;
+}
+
+FName UChanneldMissionNotiProxy::GetMissionName() const
+{
+	return MissionName;
 }
 
 void UChanneldMissionNotiProxy::ReceiveOutputMsg(FChanneldProcWorkerThread* Worker,const FString& InMsg)
@@ -51,7 +96,7 @@ void UChanneldMissionNotiProxy::ReceiveOutputMsg(FChanneldProcWorkerThread* Work
 	}
 }
 
-void UChanneldMissionNotiProxy::SpawnRuningMissionNotification(FChanneldProcWorkerThread* ProcWorker)
+void UChanneldMissionNotiProxy::SpawnRunningMissionNotification(FChanneldProcWorkerThread* ProcWorker)
 {
 	UChanneldMissionNotiProxy* MissionProxy=this;
 	AsyncTask(ENamedThreads::GameThread, [MissionProxy]()
@@ -65,7 +110,7 @@ void UChanneldMissionNotiProxy::SpawnRuningMissionNotification(FChanneldProcWork
         Info.bFireAndForget = false;
 		Info.Hyperlink = FSimpleDelegate::CreateStatic([](){ FGlobalTabmanager::Get()->InvokeTab(FName("OutputLog")); });
         Info.HyperlinkText = LOCTEXT("ShowOutputLogHyperlink", "Show Output Log");
-        Info.ButtonDetails.Add(FNotificationButtonInfo(MissionProxy->RunningNofityCancelText, FText(),
+        Info.ButtonDetails.Add(FNotificationButtonInfo(MissionProxy->RunningNotifyCancelText, FText(),
             FSimpleDelegate::CreateLambda([MissionProxy]() {MissionProxy->CancelMission(); }),
             SNotificationItem::CS_Pending
         ));
@@ -77,7 +122,7 @@ void UChanneldMissionNotiProxy::SpawnRuningMissionNotification(FChanneldProcWork
     });
 }
 
-void UChanneldMissionNotiProxy::SpawnMissionSuccessedNotification(FChanneldProcWorkerThread* ProcWorker)
+void UChanneldMissionNotiProxy::SpawnMissionSucceedNotification(FChanneldProcWorkerThread* ProcWorker)
 {
 	UChanneldMissionNotiProxy* MissionProxy=this;
 	AsyncTask(ENamedThreads::GameThread, [MissionProxy]() {
@@ -85,7 +130,7 @@ void UChanneldMissionNotiProxy::SpawnMissionSuccessedNotification(FChanneldProcW
 
         if (NotificationItem.IsValid())
         {
-            NotificationItem->SetText(MissionProxy->MissionSuccessedNotifyText);
+            NotificationItem->SetText(MissionProxy->MissionSucceedNotifyText);
             NotificationItem->SetCompletionState(SNotificationItem::CS_Success);
             NotificationItem->ExpireAndFadeout();
 
@@ -97,7 +142,7 @@ void UChanneldMissionNotiProxy::SpawnMissionSuccessedNotification(FChanneldProcW
 	});
 }
 
-void UChanneldMissionNotiProxy::SpawnMissionFaildNotification(FChanneldProcWorkerThread* ProcWorker)
+void UChanneldMissionNotiProxy::SpawnMissionFailedNotification(FChanneldProcWorkerThread* ProcWorker)
 {
 	UChanneldMissionNotiProxy* MissionProxy = this;
 	AsyncTask(ENamedThreads::GameThread, [MissionProxy]() {
@@ -121,7 +166,5 @@ void UChanneldMissionNotiProxy::CancelMission()
 {
 	MissionCanceled.Broadcast();
 }
-
-
 
 #undef LOCTEXT_NAMESPACE

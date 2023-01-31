@@ -13,7 +13,7 @@ class FChanneldProcWorkerThread : public FChanneldThreadWorker
 {
 public:
 	explicit FChanneldProcWorkerThread(const TCHAR *InThreadName,const FString& InProgramPath,const FString& InParams)
-		: FChanneldThreadWorker(InThreadName, []() {}), mProgramPath(InProgramPath), mPragramParams(InParams)
+		: FChanneldThreadWorker(InThreadName, []() {}), mProgramPath(InProgramPath), mProgramParams(InParams)
 	{}
 
 	virtual uint32 Run()override
@@ -23,7 +23,7 @@ public:
 			FPlatformProcess::CreatePipe(mReadPipe, mWritePipe);
 			// std::cout << TCHAR_TO_ANSI(*mProgramPath) << " " << TCHAR_TO_ANSI(*mPragramParams) << std::endl;
 
-			mProcessHandle = FPlatformProcess::CreateProc(*mProgramPath, *mPragramParams, false, true, true, &mProcessID, 1, NULL, mWritePipe,mReadPipe);
+			mProcessHandle = FPlatformProcess::CreateProc(*mProgramPath, *mProgramParams, false, true, true, &mProcessID, 1, NULL, mWritePipe,mReadPipe);
 			if (mProcessHandle.IsValid() && FPlatformProcess::IsApplicationRunning(mProcessID))
 			{
 				if (ProcBeginDelegate.IsBound())
@@ -62,19 +62,19 @@ public:
 			{
 				if (ProcReturnCode == 0)
 				{
-					if(ProcSuccessedDelegate.IsBound())
-						ProcSuccessedDelegate.Broadcast(this);
+					if(ProcSucceedDelegate.IsBound())
+						ProcSucceedDelegate.Broadcast(this);
 				}
 				else
 				{
-					if (ProcFaildDelegate.IsBound())
-						ProcFaildDelegate.Broadcast(this);
+					if (ProcFailedDelegate.IsBound())
+						ProcFailedDelegate.Broadcast(this);
 				}
 			}
 			else
 			{
-				if (ProcFaildDelegate.IsBound())
-					ProcFaildDelegate.Broadcast(this);
+				if (ProcFailedDelegate.IsBound())
+					ProcFailedDelegate.Broadcast(this);
 
 			}
 			
@@ -100,8 +100,8 @@ public:
 		{
 			FPlatformProcess::TerminateProc(mProcessHandle, true);
 
-			if (ProcFaildDelegate.IsBound())
-				ProcFaildDelegate.Broadcast(this);
+			if (ProcFailedDelegate.IsBound())
+				ProcFailedDelegate.Broadcast(this);
 			mProcessHandle.Reset();
 			mProcessID = 0;
 		}
@@ -110,19 +110,19 @@ public:
 			CancelDelegate.Broadcast();
 	}
 
-	virtual uint32 GetProcesId()const { return mProcessID; }
+	virtual uint32 GetProcessId()const { return mProcessID; }
 	virtual FProcHandle GetProcessHandle()const { return mProcessHandle; }
 
 public:
 	FProcStatusDelegate ProcBeginDelegate;
-	FProcStatusDelegate ProcSuccessedDelegate;
-	FProcStatusDelegate ProcFaildDelegate;
+	FProcStatusDelegate ProcSucceedDelegate;
+	FProcStatusDelegate ProcFailedDelegate;
 	FOutputMsgDelegate ProcOutputMsgDelegate;
 
 private:
 	FRunnableThread* mThread;
 	FString mProgramPath;
-	FString mPragramParams;
+	FString mProgramParams;
 	void* mReadPipe;
 	void* mWritePipe;
 	uint32 mProcessID;
