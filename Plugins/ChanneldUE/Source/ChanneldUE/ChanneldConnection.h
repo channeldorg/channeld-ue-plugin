@@ -107,6 +107,11 @@ public:
 	void SendRaw(ChannelId ChId, uint32 MsgType, const std::string& MsgBody, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const FChanneldMessageHandlerFunc& HandlerFunc = nullptr);
 	// Send a message that wrapped by the ServerForwardMessage. This is mainly for using channeld for broadcasting.
 	void Broadcast(ChannelId ChId, uint32 MsgType, const google::protobuf::Message& Msg, int BroadcastType);
+	/**
+	 * @brief Server sends a DisconnectMessage for safe disconnection. The message skips queueing and will be sent immediately.
+	 * @param InConnId The Id of the Connection to be disconnected
+	 */
+	void SendDisconnectMessage(ConnectionId InConnId);
 	
 	void Auth(const FString& PIT, const FString& LT, const TFunction<void(const channeldpb::AuthResultMessage*)>& Callback = nullptr);
 	void CreateChannel(channeldpb::ChannelType ChannelType, const FString& Metadata, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const google::protobuf::Message* Data = nullptr, const channeldpb::ChannelDataMergeOptions* MergeOptions = nullptr, const TFunction<void(const channeldpb::CreateChannelResultMessage*)>& Callback = nullptr);
@@ -143,6 +148,8 @@ public:
 	TMap<ChannelId, FListedChannelInfo> ListedChannels;
 
 private:
+	const uint32 HeaderSize = 5;
+
 	channeldpb::ConnectionType ConnectionType = channeldpb::NO_CONNECTION;
 	channeldpb::CompressionType CompressionType = channeldpb::NO_COMPRESSION;
 	ConnectionId ConnId = 0;
@@ -152,7 +159,7 @@ private:
 	FThreadSafeBool bReceiveThreadRunning = false;
 	FRunnableThread* ReceiveThread = nullptr;
 	uint8* ReceiveBuffer;
-	int ReceiveBufferOffset;
+	uint32 ReceiveBufferOffset;
 
 	struct MessageHandlerEntry
 	{
@@ -177,6 +184,7 @@ private:
 	TQueue<TSharedPtr<channeldpb::MessagePack>> OutgoingQueue;
 	TMap<uint32, FChanneldMessageHandlerFunc> RpcCallbacks;
 
+	void SendDirect(channeldpb::Packet Packet);
 	void Receive();
 	void OnDisconnected();
 

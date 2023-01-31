@@ -153,6 +153,24 @@ void UChanneldConnection::OnDisconnected()
 	ListedChannels.Empty();
 }
 
+void UChanneldConnection::SendDisconnectMessage(ConnectionId InConnId)
+{
+	channeldpb::Packet Packet;
+	channeldpb::MessagePack MsgPack;
+
+	channeldpb::DisconnectMessage DisconnectMsg;
+	DisconnectMsg.set_connid(InConnId);
+	
+	MsgPack.set_channelid(GlobalChannelId);
+	MsgPack.set_broadcast(channeldpb::NO_BROADCAST);
+	MsgPack.set_stubid(0);
+	MsgPack.set_msgtype(channeldpb::DISCONNECT);
+	MsgPack.set_msgbody(DisconnectMsg.SerializeAsString());
+	
+	Packet.add_messages()->CopyFrom(MsgPack);
+	SendDirect(Packet);
+}
+
 void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 {
 	if (!IsConnected())
@@ -187,7 +205,7 @@ void UChanneldConnection::Receive()
 	if (Socket->Recv(ReceiveBuffer + ReceiveBufferOffset, ReceiveBufferSize, BytesRead, ESocketReceiveFlags::None))
 	{
 		ReceiveBufferOffset += BytesRead;
-		if (ReceiveBufferOffset < 5)
+		if (ReceiveBufferOffset < HeaderSize)
 		{
 			// Unfinished packet
 			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet header: %d"), BytesRead);
@@ -205,16 +223,16 @@ void UChanneldConnection::Receive()
 			return;
 		}
 
-		int32 PacketSize = ReceiveBuffer[3];
+		uint32 PacketSize = ReceiveBuffer[3];
 		if (ReceiveBuffer[1] != 72)
 			PacketSize = PacketSize | (ReceiveBuffer[1] << 16) | (ReceiveBuffer[2] << 8);
 		else if (ReceiveBuffer[2] != 78)
 			PacketSize = PacketSize | (ReceiveBuffer[2] << 8);
 		
-		if (ReceiveBufferOffset < 5 + PacketSize)
+		if (ReceiveBufferOffset < HeaderSize + PacketSize)
 		{
 			// Unfinished packet
-			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet body, read: %d, pos: %d/%d"), BytesRead, ReceiveBufferOffset, 5 + PacketSize);
+			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet body, read: %d, pos: %d/%d"), BytesRead, ReceiveBufferOffset, HeaderSize + PacketSize);
 			UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
 			Metrics->AddConnTypeLabel(*Metrics->UnfinishedPacket).Increment();
 			return;
@@ -223,7 +241,7 @@ void UChanneldConnection::Receive()
 		// TODO: support Snappy compression
 
 		channeldpb::Packet Packet;
-		if (!Packet.ParseFromArray(ReceiveBuffer + 5, PacketSize))
+		if (!Packet.ParseFromArray(ReceiveBuffer + HeaderSize, PacketSize))
 		{
 			ReceiveBufferOffset = 0;
 			UE_LOG(LogChanneld, Error, TEXT("UChanneldConnection::Receive: Failed to parse packet, size: %d"), PacketSize);
@@ -395,7 +413,6 @@ void UChanneldConnection::TickOutgoing()
 	if (OutgoingQueue.IsEmpty())
 		return;
 
-	const uint32 HeaderSize = 5;
 	channeldpb::Packet Packet;
 	uint32 Size = HeaderSize;
 	TSharedPtr<channeldpb::MessagePack> MessagePack;
@@ -407,11 +424,16 @@ void UChanneldConnection::TickOutgoing()
 		Packet.add_messages()->CopyFrom(*MessagePack);
 	}
 
-	int PacketSize = Packet.ByteSizeLong();
-	Size = PacketSize + HeaderSize;
+	SendDirect(Packet);
+}
+
+void UChanneldConnection::SendDirect(channeldpb::Packet Packet)
+{
+	uint32 PacketSize = Packet.ByteSizeLong();
+	uint32 Size = HeaderSize + PacketSize;
 	// TODO: Use a send buffer for all transmissions instead of temp buffer for each transmission
 	uint8* PacketData = new uint8[Size];
-	if (!Packet.SerializeToArray(PacketData + 5, Size))
+	if (!Packet.SerializeToArray(PacketData + HeaderSize, Size))
 	{
 		Packet.Clear();
 		delete[] PacketData;
