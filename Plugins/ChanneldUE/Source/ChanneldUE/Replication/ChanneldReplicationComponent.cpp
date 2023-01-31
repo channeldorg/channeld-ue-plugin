@@ -271,7 +271,13 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 				}
 				continue;
 			}
+			TargetObj->PreNetReceive();
 			Replicator->OnStateChanged(State);
+			TargetObj = Replicator->GetTargetObject();
+			if (TargetObj)
+			{
+				TargetObj->PostNetReceive();
+			}
 		}
 	}
 }

@@ -16,7 +16,7 @@ UChanneldNetConnection::UChanneldNetConnection(const FObjectInitializer& ObjectI
 	:Super(ObjectInitializer)
 {
 	//MaxPacket = MaxPacketSize;
-	if (GetMutableDefault<UChanneldSettings>()->bDisableHandshaking)
+	if (GetMutableDefault<UChanneldSettings>()->bSetInternalAck)
 	{
 		SetInternalAck(true);
 		SetReplay(false);

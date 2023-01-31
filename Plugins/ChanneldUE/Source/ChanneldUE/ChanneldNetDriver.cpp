@@ -533,7 +533,14 @@ void UChanneldNetDriver::LowLevelSend(TSharedPtr<const FInternetAddr> Address, v
 		if (ConnToChanneld->IsServer())
 		{
 			ConnectionId ClientConnId = AddrToConnId(*Address);
-			ClientConnectionMap[ClientConnId]->SendData(unrealpb::LOW_LEVEL, DataToSend, DataSize);
+			if (auto Conn = ClientConnectionMap.FindRef(ClientConnId))
+			{
+				Conn->SendData(unrealpb::LOW_LEVEL, DataToSend, DataSize);
+			}
+			else
+			{
+				UE_LOG(LogChanneld, Log, TEXT("[Server] Failed to LowLevelSend to client %d"), ClientConnId);
+			}
 		}
 		else
 		{

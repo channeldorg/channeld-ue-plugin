@@ -193,9 +193,7 @@ void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provide
 		for (auto Itr = SavedUpdates->CreateIterator(); Itr; ++Itr)
 		{
 			auto UpdateData = *Itr;
-			Provider->GetTargetObject()->PreNetReceive();
 			Provider->OnChannelDataUpdated(UpdateData);
-			Provider->GetTargetObject()->PostNetReceive();
 			Itr.RemoveCurrent();
 			delete UpdateData;
 		}
@@ -792,11 +790,13 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	TSet<FProviderInternal>* Providers = ChannelDataProviders.Find(ChId);
 	if (Providers == nullptr || Providers->Num() == 0)
 	{
-		UE_LOG(LogChanneld, Log, TEXT("No provider registered for channel %d, typeUrl: %s. The update will be saved."), ChId, UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
-		
+		UE_LOG(LogChanneld, Log, TEXT("No provider registered for channel %d, typeUrl: %s. The update will not be applied."), ChId, UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
+
+		/* Saving the update data with removed=true can caused the provider gets destroyed immediately after AddProvider.
 		auto UnprocessedUpdateData = UpdateData->New();
 		UnprocessedUpdateData->CopyFrom(*UpdateData);
 		UnprocessedUpdateDataInChannels.FindOrAdd(ChId).Add(UnprocessedUpdateData);
+		*/
 		
 		return;
 	}
@@ -809,9 +809,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	{
 		if (Provider.IsValid() && !Provider->IsRemoved())
 		{
-			Provider->GetTargetObject()->PreNetReceive();
 			Provider->OnChannelDataUpdated(UpdateData);
-			Provider->GetTargetObject()->PostNetReceive();
 			bConsumed = true;
 		}
 	}
