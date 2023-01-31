@@ -154,6 +154,9 @@ protected:
 	// Reuse the message objects to 1) decrease the memory footprint; 2) save the data for the next update if no state is consumed.
 	TMap<ChannelId, google::protobuf::Message*> ReceivedUpdateDataInChannels;
 
+	// Received ChannelUpdateData that don't have any provider to consume. Will be consumed as soon as a provider is added to the channel.
+	TMap<ChannelId, TArray<google::protobuf::Message*>> UnprocessedUpdateDataInChannels;
+
 	// The spawned object's NetGUID mapping to the ID of the channel that owns the object.
 	TMap<const FNetworkGUID, ChannelId> NetIdOwningChannels;
 

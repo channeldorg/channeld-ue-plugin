@@ -185,6 +185,21 @@ void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provide
 	ChannelDataProviders[ChId] = Providers;
 	
 	Provider->OnAddedToChannel(ChId);
+
+	if (auto SavedUpdates = UnprocessedUpdateDataInChannels.Find(ChId))
+	{
+		UE_LOG(LogChanneld, Verbose, TEXT("Consuming %d saved ChannelDataUpdate(s) in channel %d"), SavedUpdates->Num(), ChId);
+
+		for (auto Itr = SavedUpdates->CreateIterator(); Itr; ++Itr)
+		{
+			auto UpdateData = *Itr;
+			Provider->GetTargetObject()->PreNetReceive();
+			Provider->OnChannelDataUpdated(UpdateData);
+			Provider->GetTargetObject()->PostNetReceive();
+			Itr.RemoveCurrent();
+			delete UpdateData;
+		}
+	}
 }
 
 void UChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* Provider)
@@ -777,7 +792,12 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	TSet<FProviderInternal>* Providers = ChannelDataProviders.Find(ChId);
 	if (Providers == nullptr || Providers->Num() == 0)
 	{
-		UE_LOG(LogChanneld, Warning, TEXT("No provider registered for channel %d, typeUrl: %s"), ChId, UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
+		UE_LOG(LogChanneld, Log, TEXT("No provider registered for channel %d, typeUrl: %s. The update will be saved."), ChId, UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
+		
+		auto UnprocessedUpdateData = UpdateData->New();
+		UnprocessedUpdateData->CopyFrom(*UpdateData);
+		UnprocessedUpdateDataInChannels.FindOrAdd(ChId).Add(UnprocessedUpdateData);
+		
 		return;
 	}
 
