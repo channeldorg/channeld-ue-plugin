@@ -1,6 +1,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Modules/ModuleManager.h"
+#include "ChanneldEditorSettings.h"
+
+DECLARE_LOG_CATEGORY_CLASS(LogChanneldEditor, Log, All);
 
 class FChanneldProcWorkerThread;
 class UChanneldMissionNotiProxy;
@@ -8,8 +12,6 @@ class FToolBarBuilder;
 class FMenuBuilder;
 class SWidget;
 class FUICommandList;
-
-DECLARE_LOG_CATEGORY_EXTERN(LogChanneldEditor, Log, All);
 
 class FChanneldEditorModule : public IModuleInterface
 {
@@ -26,6 +28,7 @@ private:
 
 	void LaunchChanneldAction();
 	void StopChanneldAction();
+	FTimerManager* GetTimerManager();
 	void LaunchServersAction();
 	void StopServersAction();
 
@@ -34,6 +37,10 @@ private:
 
 	void GenReplicatorProto(FChanneldProcWorkerThread* ProcWorker);
 
+	void OpenEditorSettingsAction();
+	
+	void LaunchServerGroup(const FServerGroup& ServerGroup);
+	
 	TSharedPtr<class FUICommandList> PluginCommands;
 	TSharedRef<SWidget> CreateMenuContent(TSharedPtr<FUICommandList> Commands);
 	TArray<FProcHandle> ServerProcHandles;

@@ -1,6 +1,8 @@
 #include "ChanneldConnection.h"
 
 #include "ChanneldNetDriver.h"
+#include "ChanneldSettings.h"
+#include "Metrics.h"
 #include "SocketSubsystem.h"
 
 //DEFINE_LOG_CATEGORY(LogChanneld);
@@ -56,6 +58,14 @@ void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 		{
 			HandleChannelDataUpdate(Conn, ChId, Msg);
 		});
+	RegisterMessageHandler((uint32)channeldpb::CREATE_SPATIAL_CHANNEL, new channeldpb::CreateChannelResultMessage(), [&](UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+		{
+			HandleCreateSpatialChannel(Conn, ChId, Msg);
+		});	
+	RegisterMessageHandler(channeldpb::CREATE_SPATIAL_CHANNEL, new channeldpb::CreateSpatialChannelsResultMessage());
+	RegisterMessageHandler(channeldpb::QUERY_SPATIAL_CHANNEL, new channeldpb::QuerySpatialChannelResultMessage());
+	RegisterMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, new channeldpb::ChannelDataHandoverMessage());
+	RegisterMessageHandler(channeldpb::SPATIAL_REGIONS_UPDATE, new channeldpb::SpatialRegionsUpdateMessage());
 }
 
 void UChanneldConnection::Deinitialize()
@@ -111,10 +121,13 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int32
 		return false;
 	}
 
-	if (!ensure(StartReceiveThread()))
+	if (GetMutableDefault<UChanneldSettings>()->bUseReceiveThread)
 	{
-		Error = FString::Printf(TEXT("Start receive thread failed"));
-		return false;
+		if (!ensure(StartReceiveThread()))
+		{
+			Error = FString::Printf(TEXT("Start receive thread failed"));
+			return false;
+		}
 	}
 	return true;
 }
@@ -124,10 +137,13 @@ void UChanneldConnection::OnDisconnected()
 	ConnId = 0;
 	ConnectionType = channeldpb::NO_CONNECTION;
 	RemoteAddr = nullptr;
-
+		
+	ReceiveBufferOffset = 0;
 	IncomingQueue.Empty();
 	OutgoingQueue.Empty();
 	RpcCallbacks.Empty();
+	// StubId=0 is reserved.
+	RpcCallbacks.Add(0, nullptr);
 
 	OnAuthenticated.Clear();
 	OnUserSpaceMessageReceived.Clear();
@@ -145,7 +161,6 @@ void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 	if (bFlushAll)
 	{
 		TickOutgoing();
-		// TODO: Flush?
 	}
 
 	OnDisconnected();
@@ -175,6 +190,9 @@ void UChanneldConnection::Receive()
 		if (ReceiveBufferOffset < 5)
 		{
 			// Unfinished packet
+			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet header: %d"), BytesRead);
+			UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
+			Metrics->AddConnTypeLabel(*Metrics->UnfinishedPacket).Increment();
 			return;
 		}
 
@@ -182,6 +200,8 @@ void UChanneldConnection::Receive()
 		{
 			ReceiveBufferOffset = 0;
 			UE_LOG(LogChanneld, Error, TEXT("Invalid tag: %d, the packet will be dropped"), ReceiveBuffer[0]);
+			UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
+			Metrics->AddConnTypeLabel(*Metrics->DroppedPacket).Increment();
 			return;
 		}
 
@@ -190,10 +210,13 @@ void UChanneldConnection::Receive()
 			PacketSize = PacketSize | (ReceiveBuffer[1] << 16) | (ReceiveBuffer[2] << 8);
 		else if (ReceiveBuffer[2] != 78)
 			PacketSize = PacketSize | (ReceiveBuffer[2] << 8);
-
-		if (BytesRead < 5 + PacketSize)
+		
+		if (ReceiveBufferOffset < 5 + PacketSize)
 		{
 			// Unfinished packet
+			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet body, read: %d, pos: %d/%d"), BytesRead, ReceiveBufferOffset, 5 + PacketSize);
+			UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
+			Metrics->AddConnTypeLabel(*Metrics->UnfinishedPacket).Increment();
 			return;
 		}
 
@@ -203,7 +226,9 @@ void UChanneldConnection::Receive()
 		if (!Packet.ParseFromArray(ReceiveBuffer + 5, PacketSize))
 		{
 			ReceiveBufferOffset = 0;
-			UE_LOG(LogChanneld, Error, TEXT("Failed to parse packet"));
+			UE_LOG(LogChanneld, Error, TEXT("UChanneldConnection::Receive: Failed to parse packet, size: %d"), PacketSize);
+			UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
+			Metrics->AddConnTypeLabel(*Metrics->DroppedPacket).Increment();
 			return;
 		}
 
@@ -294,6 +319,8 @@ uint32 UChanneldConnection::Run()
 	while (bReceiveThreadRunning)
 	{
 		Receive();
+		// FPlatformProcess::Sleep(0.001f);
+		Socket->Wait(ESocketWaitConditions::WaitForRead, FTimespan::FromMilliseconds(10));
 	}
 	return 0;
 }
@@ -323,6 +350,11 @@ uint32 UChanneldConnection::AddRpcCallback(const FChanneldMessageHandlerFunc& Ha
 
 void UChanneldConnection::TickIncoming()
 {
+	if (!bReceiveThreadRunning)
+	{
+		Receive();
+	}
+	
 	MessageQueueEntry Entry;
 	while (IncomingQueue.Dequeue(Entry))
 	{
@@ -345,7 +377,7 @@ void UChanneldConnection::TickIncoming()
 			auto CallbackFunc = RpcCallbacks.Find(Entry.StubId);
 			if (CallbackFunc != nullptr)
 			{
-				UE_LOG(LogChanneld, Verbose, TEXT("Handling RPC callback of %s, stubId: %d"), UTF8_TO_TCHAR(Entry.Msg->GetTypeName().c_str()), Entry.StubId);
+				UE_LOG(LogChanneld, VeryVerbose, TEXT("Handling RPC callback of %s, stubId: %d"), UTF8_TO_TCHAR(Entry.Msg->GetTypeName().c_str()), Entry.StubId);
 				(*CallbackFunc)(this, Entry.ChId, Entry.Msg);
 				RpcCallbacks.Remove(Entry.StubId);
 			}
@@ -400,31 +432,21 @@ void UChanneldConnection::TickOutgoing()
 	// Free send buffer
 	Packet.Clear();
 	delete[] PacketData;
-	if (!IsSent)
+	if (!IsSent || BytesSent != Size)
 	{
-		UE_LOG(LogChanneld, Error, TEXT("Failed to send packet to channeld, size: %d"), Size);
+		UE_LOG(LogChanneld, Error, TEXT("Failed to send packet to channeld, sent/full size: %d/%d"), BytesSent, Size);
 	}
 }
 
 void UChanneldConnection::Send(ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast/* = channeldpb::NO_BROADCAST*/, const FChanneldMessageHandlerFunc& HandlerFunc/* = nullptr*/)
 {
-	// TODO: use a serialization buffer as the member variable
-	uint8* MessageData = new uint8[Msg.ByteSizeLong()];
-	bool Serialized = Msg.SerializeToArray(MessageData, Msg.GetCachedSize());
-	if (!Serialized)
-	{
-		delete[] MessageData;
-		UE_LOG(LogChanneld, Error, TEXT("Failed to serialize message, type: %d"), MsgType);
-		return;
-	}
-
-	SendRaw(ChId, MsgType, MessageData, Msg.GetCachedSize(), Broadcast, HandlerFunc);
+	SendRaw(ChId, MsgType, Msg.SerializeAsString(), Broadcast, HandlerFunc);
 
 	if (MsgType < channeldpb::USER_SPACE_START)
 		UE_LOG(LogChanneld, Verbose, TEXT("Send message %s to channel %d"), UTF8_TO_TCHAR(channeldpb::MessageType_Name((channeldpb::MessageType)MsgType).c_str()), ChId);
 }
 
-void UChanneldConnection::SendRaw(ChannelId ChId, uint32 MsgType, const uint8* MsgBody, const int32 BodySize, channeldpb::BroadcastType Broadcast /*= channeldpb::NO_BROADCAST*/, const FChanneldMessageHandlerFunc& HandlerFunc /*= nullptr*/)
+void UChanneldConnection::SendRaw(ChannelId ChId, uint32 MsgType, const std::string& MsgBody, channeldpb::BroadcastType Broadcast /*= channeldpb::NO_BROADCAST*/, const FChanneldMessageHandlerFunc& HandlerFunc /*= nullptr*/)
 {
 	uint32 StubId = HandlerFunc != nullptr ? AddRpcCallback(HandlerFunc) : 0;
 
@@ -433,7 +455,7 @@ void UChanneldConnection::SendRaw(ChannelId ChId, uint32 MsgType, const uint8* M
 	MsgPack->set_broadcast(Broadcast);
 	MsgPack->set_stubid(StubId);
 	MsgPack->set_msgtype(MsgType);
-	MsgPack->set_msgbody(MsgBody, BodySize);
+	MsgPack->set_msgbody(MsgBody);
 	OutgoingQueue.Enqueue(MsgPack);
 
 	/*
@@ -442,12 +464,19 @@ void UChanneldConnection::SendRaw(ChannelId ChId, uint32 MsgType, const uint8* M
 	MsgPack.set_broadcast(Broadcast);
 	MsgPack.set_stubid(StubId);
 	MsgPack.set_msgtype(MsgType);
-	MsgPack.set_msgbody(MsgBody, BodySize);
+	MsgPack.set_msgbody(MsgBody);
 	OutgoingQueue.Enqueue(MsgPack);
 	*/
 
 	if (MsgType >= channeldpb::USER_SPACE_START && bShowUserSpaceMessageLog)
-		UE_LOG(LogChanneld, Verbose, TEXT("Send user-space message to channel %d, stubId=%d, type=%d, bodySize=%d)"), ChId, StubId, MsgType, BodySize);
+		UE_LOG(LogChanneld, Verbose, TEXT("Send user-space message to channel %d, stubId=%d, type=%d, bodySize=%d)"), ChId, StubId, MsgType, MsgBody.size());
+}
+
+void UChanneldConnection::Broadcast(ChannelId ChId, uint32 MsgType, const google::protobuf::Message& Msg, int BroadcastType)
+{
+	channeldpb::ServerForwardMessage ServerForwardMessage;
+	ServerForwardMessage.set_payload(Msg.SerializeAsString());
+	Send(ChId, MsgType, ServerForwardMessage, static_cast<channeldpb::BroadcastType>(BroadcastType));
 }
 
 void UChanneldConnection::HandleServerForwardMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg, uint32 MsgType)
@@ -455,7 +484,7 @@ void UChanneldConnection::HandleServerForwardMessage(UChanneldConnection* Conn, 
 	auto UserSpaceMsg = static_cast<const channeldpb::ServerForwardMessage*>(Msg);
 	if (!OnUserSpaceMessageReceived.IsBound())
 	{
-		UE_LOG(LogChanneld, Warning, TEXT("No handler for user-space message, channelId=%d, client connId=%d"), ChId, UserSpaceMsg->clientconnid());
+		UE_LOG(LogChanneld, Warning, TEXT("No handler for user-space message %d, channelId=%d, client connId=%d"), MsgType, ChId, UserSpaceMsg->clientconnid());
 		return;
 	}
 	OnUserSpaceMessageReceived.Broadcast(MsgType, ChId, UserSpaceMsg->clientconnid(), UserSpaceMsg->payload());
@@ -485,6 +514,21 @@ void UChanneldConnection::CreateChannel(channeldpb::ChannelType ChannelType, con
 {
 	channeldpb::CreateChannelMessage Msg;
 	Msg.set_channeltype(ChannelType);
+	Msg.set_metadata(TCHAR_TO_UTF8(*Metadata));
+	if (SubOptions != nullptr)
+		Msg.mutable_suboptions()->MergeFrom(*SubOptions);
+	if (Data != nullptr)
+		Msg.mutable_data()->PackFrom(*Data);
+	if (MergeOptions != nullptr)
+		Msg.mutable_mergeoptions()->MergeFrom(*MergeOptions);
+
+	Send(GlobalChannelId, channeldpb::CREATE_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
+}
+
+void UChanneldConnection::CreateSpatialChannel(const FString& Metadata, const channeldpb::ChannelSubscriptionOptions* SubOptions /*= nullptr*/, const google::protobuf::Message* Data /*= nullptr*/, const channeldpb::ChannelDataMergeOptions* MergeOptions /*= nullptr*/, const TFunction<void(const channeldpb::CreateSpatialChannelsResultMessage*)>& Callback /*= nullptr*/)
+{
+	channeldpb::CreateChannelMessage Msg;
+	Msg.set_channeltype(channeldpb::SPATIAL);
 	Msg.set_metadata(TCHAR_TO_UTF8(*Metadata));
 	if (SubOptions != nullptr)
 		Msg.mutable_suboptions()->MergeFrom(*SubOptions);
@@ -543,6 +587,20 @@ void UChanneldConnection::UnsubConnectionFromChannel(ConnectionId TargetConnId, 
 	Msg.set_connid(TargetConnId);
 
 	Send(ChId, channeldpb::UNSUB_FROM_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
+}
+
+void UChanneldConnection::QuerySpatialChannel(const TArray<FVector>& Positions, const TFunction<void(const channeldpb::QuerySpatialChannelResultMessage*)>& Callback)
+{
+	channeldpb::QuerySpatialChannelMessage Msg;
+	for (auto& Pos : Positions)
+	{
+		channeldpb::SpatialInfo* SpatialInfo = Msg.add_spatialinfo();
+		// Swap the Y and Z as UE uses the Z-Up rule but channeld uses the Y-up rule.
+		SpatialInfo->set_x(Pos.X);
+		SpatialInfo->set_y(Pos.Z);
+		SpatialInfo->set_z(Pos.Y);
+	}
+	Send(GlobalChannelId, channeldpb::QUERY_SPATIAL_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
 void UChanneldConnection::HandleAuth(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
@@ -623,9 +681,9 @@ void UChanneldConnection::HandleSubToChannel(UChanneldConnection* Conn, ChannelI
 	}
 	else
 	{
-		// Other than channel owner
+		// Other than the channel owner. Could be Master server.
 		FOwnedChannelInfo* ExistingOwnedChannel = OwnedChannels.Find(ChId);
-		if (ensureMsgf(ExistingOwnedChannel != nullptr, TEXT("Received other connnection's SubscribedToChannelResultMessage while not owning the channel, Channel ID: %d"), ChId))
+		if (ExistingOwnedChannel)
 		{
 			FSubscribedChannelInfo SubscribedInfo;
 			SubscribedInfo.Merge(*SubMsg);
@@ -643,9 +701,9 @@ void UChanneldConnection::HandleUnsubFromChannel(UChanneldConnection* Conn, Chan
 	}
 	else
 	{
-		// Other than channel owner
+		// Other than then channel owner. Could be Master server.
 		FOwnedChannelInfo* ExistingOwnedChannel = OwnedChannels.Find(ChId);
-		if (ensureMsgf(ExistingOwnedChannel != nullptr, TEXT("Received other connnection's SubscribedToChannelResultMessage while not owning the channel, Channel ID: %d"), ChId))
+		if (ExistingOwnedChannel)
 		{
 			ExistingOwnedChannel->Subscribeds.Remove(UnsubMsg->connid());
 		}
@@ -657,3 +715,19 @@ void UChanneldConnection::HandleChannelDataUpdate(UChanneldConnection* Conn, Cha
 
 }
 
+void UChanneldConnection::HandleCreateSpatialChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	auto ResultMsg = static_cast<const channeldpb::CreateSpatialChannelsResultMessage*>(Msg);
+	if (ResultMsg->ownerconnid() == GetConnId())
+	{
+		for (const ChannelId& SpatialChId : ResultMsg->spatialchannelid())
+		{
+			FOwnedChannelInfo ChannelInfo;
+			ChannelInfo.ChannelType = EChanneldChannelType::ECT_Spatial;
+			ChannelInfo.ChannelId = SpatialChId;
+			ChannelInfo.Metadata = FString(UTF8_TO_TCHAR(ResultMsg->metadata().c_str()));
+			ChannelInfo.OwnerConnId = ResultMsg->ownerconnid();
+			OwnedChannels.Add(SpatialChId, ChannelInfo);
+		}
+	}
+}

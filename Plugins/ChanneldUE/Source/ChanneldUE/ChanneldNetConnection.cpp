@@ -38,12 +38,6 @@ void UChanneldNetConnection::InitBase(UNetDriver* InDriver, class FSocket* InSoc
 		// Reset the PacketHandler to remove the StatelessConnectHandler and bypass the handshake process.
 		Handler.Reset(NULL);
 	}
-
-	GetLowLevelSendChannelId = [&]()
-	{
-		auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
-		return NetDriver->LowLevelSendToChannelId.Get();
-	};
 }
 
 void UChanneldNetConnection::InitLocalConnection(UNetDriver* InDriver, class FSocket* InSocket, const FURL& InURL, EConnectionState InState, int32 InMaxPacket /*= 0*/, int32 InPacketOverhead /*= 0*/)
@@ -113,49 +107,219 @@ void UChanneldNetConnection::LowLevelSend(void* Data, int32 CountBits, FOutPacke
 
 		if (!bBlockSend && DataSize > 0)
 		{
-			SendData(MessageType_LOW_LEVEL, DataToSend, DataSize);
+			SendData(unrealpb::LOW_LEVEL, DataToSend, DataSize);
 		}
 	}
 }
 
-void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, int32 DataSize)
+void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, int32 DataSize, ChannelId ChId)
 {
 	if (DataSize <= 0)
+	{
 		return;
+	}
 
+	if (!Driver)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("SendData failed as the NetConn %d has no NetDriver"), GetConnId());
+		return;
+	}
+	
 	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
 	auto ConnToChanneld = NetDriver->GetConnToChanneld();
+	
+	if (ChId == InvalidChannelId)
+	{
+		ChId = NetDriver->GetSendToChannelId(this);
+	}
+	
 	if (ConnToChanneld->IsServer())
 	{
 		channeldpb::ServerForwardMessage ServerForwardMessage;
 		ServerForwardMessage.set_clientconnid(GetConnId());
 		ServerForwardMessage.set_payload(DataToSend, DataSize);
-		ConnToChanneld->Send(GetLowLevelSendChannelId(), MsgType, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
+		ConnToChanneld->Send(ChId, MsgType, ServerForwardMessage, channeldpb::SINGLE_CONNECTION);
 	}
 	else
 	{
-		ConnToChanneld->SendRaw(GetLowLevelSendChannelId(), MsgType, DataToSend, DataSize);
+		ConnToChanneld->SendRaw(ChId, MsgType, std::string(reinterpret_cast<const char*>(DataToSend), DataSize));
 	}
 }
 
-void UChanneldNetConnection::SendMessage(uint32 MsgType, const google::protobuf::Message& Msg)
+void UChanneldNetConnection::SendMessage(uint32 MsgType, const google::protobuf::Message& Msg, ChannelId ChId)
 {
-	// uint8* MessageData = new uint8[Msg.ByteSizeLong()];
-	// Msg.SerializeToArray(MessageData, Msg.GetCachedSize());
-	// SendData(MsgType, MessageData, Msg.GetCachedSize());
 	const std::string StrData = Msg.SerializeAsString();
-	SendData(MsgType, reinterpret_cast<const uint8*>(StrData.data()), StrData.size());
+	SendData(MsgType, reinterpret_cast<const uint8*>(StrData.data()), StrData.size(), ChId);
+}
+
+bool UChanneldNetConnection::HasSentSpawn(UObject* Object) const
+{
+	if (!Driver)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Failed to check HasSentSpawn as the NetConn %d has no NetDriver"), GetConnId());
+		return false;
+	}
+	
+	// Already in the queue, don't send again
+	for (auto& Tuple : QueuedSpawnMessageTargets)
+	{
+		if (Tuple.Get<0>().Get() == Object)
+		{
+			return true;
+		}
+	}
+	
+	const FNetworkGUID NetId = Driver->GuidCache->GetOrAssignNetGUID(Object);
+	UPackageMapClient* PackageMapClient = CastChecked<UPackageMapClient>(PackageMap);
+	int32* ExportCount = PackageMapClient->NetGUIDExportCountMap.Find(NetId);
+	return (ExportCount != nullptr && *ExportCount > 0);
+}
+
+void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*= ENetRole::None*/, uint32 OwningChannelId /*= InvalidChannelId*/, uint32 OwningConnId /*= 0*/, FVector* Location /*= nullptr*/)
+{
+	if (!Driver)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("SendSpawnMessage failed as the NetConn %d has no NetDriver"), GetConnId());
+		return;
+	}
+	
+	const FNetworkGUID NetId = Driver->GuidCache->GetOrAssignNetGUID(Object);
+	UPackageMapClient* PackageMapClient = CastChecked<UPackageMapClient>(PackageMap);
+	int32* ExportCount = PackageMapClient->NetGUIDExportCountMap.Find(NetId);
+	if (ExportCount != nullptr && *ExportCount > 0)
+	{
+		UE_LOG(LogChanneld, Verbose, TEXT("[Server] Skip sending spawn to conn %d, obj: %s"), GetConnId(), *GetNameSafe(Object));
+		return;
+	}
+
+	// Check if the object has the owning ChannelId
+	if (OwningChannelId == InvalidChannelId)
+	{
+		auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
+		if (NetDriver->ChannelDataView.IsValid())
+		{
+			OwningChannelId = NetDriver->ChannelDataView->GetOwningChannelId(NetId);
+		}
+	}
+	if (OwningChannelId == InvalidChannelId)
+	{
+		QueuedSpawnMessageTargets.Add(MakeTuple(Object, Role, OwningChannelId, OwningConnId, Location));
+		UE_LOG(LogChanneld, Warning, TEXT("[Server] Unable to send Spawn message as there's no mapping of NetId %d -> ChannelId. Pushed to the next tick."), NetId.Value);
+		return;
+	}
+
+	unrealpb::SpawnObjectMessage SpawnMsg;
+	SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Object, this));
+	SpawnMsg.set_channelid(OwningChannelId);
+	if (Role > ENetRole::ROLE_None)
+	{
+		SpawnMsg.set_localrole(Role);
+	}
+	if (OwningConnId > 0)
+	{
+		SpawnMsg.set_owningconnid(OwningConnId);
+	}
+	if (Location)
+	{
+		SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(*Location));
+	}
+	SendMessage(unrealpb::SPAWN, SpawnMsg, OwningChannelId);
+	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %d, role: %d, owning channel: %d, owning connId: %d, location: %s"),
+		GetConnId(), *GetNameSafe(Object), SpawnMsg.obj().netguid(), SpawnMsg.localrole(), SpawnMsg.channelid(), SpawnMsg.owningconnid(), Location ? *Location->ToCompactString() : TEXT("NULL"));
+
+	SetSentSpawned(NetId);
+}
+
+void UChanneldNetConnection::SetSentSpawned(const FNetworkGUID NetId)
+{
+	UPackageMapClient* PackageMapClient = CastChecked<UPackageMapClient>(PackageMap);
+	int32* ExportCount = &PackageMapClient->NetGUIDExportCountMap.FindOrAdd(NetId, 0);
+	(*ExportCount)++;
+}
+
+void UChanneldNetConnection::SendDestroyMessage(UObject* Object, EChannelCloseReason Reason)
+{
+	if (!Driver)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("SendDestroyMessage failed as the NetConn %d has no NetDriver"), GetConnId());
+		return;
+	}
+	
+	const FNetworkGUID NetId = Driver->GuidCache->GetNetGUID(Object);
+	if (!NetId.IsValid())
+	{
+		return;
+	}
+
+	UPackageMapClient* PackageMapClient = CastChecked<UPackageMapClient>(PackageMap);
+	int32* ExportCount = PackageMapClient->NetGUIDExportCountMap.Find(NetId);
+	if (ExportCount == nullptr || *ExportCount <= 0)
+	{
+		UE_LOG(LogChanneld, Verbose, TEXT("[Server] Skip sending destroy to conn %d, obj: %s"), GetConnId(), *GetNameSafe(Object));
+		return;
+	}
+
+	unrealpb::DestroyObjectMessage DestroyMsg;
+	DestroyMsg.set_netid(NetId.Value);
+	DestroyMsg.set_reason(static_cast<uint8>(EChannelCloseReason::Destroyed));
+	SendMessage(unrealpb::DESTROY, DestroyMsg);
+	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Destroy message to conn: %d, obj: %s, netId: %d"), GetConnId(), *GetNameSafe(Object), NetId.Value);
+
+	if (ExportCount != nullptr)
+	{
+		(*ExportCount)--;
+	}
+}
+
+void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg, ChannelId ChId)
+{
+	if (GetMutableDefault<UChanneldSettings>()->bQueueUnexportedActorRPC)
+	{
+		if (Actor->HasAuthority() && !HasSentSpawn(Actor))
+		{
+			/* On server, the actor should be spawned to client via OnServerSpawnedObject.
+			// If the target object hasn't been spawned in the remote end yet, send the Spawn message before the RPC message.
+			NetConn->SendSpawnMessage(Actor, Actor->GetRemoteRole());
+			*/
+
+			UnexportedRPCs.Add(FOutgoingRPC{Actor, FuncName, ParamsMsg, ChId});
+			UE_LOG(LogChanneld, Log, TEXT("Calling RPC %s::%s while the NetConnection(%d) doesn't have the NetId exported yet. Pushed to the next tick."),
+				*Actor->GetName(), *FuncName, GetConnId());
+			return;
+		}
+	}
+	
+	unrealpb::RemoteFunctionMessage RpcMsg;
+	// Don't send the whole UnrealObjectRef to the other side - the object spawning process goes its own way!
+	// RpcMsg.mutable_targetobj()->MergeFrom(ChanneldUtils::GetRefOfObject(Actor));
+	RpcMsg.mutable_targetobj()->set_netguid(Driver->GuidCache->GetNetGUID(Actor).Value);
+	RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
+	if (ParamsMsg)
+	{
+		RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %d bytes"), RpcMsg.paramspayload().size());
+	}
+	SendMessage(unrealpb::RPC, RpcMsg, ChId);
 }
 
 FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= false*/)
 {
+	if (!Driver)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("LowLevelGetRemoteAddress failed as the NetConn %d has no NetDriver"), GetConnId());
+		return TEXT("");
+	}
+	
+	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
 	if (RemoteAddr)
 	{
+		if (bAppendPort)
+			RemoteAddr->SetPort(NetDriver->GetSendToChannelId(this));
 		return RemoteAddr->ToString(bAppendPort);
 	}
 	else
 	{
-		return FString::Printf(TEXT("0.0.0.0%s"), bAppendPort ? ":0" : "");
+		return bAppendPort ? FString::Printf(TEXT("0.0.0.0:d"), NetDriver->GetSendToChannelId(this)) : TEXT("0.0.0.0");
 	}
 }
 
@@ -175,6 +339,29 @@ FString UChanneldNetConnection::LowLevelDescribe()
 void UChanneldNetConnection::Tick(float DeltaSeconds)
 {
 	UNetConnection::Tick(DeltaSeconds);
+	
+	const int RpcNum = UnexportedRPCs.Num();
+	for (int i = 0; i < RpcNum; i++)
+	{
+		FOutgoingRPC& RPC = UnexportedRPCs[i];
+		if (IsValid(RPC.Actor))
+		{
+			SendRPCMessage(RPC.Actor, RPC.FuncName, RPC.ParamsMsg, RPC.ChId);
+		}
+	}
+	UnexportedRPCs.RemoveAt(0, RpcNum);
+
+	const int SpawnMsgNum = QueuedSpawnMessageTargets.Num();
+	for (int i = 0; i < SpawnMsgNum; i++)
+	{
+		auto& Params = QueuedSpawnMessageTargets[i];
+		if (Params.Get<0>().IsValid())
+		{
+			SendSpawnMessage(Params.Get<0>().Get(), Params.Get<1>(), Params.Get<2>(), Params.Get<3>(), Params.Get<4>());
+		}
+	}
+	QueuedSpawnMessageTargets.RemoveAt(0, SpawnMsgNum);
+
 }
 
 void UChanneldNetConnection::FlushUnauthData()

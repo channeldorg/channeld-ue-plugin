@@ -32,7 +32,7 @@ public:
     virtual void OnStateChanged(const google::protobuf::Message* NewState) = 0;
 
     virtual TSharedPtr<google::protobuf::Message> SerializeFunctionParams(UFunction* Func, void* Params, FOutParmRec* OutParams, bool& bSuccess) { bSuccess = false; return nullptr; }
-    virtual TSharedPtr<void> DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC) { bSuccess = false; return nullptr; }
+    virtual TSharedPtr<void> DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC) { bSuccess = false; return nullptr; }
 
 protected:
     TWeakObjectPtr<UObject> TargetObject;
@@ -43,6 +43,9 @@ protected:
 
 };
 
+/**
+ * @brief Base class for all replicators of the Blueprint actors.
+ */
 class CHANNELDUE_API FChanneldReplicatorBase_BP : public FChanneldReplicatorBase
 {
 public:
@@ -52,6 +55,26 @@ public:
     }
     virtual UClass* GetTargetClass() override { return BpClass; }
 
+    /*
+    virtual google::protobuf::Message* GetDeltaState() override {return nullptr;}
+    virtual void Tick(float DeltaTime) override {}
+    virtual void OnStateChanged(const google::protobuf::Message* NewState) override {}
+
+    // Support RPCs without parameter by default
+    virtual TSharedPtr<google::protobuf::Message> SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess) override { bSuccess = true; return nullptr; }
+    virtual TSharedPtr<void> DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC) override { bSuccess = true; return nullptr; }
+    */
 protected:
     UClass* BpClass;
+};
+
+/**
+ * @brief Base class for all replicators of the UActorComponent
+ */
+class CHANNELDUE_API FChanneldReplicatorBase_AC : public FChanneldReplicatorBase
+{
+public:
+    FChanneldReplicatorBase_AC(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj){}
+    // Returns the component's owner actor's NetGUID.
+    virtual uint32 GetNetGUID() override;
 };

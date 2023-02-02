@@ -28,12 +28,12 @@ FString FVectorPropertyDecorator::GetProtoStateMessageType()
 
 FString FVectorPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState)
 {
-	return FString::Printf(TEXT("ChanneldUtils::IsSame(&%s->%s(), %s)"), *FromState, *GetProtoFieldName(), *GetCode_GetPropertyValueFrom(FromActor));
+	return FString::Printf(TEXT("!ChanneldUtils::CheckDifference(%s, &%s->%s())"), *GetCode_GetPropertyValueFrom(FromActor), *FromState, *GetProtoFieldName());
 }
 
 FString FVectorPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState, bool ForceFromPointer)
 {
-	return FString::Printf(TEXT("ChanneldUtils::IsSame(&%s->%s(), %s)"), *FromState, *GetProtoFieldName(), *GetCode_GetPropertyValueFrom(FromActor, ForceFromPointer));
+	return FString::Printf(TEXT("!ChanneldUtils::CheckDifference(%s, &%s->%s())"), *GetCode_GetPropertyValueFrom(FromActor, ForceFromPointer), *FromState, *GetProtoFieldName());
 }
 
 FString FVectorPropertyDecorator::GetCode_GetProtoFieldValueFrom(const FString& StateName)
@@ -43,40 +43,8 @@ FString FVectorPropertyDecorator::GetCode_GetProtoFieldValueFrom(const FString& 
 
 FString FVectorPropertyDecorator::GetCode_SetProtoFieldValueTo(const FString& StateName, const FString& GetValueCode)
 {
-	return FString::Printf(TEXT("ChanneldUtils::SetIfNotSame(%s->mutable_%s(), %s)"), *StateName, *GetProtoFieldName(), *GetValueCode);
+	return FString::Printf(TEXT("ChanneldUtils::SetVectorToPB(%s->mutable_%s(), %s)"), *StateName, *GetProtoFieldName(), *GetValueCode);
 }
-
-// FString FVectorPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString& ContainerName, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
-// {
-// 	// return FString::Printf(
-// 	// 	TEXT("{\n%s;\nif (ChanneldUtils::SetIfNotSame(%s%s->mutable_%s(), *PropAddr))\n{\n  bStateChanged = true;\n}\n}\n"),
-// 	// 	*GetCode_AssignPropPointer(
-// 	// 		ContainerName,
-// 	// 		FString::Printf(TEXT("%s* PropAddr"), *GetCPPType())
-// 	// 	),
-// 	// 	ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? nullptr : ") : TEXT(""),
-// 	// 	*DeltaStateName, *GetProtoFieldName()
-// 	// );
-// 	FStringFormatNamedArguments FormatArgs;
-// 	FormatArgs.Add(
-// 		TEXT("Code_AssignPropPointers"),
-// 		GetCode_AssignPropPointer(
-// 			ContainerName,
-// 			FString::Printf(TEXT("%s* PropAddr"), *GetCPPType())
-// 		)
-// 	);
-// 	FormatArgs.Add(TEXT("Declare_FullStateName"), FullStateName);
-// 	FormatArgs.Add(TEXT("Definition_ProtoName"), GetProtoFieldName());
-// 	FormatArgs.Add(
-// 		TEXT("Code_SetProtoFieldValue"),
-// 		FString::Printf(
-// 			TEXT("ChanneldUtils::SetIfNotSame(%s%s->mutable_%s(), *PropAddr)"),
-// 			ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? nullptr : ") : TEXT(""),
-// 			*DeltaStateName, *GetProtoFieldName()
-// 		)
-// 	);
-// 	return FString::Format(VectorPropDeco_SetDeltaStateByMemOffsetTemp, FormatArgs);
-// }
 
 FString FVectorPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
 {

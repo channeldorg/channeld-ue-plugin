@@ -2,13 +2,13 @@
 #include "Developer/Settings/Public/ISettingsModule.h"
 #include "ChanneldSettings.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/Pawn.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/GameStateBase.h"
 #include "Components/ActorComponent.h"
 #include "Components/SceneComponent.h"
 #include "Replication/ChanneldReplication.h"
-#include "Replication/ChanneldReplicatorBase.h"
 #include "Replication/ChanneldActorComponentReplicator.h"
 #include "Replication/ChanneldSceneComponentReplicator.h"
 #include "Replication/ChanneldCharacterReplicator.h"
@@ -17,6 +17,7 @@
 #include "Replication/ChanneldPlayerStateReplicator.h"
 #include "Replication/ChanneldGameStateBaseReplicator.h"
 #include "Replication/ChanneldActorReplicator.h"
+#include "Replication/ChanneldPawnReplicator.h"
 
 #define LOCTEXT_NAMESPACE "FChanneldUEModule"
 
@@ -31,6 +32,7 @@ void FChanneldUEModule::StartupModule()
 	}
 
 	REGISTER_REPLICATOR(FChanneldActorReplicator, AActor);
+	REGISTER_REPLICATOR(FChanneldPawnReplicator, APawn);
 	REGISTER_REPLICATOR(FChanneldCharacterReplicator, ACharacter);
 	REGISTER_REPLICATOR(FChanneldControllerReplicator, AController);
 	REGISTER_REPLICATOR(FChanneldPlayerControllerReplicator, APlayerController);

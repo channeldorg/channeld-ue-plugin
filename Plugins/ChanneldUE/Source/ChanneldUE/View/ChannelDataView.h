@@ -5,6 +5,7 @@
 #include "channeld.pb.h"
 #include "ChanneldConnection.h"
 #include "ChannelDataProvider.h"
+#include "ChanneldNetConnection.h"
 #include "google/protobuf/message.h"
 #include "UObject/WeakInterfacePtr.h"
 #include "ChannelDataView.generated.h"
@@ -25,6 +26,7 @@ public:
 			AnyForTypeUrl = new google::protobuf::Any;
 		AnyForTypeUrl->PackFrom(*MsgTemplate);
 		ChannelDataTemplatesByTypeUrl.Add(FString(UTF8_TO_TCHAR(AnyForTypeUrl->type_url().c_str())), MsgTemplate);
+		UE_LOG(LogChanneld, Log, TEXT("Registered %s for channel type %d"), UTF8_TO_TCHAR(MsgTemplate->GetTypeName().c_str()), ChannelType);
 	}
 
 	UFUNCTION(BlueprintCallable)
@@ -33,13 +35,45 @@ public:
 	virtual void Initialize(UChanneldConnection* InConn);
 	virtual void Unintialize();
 	virtual void BeginDestroy() override;
+	
+	virtual bool GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const {return false;}
 
 	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider);
+	virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider);
+	void AddActorProvider(ChannelId ChId, AActor* Actor);
+	void AddObjectProvider(UObject* Obj);
+	void RemoveActorProvider(AActor* Actor, bool bSendRemoved);
 	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
-	//virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider);
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
+	virtual void MoveProvider(ChannelId OldChId, ChannelId NewChId, IChannelDataProvider* Provider);
+	void MoveObjectProvider(ChannelId OldChId, ChannelId NewChId, UObject* Provider);
 
-	void OnSpawnedObject(UObject* Obj, const FNetworkGUID NetId, ChannelId ChId);
+	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, ChannelId ChId){}
+	virtual void OnRemoveClientConnection(UChanneldNetConnection* ClientConn){}
+	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn);
+	virtual FNetworkGUID GetNetId(UObject* Obj) const;
+	virtual FNetworkGUID GetNetId(IChannelDataProvider* Provider) const;
+	
+	/**
+	 * @brief Added the object to the NetId-ChannelId mapping. If the object is an IChannelDataProvider, also add it to the providers set.\n
+	 * By default, the channelId used for adding is the LowLevelSendToChannelId in the UChanneldNetDriver / UChanneldGameInstanceSubsystem.
+	 * @param Obj The object just spawned on the server, passed from UChanneldNetDriver::OnServerSpawnedActor.
+	 * @param NetId The NetworkGUID assigned for the object.
+	 * @return Should the NetDriver send the spawn message to the clients?
+	 */
+	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId);
+	// Send the Spawn message to all interested clients.
+	virtual void SendSpawnToClients(UObject* Obj, uint32 OwningConnId);
+	// Send the Destroy message to all interested clients.
+	virtual void SendDestroyToClients(UObject* Obj, const FNetworkGUID NetId);
+	// Send the Spawn message to a single client connection.
+	// Gives the view a chance to override the NetRole, OwningChannelId, OwningConnId, or the Location parameter.
+	virtual void SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId);
+	virtual void OnClientSpawnedObject(UObject* Obj, const ChannelId ChId) {}
+	virtual void OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId);
+	virtual void SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId);
+	virtual ChannelId GetOwningChannelId(const FNetworkGUID NetId) const;
+	virtual ChannelId GetOwningChannelId(const AActor* Actor) const;
 
 	int32 SendAllChannelUpdates();
 
@@ -48,6 +82,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	EChanneldChannelType DefaultChannelType = EChanneldChannelType::ECT_Global;
 
+	// DO NOT loop-reference, otherwise the destruction can cause exception.
+	// TSharedPtr< class UChanneldNetDriver > NetDriver;
+	
 protected:
 
 	// TSet doesn't support TWeakInterfacePtr, so we need to wrap it in a new type. 
@@ -69,7 +106,9 @@ protected:
 	virtual void LoadCmdLineArgs() {}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure/*, meta=(CallableWithoutWorldContext)*/)
-	class UChanneldGameInstanceSubsystem* GetChanneldSubsystem();
+	class UChanneldGameInstanceSubsystem* GetChanneldSubsystem() const;
+
+	UObject* GetObjectFromNetGUID(const FNetworkGUID& NetId);
 
 	virtual void InitServer();
 	virtual void InitClient();
@@ -86,8 +125,28 @@ protected:
 	void ReceiveUninitServer();
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BeginUninitClient"))
 	void ReceiveUninitClient();
+	/**
+	 * @brief Server's callback when receiving the unsub message of a client.
+	 * Default implementation: Destroy the Pawn related to the NetConn and close the NetConn.
+	 * @param ClientConnId 
+	 * @param ChId 
+	 */
+	virtual void OnClientUnsub(ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, ChannelId ChId);
 
+	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	
+	void HandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+
+	// Give the subclass a chance to mess with the removed providers, e.g. add a provider back to a channel.
 	virtual void OnUnsubFromChannel(ChannelId ChId, const TSet<FProviderInternal>& RemovedProviders) {}
+
+	/**
+	 * @brief Checks if the channel data contains any unsolved NetworkGUID.
+	 * @param ChId The channel that the data belongs to.
+	 * @param ChannelData The data field in the ChannelDataUpdateMessage.
+	 * @return If true, the ChannelDataUpdate should not be applied until the objects are spawned.
+	 */
+	virtual bool CheckUnspawnedObject(ChannelId ChId, const google::protobuf::Message* ChannelData) {return false;}
 
 	UPROPERTY()
 	UChanneldConnection* Connection;
@@ -106,9 +165,4 @@ private:
 
 	TMap<ChannelId, TSet<FProviderInternal>> ChannelDataProviders;
 	TMap<ChannelId, google::protobuf::Message*> RemovedProvidersData;
-
-	void HandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-
-	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-
 };

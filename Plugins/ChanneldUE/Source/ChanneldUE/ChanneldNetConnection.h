@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/NetConnection.h"
 #include "ChanneldTypes.h"
 #include "unreal_common.pb.h"
 #include "ChanneldNetConnection.generated.h"
@@ -19,21 +20,36 @@ public:
 	virtual void InitLocalConnection(UNetDriver* InDriver, class FSocket* InSocket, const FURL& InURL, EConnectionState InState, int32 InMaxPacket = 0, int32 InPacketOverhead = 0) override;
 	virtual void InitRemoteConnection(UNetDriver* InDriver, class FSocket* InSocket, const FURL& InURL, const class FInternetAddr& InRemoteAddr, EConnectionState InState, int32 InMaxPacket = 0, int32 InPacketOverhead = 0) override;
 	virtual void LowLevelSend(void* Data, int32 CountBits, FOutPacketTraits& Traits) override;
-	FString LowLevelGetRemoteAddress(bool bAppendPort = false) override;
-	FString LowLevelDescribe() override;
+	virtual FString LowLevelGetRemoteAddress(bool bAppendPort = false) override;
+	virtual FString LowLevelDescribe() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void ReceivedRawPacket(void* Data, int32 Count) override;
 
-	FORCEINLINE uint32 GetConnId()
+	FORCEINLINE uint32 GetConnId() const
 	{
 		uint32 ConnId;
 		RemoteAddr->GetIp(ConnId);
 		return ConnId;
 	}
 
-	TFunction<ChannelId()> GetLowLevelSendChannelId;
-	void SendData(uint32 MsgType, const uint8* DataToSend, int32 DataSize);
-	void SendMessage(uint32 MsgType, const google::protobuf::Message& Msg);
+	// Send data between UE client and sever via channeld. MsgType should be in user space (>= 100).
+	void SendData(uint32 MsgType, const uint8* DataToSend, int32 DataSize, ChannelId ChId = InvalidChannelId);
+	// Send message between UE client and sever via channeld. MsgType should be in user space (>= 100).
+	void SendMessage(uint32 MsgType, const google::protobuf::Message& Msg, ChannelId ChId = InvalidChannelId);
+	bool HasSentSpawn(UObject* Object) const;
+	void SetSentSpawned(const FNetworkGUID NetId);
+	/**
+	 * @brief Send SpawnObjectMessage to the connection.
+	 * @param Object The object has been spawned on the server.
+	 * @param Role The LocalRole to set when the actor is spawn remotely. If not specified, the role will not be set.
+	 * @param OwningChannelId The channel that the object belongs to. If not set, the NetId-ChannelId mapping in the view will be use. If still not found, the message will be queued until the mapping has been set.
+	 * @param OwningConnId The connection that owns the object. It will be used remotely to amend the role (see #ChanneldUtils::SetActorRoleByOwningConnId). If not set, the amendment will not happen.
+	 * @param Location The actor's location on the server. Only used when the actor is in spatial channel. channeld uses the location to amend the OwningChannelId. If not set or in spatial channel, the amendment will not happen.
+	 */
+	void SendSpawnMessage(UObject* Object, ENetRole Role = ENetRole::ROLE_None, uint32 OwningChannelId = InvalidChannelId, uint32 OwningConnId = 0, FVector* Location = nullptr);
+	void SendDestroyMessage(UObject* Object, EChannelCloseReason Reason = EChannelCloseReason::Destroyed);
+	void SendRPCMessage(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg = nullptr, ChannelId ChId = InvalidChannelId);
+	// Flush the handshake packets that are queued before received AuthResultMessage to the server.
 	void FlushUnauthData();
 
 	bool bDisableHandshaking = false;
@@ -49,4 +65,17 @@ private:
 	// Queue the data from LowLevelSend() when the connection and authentication to channeld is not finished yet,
 	// and send them after the authentication is done.
 	TQueue<TTuple<std::string*, FOutPacketTraits*>> LowLevelSendDataBeforeAuth;
+
+	// Queued Spawn messages that don't have the object's NetId-ChannelId mapping set yet.
+	TArray<TTuple<TWeakObjectPtr<UObject>, ENetRole, uint32, uint32, FVector*>> QueuedSpawnMessageTargets;
+
+	struct FOutgoingRPC
+	{
+		AActor* Actor;
+		FString FuncName;
+		TSharedPtr<google::protobuf::Message> ParamsMsg;
+		ChannelId ChId;
+	};
+	// RPCs queued on the caller's side that don't have the NetId exported yet.
+	TArray<FOutgoingRPC> UnexportedRPCs;
 };

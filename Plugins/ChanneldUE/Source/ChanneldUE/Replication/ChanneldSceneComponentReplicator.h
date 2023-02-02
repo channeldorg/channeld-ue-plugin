@@ -5,7 +5,7 @@
 #include "Components/SceneComponent.h"
 #include "ChanneldReplicatorBase.h"
 
-class CHANNELDUE_API FChanneldSceneComponentReplicator : public FChanneldReplicatorBase
+class CHANNELDUE_API FChanneldSceneComponentReplicator : public FChanneldReplicatorBase_AC
 {
 public:
 	FChanneldSceneComponentReplicator(USceneComponent* InSceneComp);
@@ -13,7 +13,6 @@ public:
 
 	//~Begin FChanneldReplicatorBase Interface
 	virtual UClass* GetTargetClass() override { return USceneComponent::StaticClass(); }
-	virtual uint32 GetNetGUID() override;
 	virtual google::protobuf::Message* GetDeltaState() override { return DeltaState; }
 	virtual void ClearState() override;
 	virtual void Tick(float DeltaTime) override;

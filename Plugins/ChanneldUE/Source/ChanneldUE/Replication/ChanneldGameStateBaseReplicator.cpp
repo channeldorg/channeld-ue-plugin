@@ -40,8 +40,8 @@ FChanneldGameStateBaseReplicator::~FChanneldGameStateBaseReplicator()
 
 uint32 FChanneldGameStateBaseReplicator::GetNetGUID()
 {
-	// GameStateBase doesn't have a valid NetGUID, so let's use a constant value.
-	return 1;
+	// GameState doesn't have a valid NetGUID, so let's use a constant value.
+	return GameStateNetId;
 }
 
 google::protobuf::Message* FChanneldGameStateBaseReplicator::GetDeltaState()
@@ -94,7 +94,10 @@ void FChanneldGameStateBaseReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	FullState->MergeFrom(*DeltaState);
+	if (bStateChanged)
+	{
+		FullState->MergeFrom(*DeltaState);
+	}
 }
 
 void FChanneldGameStateBaseReplicator::OnStateChanged(const google::protobuf::Message* InNewState)

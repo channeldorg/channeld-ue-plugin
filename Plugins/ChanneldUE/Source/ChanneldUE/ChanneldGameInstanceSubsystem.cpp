@@ -24,7 +24,6 @@ void UChanneldGameInstanceSubsystem::Deinitialize()
 	if (ChannelDataView)
 	{
 		ChannelDataView->Unintialize();
-		ChannelDataView = NULL;
 	}
 
 	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::AUTH, this);
@@ -34,8 +33,10 @@ void UChanneldGameInstanceSubsystem::Deinitialize()
 	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::SUB_TO_CHANNEL, this);
 	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::UNSUB_FROM_CHANNEL, this);
 	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, this);
-	ConnectionInstance->OnUserSpaceMessageReceived.RemoveAll(this);
+	// ConnectionInstance->OnUserSpaceMessageReceived.RemoveAll(this);
 	ConnectionInstance->Disconnect();
+
+	Super::Deinitialize();
 }
 
 void UChanneldGameInstanceSubsystem::Tick(float DeltaTime)
@@ -79,7 +80,7 @@ void UChanneldGameInstanceSubsystem::InitConnection()
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, this, &UChanneldGameInstanceSubsystem::HandleChannelDataUpdate);
 
 	//ConnectionInstance->OnUserSpaceMessageReceived.AddUObject(this, &UChanneldGameInstanceSubsystem::OnUserSpaceMessageReceived);
-	ConnectionInstance->RegisterMessageHandler(MessageType_ANY, new google::protobuf::Any, this, &UChanneldGameInstanceSubsystem::HandleUserSpaceAnyMessage);
+	ConnectionInstance->RegisterMessageHandler(unrealpb::ANY, new google::protobuf::Any, this, &UChanneldGameInstanceSubsystem::HandleUserSpaceAnyMessage);
 }
 
 bool UChanneldGameInstanceSubsystem::IsConnected()
@@ -232,6 +233,25 @@ void UChanneldGameInstanceSubsystem::ConnectToChanneld(bool& Success, FString& E
 	}
 }
 
+void UChanneldGameInstanceSubsystem::ConnectWithDefaultSettings(bool& Success, FString& Error, const FOnceOnAuth& AuthCallback, bool bInitAsClient)
+{
+	FString Host;
+	int Port;
+	auto Settings = GetMutableDefault<UChanneldSettings>();
+	if (bInitAsClient)
+	{
+		Host = Settings->ChanneldIpForClient;
+		Port = Settings->ChanneldPortForClient;
+	}
+	else
+	{
+		Host = Settings->ChanneldIpForServer;
+		Port = Settings->ChanneldPortForServer;
+	}
+
+	ConnectToChanneld(Success, Error, Host, Port, AuthCallback, bInitAsClient);
+}
+
 void UChanneldGameInstanceSubsystem::DisconnectFromChanneld(bool bFlushAll/* = true*/)
 {
 	if (ConnectionInstance)
@@ -241,15 +261,16 @@ void UChanneldGameInstanceSubsystem::DisconnectFromChanneld(bool bFlushAll/* = t
 }
 
 void UChanneldGameInstanceSubsystem::CreateChannel(EChanneldChannelType ChannelType, FString Metadata, UProtoMessageObject* InitData,
-	const FOnceOnCreateChannel& Callback)
+	bool bHasSubOptions, const FChannelSubscriptionOptions& SubOptions,	const FOnceOnCreateChannel& Callback)
 {
 	InitConnection();
 
 	ConnectionInstance->CreateChannel(
 		static_cast<channeldpb::ChannelType>(ChannelType),
 		Metadata,
-		nullptr,
+		bHasSubOptions ? SubOptions.ToMessage().Get() : nullptr,
 		InitData == nullptr ? nullptr : InitData->GetMessage(),
+		// TODO: support the merge options in Blueprint
 		nullptr,
 		[=](const channeldpb::CreateChannelResultMessage* Message)
 		{
@@ -331,8 +352,22 @@ void UChanneldGameInstanceSubsystem::SendDataUpdate(int32 ChId, UProtoMessageObj
 	ConnectionInstance->Send(ChId, channeldpb::CHANNEL_DATA_UPDATE, UpdateMsg);
 }
 
+void UChanneldGameInstanceSubsystem::QuerySpatialChannel(const AActor* Actor,
+	const FOnceOnQuerySpatialChannel& Callback)
+{
+	InitConnection();
+
+	TArray<FVector> Positions;
+	Positions.Add(Actor->GetActorLocation());
+	ConnectionInstance->QuerySpatialChannel(Positions, [Callback](const channeldpb::QuerySpatialChannelResultMessage* ResultMsg)
+	{
+		ChannelId ChId = ResultMsg->channelid_size() == 0 ? InvalidChannelId : ResultMsg->channelid(0);
+		Callback.ExecuteIfBound((int64)ChId);
+	});
+}
+
 void UChanneldGameInstanceSubsystem::ServerBroadcast(int32 ChId, int32 ClientConnId, UProtoMessageObject* MessageObject,
-	EChanneldBroadcastType BroadcastType)
+                                                     EChanneldBroadcastType BroadcastType)
 {
 	InitConnection();
 
@@ -343,18 +378,11 @@ void UChanneldGameInstanceSubsystem::ServerBroadcast(int32 ChId, int32 ClientCon
 	google::protobuf::Message* PayloadMessage = MessageObject->GetMessage();
 	google::protobuf::Any AnyData;
 	AnyData.PackFrom(*PayloadMessage);
-	uint8* MessageData = new uint8[AnyData.ByteSizeLong()];
-	bool Serialized = AnyData.SerializeToArray(MessageData, AnyData.GetCachedSize());
-	if (!Serialized)
-	{
-		delete[] MessageData;
-		UE_LOG(LogChanneld, Error, TEXT("Failed to serialize broadcast payload, type: %d"), BroadcastType);
-		return;
-	}
+
 	channeldpb::ServerForwardMessage MessageWrapper;
 	MessageWrapper.set_clientconnid(ClientConnId);
-	MessageWrapper.set_payload(MessageData, AnyData.GetCachedSize());
-	ConnectionInstance->Send(ChId, MessageType_ANY, MessageWrapper, static_cast<channeldpb::BroadcastType>(BroadcastType));
+	MessageWrapper.set_payload(AnyData.SerializeAsString());
+	ConnectionInstance->Send(ChId, unrealpb::ANY, MessageWrapper, static_cast<channeldpb::BroadcastType>(BroadcastType));
 }
 
 void UChanneldGameInstanceSubsystem::RegisterChannelTypeByFullName(EChanneldChannelType ChannelType, FString ProtobufFullName)
@@ -401,7 +429,8 @@ void UChanneldGameInstanceSubsystem::SetLowLevelSendToChannelId(int32 ChId)
 	{
 		if (Provider.IsValid())
 		{
-			ChannelDataView->AddProvider(ChId, Provider.Get());
+			// ChannelDataView->AddProvider(ChId, Provider.Get());
+			ChannelDataView->AddProviderToDefaultChannel(Provider.Get());
 		}
 	}
 	UnregisteredDataProviders.Empty();
@@ -551,7 +580,7 @@ void UChanneldGameInstanceSubsystem::InitChannelDataView()
 	}
 	else
 	{
-		UE_LOG(LogChanneld, Warning, TEXT("Failed to load any ChannelDataView"));
+		UE_LOG(LogChanneld, Error, TEXT("Failed to load any ChannelDataView"));
 	}
 }
 
@@ -559,7 +588,10 @@ void UChanneldGameInstanceSubsystem::RegisterDataProvider(IChannelDataProvider* 
 {
 	if (ChannelDataView)
 	{
+		/* DO NOT use LowLevelSendToChannelId here as it's for LowLevelSend() only!
 		ChannelDataView->AddProvider(LowLevelSendToChannelId.Get(), Provider);
+		*/
+		ChannelDataView->AddProviderToDefaultChannel(Provider);
 	}
 	else
 	{

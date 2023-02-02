@@ -5,6 +5,7 @@
 #include "ChanneldUtils.h"
 #include "Components/PrimitiveComponent.h"
 #include "Engine/NetSerialization.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 FChanneldCharacterReplicator::FChanneldCharacterReplicator(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
 {
@@ -74,13 +75,76 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 		return;
 	}
 
+	
+	// ~Begin copy of ACharacter::PreReplication
+	if (Character->GetCharacterMovement()->CurrentRootMotion.HasActiveRootMotionSources() || Character->IsPlayingNetworkedRootMotionMontage())
+	{
+		const FAnimMontageInstance* RootMotionMontageInstance = Character->GetRootMotionAnimMontageInstance();
+
+		Character->RepRootMotion.bIsActive = true;
+		// Is position stored in local space?
+		Character->RepRootMotion.bRelativePosition = Character->GetBasedMovement().HasRelativeLocation();
+		Character->RepRootMotion.bRelativeRotation = Character->GetBasedMovement().HasRelativeRotation();
+		Character->RepRootMotion.Location			= Character->RepRootMotion.bRelativePosition ? Character->GetBasedMovement().Location : FVector_NetQuantize100(FRepMovement::RebaseOntoZeroOrigin(Character->GetActorLocation(), Character->GetWorld()->OriginLocation));
+		Character->RepRootMotion.Rotation			= Character->RepRootMotion.bRelativeRotation ? Character->GetBasedMovement().Rotation : Character->GetActorRotation();
+		Character->RepRootMotion.MovementBase		= Character->GetBasedMovement().MovementBase;
+		Character->RepRootMotion.MovementBaseBoneName = Character->GetBasedMovement().BoneName;
+		if (RootMotionMontageInstance)
+		{
+			Character->RepRootMotion.AnimMontage		= RootMotionMontageInstance->Montage;
+			Character->RepRootMotion.Position			= RootMotionMontageInstance->GetPosition();
+		}
+		else
+		{
+			Character->RepRootMotion.AnimMontage = nullptr;
+		}
+
+		Character->RepRootMotion.AuthoritativeRootMotion = Character->GetCharacterMovement()->CurrentRootMotion;
+		Character->RepRootMotion.Acceleration = Character->GetCharacterMovement()->GetCurrentAcceleration();
+		Character->RepRootMotion.LinearVelocity = Character->GetCharacterMovement()->Velocity;
+	}
+	else
+	{
+		Character->RepRootMotion.Clear();
+	}
+
+	Character->bProxyIsJumpForceApplied = (Character->JumpForceTimeRemaining > 0.0f);
+	*MovementModeValuePtr = Character->GetCharacterMovement()->PackNetworkMovementMode();	
+	*BasedMovementValuePtr = Character->GetBasedMovement();
+
+	// Optimization: only update and replicate these values if they are actually going to be used.
+	if (Character->GetBasedMovement().HasRelativeLocation())
+	{
+		// When velocity becomes zero, force replication so the position is updated to match the server (it may have moved due to simulation on the client).
+		BasedMovementValuePtr->bServerHasVelocity = !Character->GetCharacterMovement()->Velocity.IsZero();
+
+		// Make sure absolute rotations are updated in case rotation occurred after the base info was saved.
+		if (!Character->GetBasedMovement().HasRelativeRotation())
+		{
+			BasedMovementValuePtr->Rotation = Character->GetActorRotation();
+		}
+	}
+
+	// Save bandwidth by not replicating this value unless it is necessary, since it changes every update.
+	if ((Character->GetCharacterMovement()->NetworkSmoothingMode == ENetworkSmoothingMode::Linear) || Character->GetCharacterMovement()->bNetworkAlwaysReplicateTransformUpdateTimestamp)
+	{
+		*ServerLastTransformUpdateTimeStampValuePtr = Character->GetCharacterMovement()->GetServerLastTransformUpdateTimeStamp();
+	}
+	else
+	{
+		*ServerLastTransformUpdateTimeStampValuePtr = 0.f;
+	}
+	// ~End copy of ACharacter::PreReplication
+	
+	
 	// TODO: RootMotion
 
 	bool bMovementInfoChanged = false;
 	unrealpb::FBasedMovementInfo* MovementInfo = FullState->mutable_basedmovement();
 	unrealpb::FBasedMovementInfo* MovementInfoDelta = DeltaState->mutable_basedmovement();
-	auto OldMovementBase = ChanneldUtils::GetActorComponentByRef<UPrimitiveComponent>(MovementInfo->mutable_movementbase(), Character->GetWorld());
-	if (OldMovementBase != Character->GetMovementBase())
+	bool bUnmapped = false;
+	auto OldMovementBase = Cast<UPrimitiveComponent>(ChanneldUtils::GetActorComponentByRefChecked(MovementInfo->mutable_movementbase(), Character->GetWorld(), bUnmapped, false));
+	if (!bUnmapped && OldMovementBase != Character->GetMovementBase())
 	{
 		uint32 OldNetGUID = MovementInfoDelta->mutable_movementbase()->mutable_owner()->netguid();
 		// The movement base's Actor (e.g. the 'Floor') normally doesn't have a NetConnection. In that case, we use the character's NetConnection.
@@ -95,15 +159,15 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	if (ChanneldUtils::SetIfNotSame(MovementInfo->mutable_location(), Character->GetBasedMovement().Location))
+	if (ChanneldUtils::CheckDifference(Character->GetBasedMovement().Location, MovementInfo->mutable_location()))
 	{
-		ChanneldUtils::SetIfNotSame(MovementInfoDelta->mutable_location(), Character->GetBasedMovement().Location);
+		ChanneldUtils::SetVectorToPB(MovementInfoDelta->mutable_location(), Character->GetBasedMovement().Location, MovementInfo->mutable_location());
 		bStateChanged = true;
 	}
 
-	if (ChanneldUtils::SetIfNotSame(MovementInfo->mutable_rotation(), Character->GetBasedMovement().Rotation))
+	if (ChanneldUtils::CheckDifference(Character->GetBasedMovement().Rotation, MovementInfo->mutable_rotation()))
 	{
-		ChanneldUtils::SetIfNotSame(MovementInfoDelta->mutable_rotation(), Character->GetBasedMovement().Rotation);
+		ChanneldUtils::SetRotatorToPB(MovementInfoDelta->mutable_rotation(), Character->GetBasedMovement().Rotation, MovementInfo->mutable_rotation());
 		bStateChanged = true;
 	}
 
@@ -161,8 +225,10 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	// TODO: Optimization: Set the FullState as well as the DeltaState above
-	FullState->MergeFrom(*DeltaState);
+	if (bStateChanged)
+	{
+		FullState->MergeFrom(*DeltaState);
+	}
 }
 
 void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Message* InNewState)
@@ -190,7 +256,20 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 		FBasedMovementInfo BasedMovement = Character->GetBasedMovement();
 		if (NewState->basedmovement().has_movementbase())
 		{
-			BasedMovement.MovementBase = ChanneldUtils::GetActorComponentByRef<UPrimitiveComponent>(&NewState->basedmovement().movementbase(), Character->GetWorld());
+			/* We should not create the movement base here
+			UChanneldNetConnection* ClientConn = nullptr;
+			// Special case: server handover
+			if (Character->GetWorld()->IsServer())
+			{
+				ClientConn = Cast<UChanneldNetConnection>(Character->GetNetConnection());
+			}
+			*/
+			bool bUnmapped = false;
+			auto NewBase = ChanneldUtils::GetActorComponentByRefChecked(&NewState->basedmovement().movementbase(), Character->GetWorld(), bUnmapped, false);
+			if (!bUnmapped)
+			{
+				BasedMovement.MovementBase = Cast<UPrimitiveComponent>(NewBase);
+			}
 		}
 		if (NewState->basedmovement().has_bonename())
 		{
@@ -198,11 +277,11 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 		}
 		if (NewState->basedmovement().has_location())
 		{
-			BasedMovement.Location = FVector_NetQuantize100(ChanneldUtils::GetVector(NewState->basedmovement().location()));
+			ChanneldUtils::SetVectorFromPB(BasedMovement.Location, NewState->basedmovement().location());
 		}
 		if (NewState->basedmovement().has_rotation())
 		{
-			BasedMovement.Rotation = ChanneldUtils::GetRotator(NewState->basedmovement().rotation());
+			ChanneldUtils::SetRotatorFromPB(BasedMovement.Rotation, NewState->basedmovement().rotation());
 		}
 		if (NewState->basedmovement().has_bserverhasbasecomponent() && NewState->basedmovement().bserverhasbasecomponent() != BasedMovement.bServerHasBaseComponent)
 		{
@@ -234,6 +313,9 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 	if (NewState->has_movementmode() && NewState->movementmode() != Character->GetReplicatedMovementMode())
 	{
 		*MovementModeValuePtr = (uint8)NewState->movementmode();
+		// Somehow, the new movement mode won' be applied after the handover (even we call ACharacter::PostNetReceive), and
+		// SimulateMovement or SimulateRootMotion won't trigger when MovementMode = 0. So we apply it manually!
+		Character->GetCharacterMovement()->ApplyNetworkMovementMode(*MovementModeValuePtr);
 	}
 
 	if (NewState->has_biscrouched() && NewState->biscrouched() != Character->bIsCrouched)
@@ -286,15 +368,24 @@ TSharedPtr<google::protobuf::Message> FChanneldCharacterReplicator::SerializeFun
 	return nullptr;
 }
 
-TSharedPtr<void> FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
+TSharedPtr<void> FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ServerMovePacked"))
 	{
+		UNetConnection* NetConn = Character->GetNetConnection();
+		if (!NetConn)
+		{
+			UE_LOG(LogChanneld, Error, TEXT("ServerMovePacked: character doesn't have the NetConnection to deserialize the params. NetId: %d"), GetNetGUID());
+			bSuccess = false;
+			return nullptr;
+		}
+		
 		unrealpb::Character_ServerMovePacked_Params Msg;
 		if (!Msg.ParseFromString(ParamsPayload))
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Failed to parse Character_ServerMovePacked_Params"));
+			UE_LOG(LogChanneld, Error, TEXT("Failed to parse Character_ServerMovePacked_Params"));
+			bSuccess = false;
 			return nullptr;
 		}
 
@@ -302,7 +393,7 @@ TSharedPtr<void> FChanneldCharacterReplicator::DeserializeFunctionParams(UFuncti
 		bool bIDC;
 		FArchive EmptyArchive;
 		// Hack the package map into to the PackedBits for further deserialization. IDC = I don't care.
-		if (Params->PackedBits.NetSerialize(EmptyArchive, Character->GetNetConnection()->PackageMap, bIDC))
+		if (Params->PackedBits.NetSerialize(EmptyArchive, NetConn->PackageMap, bIDC))
 		{
 			// ----------------------------------------------------
 			// UCharacterMovementComponent::CallServerMovePacked
@@ -316,6 +407,15 @@ TSharedPtr<void> FChanneldCharacterReplicator::DeserializeFunctionParams(UFuncti
 	}
 	else if (Func->GetFName() == FName("ClientMoveResponsePacked"))
 	{
+		// The character doesn't have the owning NetConnection yet. Postpone the execution of the RPC.
+		UNetConnection* NetConn = Character->GetNetConnection();
+		if (!NetConn)
+		{
+			UE_LOG(LogChanneld, Verbose, TEXT("Character doesn't have the NetConn to handle RPC 'ClientMoveResponsePacked'"));
+			bDeferredRPC = true;
+			return nullptr;
+		}
+		
 		unrealpb::Character_ClientMoveResponsePacked_Params Msg;
 		if (!Msg.ParseFromString(ParamsPayload))
 		{
@@ -327,7 +427,7 @@ TSharedPtr<void> FChanneldCharacterReplicator::DeserializeFunctionParams(UFuncti
 		bool bIDC;
 		FArchive EmptyArchive;
 		// Hack the package map into to the PackedBits for further deserialization. IDC = I don't care.
-		if (Params->PackedBits.NetSerialize(EmptyArchive, Character->GetNetConnection()->PackageMap, bIDC))
+		if (Params->PackedBits.NetSerialize(EmptyArchive, NetConn->PackageMap, bIDC))
 		{
 			// ----------------------------------------------------
 			// UCharacterMovementComponent::ServerSendMoveResponse

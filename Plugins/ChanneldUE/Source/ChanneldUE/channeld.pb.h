@@ -189,11 +189,13 @@ inline bool AuthResultMessage_AuthResult_Parse(
 }
 enum BroadcastType : int {
   NO_BROADCAST = 0,
-  ALL = 1,
-  ALL_BUT_SENDER = 2,
-  ALL_BUT_OWNER = 4,
-  SINGLE_CONNECTION = 8,
-  ADJACENT_CHANNELS = 16,
+  SINGLE_CONNECTION = 1,
+  ALL = 2,
+  ALL_BUT_SENDER = 4,
+  ALL_BUT_OWNER = 6,
+  ALL_BUT_CLIENT = 8,
+  ALL_BUT_SERVER = 16,
+  ADJACENT_CHANNELS = 32,
   BroadcastType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   BroadcastType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
@@ -1380,6 +1382,7 @@ class CHANNELDUE_API ChannelSubscriptionOptions final :
     kDataAccessFieldNumber = 1,
     kFanOutIntervalMsFieldNumber = 3,
     kFanOutDelayMsFieldNumber = 4,
+    kSkipSelfUpdateFanOutFieldNumber = 5,
   };
   // repeated string dataFieldMasks = 2;
   int datafieldmasks_size() const;
@@ -1405,7 +1408,11 @@ class CHANNELDUE_API ChannelSubscriptionOptions final :
   std::string* _internal_add_datafieldmasks();
   public:
 
-  // .channeldpb.ChannelDataAccess dataAccess = 1;
+  // optional .channeldpb.ChannelDataAccess dataAccess = 1;
+  bool has_dataaccess() const;
+  private:
+  bool _internal_has_dataaccess() const;
+  public:
   void clear_dataaccess();
   ::channeldpb::ChannelDataAccess dataaccess() const;
   void set_dataaccess(::channeldpb::ChannelDataAccess value);
@@ -1414,7 +1421,11 @@ class CHANNELDUE_API ChannelSubscriptionOptions final :
   void _internal_set_dataaccess(::channeldpb::ChannelDataAccess value);
   public:
 
-  // uint32 fanOutIntervalMs = 3;
+  // optional uint32 fanOutIntervalMs = 3;
+  bool has_fanoutintervalms() const;
+  private:
+  bool _internal_has_fanoutintervalms() const;
+  public:
   void clear_fanoutintervalms();
   uint32_t fanoutintervalms() const;
   void set_fanoutintervalms(uint32_t value);
@@ -1423,13 +1434,30 @@ class CHANNELDUE_API ChannelSubscriptionOptions final :
   void _internal_set_fanoutintervalms(uint32_t value);
   public:
 
-  // int32 fanOutDelayMs = 4;
+  // optional int32 fanOutDelayMs = 4;
+  bool has_fanoutdelayms() const;
+  private:
+  bool _internal_has_fanoutdelayms() const;
+  public:
   void clear_fanoutdelayms();
   int32_t fanoutdelayms() const;
   void set_fanoutdelayms(int32_t value);
   private:
   int32_t _internal_fanoutdelayms() const;
   void _internal_set_fanoutdelayms(int32_t value);
+  public:
+
+  // optional bool skipSelfUpdateFanOut = 5;
+  bool has_skipselfupdatefanout() const;
+  private:
+  bool _internal_has_skipselfupdatefanout() const;
+  public:
+  void clear_skipselfupdatefanout();
+  bool skipselfupdatefanout() const;
+  void set_skipselfupdatefanout(bool value);
+  private:
+  bool _internal_skipselfupdatefanout() const;
+  void _internal_set_skipselfupdatefanout(bool value);
   public:
 
   // @@protoc_insertion_point(class_scope:channeldpb.ChannelSubscriptionOptions)
@@ -1440,11 +1468,13 @@ class CHANNELDUE_API ChannelSubscriptionOptions final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> datafieldmasks_;
     int dataaccess_;
     uint32_t fanoutintervalms_;
     int32_t fanoutdelayms_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+    bool skipselfupdatefanout_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_channeld_2eproto;
@@ -5461,9 +5491,17 @@ inline void AuthResultMessage::set_compressiontype(::channeldpb::CompressionType
 
 // ChannelSubscriptionOptions
 
-// .channeldpb.ChannelDataAccess dataAccess = 1;
+// optional .channeldpb.ChannelDataAccess dataAccess = 1;
+inline bool ChannelSubscriptionOptions::_internal_has_dataaccess() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool ChannelSubscriptionOptions::has_dataaccess() const {
+  return _internal_has_dataaccess();
+}
 inline void ChannelSubscriptionOptions::clear_dataaccess() {
   _impl_.dataaccess_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000001u;
 }
 inline ::channeldpb::ChannelDataAccess ChannelSubscriptionOptions::_internal_dataaccess() const {
   return static_cast< ::channeldpb::ChannelDataAccess >(_impl_.dataaccess_);
@@ -5473,7 +5511,7 @@ inline ::channeldpb::ChannelDataAccess ChannelSubscriptionOptions::dataaccess() 
   return _internal_dataaccess();
 }
 inline void ChannelSubscriptionOptions::_internal_set_dataaccess(::channeldpb::ChannelDataAccess value) {
-  
+  _impl_._has_bits_[0] |= 0x00000001u;
   _impl_.dataaccess_ = value;
 }
 inline void ChannelSubscriptionOptions::set_dataaccess(::channeldpb::ChannelDataAccess value) {
@@ -5556,9 +5594,17 @@ ChannelSubscriptionOptions::mutable_datafieldmasks() {
   return &_impl_.datafieldmasks_;
 }
 
-// uint32 fanOutIntervalMs = 3;
+// optional uint32 fanOutIntervalMs = 3;
+inline bool ChannelSubscriptionOptions::_internal_has_fanoutintervalms() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool ChannelSubscriptionOptions::has_fanoutintervalms() const {
+  return _internal_has_fanoutintervalms();
+}
 inline void ChannelSubscriptionOptions::clear_fanoutintervalms() {
   _impl_.fanoutintervalms_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000002u;
 }
 inline uint32_t ChannelSubscriptionOptions::_internal_fanoutintervalms() const {
   return _impl_.fanoutintervalms_;
@@ -5568,7 +5614,7 @@ inline uint32_t ChannelSubscriptionOptions::fanoutintervalms() const {
   return _internal_fanoutintervalms();
 }
 inline void ChannelSubscriptionOptions::_internal_set_fanoutintervalms(uint32_t value) {
-  
+  _impl_._has_bits_[0] |= 0x00000002u;
   _impl_.fanoutintervalms_ = value;
 }
 inline void ChannelSubscriptionOptions::set_fanoutintervalms(uint32_t value) {
@@ -5576,9 +5622,17 @@ inline void ChannelSubscriptionOptions::set_fanoutintervalms(uint32_t value) {
   // @@protoc_insertion_point(field_set:channeldpb.ChannelSubscriptionOptions.fanOutIntervalMs)
 }
 
-// int32 fanOutDelayMs = 4;
+// optional int32 fanOutDelayMs = 4;
+inline bool ChannelSubscriptionOptions::_internal_has_fanoutdelayms() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool ChannelSubscriptionOptions::has_fanoutdelayms() const {
+  return _internal_has_fanoutdelayms();
+}
 inline void ChannelSubscriptionOptions::clear_fanoutdelayms() {
   _impl_.fanoutdelayms_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000004u;
 }
 inline int32_t ChannelSubscriptionOptions::_internal_fanoutdelayms() const {
   return _impl_.fanoutdelayms_;
@@ -5588,12 +5642,40 @@ inline int32_t ChannelSubscriptionOptions::fanoutdelayms() const {
   return _internal_fanoutdelayms();
 }
 inline void ChannelSubscriptionOptions::_internal_set_fanoutdelayms(int32_t value) {
-  
+  _impl_._has_bits_[0] |= 0x00000004u;
   _impl_.fanoutdelayms_ = value;
 }
 inline void ChannelSubscriptionOptions::set_fanoutdelayms(int32_t value) {
   _internal_set_fanoutdelayms(value);
   // @@protoc_insertion_point(field_set:channeldpb.ChannelSubscriptionOptions.fanOutDelayMs)
+}
+
+// optional bool skipSelfUpdateFanOut = 5;
+inline bool ChannelSubscriptionOptions::_internal_has_skipselfupdatefanout() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool ChannelSubscriptionOptions::has_skipselfupdatefanout() const {
+  return _internal_has_skipselfupdatefanout();
+}
+inline void ChannelSubscriptionOptions::clear_skipselfupdatefanout() {
+  _impl_.skipselfupdatefanout_ = false;
+  _impl_._has_bits_[0] &= ~0x00000008u;
+}
+inline bool ChannelSubscriptionOptions::_internal_skipselfupdatefanout() const {
+  return _impl_.skipselfupdatefanout_;
+}
+inline bool ChannelSubscriptionOptions::skipselfupdatefanout() const {
+  // @@protoc_insertion_point(field_get:channeldpb.ChannelSubscriptionOptions.skipSelfUpdateFanOut)
+  return _internal_skipselfupdatefanout();
+}
+inline void ChannelSubscriptionOptions::_internal_set_skipselfupdatefanout(bool value) {
+  _impl_._has_bits_[0] |= 0x00000008u;
+  _impl_.skipselfupdatefanout_ = value;
+}
+inline void ChannelSubscriptionOptions::set_skipselfupdatefanout(bool value) {
+  _internal_set_skipselfupdatefanout(value);
+  // @@protoc_insertion_point(field_set:channeldpb.ChannelSubscriptionOptions.skipSelfUpdateFanOut)
 }
 
 // -------------------------------------------------------------------

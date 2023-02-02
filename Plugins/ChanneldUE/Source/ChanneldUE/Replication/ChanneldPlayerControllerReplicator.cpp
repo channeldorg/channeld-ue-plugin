@@ -66,9 +66,17 @@ void FChanneldPlayerControllerReplicator::OnStateChanged(const google::protobuf:
 		return;
 	}
 
+	if (PC->HasAuthority())
+	{
+		return;
+	}
+	
 	//auto CharacterState = static_cast<const unrealpb::PlayerControllerState*>(NewState);
 
-	FullState->MergeFrom(*NewState);
+	if (bStateChanged)
+	{
+		FullState->MergeFrom(*DeltaState);
+	}
 }
 
 TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::SerializeFunctionParams(UFunction* Func, void* Params, FOutParmRec* OutParams, bool& bSuccess)
@@ -78,7 +86,7 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	{
 		ServerUpdateCameraParams* TypedParams = (ServerUpdateCameraParams*)Params;
 		auto Msg = MakeShared<unrealpb::PlayerController_ServerUpdateCamera_Params>();
-		ChanneldUtils::SetIfNotSame(Msg->mutable_camloc(), TypedParams->CamLoc);
+		ChanneldUtils::SetVectorToPB(Msg->mutable_camloc(), TypedParams->CamLoc);
 		Msg->set_campitchandyaw(TypedParams->CamPitchAndYaw);
 		return Msg;
 	}
@@ -142,8 +150,8 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	{
 		ServerSetSpectatorLocationParams* TypedParams = (ServerSetSpectatorLocationParams*)Params;
 		auto Msg = MakeShared<unrealpb::PlayerController_ServerSetSpectatorLocation_Params>();
-		ChanneldUtils::SetIfNotSame(Msg->mutable_newloc(), TypedParams->NewLoc);
-		ChanneldUtils::SetIfNotSame(Msg->mutable_newrot(), TypedParams->NewRot);
+		ChanneldUtils::SetVectorToPB(Msg->mutable_newloc(), TypedParams->NewLoc);
+		ChanneldUtils::SetRotatorToPB(Msg->mutable_newrot(), TypedParams->NewRot);
 		return Msg;
 	}
 	else if (Func->GetFName() == FName("ServerAcknowledgePossession"))
@@ -181,7 +189,7 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	return nullptr;
 }
 
-TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDelayRPC)
+TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ServerUpdateCamera"))
@@ -189,7 +197,7 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 		unrealpb::PlayerController_ServerUpdateCamera_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ServerUpdateCameraParams>();
-		Params->CamLoc = FVector_NetQuantize(ChanneldUtils::GetVector(Msg.camloc()));
+		ChanneldUtils::SetVectorFromPB(Params->CamLoc, Msg.camloc());
 		Params->CamPitchAndYaw = Msg.campitchandyaw();
 		return Params;
 	}
@@ -208,8 +216,8 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 	{
 		unrealpb::PlayerController_ClientSetViewTarget_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
-		AActor* ViewTarget = Cast<AActor>(ChanneldUtils::GetObjectByRef(&Msg.actor(), PC->GetWorld(), bDelayRPC));
-		if (bDelayRPC)
+		AActor* ViewTarget = Cast<AActor>(ChanneldUtils::GetObjectByRef(&Msg.actor(), PC->GetWorld(), bDeferredRPC, true));
+		if (bDeferredRPC)
 		{
 			return nullptr;
 		}
@@ -242,8 +250,8 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 	{
 		unrealpb::PlayerController_ClientRestart_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
-		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDelayRPC));
-		if (bDelayRPC)
+		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDeferredRPC, true));
+		if (bDeferredRPC)
 		{
 			return nullptr;
 		}
@@ -264,8 +272,8 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 	{
 		unrealpb::PlayerController_ClientRetryClientRestart_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
-		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDelayRPC));
-		if (bDelayRPC)
+		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDeferredRPC, true));
+		if (bDeferredRPC)
 		{
 			return nullptr;
 		}
@@ -279,20 +287,26 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 		unrealpb::PlayerController_ServerSetSpectatorLocation_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ServerSetSpectatorLocationParams>();
-		Params->NewLoc = ChanneldUtils::GetVector(Msg.newloc());
-		Params->NewRot = ChanneldUtils::GetRotator(Msg.newrot());
+		ChanneldUtils::SetVectorFromPB(Params->NewLoc, Msg.newloc());
+		ChanneldUtils::SetRotatorFromPB(Params->NewRot, Msg.newrot());
 		return Params;
 	}
 	else if (Func->GetFName() == FName("ServerAcknowledgePossession"))
 	{
 		unrealpb::PlayerController_ServerAcknowledgePossession_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
-		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bDelayRPC));
-		if (bDelayRPC)
+		// Server should have all NetGUID (no need to delay RPC). If unmapped, there must be something wrong.
+		bool bNetGUIDUnmapped;
+		APawn* Pawn = Cast<APawn>(ChanneldUtils::GetObjectByRef(&Msg.pawn(), PC->GetWorld(), bNetGUIDUnmapped, false));
+		if (bNetGUIDUnmapped)
 		{
+			UE_LOG(LogChanneld, Warning, TEXT("ServerAcknowledgePossession's pawn has unmapped NetGUID: %d"), Msg.pawn().netguid());
+			bSuccess = false;
 			return nullptr;
 		}
 
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Deserialized RPC parameters of 'ServerAcknowledgePossession': %s"), *GetNameSafe(Pawn));
+		
 		auto Params = MakeShared<ClientRetryClientRestartParams>();
 		Params->Pawn = Pawn;
 		return Params;

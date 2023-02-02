@@ -10,6 +10,11 @@ FString FRotatorPropertyDecorator::GetCode_GetProtoFieldValueFrom(const FString&
 	return FString::Printf(TEXT("ChanneldUtils::GetRotator(%s->%s())"), *StateName, *GetProtoFieldName());
 }
 
+FString FRotatorPropertyDecorator::GetCode_SetProtoFieldValueTo(const FString& StateName, const FString& GetValueCode)
+{
+	return FString::Printf(TEXT("ChanneldUtils::SetRotatorToPB(%s->mutable_%s(), %s)"), *StateName, *GetProtoFieldName(), *GetValueCode);
+}
+
 FString FRotatorPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
 {
 	FStringFormatNamedArguments FormatArgs;

@@ -3,11 +3,12 @@
 #include "CoreMinimal.h"
 #include "unreal_common.pb.h"
 #include "Engine/PackageMapClient.h"
-#include "ChanneldTypes.h"
 #include "Engine/ActorChannel.h"
+#include "ChanneldConnection.h"
 #include "ChanneldNetConnection.h"
+#include "Engine/DemoNetDriver.h"
 
-class ChanneldUtils
+class CHANNELDUE_API ChanneldUtils
 {
 public:
 	static google::protobuf::Message* CreateProtobufMessage(const std::string& FullName)
@@ -21,91 +22,142 @@ public:
 		return nullptr;
 	}
 
+	static void SetVectorFromPB(FVector& VectorToSet, const unrealpb::FVector& VectorToCheck)
+	{
+		if (VectorToCheck.has_x())
+		{
+			VectorToSet.X = VectorToCheck.x();
+		}
+		if (VectorToCheck.has_y())
+		{
+			VectorToSet.Y = VectorToCheck.y();
+		}
+		if (VectorToCheck.has_z())
+		{
+			VectorToSet.Z = VectorToCheck.z();
+		}
+	}
+
+	static void SetRotatorFromPB(FRotator& RotatorToSet, const unrealpb::FVector& RotatorToCheck)
+	{
+		if (RotatorToCheck.has_x())
+		{
+			RotatorToSet.Pitch = RotatorToCheck.x();
+		}
+		if (RotatorToCheck.has_y())
+		{
+			RotatorToSet.Yaw = RotatorToCheck.y();
+		}
+		if (RotatorToCheck.has_z())
+		{
+			RotatorToSet.Roll = RotatorToCheck.z();
+		}
+	}
+
+	[[deprecated("Use SetVectorFromPB instead. Use GetVector can cause the value of x/y/z to be 0 if the it is not set.")]]
 	static FVector GetVector(const unrealpb::FVector& InVec)
 	{
 		return FVector(InVec.x(), InVec.y(), InVec.z());
 	}
 
+	static unrealpb::FVector GetVectorPB(const FVector& InVec)
+	{
+		unrealpb::FVector Vec;
+		Vec.set_x(InVec.X);
+		Vec.set_y(InVec.Y);
+		Vec.set_z(InVec.Z);
+		return Vec;
+	}
+
+	[[deprecated("Use SetRotatorFromPB instead. Use GetRotator can cause the value of pitch/yaw/roll to be 0 if the it is not set.")]]
 	static FRotator GetRotator(const unrealpb::FVector& InVec)
 	{
 		return FRotator(InVec.x(), InVec.y(), InVec.z());
 	}
 
-	static bool IsSame(const unrealpb::FVector* VectorToSet, const FVector& VectorToCheck)
+	static bool CheckDifference(const FVector& VectorToCheck, const unrealpb::FVector* VectorPBToCheck)
 	{
-		if(VectorToSet == nullptr)
-			return false;
-		if (!FMath::IsNearlyEqual(VectorToSet->x(), VectorToCheck.X))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X))
 		{
-			return false;
+			return true;
 		}
-		if (!FMath::IsNearlyEqual(VectorToSet->y(), VectorToCheck.Y))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y))
 		{
-			return false;
+			return true;
 		}
-		if (!FMath::IsNearlyEqual(VectorToSet->z(), VectorToCheck.Z))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z))
 		{
-			return false;
+			return true;
 		}
-		return true;
+		return false;
 	}
 
-	static bool IsSame(const unrealpb::FVector* RotatorToSet, const FRotator& RotatorToCheck)
+	static bool CheckDifference(const FRotator& RotatorToCheck, const unrealpb::FVector* RotatorPBToCheck)
 	{
-		if(RotatorToSet == nullptr)
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch))
 		{
-			return  false;
+			return true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorToSet->x(), RotatorToCheck.Pitch))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw))
 		{
-			return false;
+			return true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorToSet->y(), RotatorToCheck.Yaw))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll))
 		{
-			return false;
+			return true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorToSet->z(), RotatorToCheck.Roll))
-		{
-			return false;
-		}
-		return true;
+		return false;
 	}
 
-	static bool SetIfNotSame(unrealpb::FVector* VectorToSet, const FVector& VectorToCheck)
+	/**
+	 * @brief Check if the VectorToCheck is different from VectorPBToCheck and set the difference to VectorToSet
+	 * @param VectorToSet The Protobuf vector to set the difference to
+	 * @param VectorToCheck The UE vector to check the difference from
+	 * @param VectorPBToCheck The Protobuf vector to compare with the UE vector. If nullptr, VectorToSet will be used
+	 * @return True if any component(x/y/z) in the VectorToCheck is different from VectorPBToCheck
+	 */
+	static bool SetVectorToPB(unrealpb::FVector* VectorToSet, const FVector& VectorToCheck, const unrealpb::FVector* VectorPBToCheck = nullptr)
 	{
+		if (VectorPBToCheck == nullptr)
+			VectorPBToCheck = VectorToSet;
+		
 		bool bNotSame = false;
-		if (!FMath::IsNearlyEqual(VectorToSet->x(), VectorToCheck.X))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X))
 		{
 			VectorToSet->set_x(VectorToCheck.X);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(VectorToSet->y(), VectorToCheck.Y))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y))
 		{
 			VectorToSet->set_y(VectorToCheck.Y);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(VectorToSet->z(), VectorToCheck.Z))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z))
 		{
 			VectorToSet->set_z(VectorToCheck.Z);
 			bNotSame = true;
 		}
+		
 		return bNotSame;
 	}
 
-	static bool SetIfNotSame(unrealpb::FVector* RotatorToSet, const FRotator& RotatorToCheck)
+	static bool SetRotatorToPB(unrealpb::FVector* RotatorToSet, const FRotator& RotatorToCheck, const unrealpb::FVector* RotatorPBToCheck = nullptr)
 	{
+		if (RotatorPBToCheck == nullptr)
+			RotatorPBToCheck = RotatorToSet;
+		
 		bool bNotSame = false;
-		if (!FMath::IsNearlyEqual(RotatorToSet->x(), RotatorToCheck.Pitch))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch))
 		{
 			RotatorToSet->set_x(RotatorToCheck.Pitch);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorToSet->y(), RotatorToCheck.Yaw))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw))
 		{
 			RotatorToSet->set_y(RotatorToCheck.Yaw);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorToSet->z(), RotatorToCheck.Roll))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll))
 		{
 			RotatorToSet->set_z(RotatorToCheck.Roll);
 			bNotSame = true;
@@ -113,229 +165,47 @@ public:
 		return bNotSame;
 	}
 
-	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World)
+	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr)
 	{
 		bool bUnmapped;
-		return GetObjectByRef(Ref, World, bUnmapped);
+		return GetObjectByRef(Ref, World, bUnmapped, bCreateIfNotInCache, ClientConn);
 	}
 
-	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped)
-	{
-		if (!Ref || !World)
-		{
-			return nullptr;
-		}
-		FNetworkGUID NetGUID(Ref->netguid());
-		if (!NetGUID.IsValid())
-		{
-			return nullptr;
-		}
+	/**
+	 * @brief Get the object in the GuidCache or create from the UnrealObjectRef.
+	 * @param Ref The UnrealObjectRef message that contains the NetworkGUID and other data needed to deserialize the object.
+	 * @param World Used for acquiring the NetDriver.
+	 * @param bNetGUIDUnmapped Set to true if the NetDriver does not exist or the object is not in the cache.
+	 * @param bCreateIfNotInCache Create the object if it's not in the cache.
+	 * @param ClientConn The client connection that causes the handover, and is responsible for deserializing the object. Only need in server, when the object is handed over from another server.
+	 * @return The object if it's in the GuidCache or deserialized successfully.
+	 */
+	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
+	
+	static const unrealpb::UnrealObjectRef GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr);
 		
-		bNetGUIDUnmapped = (World->GetNetDriver() == nullptr);
-		if (bNetGUIDUnmapped)
-		{
-			return nullptr;
-		}
-		auto GuidCache = World->GetNetDriver()->GuidCache;
-		auto Obj = GuidCache->GetObjectFromNetGUID(NetGUID, false);
-		if (Obj == nullptr)
-		{
-			if (!GuidCache->IsNetGUIDAuthority())
-			{
-				UNetConnection* Connection = World->GetNetDriver()->ServerConnection;
-				TArray<const unrealpb::UnrealObjectRef_GuidCachedObject*> CachedObjs;
-				for (auto& Context : Ref->context())
-				{
-					CachedObjs.Add(&Context);
-				}
-				// Sort by the NetGUID to register in descending order.
-				CachedObjs.Sort([](const unrealpb::UnrealObjectRef_GuidCachedObject& Obj1, const unrealpb::UnrealObjectRef_GuidCachedObject& Obj2)
-					{
-						return Obj1.netguid() > Obj2.netguid();
-					});
-				for (auto CachedObj : CachedObjs)
-				{
-					FNetworkGUID NewGUID = FNetworkGUID(CachedObj->netguid());
-					FString PathName = UTF8_TO_TCHAR(CachedObj->pathname().c_str());
-					// Remap name for PIE
-					GEngine->NetworkRemapPath(Connection, PathName, true);
-					GuidCache->RegisterNetGUIDFromPath_Client(NewGUID, PathName, FNetworkGUID(CachedObj->outerguid()), 0, false, false);
-					UObject* NewObj = GuidCache->GetObjectFromNetGUID(NewGUID, false);
-					UE_LOG(LogChanneld, Verbose, TEXT("[Client] Registered NetGUID %d from path: %s"), CachedObj->netguid(), *PathName);
-				}
+	static UActorComponent* GetActorComponentByRef(const unrealpb::ActorComponentRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
+	
+	static UActorComponent* GetActorComponentByRefChecked(const unrealpb::ActorComponentRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
 
-				if (Ref->bunchbitsnum() > 0)
-				{
-					FInBunch InBunch(World->GetNetDriver()->ServerConnection, (uint8*)Ref->netguidbunch().data(), Ref->bunchbitsnum());
-					auto PackageMap = Cast<UPackageMapClient>(World->GetNetDriver()->ServerConnection->PackageMap);
+	static unrealpb::ActorComponentRef GetRefOfActorComponent(UActorComponent* Comp, UNetConnection* Connection = nullptr);
 
-					UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);
-					UE_LOG(LogChanneld, VeryVerbose, TEXT("[Client] ActorChannels: %d"), Connection->ActorChannelsNum());
-					AActor* Actor;
-					//-----------------------------------------
-					// Copied from UActorChannel::ProcessBunch
-					//-----------------------------------------
-					if (PackageMap->SerializeNewActor(InBunch, Channel, Actor))
-					{
-						Channel->SetChannelActor(Actor, ESetChannelActorFlags::SkipReplicatorCreation);
-						// Setup NetDriver, etc.
-						Channel->NotifyActorChannelOpen(Actor, InBunch);
-						// After all properties have been initialized, call PostNetInit. This should call BeginPlay() so initialization can be done with proper starting values.
-						Actor->PostNetInit();
-						UE_LOG(LogChanneld, Verbose, TEXT("[Client] Created new actor '%s' with NetGUID %d"), *Actor->GetName(), GuidCache->GetNetGUID(Actor).Value);
+	/**
+	 *	Standard method of serializing a new actor on server.
+	 *		For static actors, this will just be a single call to SerializeObject, since they can be referenced by their path name.
+	 *		For dynamic actors, first the actor's reference is serialized but will not resolve on clients since they haven't spawned the actor yet.
+	 *		The actor archetype is then serialized along with the starting location, rotation, and velocity.
+	 *		After reading this information, the client spawns this actor in the NetDriver's World and assigns it the NetGUID it read at the top of the function.
+	 *
+	 *		returns true if a new actor was spawned. false means an existing actor was found for the netguid.
+	 */
+	bool static SerializeNewActor_Server(UNetConnection* Connection, UPackageMapClient* PackageMap, TSharedPtr<FNetGUIDCache> GuidCache, FArchive& Ar, class UActorChannel *Channel, class AActor*& Actor);
+	
+	// Set the actor's NetRole on the client based on the NetConnection that owns the actor.
+	static void SetActorRoleByOwningConnId(AActor* Actor, ConnectionId OwningConnId);
 
-						//// Remove the channel after using it
-						//Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
-						return Actor;
-					}
-				}
-			}
-
-			if (Obj == nullptr)
-			{
-				bNetGUIDUnmapped = true;
-				UE_LOG(LogChanneld, Warning, TEXT("[Client] Unable to create object from NetGUID: %d"), NetGUID.Value);
-			}
-		}
-		return Obj;
-	}
-
-	static const unrealpb::UnrealObjectRef GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr)
+	static uint32 GetNativeNetId(uint32 UniqueNetId)
 	{
-		unrealpb::UnrealObjectRef ObjRef;
-		ObjRef.set_netguid(0);
-		ObjRef.set_bunchbitsnum(0);
-
-		if (!Obj)
-		{
-			return ObjRef;
-		}
-		auto World = Obj->GetWorld();
-		if (!World)
-		{
-			return ObjRef;
-		}
-
-		auto GuidCache = World->GetNetDriver()->GuidCache;
-		auto NetGUID = GuidCache->GetNetGUID(Obj);
-		if (Obj->IsA<AActor>() && GuidCache->IsNetGUIDAuthority())
-		{
-			auto Actor = Cast<AActor>(Obj);
-			if (Connection == nullptr)
-			{
-				Connection = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
-			}
-			if (!IsValid(Connection))
-			{
-				UE_LOG(LogChanneld, Warning, TEXT("Failed to get the ref of %s: the NetConnection is not valid"), *Obj->GetName());
-				return ObjRef;
-			}
-			auto PackageMap = Cast<UPackageMapClient>(Connection->PackageMap);
-
-			if (IsValid(PackageMap))
-			{
-				// If the NetGUID is not created yet, assign an new one and send the new NetGUID CachedObjects to the client.
-				// If the NetGUID is already created but hasn't been exported to the client yet, we need to send the CachedObjects as well.
-				if (!NetGUID.IsValid() || !PackageMap->NetGUIDExportCountMap.Contains(NetGUID))
-				{
-					TSet<FNetworkGUID> OldGUIDs;
-					PackageMap->NetGUIDExportCountMap.GetKeys(OldGUIDs);
-
-					//--------------------------------------------------
-					// Copied from UActorChannel::ReplicateActor (L3121)
-					//--------------------------------------------------
-					FOutBunch Ar(PackageMap);
-					Ar.bReliable = true;
-					UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);
-					UE_LOG(LogChanneld, VeryVerbose, TEXT("[Server] ActorChannels: %d"), Connection->ActorChannelsNum());
-					Channel->SetChannelActor(Actor, ESetChannelActorFlags::None);
-					PackageMap->SerializeNewActor(Ar, Channel, Actor);
-					Actor->OnSerializeNewActor(Ar);
-					//--------------------------------------------------
-
-					NetGUID = GuidCache->GetNetGUID(Obj);
-
-					TSet<FNetworkGUID> NewGUIDs;
-					PackageMap->NetGUIDExportCountMap.GetKeys(NewGUIDs);
-					// Find the newly-registered NetGUIDs during SerializeNewActor()
-					NewGUIDs = NewGUIDs.Difference(OldGUIDs);
-
-					for (FNetworkGUID& NewGUID : NewGUIDs)
-					{
-						// Don't send the target NetGUID in the context
-						if (NewGUID == NetGUID)
-							continue;
-
-						auto NewCachedObj = GuidCache->GetCacheObject(NewGUID);
-						auto Context = ObjRef.add_context();
-						Context->set_netguid(NewGUID.Value);
-						Context->set_pathname(std::string(TCHAR_TO_UTF8(*NewCachedObj->PathName.ToString())));
-						Context->set_outerguid(NewCachedObj->OuterGUID.Value);
-						UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send registered NetGUID %d with path: %s"), NewGUID.Value, *NewCachedObj->PathName.ToString());
-					}
-					ObjRef.set_netguidbunch(Ar.GetData(), Ar.GetNumBytes());
-					ObjRef.set_bunchbitsnum(Ar.GetNumBits());
-
-					// Remove the channel after using it
-					Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
-				}
-				//else
-				//{
-				//	NetGUID = GuidCache->GetOrAssignNetGUID(Obj);
-				//}
-			}
-			else
-			{
-				UE_LOG(LogChanneld, Warning, TEXT("Failed to get the ref of %s: the Actor's NetConnection has no PackageMapClient"), *Obj->GetName());
-			}
-		}
-
-		ObjRef.set_netguid(NetGUID.Value);
-		return ObjRef;
-	}
-
-	template<class T>
-	static T* GetActorComponentByRef(const unrealpb::ActorComponentRef* Ref, UWorld* World)
-	{
-		if (!Ref || !World)
-		{
-			return nullptr;
-		}
-
-		AActor* Actor = Cast<AActor>(GetObjectByRef(&Ref->owner(), World));
-		if (!Actor)
-		{
-			return nullptr;
-		}
-
-		FName CompName = FName(UTF8_TO_TCHAR(Ref->compname().c_str()));
-		UObject* Comp = Actor->GetDefaultSubobjectByName(CompName);
-		if (Comp)
-		{
-			return Cast<T>(Comp);
-		}
-
-		UE_LOG(LogChanneld, Warning, TEXT("Cannot find component '%s' of actor %s"), *CompName.ToString(), *Actor->GetName());
-		return nullptr;
-	}
-
-	static const unrealpb::ActorComponentRef GetRefOfActorComponent(UActorComponent* Comp, UNetConnection* Connection = nullptr)
-	{
-		unrealpb::ActorComponentRef CompRef;
-		if (!Comp || !Comp->GetOwner())
-		{
-			CompRef.mutable_owner()->set_netguid(0);
-			return CompRef;
-		}
-		auto World = Comp->GetWorld();
-		if (!World)
-		{
-			CompRef.mutable_owner()->set_netguid(0);
-			return CompRef;
-		}
-
-		CompRef.mutable_owner()->MergeFrom(GetRefOfObject(Comp->GetOwner(), Connection));
-		CompRef.set_compname(std::string(TCHAR_TO_UTF8(*Comp->GetFName().ToString())));
-		return CompRef;
+		return UniqueNetId & ((1 << ConnectionIdBitOffset) - 1);
 	}
 };
