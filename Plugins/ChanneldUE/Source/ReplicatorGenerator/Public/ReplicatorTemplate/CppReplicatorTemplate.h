@@ -157,6 +157,8 @@ static const TCHAR* CodeGen_ProtoStateMessageTemplate =
   LR"EOF(
 message {Declare_StateMessageType} {
 {Declare_ProtoFields}
+
+{Declare_SubProtoFields}
 }
 )EOF";
 

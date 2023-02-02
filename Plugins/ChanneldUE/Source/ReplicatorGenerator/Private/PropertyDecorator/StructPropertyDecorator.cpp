@@ -284,6 +284,7 @@ FString FStructPropertyDecorator::GetDefinition_ProtoStateMessage()
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_StateMessageType"), GetProtoStateMessageType());
 	FormatArgs.Add(TEXT("Declare_ProtoFields"), FieldDefinitionCodes);
+	FormatArgs.Add(TEXT("Declare_SubProtoFields"), TEXT(""));
 
 	return FString::Format(CodeGen_ProtoStateMessageTemplate, FormatArgs);
 }

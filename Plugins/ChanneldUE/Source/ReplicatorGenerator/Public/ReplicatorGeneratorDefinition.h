@@ -12,13 +12,14 @@ static const FString CodeGen_ProtoPbHeadExtension = TEXT(".pb.h");
 static const FString CodeGen_ProtoPbCPPExtension = TEXT(".pb.cpp");
 
 static const FString GenManager_GeneratedCodeDir = TEXT("ChanneldGenerated");
+static const FString GenManager_ProtoNamespace = TEXT("channeldgeneratedpb");
 static const FName GenManager_ProtobufModuleName = TEXT("ProtobufEditor");
 static const FString GenManager_RepRegisterFile = TEXT("ChanneldReplicatorRegister") + CodeGen_HeadFileExtension;
 static const FString GenManager_GlobalStructHeaderFile = TEXT("ChanneldGlobalStruct") + CodeGen_HeadFileExtension;
 static const FString GenManager_GlobalStructProtoFile = TEXT("ChanneldGlobalStruct") + CodeGen_ProtoFileExtension;
 static const FString GenManager_UnrealCommonProtoFile = TEXT("unreal_common") + CodeGen_ProtoFileExtension;
 static const FString GenManager_GlobalStructProtoHeaderFile = TEXT("ChanneldGlobalStruct") + CodeGen_ProtoPbHeadExtension;
-static const FString GenManager_GlobalStructProtoNamespace = TEXT("channeldglobalstructpb");
+static const FString GenManager_GlobalStructProtoNamespace = GenManager_ProtoNamespace;
 static const FString GenManager_GlobalStructProtoPackage = GenManager_GlobalStructProtoNamespace;
 
 static const FString GenManager_IntermediateDir = FPaths::ProjectIntermediateDir() / TEXT("ChanneldReplicatorGenerator");

@@ -53,12 +53,12 @@ FString FRPCDecorator::GetCPPType()
 
 FString FRPCDecorator::GetProtoPackageName()
 {
-	return Owner->GetProtoPackageName();
+	return Owner->GetProtoPackageName() + TEXT("::") + Owner->GetProtoStateMessageType();
 }
 
 FString FRPCDecorator::GetProtoNamespace()
 {
-	return Owner->GetProtoNamespace();
+	return Owner->GetProtoNamespace() + TEXT("::") + Owner->GetProtoStateMessageType();
 }
 
 FString FRPCDecorator::GetProtoStateMessageType()

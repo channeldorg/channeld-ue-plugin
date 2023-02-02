@@ -258,7 +258,7 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	);
 	ProtoFormatArgs.Add(
 		TEXT("Definition_ProtoStateMsg"),
-		Target->GetDefinition_ProtoStateMessage() + Target->GetDefinition_RPCParamsMessage()
+		Target->GetDefinition_ProtoStateMessage()
 	);
 	ReplicatorCode.ProtoDefinitions = FString::Format(CodeGen_ProtoTemplate, ProtoFormatArgs);
 	ReplicatorCode.ProtoFileName = Target->GetActorName() + CodeGen_ProtoFileExtension;

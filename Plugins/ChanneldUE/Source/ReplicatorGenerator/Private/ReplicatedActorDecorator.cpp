@@ -1,6 +1,7 @@
 ﻿#include "ReplicatedActorDecorator.h"
 
 #include "PropertyDecoratorFactory.h"
+#include "ReplicatorGeneratorDefinition.h"
 #include "ReplicatorGeneratorUtils.h"
 #include "GameFramework/GameStateBase.h"
 #include "ReplicatorTemplate/CppReplicatorTemplate.h"
@@ -170,7 +171,8 @@ FString FReplicatedActorDecorator::GetCode_AssignPropertyPointers()
 
 FString FReplicatedActorDecorator::GetProtoPackageName()
 {
-	return GetActorName().ToLower() + "pb";
+	// return GetActorName().ToLower() + "pb";
+	return GenManager_ProtoNamespace;
 }
 
 FString FReplicatedActorDecorator::GetProtoNamespace()
@@ -222,6 +224,7 @@ FString FReplicatedActorDecorator::GetDefinition_ProtoStateMessage()
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_StateMessageType"), GetProtoStateMessageType());
 	FormatArgs.Add(TEXT("Declare_ProtoFields"), FieldDefinitions);
+	FormatArgs.Add(TEXT("Declare_SubProtoFields"), GetDefinition_RPCParamsMessage());
 
 	return FString::Format(CodeGen_ProtoStateMessageTemplate, FormatArgs);
 }
@@ -235,6 +238,7 @@ FString FReplicatedActorDecorator::GetDefinition_RPCParamsMessage()
 		FStringFormatNamedArguments FormatArgs;
 		FormatArgs.Add(TEXT("Declare_StateMessageType"), RPC->GetProtoStateMessageType());
 		FormatArgs.Add(TEXT("Declare_ProtoFields"), RPC->GetDeclaration_ProtoFields());
+		FormatArgs.Add(TEXT("Declare_SubProtoFields"), TEXT(""));
 
 		RPCParamMessages.Append(FString::Format(CodeGen_ProtoStateMessageTemplate, FormatArgs));
 	}
