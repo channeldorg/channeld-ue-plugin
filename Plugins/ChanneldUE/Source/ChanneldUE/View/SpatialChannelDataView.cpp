@@ -23,7 +23,7 @@ USpatialChannelDataView::USpatialChannelDataView(const FObjectInitializer& Objec
 {
 }
 
-UChanneldNetConnection* USpatialChannelDataView::CreateClientConnection(ConnectionId ConnId, ChannelId ChId)
+UChanneldNetConnection* USpatialChannelDataView::CreateClientConnection(Channeld::ConnectionId ConnId, Channeld::ChannelId ChId)
 {
 	ensureMsgf(!ClientInChannels.Contains(ConnId), TEXT("Client conn %d had already been added to this server"), ConnId);
 
@@ -134,7 +134,7 @@ TArray<UObject*> USpatialChannelDataView::GetHandoverObjects_Implementation(UObj
 	return Result;
 }
 
-void USpatialChannelDataView::ServerHandleGetHandoverContext(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+void USpatialChannelDataView::ServerHandleGetHandoverContext(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto GetContextMsg = static_cast<const unrealpb::GetHandoverContextMessage*>(Msg);
 	const auto NetId = FNetworkGUID(GetContextMsg->netid());
@@ -181,7 +181,7 @@ void USpatialChannelDataView::ServerHandleGetHandoverContext(UChanneldConnection
 	GEngine->GetEngineSubsystem<UMetrics>()->GetHandoverContexts->Add({{"objNum", std::to_string(ResultMsg.context_size())}}).Increment();
 }
 
-void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto HandoverMsg = static_cast<const channeldpb::ChannelDataHandoverMessage*>(Msg);
 	unrealpb::HandoverData HandoverData;
@@ -288,7 +288,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 			// Player enters the server - only Pawn, PlayerController or PlayerState has clientConnId > 0
 			if (HandoverContext.clientconnid() > 0)
 			{
-				const ConnectionId ClientConnId = HandoverContext.clientconnid();
+				const Channeld::ConnectionId ClientConnId = HandoverContext.clientconnid();
 				ClientConn = GetChanneldSubsystem()->GetNetDriver()->GetClientConnection(ClientConnId);
 			
 				// Try to spawn the object
@@ -443,7 +443,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	GEngine->GetEngineSubsystem<UMetrics>()->Handovers->Add({{"objNum", std::to_string(HandoverData.context_size())}, {"hasData", std::to_string(HandoverData.has_channeldata())}}).Increment();
 }
 
-void USpatialChannelDataView::ServerHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+void USpatialChannelDataView::ServerHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	const auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
 	UE_LOG(LogChanneld, Log, TEXT("[Server] Sub %s conn %d to %s channel %d"),
@@ -471,7 +471,7 @@ void USpatialChannelDataView::ServerHandleSubToChannel(UChanneldConnection* _, C
 	}
 }
 
-void USpatialChannelDataView::OnClientUnsub(ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, ChannelId ChId)
+void USpatialChannelDataView::OnClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId)
 {
 	// A client leaves the spatial channel
 	if (ChannelType == channeldpb::SPATIAL)
@@ -489,7 +489,7 @@ void USpatialChannelDataView::OnClientUnsub(ConnectionId ClientConnId, channeldp
 	}
 }
 
-bool USpatialChannelDataView::CheckUnspawnedObject(ChannelId ChId, const google::protobuf::Message* ChannelData)
+bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData)
 {
 	// Only client needs to spawn the objects.
 	if (Connection->IsServer())
@@ -538,7 +538,7 @@ bool USpatialChannelDataView::CheckUnspawnedObject(ChannelId ChId, const google:
 	return true;
 }
 
-void USpatialChannelDataView::ClientHandleGetUnrealObjectRef(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+void USpatialChannelDataView::ClientHandleGetUnrealObjectRef(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto ResultMsg = static_cast<const unrealpb::GetUnrealObjectRefResultMessage*>(Msg);
 	for (auto& ObjRef : ResultMsg->objref())
@@ -601,7 +601,7 @@ void USpatialChannelDataView::InitServer()
 	
 	Connection->AddMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, this, &USpatialChannelDataView::ServerHandleHandover);
 
-	Connection->RegisterMessageHandler(unrealpb::SERVER_PLAYER_LEAVE, new channeldpb::ServerForwardMessage, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+	Connection->RegisterMessageHandler(unrealpb::SERVER_PLAYER_LEAVE, new channeldpb::ServerForwardMessage, [&](UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 	{
 		channeldpb::UnsubscribedFromChannelResultMessage UnsubMsg;
 		if (UnsubMsg.ParseFromString(static_cast<const channeldpb::ServerForwardMessage*>(Msg)->payload()))
@@ -614,7 +614,7 @@ void USpatialChannelDataView::InitServer()
 		}
 	});
 	
-	Connection->SubToChannel(GlobalChannelId, nullptr, [&](const channeldpb::SubscribedToChannelResultMessage* _)
+	Connection->SubToChannel(Channeld::GlobalChannelId, nullptr, [&](const channeldpb::SubscribedToChannelResultMessage* _)
 	{
 		channeldpb::ChannelSubscriptionOptions SpatialSubOptions;
 		SpatialSubOptions.set_skipselfupdatefanout(true);
@@ -641,12 +641,12 @@ void USpatialChannelDataView::InitServer()
 		Msg.set_clientconnid(CastChecked<UChanneldNetConnection>(NewPlayer->GetNetConnection())->GetConnId());
 		Msg.mutable_startpos()->CopyFrom(ChanneldUtils::GetVectorPB(NewPawn->GetActorLocation()));
 		// Send to Master server
-		Connection->Send(GlobalChannelId, unrealpb::SERVER_PLAYER_SPAWNED, Msg);
+		Connection->Send(Channeld::GlobalChannelId, unrealpb::SERVER_PLAYER_SPAWNED, Msg);
 	});
 	*/
 }
 
-void USpatialChannelDataView::ClientHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+void USpatialChannelDataView::ClientHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
 	UE_LOG(LogChanneld, Log, TEXT("[Client] Sub to %s channel %d"), UTF8_TO_TCHAR(channeldpb::ChannelType_Name(SubResultMsg->channeltype()).c_str()), ChId);
@@ -674,7 +674,7 @@ void USpatialChannelDataView::ClientHandleSubToChannel(UChanneldConnection* _, C
 	}
 }
 
-void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto HandoverMsg = static_cast<const channeldpb::ChannelDataHandoverMessage*>(Msg);
 	unrealpb::HandoverData HandoverData;
@@ -759,9 +759,9 @@ void USpatialChannelDataView::InitClient()
 	GlobalSubOptions.set_fanoutintervalms(50);
 	// Make the first fan-out of GLOBAL channel data update (GameStateBase) a bit slower, so the GameState is spawned from the spatial server and ready.
 	GlobalSubOptions.set_fanoutdelayms(2000);
-	Connection->SubToChannel(GlobalChannelId, &GlobalSubOptions, [&](const channeldpb::SubscribedToChannelResultMessage* Msg)
+	Connection->SubToChannel(Channeld::GlobalChannelId, &GlobalSubOptions, [&](const channeldpb::SubscribedToChannelResultMessage* Msg)
 	{
-		// GetChanneldSubsystem()->SetLowLevelSendToChannelId(GlobalChannelId);
+		// GetChanneldSubsystem()->SetLowLevelSendToChannelId(Channeld::GlobalChannelId);
 		// // Join Master server as soon as the client subscribed.
 		// GetChanneldSubsystem()->OpenLevel(FName("127.0.0.1"));
 		bClientInMasterServer = true;
@@ -769,17 +769,17 @@ void USpatialChannelDataView::InitClient()
 	});
 }
 
-ChannelId USpatialChannelDataView::GetOwningChannelId(const AActor* Actor) const
+Channeld::ChannelId USpatialChannelDataView::GetOwningChannelId(const AActor* Actor) const
 {
 	// GameState is owned by the Master server.
 	if (Actor->IsA<AGameStateBase>())
 	{
-		return GlobalChannelId;
+		return Channeld::GlobalChannelId;
 	}
 	return Super::GetOwningChannelId(Actor);
 }
 
-void USpatialChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId)
+void USpatialChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, Channeld::ChannelId ChId)
 {
 	Super::SetOwningChannelId(NetId, ChId);
 
@@ -791,7 +791,7 @@ void USpatialChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, Chann
 
 bool USpatialChannelDataView::GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const
 {
-	const ChannelId* ChId = ClientInChannels.Find(NetConn->GetConnId());
+	const Channeld::ChannelId* ChId = ClientInChannels.Find(NetConn->GetConnId());
 	if (ChId)
 	{
 		OutChId = *ChId;
@@ -825,7 +825,7 @@ void USpatialChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* 
 			Positions.Add(Actor->GetActorLocation());
 			Connection->QuerySpatialChannel(Positions, [&, NetId, Provider, Actor](const channeldpb::QuerySpatialChannelResultMessage* ResultMsg)
 			{
-				const ChannelId SpatialChId = ResultMsg->channelid(0);
+				const Channeld::ChannelId SpatialChId = ResultMsg->channelid(0);
 				UE_LOG(LogChanneld, Log, TEXT("Queried spatial channelId %d for provider: %s"), SpatialChId, *IChannelDataProvider::GetName(Provider));
 				SetOwningChannelId(NetId, SpatialChId);
 				AddProvider(SpatialChId, Provider);
@@ -851,7 +851,7 @@ void USpatialChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* 
 	}
 }
 
-void USpatialChannelDataView::OnAddClientConnection(UChanneldNetConnection* ClientConnection, ChannelId ChId)
+void USpatialChannelDataView::OnAddClientConnection(UChanneldNetConnection* ClientConnection, Channeld::ChannelId ChId)
 {
 	ClientInChannels.Add(ClientConnection->GetConnId(), ChId);
 }
@@ -878,7 +878,7 @@ void USpatialChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayer
 	*/
 }
 
-void USpatialChannelDataView::OnClientSpawnedObject(UObject* Obj, const ChannelId ChId)
+void USpatialChannelDataView::OnClientSpawnedObject(UObject* Obj, const Channeld::ChannelId ChId)
 {
 	if (Visualizer)
 	{
@@ -897,7 +897,7 @@ bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetwork
 	// GameState is in GLOBAL channel
 	if (Obj->IsA<AGameStateBase>())
 	{
-		SetOwningChannelId(NetId, GlobalChannelId);
+		SetOwningChannelId(NetId, Channeld::GlobalChannelId);
 	}
 
 	if (bSuppressAddProviderAndSendOnServerSpawn)
@@ -929,7 +929,7 @@ void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnecti
 	// GameState is spawned via GLOBAL channel
 	if (Obj->IsA<AGameStateBase>())
 	{
-		NetConn->SendSpawnMessage(Obj, ROLE_SimulatedProxy, GlobalChannelId);
+		NetConn->SendSpawnMessage(Obj, ROLE_SimulatedProxy, Channeld::GlobalChannelId);
 	}
 	else if (AActor* Actor = Cast<AActor>(Obj))
 	{
@@ -970,8 +970,8 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 	
 	const FNetworkGUID NetId = NetDriver->GuidCache->GetOrAssignNetGUID(Obj);
 	// It doesn't matter if the spatial channelId is not right, as channeld will adjust it based on the location.
-	ChannelId SpatialChId = Super::GetOwningChannelId(NetId);
-	if (SpatialChId == InvalidChannelId)
+ 	Channeld::ChannelId SpatialChId = Super::GetOwningChannelId(NetId);
+	if (SpatialChId == Channeld::InvalidChannelId)
 	{
 		SpatialChId = GetChanneldSubsystem()->LowLevelSendToChannelId.Get();
 	}
@@ -1024,8 +1024,8 @@ void USpatialChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkG
 		return;
 	}
 	
-	ChannelId SpatialChId = Super::GetOwningChannelId(NetId);
-	if (SpatialChId == InvalidChannelId)
+ 	Channeld::ChannelId SpatialChId = Super::GetOwningChannelId(NetId);
+	if (SpatialChId == Channeld::InvalidChannelId)
 	{
 		SpatialChId = GetChanneldSubsystem()->LowLevelSendToChannelId.Get();
 	}

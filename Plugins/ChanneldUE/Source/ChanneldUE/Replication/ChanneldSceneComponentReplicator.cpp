@@ -1,3 +1,6 @@
+#ifdef _MSC_VER
+#	pragma warning(disable: 4800)
+#endif
 #include "ChanneldSceneComponentReplicator.h"
 #include "unreal_common.pb.h"
 #include "ChanneldUtils.h"

@@ -24,10 +24,10 @@ void USpatialVisualizer::Initialize(UChanneldConnection* Conn)
 	Conn->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this, &USpatialVisualizer::UpdateSubBoxes);
 
 	channeldpb::DebugGetSpatialRegionsMessage Msg;
-	Conn->Send(GlobalChannelId, channeldpb::DEBUG_GET_SPATIAL_REGIONS, Msg);
+	Conn->Send(Channeld::GlobalChannelId, channeldpb::DEBUG_GET_SPATIAL_REGIONS, Msg);
 }
 
-void USpatialVisualizer::HandleSpatialRegionsResult(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+void USpatialVisualizer::HandleSpatialRegionsResult(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	const auto ResultMsg = static_cast<const channeldpb::SpatialRegionsUpdateMessage*>(Msg);
 	Regions.Empty();
@@ -87,11 +87,11 @@ void USpatialVisualizer::SpawnRegionBoxes()
 	}
 }
 
-void USpatialVisualizer::UpdateSubBoxes(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+void USpatialVisualizer::UpdateSubBoxes(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 }
 
-void USpatialVisualizer::OnSpawnedObject(UObject* Obj, ChannelId ChId)
+void USpatialVisualizer::OnSpawnedObject(UObject* Obj, Channeld::ChannelId ChId)
 {
 	if (Outliners.Contains(Obj))
 	{
@@ -122,7 +122,7 @@ void USpatialVisualizer::OnSpawnedObject(UObject* Obj, ChannelId ChId)
 	}
 }
 
-void USpatialVisualizer::OnUpdateOwningChannel(UObject* Obj, ChannelId NewChId)
+void USpatialVisualizer::OnUpdateOwningChannel(UObject* Obj, Channeld::ChannelId NewChId)
 {
 	AOutlinerActor* Outliner = Outliners.FindRef(Obj);
 	if (Outliner)
@@ -131,7 +131,7 @@ void USpatialVisualizer::OnUpdateOwningChannel(UObject* Obj, ChannelId NewChId)
 	}
 }
 
-const FLinearColor& USpatialVisualizer::GetColorByChannelId(ChannelId ChId)
+const FLinearColor& USpatialVisualizer::GetColorByChannelId(Channeld::ChannelId ChId)
 {
 	const FLinearColor* Color = ColorsByChId.Find(ChId);
 	if (Color)

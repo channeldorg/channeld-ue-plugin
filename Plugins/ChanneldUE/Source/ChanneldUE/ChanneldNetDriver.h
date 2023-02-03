@@ -61,29 +61,29 @@ public:
 	virtual void NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTravel) override;
 	//~ End UNetDriver Interface
 	
-	UChanneldNetConnection* AddChanneldClientConnection(ConnectionId ClientConnId, ChannelId ChId);
-	void RemoveChanneldClientConnection(ConnectionId ClientConnId);
+	UChanneldNetConnection* AddChanneldClientConnection(Channeld::ConnectionId ClientConnId, Channeld::ChannelId ChId);
+	void RemoveChanneldClientConnection(Channeld::ConnectionId ClientConnId);
 
 	void ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDeferredRPC);
 
 	UChanneldConnection* GetConnToChanneld() const { return ConnToChanneld; }
 
-	ConnectionId AddrToConnId(const FInternetAddr& Addr);
-	TSharedRef<FInternetAddr> ConnIdToAddr(ConnectionId ConnId);
+	Channeld::ConnectionId AddrToConnId(const FInternetAddr& Addr);
+	TSharedRef<FInternetAddr> ConnIdToAddr(Channeld::ConnectionId ConnId);
 
 	UChanneldNetConnection* GetServerConnection() const
 	{
 		return CastChecked<UChanneldNetConnection>(ServerConnection);
 	}
 
-	UChanneldNetConnection* GetClientConnection(ConnectionId ConnId) const
+	UChanneldNetConnection* GetClientConnection(Channeld::ConnectionId ConnId) const
 	{
 		return ClientConnectionMap.FindRef(ConnId);
 	}
 
 	FORCEINLINE TMap<uint32, UChanneldNetConnection*>& GetClientConnectionMap() {return ClientConnectionMap;}
 
-	virtual ChannelId GetSendToChannelId(UChanneldNetConnection* NetConn) const;
+	virtual Channeld::ChannelId GetSendToChannelId(UChanneldNetConnection* NetConn) const;
 
 	// Update the PackageMap of all connections that the specified NetId has been sent, so it's safe to send the actor's RPC message.
 	void SetAllSentSpawn(const FNetworkGUID NetId);
@@ -96,7 +96,7 @@ public:
 	void OnServerSpawnedActor(AActor* Actor);
 
 protected:
-	TSharedRef<ChannelId> LowLevelSendToChannelId = MakeShared<ChannelId>(GlobalChannelId);
+	TSharedRef<Channeld::ChannelId> LowLevelSendToChannelId = MakeShared<Channeld::ChannelId>(Channeld::GlobalChannelId);
 
 private:
 	
@@ -111,7 +111,7 @@ private:
 	FURL InitBaseURL;
 
 	// Cache the FInternetAddr so it won't be created again every time when mapping from ConnectionId.
-	TMap<ConnectionId, TSharedRef<FInternetAddr>> CachedAddr;
+	TMap<Channeld::ConnectionId, TSharedRef<FInternetAddr>> CachedAddr;
 
 	UPROPERTY()
 	TMap<uint32, UChanneldNetConnection*> ClientConnectionMap;
@@ -126,7 +126,7 @@ private:
 	TSet<TWeakObjectPtr<AActor>> ServerDeferredSpawns;
 
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
-	void OnUserSpaceMessageReceived(uint32 MsgType, ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload);
+	void OnUserSpaceMessageReceived(uint32 MsgType, Channeld::ChannelId ChId, Channeld::ConnectionId ClientConnId, const std::string& Payload);
 	void OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg);
 	void HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
 	void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer);

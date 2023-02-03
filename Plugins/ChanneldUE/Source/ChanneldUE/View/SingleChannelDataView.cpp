@@ -9,8 +9,8 @@ USingleChannelDataView::USingleChannelDataView(const FObjectInitializer& ObjectI
 	
 }
 
-ChannelId USingleChannelDataView::GetOwningChannelId(const FNetworkGUID NetId) const
+Channeld::ChannelId USingleChannelDataView::GetOwningChannelId(const FNetworkGUID NetId) const
 {
-	return GlobalChannelId;
+	return Channeld::GlobalChannelId;
 }
 

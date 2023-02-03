@@ -27,7 +27,7 @@ UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializ
 {
 }
 
-UChanneldNetConnection* UChanneldNetDriver::AddChanneldClientConnection(ConnectionId ClientConnId, ChannelId ChId)
+UChanneldNetConnection* UChanneldNetDriver::AddChanneldClientConnection(Channeld::ConnectionId ClientConnId, Channeld::ChannelId ChId)
 {
 	auto ClientConnection = NewObject<UChanneldNetConnection>(GetTransientPackage(), NetConnectionClass);
 	ClientConnection->bDisableHandshaking = GetMutableDefault<UChanneldSettings>()->bDisableHandshaking;
@@ -54,7 +54,7 @@ UChanneldNetConnection* UChanneldNetDriver::AddChanneldClientConnection(Connecti
 	return ClientConnection;
 }
 
-void UChanneldNetDriver::RemoveChanneldClientConnection(ConnectionId ClientConnId)
+void UChanneldNetDriver::RemoveChanneldClientConnection(Channeld::ConnectionId ClientConnId)
 {
 	UChanneldNetConnection* ClientConn;
 	if (ClientConnectionMap.RemoveAndCopyValue(ClientConnId, ClientConn))
@@ -155,7 +155,7 @@ void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMes
 	}
 }
 
-void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, ChannelId ChId, ConnectionId ClientConnId, const std::string& Payload)
+void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, Channeld::ChannelId ChId, Channeld::ConnectionId ClientConnId, const std::string& Payload)
 {
 	if (MsgType == unrealpb::LOW_LEVEL)
 	{
@@ -277,14 +277,14 @@ void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMess
 	}
 }
 
-ConnectionId UChanneldNetDriver::AddrToConnId(const FInternetAddr& Addr)
+Channeld::ConnectionId UChanneldNetDriver::AddrToConnId(const FInternetAddr& Addr)
 {
 	uint32 ConnId;
 	Addr.GetIp(ConnId);
 	return ConnId;
 }
 
-TSharedRef<FInternetAddr> UChanneldNetDriver::ConnIdToAddr(ConnectionId ConnId)
+TSharedRef<FInternetAddr> UChanneldNetDriver::ConnIdToAddr(Channeld::ConnectionId ConnId)
 {
 	auto AddrPtr = CachedAddr.Find(ConnId);
 	if (AddrPtr == nullptr)
@@ -297,14 +297,14 @@ TSharedRef<FInternetAddr> UChanneldNetDriver::ConnIdToAddr(ConnectionId ConnId)
 	return *AddrPtr;
 }
 
-ChannelId UChanneldNetDriver::GetSendToChannelId(UChanneldNetConnection* NetConn) const
+Channeld::ChannelId UChanneldNetDriver::GetSendToChannelId(UChanneldNetConnection* NetConn) const
 {
 	// Server view can implement the mapping of connId -> channelId.
 	if (IsServer())
 	{
 		if (ChannelDataView.IsValid())
 		{
-			ChannelId Result;
+			Channeld::ChannelId Result;
 			if (ChannelDataView->GetSendToChannelId(NetConn, Result))
 			{
 				return Result;
@@ -532,7 +532,7 @@ void UChanneldNetDriver::LowLevelSend(TSharedPtr<const FInternetAddr> Address, v
 
 		if (ConnToChanneld->IsServer())
 		{
-			ConnectionId ClientConnId = AddrToConnId(*Address);
+			Channeld::ConnectionId ClientConnId = AddrToConnId(*Address);
 			if (auto Conn = ClientConnectionMap.FindRef(ClientConnId))
 			{
 				Conn->SendData(unrealpb::LOW_LEVEL, DataToSend, DataSize);
@@ -620,7 +620,7 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	UChanneldGameInstanceSubsystem* ChanneldSubsystem = GetSubsystem();
 	UChannelDataView* View = ChanneldSubsystem->GetChannelDataView();
 	FNetworkGUID NetId = GuidCache->GetNetGUID(Actor);
-	ChannelId ChId = LowLevelSendToChannelId.Get();
+ 	Channeld::ChannelIdChId = LowLevelSendToChannelId.Get();
 	if (View)
 	{
 		View->OnSpawnedObject(Actor, NetId, ChId);
@@ -701,7 +701,7 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 			}
 			else
 			{
-				Pair.Value->SendSpawnMessage(Actor, Actor->GetRemoteRole(), InvalidChannelId, OwningConnId);
+				Pair.Value->SendSpawnMessage(Actor, Actor->GetRemoteRole(), Channeld::InvalidChannelId, OwningConnId);
 			}
 		}
 	}
@@ -749,8 +749,8 @@ void UChanneldNetDriver::SendCrossServerRPC(TSharedPtr<unrealpb::RemoteFunctionM
 {
 	if (ChannelDataView.IsValid())
 	{
-		ChannelId TargetChId = ChannelDataView->GetOwningChannelId(FNetworkGUID(Msg->targetobj().netguid()));
-		if (TargetChId != InvalidChannelId)
+		Channeld::ChannelId TargetChId = ChannelDataView->GetOwningChannelId(FNetworkGUID(Msg->targetobj().netguid()));
+		if (TargetChId != Channeld::InvalidChannelId)
 		{
 			ConnToChanneld->Broadcast(TargetChId, unrealpb::RPC, *Msg, channeldpb::SINGLE_CONNECTION);
 			UE_LOG(LogChanneld, Verbose, TEXT("Sent cross-server RPC to channel %d, netId: %d, func: %s"), TargetChId, Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
@@ -892,7 +892,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 						RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
 						UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %d bytes"), RpcMsg.paramspayload().size());
 					}
-					ChannelId ForwardChId = ChannelDataView->GetOwningChannelId(Actor);
+					Channeld::ChannelId ForwardChId = ChannelDataView->GetOwningChannelId(Actor);
 					ConnToChanneld->Broadcast(ForwardChId, unrealpb::RPC, RpcMsg, channeldpb::SINGLE_CONNECTION);
 					UE_LOG(LogChanneld, Log, TEXT("Forwarded RPC %s::%s to the owner of channel %d"), *Actor->GetName(), *FuncName, ForwardChId);
 					OnSentRPC(Actor, FuncName);
@@ -985,7 +985,7 @@ void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 {
 	// IMPORTANT: offset with the ConnId to avoid NetworkGUID conflicts
-	const uint32 UniqueNetIdOffset = ConnToChanneld->GetConnId() << ConnectionIdBitOffset;
+	const uint32 UniqueNetIdOffset = ConnToChanneld->GetConnId() << Channeld::ConnectionIdBitOffset;
 	GuidCache->UniqueNetIDs[0] = UniqueNetIdOffset;
 	// Static NetIDs may conflict on the spatial servers, so we need to offset them as well.
 	GuidCache->UniqueNetIDs[1] = UniqueNetIdOffset;

@@ -135,13 +135,13 @@ void UChanneldReplicationComponent::EndPlay(EEndPlayReason::Type Reason)
 	}
 }
 
-void UChanneldReplicationComponent::OnAddedToChannel(ChannelId ChId)
+void UChanneldReplicationComponent::OnAddedToChannel(Channeld::ChannelId ChId)
 {
 	AddedToChannelIds.Add(ChId);
 	OnComponentAddedToChannel.Broadcast(ChId);
 }
 
-void UChanneldReplicationComponent::OnRemovedFromChannel(ChannelId ChId)
+void UChanneldReplicationComponent::OnRemovedFromChannel(Channeld::ChannelId ChId)
 {
 	AddedToChannelIds.Remove(ChId);
 	OnComponentRemovedFromChannel.Broadcast(ChId);
@@ -167,7 +167,7 @@ google::protobuf::Message* UChanneldReplicationComponent::GetChannelDataTemplate
 	}
 }
 
-void UChanneldReplicationComponent::SetChannelId(ChannelId ChId)
+void UChanneldReplicationComponent::SetChannelId(Channeld::ChannelId ChId)
 {
 	OwningChannelId = ChId;
 }

@@ -591,7 +591,7 @@ bool ChanneldUtils::SerializeNewActor_Server(UNetConnection* Connection, UPackag
 	return bActorWasSpawned;
 }
 
-void ChanneldUtils::SetActorRoleByOwningConnId(AActor* Actor, ConnectionId OwningConnId)
+void ChanneldUtils::SetActorRoleByOwningConnId(AActor* Actor, Channeld::ConnectionId OwningConnId)
 {
 	UChanneldConnection* ConnToChanneld = GEngine->GetEngineSubsystem<UChanneldConnection>();
 	ENetRole OldRole = Actor->GetLocalRole();

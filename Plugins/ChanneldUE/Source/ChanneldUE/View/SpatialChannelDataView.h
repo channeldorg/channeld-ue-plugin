@@ -24,16 +24,16 @@ public:
 	virtual void InitServer() override;
 	virtual void InitClient() override;
 
-	virtual ChannelId GetOwningChannelId(const AActor* Actor) const override;
-	virtual void SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId) override;
+	virtual Channeld::ChannelId GetOwningChannelId(const AActor* Actor) const override;
+	virtual void SetOwningChannelId(const FNetworkGUID NetId, Channeld::ChannelId ChId) override;
 	virtual bool GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const override;
 	
 	virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider) override;
 
-	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, ChannelId ChId) override;
+	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, Channeld::ChannelId ChId) override;
 	virtual void OnRemoveClientConnection(UChanneldNetConnection* ClientConn) override;
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
-	virtual void OnClientSpawnedObject(UObject* Obj, const ChannelId ChId) override;
+	virtual void OnClientSpawnedObject(UObject* Obj, const Channeld::ChannelId ChId) override;
 	
 	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId) override;
 	virtual void OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId) override;
@@ -45,11 +45,11 @@ public:
 	UProtoMessageObject* ChannelInitData;
 
 protected:
-	virtual void OnClientUnsub(ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, ChannelId ChId) override;
+	virtual void OnClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId) override;
 
 	// The client may have subscribed to the spatial channels that go beyond the interest area of the client's authoritative server.
 	// In that case, the client may receive ChannelDataUpdate that contains unresolved NetworkGUIDs, so it needs to spawn the objects before applying the update.
-	virtual bool CheckUnspawnedObject(ChannelId ChId, const google::protobuf::Message* ChannelData) override;
+	virtual bool CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData) override;
 	virtual TSet<uint32> GetNetGUIDsFromChannelData(const google::protobuf::Message* Message)
 	{
 		const TSet<uint32> EmptySet;
@@ -72,7 +72,7 @@ private:
 	const FName GameplayerDebuggerClassName = FName("GameplayDebuggerCategoryReplicator");
 
     // Map the client to the channels, so the spatial server's LowLevelSend() can use the right channelId.
-	TMap<uint32, ChannelId> ClientInChannels;
+	TMap<uint32, Channeld::ChannelId> ClientInChannels;
 	
 	bool bClientInMasterServer = false;
 
@@ -100,12 +100,12 @@ private:
 	UChanneldNetConnection* NetConnForSpawn;
 	void ResetNetConnForSpawn();
 
-	void ServerHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
-	void ServerHandleGetHandoverContext(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
-	void ServerHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
-	void ClientHandleSubToChannel(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
-	void ClientHandleHandover(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
-	void ClientHandleGetUnrealObjectRef(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg);
+	void ServerHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void ServerHandleGetHandoverContext(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void ServerHandleHandover(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void ClientHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void ClientHandleHandover(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void ClientHandleGetUnrealObjectRef(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	
 	/**
 	 * @brief Create the ChanneldNetConnection for the client. The PlayerController will not be created for the connection.
@@ -113,7 +113,7 @@ private:
 	 * @param ChId The spatial channel the client belongs to 
 	 * @return 
 	 */
-	UChanneldNetConnection* CreateClientConnection(ConnectionId ConnId, ChannelId ChId);
+	UChanneldNetConnection* CreateClientConnection(Channeld::ConnectionId ConnId, Channeld::ChannelId ChId);
 	void InitPlayerController(UChanneldNetConnection* ClientConn, APlayerController* NewPlayerController);
 	void CreatePlayerController(UChanneldNetConnection* ClientConn);
 };

@@ -31,7 +31,7 @@ void USpatialMasterServerView::InitServer()
 	// Master server won't create pawn for the players.
 	GetWorld()->GetAuthGameMode()->DefaultPawnClass = NULL;
 
-	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, [&](UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 	{
 		auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
 		UE_LOG(LogChanneld, Log, TEXT("[Server] Sub %s conn %d to %s channel %d"),
@@ -43,7 +43,7 @@ void USpatialMasterServerView::InitServer()
 		// A client subs to GLOBAL - choose the start position and sub the client to corresponding spatial channels.
 		if (SubResultMsg->conntype() == channeldpb::CLIENT && SubResultMsg->channeltype() == channeldpb::GLOBAL)
 		{
-			ConnectionId ClientConnId = SubResultMsg->connid();
+			Channeld::ConnectionId ClientConnId = SubResultMsg->connid();
 			AActor* StartSpot;
 			FVector StartPos = PlayerStartLocator->GetPlayerStartPosition(ClientConnId, StartSpot);
 			UE_LOG(LogChanneld, Log, TEXT("%s selected %s for client %d"), *PlayerStartLocator->GetName(), *StartPos.ToCompactString(), ClientConnId);
@@ -70,7 +70,7 @@ void USpatialMasterServerView::InitServer()
 		// Query the channels from channeld.
 		Connection->QuerySpatialChannel(Positions, [&, ClientConnId](const channeldpb::QuerySpatialChannelResultMessage* QueryResultMsg)
 		{
-			ChannelId StartChannelId = QueryResultMsg->channelid(0);
+			Channeld::ChannelId StartChannelId = QueryResultMsg->channelid(0);
 			if (StartChannelId == 0)
 			{
 				UE_LOG(LogChanneld, Error, TEXT("Unable to map the player start position %s to a spatial channel id"), *StartPos.ToCompactString());
@@ -119,18 +119,18 @@ void USpatialMasterServerView::InitServer()
 		}
 	});
 
-	Connection->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+	Connection->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, [&](UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 	{
 		auto UnsubMsg = static_cast<const channeldpb::UnsubscribedFromChannelResultMessage*>(Msg);
 		if (UnsubMsg->channeltype() == channeldpb::GLOBAL && UnsubMsg->conntype() == channeldpb::CLIENT)
 		{
 			// Broadcast the unsub message to all spatial servers so they can remove the client connection.
-			Connection->Broadcast(GlobalChannelId, unrealpb::SERVER_PLAYER_LEAVE, *UnsubMsg, channeldpb::ALL_BUT_CLIENT | channeldpb::ALL_BUT_SENDER);
+			Connection->Broadcast(Channeld::GlobalChannelId, unrealpb::SERVER_PLAYER_LEAVE, *UnsubMsg, channeldpb::ALL_BUT_CLIENT | channeldpb::ALL_BUT_SENDER);
 			UE_LOG(LogChanneld, Log, TEXT("Broadcasted SERVER_PLAYER_LEAVE to all spatial servers, client connId: %d"), UnsubMsg->connid());
 		}
 	});
 
-	Connection->AddMessageHandler(channeldpb::CREATE_SPATIAL_CHANNEL, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+	Connection->AddMessageHandler(channeldpb::CREATE_SPATIAL_CHANNEL, [&](UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 	{
 		auto ResultMsg = static_cast<const channeldpb::CreateSpatialChannelsResultMessage*>(Msg);
 		for (auto SpatialChId : ResultMsg->spatialchannelid())
@@ -140,7 +140,7 @@ void USpatialMasterServerView::InitServer()
 		}
 	});
 
-	Connection->AddMessageHandler(channeldpb::REMOVE_CHANNEL, [&](UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+	Connection->AddMessageHandler(channeldpb::REMOVE_CHANNEL, [&](UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 	{
 		auto RemoveMsg = static_cast<const channeldpb::RemoveChannelMessage*>(Msg);
 		AllSpatialChannelIds.Remove(RemoveMsg->channelid());
@@ -153,11 +153,11 @@ void USpatialMasterServerView::InitServer()
 	Connection->CreateChannel(channeldpb::GLOBAL, UKismetSystemLibrary::GetGameName(), &GlobalSubOptions, nullptr, nullptr,
 		[&](const channeldpb::CreateChannelResultMessage* Msg)
 		{
-			GetChanneldSubsystem()->SetLowLevelSendToChannelId(GlobalChannelId);
+			GetChanneldSubsystem()->SetLowLevelSendToChannelId(Channeld::GlobalChannelId);
 		});
 }
 
-void USpatialMasterServerView::AddProvider(ChannelId ChId, IChannelDataProvider* Provider)
+void USpatialMasterServerView::AddProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider)
 {
 	// Should only replicates the GameStateBase
 	if (!Provider->GetTargetObject()->IsA(AGameStateBase::StaticClass()))
@@ -168,9 +168,9 @@ void USpatialMasterServerView::AddProvider(ChannelId ChId, IChannelDataProvider*
 	Super::AddProvider(ChId, Provider);
 }
 
-ChannelId USpatialMasterServerView::GetOwningChannelId(const FNetworkGUID NetId) const
+Channeld::ChannelId USpatialMasterServerView::GetOwningChannelId(const FNetworkGUID NetId) const
 {
-	return GlobalChannelId;
+	return Channeld::GlobalChannelId;
 }
 
 void USpatialMasterServerView::OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn)

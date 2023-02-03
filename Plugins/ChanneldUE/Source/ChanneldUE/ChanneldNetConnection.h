@@ -33,9 +33,9 @@ public:
 	}
 
 	// Send data between UE client and sever via channeld. MsgType should be in user space (>= 100).
-	void SendData(uint32 MsgType, const uint8* DataToSend, int32 DataSize, ChannelId ChId = InvalidChannelId);
+	void SendData(uint32 MsgType, const uint8* DataToSend, int32 DataSize, Channeld::ChannelId ChId = Channeld::InvalidChannelId);
 	// Send message between UE client and sever via channeld. MsgType should be in user space (>= 100).
-	void SendMessage(uint32 MsgType, const google::protobuf::Message& Msg, ChannelId ChId = InvalidChannelId);
+	void SendMessage(uint32 MsgType, const google::protobuf::Message& Msg, Channeld::ChannelId ChId = Channeld::InvalidChannelId);
 	bool HasSentSpawn(UObject* Object) const;
 	void SetSentSpawned(const FNetworkGUID NetId);
 	/**
@@ -46,9 +46,9 @@ public:
 	 * @param OwningConnId The connection that owns the object. It will be used remotely to amend the role (see #ChanneldUtils::SetActorRoleByOwningConnId). If not set, the amendment will not happen.
 	 * @param Location The actor's location on the server. Only used when the actor is in spatial channel. channeld uses the location to amend the OwningChannelId. If not set or in spatial channel, the amendment will not happen.
 	 */
-	void SendSpawnMessage(UObject* Object, ENetRole Role = ENetRole::ROLE_None, uint32 OwningChannelId = InvalidChannelId, uint32 OwningConnId = 0, FVector* Location = nullptr);
+	void SendSpawnMessage(UObject* Object, ENetRole Role = ENetRole::ROLE_None, uint32 OwningChannelId = Channeld::InvalidChannelId, uint32 OwningConnId = 0, FVector* Location = nullptr);
 	void SendDestroyMessage(UObject* Object, EChannelCloseReason Reason = EChannelCloseReason::Destroyed);
-	void SendRPCMessage(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg = nullptr, ChannelId ChId = InvalidChannelId);
+	void SendRPCMessage(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg = nullptr, Channeld::ChannelId ChId = Channeld::InvalidChannelId);
 	// Flush the handshake packets that are queued before received AuthResultMessage to the server.
 	void FlushUnauthData();
 
@@ -74,7 +74,7 @@ private:
 		AActor* Actor;
 		FString FuncName;
 		TSharedPtr<google::protobuf::Message> ParamsMsg;
-		ChannelId ChId;
+		Channeld::ChannelId ChId;
 	};
 	// RPCs queued on the caller's side that don't have the NetId exported yet.
 	TArray<FOutgoingRPC> UnexportedRPCs;

@@ -34,7 +34,7 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Components|Channeld")
 	FCrossServerHandoverSignature OnCrossServerHandover;
 	
-	TSet<ChannelId> AddedToChannelIds;
+	TSet<Channeld::ChannelId> AddedToChannelIds;
 	
 protected:
 	virtual const google::protobuf::Message* GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved);
@@ -51,7 +51,7 @@ protected:
 	bool bUninitialized = false;
 	// UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	// EChanneldChannelType ChannelType;
-	// ChannelId OwningChannelId;
+	// Channeld::ChannelId OwningChannelId;
 	bool bRemoved = false;
 
 	TArray< TUniquePtr<FChanneldReplicatorBase> > Replicators;
@@ -70,8 +70,8 @@ public:
 	
 	//~ Begin IChannelDataProvider Interface.
 	virtual UObject* GetTargetObject() override {return GetOwner();}
-	virtual void OnAddedToChannel(ChannelId ChId) override;
-	virtual void OnRemovedFromChannel(ChannelId ChId) override;
+	virtual void OnAddedToChannel(Channeld::ChannelId ChId) override;
+	virtual void OnRemovedFromChannel(Channeld::ChannelId ChId) override;
 	virtual bool IsRemoved() override;
 	virtual void SetRemoved(bool bInRemoved) override;
 	virtual bool UpdateChannelData(google::protobuf::Message* ChannelData) override;

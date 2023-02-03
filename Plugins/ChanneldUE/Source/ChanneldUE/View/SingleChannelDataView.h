@@ -19,5 +19,5 @@ class CHANNELDUE_API USingleChannelDataView : public UChannelDataView
 public:
 	USingleChannelDataView(const FObjectInitializer& ObjectInitializer);
 
-	virtual ChannelId GetOwningChannelId(const FNetworkGUID NetId) const override;
+	virtual Channeld::ChannelId GetOwningChannelId(const FNetworkGUID NetId) const override;
 };
