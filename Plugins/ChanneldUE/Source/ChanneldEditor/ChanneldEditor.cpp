@@ -208,7 +208,7 @@ void FChanneldEditorModule::LaunchServerGroup(const FServerGroup& ServerGroup)
 	const FString ProjectPath = FPaths::GetProjectFilePath();
 
 	// If server map is not set, use current level.
-	FString MapName = ServerGroup.ServerMap.IsValid() ? ServerGroup.ServerMap.GetLongPackageName() : GEditor->GetEditorWorldContext().World()->GetMapName();
+	FString MapName = ServerGroup.ServerMap.IsValid() ? ServerGroup.ServerMap.GetLongPackageName() : GEditor->GetEditorWorldContext().World()->GetOuter()->GetName();
 	FString ViewClassName = ServerGroup.ServerViewClass ? ServerGroup.ServerViewClass->GetPathName() : GetMutableDefault<UChanneldSettings>()->ChannelDataViewClass->GetPathName();
 
 	for (int i = 0; i < ServerGroup.ServerNum; i++)
