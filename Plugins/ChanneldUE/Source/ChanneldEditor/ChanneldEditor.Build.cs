@@ -42,8 +42,12 @@ public class ChanneldEditor : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
-                "EditorStyle",
-				// ... add private dependencies that you statically link with here ...	
+                "EditorStyle", 
+                "ReplicatorGenerator",
+                "UATHelper",
+                "Kismet",
+                "ChanneldProtobufEditor",
+                // ... add private dependencies that you statically link with here ...	
 			}
             );
 
@@ -54,7 +58,31 @@ public class ChanneldEditor : ModuleRules
 				// ... add any modules that your module loads dynamically here ...
 			}
             );
-
+        
+        switch (Target.Configuration)
+        {
+            case UnrealTargetConfiguration.Debug:
+            {
+                PublicDefinitions.Add("COMPILER_CONFIGURATION_NAME=\"Debug\"");
+                break;
+            }
+            case UnrealTargetConfiguration.DebugGame:
+            {
+                PublicDefinitions.Add("COMPILER_CONFIGURATION_NAME=\"DebugGame\"");
+                break;
+            }
+            case UnrealTargetConfiguration.Development:
+            {
+                PublicDefinitions.Add("COMPILER_CONFIGURATION_NAME=\"Development\"");
+                break;
+            }
+            default:
+            {
+                PublicDefinitions.Add("COMPILER_CONFIGURATION_NAME=\"\"");
+                break;
+            }
+        };
+        
         OptimizeCode = CodeOptimization.InShippingBuildsOnly;
     }
 }

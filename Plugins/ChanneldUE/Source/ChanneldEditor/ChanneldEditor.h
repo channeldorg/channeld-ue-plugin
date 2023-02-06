@@ -6,6 +6,8 @@
 
 DECLARE_LOG_CATEGORY_CLASS(LogChanneldEditor, Log, All);
 
+class FChanneldProcWorkerThread;
+class UChanneldMissionNotiProxy;
 class FToolBarBuilder;
 class FMenuBuilder;
 class SWidget;
@@ -29,6 +31,12 @@ private:
 	FTimerManager* GetTimerManager();
 	void LaunchServersAction();
 	void StopServersAction();
+
+	void GenerateReplicatorAction();
+	void AddRepCompToBPAction();
+
+	void GenReplicatorProto(FChanneldProcWorkerThread* ProcWorker);
+
 	void OpenEditorSettingsAction();
 	
 	void LaunchServerGroup(const FServerGroup& ServerGroup);
@@ -36,4 +44,12 @@ private:
 	TSharedPtr<class FUICommandList> PluginCommands;
 	TSharedRef<SWidget> CreateMenuContent(TSharedPtr<FUICommandList> Commands);
 	TArray<FProcHandle> ServerProcHandles;
+
+	mutable TSharedPtr<FChanneldProcWorkerThread> GenRepWorkThread;
+	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoWorkThread;
+	UChanneldMissionNotiProxy* GenRepMissionNotifyProxy;
+
+	mutable TSharedPtr<FChanneldProcWorkerThread> AddRepCompWorkThread;
+	UChanneldMissionNotiProxy* AddRepCompMissionNotifyProxy;
+
 };
