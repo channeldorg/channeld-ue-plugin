@@ -282,13 +282,13 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 	}
 }
 
-TSharedPtr<google::protobuf::Message> UChanneldReplicationComponent::SerializeFunctionParams(AActor* Actor, UFunction* Func, void* Params, bool& bSuccess)
+TSharedPtr<google::protobuf::Message> UChanneldReplicationComponent::SerializeFunctionParams(AActor* Actor, UFunction* Func, void* Params, FOutParmRec* OutParams, bool& bSuccess)
 {
 	for (auto& Replicator : Replicators)
 	{
 		if (Replicator->GetTargetObject() == Actor)
 		{
-			auto ParamsMsg = Replicator->SerializeFunctionParams(Func, Params, bSuccess);
+			auto ParamsMsg = Replicator->SerializeFunctionParams(Func, Params, OutParams, bSuccess);
 			if (bSuccess)
 			{
 				return ParamsMsg;

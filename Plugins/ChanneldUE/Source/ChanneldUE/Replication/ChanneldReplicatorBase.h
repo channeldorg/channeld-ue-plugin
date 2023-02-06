@@ -31,7 +31,7 @@ public:
 	// [Client] Apply ChannelDataUpdate received from channeld
     virtual void OnStateChanged(const google::protobuf::Message* NewState) = 0;
 
-    virtual TSharedPtr<google::protobuf::Message> SerializeFunctionParams(UFunction* Func, void* Params, bool& bSuccess) { bSuccess = false; return nullptr; }
+    virtual TSharedPtr<google::protobuf::Message> SerializeFunctionParams(UFunction* Func, void* Params, FOutParmRec* OutParams, bool& bSuccess) { bSuccess = false; return nullptr; }
     virtual TSharedPtr<void> DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC) { bSuccess = false; return nullptr; }
 
 protected:
@@ -49,7 +49,10 @@ protected:
 class CHANNELDUE_API FChanneldReplicatorBase_BP : public FChanneldReplicatorBase
 {
 public:
-    FChanneldReplicatorBase_BP(UObject* InTargetObj, UClass* InBpClass) : FChanneldReplicatorBase(InTargetObj), BpClass(InBpClass) {}
+    FChanneldReplicatorBase_BP(UObject* InTargetObj, const FString& BlueprintPath) : FChanneldReplicatorBase(InTargetObj)
+    {
+        BpClass = LoadClass<AActor>(nullptr, *FString::Printf(TEXT("Blueprint'%s'"), *BlueprintPath));
+    }
     virtual UClass* GetTargetClass() override { return BpClass; }
 
     /*

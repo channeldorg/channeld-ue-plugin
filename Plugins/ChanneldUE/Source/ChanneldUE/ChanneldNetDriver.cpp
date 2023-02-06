@@ -864,7 +864,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 		if (RepComp)
 		{
 			bool bSuccess = true;
-			auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters, bSuccess);
+			auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters, OutParms, bSuccess);
 			if (bSuccess)
 			{
 				UE_CLOG(bShouldLog && ParamsMsg.IsValid(), LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters: %s"), UTF8_TO_TCHAR(ParamsMsg->DebugString().c_str()));

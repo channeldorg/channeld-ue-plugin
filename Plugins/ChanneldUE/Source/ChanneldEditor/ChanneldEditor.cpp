@@ -1,9 +1,20 @@
 #include "ChanneldEditor.h"
+
+#include "BlueprintCompilationManager.h"
 #include "ChanneldEditorCommands.h"
-#include "LevelEditor.h"
-#include "Widgets/Input/SSpinBox.h"
+#include "ChanneldEditorSettings.h"
 #include "ChanneldEditorStyle.h"
+#include "ChanneldMissionNotiProxy.h"
+#include "AddCompToBPSubsystem.h"
+#include "ChanneldProtobufEditor.h"
 #include "ChanneldSettings.h"
+#include "LevelEditor.h"
+#include "ReplicatorGeneratorManager.h"
+#include "ReplicatorGeneratorUtils.h"
+#include "ChanneldUE/Replication/ChanneldReplicationComponent.h"
+#include "Commandlets/CommandletHelpers.h"
+#include "Widgets/Input/SSpinBox.h"
+#include "ThreadUtils/FChanneldProcWorkerThread.h"
 #include "ISettingsModule.h"
 
 #define LOCTEXT_NAMESPACE "FChanneldUEModule"
@@ -23,7 +34,7 @@ void FChanneldEditorModule::StartupModule()
 		FChanneldEditorCommands::Get().LaunchChanneldCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::LaunchChanneldAction));
 	PluginCommands->MapAction(
-		FChanneldEditorCommands::Get().LaunchChanneldCommand,
+		FChanneldEditorCommands::Get().StopChanneldCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::StopChanneldAction));
 	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().LaunchServersCommand,
@@ -34,12 +45,18 @@ void FChanneldEditorModule::StartupModule()
 	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().StopServersCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::StopServersAction));
+	PluginCommands->MapAction(
+		FChanneldEditorCommands::Get().GenerateReplicatorCommand,
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::GenerateReplicatorAction));
+	PluginCommands->MapAction(
+		FChanneldEditorCommands::Get().AddReplicationComponentCommand,
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::AddRepCompToBPAction));
 
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
-	
+
 	TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender());
 	ToolbarExtender->AddToolBarExtension("Compile", EExtensionHook::After, PluginCommands,
-		FToolBarExtensionDelegate::CreateRaw(this, &FChanneldEditorModule::AddToolbarButton));
+	                                     FToolBarExtensionDelegate::CreateRaw(this, &FChanneldEditorModule::AddToolbarButton));
 	LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
 
 	//TSharedPtr<FExtender> MenuExtender = MakeShareable(new FExtender());
@@ -48,11 +65,11 @@ void FChanneldEditorModule::StartupModule()
 	//LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(MenuExtender);
 
 	// Stop all services launched during the session 
-	FEditorDelegates::EditorModeIDExit.AddLambda([&](const FEditorModeID&) 
-		{
-			StopChanneldAction();
-			StopServersAction();
-		});
+	FEditorDelegates::EditorModeIDExit.AddLambda([&](const FEditorModeID&)
+	{
+		StopChanneldAction();
+		StopServersAction();
+	});
 
 	// Add editor settings 
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
@@ -62,6 +79,12 @@ void FChanneldEditorModule::StartupModule()
 			LOCTEXT("EditorSettingsDesc", ""),
 			GetMutableDefault<UChanneldEditorSettings>());
 	}
+
+	GenRepMissionNotifyProxy = NewObject<UChanneldMissionNotiProxy>();
+	GenRepMissionNotifyProxy->AddToRoot();
+
+	AddRepCompMissionNotifyProxy = NewObject<UChanneldMissionNotiProxy>();
+	AddRepCompMissionNotifyProxy->AddToRoot();
 }
 
 void FChanneldEditorModule::ShutdownModule()
@@ -77,11 +100,11 @@ void FChanneldEditorModule::AddToolbarButton(FToolBarBuilder& Builder)
 
 	FUIAction TempAction;
 	Builder.AddComboButton(TempAction,
-		FOnGetContent::CreateRaw(this, &FChanneldEditorModule::CreateMenuContent, PluginCommands),
-		LOCTEXT("ChanneldComboButton", "Channeld combo button"),
-		LOCTEXT("ChanneldComboButtonTootlip", "Channeld combo button tootltip"),
-		TAttribute<FSlateIcon>(),
-		true
+	                       FOnGetContent::CreateRaw(this, &FChanneldEditorModule::CreateMenuContent, PluginCommands),
+	                       LOCTEXT("ChanneldComboButton", "Channeld combo button"),
+	                       LOCTEXT("ChanneldComboButtonTootlip", "Channeld combo button tootltip"),
+	                       TAttribute<FSlateIcon>(),
+	                       true
 	);
 }
 
@@ -92,8 +115,8 @@ void FChanneldEditorModule::AddMenuEntry(FMenuBuilder& Builder)
 	auto Cmd = FChanneldEditorCommands::Get().LaunchChanneldCommand;
 	Builder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchChanneldCommand);
 	Builder.AddSubMenu(FText::FromString("Channeld submenu"),
-		FText::FromString("Channeld submenu tooltip"),
-		FNewMenuDelegate::CreateRaw(this, &FChanneldEditorModule::FillSubmenu));
+	                   FText::FromString("Channeld submenu tooltip"),
+	                   FNewMenuDelegate::CreateRaw(this, &FChanneldEditorModule::FillSubmenu));
 
 	Builder.EndSection();
 }
@@ -105,6 +128,7 @@ void FChanneldEditorModule::FillSubmenu(FMenuBuilder& Builder)
 	Builder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchServersCommand);
 	Builder.AddMenuEntry(FChanneldEditorCommands::Get().ServerSettingsCommand);
 	Builder.AddMenuEntry(FChanneldEditorCommands::Get().StopServersCommand);
+	Builder.AddMenuEntry(FChanneldEditorCommands::Get().GenerateReplicatorCommand);
 }
 
 TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUICommandList> Commands)
@@ -148,6 +172,14 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchServersCommand);
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().ServerSettingsCommand);
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().StopServersCommand);
+
+	MenuBuilder.AddSeparator();
+
+	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddReplicationComponentCommand);
+
+	MenuBuilder.AddSeparator();
+
+	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().GenerateReplicatorCommand);
 
 	return MenuBuilder.MakeWidget();
 }
@@ -241,6 +273,119 @@ void FChanneldEditorModule::StopServersAction()
 	ServerProcHandles.Reset();
 }
 
+void FChanneldEditorModule::GenerateReplicatorAction()
+{
+	FString MissionName = TEXT("CookAndGenerateReplicators");
+	GenRepWorkThread = MakeShareable(
+		new FChanneldProcWorkerThread(
+			TEXT("CookAndGenRepThread"),
+			ChanneldReplicatorGeneratorUtils::GetUECmdBinary(),
+			CommandletHelpers::BuildCommandletProcessArguments(
+				TEXT("CookAndGenRep"),
+				*FPaths::GetProjectFilePath(),
+				TEXT(" -targetplatform=WindowsServer -skipcompile -SkipShaderCompile -nop4 -cook -skipstage -utf8output -stdout")
+			)
+		)
+	);
+	GenRepWorkThread->ProcOutputMsgDelegate.BindUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
+	GenRepWorkThread->ProcBeginDelegate.AddUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::SpawnRunningMissionNotification);
+	GenRepWorkThread->ProcSucceedDelegate.AddRaw(this, &FChanneldEditorModule::GenReplicatorProto);
+	GenRepWorkThread->ProcFailedDelegate.AddUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
+	GenRepMissionNotifyProxy->SetMissionName(*FString::Printf(TEXT("%s"), *MissionName));
+	GenRepMissionNotifyProxy->SetMissionNotifyText(
+		FText::FromString(TEXT("Cooking and generating replicators")),
+		LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),
+		FText::FromString(FString::Printf(TEXT("%s Mission Finished!"), *MissionName)),
+		FText::FromString(FString::Printf(TEXT("%s Failed!"), *MissionName))
+	);
+	GenRepMissionNotifyProxy->MissionCanceled.AddLambda([this]()
+	{
+		if (GenRepWorkThread.IsValid() && GenRepWorkThread->GetThreadStatus() == EChanneldThreadStatus::Busy)
+		{
+			GenRepWorkThread->Cancel();
+		}
+	});
+
+	GenRepWorkThread->Execute();
+}
+
+void FChanneldEditorModule::GenReplicatorProto(FChanneldProcWorkerThread* ProcWorkerThread)
+{
+	TArray<FString> GeneratedProtoFiles = FReplicatorGeneratorManager::Get().GetGeneratedProtoFiles();
+	FString ReplicatorStorageDir = FReplicatorGeneratorManager::Get().GetReplicatorStorageDir();
+	FString ChanneldPath = FPlatformMisc::GetEnvironmentVariable(TEXT("CHANNELD_PATH"));
+	if (ChanneldPath.IsEmpty())
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Environment variable \"CHANNELD_PATH\" is empty, please set environment variable \"CHANNELD_PATH\" to you system"));
+		GenRepMissionNotifyProxy->SpawnMissionFailedNotification(ProcWorkerThread);
+		return;
+	}
+	FString ChanneldUnrealpbPath = ChanneldPath / TEXT("pkg") / TEXT("unrealpb");
+	FPaths::NormalizeDirectoryName(ChanneldUnrealpbPath);
+
+	FString GameModuleExportAPIMacro = GetMutableDefault<UChanneldSettings>()->GameModuleExportAPIMacro;
+
+	if(GameModuleExportAPIMacro.IsEmpty())
+	{
+		UE_LOG(LogChanneldEditor, Warning, TEXT("Game module export API macro is empty"));
+	}
+	
+	FString Args = ChanneldProtobufHelpers::BuildProtocProcessArguments(
+		ReplicatorStorageDir,
+		 FString::Printf(TEXT("dllexport_decl=%s"), *GameModuleExportAPIMacro),
+		{
+			ReplicatorStorageDir,
+			ChanneldUnrealpbPath,
+		},
+		GeneratedProtoFiles
+	);
+	
+	IFileManager& FileManager = IFileManager::Get();
+	FString ProtocPath = ChanneldProtobufHelpers::GetProtocPath();
+	if (!FileManager.FileExists(*ProtocPath))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Protoc path is invaild: %s"), *ProtocPath);
+		GenRepMissionNotifyProxy->SpawnMissionFailedNotification(ProcWorkerThread);
+		return;
+	}
+
+	GenProtoWorkThread = MakeShareable(new FChanneldProcWorkerThread(TEXT("GenerateReplicatorProtoThread"), ProtocPath, Args));
+	GenProtoWorkThread->ProcOutputMsgDelegate.BindUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
+	GenProtoWorkThread->ProcBeginDelegate.AddUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::SpawnRunningMissionNotification);
+	GenProtoWorkThread->ProcSucceedDelegate.AddLambda([this, GeneratedProtoFiles, ReplicatorStorageDir](FChanneldProcWorkerThread*)
+	{
+		IFileManager& FileManager = IFileManager::Get();
+		for (FString GeneratedProtoFile : GeneratedProtoFiles)
+		{
+			GeneratedProtoFile = ReplicatorStorageDir / GeneratedProtoFile;
+			FileManager.Move(
+				*FPaths::ChangeExtension(GeneratedProtoFile, TEXT("pb.cpp")),
+				*FPaths::ChangeExtension(GeneratedProtoFile, TEXT("pb.cc"))
+			);
+		}
+		GenRepMissionNotifyProxy->SpawnMissionSucceedNotification(nullptr);
+	});
+	GenProtoWorkThread->ProcFailedDelegate.AddUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
+	GenRepMissionNotifyProxy->SetRunningNotifyText(FText::FromString(TEXT("Generating replicator protos")));
+	GenRepMissionNotifyProxy->MissionCanceled.AddLambda([this]()
+	{
+		if (GenProtoWorkThread.IsValid() && GenProtoWorkThread->GetThreadStatus() == EChanneldThreadStatus::Busy)
+		{
+			GenProtoWorkThread->Cancel();
+		}
+	});
+
+	GenProtoWorkThread->Execute();
+}
+
+void FChanneldEditorModule::AddRepCompToBPAction()
+{
+	TSubclassOf<class UChanneldReplicationComponent> CompClass = GetMutableDefault<UChanneldSettings>()->DefaultReplicationComponent;
+	GEditor->GetEditorSubsystem<UAddCompToBPSubsystem>()->AddComponentToActorBlueprint(CompClass, FName(TEXT("ChanneldRepComp")));
+}
+
+IMPLEMENT_MODULE(FChanneldEditorModule, ChanneldEditor)
+
 void FChanneldEditorModule::OpenEditorSettingsAction()
 {
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
@@ -250,5 +395,3 @@ void FChanneldEditorModule::OpenEditorSettingsAction()
 }
 
 #undef LOCTEXT_NAMESPACE
-	
-IMPLEMENT_MODULE(FChanneldEditorModule, ChanneldEditor)
