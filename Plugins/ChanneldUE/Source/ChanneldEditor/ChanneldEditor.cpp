@@ -168,7 +168,7 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 		.OnTextChanged_Static(&UChanneldEditorSettings::SetAdditionalArgs);
 	MenuBuilder.AddWidget(AdditonalArgs, LOCTEXT("AdditonalArgsLabel", "Additional Args:"));
 	*/
-	
+
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchServersCommand);
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().ServerSettingsCommand);
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().StopServersCommand);
@@ -212,7 +212,7 @@ void FChanneldEditorModule::LaunchServersAction()
 		{
 			TimerManager->ClearTimer(ServerGroup.DelayHandle);
 		}
-		
+
 		if (ServerGroup.DelayTime > 0)
 		{
 			if (TimerManager)
@@ -238,14 +238,14 @@ void FChanneldEditorModule::LaunchServerGroup(const FServerGroup& ServerGroup)
 {
 	const FString EditorPath = FString(FPlatformProcess::ExecutablePath());
 	const FString ProjectPath = FPaths::GetProjectFilePath();
-		
+
 	// If server map is not set, use current level.
-	FString MapName = ServerGroup.ServerMap.IsValid() ? ServerGroup.ServerMap.GetAssetName() : GEditor->GetEditorWorldContext().World()->GetMapName();
+	FString MapName = ServerGroup.ServerMap.IsValid() ? ServerGroup.ServerMap.GetLongPackageName() : GEditor->GetEditorWorldContext().World()->GetMapName();
 	FString ViewClassName = ServerGroup.ServerViewClass ? ServerGroup.ServerViewClass->GetPathName() : GetMutableDefault<UChanneldSettings>()->ChannelDataViewClass->GetPathName();
-		
+
 	for (int i = 0; i < ServerGroup.ServerNum; i++)
 	{
-		FString Params = FString::Printf(TEXT("\"%s\" /Game/Maps/%s -game -PIEVIACONSOLE -Multiprocess -server -log -MultiprocessSaveConfig -forcepassthrough -SessionName=\"%s - Server %d\" -windowed ViewClass=%s %s"),
+		FString Params = FString::Printf(TEXT("\"%s\" %s -game -PIEVIACONSOLE -Multiprocess -server -log -MultiprocessSaveConfig -forcepassthrough -SessionName=\"%s - Server %d\" -windowed ViewClass=%s %s"),
 			*ProjectPath, *MapName, *MapName, i, *ViewClassName, *ServerGroup.AdditionalArgs.ToString());
 		uint32 ProcessId;
 		FProcHandle ProcHandle = FPlatformProcess::CreateProc(*EditorPath, *Params, true, false, false, &ProcessId, 0, nullptr, nullptr, nullptr);
@@ -265,7 +265,7 @@ void FChanneldEditorModule::StopServersAction()
 			TimerManager->ClearTimer(ServerGroup.DelayHandle);
 		}
 	}
-	
+
 	for (FProcHandle& ServerProc : ServerProcHandles)
 	{
 		FPlatformProcess::TerminateProc(ServerProc, true);

@@ -361,7 +361,7 @@ void UChanneldGameInstanceSubsystem::QuerySpatialChannel(const AActor* Actor,
 	Positions.Add(Actor->GetActorLocation());
 	ConnectionInstance->QuerySpatialChannel(Positions, [Callback](const channeldpb::QuerySpatialChannelResultMessage* ResultMsg)
 	{
-		ChannelId ChId = ResultMsg->channelid_size() == 0 ? InvalidChannelId : ResultMsg->channelid(0);
+		Channeld::ChannelId ChId = ResultMsg->channelid_size() == 0 ? Channeld::InvalidChannelId : ResultMsg->channelid(0);
 		Callback.ExecuteIfBound((int64)ChId);
 	});
 }
@@ -464,7 +464,7 @@ void UChanneldGameInstanceSubsystem::SeamlessTravelToChannel(APlayerController* 
 	PlayerController->ClientTravel(FString::Printf(TEXT("127.0.0.1%s"), *MapName), ETravelType::TRAVEL_Relative, true);
 }
 
-void UChanneldGameInstanceSubsystem::HandleAuthResult(UChanneldConnection* Conn, ChannelId ChId,
+void UChanneldGameInstanceSubsystem::HandleAuthResult(UChanneldConnection* Conn, Channeld::ChannelId ChId,
 	const google::protobuf::Message* Msg)
 {
 	auto AuthResultMsg = static_cast<const channeldpb::AuthResultMessage*>(Msg);
@@ -477,42 +477,42 @@ void UChanneldGameInstanceSubsystem::HandleAuthResult(UChanneldConnection* Conn,
 	OnAuth.Broadcast(AuthResultMsg->result(), AuthResultMsg->connid());
 }
 
-void UChanneldGameInstanceSubsystem::HandleCreateChannel(UChanneldConnection* Conn, ChannelId ChId,
+void UChanneldGameInstanceSubsystem::HandleCreateChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId,
 	const google::protobuf::Message* Msg)
 {
 	auto CreateResultMsg = static_cast<const channeldpb::CreateChannelResultMessage*>(Msg);
 	OnCreateChannel.Broadcast(ChId, static_cast<EChanneldChannelType>(CreateResultMsg->channeltype()), FString(UTF8_TO_TCHAR(CreateResultMsg->metadata().c_str())), CreateResultMsg->ownerconnid());
 }
 
-void UChanneldGameInstanceSubsystem::HandleRemoveChannel(UChanneldConnection* Conn, ChannelId ChId,
+void UChanneldGameInstanceSubsystem::HandleRemoveChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId,
 	const google::protobuf::Message* Msg)
 {
 	auto RemoveResultMsg = static_cast<const channeldpb::RemoveChannelMessage*>(Msg);
 	OnRemoveChannel.Broadcast(ChId, RemoveResultMsg->channelid());
 }
 
-void UChanneldGameInstanceSubsystem::HandleListChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+void UChanneldGameInstanceSubsystem::HandleListChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	TArray<FListedChannelInfo> Channels;
 	Conn->ListedChannels.GenerateValueArray(Channels);
 	OnListChannel.Broadcast(Channels);
 }
 
-void UChanneldGameInstanceSubsystem::HandleSubToChannel(UChanneldConnection* Conn, ChannelId ChId,
+void UChanneldGameInstanceSubsystem::HandleSubToChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId,
 	const google::protobuf::Message* Msg)
 {
 	auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
 	OnSubToChannel.Broadcast(ChId, static_cast<EChanneldChannelType>(SubResultMsg->channeltype()), SubResultMsg->connid(), static_cast<EChanneldConnectionType>(SubResultMsg->conntype()));
 }
 
-void UChanneldGameInstanceSubsystem::HandleUnsubFromChannel(UChanneldConnection* Conn, ChannelId ChId,
+void UChanneldGameInstanceSubsystem::HandleUnsubFromChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId,
 	const google::protobuf::Message* Msg)
 {
 	auto UnsubResultMsg = static_cast<const channeldpb::UnsubscribedFromChannelResultMessage*>(Msg);
 	OnUnsubFromChannel.Broadcast(ChId, static_cast<EChanneldChannelType>(UnsubResultMsg->channeltype()), UnsubResultMsg->connid(), static_cast<EChanneldConnectionType>(UnsubResultMsg->conntype()));
 }
 
-void UChanneldGameInstanceSubsystem::HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId,
+void UChanneldGameInstanceSubsystem::HandleChannelDataUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId,
 	const google::protobuf::Message* Msg)
 {
 	if (!OnDataUpdate.IsBound())
@@ -532,7 +532,7 @@ void UChanneldGameInstanceSubsystem::HandleChannelDataUpdate(UChanneldConnection
 	}
 }
 
-void UChanneldGameInstanceSubsystem::HandleUserSpaceAnyMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+void UChanneldGameInstanceSubsystem::HandleUserSpaceAnyMessage(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto AnyMsg = static_cast<const google::protobuf::Any*>(Msg);
 	std::string ProtoFullName = AnyMsg->type_url();

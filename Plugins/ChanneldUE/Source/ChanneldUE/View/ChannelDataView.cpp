@@ -71,7 +71,7 @@ void UChannelDataView::InitServer()
 {
 	// Add the GameStateBase (if it's an IChannelDataProvider).
 	// Missing this step will cause client failing to begin play.
-	AddActorProvider(GlobalChannelId, GetWorld()->GetAuthGameMode()->GameState);
+	AddActorProvider(Channeld::GlobalChannelId, GetWorld()->GetAuthGameMode()->GameState);
 	
 	ReceiveInitServer();
 }
@@ -163,7 +163,7 @@ void UChannelDataView::BeginDestroy()
 	Super::BeginDestroy();
 }
 
-void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provider)
+void UChannelDataView::AddProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider)
 {
 	/*
 	ensureMsgf(Provider->GetChannelType() != channeldpb::UNKNOWN, TEXT("Invalid channel type of data provider: %s"), *IChannelDataProvider::GetName(Provider));
@@ -185,6 +185,19 @@ void UChannelDataView::AddProvider(ChannelId ChId, IChannelDataProvider* Provide
 	ChannelDataProviders[ChId] = Providers;
 	
 	Provider->OnAddedToChannel(ChId);
+
+	if (auto SavedUpdates = UnprocessedUpdateDataInChannels.Find(ChId))
+	{
+		UE_LOG(LogChanneld, Verbose, TEXT("Consuming %d saved ChannelDataUpdate(s) in channel %d"), SavedUpdates->Num(), ChId);
+
+		for (auto Itr = SavedUpdates->CreateIterator(); Itr; ++Itr)
+		{
+			auto UpdateData = *Itr;
+			Provider->OnChannelDataUpdated(UpdateData);
+			Itr.RemoveCurrent();
+			delete UpdateData;
+		}
+	}
 }
 
 void UChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* Provider)
@@ -192,8 +205,8 @@ void UChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* Provide
 	FNetworkGUID NetId = GetNetId(Provider);
 	if (NetId.IsValid())
 	{
-		ChannelId ChId = GetOwningChannelId(NetId);
-		if (ChId != InvalidChannelId)
+		Channeld::ChannelId ChId = GetOwningChannelId(NetId);
+		if (ChId != Channeld::InvalidChannelId)
 		{
 			AddProvider(ChId, Provider);
 		}
@@ -208,7 +221,7 @@ void UChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* Provide
 	}
 }
 
-void UChannelDataView::AddActorProvider(ChannelId ChId, AActor* Actor)
+void UChannelDataView::AddActorProvider(Channeld::ChannelId ChId, AActor* Actor)
 {
 	if (Actor == nullptr)
 		return;
@@ -250,7 +263,7 @@ void UChannelDataView::RemoveActorProvider(AActor* Actor, bool bSendRemoved)
 	}
 }
 
-void UChannelDataView::RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved)
+void UChannelDataView::RemoveProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved)
 {
 	if (Provider->IsRemoved())
 	{
@@ -329,7 +342,7 @@ void UChannelDataView::RemoveProviderFromAllChannels(IChannelDataProvider* Provi
 	}
 }
 
-void UChannelDataView::MoveProvider(ChannelId OldChId, ChannelId NewChId, IChannelDataProvider* Provider)
+void UChannelDataView::MoveProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, IChannelDataProvider* Provider)
 {
 	RemoveProvider(OldChId, Provider, false);
 	if (!Connection->SubscribedChannels.Contains(NewChId))
@@ -339,7 +352,7 @@ void UChannelDataView::MoveProvider(ChannelId OldChId, ChannelId NewChId, IChann
 	AddProvider(NewChId, Provider);
 }
 
-void UChannelDataView::MoveObjectProvider(ChannelId OldChId, ChannelId NewChId, UObject* Provider)
+void UChannelDataView::MoveObjectProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, UObject* Provider)
 {
 	if (Provider->Implements<UChannelDataProvider>())
 	{
@@ -433,7 +446,7 @@ bool UChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID Ne
 	if (!NetId.IsValid())
 		return false;
 
-	ChannelId ChId = GetChanneldSubsystem()->LowLevelSendToChannelId.Get();
+	Channeld::ChannelId ChId = GetChanneldSubsystem()->LowLevelSendToChannelId.Get();
 	SetOwningChannelId(NetId, ChId);
 	// NetIdOwningChannels.Add(NetId, ChId);
 	// UE_LOG(LogChanneld, Log, TEXT("Set up mapping of netId: %d -> channelId: %d, spawned: %s"), NetId.Value, ChId, *GetNameSafe(Obj));
@@ -495,7 +508,7 @@ void UChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnection* Net
 	{
 		Role = Actor->GetRemoteRole();
 	}
-	NetConn->SendSpawnMessage(Obj, Role, InvalidChannelId, OwningConnId);
+	NetConn->SendSpawnMessage(Obj, Role, Channeld::InvalidChannelId, OwningConnId);
 }
 
 void UChannelDataView::OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId)
@@ -503,13 +516,13 @@ void UChannelDataView::OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId)
 	if (!NetId.IsValid())
 		return;
 
-	ChannelId RemovedChId = NetIdOwningChannels.Remove(NetId);
+ 	Channeld::ChannelId RemovedChId = NetIdOwningChannels.Remove(NetId);
 	UE_LOG(LogChanneld, Log, TEXT("Removed mapping of netId: %d (%d) -> channelId: %d"), NetId.Value, ChanneldUtils::GetNativeNetId(NetId.Value), RemovedChId);
 
 	RemoveActorProvider(Actor, false);
 }
 
-void UChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId)
+void UChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, Channeld::ChannelId ChId)
 {
 	if (!NetId.IsValid())
 		return;
@@ -518,17 +531,17 @@ void UChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, ChannelId Ch
 	UE_LOG(LogChanneld, Log, TEXT("Set up mapping of netId: %d (%d) -> channelId: %d"), NetId.Value, ChanneldUtils::GetNativeNetId(NetId.Value), ChId);
 }
 
-ChannelId UChannelDataView::GetOwningChannelId(const FNetworkGUID NetId) const
+Channeld::ChannelId UChannelDataView::GetOwningChannelId(const FNetworkGUID NetId) const
 {
-	const ChannelId* ChId = NetIdOwningChannels.Find(NetId);
+	const Channeld::ChannelId* ChId = NetIdOwningChannels.Find(NetId);
 	if (ChId)
 	{
 		return *ChId;
 	}
-	return InvalidChannelId;
+	return Channeld::InvalidChannelId;
 }
 
-ChannelId UChannelDataView::GetOwningChannelId(const AActor* Actor) const
+Channeld::ChannelId UChannelDataView::GetOwningChannelId(const AActor* Actor) const
 {
 	if (const auto NetConn = Actor->GetNetConnection())
 	{
@@ -546,7 +559,7 @@ ChannelId UChannelDataView::GetOwningChannelId(const AActor* Actor) const
 		}
 	}
 
-	return InvalidChannelId;
+	return Channeld::InvalidChannelId;
 }
 
 void UChannelDataView::OnDisconnect()
@@ -578,7 +591,7 @@ int32 UChannelDataView::SendAllChannelUpdates()
 	{
 		if (static_cast<channeldpb::ChannelDataAccess>(Pair.Value.SubOptions.DataAccess) == channeldpb::WRITE_ACCESS)
 		{
-			ChannelId ChId = Pair.Key;
+			Channeld::ChannelId ChId = Pair.Key;
 			TSet<FProviderInternal>* Providers = ChannelDataProviders.Find(ChId);
 			if (Providers == nullptr || Providers->Num() == 0)
 			{
@@ -685,7 +698,7 @@ UObject* UChannelDataView::GetObjectFromNetGUID(const FNetworkGUID& NetId)
 	return nullptr;
 }
 
-void UChannelDataView::HandleUnsub(UChanneldConnection* _, ChannelId ChId, const google::protobuf::Message* Msg)
+void UChannelDataView::HandleUnsub(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto UnsubMsg = static_cast<const channeldpb::UnsubscribedFromChannelResultMessage*>(Msg);
 	UE_LOG(LogChanneld, Log, TEXT("Received unsub of conn(%d), connType=%s, channelType=%s, channelId=%d"),
@@ -714,7 +727,7 @@ void UChannelDataView::HandleUnsub(UChanneldConnection* _, ChannelId ChId, const
 	}
 }
 
-void UChannelDataView::OnClientUnsub(ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, ChannelId ChId)
+void UChannelDataView::OnClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId)
 {
 	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
 	{
@@ -739,7 +752,7 @@ void UChannelDataView::OnClientUnsub(ConnectionId ClientConnId, channeldpb::Chan
 	}
 }
 
-void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg)
+void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto UpdateMsg = static_cast<const channeldpb::ChannelDataUpdateMessage*>(Msg);
 
@@ -777,7 +790,14 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	TSet<FProviderInternal>* Providers = ChannelDataProviders.Find(ChId);
 	if (Providers == nullptr || Providers->Num() == 0)
 	{
-		UE_LOG(LogChanneld, Warning, TEXT("No provider registered for channel %d, typeUrl: %s"), ChId, UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
+		UE_LOG(LogChanneld, Log, TEXT("No provider registered for channel %d, typeUrl: %s. The update will not be applied."), ChId, UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
+
+		/* Saving the update data with removed=true can caused the provider gets destroyed immediately after AddProvider.
+		auto UnprocessedUpdateData = UpdateData->New();
+		UnprocessedUpdateData->CopyFrom(*UpdateData);
+		UnprocessedUpdateDataInChannels.FindOrAdd(ChId).Add(UnprocessedUpdateData);
+		*/
+		
 		return;
 	}
 
@@ -789,9 +809,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	{
 		if (Provider.IsValid() && !Provider->IsRemoved())
 		{
-			Provider->GetTargetObject()->PreNetReceive();
 			Provider->OnChannelDataUpdated(UpdateData);
-			Provider->GetTargetObject()->PostNetReceive();
 			bConsumed = true;
 		}
 	}

@@ -6,41 +6,44 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogChanneld, Log, All);
 
-typedef uint32 ConnectionId;
-
-typedef uint32 ChannelId;
-
-/* Moved the definitions to unreal_common.proto
-// User-space message types used in ChanneldUE
-enum MessageType : uint32 {
-	// Used by LowLevelSend in NetConnection/NetDriver.
-	MessageType_LOW_LEVEL = 100,
-	// Used by ChanneldGameInstanceSubsystem to broadcast the ProtoMessageObject from server side. The message is packed as google::protobuf::any to support anonymous types.
-	MessageType_ANY = 101,
-	// Used by ReplicationDriver to send/receive UE's native RPC.
-	MessageType_RPC = 102,
-	MessageType_SPAWN = 103,
-	MessageType_DESTROY = 104,
-	MessageType_SERVER_PLAYER_SPAWNED = 201,
-};
-*/
-
-/*
-UENUM(BlueprintType)
-enum class EChannelId : ChannelId
+namespace Channeld
 {
-	Global = 0
-};
-*/
-constexpr ChannelId GlobalChannelId = 0;
-constexpr ChannelId InvalidChannelId = 0xffffffff;
+	typedef uint32 ConnectionId;
 
-constexpr uint32 GameStateNetId = 1;
+	typedef uint32 ChannelId;
 
-constexpr uint32 MaxPacketSize = 0x00ffff;
-constexpr uint32 MinPacketSize = 20;
-constexpr uint8 MaxConnectionIdBits = 13;
-constexpr uint8 ConnectionIdBitOffset = (31 - MaxConnectionIdBits);
+	/* Moved the definitions to unreal_common.proto
+	// User-space message types used in ChanneldUE
+	enum MessageType : uint32 {
+		// Used by LowLevelSend in NetConnection/NetDriver.
+		MessageType_LOW_LEVEL = 100,
+		// Used by ChanneldGameInstanceSubsystem to broadcast the ProtoMessageObject from server side. The message is packed as google::protobuf::any to support anonymous types.
+		MessageType_ANY = 101,
+		// Used by ReplicationDriver to send/receive UE's native RPC.
+		MessageType_RPC = 102,
+		MessageType_SPAWN = 103,
+		MessageType_DESTROY = 104,
+		MessageType_SERVER_PLAYER_SPAWNED = 201,
+	};
+	*/
+
+	/*
+	UENUM(BlueprintType)
+	enum class EChannelId : ChannelId
+	{
+		Global = 0
+	};
+	*/
+	constexpr ChannelId GlobalChannelId = 0;
+	constexpr ChannelId InvalidChannelId = 0xffffffff;
+
+	constexpr uint32 GameStateNetId = 1;
+
+	constexpr uint32 MaxPacketSize = 0x00ffff;
+	constexpr uint32 MinPacketSize = 20;
+	constexpr uint8 MaxConnectionIdBits = 13;
+	constexpr uint8 ConnectionIdBitOffset = (31 - MaxConnectionIdBits);
+}
 
 UENUM(BlueprintType)
 enum class EChanneldChannelType : uint8
@@ -86,7 +89,7 @@ enum class EChanneldBroadcastType : uint8
 };
 
 UENUM(BlueprintType)
-enum class  EChannelDataAccess : uint8
+enum class EChannelDataAccess : uint8
 {
 	EDA_NO_ACCESS = 0 UMETA(DisplayName = "NoAccess"),
 	EDA_READ_ACCESS = 1 UMETA(DisplayName = "Read"),
@@ -99,26 +102,27 @@ struct CHANNELDUE_API FChannelSubscriptionOptions
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-		EChannelDataAccess DataAccess;
+	EChannelDataAccess DataAccess;
 
 	UPROPERTY(BlueprintReadWrite)
-		TArray<FString> DataFieldMasks;
+	TArray<FString> DataFieldMasks;
 
 	UPROPERTY(BlueprintReadWrite)
-		int32 FanOutIntervalMs;
+	int32 FanOutIntervalMs;
 
 	UPROPERTY(BlueprintReadWrite)
-		int32 FanOutDelayMs;
+	int32 FanOutDelayMs;
 
 	UPROPERTY(BlueprintReadWrite)
-		bool bSkipSelfUpdateFanOut;
+	bool bSkipSelfUpdateFanOut;
 
 	FChannelSubscriptionOptions() :
 		DataAccess(EChannelDataAccess::EDA_WRITE_ACCESS),
 		FanOutIntervalMs(20),
 		FanOutDelayMs(0),
 		bSkipSelfUpdateFanOut(false)
-	{}
+	{
+	}
 
 	void MergeFromMessage(const channeldpb::ChannelSubscriptionOptions& Target)
 	{
@@ -138,12 +142,12 @@ struct CHANNELDUE_API FChannelSubscriptionOptions
 			{
 				DataFieldMaskSet.Add(DataFieldMask);
 			}
-			
+
 			for (std::string TargetDataFieldMask : Target.datafieldmasks())
 			{
 				DataFieldMaskSet.Add(FString(UTF8_TO_TCHAR(TargetDataFieldMask.c_str())));
 			}
-			
+
 			DataFieldMasks = DataFieldMaskSet.Array();
 		}
 
@@ -151,12 +155,12 @@ struct CHANNELDUE_API FChannelSubscriptionOptions
 		{
 			FanOutIntervalMs = Target.fanoutintervalms();
 		}
-		
+
 		if (Target.has_fanoutdelayms())
 		{
 			FanOutDelayMs = Target.fanoutdelayms();
 		}
-		
+
 		if (Target.has_skipselfupdatefanout())
 		{
 			bSkipSelfUpdateFanOut = Target.skipselfupdatefanout();
@@ -184,16 +188,16 @@ struct CHANNELDUE_API FSubscribedChannelInfo
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-		int32 ConnId;
+	int32 ConnId;
 
 	UPROPERTY(BlueprintReadWrite)
-		FChannelSubscriptionOptions SubOptions;
+	FChannelSubscriptionOptions SubOptions;
 
 	UPROPERTY(BlueprintReadWrite)
-		EChanneldConnectionType ConnType;
+	EChanneldConnectionType ConnType;
 
 	UPROPERTY(BlueprintReadWrite)
-		EChanneldChannelType ChannelType;
+	EChanneldChannelType ChannelType;
 
 	void Merge(const channeldpb::SubscribedToChannelResultMessage& Target)
 	{
@@ -214,7 +218,6 @@ struct CHANNELDUE_API FSubscribedChannelInfo
 		if (MsgReflection->HasField(Target, MsgDescriptor->FindFieldByNumber(Target.kChannelTypeFieldNumber)))
 			ChannelType = static_cast<EChanneldChannelType>(Target.channeltype());
 	}
-
 };
 
 USTRUCT(BlueprintType)
@@ -256,4 +259,3 @@ struct CHANNELDUE_API FListedChannelInfo
 	UPROPERTY(BlueprintReadWrite)
 	FString Metadata;
 };
-

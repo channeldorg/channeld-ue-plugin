@@ -20,10 +20,10 @@ public:
 	virtual UObject* GetTargetObject() = 0;
 	// virtual channeldpb::ChannelType GetChannelType() = 0;
 	// virtual google::protobuf::Message* GetChannelDataTemplate() const = 0;
-	//virtual ChannelId GetChannelId() = 0;
-	// virtual void SetChannelId(ChannelId ChId) = 0;
-	virtual void OnAddedToChannel(ChannelId ChId) {}
-	virtual void OnRemovedFromChannel(ChannelId ChId) {}
+	//virtual Channeld::ChannelId GetChannelId() = 0;
+	// virtual void SetChannelId(Channeld::ChannelId ChId) = 0;
+	virtual void OnAddedToChannel(Channeld::ChannelId ChId) {}
+	virtual void OnRemovedFromChannel(Channeld::ChannelId ChId) {}
 	virtual bool IsRemoved() = 0;
 	virtual void SetRemoved(bool bInRemoved) = 0;
 	virtual bool UpdateChannelData(google::protobuf::Message* ChannelData) = 0;

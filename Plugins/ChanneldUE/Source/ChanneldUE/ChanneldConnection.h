@@ -9,12 +9,12 @@
 
 class UChanneldConnection;
 
-DECLARE_MULTICAST_DELEGATE_ThreeParams(FChanneldMessageDelegate, UChanneldConnection*, ChannelId, const google::protobuf::Message*)
-DECLARE_MULTICAST_DELEGATE_FourParams(FUserSpaceMessageDelegate, uint32, ChannelId, ConnectionId, const std::string&)
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FChanneldMessageDelegate, UChanneldConnection*, Channeld::ChannelId, const google::protobuf::Message*)
+DECLARE_MULTICAST_DELEGATE_FourParams(FUserSpaceMessageDelegate, uint32, Channeld::ChannelId, Channeld::ConnectionId, const std::string&)
 DECLARE_MULTICAST_DELEGATE_OneParam(FChanneldAuthenticatedDelegate, UChanneldConnection*);
 
-typedef TFunction<void(UChanneldConnection*, ChannelId, const google::protobuf::Message*)> FChanneldMessageHandlerFunc;
-//typedef TFunction<void(ChannelId, ConnectionId, const std::string&)> FUserSpaceMessageHandlerFunc;
+typedef TFunction<void(UChanneldConnection*, Channeld::ChannelId, const google::protobuf::Message*)> FChanneldMessageHandlerFunc;
+//typedef TFunction<void(Channeld::ChannelId, ConnectionId, const std::string&)> FUserSpaceMessageHandlerFunc;
 
 UCLASS(transient, config = ChanneldUE)
 class CHANNELDUE_API UChanneldConnection : public UEngineSubsystem, public FRunnable
@@ -38,7 +38,7 @@ public:
 	}
 
 	template <typename UserClass>
-	FORCEINLINE void RegisterMessageHandler(uint32 MsgType, google::protobuf::Message* MessageTemplate, UserClass* InUserObject, typename TMemFunPtrType<false, UserClass, void(UChanneldConnection*, ChannelId, const google::protobuf::Message*)>::Type InFunc)
+	FORCEINLINE void RegisterMessageHandler(uint32 MsgType, google::protobuf::Message* MessageTemplate, UserClass* InUserObject, typename TMemFunPtrType<false, UserClass, void(UChanneldConnection*, Channeld::ChannelId, const google::protobuf::Message*)>::Type InFunc)
 	{
 		MessageHandlerEntry& Entry = MessageHandlers.FindOrAdd(MsgType);
 		Entry.Msg = MessageTemplate;
@@ -81,7 +81,7 @@ public:
 
 	FORCEINLINE FSocket* GetSocket() { return Socket; }
 	
-	FORCEINLINE ConnectionId GetConnId()
+	FORCEINLINE Channeld::ConnectionId GetConnId()
 	{
 		ensureMsgf(ConnId != 0, TEXT("ConnId is 0 which means the connection is not authorized yet"));
 		return ConnId;
@@ -102,11 +102,16 @@ public:
 	bool Connect(bool bInitAsClient, const FString& Host, int32 Port, FString& Error);
 	void Disconnect(bool bFlushAll = true);
 	// Send a message to channeld. Thread-safe.
-	void Send(ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const FChanneldMessageHandlerFunc& HandlerFunc = nullptr);
+	void Send(Channeld::ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const FChanneldMessageHandlerFunc& HandlerFunc = nullptr);
 	// Send with underlying bytes.
-	void SendRaw(ChannelId ChId, uint32 MsgType, const std::string& MsgBody, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const FChanneldMessageHandlerFunc& HandlerFunc = nullptr);
+	void SendRaw(Channeld::ChannelId ChId, uint32 MsgType, const std::string& MsgBody, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const FChanneldMessageHandlerFunc& HandlerFunc = nullptr);
 	// Send a message that wrapped by the ServerForwardMessage. This is mainly for using channeld for broadcasting.
-	void Broadcast(ChannelId ChId, uint32 MsgType, const google::protobuf::Message& Msg, int BroadcastType);
+	void Broadcast(Channeld::ChannelId ChId, uint32 MsgType, const google::protobuf::Message& Msg, int BroadcastType);
+	/**
+	 * @brief Server sends a DisconnectMessage for safe disconnection. The message skips queueing and will be sent immediately.
+	 * @param InConnId The Id of the Connection to be disconnected
+	 */
+	void SendDisconnectMessage(Channeld::ConnectionId InConnId);
 	
 	void Auth(const FString& PIT, const FString& LT, const TFunction<void(const channeldpb::AuthResultMessage*)>& Callback = nullptr);
 	void CreateChannel(channeldpb::ChannelType ChannelType, const FString& Metadata, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const google::protobuf::Message* Data = nullptr, const channeldpb::ChannelDataMergeOptions* MergeOptions = nullptr, const TFunction<void(const channeldpb::CreateChannelResultMessage*)>& Callback = nullptr);
@@ -118,17 +123,17 @@ public:
 	 */
 	void RemoveChannel(uint32 ChannelToRemove, const TFunction<void(const channeldpb::RemoveChannelMessage*)>& Callback = nullptr);
 	void ListChannel(channeldpb::ChannelType TypeFilter = channeldpb::UNKNOWN, const TArray<FString>* MetadataFilters = nullptr, const TFunction<void(const channeldpb::ListChannelResultMessage*)>& Callback = nullptr);
-	void SubToChannel(ChannelId ChId, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
-	void SubConnectionToChannel(ConnectionId ConnId, ChannelId ChId, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
-	void UnsubFromChannel(ChannelId ChId, const TFunction<void(const channeldpb::UnsubscribedFromChannelResultMessage*)>& Callback = nullptr);
-	void UnsubConnectionFromChannel(ConnectionId ConnId, ChannelId ChId, const TFunction<void(const channeldpb::UnsubscribedFromChannelResultMessage*)>& Callback = nullptr);
+	void SubToChannel(Channeld::ChannelId ChId, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
+	void SubConnectionToChannel(Channeld::ConnectionId ConnId, Channeld::ChannelId ChId, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const TFunction<void(const channeldpb::SubscribedToChannelResultMessage*)>& Callback = nullptr);
+	void UnsubFromChannel(Channeld::ChannelId ChId, const TFunction<void(const channeldpb::UnsubscribedFromChannelResultMessage*)>& Callback = nullptr);
+	void UnsubConnectionFromChannel(Channeld::ConnectionId ConnId, Channeld::ChannelId ChId, const TFunction<void(const channeldpb::UnsubscribedFromChannelResultMessage*)>& Callback = nullptr);
 	void QuerySpatialChannel(const TArray<FVector>& Positions, const TFunction<void(const channeldpb::QuerySpatialChannelResultMessage*)>& Callback = nullptr);
 	
 	void TickIncoming();
 	void TickOutgoing();
 
 	UPROPERTY(Config)
-		int32 ReceiveBufferSize = MaxPacketSize;
+		int32 ReceiveBufferSize = Channeld::MaxPacketSize;
 	
 	UPROPERTY(Config)
 		bool bShowUserSpaceMessageLog = false;
@@ -138,21 +143,23 @@ public:
 	//FUserSpaceMessageHandlerFunc UserSpaceMessageHandlerFunc = nullptr;
 	FUserSpaceMessageDelegate OnUserSpaceMessageReceived;
 
-	TMap<ChannelId, FSubscribedChannelInfo> SubscribedChannels;
-	TMap<ChannelId, FOwnedChannelInfo> OwnedChannels;
-	TMap<ChannelId, FListedChannelInfo> ListedChannels;
+	TMap<Channeld::ChannelId, FSubscribedChannelInfo> SubscribedChannels;
+	TMap<Channeld::ChannelId, FOwnedChannelInfo> OwnedChannels;
+	TMap<Channeld::ChannelId, FListedChannelInfo> ListedChannels;
 
 private:
+	const uint32 HeaderSize = 5;
+
 	channeldpb::ConnectionType ConnectionType = channeldpb::NO_CONNECTION;
 	channeldpb::CompressionType CompressionType = channeldpb::NO_COMPRESSION;
-	ConnectionId ConnId = 0;
+	Channeld::ConnectionId ConnId = 0;
 	TSharedPtr<FInternetAddr> RemoteAddr;
 	FSocket* Socket;
 
 	FThreadSafeBool bReceiveThreadRunning = false;
 	FRunnableThread* ReceiveThread = nullptr;
 	uint8* ReceiveBuffer;
-	int ReceiveBufferOffset;
+	uint32 ReceiveBufferOffset;
 
 	struct MessageHandlerEntry
 	{
@@ -165,7 +172,7 @@ private:
 	{
 		uint32 MsgType;
 		google::protobuf::Message* Msg;
-		ChannelId ChId;
+		Channeld::ChannelId ChId;
 		uint32 StubId;
 		TArray<FChanneldMessageHandlerFunc> Handlers;
 		FChanneldMessageDelegate Delegate;
@@ -177,6 +184,7 @@ private:
 	TQueue<TSharedPtr<channeldpb::MessagePack>> OutgoingQueue;
 	TMap<uint32, FChanneldMessageHandlerFunc> RpcCallbacks;
 
+	void SendDirect(channeldpb::Packet Packet);
 	void Receive();
 	void OnDisconnected();
 
@@ -189,13 +197,13 @@ private:
 
 	uint32 AddRpcCallback(const FChanneldMessageHandlerFunc& HandlerFunc);
 
-	void HandleServerForwardMessage(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg, uint32 MsgType);
-	void HandleAuth(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-	void HandleCreateChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-	void HandleRemoveChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-	void HandleListChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-	void HandleSubToChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-	void HandleUnsubFromChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
-	void HandleCreateSpatialChannel(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleServerForwardMessage(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg, uint32 MsgType);
+	void HandleAuth(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleCreateChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleRemoveChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleListChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleSubToChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleUnsubFromChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleChannelDataUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleCreateSpatialChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 };

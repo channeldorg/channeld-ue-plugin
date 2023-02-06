@@ -19,8 +19,8 @@ public:
 	USpatialMasterServerView(const FObjectInitializer& ObjectInitializer);
 	
 	virtual void InitServer() override;
-	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider) override;
-	virtual ChannelId GetOwningChannelId(const FNetworkGUID NetId) const override;
+	virtual void AddProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider) override;
+	virtual Channeld::ChannelId GetOwningChannelId(const FNetworkGUID NetId) const override;
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
 
 	UPROPERTY(EditAnywhere)
@@ -31,7 +31,7 @@ public:
 private:
 
 	// Maintains all the channels Master server has created.
-	TSet<ChannelId> AllSpatialChannelIds;
+	TSet<Channeld::ChannelId> AllSpatialChannelIds;
 
 	// Use by the server to locate the player start position. In order to spawn the player's pawn in the right spatial channel,
 	// the Master server and spatial servers should have the EXACTLY SAME position for a player.

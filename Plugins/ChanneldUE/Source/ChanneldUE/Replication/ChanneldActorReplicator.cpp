@@ -11,7 +11,7 @@ FChanneldActorReplicator::FChanneldActorReplicator(UObject* InTargetObj) : FChan
 	Actor = CastChecked<AActor>(InTargetObj);
 	if (Actor->IsA<AGameStateBase>())
 	{
-		NetGUID = GameStateNetId;
+		NetGUID = Channeld::GameStateNetId;
 	}
 
 	// Remove the registered DOREP() properties in the Character

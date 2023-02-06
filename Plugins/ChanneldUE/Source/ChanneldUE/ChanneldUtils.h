@@ -202,10 +202,10 @@ public:
 	bool static SerializeNewActor_Server(UNetConnection* Connection, UPackageMapClient* PackageMap, TSharedPtr<FNetGUIDCache> GuidCache, FArchive& Ar, class UActorChannel *Channel, class AActor*& Actor);
 	
 	// Set the actor's NetRole on the client based on the NetConnection that owns the actor.
-	static void SetActorRoleByOwningConnId(AActor* Actor, ConnectionId OwningConnId);
+	static void SetActorRoleByOwningConnId(AActor* Actor, Channeld::ConnectionId OwningConnId);
 
 	static uint32 GetNativeNetId(uint32 UniqueNetId)
 	{
-		return UniqueNetId & ((1 << ConnectionIdBitOffset) - 1);
+		return UniqueNetId & ((1 << Channeld::ConnectionIdBitOffset) - 1);
 	}
 };

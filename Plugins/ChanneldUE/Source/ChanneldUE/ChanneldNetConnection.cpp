@@ -16,7 +16,7 @@ UChanneldNetConnection::UChanneldNetConnection(const FObjectInitializer& ObjectI
 	:Super(ObjectInitializer)
 {
 	//MaxPacket = MaxPacketSize;
-	if (GetMutableDefault<UChanneldSettings>()->bDisableHandshaking)
+	if (GetMutableDefault<UChanneldSettings>()->bSetInternalAck)
 	{
 		SetInternalAck(true);
 		SetReplay(false);
@@ -30,7 +30,7 @@ void UChanneldNetConnection::InitBase(UNetDriver* InDriver, class FSocket* InSoc
 	Super::InitBase(InDriver, InSocket, InURL, InState,
 		// Use the default packet size/overhead unless overridden by a child class
 		InMaxPacket == 0 ? MAX_PACKET_SIZE : InMaxPacket,
-		InPacketOverhead == 0 ? MinPacketSize : InPacketOverhead);
+		InPacketOverhead == 0 ? Channeld::MinPacketSize : InPacketOverhead);
 	
 	if (bDisableHandshaking)
 	{
@@ -44,7 +44,7 @@ void UChanneldNetConnection::InitLocalConnection(UNetDriver* InDriver, class FSo
 {
 	InitBase(InDriver, InSocket, InURL, InState, InMaxPacket, InPacketOverhead);
 
-	MaxPacket = MaxPacketSize;
+	MaxPacket = Channeld::MaxPacketSize;
 	PacketOverhead = 5;
 	InitSendBuffer();
 }
@@ -61,7 +61,7 @@ void UChanneldNetConnection::InitRemoteConnection(UNetDriver* InDriver, class FS
 	RemoteAddr->SetIp(Ip);
 	RemoteAddr->SetPort(Port);
 
-	MaxPacket = MaxPacketSize;
+	MaxPacket = Channeld::MaxPacketSize;
 	PacketOverhead = 10;
 	InitSendBuffer();
 
@@ -112,7 +112,7 @@ void UChanneldNetConnection::LowLevelSend(void* Data, int32 CountBits, FOutPacke
 	}
 }
 
-void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, int32 DataSize, ChannelId ChId)
+void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, int32 DataSize, Channeld::ChannelId ChId)
 {
 	if (DataSize <= 0)
 	{
@@ -128,7 +128,7 @@ void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, i
 	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
 	auto ConnToChanneld = NetDriver->GetConnToChanneld();
 	
-	if (ChId == InvalidChannelId)
+	if (ChId == Channeld::InvalidChannelId)
 	{
 		ChId = NetDriver->GetSendToChannelId(this);
 	}
@@ -146,7 +146,7 @@ void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, i
 	}
 }
 
-void UChanneldNetConnection::SendMessage(uint32 MsgType, const google::protobuf::Message& Msg, ChannelId ChId)
+void UChanneldNetConnection::SendMessage(uint32 MsgType, const google::protobuf::Message& Msg, Channeld::ChannelId ChId)
 {
 	const std::string StrData = Msg.SerializeAsString();
 	SendData(MsgType, reinterpret_cast<const uint8*>(StrData.data()), StrData.size(), ChId);
@@ -175,7 +175,7 @@ bool UChanneldNetConnection::HasSentSpawn(UObject* Object) const
 	return (ExportCount != nullptr && *ExportCount > 0);
 }
 
-void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*= ENetRole::None*/, uint32 OwningChannelId /*= InvalidChannelId*/, uint32 OwningConnId /*= 0*/, FVector* Location /*= nullptr*/)
+void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*= ENetRole::None*/, uint32 OwningChannelId /*= Channeld::InvalidChannelId*/, uint32 OwningConnId /*= 0*/, FVector* Location /*= nullptr*/)
 {
 	if (!Driver)
 	{
@@ -193,7 +193,7 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 	}
 
 	// Check if the object has the owning ChannelId
-	if (OwningChannelId == InvalidChannelId)
+	if (OwningChannelId == Channeld::InvalidChannelId)
 	{
 		auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
 		if (NetDriver->ChannelDataView.IsValid())
@@ -201,7 +201,7 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 			OwningChannelId = NetDriver->ChannelDataView->GetOwningChannelId(NetId);
 		}
 	}
-	if (OwningChannelId == InvalidChannelId)
+	if (OwningChannelId == Channeld::InvalidChannelId)
 	{
 		QueuedSpawnMessageTargets.Add(MakeTuple(Object, Role, OwningChannelId, OwningConnId, Location));
 		UE_LOG(LogChanneld, Warning, TEXT("[Server] Unable to send Spawn message as there's no mapping of NetId %d -> ChannelId. Pushed to the next tick."), NetId.Value);
@@ -271,7 +271,7 @@ void UChanneldNetConnection::SendDestroyMessage(UObject* Object, EChannelCloseRe
 	}
 }
 
-void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg, ChannelId ChId)
+void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg, Channeld::ChannelId ChId)
 {
 	if (GetMutableDefault<UChanneldSettings>()->bQueueUnexportedActorRPC)
 	{

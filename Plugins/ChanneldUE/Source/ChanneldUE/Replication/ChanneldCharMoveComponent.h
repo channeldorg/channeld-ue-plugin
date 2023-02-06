@@ -10,7 +10,9 @@ struct FChanneldCharacterMoveResponseDataContainer : FCharacterMoveResponseDataC
 	virtual bool Serialize(UCharacterMovementComponent& CharacterMovement, FArchive& Ar, UPackageMap* PackageMap) override;
 };
 
-// Responsible for customizing FCharacterMoveResponseDataContainer::Serialize.
+// Responsibilities:
+// 1. Customize the serialization of FCharacterMoveResponseDataContainer (disabled for now)
+// 2. Adapt the cross-server handover situation
 UCLASS(BlueprintType, meta = (DisplayName = "Channeld Character Movement Component", BlueprintSpawnableComponent))
 class CHANNELDUE_API UChanneldCharMoveComponent : public UCharacterMovementComponent
 {

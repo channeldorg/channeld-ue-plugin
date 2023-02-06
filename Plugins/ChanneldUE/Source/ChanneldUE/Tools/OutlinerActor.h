@@ -18,7 +18,7 @@ class CHANNELDUE_API AOutlinerActor : public ADecalActor
 public:
 	AOutlinerActor(const FObjectInitializer& ObjectInitializer);
 	
-	void SetOutlineColor(ChannelId ChId, const FLinearColor& InColor);
+	void SetOutlineColor(Channeld::ChannelId ChId, const FLinearColor& InColor);
 	void SetFollowTarget(AActor* InTarget);
 
 	void Tick(float DeltaSeconds) override;

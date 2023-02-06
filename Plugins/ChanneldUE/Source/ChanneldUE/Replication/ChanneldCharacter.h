@@ -4,7 +4,9 @@
 #include "GameFramework/Character.h"
 #include "ChanneldCharacter.generated.h"
 
-// Responsible for replacing the default CharacterMovementComponent with the customized one.
+// Responsibilities:
+// 1. Replace the default CharacterMovementComponent with the customized UChanneldCharMoveComponent
+// 2. Route server's ProcessEvent to the cross-server RPC if no authority over the character
 UCLASS(BlueprintType)
 class AChanneldCharacter : public ACharacter
 {

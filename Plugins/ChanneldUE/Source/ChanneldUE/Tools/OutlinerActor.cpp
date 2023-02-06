@@ -9,7 +9,7 @@ AOutlinerActor::AOutlinerActor(const FObjectInitializer& ObjectInitializer)
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-void AOutlinerActor::SetOutlineColor(ChannelId ChId, const FLinearColor& InColor)
+void AOutlinerActor::SetOutlineColor(Channeld::ChannelId ChId, const FLinearColor& InColor)
 {
 	if (DynaMat == nullptr)
 	{

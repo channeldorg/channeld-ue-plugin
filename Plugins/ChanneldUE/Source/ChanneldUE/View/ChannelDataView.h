@@ -38,17 +38,17 @@ public:
 	
 	virtual bool GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const {return false;}
 
-	virtual void AddProvider(ChannelId ChId, IChannelDataProvider* Provider);
+	virtual void AddProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider);
 	virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider);
-	void AddActorProvider(ChannelId ChId, AActor* Actor);
+	void AddActorProvider(Channeld::ChannelId ChId, AActor* Actor);
 	void AddObjectProvider(UObject* Obj);
 	void RemoveActorProvider(AActor* Actor, bool bSendRemoved);
-	virtual void RemoveProvider(ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
+	virtual void RemoveProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
-	virtual void MoveProvider(ChannelId OldChId, ChannelId NewChId, IChannelDataProvider* Provider);
-	void MoveObjectProvider(ChannelId OldChId, ChannelId NewChId, UObject* Provider);
+	virtual void MoveProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, IChannelDataProvider* Provider);
+	void MoveObjectProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, UObject* Provider);
 
-	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, ChannelId ChId){}
+	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, Channeld::ChannelId ChId){}
 	virtual void OnRemoveClientConnection(UChanneldNetConnection* ClientConn){}
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn);
 	virtual FNetworkGUID GetNetId(UObject* Obj) const;
@@ -69,11 +69,11 @@ public:
 	// Send the Spawn message to a single client connection.
 	// Gives the view a chance to override the NetRole, OwningChannelId, OwningConnId, or the Location parameter.
 	virtual void SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId);
-	virtual void OnClientSpawnedObject(UObject* Obj, const ChannelId ChId) {}
+	virtual void OnClientSpawnedObject(UObject* Obj, const Channeld::ChannelId ChId) {}
 	virtual void OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId);
-	virtual void SetOwningChannelId(const FNetworkGUID NetId, ChannelId ChId);
-	virtual ChannelId GetOwningChannelId(const FNetworkGUID NetId) const;
-	virtual ChannelId GetOwningChannelId(const AActor* Actor) const;
+	virtual void SetOwningChannelId(const FNetworkGUID NetId, Channeld::ChannelId ChId);
+	virtual Channeld::ChannelId GetOwningChannelId(const FNetworkGUID NetId) const;
+	virtual Channeld::ChannelId GetOwningChannelId(const AActor* Actor) const;
 
 	int32 SendAllChannelUpdates();
 
@@ -131,14 +131,14 @@ protected:
 	 * @param ClientConnId 
 	 * @param ChId 
 	 */
-	virtual void OnClientUnsub(ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, ChannelId ChId);
+	virtual void OnClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId);
 
-	void HandleChannelDataUpdate(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleChannelDataUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	
-	void HandleUnsub(UChanneldConnection* Conn, ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleUnsub(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 
 	// Give the subclass a chance to mess with the removed providers, e.g. add a provider back to a channel.
-	virtual void OnUnsubFromChannel(ChannelId ChId, const TSet<FProviderInternal>& RemovedProviders) {}
+	virtual void OnUnsubFromChannel(Channeld::ChannelId ChId, const TSet<FProviderInternal>& RemovedProviders) {}
 
 	/**
 	 * @brief Checks if the channel data contains any unsolved NetworkGUID.
@@ -146,16 +146,19 @@ protected:
 	 * @param ChannelData The data field in the ChannelDataUpdateMessage.
 	 * @return If true, the ChannelDataUpdate should not be applied until the objects are spawned.
 	 */
-	virtual bool CheckUnspawnedObject(ChannelId ChId, const google::protobuf::Message* ChannelData) {return false;}
+	virtual bool CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData) {return false;}
 
 	UPROPERTY()
 	UChanneldConnection* Connection;
 
 	// Reuse the message objects to 1) decrease the memory footprint; 2) save the data for the next update if no state is consumed.
-	TMap<ChannelId, google::protobuf::Message*> ReceivedUpdateDataInChannels;
+	TMap<Channeld::ChannelId, google::protobuf::Message*> ReceivedUpdateDataInChannels;
+
+	// Received ChannelUpdateData that don't have any provider to consume. Will be consumed as soon as a provider is added to the channel.
+	TMap<Channeld::ChannelId, TArray<google::protobuf::Message*>> UnprocessedUpdateDataInChannels;
 
 	// The spawned object's NetGUID mapping to the ID of the channel that owns the object.
-	TMap<const FNetworkGUID, ChannelId> NetIdOwningChannels;
+	TMap<const FNetworkGUID, Channeld::ChannelId> NetIdOwningChannels;
 
 private:
 
@@ -163,6 +166,6 @@ private:
 	google::protobuf::Any* AnyForTypeUrl;
 	TMap<FString, const google::protobuf::Message*> ChannelDataTemplatesByTypeUrl;
 
-	TMap<ChannelId, TSet<FProviderInternal>> ChannelDataProviders;
-	TMap<ChannelId, google::protobuf::Message*> RemovedProvidersData;
+	TMap<Channeld::ChannelId, TSet<FProviderInternal>> ChannelDataProviders;
+	TMap<Channeld::ChannelId, google::protobuf::Message*> RemovedProvidersData;
 };

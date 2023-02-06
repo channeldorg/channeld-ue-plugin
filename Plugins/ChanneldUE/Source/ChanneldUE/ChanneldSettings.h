@@ -38,6 +38,8 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	bool bDisableHandshaking = true;
+	UPROPERTY(Config, EditAnywhere, Category = "Transport")
+	bool bSetInternalAck = true;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Replication")
 	bool bSkipCustomReplication = false;
