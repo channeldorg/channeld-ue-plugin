@@ -769,7 +769,7 @@ void USpatialChannelDataView::InitClient()
 	});
 }
 
-Channeld::ChannelId USpatialChannelDataView::GetOwningChannelId(const AActor* Actor) const
+Channeld::ChannelId USpatialChannelDataView::GetOwningChannelId(AActor* Actor) const
 {
 	// GameState is owned by the Master server.
 	if (Actor->IsA<AGameStateBase>())

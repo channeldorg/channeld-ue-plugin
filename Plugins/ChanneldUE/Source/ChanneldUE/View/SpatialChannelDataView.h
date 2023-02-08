@@ -24,7 +24,7 @@ public:
 	virtual void InitServer() override;
 	virtual void InitClient() override;
 
-	virtual Channeld::ChannelId GetOwningChannelId(const AActor* Actor) const override;
+	virtual Channeld::ChannelId GetOwningChannelId(AActor* Actor) const override;
 	virtual void SetOwningChannelId(const FNetworkGUID NetId, Channeld::ChannelId ChId) override;
 	virtual bool GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const override;
 	

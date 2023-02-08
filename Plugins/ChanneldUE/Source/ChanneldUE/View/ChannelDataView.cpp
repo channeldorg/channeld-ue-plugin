@@ -541,8 +541,9 @@ Channeld::ChannelId UChannelDataView::GetOwningChannelId(const FNetworkGUID NetI
 	return Channeld::InvalidChannelId;
 }
 
-Channeld::ChannelId UChannelDataView::GetOwningChannelId(const AActor* Actor) const
+Channeld::ChannelId UChannelDataView::GetOwningChannelId(AActor* Actor) const
 {
+	/* Actors don't necessarily have a NetConnection to have to NetId.
 	if (const auto NetConn = Actor->GetNetConnection())
 	{
 		if (const auto NetDriver = Cast<UChanneldNetDriver>(NetConn->Driver))
@@ -560,6 +561,48 @@ Channeld::ChannelId UChannelDataView::GetOwningChannelId(const AActor* Actor) co
 	}
 
 	return Channeld::InvalidChannelId;
+	*/
+	
+	return GetOwningChannelId(GetNetId(Actor));
+}
+
+bool UChannelDataView::SendMulticastRPC(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg)
+{
+	unrealpb::RemoteFunctionMessage RpcMsg;
+	RpcMsg.mutable_targetobj()->set_netguid(GetNetId(Actor).Value);
+	RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
+	if (ParamsMsg)
+	{
+		RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %d bytes"), RpcMsg.paramspayload().size());
+	}
+
+	auto ChId = GetOwningChannelId(Actor);
+	// Does this server owns the channel that owns the actor?
+	if (auto ChannelInfo = Connection->OwnedChannels.Find(ChId))
+	{
+		if (ChannelInfo->ChannelType == EChanneldChannelType::ECT_Global || ChannelInfo->ChannelType == EChanneldChannelType::ECT_SubWorld)
+		{
+			Connection->Broadcast(ChId, unrealpb::RPC, RpcMsg, channeldpb::ALL_BUT_SERVER);
+		}
+		else if (ChannelInfo->ChannelType == EChanneldChannelType::ECT_Spatial)
+		{
+			Connection->Broadcast(ChId, unrealpb::RPC, RpcMsg, channeldpb::ADJACENT_CHANNELS | channeldpb::ALL_BUT_SERVER);
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Multicast RPC is only supported in Global, SubWorld and Spatial channels. ChannelId: %d, ChannelType: %d"), ChId, (int32)ChannelInfo->ChannelType);
+			return false;
+		}
+	}
+	else
+	{
+		// Forward the RPC to the server that owns the channel / actor.
+		Connection->Broadcast(ChId, unrealpb::RPC, RpcMsg, channeldpb::SINGLE_CONNECTION);
+		UE_LOG(LogChanneld, Log, TEXT("Forwarded RPC %s::%s to the owner of channel %d"), *Actor->GetName(), *FuncName, ChId);
+	}
+	
+	return true;
 }
 
 void UChannelDataView::OnDisconnect()

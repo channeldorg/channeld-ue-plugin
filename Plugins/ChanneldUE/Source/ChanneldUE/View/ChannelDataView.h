@@ -73,7 +73,9 @@ public:
 	virtual void OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId);
 	virtual void SetOwningChannelId(const FNetworkGUID NetId, Channeld::ChannelId ChId);
 	virtual Channeld::ChannelId GetOwningChannelId(const FNetworkGUID NetId) const;
-	virtual Channeld::ChannelId GetOwningChannelId(const AActor* Actor) const;
+	virtual Channeld::ChannelId GetOwningChannelId(AActor* Actor) const;
+
+	virtual bool SendMulticastRPC(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg);
 
 	int32 SendAllChannelUpdates();
 
