@@ -503,7 +503,7 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 		return false;
 	}
 
-	TSet<uint32> NetGUIDs = GetNetGUIDsFromChannelData(ChannelData);
+	TSet<uint32> NetGUIDs = GetRelevantNetGUIDsFromChannelData(ChannelData);
 	if (NetGUIDs.Num() == 0)
 	{
 		return false;
@@ -769,7 +769,7 @@ void USpatialChannelDataView::InitClient()
 	});
 }
 
-Channeld::ChannelId USpatialChannelDataView::GetOwningChannelId(const AActor* Actor) const
+Channeld::ChannelId USpatialChannelDataView::GetOwningChannelId(AActor* Actor) const
 {
 	// GameState is owned by the Master server.
 	if (Actor->IsA<AGameStateBase>())

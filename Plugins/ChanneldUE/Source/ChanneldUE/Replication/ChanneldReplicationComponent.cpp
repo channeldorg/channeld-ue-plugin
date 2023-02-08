@@ -55,7 +55,7 @@ void UChanneldReplicationComponent::InitOnce()
 	}
 
 	auto Settings = GetMutableDefault<UChanneldSettings>();
-	if (Settings->bSkipCustomReplication && Settings->bSkipCustomRPC)
+	if (Settings->bSkipCustomReplication)
 	{
 		return;
 	}

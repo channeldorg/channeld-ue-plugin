@@ -858,7 +858,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 		return;
 	}
 	
-	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomRPC)
+	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
 	{
 		auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
 		if (RepComp)
@@ -869,8 +869,17 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 			{
 				UE_CLOG(bShouldLog && ParamsMsg.IsValid(), LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters: %s"), UTF8_TO_TCHAR(ParamsMsg->DebugString().c_str()));
 
+				// Server -> Client multicast RPC
+				if (ConnToChanneld->IsServer() && (Function->FunctionFlags & FUNC_NetMulticast))
+				{
+					if (ChannelDataView.IsValid() && ChannelDataView->SendMulticastRPC(Actor, FuncName, ParamsMsg))
+					{
+						OnSentRPC(Actor, FuncName);
+						return;
+					}
+				}
 				// Client or authoritative server sends the RPC directly
-				if (ConnToChanneld->IsClient() || Actor->HasAuthority())
+				else if (ConnToChanneld->IsClient() || Actor->HasAuthority())
 				{
 					UChanneldNetConnection* NetConn = ConnToChanneld->IsClient() ? GetServerConnection() : Cast<UChanneldNetConnection>(Actor->GetNetConnection());
 					if (NetConn)
@@ -925,18 +934,22 @@ void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, c
 {
 	const bool bShouldLog = FunctionName != ServerMovePackedFuncName && FunctionName != ClientMoveResponsePackedFuncName && FunctionName != ServerUpdateCameraFuncName;
 	UE_CLOG(bShouldLog,	LogChanneld, Verbose, TEXT("Received RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
-
-	if (Actor->GetLocalRole() <= ENetRole::ROLE_SimulatedProxy)
-	{
-		UE_LOG(LogChanneld, Warning, TEXT("Local role has no authroity to process RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
-		return;
-	}
 	
 	UFunction* Function = Actor->FindFunction(FunctionName);
 	if (!Function)
 	{
 		UE_LOG(LogChanneld, Error, TEXT("RPC function %s doesn't exist on Actor %s"), *FunctionName.ToString(), *Actor->GetName());
 		return;
+	}
+
+	if (Actor->GetLocalRole() <= ENetRole::ROLE_SimulatedProxy)
+	{
+		// Simulated proxies can't process server or client RPCs
+		if ((Function->FunctionFlags & FUNC_NetClient) || (Function->FunctionFlags & FUNC_NetServer))
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Local role has no authroity to process server or client RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
+			return;
+		}
 	}
 
 	auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));

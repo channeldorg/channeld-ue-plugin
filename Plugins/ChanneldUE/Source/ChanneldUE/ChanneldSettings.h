@@ -43,8 +43,6 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "Replication")
 	bool bSkipCustomReplication = false;
-	UPROPERTY(Config, EditAnywhere, Category = "Replication")
-	bool bSkipCustomRPC = true;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial")
 	TSubclassOf<UPlayerStartLocatorBase> PlayerStartLocatorClass;

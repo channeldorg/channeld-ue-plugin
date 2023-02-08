@@ -77,11 +77,6 @@ void UChanneldSettings::PostInitProperties()
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bSkipCustomReplication from CLI: %d"), bSkipCustomReplication);
 	}
-
-	if (FParse::Bool(CmdLine, TEXT("SkipCustomRPC="), bSkipCustomRPC))
-	{
-		UE_LOG(LogChanneld, Log, TEXT("Parsed bSkipCustomRPC from CLI: %d"), bSkipCustomRPC);
-	}
 	
 	FString PlayerStartLocatorClassName;
 	if (FParse::Value(CmdLine, TEXT("PlayerStartLocatorClass="), PlayerStartLocatorClassName))

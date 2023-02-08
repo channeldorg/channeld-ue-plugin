@@ -410,6 +410,95 @@ struct SpatialRegionsUpdateMessageDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SpatialRegionsUpdateMessageDefaultTypeInternal _SpatialRegionsUpdateMessage_default_instance_;
+PROTOBUF_CONSTEXPR SpatialInterestQuery_SpotsAOI::SpatialInterestQuery_SpotsAOI(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.spots_)*/{}
+  , /*decltype(_impl_.center_)*/nullptr
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct SpatialInterestQuery_SpotsAOIDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR SpatialInterestQuery_SpotsAOIDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~SpatialInterestQuery_SpotsAOIDefaultTypeInternal() {}
+  union {
+    SpatialInterestQuery_SpotsAOI _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SpatialInterestQuery_SpotsAOIDefaultTypeInternal _SpatialInterestQuery_SpotsAOI_default_instance_;
+PROTOBUF_CONSTEXPR SpatialInterestQuery_BoxAOI::SpatialInterestQuery_BoxAOI(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.min_)*/nullptr
+  , /*decltype(_impl_.max_)*/nullptr
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct SpatialInterestQuery_BoxAOIDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR SpatialInterestQuery_BoxAOIDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~SpatialInterestQuery_BoxAOIDefaultTypeInternal() {}
+  union {
+    SpatialInterestQuery_BoxAOI _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SpatialInterestQuery_BoxAOIDefaultTypeInternal _SpatialInterestQuery_BoxAOI_default_instance_;
+PROTOBUF_CONSTEXPR SpatialInterestQuery_SphereAOI::SpatialInterestQuery_SphereAOI(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.center_)*/nullptr
+  , /*decltype(_impl_.radius_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct SpatialInterestQuery_SphereAOIDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR SpatialInterestQuery_SphereAOIDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~SpatialInterestQuery_SphereAOIDefaultTypeInternal() {}
+  union {
+    SpatialInterestQuery_SphereAOI _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SpatialInterestQuery_SphereAOIDefaultTypeInternal _SpatialInterestQuery_SphereAOI_default_instance_;
+PROTOBUF_CONSTEXPR SpatialInterestQuery_ConeAOI::SpatialInterestQuery_ConeAOI(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.center_)*/nullptr
+  , /*decltype(_impl_.direction_)*/nullptr
+  , /*decltype(_impl_.angle_)*/0
+  , /*decltype(_impl_.radius_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct SpatialInterestQuery_ConeAOIDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR SpatialInterestQuery_ConeAOIDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~SpatialInterestQuery_ConeAOIDefaultTypeInternal() {}
+  union {
+    SpatialInterestQuery_ConeAOI _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SpatialInterestQuery_ConeAOIDefaultTypeInternal _SpatialInterestQuery_ConeAOI_default_instance_;
+PROTOBUF_CONSTEXPR SpatialInterestQuery::SpatialInterestQuery(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_._has_bits_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_.spotsaoi_)*/nullptr
+  , /*decltype(_impl_.boxaoi_)*/nullptr
+  , /*decltype(_impl_.sphereaoi_)*/nullptr
+  , /*decltype(_impl_.coneaoi_)*/nullptr} {}
+struct SpatialInterestQueryDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR SpatialInterestQueryDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~SpatialInterestQueryDefaultTypeInternal() {}
+  union {
+    SpatialInterestQuery _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SpatialInterestQueryDefaultTypeInternal _SpatialInterestQuery_default_instance_;
+PROTOBUF_CONSTEXPR UpdateSpatialInterestMessage::UpdateSpatialInterestMessage(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.query_)*/nullptr
+  , /*decltype(_impl_.connid_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct UpdateSpatialInterestMessageDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR UpdateSpatialInterestMessageDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~UpdateSpatialInterestMessageDefaultTypeInternal() {}
+  union {
+    UpdateSpatialInterestMessage _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UpdateSpatialInterestMessageDefaultTypeInternal _UpdateSpatialInterestMessage_default_instance_;
 PROTOBUF_CONSTEXPR DebugGetSpatialRegionsMessage::DebugGetSpatialRegionsMessage(
     ::_pbi::ConstantInitialized) {}
 struct DebugGetSpatialRegionsMessageDefaultTypeInternal {
@@ -422,7 +511,7 @@ struct DebugGetSpatialRegionsMessageDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DebugGetSpatialRegionsMessageDefaultTypeInternal _DebugGetSpatialRegionsMessage_default_instance_;
 }  // namespace channeldpb
-static ::_pb::Metadata file_level_metadata_channeld_2eproto[27];
+static ::_pb::Metadata file_level_metadata_channeld_2eproto[33];
 static const ::_pb::EnumDescriptor* file_level_enum_descriptors_channeld_2eproto[7];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_channeld_2eproto = nullptr;
 
@@ -657,6 +746,62 @@ const uint32_t TableStruct_channeld_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialRegionsUpdateMessage, _impl_.regions_),
   ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery_SpotsAOI, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery_SpotsAOI, _impl_.center_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery_SpotsAOI, _impl_.spots_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery_BoxAOI, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery_BoxAOI, _impl_.min_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery_BoxAOI, _impl_.max_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery_SphereAOI, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery_SphereAOI, _impl_.center_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery_SphereAOI, _impl_.radius_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery_ConeAOI, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery_ConeAOI, _impl_.center_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery_ConeAOI, _impl_.direction_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery_ConeAOI, _impl_.angle_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery_ConeAOI, _impl_.radius_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery, _impl_._has_bits_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery, _impl_.spotsaoi_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery, _impl_.boxaoi_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery, _impl_.sphereaoi_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInterestQuery, _impl_.coneaoi_),
+  0,
+  1,
+  2,
+  3,
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::UpdateSpatialInterestMessage, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::UpdateSpatialInterestMessage, _impl_.connid_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::UpdateSpatialInterestMessage, _impl_.query_),
+  ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::channeldpb::DebugGetSpatialRegionsMessage, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -690,7 +835,13 @@ static const ::_pbi::MigrationSchema schemas_channeld_2eproto[] PROTOBUF_SECTION
   { 202, -1, -1, sizeof(::channeldpb::ChannelDataHandoverMessage)},
   { 212, -1, -1, sizeof(::channeldpb::SpatialRegion)},
   { 222, -1, -1, sizeof(::channeldpb::SpatialRegionsUpdateMessage)},
-  { 229, -1, -1, sizeof(::channeldpb::DebugGetSpatialRegionsMessage)},
+  { 229, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_SpotsAOI)},
+  { 237, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_BoxAOI)},
+  { 245, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_SphereAOI)},
+  { 253, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_ConeAOI)},
+  { 263, 273, -1, sizeof(::channeldpb::SpatialInterestQuery)},
+  { 277, -1, -1, sizeof(::channeldpb::UpdateSpatialInterestMessage)},
+  { 285, -1, -1, sizeof(::channeldpb::DebugGetSpatialRegionsMessage)},
 };
 
 static const ::_pb::Message* const file_default_instances_channeld_2eproto[] = {
@@ -720,6 +871,12 @@ static const ::_pb::Message* const file_default_instances_channeld_2eproto[] = {
   &::channeldpb::_ChannelDataHandoverMessage_default_instance_._instance,
   &::channeldpb::_SpatialRegion_default_instance_._instance,
   &::channeldpb::_SpatialRegionsUpdateMessage_default_instance_._instance,
+  &::channeldpb::_SpatialInterestQuery_SpotsAOI_default_instance_._instance,
+  &::channeldpb::_SpatialInterestQuery_BoxAOI_default_instance_._instance,
+  &::channeldpb::_SpatialInterestQuery_SphereAOI_default_instance_._instance,
+  &::channeldpb::_SpatialInterestQuery_ConeAOI_default_instance_._instance,
+  &::channeldpb::_SpatialInterestQuery_default_instance_._instance,
+  &::channeldpb::_UpdateSpatialInterestMessage_default_instance_._instance,
   &::channeldpb::_DebugGetSpatialRegionsMessage_default_instance_._instance,
 };
 
@@ -797,39 +954,60 @@ const char descriptor_table_protodef_channeld_2eproto[] PROTOBUF_SECTION_VARIABL
   "(\0132\027.channeldpb.SpatialInfo\022\021\n\tchannelId"
   "\030\003 \001(\r\022\023\n\013serverIndex\030\004 \001(\r\"I\n\033SpatialRe"
   "gionsUpdateMessage\022*\n\007regions\030\001 \003(\0132\031.ch"
-  "anneldpb.SpatialRegion\"\037\n\035DebugGetSpatia"
-  "lRegionsMessage*\247\001\n\rBroadcastType\022\020\n\014NO_"
-  "BROADCAST\020\000\022\025\n\021SINGLE_CONNECTION\020\001\022\007\n\003AL"
-  "L\020\002\022\022\n\016ALL_BUT_SENDER\020\004\022\021\n\rALL_BUT_OWNER"
-  "\020\006\022\022\n\016ALL_BUT_CLIENT\020\010\022\022\n\016ALL_BUT_SERVER"
-  "\020\020\022\025\n\021ADJACENT_CHANNELS\020 *;\n\016ConnectionT"
-  "ype\022\021\n\rNO_CONNECTION\020\000\022\n\n\006SERVER\020\001\022\n\n\006CL"
-  "IENT\020\002*\204\001\n\013ChannelType\022\013\n\007UNKNOWN\020\000\022\n\n\006G"
-  "LOBAL\020\001\022\013\n\007PRIVATE\020\002\022\014\n\010SUBWORLD\020\003\022\013\n\007SP"
-  "ATIAL\020\004\022\010\n\004TEST\020d\022\t\n\005TEST1\020e\022\t\n\005TEST2\020f\022"
-  "\t\n\005TEST3\020g\022\t\n\005TEST4\020h*\326\002\n\013MessageType\022\013\n"
-  "\007INVALID\020\000\022\010\n\004AUTH\020\001\022\022\n\016CREATE_CHANNEL\020\003"
-  "\022\022\n\016REMOVE_CHANNEL\020\004\022\020\n\014LIST_CHANNEL\020\005\022\022"
-  "\n\016SUB_TO_CHANNEL\020\006\022\026\n\022UNSUB_FROM_CHANNEL"
-  "\020\007\022\027\n\023CHANNEL_DATA_UPDATE\020\010\022\016\n\nDISCONNEC"
-  "T\020\t\022\032\n\026CREATE_SPATIAL_CHANNEL\020\n\022\031\n\025QUERY"
-  "_SPATIAL_CHANNEL\020\013\022\031\n\025CHANNEL_DATA_HANDO"
-  "VER\020\014\022\032\n\026SPATIAL_REGIONS_UPDATE\020\r\022\035\n\031DEB"
-  "UG_GET_SPATIAL_REGIONS\020c\022\024\n\020USER_SPACE_S"
-  "TART\020d*1\n\017CompressionType\022\022\n\016NO_COMPRESS"
-  "ION\020\000\022\n\n\006SNAPPY\020\001*E\n\021ChannelDataAccess\022\r"
-  "\n\tNO_ACCESS\020\000\022\017\n\013READ_ACCESS\020\001\022\020\n\014WRITE_"
-  "ACCESS\020\002B.Z,channeld.clewcat.com/channel"
-  "d/pkg/channeldpbb\006proto3"
+  "anneldpb.SpatialRegion\"\304\005\n\024SpatialIntere"
+  "stQuery\022@\n\010spotsAOI\030\001 \001(\0132).channeldpb.S"
+  "patialInterestQuery.SpotsAOIH\000\210\001\001\022<\n\006box"
+  "AOI\030\002 \001(\0132\'.channeldpb.SpatialInterestQu"
+  "ery.BoxAOIH\001\210\001\001\022B\n\tsphereAOI\030\003 \001(\0132*.cha"
+  "nneldpb.SpatialInterestQuery.SphereAOIH\002"
+  "\210\001\001\022>\n\007coneAOI\030\004 \001(\0132(.channeldpb.Spatia"
+  "lInterestQuery.ConeAOIH\003\210\001\001\032[\n\010SpotsAOI\022"
+  "\'\n\006center\030\001 \001(\0132\027.channeldpb.SpatialInfo"
+  "\022&\n\005spots\030\002 \003(\0132\027.channeldpb.SpatialInfo"
+  "\032T\n\006BoxAOI\022$\n\003min\030\001 \001(\0132\027.channeldpb.Spa"
+  "tialInfo\022$\n\003max\030\002 \001(\0132\027.channeldpb.Spati"
+  "alInfo\032D\n\tSphereAOI\022\'\n\006center\030\001 \001(\0132\027.ch"
+  "anneldpb.SpatialInfo\022\016\n\006radius\030\002 \001(\001\032}\n\007"
+  "ConeAOI\022\'\n\006center\030\001 \001(\0132\027.channeldpb.Spa"
+  "tialInfo\022*\n\tdirection\030\002 \001(\0132\027.channeldpb"
+  ".SpatialInfo\022\r\n\005angle\030\003 \001(\001\022\016\n\006radius\030\004 "
+  "\001(\001B\013\n\t_spotsAOIB\t\n\007_boxAOIB\014\n\n_sphereAO"
+  "IB\n\n\010_coneAOI\"_\n\034UpdateSpatialInterestMe"
+  "ssage\022\016\n\006connId\030\001 \001(\r\022/\n\005query\030\002 \001(\0132 .c"
+  "hanneldpb.SpatialInterestQuery\"\037\n\035DebugG"
+  "etSpatialRegionsMessage*\247\001\n\rBroadcastTyp"
+  "e\022\020\n\014NO_BROADCAST\020\000\022\025\n\021SINGLE_CONNECTION"
+  "\020\001\022\007\n\003ALL\020\002\022\022\n\016ALL_BUT_SENDER\020\004\022\021\n\rALL_B"
+  "UT_OWNER\020\010\022\022\n\016ALL_BUT_CLIENT\020\020\022\022\n\016ALL_BU"
+  "T_SERVER\020 \022\025\n\021ADJACENT_CHANNELS\020@*;\n\016Con"
+  "nectionType\022\021\n\rNO_CONNECTION\020\000\022\n\n\006SERVER"
+  "\020\001\022\n\n\006CLIENT\020\002*\204\001\n\013ChannelType\022\013\n\007UNKNOW"
+  "N\020\000\022\n\n\006GLOBAL\020\001\022\013\n\007PRIVATE\020\002\022\014\n\010SUBWORLD"
+  "\020\003\022\013\n\007SPATIAL\020\004\022\010\n\004TEST\020d\022\t\n\005TEST1\020e\022\t\n\005"
+  "TEST2\020f\022\t\n\005TEST3\020g\022\t\n\005TEST4\020h*\363\002\n\013Messag"
+  "eType\022\013\n\007INVALID\020\000\022\010\n\004AUTH\020\001\022\022\n\016CREATE_C"
+  "HANNEL\020\003\022\022\n\016REMOVE_CHANNEL\020\004\022\020\n\014LIST_CHA"
+  "NNEL\020\005\022\022\n\016SUB_TO_CHANNEL\020\006\022\026\n\022UNSUB_FROM"
+  "_CHANNEL\020\007\022\027\n\023CHANNEL_DATA_UPDATE\020\010\022\016\n\nD"
+  "ISCONNECT\020\t\022\032\n\026CREATE_SPATIAL_CHANNEL\020\n\022"
+  "\031\n\025QUERY_SPATIAL_CHANNEL\020\013\022\031\n\025CHANNEL_DA"
+  "TA_HANDOVER\020\014\022\032\n\026SPATIAL_REGIONS_UPDATE\020"
+  "\r\022\033\n\027UPDATE_SPATIAL_INTEREST\020\016\022\035\n\031DEBUG_"
+  "GET_SPATIAL_REGIONS\020c\022\024\n\020USER_SPACE_STAR"
+  "T\020d*1\n\017CompressionType\022\022\n\016NO_COMPRESSION"
+  "\020\000\022\n\n\006SNAPPY\020\001*E\n\021ChannelDataAccess\022\r\n\tN"
+  "O_ACCESS\020\000\022\017\n\013READ_ACCESS\020\001\022\020\n\014WRITE_ACC"
+  "ESS\020\002B.Z,channeld.clewcat.com/channeld/p"
+  "kg/channeldpbb\006proto3"
   ;
 static const ::_pbi::DescriptorTable* const descriptor_table_channeld_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fany_2eproto,
 };
 static ::_pbi::once_flag descriptor_table_channeld_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_channeld_2eproto = {
-    false, false, 3864, descriptor_table_protodef_channeld_2eproto,
+    false, false, 4701, descriptor_table_protodef_channeld_2eproto,
     "channeld.proto",
-    &descriptor_table_channeld_2eproto_once, descriptor_table_channeld_2eproto_deps, 1, 27,
+    &descriptor_table_channeld_2eproto_once, descriptor_table_channeld_2eproto_deps, 1, 33,
     schemas_channeld_2eproto, file_default_instances_channeld_2eproto, TableStruct_channeld_2eproto::offsets,
     file_level_metadata_channeld_2eproto, file_level_enum_descriptors_channeld_2eproto,
     file_level_service_descriptors_channeld_2eproto,
@@ -874,10 +1052,10 @@ bool BroadcastType_IsValid(int value) {
     case 1:
     case 2:
     case 4:
-    case 6:
     case 8:
     case 16:
     case 32:
+    case 64:
       return true;
     default:
       return false;
@@ -940,6 +1118,7 @@ bool MessageType_IsValid(int value) {
     case 11:
     case 12:
     case 13:
+    case 14:
     case 99:
     case 100:
       return true;
@@ -7302,6 +7481,1598 @@ void SpatialRegionsUpdateMessage::InternalSwap(SpatialRegionsUpdateMessage* othe
 
 // ===================================================================
 
+class SpatialInterestQuery_SpotsAOI::_Internal {
+ public:
+  static const ::channeldpb::SpatialInfo& center(const SpatialInterestQuery_SpotsAOI* msg);
+};
+
+const ::channeldpb::SpatialInfo&
+SpatialInterestQuery_SpotsAOI::_Internal::center(const SpatialInterestQuery_SpotsAOI* msg) {
+  return *msg->_impl_.center_;
+}
+SpatialInterestQuery_SpotsAOI::SpatialInterestQuery_SpotsAOI(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:channeldpb.SpatialInterestQuery.SpotsAOI)
+}
+SpatialInterestQuery_SpotsAOI::SpatialInterestQuery_SpotsAOI(const SpatialInterestQuery_SpotsAOI& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  SpatialInterestQuery_SpotsAOI* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.spots_){from._impl_.spots_}
+    , decltype(_impl_.center_){nullptr}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_center()) {
+    _this->_impl_.center_ = new ::channeldpb::SpatialInfo(*from._impl_.center_);
+  }
+  // @@protoc_insertion_point(copy_constructor:channeldpb.SpatialInterestQuery.SpotsAOI)
+}
+
+inline void SpatialInterestQuery_SpotsAOI::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.spots_){arena}
+    , decltype(_impl_.center_){nullptr}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+}
+
+SpatialInterestQuery_SpotsAOI::~SpatialInterestQuery_SpotsAOI() {
+  // @@protoc_insertion_point(destructor:channeldpb.SpatialInterestQuery.SpotsAOI)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void SpatialInterestQuery_SpotsAOI::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.spots_.~RepeatedPtrField();
+  if (this != internal_default_instance()) delete _impl_.center_;
+}
+
+void SpatialInterestQuery_SpotsAOI::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void SpatialInterestQuery_SpotsAOI::Clear() {
+// @@protoc_insertion_point(message_clear_start:channeldpb.SpatialInterestQuery.SpotsAOI)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.spots_.Clear();
+  if (GetArenaForAllocation() == nullptr && _impl_.center_ != nullptr) {
+    delete _impl_.center_;
+  }
+  _impl_.center_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* SpatialInterestQuery_SpotsAOI::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // .channeldpb.SpatialInfo center = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_center(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // repeated .channeldpb.SpatialInfo spots = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(_internal_add_spots(), ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* SpatialInterestQuery_SpotsAOI::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:channeldpb.SpatialInterestQuery.SpotsAOI)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .channeldpb.SpatialInfo center = 1;
+  if (this->_internal_has_center()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(1, _Internal::center(this),
+        _Internal::center(this).GetCachedSize(), target, stream);
+  }
+
+  // repeated .channeldpb.SpatialInfo spots = 2;
+  for (unsigned i = 0,
+      n = static_cast<unsigned>(this->_internal_spots_size()); i < n; i++) {
+    const auto& repfield = this->_internal_spots(i);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+        InternalWriteMessage(2, repfield, repfield.GetCachedSize(), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:channeldpb.SpatialInterestQuery.SpotsAOI)
+  return target;
+}
+
+size_t SpatialInterestQuery_SpotsAOI::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:channeldpb.SpatialInterestQuery.SpotsAOI)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated .channeldpb.SpatialInfo spots = 2;
+  total_size += 1UL * this->_internal_spots_size();
+  for (const auto& msg : this->_impl_.spots_) {
+    total_size +=
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
+  // .channeldpb.SpatialInfo center = 1;
+  if (this->_internal_has_center()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.center_);
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData SpatialInterestQuery_SpotsAOI::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    SpatialInterestQuery_SpotsAOI::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*SpatialInterestQuery_SpotsAOI::GetClassData() const { return &_class_data_; }
+
+
+void SpatialInterestQuery_SpotsAOI::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<SpatialInterestQuery_SpotsAOI*>(&to_msg);
+  auto& from = static_cast<const SpatialInterestQuery_SpotsAOI&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:channeldpb.SpatialInterestQuery.SpotsAOI)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_impl_.spots_.MergeFrom(from._impl_.spots_);
+  if (from._internal_has_center()) {
+    _this->_internal_mutable_center()->::channeldpb::SpatialInfo::MergeFrom(
+        from._internal_center());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void SpatialInterestQuery_SpotsAOI::CopyFrom(const SpatialInterestQuery_SpotsAOI& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:channeldpb.SpatialInterestQuery.SpotsAOI)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SpatialInterestQuery_SpotsAOI::IsInitialized() const {
+  return true;
+}
+
+void SpatialInterestQuery_SpotsAOI::InternalSwap(SpatialInterestQuery_SpotsAOI* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.spots_.InternalSwap(&other->_impl_.spots_);
+  swap(_impl_.center_, other->_impl_.center_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata SpatialInterestQuery_SpotsAOI::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
+      file_level_metadata_channeld_2eproto[26]);
+}
+
+// ===================================================================
+
+class SpatialInterestQuery_BoxAOI::_Internal {
+ public:
+  static const ::channeldpb::SpatialInfo& min(const SpatialInterestQuery_BoxAOI* msg);
+  static const ::channeldpb::SpatialInfo& max(const SpatialInterestQuery_BoxAOI* msg);
+};
+
+const ::channeldpb::SpatialInfo&
+SpatialInterestQuery_BoxAOI::_Internal::min(const SpatialInterestQuery_BoxAOI* msg) {
+  return *msg->_impl_.min_;
+}
+const ::channeldpb::SpatialInfo&
+SpatialInterestQuery_BoxAOI::_Internal::max(const SpatialInterestQuery_BoxAOI* msg) {
+  return *msg->_impl_.max_;
+}
+SpatialInterestQuery_BoxAOI::SpatialInterestQuery_BoxAOI(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:channeldpb.SpatialInterestQuery.BoxAOI)
+}
+SpatialInterestQuery_BoxAOI::SpatialInterestQuery_BoxAOI(const SpatialInterestQuery_BoxAOI& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  SpatialInterestQuery_BoxAOI* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.min_){nullptr}
+    , decltype(_impl_.max_){nullptr}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_min()) {
+    _this->_impl_.min_ = new ::channeldpb::SpatialInfo(*from._impl_.min_);
+  }
+  if (from._internal_has_max()) {
+    _this->_impl_.max_ = new ::channeldpb::SpatialInfo(*from._impl_.max_);
+  }
+  // @@protoc_insertion_point(copy_constructor:channeldpb.SpatialInterestQuery.BoxAOI)
+}
+
+inline void SpatialInterestQuery_BoxAOI::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.min_){nullptr}
+    , decltype(_impl_.max_){nullptr}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+}
+
+SpatialInterestQuery_BoxAOI::~SpatialInterestQuery_BoxAOI() {
+  // @@protoc_insertion_point(destructor:channeldpb.SpatialInterestQuery.BoxAOI)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void SpatialInterestQuery_BoxAOI::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (this != internal_default_instance()) delete _impl_.min_;
+  if (this != internal_default_instance()) delete _impl_.max_;
+}
+
+void SpatialInterestQuery_BoxAOI::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void SpatialInterestQuery_BoxAOI::Clear() {
+// @@protoc_insertion_point(message_clear_start:channeldpb.SpatialInterestQuery.BoxAOI)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (GetArenaForAllocation() == nullptr && _impl_.min_ != nullptr) {
+    delete _impl_.min_;
+  }
+  _impl_.min_ = nullptr;
+  if (GetArenaForAllocation() == nullptr && _impl_.max_ != nullptr) {
+    delete _impl_.max_;
+  }
+  _impl_.max_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* SpatialInterestQuery_BoxAOI::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // .channeldpb.SpatialInfo min = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_min(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .channeldpb.SpatialInfo max = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          ptr = ctx->ParseMessage(_internal_mutable_max(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* SpatialInterestQuery_BoxAOI::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:channeldpb.SpatialInterestQuery.BoxAOI)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .channeldpb.SpatialInfo min = 1;
+  if (this->_internal_has_min()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(1, _Internal::min(this),
+        _Internal::min(this).GetCachedSize(), target, stream);
+  }
+
+  // .channeldpb.SpatialInfo max = 2;
+  if (this->_internal_has_max()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(2, _Internal::max(this),
+        _Internal::max(this).GetCachedSize(), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:channeldpb.SpatialInterestQuery.BoxAOI)
+  return target;
+}
+
+size_t SpatialInterestQuery_BoxAOI::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:channeldpb.SpatialInterestQuery.BoxAOI)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .channeldpb.SpatialInfo min = 1;
+  if (this->_internal_has_min()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.min_);
+  }
+
+  // .channeldpb.SpatialInfo max = 2;
+  if (this->_internal_has_max()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.max_);
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData SpatialInterestQuery_BoxAOI::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    SpatialInterestQuery_BoxAOI::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*SpatialInterestQuery_BoxAOI::GetClassData() const { return &_class_data_; }
+
+
+void SpatialInterestQuery_BoxAOI::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<SpatialInterestQuery_BoxAOI*>(&to_msg);
+  auto& from = static_cast<const SpatialInterestQuery_BoxAOI&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:channeldpb.SpatialInterestQuery.BoxAOI)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_has_min()) {
+    _this->_internal_mutable_min()->::channeldpb::SpatialInfo::MergeFrom(
+        from._internal_min());
+  }
+  if (from._internal_has_max()) {
+    _this->_internal_mutable_max()->::channeldpb::SpatialInfo::MergeFrom(
+        from._internal_max());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void SpatialInterestQuery_BoxAOI::CopyFrom(const SpatialInterestQuery_BoxAOI& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:channeldpb.SpatialInterestQuery.BoxAOI)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SpatialInterestQuery_BoxAOI::IsInitialized() const {
+  return true;
+}
+
+void SpatialInterestQuery_BoxAOI::InternalSwap(SpatialInterestQuery_BoxAOI* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(SpatialInterestQuery_BoxAOI, _impl_.max_)
+      + sizeof(SpatialInterestQuery_BoxAOI::_impl_.max_)
+      - PROTOBUF_FIELD_OFFSET(SpatialInterestQuery_BoxAOI, _impl_.min_)>(
+          reinterpret_cast<char*>(&_impl_.min_),
+          reinterpret_cast<char*>(&other->_impl_.min_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata SpatialInterestQuery_BoxAOI::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
+      file_level_metadata_channeld_2eproto[27]);
+}
+
+// ===================================================================
+
+class SpatialInterestQuery_SphereAOI::_Internal {
+ public:
+  static const ::channeldpb::SpatialInfo& center(const SpatialInterestQuery_SphereAOI* msg);
+};
+
+const ::channeldpb::SpatialInfo&
+SpatialInterestQuery_SphereAOI::_Internal::center(const SpatialInterestQuery_SphereAOI* msg) {
+  return *msg->_impl_.center_;
+}
+SpatialInterestQuery_SphereAOI::SpatialInterestQuery_SphereAOI(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:channeldpb.SpatialInterestQuery.SphereAOI)
+}
+SpatialInterestQuery_SphereAOI::SpatialInterestQuery_SphereAOI(const SpatialInterestQuery_SphereAOI& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  SpatialInterestQuery_SphereAOI* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.center_){nullptr}
+    , decltype(_impl_.radius_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_center()) {
+    _this->_impl_.center_ = new ::channeldpb::SpatialInfo(*from._impl_.center_);
+  }
+  _this->_impl_.radius_ = from._impl_.radius_;
+  // @@protoc_insertion_point(copy_constructor:channeldpb.SpatialInterestQuery.SphereAOI)
+}
+
+inline void SpatialInterestQuery_SphereAOI::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.center_){nullptr}
+    , decltype(_impl_.radius_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+}
+
+SpatialInterestQuery_SphereAOI::~SpatialInterestQuery_SphereAOI() {
+  // @@protoc_insertion_point(destructor:channeldpb.SpatialInterestQuery.SphereAOI)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void SpatialInterestQuery_SphereAOI::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (this != internal_default_instance()) delete _impl_.center_;
+}
+
+void SpatialInterestQuery_SphereAOI::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void SpatialInterestQuery_SphereAOI::Clear() {
+// @@protoc_insertion_point(message_clear_start:channeldpb.SpatialInterestQuery.SphereAOI)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (GetArenaForAllocation() == nullptr && _impl_.center_ != nullptr) {
+    delete _impl_.center_;
+  }
+  _impl_.center_ = nullptr;
+  _impl_.radius_ = 0;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* SpatialInterestQuery_SphereAOI::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // .channeldpb.SpatialInfo center = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_center(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // double radius = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 17)) {
+          _impl_.radius_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* SpatialInterestQuery_SphereAOI::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:channeldpb.SpatialInterestQuery.SphereAOI)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .channeldpb.SpatialInfo center = 1;
+  if (this->_internal_has_center()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(1, _Internal::center(this),
+        _Internal::center(this).GetCachedSize(), target, stream);
+  }
+
+  // double radius = 2;
+  static_assert(sizeof(uint64_t) == sizeof(double), "Code assumes uint64_t and double are the same size.");
+  double tmp_radius = this->_internal_radius();
+  uint64_t raw_radius;
+  memcpy(&raw_radius, &tmp_radius, sizeof(tmp_radius));
+  if (raw_radius != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteDoubleToArray(2, this->_internal_radius(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:channeldpb.SpatialInterestQuery.SphereAOI)
+  return target;
+}
+
+size_t SpatialInterestQuery_SphereAOI::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:channeldpb.SpatialInterestQuery.SphereAOI)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .channeldpb.SpatialInfo center = 1;
+  if (this->_internal_has_center()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.center_);
+  }
+
+  // double radius = 2;
+  static_assert(sizeof(uint64_t) == sizeof(double), "Code assumes uint64_t and double are the same size.");
+  double tmp_radius = this->_internal_radius();
+  uint64_t raw_radius;
+  memcpy(&raw_radius, &tmp_radius, sizeof(tmp_radius));
+  if (raw_radius != 0) {
+    total_size += 1 + 8;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData SpatialInterestQuery_SphereAOI::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    SpatialInterestQuery_SphereAOI::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*SpatialInterestQuery_SphereAOI::GetClassData() const { return &_class_data_; }
+
+
+void SpatialInterestQuery_SphereAOI::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<SpatialInterestQuery_SphereAOI*>(&to_msg);
+  auto& from = static_cast<const SpatialInterestQuery_SphereAOI&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:channeldpb.SpatialInterestQuery.SphereAOI)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_has_center()) {
+    _this->_internal_mutable_center()->::channeldpb::SpatialInfo::MergeFrom(
+        from._internal_center());
+  }
+  static_assert(sizeof(uint64_t) == sizeof(double), "Code assumes uint64_t and double are the same size.");
+  double tmp_radius = from._internal_radius();
+  uint64_t raw_radius;
+  memcpy(&raw_radius, &tmp_radius, sizeof(tmp_radius));
+  if (raw_radius != 0) {
+    _this->_internal_set_radius(from._internal_radius());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void SpatialInterestQuery_SphereAOI::CopyFrom(const SpatialInterestQuery_SphereAOI& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:channeldpb.SpatialInterestQuery.SphereAOI)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SpatialInterestQuery_SphereAOI::IsInitialized() const {
+  return true;
+}
+
+void SpatialInterestQuery_SphereAOI::InternalSwap(SpatialInterestQuery_SphereAOI* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(SpatialInterestQuery_SphereAOI, _impl_.radius_)
+      + sizeof(SpatialInterestQuery_SphereAOI::_impl_.radius_)
+      - PROTOBUF_FIELD_OFFSET(SpatialInterestQuery_SphereAOI, _impl_.center_)>(
+          reinterpret_cast<char*>(&_impl_.center_),
+          reinterpret_cast<char*>(&other->_impl_.center_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata SpatialInterestQuery_SphereAOI::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
+      file_level_metadata_channeld_2eproto[28]);
+}
+
+// ===================================================================
+
+class SpatialInterestQuery_ConeAOI::_Internal {
+ public:
+  static const ::channeldpb::SpatialInfo& center(const SpatialInterestQuery_ConeAOI* msg);
+  static const ::channeldpb::SpatialInfo& direction(const SpatialInterestQuery_ConeAOI* msg);
+};
+
+const ::channeldpb::SpatialInfo&
+SpatialInterestQuery_ConeAOI::_Internal::center(const SpatialInterestQuery_ConeAOI* msg) {
+  return *msg->_impl_.center_;
+}
+const ::channeldpb::SpatialInfo&
+SpatialInterestQuery_ConeAOI::_Internal::direction(const SpatialInterestQuery_ConeAOI* msg) {
+  return *msg->_impl_.direction_;
+}
+SpatialInterestQuery_ConeAOI::SpatialInterestQuery_ConeAOI(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:channeldpb.SpatialInterestQuery.ConeAOI)
+}
+SpatialInterestQuery_ConeAOI::SpatialInterestQuery_ConeAOI(const SpatialInterestQuery_ConeAOI& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  SpatialInterestQuery_ConeAOI* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.center_){nullptr}
+    , decltype(_impl_.direction_){nullptr}
+    , decltype(_impl_.angle_){}
+    , decltype(_impl_.radius_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_center()) {
+    _this->_impl_.center_ = new ::channeldpb::SpatialInfo(*from._impl_.center_);
+  }
+  if (from._internal_has_direction()) {
+    _this->_impl_.direction_ = new ::channeldpb::SpatialInfo(*from._impl_.direction_);
+  }
+  ::memcpy(&_impl_.angle_, &from._impl_.angle_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.radius_) -
+    reinterpret_cast<char*>(&_impl_.angle_)) + sizeof(_impl_.radius_));
+  // @@protoc_insertion_point(copy_constructor:channeldpb.SpatialInterestQuery.ConeAOI)
+}
+
+inline void SpatialInterestQuery_ConeAOI::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.center_){nullptr}
+    , decltype(_impl_.direction_){nullptr}
+    , decltype(_impl_.angle_){0}
+    , decltype(_impl_.radius_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+}
+
+SpatialInterestQuery_ConeAOI::~SpatialInterestQuery_ConeAOI() {
+  // @@protoc_insertion_point(destructor:channeldpb.SpatialInterestQuery.ConeAOI)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void SpatialInterestQuery_ConeAOI::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (this != internal_default_instance()) delete _impl_.center_;
+  if (this != internal_default_instance()) delete _impl_.direction_;
+}
+
+void SpatialInterestQuery_ConeAOI::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void SpatialInterestQuery_ConeAOI::Clear() {
+// @@protoc_insertion_point(message_clear_start:channeldpb.SpatialInterestQuery.ConeAOI)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (GetArenaForAllocation() == nullptr && _impl_.center_ != nullptr) {
+    delete _impl_.center_;
+  }
+  _impl_.center_ = nullptr;
+  if (GetArenaForAllocation() == nullptr && _impl_.direction_ != nullptr) {
+    delete _impl_.direction_;
+  }
+  _impl_.direction_ = nullptr;
+  ::memset(&_impl_.angle_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.radius_) -
+      reinterpret_cast<char*>(&_impl_.angle_)) + sizeof(_impl_.radius_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* SpatialInterestQuery_ConeAOI::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // .channeldpb.SpatialInfo center = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_center(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .channeldpb.SpatialInfo direction = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          ptr = ctx->ParseMessage(_internal_mutable_direction(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // double angle = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 25)) {
+          _impl_.angle_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else
+          goto handle_unusual;
+        continue;
+      // double radius = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 33)) {
+          _impl_.radius_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* SpatialInterestQuery_ConeAOI::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:channeldpb.SpatialInterestQuery.ConeAOI)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .channeldpb.SpatialInfo center = 1;
+  if (this->_internal_has_center()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(1, _Internal::center(this),
+        _Internal::center(this).GetCachedSize(), target, stream);
+  }
+
+  // .channeldpb.SpatialInfo direction = 2;
+  if (this->_internal_has_direction()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(2, _Internal::direction(this),
+        _Internal::direction(this).GetCachedSize(), target, stream);
+  }
+
+  // double angle = 3;
+  static_assert(sizeof(uint64_t) == sizeof(double), "Code assumes uint64_t and double are the same size.");
+  double tmp_angle = this->_internal_angle();
+  uint64_t raw_angle;
+  memcpy(&raw_angle, &tmp_angle, sizeof(tmp_angle));
+  if (raw_angle != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteDoubleToArray(3, this->_internal_angle(), target);
+  }
+
+  // double radius = 4;
+  static_assert(sizeof(uint64_t) == sizeof(double), "Code assumes uint64_t and double are the same size.");
+  double tmp_radius = this->_internal_radius();
+  uint64_t raw_radius;
+  memcpy(&raw_radius, &tmp_radius, sizeof(tmp_radius));
+  if (raw_radius != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteDoubleToArray(4, this->_internal_radius(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:channeldpb.SpatialInterestQuery.ConeAOI)
+  return target;
+}
+
+size_t SpatialInterestQuery_ConeAOI::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:channeldpb.SpatialInterestQuery.ConeAOI)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .channeldpb.SpatialInfo center = 1;
+  if (this->_internal_has_center()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.center_);
+  }
+
+  // .channeldpb.SpatialInfo direction = 2;
+  if (this->_internal_has_direction()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.direction_);
+  }
+
+  // double angle = 3;
+  static_assert(sizeof(uint64_t) == sizeof(double), "Code assumes uint64_t and double are the same size.");
+  double tmp_angle = this->_internal_angle();
+  uint64_t raw_angle;
+  memcpy(&raw_angle, &tmp_angle, sizeof(tmp_angle));
+  if (raw_angle != 0) {
+    total_size += 1 + 8;
+  }
+
+  // double radius = 4;
+  static_assert(sizeof(uint64_t) == sizeof(double), "Code assumes uint64_t and double are the same size.");
+  double tmp_radius = this->_internal_radius();
+  uint64_t raw_radius;
+  memcpy(&raw_radius, &tmp_radius, sizeof(tmp_radius));
+  if (raw_radius != 0) {
+    total_size += 1 + 8;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData SpatialInterestQuery_ConeAOI::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    SpatialInterestQuery_ConeAOI::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*SpatialInterestQuery_ConeAOI::GetClassData() const { return &_class_data_; }
+
+
+void SpatialInterestQuery_ConeAOI::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<SpatialInterestQuery_ConeAOI*>(&to_msg);
+  auto& from = static_cast<const SpatialInterestQuery_ConeAOI&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:channeldpb.SpatialInterestQuery.ConeAOI)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_has_center()) {
+    _this->_internal_mutable_center()->::channeldpb::SpatialInfo::MergeFrom(
+        from._internal_center());
+  }
+  if (from._internal_has_direction()) {
+    _this->_internal_mutable_direction()->::channeldpb::SpatialInfo::MergeFrom(
+        from._internal_direction());
+  }
+  static_assert(sizeof(uint64_t) == sizeof(double), "Code assumes uint64_t and double are the same size.");
+  double tmp_angle = from._internal_angle();
+  uint64_t raw_angle;
+  memcpy(&raw_angle, &tmp_angle, sizeof(tmp_angle));
+  if (raw_angle != 0) {
+    _this->_internal_set_angle(from._internal_angle());
+  }
+  static_assert(sizeof(uint64_t) == sizeof(double), "Code assumes uint64_t and double are the same size.");
+  double tmp_radius = from._internal_radius();
+  uint64_t raw_radius;
+  memcpy(&raw_radius, &tmp_radius, sizeof(tmp_radius));
+  if (raw_radius != 0) {
+    _this->_internal_set_radius(from._internal_radius());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void SpatialInterestQuery_ConeAOI::CopyFrom(const SpatialInterestQuery_ConeAOI& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:channeldpb.SpatialInterestQuery.ConeAOI)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SpatialInterestQuery_ConeAOI::IsInitialized() const {
+  return true;
+}
+
+void SpatialInterestQuery_ConeAOI::InternalSwap(SpatialInterestQuery_ConeAOI* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(SpatialInterestQuery_ConeAOI, _impl_.radius_)
+      + sizeof(SpatialInterestQuery_ConeAOI::_impl_.radius_)
+      - PROTOBUF_FIELD_OFFSET(SpatialInterestQuery_ConeAOI, _impl_.center_)>(
+          reinterpret_cast<char*>(&_impl_.center_),
+          reinterpret_cast<char*>(&other->_impl_.center_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata SpatialInterestQuery_ConeAOI::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
+      file_level_metadata_channeld_2eproto[29]);
+}
+
+// ===================================================================
+
+class SpatialInterestQuery::_Internal {
+ public:
+  using HasBits = decltype(std::declval<SpatialInterestQuery>()._impl_._has_bits_);
+  static const ::channeldpb::SpatialInterestQuery_SpotsAOI& spotsaoi(const SpatialInterestQuery* msg);
+  static void set_has_spotsaoi(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static const ::channeldpb::SpatialInterestQuery_BoxAOI& boxaoi(const SpatialInterestQuery* msg);
+  static void set_has_boxaoi(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static const ::channeldpb::SpatialInterestQuery_SphereAOI& sphereaoi(const SpatialInterestQuery* msg);
+  static void set_has_sphereaoi(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static const ::channeldpb::SpatialInterestQuery_ConeAOI& coneaoi(const SpatialInterestQuery* msg);
+  static void set_has_coneaoi(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+};
+
+const ::channeldpb::SpatialInterestQuery_SpotsAOI&
+SpatialInterestQuery::_Internal::spotsaoi(const SpatialInterestQuery* msg) {
+  return *msg->_impl_.spotsaoi_;
+}
+const ::channeldpb::SpatialInterestQuery_BoxAOI&
+SpatialInterestQuery::_Internal::boxaoi(const SpatialInterestQuery* msg) {
+  return *msg->_impl_.boxaoi_;
+}
+const ::channeldpb::SpatialInterestQuery_SphereAOI&
+SpatialInterestQuery::_Internal::sphereaoi(const SpatialInterestQuery* msg) {
+  return *msg->_impl_.sphereaoi_;
+}
+const ::channeldpb::SpatialInterestQuery_ConeAOI&
+SpatialInterestQuery::_Internal::coneaoi(const SpatialInterestQuery* msg) {
+  return *msg->_impl_.coneaoi_;
+}
+SpatialInterestQuery::SpatialInterestQuery(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:channeldpb.SpatialInterestQuery)
+}
+SpatialInterestQuery::SpatialInterestQuery(const SpatialInterestQuery& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  SpatialInterestQuery* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_._has_bits_){from._impl_._has_bits_}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.spotsaoi_){nullptr}
+    , decltype(_impl_.boxaoi_){nullptr}
+    , decltype(_impl_.sphereaoi_){nullptr}
+    , decltype(_impl_.coneaoi_){nullptr}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_spotsaoi()) {
+    _this->_impl_.spotsaoi_ = new ::channeldpb::SpatialInterestQuery_SpotsAOI(*from._impl_.spotsaoi_);
+  }
+  if (from._internal_has_boxaoi()) {
+    _this->_impl_.boxaoi_ = new ::channeldpb::SpatialInterestQuery_BoxAOI(*from._impl_.boxaoi_);
+  }
+  if (from._internal_has_sphereaoi()) {
+    _this->_impl_.sphereaoi_ = new ::channeldpb::SpatialInterestQuery_SphereAOI(*from._impl_.sphereaoi_);
+  }
+  if (from._internal_has_coneaoi()) {
+    _this->_impl_.coneaoi_ = new ::channeldpb::SpatialInterestQuery_ConeAOI(*from._impl_.coneaoi_);
+  }
+  // @@protoc_insertion_point(copy_constructor:channeldpb.SpatialInterestQuery)
+}
+
+inline void SpatialInterestQuery::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_._has_bits_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.spotsaoi_){nullptr}
+    , decltype(_impl_.boxaoi_){nullptr}
+    , decltype(_impl_.sphereaoi_){nullptr}
+    , decltype(_impl_.coneaoi_){nullptr}
+  };
+}
+
+SpatialInterestQuery::~SpatialInterestQuery() {
+  // @@protoc_insertion_point(destructor:channeldpb.SpatialInterestQuery)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void SpatialInterestQuery::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (this != internal_default_instance()) delete _impl_.spotsaoi_;
+  if (this != internal_default_instance()) delete _impl_.boxaoi_;
+  if (this != internal_default_instance()) delete _impl_.sphereaoi_;
+  if (this != internal_default_instance()) delete _impl_.coneaoi_;
+}
+
+void SpatialInterestQuery::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void SpatialInterestQuery::Clear() {
+// @@protoc_insertion_point(message_clear_start:channeldpb.SpatialInterestQuery)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x0000000fu) {
+    if (cached_has_bits & 0x00000001u) {
+      GOOGLE_DCHECK(_impl_.spotsaoi_ != nullptr);
+      _impl_.spotsaoi_->Clear();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      GOOGLE_DCHECK(_impl_.boxaoi_ != nullptr);
+      _impl_.boxaoi_->Clear();
+    }
+    if (cached_has_bits & 0x00000004u) {
+      GOOGLE_DCHECK(_impl_.sphereaoi_ != nullptr);
+      _impl_.sphereaoi_->Clear();
+    }
+    if (cached_has_bits & 0x00000008u) {
+      GOOGLE_DCHECK(_impl_.coneaoi_ != nullptr);
+      _impl_.coneaoi_->Clear();
+    }
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* SpatialInterestQuery::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // optional .channeldpb.SpatialInterestQuery.SpotsAOI spotsAOI = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_spotsaoi(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .channeldpb.SpatialInterestQuery.BoxAOI boxAOI = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          ptr = ctx->ParseMessage(_internal_mutable_boxaoi(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .channeldpb.SpatialInterestQuery.SphereAOI sphereAOI = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_sphereaoi(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .channeldpb.SpatialInterestQuery.ConeAOI coneAOI = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+          ptr = ctx->ParseMessage(_internal_mutable_coneaoi(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  _impl_._has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* SpatialInterestQuery::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:channeldpb.SpatialInterestQuery)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // optional .channeldpb.SpatialInterestQuery.SpotsAOI spotsAOI = 1;
+  if (_internal_has_spotsaoi()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(1, _Internal::spotsaoi(this),
+        _Internal::spotsaoi(this).GetCachedSize(), target, stream);
+  }
+
+  // optional .channeldpb.SpatialInterestQuery.BoxAOI boxAOI = 2;
+  if (_internal_has_boxaoi()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(2, _Internal::boxaoi(this),
+        _Internal::boxaoi(this).GetCachedSize(), target, stream);
+  }
+
+  // optional .channeldpb.SpatialInterestQuery.SphereAOI sphereAOI = 3;
+  if (_internal_has_sphereaoi()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(3, _Internal::sphereaoi(this),
+        _Internal::sphereaoi(this).GetCachedSize(), target, stream);
+  }
+
+  // optional .channeldpb.SpatialInterestQuery.ConeAOI coneAOI = 4;
+  if (_internal_has_coneaoi()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(4, _Internal::coneaoi(this),
+        _Internal::coneaoi(this).GetCachedSize(), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:channeldpb.SpatialInterestQuery)
+  return target;
+}
+
+size_t SpatialInterestQuery::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:channeldpb.SpatialInterestQuery)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x0000000fu) {
+    // optional .channeldpb.SpatialInterestQuery.SpotsAOI spotsAOI = 1;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.spotsaoi_);
+    }
+
+    // optional .channeldpb.SpatialInterestQuery.BoxAOI boxAOI = 2;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.boxaoi_);
+    }
+
+    // optional .channeldpb.SpatialInterestQuery.SphereAOI sphereAOI = 3;
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.sphereaoi_);
+    }
+
+    // optional .channeldpb.SpatialInterestQuery.ConeAOI coneAOI = 4;
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.coneaoi_);
+    }
+
+  }
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData SpatialInterestQuery::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    SpatialInterestQuery::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*SpatialInterestQuery::GetClassData() const { return &_class_data_; }
+
+
+void SpatialInterestQuery::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<SpatialInterestQuery*>(&to_msg);
+  auto& from = static_cast<const SpatialInterestQuery&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:channeldpb.SpatialInterestQuery)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (cached_has_bits & 0x0000000fu) {
+    if (cached_has_bits & 0x00000001u) {
+      _this->_internal_mutable_spotsaoi()->::channeldpb::SpatialInterestQuery_SpotsAOI::MergeFrom(
+          from._internal_spotsaoi());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _this->_internal_mutable_boxaoi()->::channeldpb::SpatialInterestQuery_BoxAOI::MergeFrom(
+          from._internal_boxaoi());
+    }
+    if (cached_has_bits & 0x00000004u) {
+      _this->_internal_mutable_sphereaoi()->::channeldpb::SpatialInterestQuery_SphereAOI::MergeFrom(
+          from._internal_sphereaoi());
+    }
+    if (cached_has_bits & 0x00000008u) {
+      _this->_internal_mutable_coneaoi()->::channeldpb::SpatialInterestQuery_ConeAOI::MergeFrom(
+          from._internal_coneaoi());
+    }
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void SpatialInterestQuery::CopyFrom(const SpatialInterestQuery& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:channeldpb.SpatialInterestQuery)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SpatialInterestQuery::IsInitialized() const {
+  return true;
+}
+
+void SpatialInterestQuery::InternalSwap(SpatialInterestQuery* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(SpatialInterestQuery, _impl_.coneaoi_)
+      + sizeof(SpatialInterestQuery::_impl_.coneaoi_)
+      - PROTOBUF_FIELD_OFFSET(SpatialInterestQuery, _impl_.spotsaoi_)>(
+          reinterpret_cast<char*>(&_impl_.spotsaoi_),
+          reinterpret_cast<char*>(&other->_impl_.spotsaoi_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata SpatialInterestQuery::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
+      file_level_metadata_channeld_2eproto[30]);
+}
+
+// ===================================================================
+
+class UpdateSpatialInterestMessage::_Internal {
+ public:
+  static const ::channeldpb::SpatialInterestQuery& query(const UpdateSpatialInterestMessage* msg);
+};
+
+const ::channeldpb::SpatialInterestQuery&
+UpdateSpatialInterestMessage::_Internal::query(const UpdateSpatialInterestMessage* msg) {
+  return *msg->_impl_.query_;
+}
+UpdateSpatialInterestMessage::UpdateSpatialInterestMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:channeldpb.UpdateSpatialInterestMessage)
+}
+UpdateSpatialInterestMessage::UpdateSpatialInterestMessage(const UpdateSpatialInterestMessage& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  UpdateSpatialInterestMessage* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.query_){nullptr}
+    , decltype(_impl_.connid_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_query()) {
+    _this->_impl_.query_ = new ::channeldpb::SpatialInterestQuery(*from._impl_.query_);
+  }
+  _this->_impl_.connid_ = from._impl_.connid_;
+  // @@protoc_insertion_point(copy_constructor:channeldpb.UpdateSpatialInterestMessage)
+}
+
+inline void UpdateSpatialInterestMessage::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.query_){nullptr}
+    , decltype(_impl_.connid_){0u}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+}
+
+UpdateSpatialInterestMessage::~UpdateSpatialInterestMessage() {
+  // @@protoc_insertion_point(destructor:channeldpb.UpdateSpatialInterestMessage)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void UpdateSpatialInterestMessage::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (this != internal_default_instance()) delete _impl_.query_;
+}
+
+void UpdateSpatialInterestMessage::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void UpdateSpatialInterestMessage::Clear() {
+// @@protoc_insertion_point(message_clear_start:channeldpb.UpdateSpatialInterestMessage)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (GetArenaForAllocation() == nullptr && _impl_.query_ != nullptr) {
+    delete _impl_.query_;
+  }
+  _impl_.query_ = nullptr;
+  _impl_.connid_ = 0u;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* UpdateSpatialInterestMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // uint32 connId = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.connid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .channeldpb.SpatialInterestQuery query = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          ptr = ctx->ParseMessage(_internal_mutable_query(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* UpdateSpatialInterestMessage::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:channeldpb.UpdateSpatialInterestMessage)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // uint32 connId = 1;
+  if (this->_internal_connid() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(1, this->_internal_connid(), target);
+  }
+
+  // .channeldpb.SpatialInterestQuery query = 2;
+  if (this->_internal_has_query()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(2, _Internal::query(this),
+        _Internal::query(this).GetCachedSize(), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:channeldpb.UpdateSpatialInterestMessage)
+  return target;
+}
+
+size_t UpdateSpatialInterestMessage::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:channeldpb.UpdateSpatialInterestMessage)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .channeldpb.SpatialInterestQuery query = 2;
+  if (this->_internal_has_query()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.query_);
+  }
+
+  // uint32 connId = 1;
+  if (this->_internal_connid() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_connid());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData UpdateSpatialInterestMessage::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    UpdateSpatialInterestMessage::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*UpdateSpatialInterestMessage::GetClassData() const { return &_class_data_; }
+
+
+void UpdateSpatialInterestMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<UpdateSpatialInterestMessage*>(&to_msg);
+  auto& from = static_cast<const UpdateSpatialInterestMessage&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:channeldpb.UpdateSpatialInterestMessage)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_has_query()) {
+    _this->_internal_mutable_query()->::channeldpb::SpatialInterestQuery::MergeFrom(
+        from._internal_query());
+  }
+  if (from._internal_connid() != 0) {
+    _this->_internal_set_connid(from._internal_connid());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void UpdateSpatialInterestMessage::CopyFrom(const UpdateSpatialInterestMessage& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:channeldpb.UpdateSpatialInterestMessage)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool UpdateSpatialInterestMessage::IsInitialized() const {
+  return true;
+}
+
+void UpdateSpatialInterestMessage::InternalSwap(UpdateSpatialInterestMessage* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(UpdateSpatialInterestMessage, _impl_.connid_)
+      + sizeof(UpdateSpatialInterestMessage::_impl_.connid_)
+      - PROTOBUF_FIELD_OFFSET(UpdateSpatialInterestMessage, _impl_.query_)>(
+          reinterpret_cast<char*>(&_impl_.query_),
+          reinterpret_cast<char*>(&other->_impl_.query_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata UpdateSpatialInterestMessage::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
+      file_level_metadata_channeld_2eproto[31]);
+}
+
+// ===================================================================
+
 class DebugGetSpatialRegionsMessage::_Internal {
  public:
 };
@@ -7337,7 +9108,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*DebugGetSpatialRegionsMessage:
 ::PROTOBUF_NAMESPACE_ID::Metadata DebugGetSpatialRegionsMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[26]);
+      file_level_metadata_channeld_2eproto[32]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -7446,6 +9217,30 @@ Arena::CreateMaybeMessage< ::channeldpb::SpatialRegion >(Arena* arena) {
 template<> PROTOBUF_NOINLINE ::channeldpb::SpatialRegionsUpdateMessage*
 Arena::CreateMaybeMessage< ::channeldpb::SpatialRegionsUpdateMessage >(Arena* arena) {
   return Arena::CreateMessageInternal< ::channeldpb::SpatialRegionsUpdateMessage >(arena);
+}
+template<> PROTOBUF_NOINLINE ::channeldpb::SpatialInterestQuery_SpotsAOI*
+Arena::CreateMaybeMessage< ::channeldpb::SpatialInterestQuery_SpotsAOI >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::channeldpb::SpatialInterestQuery_SpotsAOI >(arena);
+}
+template<> PROTOBUF_NOINLINE ::channeldpb::SpatialInterestQuery_BoxAOI*
+Arena::CreateMaybeMessage< ::channeldpb::SpatialInterestQuery_BoxAOI >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::channeldpb::SpatialInterestQuery_BoxAOI >(arena);
+}
+template<> PROTOBUF_NOINLINE ::channeldpb::SpatialInterestQuery_SphereAOI*
+Arena::CreateMaybeMessage< ::channeldpb::SpatialInterestQuery_SphereAOI >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::channeldpb::SpatialInterestQuery_SphereAOI >(arena);
+}
+template<> PROTOBUF_NOINLINE ::channeldpb::SpatialInterestQuery_ConeAOI*
+Arena::CreateMaybeMessage< ::channeldpb::SpatialInterestQuery_ConeAOI >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::channeldpb::SpatialInterestQuery_ConeAOI >(arena);
+}
+template<> PROTOBUF_NOINLINE ::channeldpb::SpatialInterestQuery*
+Arena::CreateMaybeMessage< ::channeldpb::SpatialInterestQuery >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::channeldpb::SpatialInterestQuery >(arena);
+}
+template<> PROTOBUF_NOINLINE ::channeldpb::UpdateSpatialInterestMessage*
+Arena::CreateMaybeMessage< ::channeldpb::UpdateSpatialInterestMessage >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::channeldpb::UpdateSpatialInterestMessage >(arena);
 }
 template<> PROTOBUF_NOINLINE ::channeldpb::DebugGetSpatialRegionsMessage*
 Arena::CreateMaybeMessage< ::channeldpb::DebugGetSpatialRegionsMessage >(Arena* arena) {
