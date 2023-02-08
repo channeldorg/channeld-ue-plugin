@@ -49,8 +49,8 @@ void FChanneldEditorModule::StartupModule()
 		FChanneldEditorCommands::Get().GenerateReplicatorCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::GenerateReplicatorAction));
 	PluginCommands->MapAction(
-		FChanneldEditorCommands::Get().AddReplicationComponentCommand,
-		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::AddRepCompToBPAction));
+		FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand,
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::AddRepCompsToBPsAction));
 
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
@@ -175,7 +175,7 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 
 	MenuBuilder.AddSeparator();
 
-	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddReplicationComponentCommand);
+	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand);
 
 	MenuBuilder.AddSeparator();
 
@@ -323,7 +323,7 @@ void FChanneldEditorModule::GenReplicatorProto(FChanneldProcWorkerThread* ProcWo
 	FString ChanneldUnrealpbPath = ChanneldPath / TEXT("pkg") / TEXT("unrealpb");
 	FPaths::NormalizeDirectoryName(ChanneldUnrealpbPath);
 
-	FString GameModuleExportAPIMacro = GetMutableDefault<UChanneldSettings>()->GameModuleExportAPIMacro;
+	FString GameModuleExportAPIMacro = GetMutableDefault<UChanneldEditorSettings>()->GameModuleExportAPIMacro;
 
 	if(GameModuleExportAPIMacro.IsEmpty())
 	{
@@ -378,10 +378,10 @@ void FChanneldEditorModule::GenReplicatorProto(FChanneldProcWorkerThread* ProcWo
 	GenProtoWorkThread->Execute();
 }
 
-void FChanneldEditorModule::AddRepCompToBPAction()
+void FChanneldEditorModule::AddRepCompsToBPsAction()
 {
-	TSubclassOf<class UChanneldReplicationComponent> CompClass = GetMutableDefault<UChanneldSettings>()->DefaultReplicationComponent;
-	GEditor->GetEditorSubsystem<UAddCompToBPSubsystem>()->AddComponentToActorBlueprint(CompClass, FName(TEXT("ChanneldRepComp")));
+	TSubclassOf<class UChanneldReplicationComponent> CompClass = GetMutableDefault<UChanneldEditorSettings>()->DefaultReplicationComponent;
+	GEditor->GetEditorSubsystem<UAddCompToBPSubsystem>()->AddComponentToBlueprints(CompClass, FName(TEXT("ChanneldRepComp")));
 }
 
 IMPLEMENT_MODULE(FChanneldEditorModule, ChanneldEditor)

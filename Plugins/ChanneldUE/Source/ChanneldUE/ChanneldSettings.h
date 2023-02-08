@@ -7,7 +7,6 @@
 #include "Tools/ATintActor.h"
 #include "Tools/OutlinerActor.h"
 #include "View/PlayerStartLocator.h"
-#include "Replication/ChanneldReplicationComponent.h"
 #include "ChanneldSettings.generated.h"
 
 /**
@@ -67,11 +66,6 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Server|Debug")
 	float DelayViewInitInSeconds = 0;
 
-	UPROPERTY(Config, EditAnywhere, Category = "ReplicatorGenerator")
-	FString GameModuleExportAPIMacro;
-	UPROPERTY(Config, EditAnywhere, Category = "ReplicatorGenerator")
-	TSubclassOf<UChanneldReplicationComponent> DefaultReplicationComponent;
-	
 private:
 	bool ParseNetAddr(const FString& Addr, FString& OutIp, int32& OutPort);
 };

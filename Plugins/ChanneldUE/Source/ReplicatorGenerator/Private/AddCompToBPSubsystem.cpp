@@ -274,7 +274,7 @@ bool UAddCompToBPSubsystem::IsTickableInEditor() const
 	return true;
 }
 
-void UAddCompToBPSubsystem::AddComponentToActorBlueprint(UClass* InCompClass, FName InCompName)
+void UAddCompToBPSubsystem::AddComponentToBlueprints(UClass* InCompClass, FName InCompName)
 {
 	if (FilterRepActorProcessStatus == Busy || FilterRepActorProcessStatus == Canceling)
 	{
