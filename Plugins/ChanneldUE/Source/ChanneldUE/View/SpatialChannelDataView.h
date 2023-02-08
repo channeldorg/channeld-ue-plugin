@@ -50,7 +50,8 @@ protected:
 	// The client may have subscribed to the spatial channels that go beyond the interest area of the client's authoritative server.
 	// In that case, the client may receive ChannelDataUpdate that contains unresolved NetworkGUIDs, so it needs to spawn the objects before applying the update.
 	virtual bool CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData) override;
-	virtual TSet<uint32> GetNetGUIDsFromChannelData(const google::protobuf::Message* Message)
+	// The NetIds of the objects that are relevant to the client in the ChannelDataUpdate. If any NetId is unresolved, the client will spawn the object.
+	virtual TSet<uint32> GetRelevantNetGUIDsFromChannelData(const google::protobuf::Message* Message)
 	{
 		const TSet<uint32> EmptySet;
 		return EmptySet;

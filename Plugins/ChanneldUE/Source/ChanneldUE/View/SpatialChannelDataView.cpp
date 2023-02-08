@@ -503,7 +503,7 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 		return false;
 	}
 
-	TSet<uint32> NetGUIDs = GetNetGUIDsFromChannelData(ChannelData);
+	TSet<uint32> NetGUIDs = GetRelevantNetGUIDsFromChannelData(ChannelData);
 	if (NetGUIDs.Num() == 0)
 	{
 		return false;
