@@ -282,7 +282,7 @@ void FChanneldEditorModule::GenerateReplicatorAction()
 			ChanneldReplicatorGeneratorUtils::GetUECmdBinary(),
 			CommandletHelpers::BuildCommandletProcessArguments(
 				TEXT("CookAndGenRep"),
-				*FPaths::GetProjectFilePath(),
+				*FString::Printf( TEXT("\"%s\""), *FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())),
 				TEXT(" -targetplatform=WindowsServer -skipcompile -SkipShaderCompile -nop4 -cook -skipstage -utf8output -stdout")
 			)
 		)
@@ -327,9 +327,9 @@ void FChanneldEditorModule::GenReplicatorProto(FChanneldProcWorkerThread* ProcWo
 
 	if(GameModuleExportAPIMacro.IsEmpty())
 	{
-		UE_LOG(LogChanneldEditor, Warning, TEXT("Game module export API macro is empty"));
+		UE_LOG(LogChanneldEditor, Verbose, TEXT("Game module export API macro is empty"));
 	}
-	
+
 	FString Args = ChanneldProtobufHelpers::BuildProtocProcessArguments(
 		ReplicatorStorageDir,
 		 FString::Printf(TEXT("dllexport_decl=%s"), *GameModuleExportAPIMacro),
