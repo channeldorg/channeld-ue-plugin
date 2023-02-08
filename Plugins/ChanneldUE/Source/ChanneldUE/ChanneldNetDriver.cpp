@@ -858,7 +858,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 		return;
 	}
 	
-	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomRPC)
+	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
 	{
 		auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
 		if (RepComp)
