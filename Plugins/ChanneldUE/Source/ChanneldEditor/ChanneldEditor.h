@@ -33,7 +33,7 @@ private:
 	void StopServersAction();
 
 	void GenerateReplicatorAction();
-	void AddRepCompToBPAction();
+	void AddRepCompsToBPsAction();
 
 	void GenReplicatorProto(FChanneldProcWorkerThread* ProcWorker);
 

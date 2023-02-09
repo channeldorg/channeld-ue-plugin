@@ -8,10 +8,17 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogMissionNotificationProxy, All, All);
 
+#define COMMANDLET_LOG_PROXY(Type, Else) \
+Else if ((MsgIndex = InMsg.Find(TEXT(#Type ":"))) != INDEX_NONE) \
+{ \
+UE_LOG(LogMissionNotificationProxy, Type, TEXT("[Proxy]%s"), *InMsg + MsgIndex + FString(TEXT(#Type)).Len() + 1); \
+}
+
 #define LOCTEXT_NAMESPACE "MissionNotificationPorxy"
 
-UChanneldMissionNotiProxy::UChanneldMissionNotiProxy(const FObjectInitializer& Initializer):Super(Initializer)
-{}
+UChanneldMissionNotiProxy::UChanneldMissionNotiProxy(const FObjectInitializer& Initializer): Super(Initializer)
+{
+}
 
 
 void UChanneldMissionNotiProxy::SetMissionName(FName NewMissionName)
@@ -20,7 +27,7 @@ void UChanneldMissionNotiProxy::SetMissionName(FName NewMissionName)
 }
 
 void UChanneldMissionNotiProxy::SetMissionNotifyText(const FText& RunningText, const FText& CancelText,
-    const FText& SucceedText, const FText& FailedText)
+                                                     const FText& SucceedText, const FText& FailedText)
 {
 	// running
 	RunningNotifyText = RunningText; // LOCTEXT("CookNotificationInProgress", "Cook in progress");
@@ -77,88 +84,82 @@ FName UChanneldMissionNotiProxy::GetMissionName() const
 	return MissionName;
 }
 
-void UChanneldMissionNotiProxy::ReceiveOutputMsg(FChanneldProcWorkerThread* Worker,const FString& InMsg)
+void UChanneldMissionNotiProxy::ReceiveOutputMsg(FChanneldProcWorkerThread* Worker, const FString& InMsg)
 {
-	FString FindItem(TEXT("Display:"));
-	int32 Index = InMsg.Len() - InMsg.Find(FindItem) - FindItem.Len();
-
-	if (InMsg.Contains(TEXT("Error:")))
-	{
-		UE_LOG(LogMissionNotificationProxy, Error, TEXT("%s"), *InMsg);
-	}
-	else if (InMsg.Contains(TEXT("Warning:")))
-	{
-		UE_LOG(LogMissionNotificationProxy, Warning, TEXT("%s"), *InMsg.Right(Index));
-	}
-	else
-	{
-		UE_LOG(LogMissionNotificationProxy, Display, TEXT("%s"), *InMsg);
-	}
+	int32 MsgIndex;
+	COMMANDLET_LOG_PROXY(Display,)
+	COMMANDLET_LOG_PROXY(Log, else)
+	COMMANDLET_LOG_PROXY(Verbose, else)
+	COMMANDLET_LOG_PROXY(VeryVerbose, else)
+	COMMANDLET_LOG_PROXY(Warning, else)
+	COMMANDLET_LOG_PROXY(Error, else)
+	COMMANDLET_LOG_PROXY(Fatal, else)
 }
 
 void UChanneldMissionNotiProxy::SpawnRunningMissionNotification(FChanneldProcWorkerThread* ProcWorker)
 {
-	UChanneldMissionNotiProxy* MissionProxy=this;
+	UChanneldMissionNotiProxy* MissionProxy = this;
 	AsyncTask(ENamedThreads::GameThread, [MissionProxy]()
-    {
-        if (MissionProxy->PendingProgressPtr.IsValid())
-        {
-            MissionProxy->PendingProgressPtr.Pin()->ExpireAndFadeout();
-        }
-        FNotificationInfo Info(MissionProxy->RunningNotifyText);
+	{
+		if (MissionProxy->PendingProgressPtr.IsValid())
+		{
+			MissionProxy->PendingProgressPtr.Pin()->ExpireAndFadeout();
+		}
+		FNotificationInfo Info(MissionProxy->RunningNotifyText);
 
-        Info.bFireAndForget = false;
-		Info.Hyperlink = FSimpleDelegate::CreateStatic([](){ FGlobalTabmanager::Get()->InvokeTab(FName("OutputLog")); });
-        Info.HyperlinkText = LOCTEXT("ShowOutputLogHyperlink", "Show Output Log");
-        Info.ButtonDetails.Add(FNotificationButtonInfo(MissionProxy->RunningNotifyCancelText, FText(),
-            FSimpleDelegate::CreateLambda([MissionProxy]() {MissionProxy->CancelMission(); }),
-            SNotificationItem::CS_Pending
-        ));
+		Info.bFireAndForget = false;
+		Info.Hyperlink = FSimpleDelegate::CreateStatic([]() { FGlobalTabmanager::Get()->InvokeTab(FName("OutputLog")); });
+		Info.HyperlinkText = LOCTEXT("ShowOutputLogHyperlink", "Show Output Log");
+		Info.ButtonDetails.Add(FNotificationButtonInfo(MissionProxy->RunningNotifyCancelText, FText(),
+		                                               FSimpleDelegate::CreateLambda([MissionProxy]() { MissionProxy->CancelMission(); }),
+		                                               SNotificationItem::CS_Pending
+		));
 
-        MissionProxy->PendingProgressPtr = FSlateNotificationManager::Get().AddNotification(Info);
+		MissionProxy->PendingProgressPtr = FSlateNotificationManager::Get().AddNotification(Info);
 
-        MissionProxy->PendingProgressPtr.Pin()->SetCompletionState(SNotificationItem::CS_Pending);
-        MissionProxy->bRunning = true;
-    });
+		MissionProxy->PendingProgressPtr.Pin()->SetCompletionState(SNotificationItem::CS_Pending);
+		MissionProxy->bRunning = true;
+	});
 }
 
 void UChanneldMissionNotiProxy::SpawnMissionSucceedNotification(FChanneldProcWorkerThread* ProcWorker)
 {
-	UChanneldMissionNotiProxy* MissionProxy=this;
-	AsyncTask(ENamedThreads::GameThread, [MissionProxy]() {
-        TSharedPtr<SNotificationItem> NotificationItem = MissionProxy->PendingProgressPtr.Pin();
+	UChanneldMissionNotiProxy* MissionProxy = this;
+	AsyncTask(ENamedThreads::GameThread, [MissionProxy]()
+	{
+		TSharedPtr<SNotificationItem> NotificationItem = MissionProxy->PendingProgressPtr.Pin();
 
-        if (NotificationItem.IsValid())
-        {
-            NotificationItem->SetText(MissionProxy->MissionSucceedNotifyText);
-            NotificationItem->SetCompletionState(SNotificationItem::CS_Success);
-            NotificationItem->ExpireAndFadeout();
+		if (NotificationItem.IsValid())
+		{
+			NotificationItem->SetText(MissionProxy->MissionSucceedNotifyText);
+			NotificationItem->SetCompletionState(SNotificationItem::CS_Success);
+			NotificationItem->ExpireAndFadeout();
 
-            MissionProxy->PendingProgressPtr.Reset();
-        }
+			MissionProxy->PendingProgressPtr.Reset();
+		}
 
-        MissionProxy->bRunning = false;
-        UE_LOG(LogMissionNotificationProxy, Log, TEXT("The %s Mission is Successfuly."),*MissionProxy->MissionName.ToString());
+		MissionProxy->bRunning = false;
+		UE_LOG(LogMissionNotificationProxy, Log, TEXT("The %s Mission is Successfuly."), *MissionProxy->MissionName.ToString());
 	});
 }
 
 void UChanneldMissionNotiProxy::SpawnMissionFailedNotification(FChanneldProcWorkerThread* ProcWorker)
 {
 	UChanneldMissionNotiProxy* MissionProxy = this;
-	AsyncTask(ENamedThreads::GameThread, [MissionProxy]() {
-        TSharedPtr<SNotificationItem> NotificationItem = MissionProxy->PendingProgressPtr.Pin();
+	AsyncTask(ENamedThreads::GameThread, [MissionProxy]()
+	{
+		TSharedPtr<SNotificationItem> NotificationItem = MissionProxy->PendingProgressPtr.Pin();
 
-        if (NotificationItem.IsValid())
-        {
-            NotificationItem->SetText(MissionProxy->MissionFailedNotifyText);
-            NotificationItem->SetCompletionState(SNotificationItem::CS_Fail);
-            NotificationItem->ExpireAndFadeout();
+		if (NotificationItem.IsValid())
+		{
+			NotificationItem->SetText(MissionProxy->MissionFailedNotifyText);
+			NotificationItem->SetCompletionState(SNotificationItem::CS_Fail);
+			NotificationItem->ExpireAndFadeout();
 
-            MissionProxy->PendingProgressPtr.Reset();
-            MissionProxy->bRunning = false;
-        	UE_LOG(LogMissionNotificationProxy, Error, TEXT("The %s Mission is faild."),*MissionProxy->MissionName.ToString())
-        }
-        
+			MissionProxy->PendingProgressPtr.Reset();
+			MissionProxy->bRunning = false;
+			UE_LOG(LogMissionNotificationProxy, Error, TEXT("The %s Mission is faild."), *MissionProxy->MissionName.ToString())
+		}
 	});
 }
 

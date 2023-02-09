@@ -1,5 +1,6 @@
 ﻿#include "ReplicatorGeneratorUtils.h"
 
+#include "Engine/LevelScriptActor.h"
 #include "Engine/SCS_Node.h"
 #include "Internationalization/Regex.h"
 #include "Replication/ChanneldReplicationComponent.h"
@@ -115,6 +116,7 @@ namespace ChanneldReplicatorGeneratorUtils
 		return
 			!FReplicatorGeneratorManager::Get().IsIgnoredActor(TargetClass) &&
 			TargetClass->IsChildOf(AActor::StaticClass()) &&
+			!TargetClass->IsChildOf(ALevelScriptActor::StaticClass()) &&
 			!(ClassName.StartsWith(TEXT("SKEL_")) || ClassName.StartsWith(TEXT("REINST_"))) &&
 			// HasRepComponent(TargetClass) &&
 			HasReplicatedPropertyOrRPC(TargetClass);

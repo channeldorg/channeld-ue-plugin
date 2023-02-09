@@ -2,7 +2,6 @@
 
 
 #include "AddCompToBPSubsystem.h"
-#include "ReplicatorGeneratorDefinition.h"
 #include "ReplicatorGeneratorUtils.h"
 #include "Async/Async.h"
 #include "Commandlets/CommandletHelpers.h"
@@ -12,6 +11,14 @@
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Widgets/Notifications/SNotificationList.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogAddRepCompToBP, Log, All);
+
+#define COMMANDLET_LOG_PROXY(Type, Else) \
+Else if ((MsgIndex = OutMsg.Find(TEXT(#Type ":"))) != INDEX_NONE) \
+{ \
+	UE_LOG(LogAddRepCompToBP, Type, TEXT("[Proxy]%s"), *OutMsg + MsgIndex + FString(TEXT(#Type)).Len() + 1); \
+}
 
 #define LOCTEXT_NAMESPACE "ChanneldAddCompToBPSubsystem"
 
@@ -210,18 +217,13 @@ void UAddCompToBPSubsystem::Tick(float DeltaTime)
 
 					FString OutMsg = StringArray[Index];
 					int32 MsgIndex;
-					if ((MsgIndex = OutMsg.Find(TEXT("Error:"))) != INDEX_NONE)
-					{
-						UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *OutMsg.Right(MsgIndex));
-					}
-					else if ((MsgIndex = OutMsg.Find(TEXT("Warning:"))) != INDEX_NONE)
-					{
-						UE_LOG(LogChanneldRepGenerator, Warning, TEXT("%s"), *OutMsg.Right(MsgIndex));
-					}
-					else
-					{
-						UE_LOG(LogChanneldRepGenerator, Display, TEXT("%s"), *OutMsg);
-					}
+					COMMANDLET_LOG_PROXY(Display,)
+					COMMANDLET_LOG_PROXY(Log, else)
+					COMMANDLET_LOG_PROXY(Verbose, else)
+					COMMANDLET_LOG_PROXY(VeryVerbose, else)
+					COMMANDLET_LOG_PROXY(Warning, else)
+					COMMANDLET_LOG_PROXY(Error, else)
+					COMMANDLET_LOG_PROXY(Fatal, else)
 				}
 				FilterRepActorProcOutLine = StringArray[count - 1];
 				if (NewLine.EndsWith(TEXT("\n")))
@@ -272,7 +274,7 @@ bool UAddCompToBPSubsystem::IsTickableInEditor() const
 	return true;
 }
 
-void UAddCompToBPSubsystem::AddComponentToActorBlueprint(UClass* InCompClass, FName InCompName)
+void UAddCompToBPSubsystem::AddComponentToBlueprints(UClass* InCompClass, FName InCompName)
 {
 	if (FilterRepActorProcessStatus == Busy || FilterRepActorProcessStatus == Canceling)
 	{
@@ -281,7 +283,11 @@ void UAddCompToBPSubsystem::AddComponentToActorBlueprint(UClass* InCompClass, FN
 	FilterRepActorProcessStatus = Busy;
 	TargetRepCompClass = InCompClass;
 	RepCompName = InCompName;
-	FString Command = CommandletHelpers::BuildCommandletProcessArguments(TEXT("CookAndFilterRepActor"), *FPaths::GetProjectFilePath(), TEXT(" -targetplatform=WindowsServer -skipcompile -SkipShaderCompile -nop4 -cook -skipstage -utf8output -stdout"));
+	FString Params = CommandletHelpers::BuildCommandletProcessArguments(
+		TEXT("CookAndFilterRepActor"),
+		*FString::Printf(TEXT("\"%s\""), *FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())),
+		TEXT(" -targetplatform=WindowsServer -skipcompile -SkipShaderCompile -nop4 -cook -skipstage -utf8output -stdout")
+	);
 	FString Cmd = ChanneldReplicatorGeneratorUtils::GetUECmdBinary();
 
 	if (FPaths::FileExists(Cmd))
@@ -292,7 +298,7 @@ void UAddCompToBPSubsystem::AddComponentToActorBlueprint(UClass* InCompClass, FN
 
 		FilterRepActorProcessHandle = FPlatformProcess::CreateProc(
 			*Cmd,
-			*Command,
+			*Params,
 			false,
 			true,
 			true,
@@ -333,6 +339,11 @@ void UAddCompToBPSubsystem::AddCompToActorBPInternal(bool ShowDialog)
 		if (ClassPath.RemoveFromEnd(TEXT("_C")))
 		{
 			UBlueprint* BP = LoadObject<UBlueprint>(nullptr, *ClassPath);
+			if (BP == nullptr)
+			{
+				UE_LOG(LogAddRepCompToBP, Warning, TEXT("We could not load blueprint: %s"), *ClassPath);
+				continue;
+			}
 			if (BP->GeneratedClass != nullptr && !ChanneldReplicatorGeneratorUtils::HasRepComponent(BP->GeneratedClass))
 			{
 				TargetAssetPathList.Add(ClassPath);
@@ -428,7 +439,7 @@ void UAddCompToBPSubsystem::SpawnFilterRepActorFailedNotification()
 			NotificationItem->ExpireAndFadeout();
 
 			AddCompToBPSubsystem->FilterRepActorNotiPtr.Reset();
-			UE_LOG(LogChanneldRepGenerator, Error, TEXT("Filter replicaiton actor is failed"))
+			UE_LOG(LogAddRepCompToBP, Error, TEXT("Filter replicaiton actor is failed"))
 		}
 	});
 }

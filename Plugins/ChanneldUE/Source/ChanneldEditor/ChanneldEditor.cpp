@@ -49,8 +49,8 @@ void FChanneldEditorModule::StartupModule()
 		FChanneldEditorCommands::Get().GenerateReplicatorCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::GenerateReplicatorAction));
 	PluginCommands->MapAction(
-		FChanneldEditorCommands::Get().AddReplicationComponentCommand,
-		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::AddRepCompToBPAction));
+		FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand,
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::AddRepCompsToBPsAction));
 
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
@@ -175,7 +175,7 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 
 	MenuBuilder.AddSeparator();
 
-	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddReplicationComponentCommand);
+	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand);
 
 	MenuBuilder.AddSeparator();
 
@@ -282,7 +282,7 @@ void FChanneldEditorModule::GenerateReplicatorAction()
 			ChanneldReplicatorGeneratorUtils::GetUECmdBinary(),
 			CommandletHelpers::BuildCommandletProcessArguments(
 				TEXT("CookAndGenRep"),
-				*FPaths::GetProjectFilePath(),
+				*FString::Printf( TEXT("\"%s\""), *FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())),
 				TEXT(" -targetplatform=WindowsServer -skipcompile -SkipShaderCompile -nop4 -cook -skipstage -utf8output -stdout")
 			)
 		)
@@ -323,13 +323,13 @@ void FChanneldEditorModule::GenReplicatorProto(FChanneldProcWorkerThread* ProcWo
 	FString ChanneldUnrealpbPath = ChanneldPath / TEXT("pkg") / TEXT("unrealpb");
 	FPaths::NormalizeDirectoryName(ChanneldUnrealpbPath);
 
-	FString GameModuleExportAPIMacro = GetMutableDefault<UChanneldSettings>()->GameModuleExportAPIMacro;
+	FString GameModuleExportAPIMacro = GetMutableDefault<UChanneldEditorSettings>()->GameModuleExportAPIMacro;
 
 	if(GameModuleExportAPIMacro.IsEmpty())
 	{
-		UE_LOG(LogChanneldEditor, Warning, TEXT("Game module export API macro is empty"));
+		UE_LOG(LogChanneldEditor, Verbose, TEXT("Game module export API macro is empty"));
 	}
-	
+
 	FString Args = ChanneldProtobufHelpers::BuildProtocProcessArguments(
 		ReplicatorStorageDir,
 		 FString::Printf(TEXT("dllexport_decl=%s"), *GameModuleExportAPIMacro),
@@ -378,10 +378,10 @@ void FChanneldEditorModule::GenReplicatorProto(FChanneldProcWorkerThread* ProcWo
 	GenProtoWorkThread->Execute();
 }
 
-void FChanneldEditorModule::AddRepCompToBPAction()
+void FChanneldEditorModule::AddRepCompsToBPsAction()
 {
-	TSubclassOf<class UChanneldReplicationComponent> CompClass = GetMutableDefault<UChanneldSettings>()->DefaultReplicationComponent;
-	GEditor->GetEditorSubsystem<UAddCompToBPSubsystem>()->AddComponentToActorBlueprint(CompClass, FName(TEXT("ChanneldRepComp")));
+	TSubclassOf<class UChanneldReplicationComponent> CompClass = GetMutableDefault<UChanneldEditorSettings>()->DefaultReplicationComponent;
+	GEditor->GetEditorSubsystem<UAddCompToBPSubsystem>()->AddComponentToBlueprints(CompClass, FName(TEXT("ChanneldRepComp")));
 }
 
 IMPLEMENT_MODULE(FChanneldEditorModule, ChanneldEditor)
