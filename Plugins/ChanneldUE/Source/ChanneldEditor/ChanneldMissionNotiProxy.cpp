@@ -11,7 +11,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogMissionNotificationProxy, All, All);
 #define COMMANDLET_LOG_PROXY(Type, Else) \
 Else if ((MsgIndex = InMsg.Find(TEXT(#Type ":"))) != INDEX_NONE) \
 { \
-UE_LOG(LogMissionNotificationProxy, Type, TEXT("[Proxy]%s"), *InMsg + MsgIndex + FString(TEXT(#Type)).Len() + 1); \
+	UE_LOG(LogMissionNotificationProxy, Type, TEXT("[Proxy]%s"), *InMsg.Replace(TEXT(#Type ":"), TEXT(""))); \
 }
 
 #define LOCTEXT_NAMESPACE "MissionNotificationPorxy"

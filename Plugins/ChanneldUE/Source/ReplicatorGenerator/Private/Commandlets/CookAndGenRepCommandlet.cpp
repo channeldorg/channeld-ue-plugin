@@ -24,7 +24,7 @@ int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
 	ChanneldReplicatorGeneratorUtils::FObjectLoadedListener ObjLoadedListener;
 	ObjLoadedListener.StartListen();
 
-	const FString AdditionalParam(TEXT(" -cookloadonly"));
+	const FString AdditionalParam(TEXT(" -SkipShaderCompile"));
 	FString NewCmdLine = CmdLineParams;
 	NewCmdLine.Append(AdditionalParam);
 	FCommandLine::Append(*AdditionalParam);

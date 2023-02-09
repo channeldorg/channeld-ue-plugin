@@ -17,7 +17,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogAddRepCompToBP, Log, All);
 #define COMMANDLET_LOG_PROXY(Type, Else) \
 Else if ((MsgIndex = OutMsg.Find(TEXT(#Type ":"))) != INDEX_NONE) \
 { \
-	UE_LOG(LogAddRepCompToBP, Type, TEXT("[Proxy]%s"), *OutMsg + MsgIndex + FString(TEXT(#Type)).Len() + 1); \
+	UE_LOG(LogAddRepCompToBP, Type, TEXT("[Proxy]%s"), *OutMsg.Replace(TEXT(#Type ":"), TEXT(""))); \
 }
 
 #define LOCTEXT_NAMESPACE "ChanneldAddCompToBPSubsystem"
@@ -276,23 +276,30 @@ bool UAddCompToBPSubsystem::IsTickableInEditor() const
 
 void UAddCompToBPSubsystem::AddComponentToBlueprints(UClass* InCompClass, FName InCompName)
 {
+	SpawnRunningFilterRepActorNotification();
+
 	if (FilterRepActorProcessStatus == Busy || FilterRepActorProcessStatus == Canceling)
 	{
 		return;
 	}
 	FilterRepActorProcessStatus = Busy;
+	if(InCompClass == nullptr)
+	{
+		UE_LOG(LogAddRepCompToBP, Error, TEXT("The replication component that needs to add can not be empty"));
+		SpawnFilterRepActorFailedNotification();
+		return;
+	}
 	TargetRepCompClass = InCompClass;
 	RepCompName = InCompName;
 	FString Params = CommandletHelpers::BuildCommandletProcessArguments(
 		TEXT("CookAndFilterRepActor"),
 		*FString::Printf(TEXT("\"%s\""), *FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())),
-		TEXT(" -targetplatform=WindowsServer -skipcompile -SkipShaderCompile -nop4 -cook -skipstage -utf8output -stdout")
+		TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout")
 	);
 	FString Cmd = ChanneldReplicatorGeneratorUtils::GetUECmdBinary();
 
 	if (FPaths::FileExists(Cmd))
 	{
-		SpawnRunningFilterRepActorNotification();
 
 		FPlatformProcess::CreatePipe(FilterRepActorProcReadPipe, FilterRepActorProcWritePipe);
 
