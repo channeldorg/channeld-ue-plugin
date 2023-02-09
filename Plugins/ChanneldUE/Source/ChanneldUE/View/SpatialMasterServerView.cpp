@@ -150,6 +150,7 @@ void USpatialMasterServerView::InitServer()
 	GlobalSubOptions.set_dataaccess(channeldpb::WRITE_ACCESS);
 	GlobalSubOptions.set_fanoutintervalms(ClientFanOutIntervalMs);
 	GlobalSubOptions.set_fanoutdelayms(ClientFanOutDelayMs);
+	GlobalSubOptions.set_skipselfupdatefanout(true);
 	Connection->CreateChannel(channeldpb::GLOBAL, UKismetSystemLibrary::GetGameName(), &GlobalSubOptions, nullptr, nullptr,
 		[&](const channeldpb::CreateChannelResultMessage* Msg)
 		{

@@ -4,6 +4,7 @@
 #include "ChanneldCharacter.h"
 
 #include "ChanneldCharMoveComponent.h"
+#include "ChanneldTypes.h"
 
 AChanneldCharacter::AChanneldCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UChanneldCharMoveComponent>(CharacterMovementComponentName))
@@ -31,4 +32,19 @@ int32 AChanneldCharacter::GetFunctionCallspace(UFunction* Function, FFrame* Stac
 	}
 	
 	return Super::GetFunctionCallspace(Function, Stack);
+}
+
+void AChanneldCharacter::PostNetReceiveLocationAndRotation()
+{
+	// Don't perform SmoothCorrection if we are a simulated proxy on a dedicated server, to avoid check crash.
+	// This case should only exist when the server's interest border size > 0.
+	if (GetNetMode() == NM_DedicatedServer && GetLocalRole() == ROLE_SimulatedProxy)
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Skip ACharacter::PostNetReceiveLocationAndRotation for SimulatedProxy on dedicated server."))
+		AActor::PostNetReceiveLocationAndRotation();
+	}
+	else
+	{
+		ACharacter::PostNetReceiveLocationAndRotation();
+	}
 }
