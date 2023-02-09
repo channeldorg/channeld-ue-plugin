@@ -381,9 +381,10 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 		}
 	}
 
+	bool bCrossServerHandover = HandoverData.has_channeldata();
 	// Applies the channel data update to the newly spawned objects.
 	// The references between the Pawn, PlayerController, and PlayerState should be set properly in this step.
-	if (CrossServerActors.Num() > 0 && HandoverData.has_channeldata())
+	if (CrossServerActors.Num() > 0 && bCrossServerHandover)
 	{
 		channeldpb::ChannelDataUpdateMessage UpdateMsg;
 		/* DO NOT use set_allocated_data - the HandoverData is in the stack memory but set_allocated_data requires the data in the heap.
@@ -716,18 +717,6 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 				// Only the client's owning Pawn has the PlayerController
 				if (Pawn->GetController())
 				{
-					// Reset the movement data to avoid timestamp discrepancy on the dest server.
-					if (ACharacter* Char = Cast<ACharacter>(Pawn))
-					{
-						// has_channeldata = true means the handover is between spatial servers.
-						if (HandoverData.has_channeldata() && Char->GetCharacterMovement() != nullptr)
-						{
-							// Char->GetCharacterMovement()->StopMovementImmediately();
-							Char->GetCharacterMovement()->ResetPredictionData_Client();
-							UE_LOG(LogChanneld, Verbose, TEXT("Reset client's movement prediction data."));
-						}
-					}
-					
 					// Update the channelId for LowLevelSend() if it's a player's pawn that been handed over.
 					GetChanneldSubsystem()->SetLowLevelSendToChannelId(HandoverMsg->dstchannelid());
 

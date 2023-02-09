@@ -677,7 +677,9 @@ int32 UChannelDataView::SendAllChannelUpdates()
 				}
 			}
 			if (RemovedCount > 0)
+			{
 				UE_LOG(LogChanneld, Log, TEXT("Removed %d channel data provider(s) from channel %d"), RemovedCount, ChId);
+			}
 
 			if (UpdateCount > 0 || RemovedCount > 0)
 			{
@@ -816,14 +818,14 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 		UpdateData = MsgTemplate->New();
 	}
 
+	UE_LOG(LogChanneld, Verbose, TEXT("Received %s channel %d update(%d B): %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), ChId, UpdateMsg->data().value().size(), UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
+
 	// Call ParsePartial instead of Parse to keep the existing value from being reset.
 	if (!UpdateData->ParsePartialFromString(UpdateMsg->data().value()))
 	{
 		UE_LOG(LogChanneld, Error, TEXT("Failed to parse %s channel data, typeUrl: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
 		return;
 	}
-
-	UE_LOG(LogChanneld, Verbose, TEXT("Received %s channel %d update(%d B): %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), ChId, UpdateData->ByteSizeLong(), UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
 
 	if (CheckUnspawnedObject(ChId, UpdateData))
 	{
