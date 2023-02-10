@@ -529,6 +529,24 @@ void UChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, Channeld::Ch
 	
 	NetIdOwningChannels.Add(NetId, ChId);
 	UE_LOG(LogChanneld, Log, TEXT("Set up mapping of netId: %d (%d) -> channelId: %d"), NetId.Value, ChanneldUtils::GetNativeNetId(NetId.Value), ChId);
+
+	/*
+	if (Connection->IsServer())
+	{
+		if (AActor* Actor = Cast<AActor>(GetObjectFromNetGUID(NetId)))
+		{
+			if (Connection->OwnedChannels.Contains(ChId))
+			{
+				Actor->SetRole(ROLE_Authority);
+			}
+			else
+			{
+				Actor->SetRole(ROLE_SimulatedProxy);
+			}
+			UE_LOG(LogChanneld, Verbose, TEXT("[Server] Set %s's NetRole to %s"), *Actor->GetName(), *UEnum::GetValueAsString(TEXT("Engine.ENetRole"), Actor->GetLocalRole()));
+		}
+	}
+	*/
 }
 
 Channeld::ChannelId UChannelDataView::GetOwningChannelId(const FNetworkGUID NetId) const
@@ -759,7 +777,7 @@ void UChannelDataView::HandleUnsub(UChanneldConnection* _, Channeld::ChannelId C
 		if (ChannelDataProviders.RemoveAndCopyValue(ChId, Providers))
 		{
 			UE_LOG(LogChanneld, Log, TEXT("Received Unsub message. Removed all data providers(%d) from channel %d"), Providers.Num(), ChId);
-			OnUnsubFromChannel(ChId, Providers);
+			OnRemovedProvidersFromChannel(ChId, UnsubMsg->channeltype(), Providers);
 		}
 	}
 
@@ -767,32 +785,7 @@ void UChannelDataView::HandleUnsub(UChanneldConnection* _, Channeld::ChannelId C
 	{
 		if (UnsubMsg->conntype() == channeldpb::CLIENT && Connection->OwnedChannels.Contains(ChId))
 		{
-			OnClientUnsub(UnsubMsg->connid(), UnsubMsg->channeltype(), ChId);
-		}
-	}
-}
-
-void UChannelDataView::OnClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId)
-{
-	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
-	{
-		UChanneldNetConnection* ClientConn;
-		if (NetDriver->GetClientConnectionMap().RemoveAndCopyValue(ClientConnId, ClientConn))
-		{
-			//~ Start copy from UNetDriver::Shutdown()
-			if (ClientConn->PlayerController)
-			{
-				APawn* Pawn = ClientConn->PlayerController->GetPawn();
-				if (Pawn)
-				{
-					Pawn->Destroy(true);
-				}
-			}
-
-			// Calls Close() internally and removes from ClientConnections
-			// Will also destroy the player controller.
-			ClientConn->CleanUp();
-			//~ End copy
+			ServerHandleClientUnsub(UnsubMsg->connid(), UnsubMsg->channeltype(), ChId);
 		}
 	}
 }

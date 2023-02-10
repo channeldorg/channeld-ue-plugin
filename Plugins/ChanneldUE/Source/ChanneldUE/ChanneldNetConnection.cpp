@@ -131,6 +131,10 @@ void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, i
 	if (ChId == Channeld::InvalidChannelId)
 	{
 		ChId = NetDriver->GetSendToChannelId(this);
+		if (ChId == Channeld::InvalidChannelId)
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("UChanneldNetConnection::SendData failed as the NetConn %d has no channelId"), GetConnId());
+		}
 	}
 	
 	if (ConnToChanneld->IsServer())

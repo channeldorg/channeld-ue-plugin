@@ -165,6 +165,16 @@ public:
 		return bNotSame;
 	}
 
+	static channeldpb::SpatialInfo ToSpatialInfo(const FVector& Location)
+	{
+		channeldpb::SpatialInfo SpatialInfo;
+		SpatialInfo.set_x(Location.X);
+		// Swap the Y and Z as UE uses the Z-Up rule but channeld uses the Y-up rule.
+		SpatialInfo.set_y(Location.Z);
+		SpatialInfo.set_z(Location.Y);
+		return SpatialInfo;
+	}
+
 	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr)
 	{
 		bool bUnmapped;
@@ -182,7 +192,7 @@ public:
 	 */
 	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
 	
-	static const unrealpb::UnrealObjectRef GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr);
+	static unrealpb::UnrealObjectRef GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr);
 		
 	static UActorComponent* GetActorComponentByRef(const unrealpb::ActorComponentRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
 	
@@ -204,8 +214,11 @@ public:
 	// Set the actor's NetRole on the client based on the NetConnection that owns the actor.
 	static void SetActorRoleByOwningConnId(AActor* Actor, Channeld::ConnectionId OwningConnId);
 
+	static ENetRole ServerGetActorNetRole(AActor* Actor);
+	
 	static uint32 GetNativeNetId(uint32 UniqueNetId)
 	{
 		return UniqueNetId & ((1 << Channeld::ConnectionIdBitOffset) - 1);
 	}
+
 };

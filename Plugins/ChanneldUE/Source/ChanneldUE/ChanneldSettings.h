@@ -45,18 +45,22 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial")
 	TSubclassOf<UPlayerStartLocatorBase> PlayerStartLocatorClass;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial")
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|ClientInterest")
+	float SphereRadius = 1000;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|ClientInterest")
+	bool bUseNetRelevantForUninterestedActors = false;
+	
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug")
 	bool bEnableSpatialVisualizer = false;
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
 	TSubclassOf<ATintActor> RegionBoxClass;
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
 	FVector RegionBoxMinSize;
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
 	FVector RegionBoxMaxSize;
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
 	TSubclassOf<AActor> SubscriptionBoxClass;
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
 	TSubclassOf<AOutlinerActor> SpatialOutlinerClass;
 
 	// If set to true, the RPC with the actor that hasn't been exported to the client will be postponed until being exported.

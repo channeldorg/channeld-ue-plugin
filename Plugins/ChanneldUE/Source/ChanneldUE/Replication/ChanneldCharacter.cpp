@@ -40,7 +40,7 @@ void AChanneldCharacter::PostNetReceiveLocationAndRotation()
 	// This case should only exist when the server's interest border size > 0.
 	if (GetNetMode() == NM_DedicatedServer && GetLocalRole() == ROLE_SimulatedProxy)
 	{
-		UE_LOG(LogChanneld, Log, TEXT("Skip ACharacter::PostNetReceiveLocationAndRotation for SimulatedProxy on dedicated server."))
+		UE_LOG(LogChanneld, Verbose, TEXT("Skip ACharacter::PostNetReceiveLocationAndRotation for SimulatedProxy on dedicated server."))
 		AActor::PostNetReceiveLocationAndRotation();
 	}
 	else

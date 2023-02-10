@@ -127,20 +127,14 @@ protected:
 	void ReceiveUninitServer();
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BeginUninitClient"))
 	void ReceiveUninitClient();
-	/**
-	 * @brief Server's callback when receiving the unsub message of a client.
-	 * Default implementation: Destroy the Pawn related to the NetConn and close the NetConn.
-	 * @param ClientConnId 
-	 * @param ChId 
-	 */
-	virtual void OnClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId);
 
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
-	
-	void HandleUnsub(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 
+	void HandleUnsub(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	virtual void ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId){}
+	
 	// Give the subclass a chance to mess with the removed providers, e.g. add a provider back to a channel.
-	virtual void OnUnsubFromChannel(Channeld::ChannelId ChId, const TSet<FProviderInternal>& RemovedProviders) {}
+	virtual void OnRemovedProvidersFromChannel(Channeld::ChannelId ChId, channeldpb::ChannelType ChannelType, const TSet<FProviderInternal>& RemovedProviders) {}
 
 	/**
 	 * @brief Checks if the channel data contains any unsolved NetworkGUID.

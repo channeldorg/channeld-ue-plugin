@@ -45,8 +45,11 @@ public:
 	UProtoMessageObject* ChannelInitData;
 
 protected:
-	virtual void OnClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId) override;
+	virtual void ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId) override;
 
+	// The client need to destroy the objects that are no longer relevant to the client.
+	virtual void OnRemovedProvidersFromChannel(Channeld::ChannelId ChId, channeldpb::ChannelType ChannelType, const TSet<FProviderInternal>& RemovedProviders) override;
+	
 	// The client may have subscribed to the spatial channels that go beyond the interest area of the client's authoritative server.
 	// In that case, the client may receive ChannelDataUpdate that contains unresolved NetworkGUIDs, so it needs to spawn the objects before applying the update.
 	virtual bool CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData) override;
@@ -72,7 +75,7 @@ protected:
 private:
 	const FName GameplayerDebuggerClassName = FName("GameplayDebuggerCategoryReplicator");
 
-    // Map the client to the channels, so the spatial server's LowLevelSend() can use the right channelId.
+    // [Server only] Map the client to the channels, so the spatial server's LowLevelSend() can use the right channelId.
 	TMap<uint32, Channeld::ChannelId> ClientInChannels;
 	
 	bool bClientInMasterServer = false;
