@@ -3,9 +3,9 @@
 TMap<const UClass*, const FReplicatorCreateFunc> ChanneldReplication::ReplicatorRegistry;
 TMap<const FString, const FReplicatorCreateFunc> ChanneldReplication::BPReplicatorRegistry;
 
-void ChanneldReplication::RegisterReplicator(const UClass* TargetClass, const FReplicatorCreateFunc& Func)
+void ChanneldReplication::RegisterReplicator(const UClass* TargetClass, const FReplicatorCreateFunc& Func, bool Override)
 {
-	if (ReplicatorRegistry.Contains(TargetClass))
+	if (!Override && ReplicatorRegistry.Contains(TargetClass))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("%s already exists in the replicator registry, will not be added."), *TargetClass->GetFullName());
 		return;
@@ -14,8 +14,13 @@ void ChanneldReplication::RegisterReplicator(const UClass* TargetClass, const FR
 	UE_LOG(LogChanneld, Log, TEXT("Registered replicator for %s, registry size: %d"), *TargetClass->GetFullName(), ReplicatorRegistry.Num());
 }
 
-void ChanneldReplication::RegisterReplicator(const FString& PathName, const FReplicatorCreateFunc& Func)
+void ChanneldReplication::RegisterReplicator(const FString& PathName, const FReplicatorCreateFunc& Func, bool Override)
 {
+	if (!Override && BPReplicatorRegistry.Contains(PathName))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("%s already exists in the replicator registry, will not be added."), *PathName);
+		return;
+	}
 	BPReplicatorRegistry.Add(PathName, Func);
 	UE_LOG(LogChanneld, Log, TEXT("Registered replicator for %s, registry size: %d"), *PathName, BPReplicatorRegistry.Num());
 }
