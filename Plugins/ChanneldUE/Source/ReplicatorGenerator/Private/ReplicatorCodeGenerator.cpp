@@ -268,7 +268,7 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	if (!bIsBlueprint)
 	{
 		ReplicatorCode.RegisterReplicatorCode = FString::Printf(
-			TEXT("REGISTER_REPLICATOR(%s, %s);"),
+			TEXT("REGISTER_REPLICATOR_BASE(%s, %s, false);"),
 			*Target->GetReplicatorClassName(),
 			*Target->GetActorCPPClassName()
 		);
@@ -276,7 +276,7 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	else
 	{
 		ReplicatorCode.RegisterReplicatorCode = FString::Printf(
-			TEXT("REGISTER_REPLICATOR_BP(%s, \"%s\");"),
+			TEXT("REGISTER_REPLICATOR_BP_BASE(%s, \"%s\", false);"),
 			*Target->GetReplicatorClassName(),
 			*TargetActor->GetPathName()
 		);
