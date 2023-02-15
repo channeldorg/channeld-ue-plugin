@@ -37,11 +37,11 @@ void FChanneldSettingsDetails::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 			AreaTypeHandle->GetValue(uAreaType);
 			EClientInterestAreaType AreaType = static_cast<EClientInterestAreaType>(uAreaType);
 			UE_LOG(LogChanneldEditor, Log, TEXT("AreaType: %d"), AreaType);
-			if (AreaType == EClientInterestAreaType::Spots)
+			if (AreaType == EClientInterestAreaType::StaticLocations)
 			{
 				// DetailBuilder->HideProperty(RadiusHandle);
 				// DetailBuilder->HideProperty(ExtentHandle);
-				DetailBuilder->HideProperty(AngleHandle);
+				// DetailBuilder->HideProperty(AngleHandle);
 				RadiusHandle->MarkHiddenByCustomization();
 				ExtentHandle->MarkHiddenByCustomization();
 				AngleHandle->MarkHiddenByCustomization();

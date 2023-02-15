@@ -1,34 +1,17 @@
 #include "ClientInterestManager.h"
 
 #include "ChanneldConnection.h"
+#include "ChanneldGameInstanceSubsystem.h"
+#include "ChanneldNetDriver.h"
 #include "ChanneldSettings.h"
 #include "SphereAOI.h"
+#include "StaticLocationsAOI.h"
 
 class UChanneldConnection;
 
-bool UClientInterestManager::IsTickable() const
+UClientInterestManager::UClientInterestManager(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
-	if (IsTemplate())
-	{
-		return false;
-	}
-	
-	for (auto& AOI : ActiveAOIs)
-	{
-		if (AOI->IsTickable())
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-void UClientInterestManager::Tick(float DeltaTime)
-{
-	for (auto& AOI : ActiveAOIs)
-	{
-		AOI->Tick(DeltaTime);
-	}
 }
 
 void UClientInterestManager::ServerSetup(UChanneldNetConnection* ClientNetConn)
@@ -42,6 +25,14 @@ void UClientInterestManager::ServerSetup(UChanneldNetConnection* ClientNetConn)
 			AOI->Radius = Preset.Radius;
 			AddAOI(AOI, Preset.bActivateByDefault);
 		}
+		else if (Preset.AreaType == EClientInterestAreaType::StaticLocations)
+		{
+			auto AOI = MakeShared<FStaticLocationsAOI>();
+			AOI->Name = Preset.PresetName;
+			AOI->Spots = Preset.Spots;
+			// AOI->InterestedActors = InterestedActors;
+			AddAOI(AOI, Preset.bActivateByDefault);
+		}
 	}
 
 	ClientNetConn->PlayerEnterSpatialChannelEvent.AddUObject(this, &UClientInterestManager::OnPlayerEnterSpatialChannel);
@@ -51,6 +42,8 @@ void UClientInterestManager::ServerSetup(UChanneldNetConnection* ClientNetConn)
 
 void UClientInterestManager::CleanUp(UChanneldNetConnection* ClientNetConn)
 {
+	InterestedActors.Empty();
+	FollowingPC = nullptr;
 	AvailableAOIs.Empty();
 	ActiveAOIs.Empty();
 	ClientNetConn->PlayerEnterSpatialChannelEvent.RemoveAll(this);
@@ -97,6 +90,9 @@ void UClientInterestManager::DeactivateAOI(int Index)
 
 void UClientInterestManager::FollowPlayer(APlayerController* PC, int IndexOfAOI)
 {
+	FollowingPC = PC;
+	LastUpdateLocation = PC->GetFocalLocation();
+	
 	if (IndexOfAOI < 0)
 	{
 		for (auto& AOI : AvailableAOIs)
@@ -123,14 +119,66 @@ void UClientInterestManager::UnfollowPlayer(int IndexOfAOI)
 	{
 		AvailableAOIs[IndexOfAOI]->UnfollowPlayer();
 	}
+	
+	FollowingPC = nullptr;
+}
+
+bool UClientInterestManager::IsTickable() const
+{
+	if (IsTemplate())
+	{
+		return false;
+	}
+
+	if (FollowingPC.IsValid())
+	{
+		return true;
+	}
+	
+	for (auto& AOI : ActiveAOIs)
+	{
+		if (AOI->IsTickable())
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void UClientInterestManager::Tick(float DeltaTime)
+{
+	if (FollowingPC.IsValid())
+	{
+		float DistToCheck = GetMutableDefault<UChanneldSettings>()->MinDistanceToUpdateInterestForPlayer;
+		if (DistToCheck > 0)
+		{
+			FVector CurrentLocation = FollowingPC->GetFocalLocation();
+			if (!CurrentLocation.Equals(LastUpdateLocation, DistToCheck))
+			{
+				OnPlayerMoved(FollowingPC.Get());
+				LastUpdateLocation = CurrentLocation;
+			}
+		}
+		else
+		{
+			OnPlayerMoved(FollowingPC.Get());
+		}
+	}
+	
+	for (auto& AOI : ActiveAOIs)
+	{
+		AOI->Tick(DeltaTime);
+	}
 }
 
 void UClientInterestManager::AddActorInterest(AActor* Actor)
 {
+	InterestedActors.Add(Actor);
 }
 
 void UClientInterestManager::RemoveActorInterest(AActor* Actor)
 {
+	InterestedActors.Remove(Actor);
 }
 
 void UClientInterestManager::OnPlayerEnterSpatialChannel(UChanneldNetConnection* NetConn, Channeld::ChannelId SpatialChId)
@@ -156,4 +204,25 @@ void UClientInterestManager::OnPlayerEnterSpatialChannel(UChanneldNetConnection*
 	}
 	
 	GEngine->GetEngineSubsystem<UChanneldConnection>()->Send(SpatialChId, channeldpb::UPDATE_SPATIAL_INTEREST, InterestMsg);
+}
+
+void UClientInterestManager::OnPlayerMoved(APlayerController* PC)
+{
+	if (auto NetConn = Cast<UChanneldNetConnection>(PC->NetConnection))
+	{
+		FOwnedChannelInfo ChannelInfo;
+		if (GetWorld()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetOwningChannelInfo(PC, ChannelInfo)
+			&& ChannelInfo.ChannelType == EChanneldChannelType::ECT_Spatial)
+		{
+			OnPlayerEnterSpatialChannel(NetConn, ChannelInfo.ChannelId);
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Player %s is not in a spatial channel."), *PC->GetName());
+		}
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Player %s does not have a NetConn to update the spatial interest"), *PC->GetName());
+	}
 }

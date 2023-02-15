@@ -94,7 +94,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 			.Padding(5, 0)
 			[
 				SNew(SBox)
-				.IsEnabled_Lambda([=] {return AreaType == EClientInterestAreaType::Spots; })
+				.IsEnabled_Lambda([=] {return AreaType == EClientInterestAreaType::StaticLocations; })
 				.MinDesiredWidth(200.f)
 				[
 					SNew(SVerticalBox)

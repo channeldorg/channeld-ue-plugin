@@ -420,6 +420,25 @@ UChannelDataView* UChanneldGameInstanceSubsystem::GetChannelDataView()
 	return ChannelDataView;
 }
 
+int32 UChanneldGameInstanceSubsystem::GetOwningChannelId(AActor* Actor)
+{
+	if (ChannelDataView)
+	{
+		return ChannelDataView->GetOwningChannelId(Actor);
+	}
+	return Channeld::InvalidChannelId;
+}
+
+bool UChanneldGameInstanceSubsystem::GetOwningChannelInfo(AActor* Actor, FOwnedChannelInfo& OutInfo)
+{
+	if (auto Info = ConnectionInstance->OwnedChannels.Find(GetOwningChannelId(Actor)))
+	{
+		OutInfo = *Info;
+		return true;
+	}
+	return false;
+}
+
 void UChanneldGameInstanceSubsystem::SetLowLevelSendToChannelId(int32 ChId)
 {
 	*LowLevelSendToChannelId = ChId;

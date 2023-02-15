@@ -181,6 +181,12 @@ public:
 		UChannelDataView* GetChannelDataView();
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|View")
+	int32 GetOwningChannelId(AActor* Actor);
+
+	UFUNCTION(BlueprintCallable, Category = "Channeld|View")
+	bool GetOwningChannelInfo(AActor* Actor, FOwnedChannelInfo& OutInfo);
+	
+	UFUNCTION(BlueprintCallable, Category = "Channeld|View")
 		void SetLowLevelSendToChannelId(int32 ChId);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Utility")
@@ -192,6 +198,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Utility")
 		void SeamlessTravelToChannel(APlayerController* PlayerController, int32 ChId);
 
+	
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Spatial")
 	UClientInterestManager* GetClientInterestManager(APlayerController* PC);
 

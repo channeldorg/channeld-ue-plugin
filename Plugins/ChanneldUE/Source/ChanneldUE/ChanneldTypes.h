@@ -264,7 +264,7 @@ UENUM(BlueprintType)
 enum class EClientInterestAreaType : uint8
 {
 	None = 0 UMETA(DisplayName = "None"),
-	Spots = 1 UMETA(DisplayName = "Spots"),
+	StaticLocations = 1 UMETA(DisplayName = "Static Locations"),
 	Box = 2 UMETA(DisplayName = "Box"),
 	Sphere = 3 UMETA(DisplayName = "Sphere"),
 	Cone = 4 UMETA(DisplayName = "Cone"),

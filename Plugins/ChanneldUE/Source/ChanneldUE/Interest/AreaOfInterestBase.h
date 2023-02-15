@@ -7,7 +7,8 @@ class CHANNELDUE_API FAreaOfInterestBase// : public UObject
 {
 // GENERATED_BODY()
 public:
-	FAreaOfInterestBase();
+	FAreaOfInterestBase() {}
+	virtual ~FAreaOfInterestBase() {FollowingPC = nullptr;}
 
 	virtual void OnActivate() {}
 	virtual void OnDeactivate() {}

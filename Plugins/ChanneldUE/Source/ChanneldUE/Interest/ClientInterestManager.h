@@ -10,6 +10,7 @@ class CHANNELDUE_API UClientInterestManager : public UObject, public FTickableGa
 {
 	GENERATED_BODY()
 public:
+	UClientInterestManager(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	void ServerSetup(UChanneldNetConnection* ClientNetConn);
 	void CleanUp(UChanneldNetConnection* ClientNetConn);
 
@@ -41,6 +42,12 @@ private:
 	TArray<TSharedPtr<FAreaOfInterestBase>> AvailableAOIs;
 
 	TArray<TSharedPtr<FAreaOfInterestBase>> ActiveAOIs;
+	
+	TWeakObjectPtr<APlayerController> FollowingPC;
+	FVector LastUpdateLocation;
+
+	TArray<TWeakObjectPtr<AActor>> InterestedActors;
 
 	void OnPlayerEnterSpatialChannel(UChanneldNetConnection* ChanneldNetConnection, Channeld::ChannelId SpatialChId);
+	void OnPlayerMoved(APlayerController* PC);
 };

@@ -35,11 +35,14 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	bool bUseReceiveThread = false;
 
+	// If true, UE's default handshaking process will be skipped and the server will expect NMT_Hello as the first message.
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	bool bDisableHandshaking = true;
+	// If true, UNetConnection::SetInternalAck() will be called to internally ack all packets. Should be turned on for reliable connection (TCP) to save bandwidth.
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	bool bSetInternalAck = true;
 
+	// Should the server and client skip the custom replication system and use UE's default one. All traffic still goes through channeld either way.
 	UPROPERTY(Config, EditAnywhere, Category = "Replication")
 	bool bSkipCustomReplication = false;
 
@@ -47,11 +50,12 @@ public:
 	TSubclassOf<UPlayerStartLocatorBase> PlayerStartLocatorClass;
 	
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Client Interest")
-	float SphereRadius = 1000;
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Client Interest")
 	bool bUseNetRelevantForUninterestedActors = false;
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Client Interest")
 	TArray<FClientInterestSettingsPreset> ClientInterestPresets;
+	// The minimal distance required for the following player to move before updating its client interest. If equal or less than 0, the client interest will be updated every tick.
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Client Interest")
+	float MinDistanceToUpdateInterestForPlayer = 1000;
 	
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug")
 	bool bEnableSpatialVisualizer = false;
