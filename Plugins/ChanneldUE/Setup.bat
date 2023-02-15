@@ -1,6 +1,7 @@
 @echo off
 SET ChanneldVersion=v0.4.0
 SET ChanneldRepoUrl=git@github.com:metaworking/channeld.git
+SET WorkspaceDir=%~dp0
 SET ChanneldLocalSourceDir=%~dp0Source\ThirdParty\channeld
 
 SET ErrorMessages=run %~dp0%~n0.bat manually
@@ -37,11 +38,10 @@ echo exit 0 >> "%PostMergeHook%"
 :: Set CHANNELD_PATH user env to channeld source dir when the CHANNELD_PATH is not set
 if NOT DEFINED CHANNELD_PATH (
     echo Set CHANNELD_PATH to %ChanneldLocalSourceDir%
-    SET CHANNELD_PATH=%ChanneldLocalSourceDir%
     setx CHANNELD_PATH %ChanneldLocalSourceDir%
     :: invoke refreshenv.bat to make the CHANNELD_PATH take effect
-    call "%~dp0Scripts\refreshenv.bat"
-    echo If you are not running the script via cmd.exe, please restart your shell before update source code !!!
+    call "%~dp0Source\ThirdParty\refrenv.bat"
+    echo If you are not running the script via cmd.exe, please restart your shell before update ChanneldUE source code !!!
 )
 
 cd "%ChanneldLocalSourceDir%"
@@ -49,6 +49,6 @@ SET GOPROXY=https://goproxy.io,direct
 go mod download -x
 go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
-
+cd "%WorkspaceDir%"
 
 echo Setup Completed
