@@ -45,10 +45,13 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial")
 	TSubclassOf<UPlayerStartLocatorBase> PlayerStartLocatorClass;
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial|ClientInterest")
+	
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Client Interest")
 	float SphereRadius = 1000;
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial|ClientInterest")
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Client Interest")
 	bool bUseNetRelevantForUninterestedActors = false;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Client Interest")
+	TArray<FClientInterestSettingsPreset> ClientInterestPresets;
 	
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug")
 	bool bEnableSpatialVisualizer = false;

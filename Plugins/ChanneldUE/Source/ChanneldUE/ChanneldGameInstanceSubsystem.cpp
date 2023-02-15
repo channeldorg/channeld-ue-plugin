@@ -137,7 +137,7 @@ TArray<FSubscribedChannelInfo> UChanneldGameInstanceSubsystem::GetSubscribedChan
 		ConnectionInstance->SubscribedChannels.GenerateValueArray(Result);
 		return Result;
 	}
-	const auto EmptyResult = TArray<FSubscribedChannelInfo>();
+	static const auto EmptyResult = TArray<FSubscribedChannelInfo>();
 	return EmptyResult;
 }
 
@@ -167,7 +167,7 @@ TArray<FListedChannelInfo> UChanneldGameInstanceSubsystem::GetListedChannels()
 		ConnectionInstance->ListedChannels.GenerateValueArray(Result);
 		return Result;
 	}
-	const auto EmptyResult = TArray<FListedChannelInfo>();
+	static const auto EmptyResult = TArray<FListedChannelInfo>();
 	return EmptyResult;
 }
 
@@ -183,7 +183,7 @@ const TMap<int32, FSubscribedChannelInfo> UChanneldGameInstanceSubsystem::GetSub
 			return OwnedChannel->Subscribeds;
 		}
 	}
-	const auto EmptyMap = TMap<int32, FSubscribedChannelInfo>();
+	static const auto EmptyMap = TMap<int32, FSubscribedChannelInfo>();
 	return EmptyMap;
 }
 
@@ -464,8 +464,17 @@ void UChanneldGameInstanceSubsystem::SeamlessTravelToChannel(APlayerController* 
 	PlayerController->ClientTravel(FString::Printf(TEXT("127.0.0.1%s"), *MapName), ETravelType::TRAVEL_Relative, true);
 }
 
+UClientInterestManager* UChanneldGameInstanceSubsystem::GetClientInterestManager(APlayerController* PC)
+{
+	if (auto NetConn = Cast<UChanneldNetConnection>(PC->GetNetConnection()))
+	{
+		return NetConn->ClientInterestManager;
+	}
+	return nullptr;
+}
+
 void UChanneldGameInstanceSubsystem::HandleAuthResult(UChanneldConnection* Conn, Channeld::ChannelId ChId,
-	const google::protobuf::Message* Msg)
+                                                      const google::protobuf::Message* Msg)
 {
 	auto AuthResultMsg = static_cast<const channeldpb::AuthResultMessage*>(Msg);
 

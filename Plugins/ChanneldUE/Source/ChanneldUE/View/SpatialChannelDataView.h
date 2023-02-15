@@ -56,7 +56,7 @@ protected:
 	// The NetIds of the objects that are relevant to the client in the ChannelDataUpdate. If any NetId is unresolved, the client will spawn the object.
 	virtual TSet<uint32> GetRelevantNetGUIDsFromChannelData(const google::protobuf::Message* Message)
 	{
-		const TSet<uint32> EmptySet;
+		static const TSet<uint32> EmptySet;
 		return EmptySet;
 	}
 	

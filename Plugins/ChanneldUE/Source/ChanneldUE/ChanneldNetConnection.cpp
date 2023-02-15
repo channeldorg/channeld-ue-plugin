@@ -4,13 +4,12 @@
 #include "Net/DataChannel.h"
 #include "PacketHandler.h"
 #include "PacketHandlers/StatelessConnectHandlerComponent.h"
-#include "Replication/ChanneldReplicationComponent.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameStateBase.h"
-#include "GameFramework/PlayerController.h"
 #include "unreal_common.pb.h"
 #include "ChanneldUtils.h"
 #include "ChanneldSettings.h"
+#include "Interest/ClientInterestManager.h"
 
 UChanneldNetConnection::UChanneldNetConnection(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -38,6 +37,8 @@ void UChanneldNetConnection::InitBase(UNetDriver* InDriver, class FSocket* InSoc
 		// Reset the PacketHandler to remove the StatelessConnectHandler and bypass the handshake process.
 		Handler.Reset(NULL);
 	}
+
+	ClientInterestManager = NewObject<UClientInterestManager>(this, UClientInterestManager::StaticClass());
 }
 
 void UChanneldNetConnection::InitLocalConnection(UNetDriver* InDriver, class FSocket* InSocket, const FURL& InURL, EConnectionState InState, int32 InMaxPacket /*= 0*/, int32 InPacketOverhead /*= 0*/)
@@ -64,6 +65,8 @@ void UChanneldNetConnection::InitRemoteConnection(UNetDriver* InDriver, class FS
 	MaxPacket = Channeld::MaxPacketSize;
 	PacketOverhead = 10;
 	InitSendBuffer();
+
+	ClientInterestManager->ServerSetup(this);
 
 	// This is for a client that needs to log in, setup ClientLoginState and ExpectedClientLoginMsgType to reflect that
 	SetClientLoginState(EClientLoginState::LoggingIn);
@@ -338,6 +341,16 @@ FString UChanneldNetConnection::LowLevelDescribe()
 		: State == USOCK_Closed ? TEXT("Closed")
 		: TEXT("Invalid")
 	);
+}
+
+void UChanneldNetConnection::CleanUp()
+{
+	if (ClientInterestManager)
+	{
+		ClientInterestManager->CleanUp(this);
+	}
+	
+	Super::CleanUp();
 }
 
 void UChanneldNetConnection::Tick(float DeltaSeconds)

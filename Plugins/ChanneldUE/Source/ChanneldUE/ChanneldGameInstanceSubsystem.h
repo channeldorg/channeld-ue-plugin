@@ -9,6 +9,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "ChannelDataProvider.h"
 #include "ChanneldSettings.h"
+#include "Interest/ClientInterestManager.h"
 #include "UObject/WeakInterfacePtr.h"
 #include "View/ChannelDataView.h"
 #include "ChanneldGameInstanceSubsystem.generated.h"
@@ -76,7 +77,7 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	virtual void Tick(float DeltaTime) override;
-	virtual bool IsTickable() const override { return !IsTemplate(); };
+	virtual bool IsTickable() const override { return !IsTemplate(); }
 	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UChanneldGameInstanceSubsystem, STATGROUP_Tickables); }
 
 	void InitConnection();
@@ -190,6 +191,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Utility")
 		void SeamlessTravelToChannel(APlayerController* PlayerController, int32 ChId);
+
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Spatial")
+	UClientInterestManager* GetClientInterestManager(APlayerController* PC);
 
 	void RegisterDataProvider(IChannelDataProvider* Provider);
 

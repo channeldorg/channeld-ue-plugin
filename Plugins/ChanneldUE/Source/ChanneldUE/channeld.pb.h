@@ -5267,44 +5267,44 @@ class CHANNELDUE_API SpatialInterestQuery_BoxAOI final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kMinFieldNumber = 1,
-    kMaxFieldNumber = 2,
+    kCenterFieldNumber = 1,
+    kExtentFieldNumber = 2,
   };
-  // .channeldpb.SpatialInfo min = 1;
-  bool has_min() const;
+  // .channeldpb.SpatialInfo center = 1;
+  bool has_center() const;
   private:
-  bool _internal_has_min() const;
+  bool _internal_has_center() const;
   public:
-  void clear_min();
-  const ::channeldpb::SpatialInfo& min() const;
-  PROTOBUF_NODISCARD ::channeldpb::SpatialInfo* release_min();
-  ::channeldpb::SpatialInfo* mutable_min();
-  void set_allocated_min(::channeldpb::SpatialInfo* min);
+  void clear_center();
+  const ::channeldpb::SpatialInfo& center() const;
+  PROTOBUF_NODISCARD ::channeldpb::SpatialInfo* release_center();
+  ::channeldpb::SpatialInfo* mutable_center();
+  void set_allocated_center(::channeldpb::SpatialInfo* center);
   private:
-  const ::channeldpb::SpatialInfo& _internal_min() const;
-  ::channeldpb::SpatialInfo* _internal_mutable_min();
+  const ::channeldpb::SpatialInfo& _internal_center() const;
+  ::channeldpb::SpatialInfo* _internal_mutable_center();
   public:
-  void unsafe_arena_set_allocated_min(
-      ::channeldpb::SpatialInfo* min);
-  ::channeldpb::SpatialInfo* unsafe_arena_release_min();
+  void unsafe_arena_set_allocated_center(
+      ::channeldpb::SpatialInfo* center);
+  ::channeldpb::SpatialInfo* unsafe_arena_release_center();
 
-  // .channeldpb.SpatialInfo max = 2;
-  bool has_max() const;
+  // .channeldpb.SpatialInfo extent = 2;
+  bool has_extent() const;
   private:
-  bool _internal_has_max() const;
+  bool _internal_has_extent() const;
   public:
-  void clear_max();
-  const ::channeldpb::SpatialInfo& max() const;
-  PROTOBUF_NODISCARD ::channeldpb::SpatialInfo* release_max();
-  ::channeldpb::SpatialInfo* mutable_max();
-  void set_allocated_max(::channeldpb::SpatialInfo* max);
+  void clear_extent();
+  const ::channeldpb::SpatialInfo& extent() const;
+  PROTOBUF_NODISCARD ::channeldpb::SpatialInfo* release_extent();
+  ::channeldpb::SpatialInfo* mutable_extent();
+  void set_allocated_extent(::channeldpb::SpatialInfo* extent);
   private:
-  const ::channeldpb::SpatialInfo& _internal_max() const;
-  ::channeldpb::SpatialInfo* _internal_mutable_max();
+  const ::channeldpb::SpatialInfo& _internal_extent() const;
+  ::channeldpb::SpatialInfo* _internal_mutable_extent();
   public:
-  void unsafe_arena_set_allocated_max(
-      ::channeldpb::SpatialInfo* max);
-  ::channeldpb::SpatialInfo* unsafe_arena_release_max();
+  void unsafe_arena_set_allocated_extent(
+      ::channeldpb::SpatialInfo* extent);
+  ::channeldpb::SpatialInfo* unsafe_arena_release_extent();
 
   // @@protoc_insertion_point(class_scope:channeldpb.SpatialInterestQuery.BoxAOI)
  private:
@@ -5314,8 +5314,8 @@ class CHANNELDUE_API SpatialInterestQuery_BoxAOI final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
-    ::channeldpb::SpatialInfo* min_;
-    ::channeldpb::SpatialInfo* max_;
+    ::channeldpb::SpatialInfo* center_;
+    ::channeldpb::SpatialInfo* extent_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -8937,45 +8937,45 @@ SpatialInterestQuery_SpotsAOI::spots() const {
 
 // SpatialInterestQuery_BoxAOI
 
-// .channeldpb.SpatialInfo min = 1;
-inline bool SpatialInterestQuery_BoxAOI::_internal_has_min() const {
-  return this != internal_default_instance() && _impl_.min_ != nullptr;
+// .channeldpb.SpatialInfo center = 1;
+inline bool SpatialInterestQuery_BoxAOI::_internal_has_center() const {
+  return this != internal_default_instance() && _impl_.center_ != nullptr;
 }
-inline bool SpatialInterestQuery_BoxAOI::has_min() const {
-  return _internal_has_min();
+inline bool SpatialInterestQuery_BoxAOI::has_center() const {
+  return _internal_has_center();
 }
-inline void SpatialInterestQuery_BoxAOI::clear_min() {
-  if (GetArenaForAllocation() == nullptr && _impl_.min_ != nullptr) {
-    delete _impl_.min_;
+inline void SpatialInterestQuery_BoxAOI::clear_center() {
+  if (GetArenaForAllocation() == nullptr && _impl_.center_ != nullptr) {
+    delete _impl_.center_;
   }
-  _impl_.min_ = nullptr;
+  _impl_.center_ = nullptr;
 }
-inline const ::channeldpb::SpatialInfo& SpatialInterestQuery_BoxAOI::_internal_min() const {
-  const ::channeldpb::SpatialInfo* p = _impl_.min_;
+inline const ::channeldpb::SpatialInfo& SpatialInterestQuery_BoxAOI::_internal_center() const {
+  const ::channeldpb::SpatialInfo* p = _impl_.center_;
   return p != nullptr ? *p : reinterpret_cast<const ::channeldpb::SpatialInfo&>(
       ::channeldpb::_SpatialInfo_default_instance_);
 }
-inline const ::channeldpb::SpatialInfo& SpatialInterestQuery_BoxAOI::min() const {
-  // @@protoc_insertion_point(field_get:channeldpb.SpatialInterestQuery.BoxAOI.min)
-  return _internal_min();
+inline const ::channeldpb::SpatialInfo& SpatialInterestQuery_BoxAOI::center() const {
+  // @@protoc_insertion_point(field_get:channeldpb.SpatialInterestQuery.BoxAOI.center)
+  return _internal_center();
 }
-inline void SpatialInterestQuery_BoxAOI::unsafe_arena_set_allocated_min(
-    ::channeldpb::SpatialInfo* min) {
+inline void SpatialInterestQuery_BoxAOI::unsafe_arena_set_allocated_center(
+    ::channeldpb::SpatialInfo* center) {
   if (GetArenaForAllocation() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.min_);
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.center_);
   }
-  _impl_.min_ = min;
-  if (min) {
+  _impl_.center_ = center;
+  if (center) {
     
   } else {
     
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:channeldpb.SpatialInterestQuery.BoxAOI.min)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:channeldpb.SpatialInterestQuery.BoxAOI.center)
 }
-inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::release_min() {
+inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::release_center() {
   
-  ::channeldpb::SpatialInfo* temp = _impl_.min_;
-  _impl_.min_ = nullptr;
+  ::channeldpb::SpatialInfo* temp = _impl_.center_;
+  _impl_.center_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
   auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
   temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
@@ -8987,85 +8987,85 @@ inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::release_min() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::unsafe_arena_release_min() {
-  // @@protoc_insertion_point(field_release:channeldpb.SpatialInterestQuery.BoxAOI.min)
+inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::unsafe_arena_release_center() {
+  // @@protoc_insertion_point(field_release:channeldpb.SpatialInterestQuery.BoxAOI.center)
   
-  ::channeldpb::SpatialInfo* temp = _impl_.min_;
-  _impl_.min_ = nullptr;
+  ::channeldpb::SpatialInfo* temp = _impl_.center_;
+  _impl_.center_ = nullptr;
   return temp;
 }
-inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::_internal_mutable_min() {
+inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::_internal_mutable_center() {
   
-  if (_impl_.min_ == nullptr) {
+  if (_impl_.center_ == nullptr) {
     auto* p = CreateMaybeMessage<::channeldpb::SpatialInfo>(GetArenaForAllocation());
-    _impl_.min_ = p;
+    _impl_.center_ = p;
   }
-  return _impl_.min_;
+  return _impl_.center_;
 }
-inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::mutable_min() {
-  ::channeldpb::SpatialInfo* _msg = _internal_mutable_min();
-  // @@protoc_insertion_point(field_mutable:channeldpb.SpatialInterestQuery.BoxAOI.min)
+inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::mutable_center() {
+  ::channeldpb::SpatialInfo* _msg = _internal_mutable_center();
+  // @@protoc_insertion_point(field_mutable:channeldpb.SpatialInterestQuery.BoxAOI.center)
   return _msg;
 }
-inline void SpatialInterestQuery_BoxAOI::set_allocated_min(::channeldpb::SpatialInfo* min) {
+inline void SpatialInterestQuery_BoxAOI::set_allocated_center(::channeldpb::SpatialInfo* center) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
-    delete _impl_.min_;
+    delete _impl_.center_;
   }
-  if (min) {
+  if (center) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(min);
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(center);
     if (message_arena != submessage_arena) {
-      min = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, min, submessage_arena);
+      center = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, center, submessage_arena);
     }
     
   } else {
     
   }
-  _impl_.min_ = min;
-  // @@protoc_insertion_point(field_set_allocated:channeldpb.SpatialInterestQuery.BoxAOI.min)
+  _impl_.center_ = center;
+  // @@protoc_insertion_point(field_set_allocated:channeldpb.SpatialInterestQuery.BoxAOI.center)
 }
 
-// .channeldpb.SpatialInfo max = 2;
-inline bool SpatialInterestQuery_BoxAOI::_internal_has_max() const {
-  return this != internal_default_instance() && _impl_.max_ != nullptr;
+// .channeldpb.SpatialInfo extent = 2;
+inline bool SpatialInterestQuery_BoxAOI::_internal_has_extent() const {
+  return this != internal_default_instance() && _impl_.extent_ != nullptr;
 }
-inline bool SpatialInterestQuery_BoxAOI::has_max() const {
-  return _internal_has_max();
+inline bool SpatialInterestQuery_BoxAOI::has_extent() const {
+  return _internal_has_extent();
 }
-inline void SpatialInterestQuery_BoxAOI::clear_max() {
-  if (GetArenaForAllocation() == nullptr && _impl_.max_ != nullptr) {
-    delete _impl_.max_;
+inline void SpatialInterestQuery_BoxAOI::clear_extent() {
+  if (GetArenaForAllocation() == nullptr && _impl_.extent_ != nullptr) {
+    delete _impl_.extent_;
   }
-  _impl_.max_ = nullptr;
+  _impl_.extent_ = nullptr;
 }
-inline const ::channeldpb::SpatialInfo& SpatialInterestQuery_BoxAOI::_internal_max() const {
-  const ::channeldpb::SpatialInfo* p = _impl_.max_;
+inline const ::channeldpb::SpatialInfo& SpatialInterestQuery_BoxAOI::_internal_extent() const {
+  const ::channeldpb::SpatialInfo* p = _impl_.extent_;
   return p != nullptr ? *p : reinterpret_cast<const ::channeldpb::SpatialInfo&>(
       ::channeldpb::_SpatialInfo_default_instance_);
 }
-inline const ::channeldpb::SpatialInfo& SpatialInterestQuery_BoxAOI::max() const {
-  // @@protoc_insertion_point(field_get:channeldpb.SpatialInterestQuery.BoxAOI.max)
-  return _internal_max();
+inline const ::channeldpb::SpatialInfo& SpatialInterestQuery_BoxAOI::extent() const {
+  // @@protoc_insertion_point(field_get:channeldpb.SpatialInterestQuery.BoxAOI.extent)
+  return _internal_extent();
 }
-inline void SpatialInterestQuery_BoxAOI::unsafe_arena_set_allocated_max(
-    ::channeldpb::SpatialInfo* max) {
+inline void SpatialInterestQuery_BoxAOI::unsafe_arena_set_allocated_extent(
+    ::channeldpb::SpatialInfo* extent) {
   if (GetArenaForAllocation() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.max_);
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.extent_);
   }
-  _impl_.max_ = max;
-  if (max) {
+  _impl_.extent_ = extent;
+  if (extent) {
     
   } else {
     
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:channeldpb.SpatialInterestQuery.BoxAOI.max)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:channeldpb.SpatialInterestQuery.BoxAOI.extent)
 }
-inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::release_max() {
+inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::release_extent() {
   
-  ::channeldpb::SpatialInfo* temp = _impl_.max_;
-  _impl_.max_ = nullptr;
+  ::channeldpb::SpatialInfo* temp = _impl_.extent_;
+  _impl_.extent_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
   auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
   temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
@@ -9077,44 +9077,44 @@ inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::release_max() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::unsafe_arena_release_max() {
-  // @@protoc_insertion_point(field_release:channeldpb.SpatialInterestQuery.BoxAOI.max)
+inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::unsafe_arena_release_extent() {
+  // @@protoc_insertion_point(field_release:channeldpb.SpatialInterestQuery.BoxAOI.extent)
   
-  ::channeldpb::SpatialInfo* temp = _impl_.max_;
-  _impl_.max_ = nullptr;
+  ::channeldpb::SpatialInfo* temp = _impl_.extent_;
+  _impl_.extent_ = nullptr;
   return temp;
 }
-inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::_internal_mutable_max() {
+inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::_internal_mutable_extent() {
   
-  if (_impl_.max_ == nullptr) {
+  if (_impl_.extent_ == nullptr) {
     auto* p = CreateMaybeMessage<::channeldpb::SpatialInfo>(GetArenaForAllocation());
-    _impl_.max_ = p;
+    _impl_.extent_ = p;
   }
-  return _impl_.max_;
+  return _impl_.extent_;
 }
-inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::mutable_max() {
-  ::channeldpb::SpatialInfo* _msg = _internal_mutable_max();
-  // @@protoc_insertion_point(field_mutable:channeldpb.SpatialInterestQuery.BoxAOI.max)
+inline ::channeldpb::SpatialInfo* SpatialInterestQuery_BoxAOI::mutable_extent() {
+  ::channeldpb::SpatialInfo* _msg = _internal_mutable_extent();
+  // @@protoc_insertion_point(field_mutable:channeldpb.SpatialInterestQuery.BoxAOI.extent)
   return _msg;
 }
-inline void SpatialInterestQuery_BoxAOI::set_allocated_max(::channeldpb::SpatialInfo* max) {
+inline void SpatialInterestQuery_BoxAOI::set_allocated_extent(::channeldpb::SpatialInfo* extent) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
-    delete _impl_.max_;
+    delete _impl_.extent_;
   }
-  if (max) {
+  if (extent) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(max);
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(extent);
     if (message_arena != submessage_arena) {
-      max = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, max, submessage_arena);
+      extent = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, extent, submessage_arena);
     }
     
   } else {
     
   }
-  _impl_.max_ = max;
-  // @@protoc_insertion_point(field_set_allocated:channeldpb.SpatialInterestQuery.BoxAOI.max)
+  _impl_.extent_ = extent;
+  // @@protoc_insertion_point(field_set_allocated:channeldpb.SpatialInterestQuery.BoxAOI.extent)
 }
 
 // -------------------------------------------------------------------

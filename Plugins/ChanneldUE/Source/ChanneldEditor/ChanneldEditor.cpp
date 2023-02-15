@@ -8,6 +8,7 @@
 #include "AddCompToBPSubsystem.h"
 #include "ChanneldProtobufEditor.h"
 #include "ChanneldSettings.h"
+#include "ChanneldSettingsDetails.h"
 #include "LevelEditor.h"
 #include "ReplicatorGeneratorManager.h"
 #include "ReplicatorGeneratorUtils.h"
@@ -16,6 +17,13 @@
 #include "Widgets/Input/SSpinBox.h"
 #include "ThreadUtils/FChanneldProcWorkerThread.h"
 #include "ISettingsModule.h"
+#include "Modules/ModuleManager.h"
+#include "PropertyEditorModule.h"
+#include "PropertyEditorDelegates.h"
+#include "ChanneldTypes.h"
+#include "ClientInterestSettingsCustomization.h"
+
+IMPLEMENT_MODULE(FChanneldEditorModule, ChanneldEditor);
 
 #define LOCTEXT_NAMESPACE "FChanneldUEModule"
 
@@ -80,6 +88,15 @@ void FChanneldEditorModule::StartupModule()
 			GetMutableDefault<UChanneldEditorSettings>());
 	}
 
+	// Register the custom property type layout for the FClientInterestSettingsPreset struct in Project Settings.
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	// PropertyModule.RegisterCustomPropertyTypeLayout(FClientInterestSettingsPreset::StaticStruct()->GetFName(),
+	// 	FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FClientInterestSettingsCustomization::MakeInstance));
+	PropertyModule.RegisterCustomClassLayout(UChanneldSettings::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FChanneldSettingsDetails::MakeInstance));
+
+	PropertyModule.NotifyCustomizationModuleChanged();
+
+	
 	GenRepMissionNotifyProxy = NewObject<UChanneldMissionNotiProxy>();
 	GenRepMissionNotifyProxy->AddToRoot();
 
@@ -89,6 +106,14 @@ void FChanneldEditorModule::StartupModule()
 
 void FChanneldEditorModule::ShutdownModule()
 {
+	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
+	{
+		FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+		PropertyModule.UnregisterCustomPropertyTypeLayout(FClientInterestSettingsPreset::StaticStruct()->GetFName());
+		PropertyModule.UnregisterCustomClassLayout(UChanneldSettings::StaticClass()->GetFName());
+		PropertyModule.NotifyCustomizationModuleChanged();
+	}
+	
 	FChanneldEditorStyle::Shutdown();
 
 	FChanneldEditorCommands::Unregister();
@@ -383,8 +408,6 @@ void FChanneldEditorModule::AddRepCompsToBPsAction()
 	TSubclassOf<class UChanneldReplicationComponent> CompClass = GetMutableDefault<UChanneldEditorSettings>()->DefaultReplicationComponent;
 	GEditor->GetEditorSubsystem<UAddCompToBPSubsystem>()->AddComponentToBlueprints(CompClass, FName(TEXT("ChanneldRepComp")));
 }
-
-IMPLEMENT_MODULE(FChanneldEditorModule, ChanneldEditor)
 
 void FChanneldEditorModule::OpenEditorSettingsAction()
 {

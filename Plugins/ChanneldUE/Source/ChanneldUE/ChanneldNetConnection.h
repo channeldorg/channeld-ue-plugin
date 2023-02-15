@@ -6,6 +6,8 @@
 #include "unreal_common.pb.h"
 #include "ChanneldNetConnection.generated.h"
 
+DECLARE_EVENT_TwoParams(UChanneldNetConnection, FPlayerEnterSpatialChannelEvent, UChanneldNetConnection*, Channeld::ChannelId);
+
 UCLASS(transient, config=ChanneldUE)
 class CHANNELDUE_API UChanneldNetConnection : public UNetConnection
 {
@@ -22,6 +24,7 @@ public:
 	virtual void LowLevelSend(void* Data, int32 CountBits, FOutPacketTraits& Traits) override;
 	virtual FString LowLevelGetRemoteAddress(bool bAppendPort = false) override;
 	virtual FString LowLevelDescribe() override;
+	virtual void CleanUp() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void ReceivedRawPacket(void* Data, int32 Count) override;
 
@@ -56,7 +59,10 @@ public:
 	bool bInConnectionlessHandshake = false;
 	bool bChanneldAuthenticated = false;
 
-	//ChannelId LowLevelSendToChannelId = GlobalChannelId;
+	UPROPERTY()
+	class UClientInterestManager* ClientInterestManager;
+	
+	FPlayerEnterSpatialChannelEvent PlayerEnterSpatialChannelEvent;
 
 private:
 

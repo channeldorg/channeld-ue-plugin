@@ -16,6 +16,7 @@
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerStart.h"
 #include "GameFramework/PlayerState.h"
+#include "Interest/ClientInterestManager.h"
 #include "Kismet/GameplayStatics.h"
 
 USpatialChannelDataView::USpatialChannelDataView(const FObjectInitializer& ObjectInitializer)
@@ -29,6 +30,10 @@ UChanneldNetConnection* USpatialChannelDataView::CreateClientConnection(Channeld
 
 	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())//NetDriver.IsValid())
 	{
+		if (NetDriver->GetClientConnectionMap().Contains(ConnId))
+		{
+			return NetDriver->GetClientConnectionMap()[ConnId];
+		}
 		UChanneldNetConnection* ClientConn = NetDriver->AddChanneldClientConnection(ConnId, ChId);
 		// Create the ControlChannel and set OpenAcked = 1
 		UChannel* ControlChannel = ClientConn->CreateChannelByName(NAME_Control, EChannelCreateFlags::OpenedLocally);
@@ -446,11 +451,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 					if (auto ClientConn = Cast<UChanneldNetConnection>(PC->NetConnection))
 					{
 						// Authority server updates the client's interest area no matter if it's cross-server handover.
-						channeldpb::UpdateSpatialInterestMessage InterestMsg;
-						InterestMsg.set_connid(ClientConn->GetConnId());
-						InterestMsg.mutable_query()->mutable_sphereaoi()->mutable_center()->MergeFrom(ChanneldUtils::ToSpatialInfo(PC->GetPawn()->GetActorLocation()));
-						InterestMsg.mutable_query()->mutable_sphereaoi()->set_radius(GetMutableDefault<UChanneldSettings>()->SphereRadius);
-						Connection->Send(HandoverMsg->dstchannelid(), channeldpb::UPDATE_SPATIAL_INTEREST, InterestMsg);
+						ClientConn->PlayerEnterSpatialChannelEvent.Broadcast(ClientConn, HandoverMsg->dstchannelid());
 					}
 					else
 					{
@@ -950,12 +951,8 @@ void USpatialChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayer
 	Channeld::ChannelId SpatialChId;
 	if (GetSendToChannelId(NewPlayerConn, SpatialChId))
 	{
-		channeldpb::UpdateSpatialInterestMessage InterestMsg;
-		InterestMsg.set_connid(NewPlayerConn->GetConnId());
 		// The PC's spawn location should have been set correctly by SendSpawnToConn().
-		InterestMsg.mutable_query()->mutable_sphereaoi()->mutable_center()->MergeFrom(ChanneldUtils::ToSpatialInfo(NewPlayer->GetSpawnLocation()));
-		InterestMsg.mutable_query()->mutable_sphereaoi()->set_radius(GetMutableDefault<UChanneldSettings>()->SphereRadius);
-		Connection->Send(SpatialChId, channeldpb::UPDATE_SPATIAL_INTEREST, InterestMsg);
+		NewPlayerConn->PlayerEnterSpatialChannelEvent.Broadcast(NewPlayerConn, SpatialChId);
 	}
 	else
 	{

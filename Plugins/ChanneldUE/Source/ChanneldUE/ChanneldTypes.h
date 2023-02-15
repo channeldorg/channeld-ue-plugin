@@ -259,3 +259,44 @@ struct CHANNELDUE_API FListedChannelInfo
 	UPROPERTY(BlueprintReadWrite)
 	FString Metadata;
 };
+
+UENUM(BlueprintType)
+enum class EClientInterestAreaType : uint8
+{
+	None = 0 UMETA(DisplayName = "None"),
+	Spots = 1 UMETA(DisplayName = "Spots"),
+	Box = 2 UMETA(DisplayName = "Box"),
+	Sphere = 3 UMETA(DisplayName = "Sphere"),
+	Cone = 4 UMETA(DisplayName = "Cone"),
+};
+
+USTRUCT(BlueprintType)
+struct CHANNELDUE_API FClientInterestSettingsPreset
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category="Default")
+	EClientInterestAreaType AreaType = EClientInterestAreaType::None;
+
+	UPROPERTY(EditAnywhere, Category="Default")
+	FName PresetName;
+	
+	UPROPERTY(EditAnywhere, Category="Default")
+	bool bActivateByDefault = true;
+
+	// Used by SpotsAOI
+	UPROPERTY(EditAnywhere, Category="Data")
+	TArray<FVector> Spots;
+
+	// Used by BoxAOI
+	UPROPERTY(EditAnywhere, Category="Data")
+	FVector Extent = FVector(15000.0f, 15000.0f, 15000.0f);
+
+	// Used by SphereAOI
+	UPROPERTY(EditAnywhere, Category="Data")
+	float Radius = 15000.0f;
+
+	// Used by SphereAOI and ConeAOI
+	UPROPERTY(EditAnywhere, Category="Data")
+	float Angle = 120.0f;
+};
