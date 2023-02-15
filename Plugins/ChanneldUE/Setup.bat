@@ -25,7 +25,6 @@ if NOT EXIST "%ChanneldLocalSourceDir%\.git" (
     )
 )
 
-:: Set post-merge hook to channeld\.git\hooks\post-merge
 echo Set post-merge hook to .git\hooks
 
 SET PostMergeHook=%~dp0..\..\.git\hooks\post-merge
@@ -40,6 +39,9 @@ if NOT DEFINED CHANNELD_PATH (
     echo Set CHANNELD_PATH to %ChanneldLocalSourceDir%
     SET CHANNELD_PATH=%ChanneldLocalSourceDir%
     setx CHANNELD_PATH %ChanneldLocalSourceDir%
+    :: invoke refreshenv.bat to make the CHANNELD_PATH take effect
+    call "%~dp0Scripts\refreshenv.bat"
+    echo If you are not running the script via cmd.exe, please restart your shell before update source code !!!
 )
 
 cd "%ChanneldLocalSourceDir%"
