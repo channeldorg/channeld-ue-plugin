@@ -40,6 +40,8 @@ private:
 	void OpenEditorSettingsAction();
 	
 	void LaunchServerGroup(const FServerGroup& ServerGroup);
+
+	FProcHandle ChanneldProcHandle;
 	
 	TSharedPtr<class FUICommandList> PluginCommands;
 	TSharedRef<SWidget> CreateMenuContent(TSharedPtr<FUICommandList> Commands);

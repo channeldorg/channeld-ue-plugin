@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -13,7 +12,7 @@ struct FServerGroup
 
 	UPROPERTY(EditAnywhere)
 	bool bEnabled;
-	
+
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "1", ClampMax = "16"))
 	int32 ServerNum;
 
@@ -28,26 +27,28 @@ struct FServerGroup
 	// If not set, the ChannelDataViewClass in the UChanneldSettings will be used.
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UChannelDataView> ServerViewClass;
-	
+
 	UPROPERTY(EditAnywhere)
 	FText AdditionalArgs;
-	
+
 	FTimerHandle DelayHandle;
 };
 
 UCLASS(config = EditorPerProjectUserSettings)
 class UChanneldEditorSettings : public UObject
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
 public:
-
 	UPROPERTY(Config, EditAnywhere, Category = "Channeld")
 	TArray<FServerGroup> ServerGroups;
 
+	UPROPERTY(Config, EditAnywhere, Category = "Channeld")
+	FString ChanneldLaunchParameters = "-cfsm=\"config/client_authoratative_fsm.json\" -dev -loglevel=-1 -ct=0 -mcb=13 -scc=\"config/spatial_static_2x2.json\"";
+
 	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator", DisplayName = "Game Module Export API Macro", meta = ( ToolTip = "If developer wants to export replicators from the default game module, set the item to be the same as the default game module API Macro. For Example \"CHANNELDUE_API\"" ))
 	FString GameModuleExportAPIMacro;
-	
+
 	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator|Tools", DisplayName = "Default Replication Component", meta = ( ToolTip = "Using to add the replicator component to all replicated blueprint actors without replicator" ))
 	TSubclassOf<UChanneldReplicationComponent> DefaultReplicationComponent;
 	/*

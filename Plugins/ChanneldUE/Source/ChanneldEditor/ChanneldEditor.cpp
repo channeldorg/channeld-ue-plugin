@@ -186,12 +186,36 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 
 void FChanneldEditorModule::LaunchChanneldAction()
 {
-	UE_LOG(LogChanneldEditor, Warning, TEXT("LaunchChanneldAction is not implemented yet"));
+	if (ChanneldProcHandle.IsValid())
+	{
+		UE_LOG(LogChanneldEditor, Warning, TEXT("Channeld is already running"));
+	}
+	FString ChanneldPath = FPlatformMisc::GetEnvironmentVariable(TEXT("CHANNELD_PATH"));
+	if (ChanneldPath.IsEmpty())
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("CHANNELD_PATH environment variable is not set. Please set it to the path of the channeld source code directory."));
+		return;
+	}
+	const FString WorkingDir = ChanneldPath;
+	const UChanneldEditorSettings* Settings = GetMutableDefault<UChanneldEditorSettings>();
+	const FString Params = FString::Printf(TEXT("run ./examples/channeld-ue-tps/main.go %s"), *Settings->ChanneldLaunchParameters);
+	uint32 ProcessId;
+	ChanneldProcHandle = FPlatformProcess::CreateProc(TEXT("go"), *Params, false, false, false, &ProcessId, 0, *WorkingDir, nullptr, nullptr);
+	if (!ChanneldProcHandle.IsValid())
+	{
+		ChanneldProcHandle.Reset();
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to launch channeld"));
+	}
+	else
+	{
+		UE_LOG(LogChanneldEditor, Log, TEXT("Launched channeld"));
+	}
 }
 
 void FChanneldEditorModule::StopChanneldAction()
 {
-	UE_LOG(LogChanneldEditor, Warning, TEXT("LaunchChanneldAction is not implemented yet"));
+	FPlatformProcess::TerminateProc(ChanneldProcHandle, true);
+	ChanneldProcHandle.Reset();
 }
 
 FTimerManager* FChanneldEditorModule::GetTimerManager()
@@ -282,7 +306,7 @@ void FChanneldEditorModule::GenerateReplicatorAction()
 			ChanneldReplicatorGeneratorUtils::GetUECmdBinary(),
 			CommandletHelpers::BuildCommandletProcessArguments(
 				TEXT("CookAndGenRep"),
-				*FString::Printf( TEXT("\"%s\""), *FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())),
+				*FString::Printf(TEXT("\"%s\""), *FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())),
 				TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout")
 			)
 		)
@@ -325,21 +349,21 @@ void FChanneldEditorModule::GenReplicatorProto(FChanneldProcWorkerThread* ProcWo
 
 	FString GameModuleExportAPIMacro = GetMutableDefault<UChanneldEditorSettings>()->GameModuleExportAPIMacro;
 
-	if(GameModuleExportAPIMacro.IsEmpty())
+	if (GameModuleExportAPIMacro.IsEmpty())
 	{
 		UE_LOG(LogChanneldEditor, Verbose, TEXT("Game module export API macro is empty"));
 	}
 
 	FString Args = ChanneldProtobufHelpers::BuildProtocProcessArguments(
 		ReplicatorStorageDir,
-		 FString::Printf(TEXT("dllexport_decl=%s"), *GameModuleExportAPIMacro),
+		FString::Printf(TEXT("dllexport_decl=%s"), *GameModuleExportAPIMacro),
 		{
 			ReplicatorStorageDir,
 			ChanneldUnrealpbPath,
 		},
 		GeneratedProtoFiles
 	);
-	
+
 	IFileManager& FileManager = IFileManager::Get();
 	FString ProtocPath = ChanneldProtobufHelpers::GetProtocPath();
 	if (!FileManager.FileExists(*ProtocPath))
