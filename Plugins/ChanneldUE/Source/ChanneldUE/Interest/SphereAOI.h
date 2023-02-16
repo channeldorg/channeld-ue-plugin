@@ -1,10 +1,17 @@
 #pragma once
 
 #include "AreaOfInterestBase.h"
+#include "SphereAOI.generated.h"
 
-class CHANNELDUE_API FSphereAOI : public FAreaOfInterestBase
+UCLASS(BlueprintType)
+class CHANNELDUE_API USphereAOI : public UAreaOfInterestBase
 {
+	GENERATED_BODY()
+	
 public:
+	USphereAOI(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get()) {}
+
+	UPROPERTY(EditAnywhere)
 	float Radius;
 	
 protected:

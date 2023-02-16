@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldTypes.h"
-#include "Tools/ATintActor.h"
+#include "Tools/TintActor.h"
 #include "Tools/OutlinerActor.h"
 #include "View/PlayerStartLocator.h"
 #include "ChanneldSettings.generated.h"
@@ -66,7 +66,15 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
 	FVector RegionBoxMaxSize;
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
+	FVector RegionBoxOffset;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
 	TSubclassOf<AActor> SubscriptionBoxClass;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
+	FVector SubscriptionBoxMinSize;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
+	FVector SubscriptionBoxMaxSize;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
+	FVector SubscriptionBoxOffset;
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
 	TSubclassOf<AOutlinerActor> SpatialOutlinerClass;
 

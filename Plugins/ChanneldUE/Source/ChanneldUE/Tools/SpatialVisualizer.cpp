@@ -19,15 +19,15 @@ void USpatialVisualizer::Initialize(UChanneldConnection* Conn)
 		return;
 	}
 
-	Conn->AddMessageHandler(channeldpb::SPATIAL_REGIONS_UPDATE, this, &USpatialVisualizer::HandleSpatialRegionsResult);
-	Conn->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, this, &USpatialVisualizer::UpdateSubBoxes);
-	Conn->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this, &USpatialVisualizer::UpdateSubBoxes);
+	Conn->AddMessageHandler(channeldpb::SPATIAL_REGIONS_UPDATE, this, &USpatialVisualizer::HandleSpatialRegionsUpdate);
+	Conn->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, this, &USpatialVisualizer::HandleSubToChannel);
+	Conn->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this, &USpatialVisualizer::HandleUnsubFromChannel);
 
 	channeldpb::DebugGetSpatialRegionsMessage Msg;
 	Conn->Send(Channeld::GlobalChannelId, channeldpb::DEBUG_GET_SPATIAL_REGIONS, Msg);
 }
 
-void USpatialVisualizer::HandleSpatialRegionsResult(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+void USpatialVisualizer::HandleSpatialRegionsUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	const auto ResultMsg = static_cast<const channeldpb::SpatialRegionsUpdateMessage*>(Msg);
 	Regions.Empty();
@@ -49,14 +49,19 @@ void USpatialVisualizer::HandleSpatialRegionsResult(UChanneldConnection* Conn, C
 
 	for (auto Region : Regions)
 	{
+		// Saturation and Value should be decided by the TintActor rather than fixed in code.
 		ColorsByChId.Add(Region.channelid(), FLinearColor::MakeFromHSV8(256 * Region.serverindex() / ServerCount, 0xcc, 0xff));
 	}
 
 	FTimerHandle Handle;
 	// Wait a couple of seconds for the client travel to finish, otherwise the actors created by the visualizer will be removed.
-	GetWorld()->GetTimerManager().SetTimer(Handle, [&]()
+	GetWorld()->GetTimerManager().SetTimer(Handle, [&, Conn]()
 	{
 		SpawnRegionBoxes();
+		for (auto& Pair : Conn->SubscribedChannels)
+		{
+			SpawnSubBox(Pair.Key);
+		}
 	}, 1, false, 2.0f);
 
 }
@@ -66,29 +71,94 @@ void USpatialVisualizer::SpawnRegionBoxes()
 	const auto Settings = GetMutableDefault<UChanneldSettings>();
 	ensureMsgf(Settings->RegionBoxClass, TEXT("RegionBoxClass is not set!"));
 
-	for (const auto Box : RegionBoxes)
+	for (const auto Pair : RegionBoxes)
 	{
-		GetWorld()->DestroyActor(Box);
+		GetWorld()->DestroyActor(Pair.Value);
 	}
 	RegionBoxes.Empty();
 		
 	for (auto Region : Regions)
 	{
 		// Swap the Y and Z as UE uses the Z-Up rule but channeld uses the Y-up rule.
-		FVector BoundsMin = FVector(Region.min().x(), Region.min().z(), Settings->RegionBoxMinSize.Z);
-		FVector BoundsMax = FVector(Region.max().x(), Region.max().z(), Settings->RegionBoxMinSize.Z);
-		FVector Location = 0.5f * (BoundsMin + BoundsMax);
+		FVector BoundsMin = FVector(Region.min().x(), Region.min().z(), Region.min().y());//Settings->RegionBoxMinSize.Z);
+		FVector BoundsMax = FVector(Region.max().x(), Region.max().z(), Region.max().y()); //Settings->RegionBoxMinSize.Z);
+		FVector Location = 0.5f * (BoundsMin + BoundsMax) + Settings->RegionBoxOffset;
 		ATintActor* Box = CastChecked<ATintActor>(GetWorld()->SpawnActor(Settings->RegionBoxClass, &Location));
 		FVector BoundsSize = ClampVector(BoundsMax - BoundsMin, Settings->RegionBoxMinSize, Settings->RegionBoxMaxSize);
 		FVector BoxSize = Box->GetRootComponent()->Bounds.BoxExtent * 2;
 		Box->SetActorScale3D(BoundsSize / BoxSize);
 		Box->SetColor(RegionColors[Region.serverindex()]);
-		RegionBoxes.Add(Box);
+		RegionBoxes.Add(Region.channelid(), Box);
 	}
 }
 
-void USpatialVisualizer::UpdateSubBoxes(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+void USpatialVisualizer::SpawnSubBox(Channeld::ChannelId ChId)
 {
+	const auto Settings = GetMutableDefault<UChanneldSettings>();
+	if (!Settings->SubscriptionBoxClass)
+	{
+		return;
+	}
+
+	channeldpb::SpatialRegion* SubRegion = Regions.FindByPredicate([ChId](auto Value) {return Value.channelid() == ChId; });
+	if (!SubRegion)
+	{
+		return;
+	}
+	auto Region = *SubRegion;
+
+	FVector BoundsMin = FVector(Region.min().x(), Region.min().z(), Region.min().y());
+	FVector BoundsMax = FVector(Region.max().x(), Region.max().z(), Region.max().y());
+	FVector Location = 0.5f * (BoundsMin + BoundsMax) + Settings->SubscriptionBoxOffset;
+	ATintActor* Box = CastChecked<ATintActor>(GetWorld()->SpawnActor(Settings->SubscriptionBoxClass, &Location));
+	FVector BoundsSize = ClampVector(BoundsMax - BoundsMin, Settings->SubscriptionBoxMinSize, Settings->SubscriptionBoxMaxSize);
+	FVector BoxSize = Box->GetRootComponent()->Bounds.BoxExtent * 2;
+	Box->SetActorScale3D(BoundsSize / BoxSize);
+	Box->SetColor(RegionColors[Region.serverindex()]);
+	SubBoxes.Add(Region.channelid(), Box);
+}
+
+void USpatialVisualizer::HandleSubToChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	// We should wait the region boxes to be spawned before spawning the subscription box.
+	if (RegionBoxes.Num() == 0)
+	{
+		return;
+	}
+
+	// Subscription box already exists.
+	if (SubBoxes.Contains(ChId))
+	{
+		return;
+	}
+	
+	const auto ResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
+	if (ResultMsg->connid() != Conn->GetConnId())
+	{
+		return;
+	}
+
+	SpawnSubBox(ChId);
+}
+
+void USpatialVisualizer::HandleUnsubFromChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	if (RegionBoxes.Num() == 0)
+	{
+		return;
+	}
+	
+	const auto ResultMsg = static_cast<const channeldpb::UnsubscribedFromChannelResultMessage*>(Msg);
+	if (ResultMsg->connid() != Conn->GetConnId())
+	{
+		return;
+	}
+
+	ATintActor* SubBox;
+	if (SubBoxes.RemoveAndCopyValue(ChId, SubBox))
+	{
+		GetWorld()->DestroyActor(SubBox);
+	}
 }
 
 void USpatialVisualizer::OnSpawnedObject(UObject* Obj, Channeld::ChannelId ChId)

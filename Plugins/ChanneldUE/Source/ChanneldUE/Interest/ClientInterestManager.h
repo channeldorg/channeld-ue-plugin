@@ -6,7 +6,7 @@
 #include "ClientInterestManager.generated.h"
 
 UCLASS(BlueprintType)
-class CHANNELDUE_API UClientInterestManager : public UObject, public FTickableGameObject
+class CHANNELDUE_API UClientInterestManager : public UObject//, public FTickableGameObject
 {
 	GENERATED_BODY()
 public:
@@ -14,11 +14,11 @@ public:
 	void ServerSetup(UChanneldNetConnection* ClientNetConn);
 	void CleanUp(UChanneldNetConnection* ClientNetConn);
 
-	virtual bool IsTickable() const override;
-	virtual void Tick(float DeltaTime) override;
-	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UClientInterestManager, STATGROUP_Tickables); }
+	// virtual bool IsTickable() const override;
+	// virtual void Tick(float DeltaTime) override;
+	// virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UClientInterestManager, STATGROUP_Tickables); }
 
-	void AddAOI(TSharedPtr<FAreaOfInterestBase> AOI, bool bActivate = false);
+	void AddAOI(UAreaOfInterestBase* AOI, bool bActivate = false);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Interest")
 	void ActivateAOI(int Index = 0);
@@ -39,9 +39,11 @@ public:
 	void RemoveActorInterest(AActor* Actor);
 
 private:
-	TArray<TSharedPtr<FAreaOfInterestBase>> AvailableAOIs;
+	UPROPERTY()
+	TArray<UAreaOfInterestBase*> AvailableAOIs;
 
-	TArray<TSharedPtr<FAreaOfInterestBase>> ActiveAOIs;
+	UPROPERTY()
+	TArray<UAreaOfInterestBase*> ActiveAOIs;
 	
 	TWeakObjectPtr<APlayerController> FollowingPC;
 	FVector LastUpdateLocation;

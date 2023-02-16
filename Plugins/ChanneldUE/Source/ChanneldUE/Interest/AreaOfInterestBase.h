@@ -2,21 +2,23 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldNetConnection.h"
+#include "AreaOfInterestBase.generated.h"
 
-class CHANNELDUE_API FAreaOfInterestBase// : public UObject
+UCLASS(Blueprintable, Abstract)
+class CHANNELDUE_API UAreaOfInterestBase : public UObject
 {
-// GENERATED_BODY()
+	GENERATED_BODY()
+	
 public:
-	FAreaOfInterestBase() {}
-	virtual ~FAreaOfInterestBase() {FollowingPC = nullptr;}
+	UAreaOfInterestBase() {}
 
 	virtual void OnActivate() {}
 	virtual void OnDeactivate() {}
-	virtual void SetSpatialQuery(channeldpb::SpatialInterestQuery* Query, const FVector& PawnLocation, const FRotator& PawnRotation) = 0;
+	virtual void SetSpatialQuery(channeldpb::SpatialInterestQuery* Query, const FVector& PawnLocation, const FRotator& PawnRotation) PURE_VIRTUAL(,);
 	void FollowPlayer(APlayerController* PC) {FollowingPC = PC;}
 	void UnfollowPlayer() {FollowingPC = nullptr;}
-	virtual bool IsTickable() {return FollowingPC.IsValid();}
-	virtual void Tick(float DeltaTime){}
+	// virtual bool IsTickable() {return FollowingPC.IsValid();}
+	// virtual void Tick(float DeltaTime){}
 
 	FName Name;
 	

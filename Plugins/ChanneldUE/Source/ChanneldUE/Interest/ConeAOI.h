@@ -2,11 +2,12 @@
 
 #include "AreaOfInterestBase.h"
 
-class CHANNELDUE_API FStaticLocationsAOI : public UAreaOfInterestBase
+class CHANNELDUE_API FConeAOI : public UAreaOfInterestBase
 {
 public:
-	TArray<FVector> Spots;
-
+	float Radius;
+	float Angle;
+	
 protected:
 	virtual void SetSpatialQuery(channeldpb::SpatialInterestQuery* Query, const FVector& PawnLocation, const FRotator& PawnRotation) override;
 };

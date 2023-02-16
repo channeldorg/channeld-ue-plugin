@@ -20,14 +20,14 @@ void UClientInterestManager::ServerSetup(UChanneldNetConnection* ClientNetConn)
 	{
 		if (Preset.AreaType == EClientInterestAreaType::Sphere)
 		{
-			auto AOI = MakeShared<FSphereAOI>();
+			auto AOI = NewObject<USphereAOI>(this);
 			AOI->Name = Preset.PresetName;
 			AOI->Radius = Preset.Radius;
 			AddAOI(AOI, Preset.bActivateByDefault);
 		}
 		else if (Preset.AreaType == EClientInterestAreaType::StaticLocations)
 		{
-			auto AOI = MakeShared<FStaticLocationsAOI>();
+			auto AOI = NewObject<FStaticLocationsAOI>(this);
 			AOI->Name = Preset.PresetName;
 			AOI->Spots = Preset.Spots;
 			// AOI->InterestedActors = InterestedActors;
@@ -50,7 +50,7 @@ void UClientInterestManager::CleanUp(UChanneldNetConnection* ClientNetConn)
 	UE_LOG(LogChanneld, Log, TEXT("[Server] ClientInterestManager has been cleanup for client conn %d"), ClientNetConn->GetConnId());
 }
 
-void UClientInterestManager::AddAOI(TSharedPtr<FAreaOfInterestBase> AOI, bool bActivate)
+void UClientInterestManager::AddAOI(UAreaOfInterestBase* AOI, bool bActivate)
 {
 	int Index = AvailableAOIs.Add(AOI);
 	if (bActivate)
@@ -123,6 +123,7 @@ void UClientInterestManager::UnfollowPlayer(int IndexOfAOI)
 	FollowingPC = nullptr;
 }
 
+/*
 bool UClientInterestManager::IsTickable() const
 {
 	if (IsTemplate())
@@ -170,6 +171,7 @@ void UClientInterestManager::Tick(float DeltaTime)
 		AOI->Tick(DeltaTime);
 	}
 }
+*/
 
 void UClientInterestManager::AddActorInterest(AActor* Actor)
 {
