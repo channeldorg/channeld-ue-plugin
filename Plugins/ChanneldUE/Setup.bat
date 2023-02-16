@@ -24,6 +24,7 @@ if NOT EXIST "%ChanneldLocalSourceDir%\.git" (
         echo ERROR: Clone channel:%ChanneldVersion% failed, please clone channeld[%ChanneldRepoUrl%]:%ChanneldVersion% manually and %ErrorMessages%.
         exit /b 3
     )
+    echo Clone channeld:%ChanneldVersion% successfully, the source code is at %ChanneldLocalSourceDir%
 )
 
 echo Set post-merge hook to .git\hooks
@@ -41,7 +42,10 @@ if NOT DEFINED CHANNELD_PATH (
     setx CHANNELD_PATH %ChanneldLocalSourceDir%
     :: invoke refreshenv.bat to make the CHANNELD_PATH take effect
     call "%~dp0Source\ThirdParty\refrenv.bat"
+    echo Set user environment variable CHANNELD_PATH to %ChanneldLocalSourceDir%
     echo If you are not running the script via cmd.exe, please restart your shell before update ChanneldUE source code !!!
+) else (
+    echo CHANNELD_PATH is already set to %CHANNELD_PATH%
 )
 
 cd "%ChanneldLocalSourceDir%"
