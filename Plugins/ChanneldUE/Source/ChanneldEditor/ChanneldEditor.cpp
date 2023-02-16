@@ -198,7 +198,7 @@ void FChanneldEditorModule::LaunchChanneldAction()
 	}
 	const FString WorkingDir = ChanneldPath;
 	const UChanneldEditorSettings* Settings = GetMutableDefault<UChanneldEditorSettings>();
-	const FString Params = FString::Printf(TEXT("run ./examples/channeld-ue-tps/main.go %s"), *Settings->ChanneldLaunchParameters);
+	const FString Params = FString::Printf(TEXT("run %s %s"), *Settings->LaunchChanneldEntry, *Settings->LaunchChanneldParameters);
 	uint32 ProcessId;
 	ChanneldProcHandle = FPlatformProcess::CreateProc(TEXT("go"), *Params, false, false, false, &ProcessId, 0, *WorkingDir, nullptr, nullptr);
 	if (!ChanneldProcHandle.IsValid())
