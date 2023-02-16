@@ -49,7 +49,8 @@ protected:
 
 	// The client need to destroy the objects that are no longer relevant to the client.
 	virtual void OnRemovedProvidersFromChannel(Channeld::ChannelId ChId, channeldpb::ChannelType ChannelType, const TSet<FProviderInternal>& RemovedProviders) override;
-	
+	bool ClientDeleteObject(UObject* Obj);
+
 	// The client may have subscribed to the spatial channels that go beyond the interest area of the client's authoritative server.
 	// In that case, the client may receive ChannelDataUpdate that contains unresolved NetworkGUIDs, so it needs to spawn the objects before applying the update.
 	virtual bool CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData) override;

@@ -263,6 +263,21 @@ void UChannelDataView::RemoveActorProvider(AActor* Actor, bool bSendRemoved)
 	}
 }
 
+void UChannelDataView::RemoveObjectProvider(UObject* Obj, bool bSendRemoved)
+{
+	if (Obj->Implements<UChannelDataProvider>())
+	{
+		RemoveProviderFromAllChannels(Cast<IChannelDataProvider>(Obj), bSendRemoved);
+	}
+	if (AActor* Actor = Cast<AActor>(Obj))
+	{
+		for (const auto Comp : Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+		{
+			RemoveProviderFromAllChannels(Cast<IChannelDataProvider>(Comp), bSendRemoved);
+		}
+	}
+}
+
 void UChannelDataView::RemoveProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved)
 {
 	if (Provider->IsRemoved())

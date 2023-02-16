@@ -551,45 +551,54 @@ void USpatialChannelDataView::OnRemovedProvidersFromChannel(Channeld::ChannelId 
 
 		if (UObject* Obj = Provider->GetTargetObject())
 		{
-			UE_LOG(LogChanneld, Log, TEXT("Deleting object that is no longer in the client's interest area: %s"), *Obj->GetName());
-			if (auto Actor = Cast<AActor>(Obj))
+			if (!ClientDeleteObject(Obj))
 			{
-				// Call the actor's IsNetRelevantFor() to determine if the actor should be deleted or not.
-				if (GetMutableDefault<UChanneldSettings>()->bUseNetRelevantForUninterestedActors)
-				{
-					if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
-					{
-						if (auto PC = NetDriver->GetServerConnection()->PlayerController)
-						{
-							FVector ViewLocation;
-							FRotator ViewRotation;
-							PC->GetPlayerViewPoint(ViewLocation, ViewRotation);
-							if (Actor->IsNetRelevantFor(PC, PC->GetViewTarget(), ViewLocation))
-							{
-								UE_LOG(LogChanneld, Log, TEXT("Skipped deleting the net relevant actor. Now add the provider back to the channel."));
-								AddProvider(ChId, Provider.Get());
-								continue;
-							}
-						}
-					}
-				}
-				
-				GetWorld()->DestroyActor(Actor, true);
-			}
-			else
-			{
-				Obj->ConditionalBeginDestroy();
-			}
-			
-			// Remove the object from the GuidCache so it can be re-created in CheckUnspawnedObject() when the client regain the interest.
-			auto GuidCache = GetWorld()->NetDriver->GuidCache;
-			FNetworkGUID NetId;
-			if (GuidCache->NetGUIDLookup.RemoveAndCopyValue(Obj, NetId))
-			{
-				GuidCache->ObjectLookup.Remove(NetId);
+				UE_LOG(LogChanneld, Log, TEXT("Skipped deleting the net relevant actor. Now add the provider back to the channel."));
+				AddProvider(ChId, Provider.Get());
 			}
 		}
 	}
+}
+
+bool USpatialChannelDataView::ClientDeleteObject(UObject* Obj)
+{
+	UE_LOG(LogChanneld, Log, TEXT("Deleting object that is no longer in the client's interest area: %s"), *Obj->GetName());
+	if (auto Actor = Cast<AActor>(Obj))
+	{
+		// Call the actor's IsNetRelevantFor() to determine if the actor should be deleted or not.
+		if (GetMutableDefault<UChanneldSettings>()->bUseNetRelevantForUninterestedActors)
+		{
+			if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
+			{
+				if (auto PC = NetDriver->GetServerConnection()->PlayerController)
+				{
+					FVector ViewLocation;
+					FRotator ViewRotation;
+					PC->GetPlayerViewPoint(ViewLocation, ViewRotation);
+					if (Actor->IsNetRelevantFor(PC, PC->GetViewTarget(), ViewLocation))
+					{
+						return false;
+					}
+				}
+			}
+		}
+				
+		GetWorld()->DestroyActor(Actor, true);
+	}
+	else
+	{
+		Obj->ConditionalBeginDestroy();
+	}
+			
+	// Remove the object from the GuidCache so it can be re-created in CheckUnspawnedObject() when the client regain the interest.
+	auto GuidCache = GetWorld()->NetDriver->GuidCache;
+	FNetworkGUID NetId;
+	if (GuidCache->NetGUIDLookup.RemoveAndCopyValue(Obj, NetId))
+	{
+		GuidCache->ObjectLookup.Remove(NetId);
+	}
+	
+	return true;
 }
 
 bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData)
@@ -798,6 +807,9 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 	}
 	UE_LOG(LogChanneld, Log, TEXT("ChannelDataHandover from channel %d to %d, object netIds: %s"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), *FString::Join(NetIds, TEXT(",")));
 
+	// Does the client has interest over the handover objects?
+	const bool bHasInterest = Connection->SubscribedChannels.Contains(HandoverMsg->dstchannelid());
+	
 	for (auto& HandoverContext : HandoverData.context())
 	{
 		FNetworkGUID NetId(HandoverContext.obj().netguid());
@@ -806,7 +818,16 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 		SetOwningChannelId(NetId, HandoverMsg->dstchannelid());
 
 		UObject* Obj = GetObjectFromNetGUID(NetId);
-		if (Obj)
+		if (!Obj)
+		{
+			// FIXME: We can't wait the server to send the Spawn messages as it's suppressed in the handover process.
+			// But we also don't want to spawn the PlayerState or PlayerController of other players.
+			
+			UE_LOG(LogChanneld, Warning, TEXT("Unable to find data provider to move from channel %d to %d, NetId: %d"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), NetId.Value);
+			continue;
+		}
+
+		if (bHasInterest)
 		{
 			// Move data provider to the new channel
 			if (Obj->Implements<UChannelDataProvider>())
@@ -837,10 +858,10 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 		}
 		else
 		{
-			// FIXME: We can't wait the server to send the Spawn messages as it's suppressed in the handover process.
-			// But we also don't want to spawn the PlayerState or PlayerController of other players.
-			
-			UE_LOG(LogChanneld, Warning, TEXT("Unable to find data provider to move from channel %d to %d, NetId: %d"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), NetId.Value);
+			if (ClientDeleteObject(Obj))
+			{
+				RemoveObjectProvider(Obj, false);
+			}
 		}
 	}
 }

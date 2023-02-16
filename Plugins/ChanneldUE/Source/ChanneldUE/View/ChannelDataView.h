@@ -43,6 +43,7 @@ public:
 	void AddActorProvider(Channeld::ChannelId ChId, AActor* Actor);
 	void AddObjectProvider(UObject* Obj);
 	void RemoveActorProvider(AActor* Actor, bool bSendRemoved);
+	void RemoveObjectProvider(UObject* Obj, bool bSendRemoved);
 	virtual void RemoveProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void MoveProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, IChannelDataProvider* Provider);
