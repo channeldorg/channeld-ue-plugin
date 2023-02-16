@@ -267,7 +267,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 					NetIdOwningChannels.Remove(NetId);
 					*/
 
-					// Remove from the NetGUIDCache
+					// Remove from the GuidCache so that the object can be re-created in the future cross-server handover.
 					auto GuidCache = GetWorld()->NetDriver->GuidCache;
 					GuidCache->ObjectLookup.Remove(NetId);
 					GuidCache->NetGUIDLookup.Remove(HandoverObj);
@@ -580,6 +580,14 @@ void USpatialChannelDataView::OnRemovedProvidersFromChannel(Channeld::ChannelId 
 			{
 				Obj->ConditionalBeginDestroy();
 			}
+			
+			// Remove the object from the GuidCache so it can be re-created in CheckUnspawnedObject() when the client regain the interest.
+			auto GuidCache = GetWorld()->NetDriver->GuidCache;
+			FNetworkGUID NetId;
+			if (GuidCache->NetGUIDLookup.RemoveAndCopyValue(Obj, NetId))
+			{
+				GuidCache->ObjectLookup.Remove(NetId);
+			}
 		}
 	}
 }
@@ -615,7 +623,8 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 
 	if (UnresolvedNetGUIDs.Num() == 0)
 	{
-		return false;
+		// Stop the channel data from being consumed in UChannelDataView::HandleChannelDataUpdate if still under resolving.
+		return ResolvingNetGUIDs.Num() > 0;
 	}
 
 	unrealpb::GetUnrealObjectRefMessage Msg;
@@ -654,7 +663,14 @@ void USpatialChannelDataView::ClientHandleGetUnrealObjectRef(UChanneldConnection
 			AddObjectProvider(NewObj);
 			OnClientSpawnedObject(NewObj, ChId);
 		}
+		
 		ResolvingNetGUIDs.Remove(ObjRef.netguid());
+	}
+
+	// Now there should be no unresolved object in the channel, so we can consume the accumulated data.
+	if (auto UpdateData = ReceivedUpdateDataInChannels.FindRef(ChId))
+	{
+		ConsumeChannelUpdateData(ChId, UpdateData);
 	}
 }
 

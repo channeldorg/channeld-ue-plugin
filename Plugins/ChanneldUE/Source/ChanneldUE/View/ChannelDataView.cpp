@@ -809,6 +809,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 			return;
 		}
 		UpdateData = MsgTemplate->New();
+		ReceivedUpdateDataInChannels.Add(ChId, UpdateData);
 	}
 
 	UE_LOG(LogChanneld, Verbose, TEXT("Received %s channel %d update(%d B): %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), ChId, UpdateMsg->data().value().size(), UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
@@ -825,10 +826,15 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 		return;
 	}
 	
+	ConsumeChannelUpdateData(ChId, UpdateData);
+}
+
+bool UChannelDataView::ConsumeChannelUpdateData(Channeld::ChannelId ChId, google::protobuf::Message* UpdateData)
+{
 	TSet<FProviderInternal>* Providers = ChannelDataProviders.Find(ChId);
 	if (Providers == nullptr || Providers->Num() == 0)
 	{
-		UE_LOG(LogChanneld, Log, TEXT("No provider registered for channel %d, typeUrl: %s. The update will not be applied."), ChId, UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
+		UE_LOG(LogChanneld, Log, TEXT("No provider registered for channel %d. The update will not be applied."), ChId);
 
 		/* Saving the update data with removed=true can caused the provider gets destroyed immediately after AddProvider.
 		auto UnprocessedUpdateData = UpdateData->New();
@@ -836,7 +842,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 		UnprocessedUpdateDataInChannels.FindOrAdd(ChId).Add(UnprocessedUpdateData);
 		*/
 		
-		return;
+		return false;
 	}
 
 	// The set can be changed during the iteration, when a new provider is created from the UnrealObjectRef during any replicator's OnStateChanged(),
@@ -857,5 +863,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	{
 		UpdateData->Clear();
 	}
+	
+	return bConsumed;
 }
 

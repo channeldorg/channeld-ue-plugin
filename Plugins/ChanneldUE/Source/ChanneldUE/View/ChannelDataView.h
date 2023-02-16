@@ -129,6 +129,7 @@ protected:
 	void ReceiveUninitClient();
 
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	bool ConsumeChannelUpdateData(Channeld::ChannelId ChId, google::protobuf::Message* UpdateData);
 
 	void HandleUnsub(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	virtual void ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId){}

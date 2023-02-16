@@ -70,6 +70,8 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category="Spatial")
 	TArray<UObject*> GetHandoverObjects(UObject* Obj, int32 SrcChId, int32 DstChId);
 
+	// The NetId of objects that are contained in the channel data update but unresolved in the client.
+	// The client needs to ask channeld for the full-exported UnrealObjectRef in order to create it.
 	TSet<uint32> ResolvingNetGUIDs;
 	
 private:
