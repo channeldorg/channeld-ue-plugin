@@ -62,7 +62,7 @@ void FReplicatorGeneratorManager::StopGenerateReplicator()
 {
 }
 
-bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<UClass*> Targets)
+bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<UClass*> Targets, const TFunction<FString(const FString& PackageName)>* GetGoPackage)
 {
 	UE_LOG(LogChanneldRepGenerator, Display, TEXT("Start generating %d replicators"), Targets.Num());
 
@@ -70,7 +70,7 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<UClass*> Targets)
 
 	FReplicatorCodeBundle ReplicatorCodeBundle;
 
-	CodeGenerator->Generate(Targets, ReplicatorCodeBundle);
+	CodeGenerator->Generate(Targets, GetGoPackage, ReplicatorCodeBundle);
 	FString WriteCodeFileMessage;
 
 	// Generate replicator code file
@@ -123,8 +123,6 @@ bool FReplicatorGeneratorManager::WriteProtoFile(const FString& FilePath, const 
 		ResultMessage = TEXT("\"ue4-protobuf\" plugin not found");
 		return false;
 	}
-	// FProtobufEditorModule* ProtoModule = static_cast<FProtobufEditorModule*>(Module);
-	// ProtoModule->PluginButtonClicked();
 
 	return bSuccess;
 }

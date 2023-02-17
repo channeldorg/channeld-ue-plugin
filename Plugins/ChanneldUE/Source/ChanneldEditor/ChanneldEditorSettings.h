@@ -49,8 +49,14 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Channeld")
 	TArray<FServerGroup> ServerGroups;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator", DisplayName = "Game Module Export API Macro", meta = ( ToolTip = "If developer wants to export replicators from the default game module, set the item to be the same as the default game module API Macro. For Example \"CHANNELDUE_API\"" ))
+	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator|Protobuf", DisplayName = "Game Module Export API Macro", meta = ( ToolTip = "If developer wants to export replicators from the default game module, set the item to be the same as the default game module API Macro. For Example \"CHANNELDUE_API\"" ))
 	FString GameModuleExportAPIMacro;
+
+	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator|Protobuf", meta = ( ToolTip = "Set go_package in generated .proto file to the specified value" ))
+	FString ChanneldGoPackage = TEXT("channeld.clewcat.com/channeld/examples/channeld-ue-tps/channeldgeneratedpb");
+	
+	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator|Protobuf", DisplayName = "Channeld Proto Files Storage Directory", meta = ( ToolTip = "Copy the .proto files to the specified directory after generating replicators, the directory is relative to CHANNELD_PATH" ))
+	FString ChanneldProtoFilesStorageDir = TEXT("examples/channeld-ue-tps/channeldgeneratedpb");
 
 	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator|Tools", DisplayName = "Default Replication Component", meta = ( ToolTip = "Using to add the replicator component to all replicated blueprint actors without replicator" ))
 	TSubclassOf<UChanneldReplicationComponent> DefaultReplicationComponent;

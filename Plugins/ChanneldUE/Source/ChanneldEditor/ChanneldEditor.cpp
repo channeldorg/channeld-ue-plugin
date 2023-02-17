@@ -82,6 +82,8 @@ void FChanneldEditorModule::StartupModule()
 
 	GenRepMissionNotifyProxy = NewObject<UChanneldMissionNotiProxy>();
 	GenRepMissionNotifyProxy->AddToRoot();
+	GenProtoMissionNotifyProxy = NewObject<UChanneldMissionNotiProxy>();
+	GenProtoMissionNotifyProxy->AddToRoot();
 
 	AddRepCompMissionNotifyProxy = NewObject<UChanneldMissionNotiProxy>();
 	AddRepCompMissionNotifyProxy->AddToRoot();
@@ -299,7 +301,6 @@ void FChanneldEditorModule::StopServersAction()
 
 void FChanneldEditorModule::GenerateReplicatorAction()
 {
-	FString MissionName = TEXT("CookAndGenerateReplicators");
 	GenRepWorkThread = MakeShareable(
 		new FChanneldProcWorkerThread(
 			TEXT("CookAndGenRepThread"),
@@ -307,20 +308,24 @@ void FChanneldEditorModule::GenerateReplicatorAction()
 			CommandletHelpers::BuildCommandletProcessArguments(
 				TEXT("CookAndGenRep"),
 				*FString::Printf(TEXT("\"%s\""), *FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())),
-				TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout")
+				*FString::Printf(TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout -GoPackage=%s"), *GetMutableDefault<UChanneldEditorSettings>()->ChanneldGoPackage)
 			)
 		)
 	);
 	GenRepWorkThread->ProcOutputMsgDelegate.BindUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
 	GenRepWorkThread->ProcBeginDelegate.AddUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::SpawnRunningMissionNotification);
-	GenRepWorkThread->ProcSucceedDelegate.AddRaw(this, &FChanneldEditorModule::GenReplicatorProto);
+	GenRepWorkThread->ProcSucceedDelegate.AddLambda([this](FChanneldProcWorkerThread* ProcWorkerThread)
+	{
+		GenRepMissionNotifyProxy->SpawnMissionSucceedNotification(ProcWorkerThread);
+		GenReplicatorProto();
+	});
 	GenRepWorkThread->ProcFailedDelegate.AddUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
-	GenRepMissionNotifyProxy->SetMissionName(*FString::Printf(TEXT("%s"), *MissionName));
+	GenRepMissionNotifyProxy->SetMissionName(TEXT("CookAndGenerateReplicators"));
 	GenRepMissionNotifyProxy->SetMissionNotifyText(
 		FText::FromString(TEXT("Cooking and generating replicators")),
 		LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),
-		FText::FromString(FString::Printf(TEXT("%s Mission Finished!"), *MissionName)),
-		FText::FromString(FString::Printf(TEXT("%s Failed!"), *MissionName))
+		FText::FromString(TEXT("Generated replicators!")),
+		FText::FromString(TEXT("Generating replicators failed!"))
 	);
 	GenRepMissionNotifyProxy->MissionCanceled.AddLambda([this]()
 	{
@@ -333,15 +338,23 @@ void FChanneldEditorModule::GenerateReplicatorAction()
 	GenRepWorkThread->Execute();
 }
 
-void FChanneldEditorModule::GenReplicatorProto(FChanneldProcWorkerThread* ProcWorkerThread)
+void FChanneldEditorModule::GenReplicatorProto()
 {
+	
+	GenProtoMissionNotifyProxy->SetMissionNotifyText(
+		FText::FromString(TEXT("Generating protos of replicators")),
+		LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),
+		FText::FromString(TEXT("Generated protos of replicators!")),
+		FText::FromString(TEXT("Generating protos of replicators failed!"))
+	);
+	
 	TArray<FString> GeneratedProtoFiles = FReplicatorGeneratorManager::Get().GetGeneratedProtoFiles();
 	FString ReplicatorStorageDir = FReplicatorGeneratorManager::Get().GetReplicatorStorageDir();
 	FString ChanneldPath = FPlatformMisc::GetEnvironmentVariable(TEXT("CHANNELD_PATH"));
 	if (ChanneldPath.IsEmpty())
 	{
-		UE_LOG(LogChanneldEditor, Error, TEXT("Environment variable \"CHANNELD_PATH\" is empty, please set environment variable \"CHANNELD_PATH\" to you system"));
-		GenRepMissionNotifyProxy->SpawnMissionFailedNotification(ProcWorkerThread);
+		UE_LOG(LogChanneldEditor, Error, TEXT("Environment variable \"CHANNELD_PATH\" is empty, please set user environment variable \"CHANNELD_PATH\" to Channeld root directory"));
+		GenProtoMissionNotifyProxy->SpawnMissionFailedNotification(nullptr);
 		return;
 	}
 	FString ChanneldUnrealpbPath = ChanneldPath / TEXT("pkg") / TEXT("unrealpb");
@@ -369,13 +382,13 @@ void FChanneldEditorModule::GenReplicatorProto(FChanneldProcWorkerThread* ProcWo
 	if (!FileManager.FileExists(*ProtocPath))
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("Protoc path is invaild: %s"), *ProtocPath);
-		GenRepMissionNotifyProxy->SpawnMissionFailedNotification(ProcWorkerThread);
+		GenProtoMissionNotifyProxy->SpawnMissionFailedNotification(nullptr);
 		return;
 	}
 
 	GenProtoWorkThread = MakeShareable(new FChanneldProcWorkerThread(TEXT("GenerateReplicatorProtoThread"), ProtocPath, Args));
-	GenProtoWorkThread->ProcOutputMsgDelegate.BindUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
-	GenProtoWorkThread->ProcBeginDelegate.AddUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::SpawnRunningMissionNotification);
+	GenProtoWorkThread->ProcOutputMsgDelegate.BindUObject(GenProtoMissionNotifyProxy, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
+	GenProtoWorkThread->ProcBeginDelegate.AddUObject(GenProtoMissionNotifyProxy, &UChanneldMissionNotiProxy::SpawnRunningMissionNotification);
 	GenProtoWorkThread->ProcSucceedDelegate.AddLambda([this, GeneratedProtoFiles, ReplicatorStorageDir](FChanneldProcWorkerThread*)
 	{
 		IFileManager& FileManager = IFileManager::Get();
@@ -387,11 +400,10 @@ void FChanneldEditorModule::GenReplicatorProto(FChanneldProcWorkerThread* ProcWo
 				*FPaths::ChangeExtension(GeneratedProtoFile, TEXT("pb.cc"))
 			);
 		}
-		GenRepMissionNotifyProxy->SpawnMissionSucceedNotification(nullptr);
+		GenProtoMissionNotifyProxy->SpawnMissionSucceedNotification(nullptr);
 	});
-	GenProtoWorkThread->ProcFailedDelegate.AddUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
-	GenRepMissionNotifyProxy->SetRunningNotifyText(FText::FromString(TEXT("Generating replicator protos")));
-	GenRepMissionNotifyProxy->MissionCanceled.AddLambda([this]()
+	GenProtoWorkThread->ProcFailedDelegate.AddUObject(GenProtoMissionNotifyProxy, &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
+	GenProtoMissionNotifyProxy->MissionCanceled.AddLambda([this]()
 	{
 		if (GenProtoWorkThread.IsValid() && GenProtoWorkThread->GetThreadStatus() == EChanneldThreadStatus::Busy)
 		{
@@ -400,6 +412,18 @@ void FChanneldEditorModule::GenReplicatorProto(FChanneldProcWorkerThread* ProcWo
 	});
 
 	GenProtoWorkThread->Execute();
+
+	// Copy proto files to Channeld
+	const UChanneldEditorSettings* Settings = GetMutableDefault<UChanneldEditorSettings>();
+	const FString DirToCopy = ChanneldPath / Settings->ChanneldProtoFilesStorageDir;
+	if (!FileManager.DirectoryExists(*DirToCopy))
+	{
+		FileManager.MakeDirectory(*DirToCopy);
+	}
+	for (FString GeneratedProtoFile : GeneratedProtoFiles)
+	{
+		FileManager.Copy(*(DirToCopy / GeneratedProtoFile), *(ReplicatorStorageDir / GeneratedProtoFile));
+	}
 }
 
 void FChanneldEditorModule::AddRepCompsToBPsAction()

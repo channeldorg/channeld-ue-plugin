@@ -38,12 +38,42 @@ struct FReplicatorCodeBundle
 class REPLICATORGENERATOR_API FReplicatorCodeGenerator
 {
 public:
+	/**
+	 * Load the related information of the module of the class from '.uhtmanifest'.
+	 * 
+	 * @return true on success, false otherwise.
+	 */
 	bool RefreshModuleInfoByClassName();
 
+	/**
+	 * Get the path of the header file by class name.
+	 * Before calling this function, you need to call RefreshModuleInfoByClassName() at least once.
+	 * 
+	 * @param ClassName The name of the class, without UE prefix.
+	 * @return Absolute path of the header file.
+	 */
 	FString GetClassHeadFilePath(const FString& ClassName);
 
-	bool Generate(TArray<UClass*> TargetActors, FReplicatorCodeBundle& ReplicatorCodeBundle);
-	bool GenerateActorCode(UClass* TargetActor, FReplicatorCode& ReplicatorCode, FString& ResultMessage);
+	/**
+	 * Generate replicator codes for the specified actors.
+	 *
+	 * @param TargetActors The actors to generate replicators for.
+	 * @param GetGoPackage The function to get the 'go_package' for proto file. The parameter is the package name of the proto file. If it is nullptr, the 'go_package' will be empty.
+	 * @param ReplicatorCodeBundle The generated replicator codes (.h, .cpp, .proto) .
+	 * @return true on success, false otherwise.
+	 */
+	bool Generate(TArray<UClass*> TargetActors, const TFunction<FString(const FString& PackageName)>* GetGoPackage, FReplicatorCodeBundle& ReplicatorCodeBundle);
+
+	/**
+	 * Generate replicator code for the specified actor.
+	 *
+	 * @param TargetActor The actor to generate replicator for.
+	 * @param ReplicatorCode The generated replicator code (.h, .cpp, .proto) .
+	 * @param GetGoPackage The function to get the 'go_package' for proto file.
+	 * @param ResultMessage The result message.
+	 * @return true on success, false otherwise.
+	 */
+	bool GenerateActorCode(UClass* TargetActor, const TFunction<FString(const FString& PackageName)>* GetGoPackage, FReplicatorCode& ReplicatorCode, FString& ResultMessage);
 
 protected:
 	TMap<FString, FModuleInfo> ModuleInfoByClassName;

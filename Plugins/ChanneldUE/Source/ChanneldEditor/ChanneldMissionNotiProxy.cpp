@@ -8,12 +8,6 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogMissionNotificationProxy, All, All);
 
-#define COMMANDLET_LOG_PROXY(Type, Else) \
-Else if ((MsgIndex = InMsg.Find(TEXT(#Type ":"))) != INDEX_NONE) \
-{ \
-	UE_LOG(LogMissionNotificationProxy, Type, TEXT("[Proxy]%s"), *InMsg.Replace(TEXT(#Type ":"), TEXT(""))); \
-}
-
 #define LOCTEXT_NAMESPACE "MissionNotificationPorxy"
 
 UChanneldMissionNotiProxy::UChanneldMissionNotiProxy(const FObjectInitializer& Initializer): Super(Initializer)
@@ -84,6 +78,11 @@ FName UChanneldMissionNotiProxy::GetMissionName() const
 	return MissionName;
 }
 
+#define COMMANDLET_LOG_PROXY(Type, Else) \
+Else if ((MsgIndex = InMsg.Find(TEXT(#Type ":"))) != INDEX_NONE) \
+{ \
+UE_LOG(LogMissionNotificationProxy, Type, TEXT("[Proxy]%s"), *InMsg.Replace(TEXT(#Type ":"), TEXT(""))); \
+}
 void UChanneldMissionNotiProxy::ReceiveOutputMsg(FChanneldProcWorkerThread* Worker, const FString& InMsg)
 {
 	int32 MsgIndex;
@@ -94,6 +93,10 @@ void UChanneldMissionNotiProxy::ReceiveOutputMsg(FChanneldProcWorkerThread* Work
 	COMMANDLET_LOG_PROXY(Warning, else)
 	COMMANDLET_LOG_PROXY(Error, else)
 	COMMANDLET_LOG_PROXY(Fatal, else)
+	else
+	{
+		UE_LOG(LogMissionNotificationProxy, Display, TEXT("[Proxy]%s"), *InMsg); \
+	}
 }
 
 void UChanneldMissionNotiProxy::SpawnRunningMissionNotification(FChanneldProcWorkerThread* ProcWorker)
@@ -139,7 +142,7 @@ void UChanneldMissionNotiProxy::SpawnMissionSucceedNotification(FChanneldProcWor
 		}
 
 		MissionProxy->bRunning = false;
-		UE_LOG(LogMissionNotificationProxy, Log, TEXT("The %s Mission is Successfuly."), *MissionProxy->MissionName.ToString());
+		UE_LOG(LogMissionNotificationProxy, Log, TEXT("%s"), *MissionProxy->MissionSucceedNotifyText.ToString());
 	});
 }
 
@@ -158,7 +161,7 @@ void UChanneldMissionNotiProxy::SpawnMissionFailedNotification(FChanneldProcWork
 
 			MissionProxy->PendingProgressPtr.Reset();
 			MissionProxy->bRunning = false;
-			UE_LOG(LogMissionNotificationProxy, Error, TEXT("The %s Mission is faild."), *MissionProxy->MissionName.ToString())
+			UE_LOG(LogMissionNotificationProxy, Error, TEXT("%s"), *MissionProxy->MissionFailedNotifyText.ToString())
 		}
 	});
 }

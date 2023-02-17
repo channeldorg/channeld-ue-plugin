@@ -44,6 +44,7 @@ int32 UCookAndFilterRepActorCommandlet::Main(const FString& CmdLineParams)
 	}
 	SaveResult(LoadedRepClassPath);
 
+	GeneratorManager.StopGenerateReplicator();
 	return Result;
 }
 

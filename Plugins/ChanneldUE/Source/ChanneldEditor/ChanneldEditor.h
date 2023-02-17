@@ -35,7 +35,7 @@ private:
 	void GenerateReplicatorAction();
 	void AddRepCompsToBPsAction();
 
-	void GenReplicatorProto(FChanneldProcWorkerThread* ProcWorker);
+	void GenReplicatorProto();
 
 	void OpenEditorSettingsAction();
 	
@@ -50,6 +50,7 @@ private:
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenRepWorkThread;
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoWorkThread;
 	UChanneldMissionNotiProxy* GenRepMissionNotifyProxy;
+	UChanneldMissionNotiProxy* GenProtoMissionNotifyProxy;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> AddRepCompWorkThread;
 	UChanneldMissionNotiProxy* AddRepCompMissionNotifyProxy;
