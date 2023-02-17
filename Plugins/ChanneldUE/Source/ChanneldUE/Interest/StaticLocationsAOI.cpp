@@ -2,13 +2,13 @@
 
 #include "ChanneldUtils.h"
 
-void FStaticLocationsAOI::SetSpatialQuery(channeldpb::SpatialInterestQuery* Query, const FVector& PawnLocation, const FRotator& PawnRotation)
+void UStaticLocationsAOI::SetSpatialQuery(channeldpb::SpatialInterestQuery* Query, const FVector& PawnLocation, const FRotator& PawnRotation)
 {
-	for (auto& Spot : Spots)
+	for (auto& Key : SpotsAndDists)
 	{
-		Query->mutable_spotsaoi()->add_spots()->MergeFrom(ChanneldUtils::ToSpatialInfo(Spot));
+		ChanneldUtils::SetSpatialInfoPB(Query->mutable_spotsaoi()->add_spots(), Key.Key);
+		Query->mutable_spotsaoi()->add_dists(Key.Value);
 	}
 	
-	UE_LOG(LogChanneld, Verbose, TEXT("Updating the SpotsAOI with %d spots"), Spots.Num());
+	UE_LOG(LogChanneld, Verbose, TEXT("Updating the SpotsAOI with %d spots"), SpotsAndDists.Num());
 }
-

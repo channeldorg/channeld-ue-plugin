@@ -60,7 +60,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 	IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
 	auto TypePropertyHandle = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FClientInterestSettingsPreset, AreaType));
-	auto SpotsPropertyHandle = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FClientInterestSettingsPreset, Spots));
+	auto SpotsPropertyHandle = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FClientInterestSettingsPreset, SpotsAndDists));
 	auto ExtentPropertyHandle = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FClientInterestSettingsPreset, Extent));
 	auto RadiusPropertyHandle = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FClientInterestSettingsPreset, Radius));
 	auto AnglePropertyHandle = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FClientInterestSettingsPreset, Angle));

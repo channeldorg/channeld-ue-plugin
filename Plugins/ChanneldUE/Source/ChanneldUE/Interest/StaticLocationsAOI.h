@@ -1,12 +1,16 @@
 #pragma once
 
 #include "AreaOfInterestBase.h"
+#include "StaticLocationsAOI.generated.h"
 
-class CHANNELDUE_API FStaticLocationsAOI : public UAreaOfInterestBase
+UCLASS(BlueprintType)
+class CHANNELDUE_API UStaticLocationsAOI : public UAreaOfInterestBase
 {
+	GENERATED_BODY()
+	
 public:
-	TArray<FVector> Spots;
-
-protected:
 	virtual void SetSpatialQuery(channeldpb::SpatialInterestQuery* Query, const FVector& PawnLocation, const FRotator& PawnRotation) override;
+
+	UPROPERTY(EditAnywhere)
+	TMap<FVector, uint32> SpotsAndDists;
 };

@@ -115,6 +115,11 @@ void UChanneldNetConnection::LowLevelSend(void* Data, int32 CountBits, FOutPacke
 	}
 }
 
+Channeld::ChannelId UChanneldNetConnection::GetSendToChannelId()
+{
+	return CastChecked<UChanneldNetDriver>(Driver)->GetSendToChannelId(this);
+}
+
 void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, int32 DataSize, Channeld::ChannelId ChId)
 {
 	if (DataSize <= 0)
@@ -128,12 +133,11 @@ void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, i
 		return;
 	}
 	
-	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
-	auto ConnToChanneld = NetDriver->GetConnToChanneld();
+	auto ConnToChanneld = GEngine->GetEngineSubsystem<UChanneldConnection>();
 	
 	if (ChId == Channeld::InvalidChannelId)
 	{
-		ChId = NetDriver->GetSendToChannelId(this);
+		ChId = GetSendToChannelId();
 		if (ChId == Channeld::InvalidChannelId)
 		{
 			UE_LOG(LogChanneld, Warning, TEXT("UChanneldNetConnection::SendData failed as the NetConn %d has no channelId"), GetConnId());
@@ -317,16 +321,15 @@ FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= fa
 		return TEXT("");
 	}
 	
-	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
 	if (RemoteAddr)
 	{
 		if (bAppendPort)
-			RemoteAddr->SetPort(NetDriver->GetSendToChannelId(this));
+			RemoteAddr->SetPort(GetSendToChannelId());
 		return RemoteAddr->ToString(bAppendPort);
 	}
 	else
 	{
-		return bAppendPort ? FString::Printf(TEXT("0.0.0.0:d"), NetDriver->GetSendToChannelId(this)) : TEXT("0.0.0.0");
+		return bAppendPort ? FString::Printf(TEXT("0.0.0.0:%d"), GetSendToChannelId()) : TEXT("0.0.0.0");
 	}
 }
 
@@ -347,7 +350,7 @@ void UChanneldNetConnection::CleanUp()
 {
 	if (ClientInterestManager)
 	{
-		ClientInterestManager->CleanUp(this);
+		ClientInterestManager->CleanUp();
 	}
 	
 	Super::CleanUp();

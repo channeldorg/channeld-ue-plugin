@@ -4,6 +4,7 @@
 #include "ChanneldGameInstanceSubsystem.h"
 #include "ChanneldNetDriver.h"
 #include "ChanneldSettings.h"
+#include "ConeAOI.h"
 #include "SphereAOI.h"
 #include "StaticLocationsAOI.h"
 
@@ -12,42 +13,61 @@ class UChanneldConnection;
 UClientInterestManager::UClientInterestManager(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	QueryForTick = new channeldpb::SpatialInterestQuery;
 }
 
-void UClientInterestManager::ServerSetup(UChanneldNetConnection* ClientNetConn)
+void UClientInterestManager::ServerSetup(UChanneldNetConnection* InClientNetConn)
 {
+	ClientNetConn = InClientNetConn;
+	
 	for (auto& Preset : GetMutableDefault<UChanneldSettings>()->ClientInterestPresets)
 	{
+		UAreaOfInterestBase* AOI = nullptr;
+		
 		if (Preset.AreaType == EClientInterestAreaType::Sphere)
 		{
-			auto AOI = NewObject<USphereAOI>(this);
-			AOI->Name = Preset.PresetName;
-			AOI->Radius = Preset.Radius;
-			AddAOI(AOI, Preset.bActivateByDefault);
+			auto Sphere = NewObject<USphereAOI>(this);
+			AOI = Sphere;
+			Sphere->Radius = Preset.Radius;
+		}
+		else if (Preset.AreaType == EClientInterestAreaType::Cone)
+		{
+			auto Cone = NewObject<UConeAOI>(this);
+			AOI = Cone;
+			Cone->Radius = Preset.Radius;
+			Cone->Angle = Preset.Angle;
 		}
 		else if (Preset.AreaType == EClientInterestAreaType::StaticLocations)
 		{
-			auto AOI = NewObject<FStaticLocationsAOI>(this);
+			auto StaticLoc = NewObject<UStaticLocationsAOI>(this);
+			AOI = StaticLoc;
+			StaticLoc->SpotsAndDists = Preset.SpotsAndDists;
+		}
+
+		if (AOI)
+		{
 			AOI->Name = Preset.PresetName;
-			AOI->Spots = Preset.Spots;
-			// AOI->InterestedActors = InterestedActors;
+			AOI->MinDistanceToTriggerUpdate = Preset.MinDistanceToTriggerUpdate;
 			AddAOI(AOI, Preset.bActivateByDefault);
 		}
 	}
 
-	ClientNetConn->PlayerEnterSpatialChannelEvent.AddUObject(this, &UClientInterestManager::OnPlayerEnterSpatialChannel);
+	InClientNetConn->PlayerEnterSpatialChannelEvent.AddUObject(this, &UClientInterestManager::OnPlayerEnterSpatialChannel);
 
-	UE_LOG(LogChanneld, Log, TEXT("[Server] ClientInterestManager has been setup for client conn %d"), ClientNetConn->GetConnId());
+	UE_LOG(LogChanneld, Log, TEXT("[Server] ClientInterestManager has been setup for client conn %d"), InClientNetConn->GetConnId());
 }
 
-void UClientInterestManager::CleanUp(UChanneldNetConnection* ClientNetConn)
+void UClientInterestManager::CleanUp()
 {
-	InterestedActors.Empty();
-	FollowingPC = nullptr;
 	AvailableAOIs.Empty();
 	ActiveAOIs.Empty();
-	ClientNetConn->PlayerEnterSpatialChannelEvent.RemoveAll(this);
-	UE_LOG(LogChanneld, Log, TEXT("[Server] ClientInterestManager has been cleanup for client conn %d"), ClientNetConn->GetConnId());
+	QueryForTick->Clear();
+	delete QueryForTick;
+	if (ClientNetConn.IsValid())
+	{
+		ClientNetConn->PlayerEnterSpatialChannelEvent.RemoveAll(this);
+		UE_LOG(LogChanneld, Log, TEXT("[Server] ClientInterestManager has been cleanup for client conn %d"), ClientNetConn->GetConnId());
+	}
 }
 
 void UClientInterestManager::AddAOI(UAreaOfInterestBase* AOI, bool bActivate)
@@ -57,6 +77,27 @@ void UClientInterestManager::AddAOI(UAreaOfInterestBase* AOI, bool bActivate)
 	{
 		ActivateAOI(Index);
 	}
+}
+
+UAreaOfInterestBase* UClientInterestManager::GetAOIByIndex(int Index)
+{
+	if (Index < 0 || Index >= AvailableAOIs.Num())
+	{
+		return nullptr;
+	}
+	return AvailableAOIs[Index];
+}
+
+UAreaOfInterestBase* UClientInterestManager::GetAOIByName(const FName& Name)
+{
+	for (auto& AOI : AvailableAOIs)
+	{
+		if (AOI->Name == Name)
+		{
+			return AOI;
+		}
+	}
+	return nullptr;
 }
 
 void UClientInterestManager::ActivateAOI(int Index)
@@ -88,99 +129,62 @@ void UClientInterestManager::DeactivateAOI(int Index)
 	}
 }
 
-void UClientInterestManager::FollowPlayer(APlayerController* PC, int IndexOfAOI)
-{
-	FollowingPC = PC;
-	LastUpdateLocation = PC->GetFocalLocation();
-	
-	if (IndexOfAOI < 0)
-	{
-		for (auto& AOI : AvailableAOIs)
-		{
-			AOI->FollowPlayer(PC);
-		}
-	}
-	else if (IndexOfAOI < AvailableAOIs.Num())
-	{
-		AvailableAOIs[IndexOfAOI]->FollowPlayer(PC);
-	}
-}
-
-void UClientInterestManager::UnfollowPlayer(int IndexOfAOI)
+void UClientInterestManager::FollowActor(AActor* Target, int IndexOfAOI)
 {
 	if (IndexOfAOI < 0)
 	{
 		for (auto& AOI : AvailableAOIs)
 		{
-			AOI->UnfollowPlayer();
+			AOI->FollowActor(Target);
 		}
 	}
 	else if (IndexOfAOI < AvailableAOIs.Num())
 	{
-		AvailableAOIs[IndexOfAOI]->UnfollowPlayer();
+		AvailableAOIs[IndexOfAOI]->FollowActor(Target);
 	}
-	
-	FollowingPC = nullptr;
 }
 
-/*
+void UClientInterestManager::UnfollowActor(AActor* Target, int IndexOfAOI)
+{
+	if (IndexOfAOI < 0)
+	{
+		for (auto& AOI : AvailableAOIs)
+		{
+			AOI->UnfollowActor(Target);
+		}
+	}
+	else if (IndexOfAOI < AvailableAOIs.Num())
+	{
+		AvailableAOIs[IndexOfAOI]->UnfollowActor(Target);
+	}
+}
+
 bool UClientInterestManager::IsTickable() const
 {
 	if (IsTemplate())
 	{
 		return false;
 	}
-
-	if (FollowingPC.IsValid())
-	{
-		return true;
-	}
 	
-	for (auto& AOI : ActiveAOIs)
-	{
-		if (AOI->IsTickable())
-		{
-			return true;
-		}
-	}
-	return false;
+	return ClientNetConn.IsValid();
 }
 
 void UClientInterestManager::Tick(float DeltaTime)
 {
-	if (FollowingPC.IsValid())
-	{
-		float DistToCheck = GetMutableDefault<UChanneldSettings>()->MinDistanceToUpdateInterestForPlayer;
-		if (DistToCheck > 0)
-		{
-			FVector CurrentLocation = FollowingPC->GetFocalLocation();
-			if (!CurrentLocation.Equals(LastUpdateLocation, DistToCheck))
-			{
-				OnPlayerMoved(FollowingPC.Get());
-				LastUpdateLocation = CurrentLocation;
-			}
-		}
-		else
-		{
-			OnPlayerMoved(FollowingPC.Get());
-		}
-	}
-	
+	bool bNewQuery = false;
 	for (auto& AOI : ActiveAOIs)
 	{
-		AOI->Tick(DeltaTime);
+		bNewQuery |= AOI->TickQuery(QueryForTick, DeltaTime);
 	}
-}
-*/
 
-void UClientInterestManager::AddActorInterest(AActor* Actor)
-{
-	InterestedActors.Add(Actor);
-}
-
-void UClientInterestManager::RemoveActorInterest(AActor* Actor)
-{
-	InterestedActors.Remove(Actor);
+	if (bNewQuery)
+	{
+		channeldpb::UpdateSpatialInterestMessage InterestMsg;
+		InterestMsg.set_connid(ClientNetConn->GetConnId());
+		InterestMsg.mutable_query()->MergeFrom(*QueryForTick);
+		GEngine->GetEngineSubsystem<UChanneldConnection>()->Send(ClientNetConn->GetSendToChannelId(), channeldpb::UPDATE_SPATIAL_INTEREST, InterestMsg);
+		QueryForTick->Clear();
+	}
 }
 
 void UClientInterestManager::OnPlayerEnterSpatialChannel(UChanneldNetConnection* NetConn, Channeld::ChannelId SpatialChId)
@@ -202,29 +206,9 @@ void UClientInterestManager::OnPlayerEnterSpatialChannel(UChanneldNetConnection*
 	
 	for (auto& AOI : ActiveAOIs)
 	{
+		// AOI->OnPlayerEnterSpatialChannel(NetConn, SpatialChId);
 		AOI->SetSpatialQuery(InterestMsg.mutable_query(), PawnLocation, PawnRotation);
 	}
 	
 	GEngine->GetEngineSubsystem<UChanneldConnection>()->Send(SpatialChId, channeldpb::UPDATE_SPATIAL_INTEREST, InterestMsg);
-}
-
-void UClientInterestManager::OnPlayerMoved(APlayerController* PC)
-{
-	if (auto NetConn = Cast<UChanneldNetConnection>(PC->NetConnection))
-	{
-		FOwnedChannelInfo ChannelInfo;
-		if (GetWorld()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetOwningChannelInfo(PC, ChannelInfo)
-			&& ChannelInfo.ChannelType == EChanneldChannelType::ECT_Spatial)
-		{
-			OnPlayerEnterSpatialChannel(NetConn, ChannelInfo.ChannelId);
-		}
-		else
-		{
-			UE_LOG(LogChanneld, Warning, TEXT("Player %s is not in a spatial channel."), *PC->GetName());
-		}
-	}
-	else
-	{
-		UE_LOG(LogChanneld, Warning, TEXT("Player %s does not have a NetConn to update the spatial interest"), *PC->GetName());
-	}
 }

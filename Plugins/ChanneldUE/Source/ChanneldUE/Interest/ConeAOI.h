@@ -1,13 +1,24 @@
 #pragma once
 
-#include "AreaOfInterestBase.h"
+#include "PlayerFollowingAOI.h"
+#include "ConeAOI.generated.h"
 
-class CHANNELDUE_API FConeAOI : public UAreaOfInterestBase
+UCLASS(BlueprintType)
+class CHANNELDUE_API UConeAOI : public UPlayerFollowingAOI
 {
-public:
-	float Radius;
-	float Angle;
+	GENERATED_BODY()
 	
-protected:
+public:
+	virtual void FollowActor(AActor* Target) override;
 	virtual void SetSpatialQuery(channeldpb::SpatialInterestQuery* Query, const FVector& PawnLocation, const FRotator& PawnRotation) override;
+	virtual bool TickQuery(channeldpb::SpatialInterestQuery* Query, float DeltaTime) override;
+	
+	UPROPERTY(EditAnywhere)
+	float Radius;
+
+	UPROPERTY(EditAnywhere)
+	float Angle;
+
+protected:
+	FRotator LastUpdateRotation;
 };

@@ -53,9 +53,6 @@ public:
 	bool bUseNetRelevantForUninterestedActors = false;
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Client Interest")
 	TArray<FClientInterestSettingsPreset> ClientInterestPresets;
-	// The minimal distance required for the following player to move before updating its client interest. If equal or less than 0, the client interest will be updated every tick.
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Client Interest")
-	float MinDistanceToUpdateInterestForPlayer = 1000;
 	
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug")
 	bool bEnableSpatialVisualizer = false;

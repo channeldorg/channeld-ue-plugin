@@ -98,8 +98,16 @@ void USpatialMasterServerView::InitServer()
 		auto UnsubMsg = static_cast<const channeldpb::UnsubscribedFromChannelResultMessage*>(Msg);
 		if (UnsubMsg->channeltype() == channeldpb::GLOBAL && UnsubMsg->conntype() == channeldpb::CLIENT)
 		{
-			// Broadcast the unsub message to all spatial servers so they can remove the client connection.
+			// Broadcast the unsub message to all other servers so they can remove the client connection.
 			Connection->Broadcast(Channeld::GlobalChannelId, unrealpb::SERVER_PLAYER_LEAVE, *UnsubMsg, channeldpb::ALL_BUT_CLIENT | channeldpb::ALL_BUT_SENDER);
+			/* Should not only send to spatial servers. The sub-world servers may also need to know the player leave.
+			TArray<Channeld::ConnectionId> SpatialServerConnIds;
+			AllSpatialChannelIds.GenerateValueArray(SpatialServerConnIds);
+			for (auto ConnId : SpatialServerConnIds)
+			{
+				Connection->Forward(*AllSpatialChannelIds.FindKey(ConnId), unrealpb::SERVER_PLAYER_LEAVE, *UnsubMsg);
+			}
+			*/
 			UE_LOG(LogChanneld, Log, TEXT("Broadcasted SERVER_PLAYER_LEAVE to all spatial servers, client connId: %d"), UnsubMsg->connid());
 		}
 	});
@@ -109,7 +117,7 @@ void USpatialMasterServerView::InitServer()
 		auto ResultMsg = static_cast<const channeldpb::CreateSpatialChannelsResultMessage*>(Msg);
 		for (auto SpatialChId : ResultMsg->spatialchannelid())
 		{
-			AllSpatialChannelIds.Add(SpatialChId);
+			AllSpatialChannelIds.Emplace(SpatialChId, ResultMsg->ownerconnid());
 			UE_LOG(LogChanneld, Verbose, TEXT("Added spatial channel %d"), SpatialChId);
 		}
 	});

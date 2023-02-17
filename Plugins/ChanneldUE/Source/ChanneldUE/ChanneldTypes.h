@@ -284,19 +284,24 @@ struct CHANNELDUE_API FClientInterestSettingsPreset
 	UPROPERTY(EditAnywhere, Category="Default")
 	bool bActivateByDefault = true;
 
+	// The minimal distance required for the following actor to move before updating its client interest. If equal or less than 0, the client interest will be updated every tick.
+	UPROPERTY(Config, EditAnywhere, Category = "Default")
+	float MinDistanceToTriggerUpdate = 100.0f;
+
 	// Used by SpotsAOI
-	UPROPERTY(EditAnywhere, Category="Data")
-	TArray<FVector> Spots;
+	UPROPERTY(EditAnywhere, Category="Spots AOI")
+	TMap<FVector, uint32> SpotsAndDists;
+	// TArray<FVector> Spots;
 
 	// Used by BoxAOI
-	UPROPERTY(EditAnywhere, Category="Data")
+	UPROPERTY(EditAnywhere, Category="Box AOI")
 	FVector Extent = FVector(15000.0f, 15000.0f, 15000.0f);
 
 	// Used by SphereAOI
-	UPROPERTY(EditAnywhere, Category="Data")
+	UPROPERTY(EditAnywhere, Category="Sphere and Cone AOI")
 	float Radius = 15000.0f;
 
 	// Used by SphereAOI and ConeAOI
-	UPROPERTY(EditAnywhere, Category="Data")
+	UPROPERTY(EditAnywhere, Category="Cone AOI")
 	float Angle = 120.0f;
 };

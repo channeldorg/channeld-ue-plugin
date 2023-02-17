@@ -21,7 +21,7 @@ void FChanneldSettingsDetails::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 	{
 		auto PresetHandle = PresetHandles->GetElement(i);
 		auto AreaTypeHandle = PresetHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FClientInterestSettingsPreset, AreaType));
-		auto SpotsHandle = PresetHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FClientInterestSettingsPreset, Spots));
+		auto SpotsHandle = PresetHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FClientInterestSettingsPreset, SpotsAndDists));
 		auto ExtentHandle = PresetHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FClientInterestSettingsPreset, Extent));
 		auto RadiusHandle = PresetHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FClientInterestSettingsPreset, Radius));
 		auto AngleHandle = PresetHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FClientInterestSettingsPreset, Angle));

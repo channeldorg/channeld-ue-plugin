@@ -175,6 +175,14 @@ public:
 		return SpatialInfo;
 	}
 
+	static void SetSpatialInfoPB(channeldpb::SpatialInfo* SpatialInfo, const FVector& Vector)
+	{
+		SpatialInfo->set_x(Vector.X);
+		// Swap the Y and Z as UE uses the Z-Up rule but channeld uses the Y-up rule.
+		SpatialInfo->set_y(Vector.Z);
+		SpatialInfo->set_z(Vector.Y);
+	}
+
 	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr)
 	{
 		bool bUnmapped;

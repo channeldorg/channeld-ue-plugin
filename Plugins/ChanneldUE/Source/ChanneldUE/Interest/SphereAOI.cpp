@@ -4,7 +4,7 @@
 
 void USphereAOI::SetSpatialQuery(channeldpb::SpatialInterestQuery* Query, const FVector& PawnLocation, const FRotator& PawnRotation)
 {
-	Query->mutable_sphereaoi()->mutable_center()->MergeFrom(ChanneldUtils::ToSpatialInfo(PawnLocation));
+	ChanneldUtils::SetSpatialInfoPB(Query->mutable_sphereaoi()->mutable_center(), PawnLocation);
 	Query->mutable_sphereaoi()->set_radius(Radius);
 	
 	UE_LOG(LogChanneld, Verbose, TEXT("Updating the SphereAOI with center=%s, radius=%f"), *PawnLocation.ToCompactString(), Radius);

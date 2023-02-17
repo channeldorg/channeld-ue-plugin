@@ -79,7 +79,7 @@ private:
 	const FName GameplayerDebuggerClassName = FName("GameplayDebuggerCategoryReplicator");
 
     // [Server only] Map the client to the channels, so the spatial server's LowLevelSend() can use the right channelId.
-	TMap<uint32, Channeld::ChannelId> ClientInChannels;
+	TMap<Channeld::ConnectionId, Channeld::ChannelId> ClientInChannels;
 	
 	bool bClientInMasterServer = false;
 
