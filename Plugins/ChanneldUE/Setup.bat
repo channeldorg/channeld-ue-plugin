@@ -79,8 +79,7 @@ if NOT EXIST "%ChanneldLocalSourceDir%\.git" (
         exit /b 3
     )
     : If clone failed with internal error like "unable to access", the ERRORLEVEL still be 0, so we need to check the .git dir.
-    if NOT EXIST "%ChanneldLocalSourceDir%\.git"
-    (
+    if NOT EXIST "%ChanneldLocalSourceDir%\.git" (
         echo ERROR: Clone channel:%ChanneldVersion% failed, please clone channeld[%ChanneldRepoUrl%]:%ChanneldVersion% manually and %ErrorMessages%.
         exit /b 3
     )
