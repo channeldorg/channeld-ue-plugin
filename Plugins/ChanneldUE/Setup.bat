@@ -4,18 +4,72 @@ SET ChanneldRepoUrl=git@github.com:metaworking/channeld.git
 SET WorkspaceDir=%~dp0
 SET ChanneldLocalSourceDir=%~dp0Source\ThirdParty\channeld
 
-SET ErrorMessages=run %~dp0%~n0.bat manually
+SET ErrorMessages=run %~dp0%~n0.bat again
 
-where git
+echo Start setup
+
+echo checking git...
+where git > null
 if NOT %ERRORLEVEL% == 0 (
-    echo ERROR: Please install git[https://git-scm.com/downloads] first and %ErrorMessages%
+    echo ERROR: Please install git[https://git-scm.com/downloads] first and %ErrorMessages%.
     exit /b 1
 )
-where go
-if NOT %ERRORLEVEL% == 0 (
-    echo ERROR: Please install golang[https://go.dev/dl/] first and run %ErrorMessages%
-    exit /b 2
+echo 'git' is installed.
+
+echo Checking golang...
+where go > null
+if %ERRORLEVEL% == 0 (
+    echo 'golang' is installed.
+    goto SkipInstallGo
 )
+:prompt
+    : If go is not installed, prompt to install golang.
+    set /p installGolang='channel' runs with golang, do you want to install golang now? [y/n]
+    if "%installGolang%" == "y" (
+        goto downloadGo
+    ) else if "%installGolang%" == "n" (
+        goto cannelInstallGo
+    ) else (
+        goto prompt
+    )
+:downloadGo
+    set golangVersion=1.18.10
+    set golangOS=windows
+    set golangArch=amd64
+    set golangDownloadUrl=https://golang.org/dl/go%golangVersion%.%golangOS%-%golangArch%.msi
+    set golangDownloadPath=%TEMP%\go%golangVersion%.%golangOS%-%golangArch%.msi
+    echo Try to dowanload golang installer from %golangDownloadUrl%.
+    echo Downloading...
+    powershell -Command "(New-Object System.Net.WebClient).DownloadFile('%golangDownloadUrl%', '%golangDownloadPath%')"
+    if %ERRORLEVEL% == 0 (
+        goto installGo
+    )
+    : If dowanload failed, try to use https://golang.google.cn/dl/ to download the golang installer.
+    set golangDownloadUrl=https://golang.google.cn/dl/go%golangVersion%.%golangOS%-%golangArch%.msi
+    echo Download failed, try to download golang installer from %golangDownloadUrl%.
+    echo Downloading...
+    powershell -Command "(New-Object System.Net.WebClient).DownloadFile('%golangDownloadUrl%', '%golangDownloadPath%')"
+    if %ERRORLEVEL% == 0 (
+        goto installGo
+    )
+    : If dowanload failed, exit the script.
+    echo Download golang installer failed.
+    goto cannelInstallGo
+:installGo
+    echo Installing golang...
+    msiexec /i "%golangDownloadPath%" /passive /qr /norestart /log "%TEMP%\golang_install.log"
+    if NOT %ERRORLEVEL% == 0 (
+        echo Download golang install failed.
+        goto cannelInstallGo
+    )
+    goto installGoFinfished
+:cannelInstallGo
+    echo ERROR: Please install Golang[https://go.dev/dl/] first and %ErrorMessages%.
+    exit /b 2
+:installGoFinfished
+    echo Installing Golang is complete.
+
+:SkipInstallGo
 
 :: Clone channeld from github
 if NOT EXIST "%ChanneldLocalSourceDir%\.git" (
@@ -24,6 +78,13 @@ if NOT EXIST "%ChanneldLocalSourceDir%\.git" (
         echo ERROR: Clone channel:%ChanneldVersion% failed, please clone channeld[%ChanneldRepoUrl%]:%ChanneldVersion% manually and %ErrorMessages%.
         exit /b 3
     )
+    : If clone failed with internal error like "unable to access", the ERRORLEVEL still be 0, so we need to check the .git dir.
+    if NOT EXIST "%ChanneldLocalSourceDir%\.git"
+    (
+        echo ERROR: Clone channel:%ChanneldVersion% failed, please clone channeld[%ChanneldRepoUrl%]:%ChanneldVersion% manually and %ErrorMessages%.
+        exit /b 3
+    )
+ 
     echo Clone channeld:%ChanneldVersion% successfully, the source code is at %ChanneldLocalSourceDir%
 )
 
