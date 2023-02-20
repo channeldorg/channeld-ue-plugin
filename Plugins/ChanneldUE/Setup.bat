@@ -9,7 +9,7 @@ SET ErrorMessages=run %~dp0%~n0.bat again
 echo Start setup
 
 echo checking git...
-where git > null
+where git
 if NOT %ERRORLEVEL% == 0 (
     echo ERROR: Please install git[https://git-scm.com/downloads] first and %ErrorMessages%.
     exit /b 1
@@ -17,7 +17,7 @@ if NOT %ERRORLEVEL% == 0 (
 echo 'git' is installed.
 
 echo Checking golang...
-where go > null
+where go
 if %ERRORLEVEL% == 0 (
     echo 'golang' is installed.
     goto SkipInstallGo
@@ -73,6 +73,7 @@ if %ERRORLEVEL% == 0 (
 
 :: Clone channeld from github
 if NOT EXIST "%ChanneldLocalSourceDir%\.git" (
+    echo Clone channeld:%ChanneldVersion% from %ChanneldRepoUrl% ...
     git -c advice.detachedHead=false clone --branch %ChanneldVersion% %ChanneldRepoUrl% "%ChanneldLocalSourceDir%"
     if NOT %ERRORLEVEL% == 0 (
         echo ERROR: Clone channel:%ChanneldVersion% failed, please clone channeld[%ChanneldRepoUrl%]:%ChanneldVersion% manually and %ErrorMessages%.
@@ -108,6 +109,7 @@ if NOT DEFINED CHANNELD_PATH (
     echo CHANNELD_PATH is already set to %CHANNELD_PATH%
 )
 
+echo Downloading channeld dependencies...
 cd "%ChanneldLocalSourceDir%"
 SET GOPROXY=https://goproxy.io,direct
 go mod download -x
