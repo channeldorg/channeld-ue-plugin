@@ -259,3 +259,49 @@ struct CHANNELDUE_API FListedChannelInfo
 	UPROPERTY(BlueprintReadWrite)
 	FString Metadata;
 };
+
+UENUM(BlueprintType)
+enum class EClientInterestAreaType : uint8
+{
+	None = 0 UMETA(DisplayName = "None"),
+	StaticLocations = 1 UMETA(DisplayName = "Static Locations"),
+	Box = 2 UMETA(DisplayName = "Box"),
+	Sphere = 3 UMETA(DisplayName = "Sphere"),
+	Cone = 4 UMETA(DisplayName = "Cone"),
+};
+
+USTRUCT(BlueprintType)
+struct CHANNELDUE_API FClientInterestSettingsPreset
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category="Default")
+	EClientInterestAreaType AreaType = EClientInterestAreaType::None;
+
+	UPROPERTY(EditAnywhere, Category="Default")
+	FName PresetName;
+	
+	UPROPERTY(EditAnywhere, Category="Default")
+	bool bActivateByDefault = true;
+
+	// The minimal distance required for the following actor to move before updating its client interest. If equal or less than 0, the client interest will be updated every tick.
+	UPROPERTY(Config, EditAnywhere, Category = "Default")
+	float MinDistanceToTriggerUpdate = 100.0f;
+
+	// Used by SpotsAOI
+	UPROPERTY(EditAnywhere, Category="Spots AOI")
+	TMap<FVector, uint32> SpotsAndDists;
+	// TArray<FVector> Spots;
+
+	// Used by BoxAOI
+	UPROPERTY(EditAnywhere, Category="Box AOI")
+	FVector Extent = FVector(15000.0f, 15000.0f, 15000.0f);
+
+	// Used by SphereAOI
+	UPROPERTY(EditAnywhere, Category="Sphere and Cone AOI")
+	float Radius = 15000.0f;
+
+	// Used by SphereAOI and ConeAOI
+	UPROPERTY(EditAnywhere, Category="Cone AOI")
+	float Angle = 120.0f;
+};

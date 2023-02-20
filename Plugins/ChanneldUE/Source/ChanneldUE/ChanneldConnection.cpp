@@ -461,6 +461,12 @@ void UChanneldConnection::SendDirect(channeldpb::Packet Packet)
 
 void UChanneldConnection::Send(Channeld::ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast/* = channeldpb::NO_BROADCAST*/, const FChanneldMessageHandlerFunc& HandlerFunc/* = nullptr*/)
 {
+	if (ChId == Channeld::InvalidChannelId)
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Illegal attempt to send message to invalid channel"));
+		return;
+	}
+	
 	SendRaw(ChId, MsgType, Msg.SerializeAsString(), Broadcast, HandlerFunc);
 
 	if (MsgType < channeldpb::USER_SPACE_START)
@@ -469,6 +475,12 @@ void UChanneldConnection::Send(Channeld::ChannelId ChId, uint32 MsgType, google:
 
 void UChanneldConnection::SendRaw(Channeld::ChannelId ChId, uint32 MsgType, const std::string& MsgBody, channeldpb::BroadcastType Broadcast /*= channeldpb::NO_BROADCAST*/, const FChanneldMessageHandlerFunc& HandlerFunc /*= nullptr*/)
 {
+	if (ChId == Channeld::InvalidChannelId)
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Illegal attempt to send message to invalid channel"));
+		return;
+	}
+	
 	uint32 StubId = HandlerFunc != nullptr ? AddRpcCallback(HandlerFunc) : 0;
 
 	TSharedPtr<channeldpb::MessagePack> MsgPack(new channeldpb::MessagePack);
@@ -491,6 +503,14 @@ void UChanneldConnection::SendRaw(Channeld::ChannelId ChId, uint32 MsgType, cons
 
 	if (MsgType >= channeldpb::USER_SPACE_START && bShowUserSpaceMessageLog)
 		UE_LOG(LogChanneld, Verbose, TEXT("Send user-space message to channel %d, stubId=%d, type=%d, bodySize=%d)"), ChId, StubId, MsgType, MsgBody.size());
+}
+
+void UChanneldConnection::Forward(Channeld::ChannelId ChId, uint32 MsgType, const google::protobuf::Message& Msg, Channeld::ConnectionId ClientConnId)
+{
+	channeldpb::ServerForwardMessage ServerForwardMessage;
+	ServerForwardMessage.set_clientconnid(ClientConnId);
+	ServerForwardMessage.set_payload(Msg.SerializeAsString());
+	Send(ChId, MsgType, ServerForwardMessage, channeldpb::BroadcastType::SINGLE_CONNECTION);
 }
 
 void UChanneldConnection::Broadcast(Channeld::ChannelId ChId, uint32 MsgType, const google::protobuf::Message& Msg, int BroadcastType)

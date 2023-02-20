@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldTypes.h"
-#include "Tools/ATintActor.h"
+#include "Tools/TintActor.h"
 #include "Tools/OutlinerActor.h"
 #include "View/PlayerStartLocator.h"
 #include "ChanneldSettings.generated.h"
@@ -35,28 +35,44 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	bool bUseReceiveThread = false;
 
+	// If true, UE's default handshaking process will be skipped and the server will expect NMT_Hello as the first message.
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	bool bDisableHandshaking = true;
+	// If true, UNetConnection::SetInternalAck() will be called to internally ack all packets. Should be turned on for reliable connection (TCP) to save bandwidth.
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	bool bSetInternalAck = true;
 
+	// Should the server and client skip the custom replication system and use UE's default one. All traffic still goes through channeld either way.
 	UPROPERTY(Config, EditAnywhere, Category = "Replication")
 	bool bSkipCustomReplication = false;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial")
 	TSubclassOf<UPlayerStartLocatorBase> PlayerStartLocatorClass;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial")
+	
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Client Interest")
+	bool bUseNetRelevantForUninterestedActors = false;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Client Interest")
+	TArray<FClientInterestSettingsPreset> ClientInterestPresets;
+	
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug")
 	bool bEnableSpatialVisualizer = false;
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
 	TSubclassOf<ATintActor> RegionBoxClass;
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
 	FVector RegionBoxMinSize;
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
 	FVector RegionBoxMaxSize;
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
+	FVector RegionBoxOffset;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
 	TSubclassOf<AActor> SubscriptionBoxClass;
-	UPROPERTY(Config, EditAnywhere, Category = "Spatial", meta=(EditCondition="bEnableSpatialVisualizer"))
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
+	FVector SubscriptionBoxMinSize;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
+	FVector SubscriptionBoxMaxSize;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
+	FVector SubscriptionBoxOffset;
+	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
 	TSubclassOf<AOutlinerActor> SpatialOutlinerClass;
 
 	// If set to true, the RPC with the actor that hasn't been exported to the client will be postponed until being exported.

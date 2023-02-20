@@ -28,7 +28,7 @@ public class ChanneldEditor : ModuleRules
                 "ChanneldUE",
 				// ... add other public dependencies that you statically link with here ...
 			}
-            );
+        );
 
 
         PrivateDependencyModuleNames.AddRange(
@@ -37,6 +37,7 @@ public class ChanneldEditor : ModuleRules
                 "Projects",
                 "InputCore",
                 "UnrealEd",
+                "PropertyEditor",
                 "LevelEditor",
                 "CoreUObject",
                 "Engine",
@@ -49,7 +50,7 @@ public class ChanneldEditor : ModuleRules
                 "ChanneldProtobufEditor",
                 // ... add private dependencies that you statically link with here ...	
 			}
-            );
+        );
 
 
         DynamicallyLoadedModuleNames.AddRange(
