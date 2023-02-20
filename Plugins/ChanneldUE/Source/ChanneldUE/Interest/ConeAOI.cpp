@@ -17,7 +17,8 @@ void UConeAOI::SetSpatialQuery(channeldpb::SpatialInterestQuery* Query, const FV
 	ChanneldUtils::SetSpatialInfoPB(Query->mutable_coneaoi()->mutable_center(), PawnLocation);
 	ChanneldUtils::SetSpatialInfoPB(Query->mutable_coneaoi()->mutable_direction(), PawnRotation.Vector());
 	Query->mutable_coneaoi()->set_radius(Radius);
-	Query->mutable_coneaoi()->set_angle(Angle);
+	// Angle is in radians in channeld
+	Query->mutable_coneaoi()->set_angle(fmod(Angle, 360.f) * PI / 180.f);
 	
 	UE_LOG(LogChanneld, Verbose, TEXT("Updating the ConeAOI with %s"), UTF8_TO_TCHAR(Query->mutable_coneaoi()->ShortDebugString().c_str()));
 }

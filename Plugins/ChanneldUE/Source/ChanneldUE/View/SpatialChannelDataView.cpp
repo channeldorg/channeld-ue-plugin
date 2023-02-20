@@ -565,6 +565,12 @@ bool USpatialChannelDataView::ClientDeleteObject(UObject* Obj)
 	UE_LOG(LogChanneld, Log, TEXT("Deleting object that is no longer in the client's interest area: %s"), *Obj->GetName());
 	if (auto Actor = Cast<AActor>(Obj))
 	{
+		// AutonomousProxy actors (PlayerControllers, Pawn, PlayerStates, etc.) are always relevant to the client.
+		if (Actor->GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			return false;
+		}
+		
 		// Call the actor's IsNetRelevantFor() to determine if the actor should be deleted or not.
 		if (GetMutableDefault<UChanneldSettings>()->bUseNetRelevantForUninterestedActors)
 		{
@@ -861,6 +867,10 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 			if (ClientDeleteObject(Obj))
 			{
 				RemoveObjectProvider(Obj, false);
+			}
+			else
+			{
+				UE_LOG(LogChanneld, Log, TEXT("Skipped deleting the net relevant actor."));
 			}
 		}
 	}
