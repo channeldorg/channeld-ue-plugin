@@ -51,13 +51,14 @@ protected:
 	virtual void OnRemovedProvidersFromChannel(Channeld::ChannelId ChId, channeldpb::ChannelType ChannelType, const TSet<FProviderInternal>& RemovedProviders) override;
 	bool ClientDeleteObject(UObject* Obj);
 
+	bool TryToResolveObjects(Channeld::ChannelId ChId, TArray<uint32> NetGUIDs);
 	// The client may have subscribed to the spatial channels that go beyond the interest area of the client's authoritative server.
 	// In that case, the client may receive ChannelDataUpdate that contains unresolved NetworkGUIDs, so it needs to spawn the objects before applying the update.
 	virtual bool CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData) override;
 	// The NetIds of the objects that are relevant to the client in the ChannelDataUpdate. If any NetId is unresolved, the client will spawn the object.
-	virtual TSet<uint32> GetRelevantNetGUIDsFromChannelData(const google::protobuf::Message* Message)
+	virtual TArray<uint32> GetRelevantNetGUIDsFromChannelData(const google::protobuf::Message* Message)
 	{
-		static const TSet<uint32> EmptySet;
+		static const TArray<uint32> EmptySet;
 		return EmptySet;
 	}
 	

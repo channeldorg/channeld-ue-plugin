@@ -627,31 +627,27 @@ bool USpatialChannelDataView::ClientDeleteObject(UObject* Obj)
 	return true;
 }
 
-bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData)
+bool USpatialChannelDataView::TryToResolveObjects(Channeld::ChannelId ChId, TArray<uint32> NetGUIDs)
 {
-	// Only client needs to spawn the objects.
-	if (Connection->IsServer())
-	{
-		return false;
-	}
-
 	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
 	if (!NetDriver)
 	{
 		return false;
 	}
-
-	TSet<uint32> NetGUIDs = GetRelevantNetGUIDsFromChannelData(ChannelData);
-	if (NetGUIDs.Num() == 0)
-	{
-		return false;
-	}
-
+	
 	TArray<uint32> UnresolvedNetGUIDs;
 	for (uint32 NetGUID : NetGUIDs)
 	{
-		if (!ResolvingNetGUIDs.Contains(NetGUID) && !NetDriver->GuidCache->IsGUIDRegistered(FNetworkGUID(NetGUID)))
+		if (!ResolvingNetGUIDs.Contains(NetGUID))// && !NetDriver->GuidCache->IsGUIDRegistered(FNetworkGUID(NetGUID)))
 		{
+			if (auto CacheObj = NetDriver->GuidCache->ObjectLookup.Find(FNetworkGUID(NetGUID)))
+			{
+				if (CacheObj->Object.IsValid())
+				{
+					continue;
+				}
+			}
+			
 			UnresolvedNetGUIDs.Add(NetGUID);
 		}
 	}
@@ -673,8 +669,25 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 	
 	Connection->Send(ChId, unrealpb::GET_UNREAL_OBJECT_REF, Msg);
 	UE_LOG(LogChanneld, Verbose, TEXT("Sent GetUnrealObjectRefMessage to channel %d, NetIds: %s"), ChId, *LogStr);
-	
+
 	return true;
+}
+
+bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData)
+{
+	// Only client needs to spawn the objects.
+	if (Connection->IsServer())
+	{
+		return false;
+	}
+
+	TArray<uint32> NetGUIDs = GetRelevantNetGUIDsFromChannelData(ChannelData);
+	if (NetGUIDs.Num() == 0)
+	{
+		return false;
+	}
+
+	return TryToResolveObjects(ChId, NetGUIDs);
 }
 
 void USpatialChannelDataView::ClientHandleGetUnrealObjectRef(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
@@ -835,6 +848,7 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 
 	// Does the client has interest over the handover objects?
 	const bool bHasInterest = Connection->SubscribedChannels.Contains(HandoverMsg->dstchannelid());
+	TArray<uint32> UnresolvedNetIds;
 	
 	for (auto& HandoverContext : HandoverData.context())
 	{
@@ -846,9 +860,11 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 		UObject* Obj = GetObjectFromNetGUID(NetId);
 		if (!Obj)
 		{
-			// FIXME: We can't wait the server to send the Spawn messages as it's suppressed in the handover process.
-			// But we also don't want to spawn the PlayerState or PlayerController of other players.
-			
+			/*
+				We can't wait the server to send the Spawn messages as it's suppressed in the handover process.
+				But we also don't want to spawn the PlayerState or PlayerController of other players:
+			UnresolvedNetIds.Add(NetId.Value);
+			*/
 			UE_LOG(LogChanneld, Warning, TEXT("Unable to find data provider to move from channel %d to %d, NetId: %d"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), NetId.Value);
 			continue;
 		}
@@ -893,6 +909,11 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 				UE_LOG(LogChanneld, Log, TEXT("Skipped deleting the net relevant actor."));
 			}
 		}
+	}
+
+	if (UnresolvedNetIds.Num() > 0)
+	{
+		TryToResolveObjects(HandoverMsg->dstchannelid(), UnresolvedNetIds);
 	}
 }
 
