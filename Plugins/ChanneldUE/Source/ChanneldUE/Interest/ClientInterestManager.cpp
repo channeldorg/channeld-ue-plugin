@@ -13,7 +13,7 @@ class UChanneldConnection;
 UClientInterestManager::UClientInterestManager(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	QueryForTick = new channeldpb::SpatialInterestQuery;
+	// QueryForTick = new channeldpb::SpatialInterestQuery;
 }
 
 void UClientInterestManager::ServerSetup(UChanneldNetConnection* InClientNetConn)
@@ -61,8 +61,8 @@ void UClientInterestManager::CleanUp()
 {
 	AvailableAOIs.Empty();
 	ActiveAOIs.Empty();
-	QueryForTick->Clear();
-	delete QueryForTick;
+	// QueryForTick->Clear();
+	// delete QueryForTick;
 	if (ClientNetConn.IsValid())
 	{
 		ClientNetConn->PlayerEnterSpatialChannelEvent.RemoveAll(this);
@@ -174,16 +174,16 @@ void UClientInterestManager::Tick(float DeltaTime)
 	bool bNewQuery = false;
 	for (auto& AOI : ActiveAOIs)
 	{
-		bNewQuery |= AOI->TickQuery(QueryForTick, DeltaTime);
+		bNewQuery |= AOI->TickQuery(&QueryForTick, DeltaTime);
 	}
 
 	if (bNewQuery)
 	{
 		channeldpb::UpdateSpatialInterestMessage InterestMsg;
 		InterestMsg.set_connid(ClientNetConn->GetConnId());
-		InterestMsg.mutable_query()->MergeFrom(*QueryForTick);
+		InterestMsg.mutable_query()->MergeFrom(QueryForTick);
 		GEngine->GetEngineSubsystem<UChanneldConnection>()->Send(ClientNetConn->GetSendToChannelId(), channeldpb::UPDATE_SPATIAL_INTEREST, InterestMsg);
-		QueryForTick->Clear();
+		QueryForTick.Clear();
 	}
 }
 

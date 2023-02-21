@@ -48,7 +48,7 @@ private:
 	UPROPERTY()
 	TArray<UAreaOfInterestBase*> ActiveAOIs;
 
-	channeldpb::SpatialInterestQuery* QueryForTick;
+	channeldpb::SpatialInterestQuery QueryForTick;
 
 	// TWeakObjectPtr<APlayerController> FollowingPC;
 	//

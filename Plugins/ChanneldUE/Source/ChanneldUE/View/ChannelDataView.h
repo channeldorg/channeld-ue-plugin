@@ -19,7 +19,7 @@ class CHANNELDUE_API UChannelDataView : public UObject
 public:
 	UChannelDataView(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	FORCEINLINE void RegisterChannelDataTemplate(channeldpb::ChannelType ChannelType, const google::protobuf::Message* MsgTemplate)
+	FORCEINLINE void RegisterChannelDataTemplate(int ChannelType, const google::protobuf::Message* MsgTemplate)
 	{
 		ChannelDataTemplates.Add(ChannelType, MsgTemplate);
 		if (AnyForTypeUrl == nullptr)
@@ -46,8 +46,8 @@ public:
 	void RemoveObjectProvider(UObject* Obj, bool bSendRemoved);
 	virtual void RemoveProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
-	virtual void MoveProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, IChannelDataProvider* Provider);
-	void MoveObjectProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, UObject* Provider);
+	virtual void MoveProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, IChannelDataProvider* Provider, bool bSendRemoved);
+	void MoveObjectProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, UObject* Provider, bool bSendRemoved);
 
 	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, Channeld::ChannelId ChId){}
 	virtual void OnRemoveClientConnection(UChanneldNetConnection* ClientConn){}
@@ -78,6 +78,7 @@ public:
 
 	virtual bool SendMulticastRPC(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg);
 
+	int32 SendChannelUpdate(Channeld::ChannelId ChId);
 	int32 SendAllChannelUpdates();
 
 	void OnDisconnect();
@@ -159,8 +160,11 @@ protected:
 	TMap<const FNetworkGUID, Channeld::ChannelId> NetIdOwningChannels;
 
 private:
+	
+	// Use the Arena for faster allocation. See https://developers.google.com/protocol-buffers/docs/reference/arenas
+	google::protobuf::Arena ArenaForSend;
 
-	TMap<channeldpb::ChannelType, const google::protobuf::Message*> ChannelDataTemplates;
+	TMap<int, const google::protobuf::Message*> ChannelDataTemplates;
 	google::protobuf::Any* AnyForTypeUrl;
 	TMap<FString, const google::protobuf::Message*> ChannelDataTemplatesByTypeUrl;
 
