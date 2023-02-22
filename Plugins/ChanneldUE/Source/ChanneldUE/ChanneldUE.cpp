@@ -31,13 +31,13 @@ void FChanneldUEModule::StartupModule()
 			GetMutableDefault<UChanneldSettings>());
 	}
 
+	REGISTER_REPLICATOR_SINGLETON(FChanneldGameStateBaseReplicator, AGameStateBase);
 	REGISTER_REPLICATOR(FChanneldActorReplicator, AActor);
 	REGISTER_REPLICATOR(FChanneldPawnReplicator, APawn);
 	REGISTER_REPLICATOR(FChanneldCharacterReplicator, ACharacter);
+	REGISTER_REPLICATOR(FChanneldPlayerStateReplicator, APlayerState);
 	REGISTER_REPLICATOR(FChanneldControllerReplicator, AController);
 	REGISTER_REPLICATOR(FChanneldPlayerControllerReplicator, APlayerController);
-	REGISTER_REPLICATOR(FChanneldPlayerStateReplicator, APlayerState);
-	REGISTER_REPLICATOR(FChanneldGameStateBaseReplicator, AGameStateBase);
 	REGISTER_REPLICATOR(FChanneldActorComponentReplicator, UActorComponent);
 	REGISTER_REPLICATOR(FChanneldSceneComponentReplicator, USceneComponent);
 }

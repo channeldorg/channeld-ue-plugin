@@ -726,7 +726,7 @@ void UChanneldNetDriver::OnServerBeginPlay(UChanneldReplicationComponent* RepCom
 		OnServerSpawnedActor(Actor);
 		ServerDeferredSpawns.Remove(Actor);
 	}
-	// Actor's ChanneldReplicationComponent is not registered when spawned, so we need to wait for BeginPlay to perform the spawn logic. E.g. BP_NPC.
+	// Actor's ChanneldReplicationComponent is not registered when spawned, so we need to wait for BeginPlay to perform the spawn logic. E.g. BP_TestNPC.
 	else if (RepComp->AddedToChannelIds.Num() == 0)
 	{
 		if (ChannelDataView.IsValid())
@@ -1024,7 +1024,8 @@ void UChanneldNetDriver::NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTrav
 	FNetworkGUID NetId = GuidCache->GetNetGUID(Actor);
 	if (NetId.IsValid() && ChannelDataView.IsValid())
 	{
-		if (IsServer() && Actor->GetIsReplicated())
+		// Only authoritative server should send destroy to clients
+		if (IsServer() && Actor->HasAuthority() && Actor->GetIsReplicated())
 		{
 			ChannelDataView->SendDestroyToClients(Actor, NetId);
 		}

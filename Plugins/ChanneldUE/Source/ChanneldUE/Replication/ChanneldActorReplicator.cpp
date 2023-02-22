@@ -381,5 +381,9 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 
 		Actor->ProcessEvent(OnRep_ReplicatedMovementFunc, NULL);
 	}
+
+	// In debug builds, Actor->PostNetReceive() will throw a check error as the owner is already set.
+	// Calling Actor->PreNetReceive() can bypass the check.
+	Actor->PreNetReceive();
 }
 

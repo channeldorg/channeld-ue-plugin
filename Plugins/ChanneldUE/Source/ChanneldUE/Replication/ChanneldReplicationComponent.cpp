@@ -239,6 +239,8 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 		return;
 	}
 
+	GetOwner()->PreNetReceive();
+
 	for (auto& Replicator : Replicators)
 	{
 		auto TargetObj = Replicator->GetTargetObject();
@@ -271,14 +273,13 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 				}
 				continue;
 			}
-			TargetObj->PreNetReceive();
 			Replicator->OnStateChanged(State);
-			TargetObj = Replicator->GetTargetObject();
-			if (TargetObj)
-			{
-				TargetObj->PostNetReceive();
-			}
 		}
+	}
+
+	if (auto Owner = GetOwner())
+	{
+		Owner->PostNetReceive();
 	}
 }
 
