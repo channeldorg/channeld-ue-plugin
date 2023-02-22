@@ -34,6 +34,8 @@ private:
 	void GenerateReplicatorAction();
 	void AddRepCompsToBPsAction();
 
+	void RecompileGameCode() const;
+
 	void GenReplicatorProto(FChanneldProcWorkerThread* ProcWorker);
 
 	void OpenEditorSettingsAction();

@@ -22,6 +22,9 @@
 #include "PropertyEditorDelegates.h"
 #include "ChanneldTypes.h"
 #include "ClientInterestSettingsCustomization.h"
+#include "ILiveCodingModule.h"
+#include "Async/Async.h"
+#include "Misc/HotReloadInterface.h"
 
 IMPLEMENT_MODULE(FChanneldEditorModule, ChanneldEditor);
 
@@ -96,7 +99,6 @@ void FChanneldEditorModule::StartupModule()
 
 	PropertyModule.NotifyCustomizationModuleChanged();
 
-	
 	GenRepMissionNotifyProxy = NewObject<UChanneldMissionNotiProxy>();
 	GenRepMissionNotifyProxy->AddToRoot();
 
@@ -113,7 +115,7 @@ void FChanneldEditorModule::ShutdownModule()
 		PropertyModule.UnregisterCustomClassLayout(UChanneldSettings::StaticClass()->GetFName());
 		PropertyModule.NotifyCustomizationModuleChanged();
 	}
-	
+
 	FChanneldEditorStyle::Shutdown();
 
 	FChanneldEditorCommands::Unregister();
@@ -307,7 +309,7 @@ void FChanneldEditorModule::GenerateReplicatorAction()
 			ChanneldReplicatorGeneratorUtils::GetUECmdBinary(),
 			CommandletHelpers::BuildCommandletProcessArguments(
 				TEXT("CookAndGenRep"),
-				*FString::Printf( TEXT("\"%s\""), *FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())),
+				*FString::Printf(TEXT("\"%s\""), *FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())),
 				TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout")
 			)
 		)
@@ -338,7 +340,7 @@ void FChanneldEditorModule::GenReplicatorProto(FChanneldProcWorkerThread* ProcWo
 {
 	TArray<FString> GeneratedProtoFiles = FReplicatorGeneratorManager::Get().GetGeneratedProtoFiles();
 	FString ReplicatorStorageDir = FReplicatorGeneratorManager::Get().GetReplicatorStorageDir();
-	FString ChanneldPath = FPlatformMisc::GetEnvironmentVariable(TEXT("CHANNELD_PATH"));
+	const FString ChanneldPath = FPlatformMisc::GetEnvironmentVariable(TEXT("CHANNELD_PATH"));
 	if (ChanneldPath.IsEmpty())
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("Environment variable \"CHANNELD_PATH\" is empty, please set environment variable \"CHANNELD_PATH\" to you system"));
@@ -348,25 +350,24 @@ void FChanneldEditorModule::GenReplicatorProto(FChanneldProcWorkerThread* ProcWo
 	FString ChanneldUnrealpbPath = ChanneldPath / TEXT("pkg") / TEXT("unrealpb");
 	FPaths::NormalizeDirectoryName(ChanneldUnrealpbPath);
 
-	FString GameModuleExportAPIMacro = GetMutableDefault<UChanneldEditorSettings>()->GameModuleExportAPIMacro;
-
-	if(GameModuleExportAPIMacro.IsEmpty())
+	const FString GameModuleExportAPIMacro = GetMutableDefault<UChanneldEditorSettings>()->GameModuleExportAPIMacro;
+	if (GameModuleExportAPIMacro.IsEmpty())
 	{
 		UE_LOG(LogChanneldEditor, Verbose, TEXT("Game module export API macro is empty"));
 	}
 
-	FString Args = ChanneldProtobufHelpers::BuildProtocProcessArguments(
+	const FString Args = ChanneldProtobufHelpers::BuildProtocProcessArguments(
 		ReplicatorStorageDir,
-		 FString::Printf(TEXT("dllexport_decl=%s"), *GameModuleExportAPIMacro),
+		FString::Printf(TEXT("dllexport_decl=%s"), *GameModuleExportAPIMacro),
 		{
 			ReplicatorStorageDir,
 			ChanneldUnrealpbPath,
 		},
 		GeneratedProtoFiles
 	);
-	
+
 	IFileManager& FileManager = IFileManager::Get();
-	FString ProtocPath = ChanneldProtobufHelpers::GetProtocPath();
+	const FString ProtocPath = ChanneldProtobufHelpers::GetProtocPath();
 	if (!FileManager.FileExists(*ProtocPath))
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("Protoc path is invaild: %s"), *ProtocPath);
@@ -389,6 +390,16 @@ void FChanneldEditorModule::GenReplicatorProto(FChanneldProcWorkerThread* ProcWo
 			);
 		}
 		GenRepMissionNotifyProxy->SpawnMissionSucceedNotification(nullptr);
+
+		if (GetMutableDefault<UChanneldEditorSettings>()->bAutoRecompileAfterGenerate)
+		{
+			UE_LOG(LogChanneldEditor, Verbose, TEXT("Auto recompile game code after generate replicator protos"));
+			// Run RecompileGameCode in game thread
+			AsyncTask(ENamedThreads::GameThread, [this]()
+			{
+				RecompileGameCode();
+			});
+		}
 	});
 	GenProtoWorkThread->ProcFailedDelegate.AddUObject(GenRepMissionNotifyProxy, &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
 	GenRepMissionNotifyProxy->SetRunningNotifyText(FText::FromString(TEXT("Generating replicator protos")));
@@ -414,6 +425,34 @@ void FChanneldEditorModule::OpenEditorSettingsAction()
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 	{
 		SettingsModule->ShowViewer("Editor", "Plugins", "ChanneldEditorSettings");
+	}
+}
+
+void FChanneldEditorModule::RecompileGameCode() const
+{
+#if WITH_LIVE_CODING
+	ILiveCodingModule* LiveCoding = FModuleManager::GetModulePtr<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
+	if (LiveCoding != nullptr && LiveCoding->IsEnabledByDefault())
+	{
+		LiveCoding->EnableForSession(true);
+		if (LiveCoding->IsEnabledForSession())
+		{
+			LiveCoding->Compile();
+		}
+		else
+		{
+			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("NoLiveCodingCompileAfterHotReload", "Live Coding cannot be enabled while hot-reloaded modules are active. Please close the editor and build from your IDE before restarting."));
+		}
+		return;
+	}
+#endif
+
+	// Don't allow a recompile while already compiling!
+	IHotReloadInterface& HotReloadSupport = FModuleManager::LoadModuleChecked<IHotReloadInterface>(TEXT("HotReload"));
+	if (!HotReloadSupport.IsCurrentlyCompiling())
+	{
+		// We want compiling to happen asynchronously
+		HotReloadSupport.DoHotReloadFromEditor(EHotReloadFlags::None);
 	}
 }
 
