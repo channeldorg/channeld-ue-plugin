@@ -111,7 +111,7 @@ void UChanneldMissionNotiProxy::SpawnRunningMissionNotification(FChanneldProcWor
 		FNotificationInfo Info(MissionProxy->RunningNotifyText);
 
 		Info.bFireAndForget = false;
-		Info.Hyperlink = FSimpleDelegate::CreateStatic([]() { FGlobalTabmanager::Get()->InvokeTab(FName("OutputLog")); });
+		Info.Hyperlink = FSimpleDelegate::CreateStatic([]() { FGlobalTabmanager::Get()->TryInvokeTab(FName("OutputLog")); });
 		Info.HyperlinkText = LOCTEXT("ShowOutputLogHyperlink", "Show Output Log");
 		Info.ButtonDetails.Add(FNotificationButtonInfo(MissionProxy->RunningNotifyCancelText, FText(),
 		                                               FSimpleDelegate::CreateLambda([MissionProxy]() { MissionProxy->CancelMission(); }),

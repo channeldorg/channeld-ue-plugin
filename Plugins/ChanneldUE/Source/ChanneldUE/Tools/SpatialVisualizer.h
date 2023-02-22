@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ATintActor.h"
+#include "TintActor.h"
 #include "channeld.pb.h"
 #include "ChanneldConnection.h"
 #include "OutlinerActor.h"
@@ -15,8 +15,9 @@ public:
 	USpatialVisualizer(const FObjectInitializer& ObjectInitializer);
 
 	void Initialize(UChanneldConnection* Conn);
-	void HandleSpatialRegionsResult(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
-	void UpdateSubBoxes(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleSpatialRegionsUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleSubToChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleUnsubFromChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void OnSpawnedObject(UObject* Obj, Channeld::ChannelId ChId);
 	void OnUpdateOwningChannel(UObject* Obj, Channeld::ChannelId NewChId);
 	const FLinearColor& GetColorByChannelId(Channeld::ChannelId ChId);
@@ -24,12 +25,13 @@ public:
 private:
 
 	void SpawnRegionBoxes();
+	void SpawnSubBox(Channeld::ChannelId ChId);
 
 	TArray<channeldpb::SpatialRegion> Regions;
 	UPROPERTY()
-	TArray<ATintActor*> RegionBoxes;
+	TMap<uint32, ATintActor*> RegionBoxes;
 	UPROPERTY()
-	TArray<AActor*> SubBoxes;
+	TMap<uint32, ATintActor*> SubBoxes;
 	TArray<FLinearColor> RegionColors;
 	TMap<Channeld::ChannelId, FLinearColor> ColorsByChId;
 	UPROPERTY()

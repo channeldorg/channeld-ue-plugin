@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ATintActor.generated.h"
+#include "TintActor.generated.h"
 
 UCLASS()
 class ATintActor : public AActor

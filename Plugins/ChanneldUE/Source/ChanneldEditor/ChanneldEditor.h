@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
 #include "ChanneldEditorSettings.h"
 
 DECLARE_LOG_CATEGORY_CLASS(LogChanneldEditor, Log, All);
@@ -34,6 +33,8 @@ private:
 
 	void GenerateReplicatorAction();
 	void AddRepCompsToBPsAction();
+
+	void RecompileGameCode() const;
 
 	void GenReplicatorProto();
 

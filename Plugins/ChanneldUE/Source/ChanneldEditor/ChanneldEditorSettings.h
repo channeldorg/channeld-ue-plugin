@@ -49,6 +49,9 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Channeld")
 	TArray<FServerGroup> ServerGroups;
 
+	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator", DisplayName = "Automatically Recompile After Generate Replicators", meta = ( ToolTip = "Repilcator Generator will automatically recompile the game code after generating the replicators. if you want to disable this feature, set the item to be false" ))
+	bool bAutoRecompileAfterGenerate = true;
+
 	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator|Protobuf", DisplayName = "Game Module Export API Macro", meta = ( ToolTip = "If developer wants to export replicators from the default game module, set the item to be the same as the default game module API Macro. For Example \"CHANNELDUE_API\"" ))
 	FString GameModuleExportAPIMacro;
 

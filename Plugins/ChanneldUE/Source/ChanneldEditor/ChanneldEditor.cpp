@@ -8,6 +8,7 @@
 #include "AddCompToBPSubsystem.h"
 #include "ChanneldProtobufEditor.h"
 #include "ChanneldSettings.h"
+#include "ChanneldSettingsDetails.h"
 #include "LevelEditor.h"
 #include "ReplicatorGeneratorManager.h"
 #include "ReplicatorGeneratorUtils.h"
@@ -16,6 +17,16 @@
 #include "Widgets/Input/SSpinBox.h"
 #include "ThreadUtils/FChanneldProcWorkerThread.h"
 #include "ISettingsModule.h"
+#include "Modules/ModuleManager.h"
+#include "PropertyEditorModule.h"
+#include "PropertyEditorDelegates.h"
+#include "ChanneldTypes.h"
+#include "ClientInterestSettingsCustomization.h"
+#include "ILiveCodingModule.h"
+#include "Async/Async.h"
+#include "Misc/HotReloadInterface.h"
+
+IMPLEMENT_MODULE(FChanneldEditorModule, ChanneldEditor);
 
 #define LOCTEXT_NAMESPACE "FChanneldUEModule"
 
@@ -80,6 +91,14 @@ void FChanneldEditorModule::StartupModule()
 			GetMutableDefault<UChanneldEditorSettings>());
 	}
 
+	// Register the custom property type layout for the FClientInterestSettingsPreset struct in Project Settings.
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	// PropertyModule.RegisterCustomPropertyTypeLayout(FClientInterestSettingsPreset::StaticStruct()->GetFName(),
+	// 	FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FClientInterestSettingsCustomization::MakeInstance));
+	PropertyModule.RegisterCustomClassLayout(UChanneldSettings::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FChanneldSettingsDetails::MakeInstance));
+
+	PropertyModule.NotifyCustomizationModuleChanged();
+
 	GenRepMissionNotifyProxy = NewObject<UChanneldMissionNotiProxy>();
 	GenRepMissionNotifyProxy->AddToRoot();
 	GenProtoMissionNotifyProxy = NewObject<UChanneldMissionNotiProxy>();
@@ -91,6 +110,14 @@ void FChanneldEditorModule::StartupModule()
 
 void FChanneldEditorModule::ShutdownModule()
 {
+	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
+	{
+		FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+		PropertyModule.UnregisterCustomPropertyTypeLayout(FClientInterestSettingsPreset::StaticStruct()->GetFName());
+		PropertyModule.UnregisterCustomClassLayout(UChanneldSettings::StaticClass()->GetFName());
+		PropertyModule.NotifyCustomizationModuleChanged();
+	}
+
 	FChanneldEditorStyle::Shutdown();
 
 	FChanneldEditorCommands::Unregister();
@@ -350,7 +377,7 @@ void FChanneldEditorModule::GenReplicatorProto()
 	
 	TArray<FString> GeneratedProtoFiles = FReplicatorGeneratorManager::Get().GetGeneratedProtoFiles();
 	FString ReplicatorStorageDir = FReplicatorGeneratorManager::Get().GetReplicatorStorageDir();
-	FString ChanneldPath = FPlatformMisc::GetEnvironmentVariable(TEXT("CHANNELD_PATH"));
+	const FString ChanneldPath = FPlatformMisc::GetEnvironmentVariable(TEXT("CHANNELD_PATH"));
 	if (ChanneldPath.IsEmpty())
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("Environment variable \"CHANNELD_PATH\" is empty, please set user environment variable \"CHANNELD_PATH\" to Channeld root directory"));
@@ -360,14 +387,13 @@ void FChanneldEditorModule::GenReplicatorProto()
 	FString ChanneldUnrealpbPath = ChanneldPath / TEXT("pkg") / TEXT("unrealpb");
 	FPaths::NormalizeDirectoryName(ChanneldUnrealpbPath);
 
-	FString GameModuleExportAPIMacro = GetMutableDefault<UChanneldEditorSettings>()->GameModuleExportAPIMacro;
-
+	const FString GameModuleExportAPIMacro = GetMutableDefault<UChanneldEditorSettings>()->GameModuleExportAPIMacro;
 	if (GameModuleExportAPIMacro.IsEmpty())
 	{
 		UE_LOG(LogChanneldEditor, Verbose, TEXT("Game module export API macro is empty"));
 	}
 
-	FString Args = ChanneldProtobufHelpers::BuildProtocProcessArguments(
+	const FString Args = ChanneldProtobufHelpers::BuildProtocProcessArguments(
 		ReplicatorStorageDir,
 		FString::Printf(TEXT("dllexport_decl=%s"), *GameModuleExportAPIMacro),
 		{
@@ -378,7 +404,7 @@ void FChanneldEditorModule::GenReplicatorProto()
 	);
 
 	IFileManager& FileManager = IFileManager::Get();
-	FString ProtocPath = ChanneldProtobufHelpers::GetProtocPath();
+	const FString ProtocPath = ChanneldProtobufHelpers::GetProtocPath();
 	if (!FileManager.FileExists(*ProtocPath))
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("Protoc path is invaild: %s"), *ProtocPath);
@@ -401,6 +427,16 @@ void FChanneldEditorModule::GenReplicatorProto()
 			);
 		}
 		GenProtoMissionNotifyProxy->SpawnMissionSucceedNotification(nullptr);
+
+		if (GetMutableDefault<UChanneldEditorSettings>()->bAutoRecompileAfterGenerate)
+		{
+			UE_LOG(LogChanneldEditor, Verbose, TEXT("Auto recompile game code after generate replicator protos"));
+			// Run RecompileGameCode in game thread
+			AsyncTask(ENamedThreads::GameThread, [this]()
+			{
+				RecompileGameCode();
+			});
+		}
 	});
 	GenProtoWorkThread->ProcFailedDelegate.AddUObject(GenProtoMissionNotifyProxy, &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
 	GenProtoMissionNotifyProxy->MissionCanceled.AddLambda([this]()
@@ -432,13 +468,39 @@ void FChanneldEditorModule::AddRepCompsToBPsAction()
 	GEditor->GetEditorSubsystem<UAddCompToBPSubsystem>()->AddComponentToBlueprints(CompClass, FName(TEXT("ChanneldRepComp")));
 }
 
-IMPLEMENT_MODULE(FChanneldEditorModule, ChanneldEditor)
-
 void FChanneldEditorModule::OpenEditorSettingsAction()
 {
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 	{
 		SettingsModule->ShowViewer("Editor", "Plugins", "ChanneldEditorSettings");
+	}
+}
+
+void FChanneldEditorModule::RecompileGameCode() const
+{
+#if WITH_LIVE_CODING
+	ILiveCodingModule* LiveCoding = FModuleManager::GetModulePtr<ILiveCodingModule>(LIVE_CODING_MODULE_NAME);
+	if (LiveCoding != nullptr && LiveCoding->IsEnabledByDefault())
+	{
+		LiveCoding->EnableForSession(true);
+		if (LiveCoding->IsEnabledForSession())
+		{
+			LiveCoding->Compile();
+		}
+		else
+		{
+			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("NoLiveCodingCompileAfterHotReload", "Live Coding cannot be enabled while hot-reloaded modules are active. Please close the editor and build from your IDE before restarting."));
+		}
+		return;
+	}
+#endif
+
+	// Don't allow a recompile while already compiling!
+	IHotReloadInterface& HotReloadSupport = FModuleManager::LoadModuleChecked<IHotReloadInterface>(TEXT("HotReload"));
+	if (!HotReloadSupport.IsCurrentlyCompiling())
+	{
+		// We want compiling to happen asynchronously
+		HotReloadSupport.DoHotReloadFromEditor(EHotReloadFlags::None);
 	}
 }
 

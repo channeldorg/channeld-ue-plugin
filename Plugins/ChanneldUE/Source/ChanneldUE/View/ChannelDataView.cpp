@@ -263,6 +263,21 @@ void UChannelDataView::RemoveActorProvider(AActor* Actor, bool bSendRemoved)
 	}
 }
 
+void UChannelDataView::RemoveObjectProvider(UObject* Obj, bool bSendRemoved)
+{
+	if (Obj->Implements<UChannelDataProvider>())
+	{
+		RemoveProviderFromAllChannels(Cast<IChannelDataProvider>(Obj), bSendRemoved);
+	}
+	if (AActor* Actor = Cast<AActor>(Obj))
+	{
+		for (const auto Comp : Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+		{
+			RemoveProviderFromAllChannels(Cast<IChannelDataProvider>(Comp), bSendRemoved);
+		}
+	}
+}
+
 void UChannelDataView::RemoveProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved)
 {
 	if (Provider->IsRemoved())
@@ -529,6 +544,24 @@ void UChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, Channeld::Ch
 	
 	NetIdOwningChannels.Add(NetId, ChId);
 	UE_LOG(LogChanneld, Log, TEXT("Set up mapping of netId: %d (%d) -> channelId: %d"), NetId.Value, ChanneldUtils::GetNativeNetId(NetId.Value), ChId);
+
+	/*
+	if (Connection->IsServer())
+	{
+		if (AActor* Actor = Cast<AActor>(GetObjectFromNetGUID(NetId)))
+		{
+			if (Connection->OwnedChannels.Contains(ChId))
+			{
+				Actor->SetRole(ROLE_Authority);
+			}
+			else
+			{
+				Actor->SetRole(ROLE_SimulatedProxy);
+			}
+			UE_LOG(LogChanneld, Verbose, TEXT("[Server] Set %s's NetRole to %s"), *Actor->GetName(), *UEnum::GetValueAsString(TEXT("Engine.ENetRole"), Actor->GetLocalRole()));
+		}
+	}
+	*/
 }
 
 Channeld::ChannelId UChannelDataView::GetOwningChannelId(const FNetworkGUID NetId) const
@@ -759,7 +792,7 @@ void UChannelDataView::HandleUnsub(UChanneldConnection* _, Channeld::ChannelId C
 		if (ChannelDataProviders.RemoveAndCopyValue(ChId, Providers))
 		{
 			UE_LOG(LogChanneld, Log, TEXT("Received Unsub message. Removed all data providers(%d) from channel %d"), Providers.Num(), ChId);
-			OnUnsubFromChannel(ChId, Providers);
+			OnRemovedProvidersFromChannel(ChId, UnsubMsg->channeltype(), Providers);
 		}
 	}
 
@@ -767,32 +800,7 @@ void UChannelDataView::HandleUnsub(UChanneldConnection* _, Channeld::ChannelId C
 	{
 		if (UnsubMsg->conntype() == channeldpb::CLIENT && Connection->OwnedChannels.Contains(ChId))
 		{
-			OnClientUnsub(UnsubMsg->connid(), UnsubMsg->channeltype(), ChId);
-		}
-	}
-}
-
-void UChannelDataView::OnClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId)
-{
-	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
-	{
-		UChanneldNetConnection* ClientConn;
-		if (NetDriver->GetClientConnectionMap().RemoveAndCopyValue(ClientConnId, ClientConn))
-		{
-			//~ Start copy from UNetDriver::Shutdown()
-			if (ClientConn->PlayerController)
-			{
-				APawn* Pawn = ClientConn->PlayerController->GetPawn();
-				if (Pawn)
-				{
-					Pawn->Destroy(true);
-				}
-			}
-
-			// Calls Close() internally and removes from ClientConnections
-			// Will also destroy the player controller.
-			ClientConn->CleanUp();
-			//~ End copy
+			ServerHandleClientUnsub(UnsubMsg->connid(), UnsubMsg->channeltype(), ChId);
 		}
 	}
 }
@@ -816,6 +824,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 			return;
 		}
 		UpdateData = MsgTemplate->New();
+		ReceivedUpdateDataInChannels.Add(ChId, UpdateData);
 	}
 
 	UE_LOG(LogChanneld, Verbose, TEXT("Received %s channel %d update(%d B): %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), ChId, UpdateMsg->data().value().size(), UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
@@ -832,10 +841,15 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 		return;
 	}
 	
+	ConsumeChannelUpdateData(ChId, UpdateData);
+}
+
+bool UChannelDataView::ConsumeChannelUpdateData(Channeld::ChannelId ChId, google::protobuf::Message* UpdateData)
+{
 	TSet<FProviderInternal>* Providers = ChannelDataProviders.Find(ChId);
 	if (Providers == nullptr || Providers->Num() == 0)
 	{
-		UE_LOG(LogChanneld, Log, TEXT("No provider registered for channel %d, typeUrl: %s. The update will not be applied."), ChId, UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
+		UE_LOG(LogChanneld, Log, TEXT("No provider registered for channel %d. The update will not be applied."), ChId);
 
 		/* Saving the update data with removed=true can caused the provider gets destroyed immediately after AddProvider.
 		auto UnprocessedUpdateData = UpdateData->New();
@@ -843,7 +857,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 		UnprocessedUpdateDataInChannels.FindOrAdd(ChId).Add(UnprocessedUpdateData);
 		*/
 		
-		return;
+		return false;
 	}
 
 	// The set can be changed during the iteration, when a new provider is created from the UnrealObjectRef during any replicator's OnStateChanged(),
@@ -864,5 +878,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	{
 		UpdateData->Clear();
 	}
+	
+	return bConsumed;
 }
 

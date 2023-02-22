@@ -30,8 +30,8 @@ public:
 	
 private:
 
-	// Maintains all the channels Master server has created.
-	TSet<Channeld::ChannelId> AllSpatialChannelIds;
+	// Maintains all the channels Master server has created and which spatial server they belong to.
+	TMap<Channeld::ChannelId, Channeld::ConnectionId> AllSpatialChannelIds;
 
 	// Use by the server to locate the player start position. In order to spawn the player's pawn in the right spatial channel,
 	// the Master server and spatial servers should have the EXACTLY SAME position for a player.

@@ -45,7 +45,11 @@ public:
 	UProtoMessageObject* ChannelInitData;
 
 protected:
-	virtual void OnClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId) override;
+	virtual void ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId) override;
+
+	// The client need to destroy the objects that are no longer relevant to the client.
+	virtual void OnRemovedProvidersFromChannel(Channeld::ChannelId ChId, channeldpb::ChannelType ChannelType, const TSet<FProviderInternal>& RemovedProviders) override;
+	bool ClientDeleteObject(UObject* Obj);
 
 	// The client may have subscribed to the spatial channels that go beyond the interest area of the client's authoritative server.
 	// In that case, the client may receive ChannelDataUpdate that contains unresolved NetworkGUIDs, so it needs to spawn the objects before applying the update.
@@ -53,7 +57,7 @@ protected:
 	// The NetIds of the objects that are relevant to the client in the ChannelDataUpdate. If any NetId is unresolved, the client will spawn the object.
 	virtual TSet<uint32> GetRelevantNetGUIDsFromChannelData(const google::protobuf::Message* Message)
 	{
-		const TSet<uint32> EmptySet;
+		static const TSet<uint32> EmptySet;
 		return EmptySet;
 	}
 	
@@ -67,13 +71,15 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category="Spatial")
 	TArray<UObject*> GetHandoverObjects(UObject* Obj, int32 SrcChId, int32 DstChId);
 
+	// The NetId of objects that are contained in the channel data update but unresolved in the client.
+	// The client needs to ask channeld for the full-exported UnrealObjectRef in order to create it.
 	TSet<uint32> ResolvingNetGUIDs;
 	
 private:
 	const FName GameplayerDebuggerClassName = FName("GameplayDebuggerCategoryReplicator");
 
-    // Map the client to the channels, so the spatial server's LowLevelSend() can use the right channelId.
-	TMap<uint32, Channeld::ChannelId> ClientInChannels;
+    // [Server only] Map the client to the channels, so the spatial server's LowLevelSend() can use the right channelId.
+	TMap<Channeld::ConnectionId, Channeld::ChannelId> ClientInChannels;
 	
 	bool bClientInMasterServer = false;
 
