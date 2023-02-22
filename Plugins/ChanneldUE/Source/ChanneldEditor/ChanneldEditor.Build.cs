@@ -48,6 +48,7 @@ public class ChanneldEditor : ModuleRules
                 "UATHelper",
                 "Kismet",
                 "ChanneldProtobufEditor",
+                "LiveCoding",
                 // ... add private dependencies that you statically link with here ...	
 			}
         );
