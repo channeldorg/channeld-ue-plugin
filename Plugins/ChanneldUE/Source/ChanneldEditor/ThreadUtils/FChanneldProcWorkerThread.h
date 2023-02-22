@@ -5,25 +5,28 @@
 
 class FChanneldProcWorkerThread;
 
-DECLARE_DELEGATE_TwoParams(FOutputMsgDelegate,FChanneldProcWorkerThread*,const FString&);
-DECLARE_MULTICAST_DELEGATE_OneParam(FProcStatusDelegate,FChanneldProcWorkerThread*);
+DECLARE_DELEGATE_TwoParams(FOutputMsgDelegate, FChanneldProcWorkerThread*, const FString&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FProcStatusDelegate, FChanneldProcWorkerThread*);
 
 
 class FChanneldProcWorkerThread : public FChanneldThreadWorker
 {
 public:
-	explicit FChanneldProcWorkerThread(const TCHAR *InThreadName,const FString& InProgramPath,const FString& InParams)
-		: FChanneldThreadWorker(InThreadName, []() {}), mProgramPath(InProgramPath), mProgramParams(InParams)
-	{}
+	explicit FChanneldProcWorkerThread(const TCHAR* InThreadName, const FString& InProgramPath, const FString& InParams)
+		: FChanneldThreadWorker(InThreadName, []()
+		{
+		}), mProgramPath(InProgramPath), mProgramParams(InParams)
+	{
+	}
 
-	virtual uint32 Run()override
+	virtual uint32 Run() override
 	{
 		if (FPaths::FileExists(mProgramPath))
 		{
 			FPlatformProcess::CreatePipe(mReadPipe, mWritePipe);
 			// std::cout << TCHAR_TO_ANSI(*mProgramPath) << " " << TCHAR_TO_ANSI(*mPragramParams) << std::endl;
 
-			mProcessHandle = FPlatformProcess::CreateProc(*mProgramPath, *mProgramParams, false, true, true, &mProcessID, 1, NULL, mWritePipe,mReadPipe);
+			mProcessHandle = FPlatformProcess::CreateProc(*mProgramPath, *mProgramParams, false, true, true, &mProcessID, 1, NULL, mWritePipe, mReadPipe);
 			if (mProcessHandle.IsValid() && FPlatformProcess::IsApplicationRunning(mProcessID))
 			{
 				if (ProcBeginDelegate.IsBound())
@@ -31,7 +34,7 @@ public:
 			}
 
 			FString Line;
-			while (mProcessHandle.IsValid() && FPlatformProcess::IsApplicationRunning(mProcessID))
+			auto ReadOutput = [this, &Line]()
 			{
 				FString NewLine = FPlatformProcess::ReadPipe(mReadPipe);
 				if (NewLine.Len() > 0)
@@ -45,7 +48,7 @@ public:
 						for (int32 Index = 0; Index < count - 1; ++Index)
 						{
 							StringArray[Index].TrimEndInline();
-							ProcOutputMsgDelegate.ExecuteIfBound(this,StringArray[Index]);
+							ProcOutputMsgDelegate.ExecuteIfBound(this, StringArray[Index]);
 						}
 						Line = StringArray[count - 1];
 						if (NewLine.EndsWith(TEXT("\n")))
@@ -54,15 +57,25 @@ public:
 						}
 					}
 				}
+			};
+
+			while (mProcessHandle.IsValid() && FPlatformProcess::IsApplicationRunning(mProcessID))
+			{
+				ReadOutput();
 				FPlatformProcess::Sleep(0.2f);
+			}
+			// The process has exited, so read the remaining output
+			ReadOutput();
+			if(Line.Len() > 0) {
+				ProcOutputMsgDelegate.ExecuteIfBound(this, Line + TEXT("\n"));
 			}
 
 			int32 ProcReturnCode;
-			if (FPlatformProcess::GetProcReturnCode(mProcessHandle,&ProcReturnCode))
+			if (FPlatformProcess::GetProcReturnCode(mProcessHandle, &ProcReturnCode))
 			{
 				if (ProcReturnCode == 0)
 				{
-					if(ProcSucceedDelegate.IsBound())
+					if (ProcSucceedDelegate.IsBound())
 						ProcSucceedDelegate.Broadcast(this);
 				}
 				else
@@ -75,18 +88,18 @@ public:
 			{
 				if (ProcFailedDelegate.IsBound())
 					ProcFailedDelegate.Broadcast(this);
-
 			}
-			
 		}
 		mThreadStatus = EChanneldThreadStatus::Completed;
 		return 0;
 	}
-	virtual void Exit()override
+
+	virtual void Exit() override
 	{
 		Cancel();
 	}
-	virtual void Cancel()override
+
+	virtual void Cancel() override
 	{
 		if (GetThreadStatus() != EChanneldThreadStatus::Busy)
 		{
@@ -94,7 +107,7 @@ public:
 				CancelDelegate.Broadcast();
 			return;
 		}
-			
+
 		mThreadStatus = EChanneldThreadStatus::Canceling;
 		if (mProcessHandle.IsValid() && FPlatformProcess::IsApplicationRunning(mProcessID))
 		{
@@ -110,8 +123,8 @@ public:
 			CancelDelegate.Broadcast();
 	}
 
-	virtual uint32 GetProcessId()const { return mProcessID; }
-	virtual FProcHandle GetProcessHandle()const { return mProcessHandle; }
+	virtual uint32 GetProcessId() const { return mProcessID; }
+	virtual FProcHandle GetProcessHandle() const { return mProcessHandle; }
 
 public:
 	FProcStatusDelegate ProcBeginDelegate;

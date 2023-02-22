@@ -36,11 +36,13 @@ private:
 
 	void RecompileGameCode() const;
 
-	void GenReplicatorProto(FChanneldProcWorkerThread* ProcWorker);
+	void GenReplicatorProto();
 
 	void OpenEditorSettingsAction();
 	
 	void LaunchServerGroup(const FServerGroup& ServerGroup);
+
+	FProcHandle ChanneldProcHandle;
 	
 	TSharedPtr<class FUICommandList> PluginCommands;
 	TSharedRef<SWidget> CreateMenuContent(TSharedPtr<FUICommandList> Commands);
@@ -49,6 +51,7 @@ private:
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenRepWorkThread;
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoWorkThread;
 	UChanneldMissionNotiProxy* GenRepMissionNotifyProxy;
+	UChanneldMissionNotiProxy* GenProtoMissionNotifyProxy;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> AddRepCompWorkThread;
 	UChanneldMissionNotiProxy* AddRepCompMissionNotifyProxy;

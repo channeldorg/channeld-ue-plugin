@@ -42,8 +42,18 @@ int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
 		}
 	}
 
+	//Get parameter '-GoPackage' from command line
+	FString GoPackage;
+	FParse::Value(*CmdLineParams, TEXT("-GoPackage="), GoPackage);
+	const TFunction<FString(const FString& PackageName)> GetGoPackage = [GoPackage](const FString& PackageName)
+	{
+		return GoPackage;
+	};
+
 	GeneratorManager.RemoveGeneratedCode();
-	GeneratorManager.GeneratedReplicators(TargetClasses);
-	
+	GeneratorManager.GeneratedReplicators(TargetClasses, &GetGoPackage);
+
+	GeneratorManager.StopGenerateReplicator();
+
 	return Result;
 }
