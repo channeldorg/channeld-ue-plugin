@@ -122,7 +122,18 @@ void FChanneldPawnReplicator::OnStateChanged(const google::protobuf::Message* In
 	if (NewState->has_controller())
 	{
 		Pawn->Controller = Cast<AController>(ChanneldUtils::GetObjectByRef(&NewState->controller(), Pawn->GetWorld()));
-		Pawn->OnRep_Controller();
+		if (auto PC = Cast<APlayerController>(Pawn->Controller))
+		{
+			// Special case: the PlayerController is under destruction, so calling OnRep_Controller() will cause crash
+			if (PC->PlayerCameraManager)
+			{
+				Pawn->OnRep_Controller();
+			}
+		}
+		else
+		{
+			Pawn->OnRep_Controller();
+		}
 		UE_LOG(LogChanneld, Verbose, TEXT("Replicator set Pawn's Controller to %s"), *GetNameSafe(Pawn->Controller));
 	}
 

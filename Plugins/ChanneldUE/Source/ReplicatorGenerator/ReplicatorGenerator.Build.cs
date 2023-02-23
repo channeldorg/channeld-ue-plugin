@@ -23,7 +23,8 @@ public class ReplicatorGenerator : ModuleRules
                 "SlateCore",
                 "Json",
                 "EditorSubsystem",
-                "ChanneldUE"
+                "ChanneldUE",
+                "AnalyticsET"
             }
         );
         

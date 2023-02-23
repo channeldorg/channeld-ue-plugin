@@ -3,8 +3,6 @@
 #include "ChanneldUtils.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/GameStateBase.h"
-#include "ChanneldConnection.h"
-#include "GameFramework/PlayerState.h"
 
 FChanneldActorReplicator::FChanneldActorReplicator(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
 {
@@ -247,11 +245,37 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 		Actor->SetReplicateMovement(NewState->breplicatemovement());
 		Actor->OnRep_ReplicateMovement();
 	}
-	
-	// Client reverses the local/remote role as the role in the dedicated server.
+
+
+	if (Actor->IsNetMode(NM_DedicatedServer))
+	{
+		// Actor->SetRole(ChanneldUtils::ServerGetActorNetRole(Actor.Get()));
+		if (NewState->has_remoterole())
+		{
+			*RemoteRolePtr = (uint8)NewState->remoterole();
+		}
+	}
+	else
+	{
+		if (NewState->has_remoterole())
+		{
+			Actor->SetRole((ENetRole)NewState->remoterole());
+		}
+		if (NewState->has_localrole())
+		{
+			*RemoteRolePtr = (uint8)NewState->localrole();
+		}
+		if (NewState->has_owningconnid())
+		{
+			ChanneldUtils::SetActorRoleByOwningConnId(Actor.Get(), NewState->owningconnid());
+		}
+	}
+
+	/*
+	// Client reverses the local/remote role as the role in the dedicated server (except for GameStateBase).
 	if (NewState->has_localrole())
 	{
-		if (Actor->IsNetMode(NM_DedicatedServer) && Actor->GetLocalRole() == ENetRole::ROLE_AutonomousProxy)
+		if (Actor->IsNetMode(NM_DedicatedServer) && !Actor->IsA<AGameStateBase>())
 		{
 			Actor->SetRole((ENetRole)NewState->localrole());
 		}
@@ -262,7 +286,7 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 	}
 	if (NewState->has_remoterole())
 	{
-		if (Actor->IsNetMode(NM_DedicatedServer) && Actor->GetLocalRole() == ENetRole::ROLE_AutonomousProxy)
+		if (Actor->IsNetMode(NM_DedicatedServer) && !Actor->IsA<AGameStateBase>())
 		{
 			*RemoteRolePtr = (uint8)NewState->remoterole();
 		}
@@ -277,6 +301,7 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 	{
 		ChanneldUtils::SetActorRoleByOwningConnId(Actor.Get(), NewState->owningconnid());
 	}
+	*/
 
 	if (NewState->has_owner())
 	{
@@ -356,5 +381,9 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 
 		Actor->ProcessEvent(OnRep_ReplicatedMovementFunc, NULL);
 	}
+
+	// In debug builds, Actor->PostNetReceive() will throw a check error as the owner is already set.
+	// Calling Actor->PreNetReceive() can bypass the check.
+	Actor->PreNetReceive();
 }
 

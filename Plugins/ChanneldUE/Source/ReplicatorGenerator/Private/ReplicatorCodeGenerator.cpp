@@ -39,9 +39,13 @@ FString FReplicatorCodeGenerator::GetClassHeadFilePath(const FString& ClassName)
 	return TEXT("");
 }
 
-bool FReplicatorCodeGenerator::Generate(TArray<UClass*> TargetActors, FReplicatorCodeBundle& ReplicatorCodeBundle)
+bool FReplicatorCodeGenerator::Generate(
+	TArray<UClass*> TargetActors,
+	const TFunction<FString(const FString& PackageName)>* GetGoPackage,
+	FReplicatorCodeBundle& ReplicatorCodeBundle
+)
 {
-	// Clean global variables
+	// Clean global variables, make sure it's empty for this generation
 	IllegalClassNameIndex = 0;
 	TargetActorSameNameCounter.Empty(TargetActors.Num());
 
@@ -49,7 +53,7 @@ bool FReplicatorCodeGenerator::Generate(TArray<UClass*> TargetActors, FReplicato
 	for (UClass* TargetActor : TargetActors)
 	{
 		FReplicatorCode ReplicatorCode;
-		GenerateActorCode(TargetActor, ReplicatorCode, Message);
+		GenerateActorCode(TargetActor, GetGoPackage, ReplicatorCode, Message);
 		ReplicatorCodeBundle.ReplicatorCodes.Add(ReplicatorCode);
 		IncludeCode += ReplicatorCode.IncludeActorCode + TEXT("\n");
 		IncludeCode += FString::Printf(TEXT("#include \"%s\"\n"), *ReplicatorCode.HeadFileName);
@@ -72,16 +76,25 @@ bool FReplicatorCodeGenerator::Generate(TArray<UClass*> TargetActors, FReplicato
 	FStringFormatNamedArguments ProtoFormatArgs;
 	ProtoFormatArgs.Add(TEXT("Declare_ProtoPackageName"), GenManager_GlobalStructProtoPackage);
 	ProtoFormatArgs.Add(TEXT("Code_Import"), TEXT("import \"unreal_common.proto\";"));
+	FString GoPackage = GetGoPackage == nullptr ? TEXT("") : (*GetGoPackage)(GenManager_GlobalStructProtoPackage);
+	ProtoFormatArgs.Add(
+		TEXT("Option"),
+		GoPackage.IsEmpty() ? TEXT("") : FString::Printf(TEXT("option go_package = \"%s\";"), *GoPackage)
+	);
 	ProtoFormatArgs.Add(TEXT("Definition_ProtoStateMsg"), ReplicatorCodeBundle.GlobalStructProtoDefinitions);
 	ReplicatorCodeBundle.GlobalStructProtoDefinitions = FString::Format(CodeGen_ProtoTemplate, ProtoFormatArgs);
 
-	// Clear global struct decorators
+	// Clear global struct decorators, make sure it's empty for next generation
 	FPropertyDecoratorFactory::Get().ClearGlobalStruct();
 	return true;
 }
 
-
-bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicatorCode& ReplicatorCode, FString& ResultMessage)
+bool FReplicatorCodeGenerator::GenerateActorCode(
+	UClass* TargetActor,
+	const TFunction<FString(const FString& PackageName)>* GetGoPackage,
+	FReplicatorCode& ReplicatorCode,
+	FString& ResultMessage
+)
 {
 	const TSharedPtr<FReplicatedActorDecorator> Target = MakeShareable(
 		new FReplicatedActorDecorator(
@@ -256,11 +269,17 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	ProtoFormatArgs.Add(TEXT("Code_Import"),
 	                    FString::Printf(TEXT("import \"%s\";\nimport \"%s\";"), *GenManager_GlobalStructProtoFile, *GenManager_UnrealCommonProtoFile)
 	);
+	FString GoPackage = GetGoPackage == nullptr ? TEXT("") : (*GetGoPackage)(Target->GetProtoPackageName());
+	ProtoFormatArgs.Add(
+		TEXT("Option"),
+		GoPackage.IsEmpty() ? TEXT("") : FString::Printf(TEXT("option go_package = \"%s\";"), *GoPackage)
+	);
 	ProtoFormatArgs.Add(
 		TEXT("Definition_ProtoStateMsg"),
 		Target->GetDefinition_ProtoStateMessage()
 	);
 	ReplicatorCode.ProtoDefinitions = FString::Format(CodeGen_ProtoTemplate, ProtoFormatArgs);
+
 	ReplicatorCode.ProtoFileName = Target->GetActorName() + CodeGen_ProtoFileExtension;
 	// ---------- Protobuf ----------
 
@@ -268,7 +287,7 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	if (!bIsBlueprint)
 	{
 		ReplicatorCode.RegisterReplicatorCode = FString::Printf(
-			TEXT("REGISTER_REPLICATOR(%s, %s);"),
+			TEXT("REGISTER_REPLICATOR_BASE(%s, %s, false);"),
 			*Target->GetReplicatorClassName(),
 			*Target->GetActorCPPClassName()
 		);
@@ -276,7 +295,7 @@ bool FReplicatorCodeGenerator::GenerateActorCode(UClass* TargetActor, FReplicato
 	else
 	{
 		ReplicatorCode.RegisterReplicatorCode = FString::Printf(
-			TEXT("REGISTER_REPLICATOR_BP(%s, \"%s\");"),
+			TEXT("REGISTER_REPLICATOR_BP_BASE(%s, \"%s\", false);"),
 			*Target->GetReplicatorClassName(),
 			*TargetActor->GetPathName()
 		);

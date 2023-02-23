@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Commandlets/CookCommandlet.h"
+#include "ChanneldCookCommandlet.h"
 #include "CookAndFilterRepActorCommandlet.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class REPLICATORGENERATOR_API UCookAndFilterRepActorCommandlet : public UCookCommandlet
+class REPLICATORGENERATOR_API UCookAndFilterRepActorCommandlet : public UChanneldCookCommandlet
 {
 	GENERATED_BODY()
 

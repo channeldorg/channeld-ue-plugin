@@ -37,7 +37,7 @@ public:
 	virtual bool IsTickableInEditor() const;
 	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UChanneldRepGenTickable, STATGROUP_Tickables); }
 
-	void AddComponentToActorBlueprint(UClass* CompClass, FName CompName);
+	void AddComponentToBlueprints(UClass* CompClass, FName CompName);
 
 	void CancelFilterRepActor();
 private:

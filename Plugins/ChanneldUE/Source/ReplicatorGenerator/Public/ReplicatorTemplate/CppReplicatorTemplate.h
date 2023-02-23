@@ -149,6 +149,7 @@ static const TCHAR* CodeGen_ProtoTemplate =
 	LR"EOF(
 syntax = "proto3";
 {Code_Import}
+{Option}
 package {Declare_ProtoPackageName};
 {Definition_ProtoStateMsg}
 )EOF";

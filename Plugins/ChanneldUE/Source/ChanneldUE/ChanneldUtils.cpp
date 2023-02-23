@@ -1,4 +1,7 @@
 #include "ChanneldUtils.h"
+
+#include "ChanneldGameInstanceSubsystem.h"
+#include "ChanneldNetDriver.h"
 #include "ChanneldTypes.h"
 
 UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache, UChanneldNetConnection* ClientConn)
@@ -119,7 +122,7 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 	return Obj;
 }
 
-const unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnection* Connection /* = nullptr*/)
+unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnection* Connection /* = nullptr*/)
 {
 	unrealpb::UnrealObjectRef ObjRef;
 	ObjRef.set_netguid(0);
@@ -600,9 +603,9 @@ void ChanneldUtils::SetActorRoleByOwningConnId(AActor* Actor, Channeld::Connecti
 		Actor->SetRole(ROLE_AutonomousProxy);
 	}
 	else// if (Actor->GetLocalRole() == ROLE_AutonomousProxy)
-		{
+	{
 		Actor->SetRole(ROLE_SimulatedProxy);
-		}
+	}
 	const static UEnum* Enum = StaticEnum<ENetRole>();
 	UE_LOG(LogChanneld, Verbose, TEXT("[Client] Updated actor %s's role from %s to %s, local/remote owning connId: %d/%d"),
 		*Actor->GetName(),
@@ -611,4 +614,29 @@ void ChanneldUtils::SetActorRoleByOwningConnId(AActor* Actor, Channeld::Connecti
 		ConnToChanneld->GetConnId(),
 		OwningConnId
 	);
+}
+
+ENetRole ChanneldUtils::ServerGetActorNetRole(AActor* Actor)
+{
+	if (UWorld* World = Actor->GetWorld())
+	{
+		if (auto NetDriver = Cast<UChanneldNetDriver>(World->GetNetDriver()))
+		{
+			if (NetDriver->ChannelDataView.IsValid())
+			{
+				auto ChId = NetDriver->ChannelDataView->GetOwningChannelId(Actor);
+				if (NetDriver->GetConnToChanneld()->OwnedChannels.Contains(ChId))
+				{
+					return ROLE_Authority;
+				}
+				else
+				{
+					return ROLE_SimulatedProxy;
+				}
+			}
+		}
+	}
+
+	UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::ServerGetActorNetRole failed. Actor: %s"), *Actor->GetName());
+	return ROLE_None;
 }

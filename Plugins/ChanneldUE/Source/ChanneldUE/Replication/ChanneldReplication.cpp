@@ -2,22 +2,82 @@
 
 TMap<const UClass*, const FReplicatorCreateFunc> ChanneldReplication::ReplicatorRegistry;
 TMap<const FString, const FReplicatorCreateFunc> ChanneldReplication::BPReplicatorRegistry;
+TArray<FReplicatorStateInProto> ChanneldReplication::ReplicatorStatesInProto;
+TMap<const UClass*, FReplicatorStateInProto> ChanneldReplication::ReplicatorTargetClassToStateInProto;
 
-void ChanneldReplication::RegisterReplicator(const UClass* TargetClass, const FReplicatorCreateFunc& Func)
+FReplicatorStateInProto* ChanneldReplication::FindReplicatorStateInProto(const UClass* TargetClass)
 {
-	if (ReplicatorRegistry.Contains(TargetClass))
+	// Find in the cached map
+	FReplicatorStateInProto* Result = ReplicatorTargetClassToStateInProto.Find(TargetClass);
+	if (Result)
+	{
+		return Result;
+	}
+
+	// Find in the original array
+	for (FReplicatorStateInProto& State : ReplicatorStatesInProto)
+	{
+		if (State.TargetClass)
+		{
+			if (State.TargetClass == TargetClass)
+			{
+				Result = &State;
+				break;
+			}
+		}
+		else
+		{
+			if (State.TargetClassPathName == TargetClass->GetPathName())
+			{
+				State.TargetClass = TargetClass;
+				Result = &State;
+				break;;
+			}
+		}
+	}
+
+	if (Result)
+	{
+		// Update the cached map
+		ReplicatorTargetClassToStateInProto.Add(TargetClass, *Result);
+	}
+	
+	return Result;
+}
+
+void ChanneldReplication::RegisterReplicator(const UClass* TargetClass, const FReplicatorCreateFunc& Func, bool bOverride, bool bIsInMap)
+{
+	bool bExists = ReplicatorRegistry.Contains(TargetClass);
+	if (!bOverride && bExists)
 	{
 		UE_LOG(LogChanneld, Log, TEXT("%s already exists in the replicator registry, will not be added."), *TargetClass->GetFullName());
 		return;
 	}
 	ReplicatorRegistry.Add(TargetClass, Func);
+	ReplicatorRegistry.Emplace(TargetClass, Func);
 	UE_LOG(LogChanneld, Log, TEXT("Registered replicator for %s, registry size: %d"), *TargetClass->GetFullName(), ReplicatorRegistry.Num());
+
+	if (!bExists)
+	{
+		ReplicatorStatesInProto.Add(FReplicatorStateInProto(ReplicatorStatesInProto.Num(), TargetClass, nullptr, bIsInMap));
+	}
 }
 
-void ChanneldReplication::RegisterReplicator(const FString& PathName, const FReplicatorCreateFunc& Func)
+void ChanneldReplication::RegisterReplicator(const FString& PathName, const FReplicatorCreateFunc& Func, bool bOverride, bool bIsInMap)
 {
+	bool bExists = BPReplicatorRegistry.Contains(PathName);
+	if (!bOverride && bExists)
+	{
+		UE_LOG(LogChanneld, Log, TEXT("%s already exists in the replicator registry, will not be added."), *PathName);
+		return;
+	}
 	BPReplicatorRegistry.Add(PathName, Func);
 	UE_LOG(LogChanneld, Log, TEXT("Registered replicator for %s, registry size: %d"), *PathName, BPReplicatorRegistry.Num());
+
+	if (!bExists)
+	{
+		ReplicatorStatesInProto.Add(FReplicatorStateInProto(ReplicatorStatesInProto.Num(), nullptr, &PathName, bIsInMap));
+	}
 }
 
 // TODO: use the pool

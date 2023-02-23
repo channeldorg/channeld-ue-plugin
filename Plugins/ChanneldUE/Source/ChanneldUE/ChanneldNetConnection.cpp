@@ -4,13 +4,12 @@
 #include "Net/DataChannel.h"
 #include "PacketHandler.h"
 #include "PacketHandlers/StatelessConnectHandlerComponent.h"
-#include "Replication/ChanneldReplicationComponent.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameStateBase.h"
-#include "GameFramework/PlayerController.h"
 #include "unreal_common.pb.h"
 #include "ChanneldUtils.h"
 #include "ChanneldSettings.h"
+#include "Interest/ClientInterestManager.h"
 
 UChanneldNetConnection::UChanneldNetConnection(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -38,6 +37,8 @@ void UChanneldNetConnection::InitBase(UNetDriver* InDriver, class FSocket* InSoc
 		// Reset the PacketHandler to remove the StatelessConnectHandler and bypass the handshake process.
 		Handler.Reset(NULL);
 	}
+
+	ClientInterestManager = NewObject<UClientInterestManager>(this, UClientInterestManager::StaticClass());
 }
 
 void UChanneldNetConnection::InitLocalConnection(UNetDriver* InDriver, class FSocket* InSocket, const FURL& InURL, EConnectionState InState, int32 InMaxPacket /*= 0*/, int32 InPacketOverhead /*= 0*/)
@@ -64,6 +65,8 @@ void UChanneldNetConnection::InitRemoteConnection(UNetDriver* InDriver, class FS
 	MaxPacket = Channeld::MaxPacketSize;
 	PacketOverhead = 10;
 	InitSendBuffer();
+
+	ClientInterestManager->ServerSetup(this);
 
 	// This is for a client that needs to log in, setup ClientLoginState and ExpectedClientLoginMsgType to reflect that
 	SetClientLoginState(EClientLoginState::LoggingIn);
@@ -112,6 +115,11 @@ void UChanneldNetConnection::LowLevelSend(void* Data, int32 CountBits, FOutPacke
 	}
 }
 
+Channeld::ChannelId UChanneldNetConnection::GetSendToChannelId()
+{
+	return CastChecked<UChanneldNetDriver>(Driver)->GetSendToChannelId(this);
+}
+
 void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, int32 DataSize, Channeld::ChannelId ChId)
 {
 	if (DataSize <= 0)
@@ -125,12 +133,15 @@ void UChanneldNetConnection::SendData(uint32 MsgType, const uint8* DataToSend, i
 		return;
 	}
 	
-	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
-	auto ConnToChanneld = NetDriver->GetConnToChanneld();
+	auto ConnToChanneld = GEngine->GetEngineSubsystem<UChanneldConnection>();
 	
 	if (ChId == Channeld::InvalidChannelId)
 	{
-		ChId = NetDriver->GetSendToChannelId(this);
+		ChId = GetSendToChannelId();
+		if (ChId == Channeld::InvalidChannelId)
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("UChanneldNetConnection::SendData failed as the NetConn %d has no channelId"), GetConnId());
+		}
 	}
 	
 	if (ConnToChanneld->IsServer())
@@ -310,16 +321,15 @@ FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= fa
 		return TEXT("");
 	}
 	
-	auto NetDriver = CastChecked<UChanneldNetDriver>(Driver);
 	if (RemoteAddr)
 	{
 		if (bAppendPort)
-			RemoteAddr->SetPort(NetDriver->GetSendToChannelId(this));
+			RemoteAddr->SetPort(GetSendToChannelId());
 		return RemoteAddr->ToString(bAppendPort);
 	}
 	else
 	{
-		return bAppendPort ? FString::Printf(TEXT("0.0.0.0:d"), NetDriver->GetSendToChannelId(this)) : TEXT("0.0.0.0");
+		return bAppendPort ? FString::Printf(TEXT("0.0.0.0:%d"), GetSendToChannelId()) : TEXT("0.0.0.0");
 	}
 }
 
@@ -334,6 +344,16 @@ FString UChanneldNetConnection::LowLevelDescribe()
 		: State == USOCK_Closed ? TEXT("Closed")
 		: TEXT("Invalid")
 	);
+}
+
+void UChanneldNetConnection::CleanUp()
+{
+	if (ClientInterestManager)
+	{
+		ClientInterestManager->CleanUp();
+	}
+	
+	Super::CleanUp();
 }
 
 void UChanneldNetConnection::Tick(float DeltaSeconds)

@@ -172,7 +172,10 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	{
 		ClientReceiveLocalizedMessageParams* TypedParams = (ClientReceiveLocalizedMessageParams*)Params;
 		auto Msg = MakeShared<unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params>();
-		Msg->set_message(std::string(TCHAR_TO_UTF8(*TypedParams->Message->GetName())));
+		if (*TypedParams->Message)
+		{
+			Msg->set_message(std::string(TCHAR_TO_UTF8(*TypedParams->Message->GetName())));
+		}
 		Msg->set_switch_(TypedParams->Switch);
 		Msg->mutable_relatedplayerstate_1()->CopyFrom(ChanneldUtils::GetRefOfObject(TypedParams->RelatedPlayerState_1));
 		Msg->mutable_relatedplayerstate_2()->CopyFrom(ChanneldUtils::GetRefOfObject(TypedParams->RelatedPlayerState_2));

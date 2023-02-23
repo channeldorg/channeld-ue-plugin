@@ -105,6 +105,8 @@ public:
 	void Send(Channeld::ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const FChanneldMessageHandlerFunc& HandlerFunc = nullptr);
 	// Send with underlying bytes.
 	void SendRaw(Channeld::ChannelId ChId, uint32 MsgType, const std::string& MsgBody, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const FChanneldMessageHandlerFunc& HandlerFunc = nullptr);
+	// Send a message that wrapped by the ServerForwardMessage to a specific connection. If ClientConnId is 0, the message will be forwarded to the channel owner.
+	void Forward(Channeld::ChannelId ChId, uint32 MsgType, const google::protobuf::Message& Msg, Channeld::ConnectionId ClientConnId = 0);
 	// Send a message that wrapped by the ServerForwardMessage. This is mainly for using channeld for broadcasting.
 	void Broadcast(Channeld::ChannelId ChId, uint32 MsgType, const google::protobuf::Message& Msg, int BroadcastType);
 	/**

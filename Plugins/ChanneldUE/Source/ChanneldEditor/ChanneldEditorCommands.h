@@ -27,5 +27,5 @@ public:
 	TSharedPtr<FUICommandInfo> ServerSettingsCommand;
 	TSharedPtr<FUICommandInfo> StopServersCommand;
 	TSharedPtr<FUICommandInfo> GenerateReplicatorCommand;
-	TSharedPtr<FUICommandInfo> AddReplicationComponentCommand;
+	TSharedPtr<FUICommandInfo> AddRepComponentsToBPsCommand;
 };

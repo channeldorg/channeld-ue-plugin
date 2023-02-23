@@ -19,7 +19,7 @@ class CHANNELDUE_API UChannelDataView : public UObject
 public:
 	UChannelDataView(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	FORCEINLINE void RegisterChannelDataTemplate(channeldpb::ChannelType ChannelType, const google::protobuf::Message* MsgTemplate)
+	FORCEINLINE void RegisterChannelDataTemplate(int ChannelType, const google::protobuf::Message* MsgTemplate)
 	{
 		ChannelDataTemplates.Add(ChannelType, MsgTemplate);
 		if (AnyForTypeUrl == nullptr)
@@ -43,10 +43,11 @@ public:
 	void AddActorProvider(Channeld::ChannelId ChId, AActor* Actor);
 	void AddObjectProvider(UObject* Obj);
 	void RemoveActorProvider(AActor* Actor, bool bSendRemoved);
+	void RemoveObjectProvider(UObject* Obj, bool bSendRemoved);
 	virtual void RemoveProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
-	virtual void MoveProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, IChannelDataProvider* Provider);
-	void MoveObjectProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, UObject* Provider);
+	virtual void MoveProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, IChannelDataProvider* Provider, bool bSendRemoved);
+	void MoveObjectProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, UObject* Provider, bool bSendRemoved);
 
 	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, Channeld::ChannelId ChId){}
 	virtual void OnRemoveClientConnection(UChanneldNetConnection* ClientConn){}
@@ -77,6 +78,7 @@ public:
 
 	virtual bool SendMulticastRPC(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg);
 
+	int32 SendChannelUpdate(Channeld::ChannelId ChId);
 	int32 SendAllChannelUpdates();
 
 	void OnDisconnect();
@@ -127,20 +129,15 @@ protected:
 	void ReceiveUninitServer();
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BeginUninitClient"))
 	void ReceiveUninitClient();
-	/**
-	 * @brief Server's callback when receiving the unsub message of a client.
-	 * Default implementation: Destroy the Pawn related to the NetConn and close the NetConn.
-	 * @param ClientConnId 
-	 * @param ChId 
-	 */
-	virtual void OnClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId);
 
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
-	
-	void HandleUnsub(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	bool ConsumeChannelUpdateData(Channeld::ChannelId ChId, google::protobuf::Message* UpdateData);
 
+	void HandleUnsub(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	virtual void ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId){}
+	
 	// Give the subclass a chance to mess with the removed providers, e.g. add a provider back to a channel.
-	virtual void OnUnsubFromChannel(Channeld::ChannelId ChId, const TSet<FProviderInternal>& RemovedProviders) {}
+	virtual void OnRemovedProvidersFromChannel(Channeld::ChannelId ChId, channeldpb::ChannelType ChannelType, const TSet<FProviderInternal>& RemovedProviders) {}
 
 	/**
 	 * @brief Checks if the channel data contains any unsolved NetworkGUID.
@@ -163,8 +160,11 @@ protected:
 	TMap<const FNetworkGUID, Channeld::ChannelId> NetIdOwningChannels;
 
 private:
+	
+	// Use the Arena for faster allocation. See https://developers.google.com/protocol-buffers/docs/reference/arenas
+	google::protobuf::Arena ArenaForSend;
 
-	TMap<channeldpb::ChannelType, const google::protobuf::Message*> ChannelDataTemplates;
+	TMap<int, const google::protobuf::Message*> ChannelDataTemplates;
 	google::protobuf::Any* AnyForTypeUrl;
 	TMap<FString, const google::protobuf::Message*> ChannelDataTemplatesByTypeUrl;
 

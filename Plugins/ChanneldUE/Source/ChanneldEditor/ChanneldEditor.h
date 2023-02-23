@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
 #include "ChanneldEditorSettings.h"
 
 DECLARE_LOG_CATEGORY_CLASS(LogChanneldEditor, Log, All);
@@ -33,13 +32,17 @@ private:
 	void StopServersAction();
 
 	void GenerateReplicatorAction();
-	void AddRepCompToBPAction();
+	void AddRepCompsToBPsAction();
 
-	void GenReplicatorProto(FChanneldProcWorkerThread* ProcWorker);
+	void RecompileGameCode() const;
+
+	void GenReplicatorProto();
 
 	void OpenEditorSettingsAction();
 	
 	void LaunchServerGroup(const FServerGroup& ServerGroup);
+
+	FProcHandle ChanneldProcHandle;
 	
 	TSharedPtr<class FUICommandList> PluginCommands;
 	TSharedRef<SWidget> CreateMenuContent(TSharedPtr<FUICommandList> Commands);
@@ -48,6 +51,7 @@ private:
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenRepWorkThread;
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoWorkThread;
 	UChanneldMissionNotiProxy* GenRepMissionNotifyProxy;
+	UChanneldMissionNotiProxy* GenProtoMissionNotifyProxy;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> AddRepCompWorkThread;
 	UChanneldMissionNotiProxy* AddRepCompMissionNotifyProxy;
