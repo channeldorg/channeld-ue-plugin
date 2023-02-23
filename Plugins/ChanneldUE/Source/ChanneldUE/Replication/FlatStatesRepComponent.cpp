@@ -1,8 +1,8 @@
 #include "FlatStatesRepComponent.h"
 
 #include "ChanneldReplication.h"
-#include "Protobuf/ThirdParty/google/protobuf/map_field.h"
-#include "Protobuf/ThirdParty/google/protobuf/reflection.h"
+#include "google/protobuf/map_field.h"
+#include "google/protobuf/reflection.h"
 
 using namespace google::protobuf;
 

@@ -20,22 +20,17 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "ProtobufUE",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "ChanneldEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"
     },
     {
       "Name": "ReplicatorGenerator",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "ChanneldProtobuf",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "ChanneldProtobufEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"
     }

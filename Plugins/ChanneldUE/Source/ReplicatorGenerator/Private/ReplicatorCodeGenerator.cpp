@@ -284,20 +284,23 @@ bool FReplicatorCodeGenerator::GenerateActorCode(
 	// ---------- Protobuf ----------
 
 	// ---------- Register ----------
+	FString IsMapInChannelData = Target->IsMapInChannelData() ? TEXT("true") : TEXT("false");
 	if (!bIsBlueprint)
 	{
 		ReplicatorCode.RegisterReplicatorCode = FString::Printf(
-			TEXT("REGISTER_REPLICATOR_BASE(%s, %s, false);"),
+			TEXT("REGISTER_REPLICATOR_BASE(%s, %s, false, %s);"),
 			*Target->GetReplicatorClassName(),
-			*Target->GetActorCPPClassName()
+			*Target->GetActorCPPClassName(),
+			*IsMapInChannelData
 		);
 	}
 	else
 	{
 		ReplicatorCode.RegisterReplicatorCode = FString::Printf(
-			TEXT("REGISTER_REPLICATOR_BP_BASE(%s, \"%s\", false);"),
+			TEXT("REGISTER_REPLICATOR_BP_BASE(%s, \"%s\", false, %s);"),
 			*Target->GetReplicatorClassName(),
-			*TargetActor->GetPathName()
+			*TargetActor->GetPathName(),
+			*IsMapInChannelData
 		);
 	}
 	// ---------- Register ----------
