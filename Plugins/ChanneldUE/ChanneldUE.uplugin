@@ -33,16 +33,17 @@
       "Name": "ReplicatorGenerator",
       "Type": "Editor",
       "LoadingPhase": "Default"
+    },
+    {
+      "Name": "PrometheusUE",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
     }
   ],
   "Plugins": [
     {
       "Name": "ReplicationGraph",
       "Enabled": true
-    },
-    {
-      "Name": "PrometheusUE",
-      "Enabled": true
-    },
+    }
   ]
 }
