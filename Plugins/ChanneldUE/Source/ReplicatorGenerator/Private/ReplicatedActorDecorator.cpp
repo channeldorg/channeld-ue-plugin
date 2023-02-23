@@ -339,3 +339,9 @@ FString FReplicatedActorDecorator::GetCode_OverrideGetNetGUID()
 	}
 	return TEXT("");
 }
+
+bool FReplicatedActorDecorator::IsMapInChannelData()
+{
+	// Currently, only replicator of GameState is singleton in ChanneldData.
+	return !Target->IsChildOf(AGameStateBase::StaticClass()) && true;
+}

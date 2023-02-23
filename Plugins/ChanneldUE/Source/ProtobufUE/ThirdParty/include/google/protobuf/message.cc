@@ -254,9 +254,11 @@ GeneratedMessageFactory* GeneratedMessageFactory::singleton() {
 
 void GeneratedMessageFactory::RegisterFile(
     const google::protobuf::internal::DescriptorTable* table) {
-  if (!InsertIfNotPresent(&file_map_, table->filename, table)) {
-    GOOGLE_LOG(FATAL) << "File is already registered: " << table->filename;
-  }
+  file_map_.insert(HASH_MAP<StringPiece, const google::protobuf::internal::DescriptorTable*,
+           STR_HASH_FXN>::value_type{table->filename, table});
+  // if (!InsertIfNotPresent(&file_map_, table->filename, table)) {
+  //   GOOGLE_LOG(FATAL) << "File is already registered: " << table->filename;
+  // }
 }
 
 void GeneratedMessageFactory::RegisterType(const Descriptor* descriptor,

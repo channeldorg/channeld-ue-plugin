@@ -1,21 +1,15 @@
-﻿using UnrealBuildTool;
+using UnrealBuildTool;
 using System.IO;
 
-public class ChanneldProtobuf : ModuleRules
+public class ProtobufUE : ModuleRules
 {
-	public ChanneldProtobuf(ReadOnlyTargetRules Target) : base(Target)
+	public ProtobufUE(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PrivateDependencyModuleNames.AddRange(new string[]
-		{
-			"Core",
-		});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core" });
 
-		PublicSystemIncludePaths.AddRange(new string[]
-		{
-			Path.Combine(ModuleDirectory, "ThirdParty"),
-		});
+		PublicSystemIncludePaths.AddRange(new string[] { Path.Combine(ModuleDirectory, "ThirdParty", "include") });
 
 		if (Target.bForceEnableRTTI)
 		{
@@ -35,7 +29,7 @@ public class ChanneldProtobuf : ModuleRules
 				"PROTOBUF_USE_DLLS", // Basically for ThreadCache
 			}
 		);
-		
+
 		ShadowVariableWarningLevel = WarningLevel.Off;
 		bEnableUndefinedIdentifierWarnings = false;
 	}

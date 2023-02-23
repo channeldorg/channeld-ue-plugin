@@ -67,7 +67,7 @@ MutableRepeatedFieldRef<T> Reflection::GetMutableRepeatedFieldRef(
 
 // RepeatedFieldRef definition for non-message types.
 template <typename T>
-class RepeatedFieldRef<
+class PROTOBUF_EXPORT RepeatedFieldRef<
     T, typename std::enable_if<!std::is_base_of<Message, T>::value>::type> {
   typedef typename internal::RefTypeTraits<T>::iterator IteratorType;
   typedef typename internal::RefTypeTraits<T>::AccessorType AccessorType;
@@ -155,7 +155,7 @@ class MutableRepeatedFieldRef<
 
 // RepeatedFieldRef definition for message types.
 template <typename T>
-class RepeatedFieldRef<
+class PROTOBUF_EXPORT RepeatedFieldRef<
     T, typename std::enable_if<std::is_base_of<Message, T>::value>::type> {
   typedef typename internal::RefTypeTraits<T>::iterator IteratorType;
   typedef typename internal::RefTypeTraits<T>::AccessorType AccessorType;

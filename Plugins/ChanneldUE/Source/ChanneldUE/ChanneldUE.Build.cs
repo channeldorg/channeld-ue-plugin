@@ -21,7 +21,7 @@ public class ChanneldUE : ModuleRules
             //"OnlineSubsystemUtils",
             "Sockets",
             "PacketHandler",
-            "Protobuf",
+            "ProtobufUE",
             "ReplicationGraph",
             "PrometheusUE",
             }

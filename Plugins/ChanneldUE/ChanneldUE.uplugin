@@ -20,6 +20,11 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "ProtobufUE",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "ChanneldEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"
@@ -31,10 +36,6 @@
     }
   ],
   "Plugins": [
-    {
-      "Name": "Protobuf",
-      "Enabled": true
-    },
     {
       "Name": "ReplicationGraph",
       "Enabled": true

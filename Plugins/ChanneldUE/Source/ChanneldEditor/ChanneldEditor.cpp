@@ -6,7 +6,6 @@
 #include "ChanneldEditorStyle.h"
 #include "ChanneldMissionNotiProxy.h"
 #include "AddCompToBPSubsystem.h"
-#include "ChanneldProtobufEditor.h"
 #include "ChanneldSettings.h"
 #include "ChanneldSettingsDetails.h"
 #include "LevelEditor.h"
@@ -23,6 +22,7 @@
 #include "ChanneldTypes.h"
 #include "ClientInterestSettingsCustomization.h"
 #include "ILiveCodingModule.h"
+#include "ProtocHelper.h"
 #include "Async/Async.h"
 #include "Misc/HotReloadInterface.h"
 
@@ -393,7 +393,7 @@ void FChanneldEditorModule::GenReplicatorProto()
 		UE_LOG(LogChanneldEditor, Verbose, TEXT("Game module export API macro is empty"));
 	}
 
-	const FString Args = ChanneldProtobufHelpers::BuildProtocProcessArguments(
+	const FString Args = FProtocHelper::BuildProtocProcessArguments(
 		ReplicatorStorageDir,
 		FString::Printf(TEXT("dllexport_decl=%s"), *GameModuleExportAPIMacro),
 		{
@@ -404,7 +404,7 @@ void FChanneldEditorModule::GenReplicatorProto()
 	);
 
 	IFileManager& FileManager = IFileManager::Get();
-	const FString ProtocPath = ChanneldProtobufHelpers::GetProtocPath();
+	const FString ProtocPath = FProtocHelper::GetProtocPath();
 	if (!FileManager.FileExists(*ProtocPath))
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("Protoc path is invaild: %s"), *ProtocPath);

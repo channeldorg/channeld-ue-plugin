@@ -47,7 +47,6 @@ public class ChanneldEditor : ModuleRules
                 "ReplicatorGenerator",
                 "UATHelper",
                 "Kismet",
-                "ChanneldProtobufEditor",
                 "LiveCoding",
                 // ... add private dependencies that you statically link with here ...	
 			}
@@ -61,29 +60,13 @@ public class ChanneldEditor : ModuleRules
 			}
             );
         
-        switch (Target.Configuration)
-        {
-            case UnrealTargetConfiguration.Debug:
+        PrivateDefinitions.AddRange(
+            new string[]
             {
-                PublicDefinitions.Add("COMPILER_CONFIGURATION_NAME=\"Debug\"");
-                break;
+                "PROTOC_PATH=R\"(" + Path.Combine(PluginDirectory, "Source", "ProtobufUE", "ThirdParty", "bin", "protoc.exe") + ")\"",
+                "PROTOBUF_INCLUDE_PATH=R\"(" + Path.Combine(PluginDirectory, "Source", "ProtobufUE", "ThirdParty", "include") + ")\"",
             }
-            case UnrealTargetConfiguration.DebugGame:
-            {
-                PublicDefinitions.Add("COMPILER_CONFIGURATION_NAME=\"DebugGame\"");
-                break;
-            }
-            case UnrealTargetConfiguration.Development:
-            {
-                PublicDefinitions.Add("COMPILER_CONFIGURATION_NAME=\"Development\"");
-                break;
-            }
-            default:
-            {
-                PublicDefinitions.Add("COMPILER_CONFIGURATION_NAME=\"\"");
-                break;
-            }
-        };
+        );
         
         OptimizeCode = CodeOptimization.InShippingBuildsOnly;
     }

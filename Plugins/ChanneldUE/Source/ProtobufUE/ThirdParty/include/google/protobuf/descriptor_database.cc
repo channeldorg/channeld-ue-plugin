@@ -637,14 +637,30 @@ bool EncodedDescriptorDatabase::DescriptorIndex::AddFile(const FileProto& file,
   }
   all_values_.back().encoded_package = EncodeString(file.package());
 
-  if (!InsertIfNotPresent(
-          &by_name_, FileEntry{static_cast<int>(all_values_.size() - 1),
-                               EncodeString(file.name())}) ||
-      std::binary_search(by_name_flat_.begin(), by_name_flat_.end(),
-                         file.name(), by_name_.key_comp())) {
-    GOOGLE_LOG(ERROR) << "File already exists in database: " << file.name();
-    return false;
+  // Forcibly add the file to the by_name_ map. When you recomplie modules,
+  // the dlls of the module will reload, so the static register descriptor will be call again,
+  // and the by_name_ will be insert again, so we need to remove the old one in by_name_flat_ if it is exist.
+  String EncodedFileName = EncodeString(file.name());
+  by_name_.insert(
+    FileEntry{static_cast<int>(all_values_.size() - 1), EncodedFileName}
+  );
+  if(std::binary_search(by_name_flat_.begin(), by_name_flat_.end(), file.name(), by_name_.key_comp())) {
+    for (std::vector<FileEntry>::iterator it = by_name_flat_.begin(); it != by_name_flat_.end(); ++it) {
+      if(it->encoded_name == EncodedFileName) {
+        by_name_flat_.erase(it);
+        break;
+      }
+    }
   }
+  
+  // if (!InsertIfNotPresent(
+  //         &by_name_, FileEntry{static_cast<int>(all_values_.size() - 1),
+  //                              EncodeString(file.name())}) ||
+  //     std::binary_search(by_name_flat_.begin(), by_name_flat_.end(),
+  //                        file.name(), by_name_.key_comp())) {
+  //   GOOGLE_LOG(ERROR) << "File already exists in database: " << file.name();
+  //   return false;
+  // }
 
   for (const auto& message_type : file.message_type()) {
     if (!AddSymbol(message_type.name())) return false;
@@ -668,12 +684,12 @@ template <typename Iter, typename Iter2, typename Index>
 static bool CheckForMutualSubsymbols(StringPiece symbol_name, Iter* iter,
                                      Iter2 end, const Index& index) {
   if (*iter != end) {
-    if (IsSubSymbol((*iter)->AsString(index), symbol_name)) {
-      GOOGLE_LOG(ERROR) << "Symbol name \"" << symbol_name
-                 << "\" conflicts with the existing symbol \""
-                 << (*iter)->AsString(index) << "\".";
-      return false;
-    }
+    // if (IsSubSymbol((*iter)->AsString(index), symbol_name)) {
+    //   GOOGLE_LOG(ERROR) << "Symbol name \"" << symbol_name
+    //              << "\" conflicts with the existing symbol \""
+    //              << (*iter)->AsString(index) << "\".";
+    //   return false;
+    // }
 
     // OK, that worked.  Now we have to make sure that no symbol in the map is
     // a sub-symbol of the one we are inserting.  The only symbol which could
@@ -747,22 +763,40 @@ template <typename FieldProto>
 bool EncodedDescriptorDatabase::DescriptorIndex::AddExtension(
     StringPiece filename, const FieldProto& field) {
   if (!field.extendee().empty() && field.extendee()[0] == '.') {
-    // The extension is fully-qualified.  We can use it as a lookup key in
-    // the by_symbol_ table.
-    if (!InsertIfNotPresent(
-            &by_extension_,
-            ExtensionEntry{static_cast<int>(all_values_.size() - 1),
-                           EncodeString(field.extendee()), field.number()}) ||
-        std::binary_search(
+
+    String EncodedExtendeName = EncodeString(field.extendee());
+    by_extension_.insert(
+      ExtensionEntry{static_cast<int>(all_values_.size() - 1), EncodedExtendeName, field.number()}
+    );
+    if(std::binary_search(
             by_extension_flat_.begin(), by_extension_flat_.end(),
             std::make_pair(field.extendee().substr(1), field.number()),
-            by_extension_.key_comp())) {
-      GOOGLE_LOG(ERROR) << "Extension conflicts with extension already in database: "
-                    "extend "
-                 << field.extendee() << " { " << field.name() << " = "
-                 << field.number() << " } from:" << filename;
-      return false;
+            by_extension_.key_comp())
+      ) {
+      for (std::vector<ExtensionEntry>::iterator it = by_extension_flat_.begin(); it != by_extension_flat_.end(); ++it) {
+        if(it->encoded_extendee == EncodedExtendeName && it->extension_number == field.number()) {
+          by_extension_flat_.erase(it);
+          break;
+        }
+      }
     }
+    
+    // The extension is fully-qualified.  We can use it as a lookup key in
+    // the by_symbol_ table.
+    // if (!InsertIfNotPresent(
+    //         &by_extension_,
+    //         ExtensionEntry{static_cast<int>(all_values_.size() - 1),
+    //                        EncodeString(field.extendee()), field.number()}) ||
+    //     std::binary_search(
+    //         by_extension_flat_.begin(), by_extension_flat_.end(),
+    //         std::make_pair(field.extendee().substr(1), field.number()),
+    //         by_extension_.key_comp())) {
+    //   GOOGLE_LOG(ERROR) << "Extension conflicts with extension already in database: "
+    //                 "extend "
+    //              << field.extendee() << " { " << field.name() << " = "
+    //              << field.number() << " } from:" << filename;
+    //   return false;
+    // }
   } else {
     // Not fully-qualified.  We can't really do anything here, unfortunately.
     // We don't consider this an error, though, because the descriptor is
