@@ -1,8 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ChannelDataProvider.h"
-#include "Components/SceneComponent.h"
 #include "google/protobuf/message.h"
 //#include "ChanneldReplicatorBase.generated.h"
 

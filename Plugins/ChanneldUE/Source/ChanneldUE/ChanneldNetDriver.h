@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "ChanneldTypes.h"
 #include "ChanneldConnection.h"
-#include "ChannelDataProvider.h"
+#include "ChannelDataInterfaces.h"
 #include "ChanneldNetConnection.h"
 #include "Engine/NetDriver.h"
 #include "Sockets.h"

@@ -4,7 +4,7 @@
 #include "ChanneldTypes.h"
 #include "channeld.pb.h"
 #include "ChanneldConnection.h"
-#include "ChannelDataProvider.h"
+#include "ChannelDataInterfaces.h"
 #include "ChanneldNetConnection.h"
 #include "google/protobuf/message.h"
 #include "UObject/WeakInterfacePtr.h"
@@ -19,7 +19,7 @@ class CHANNELDUE_API UChannelDataView : public UObject
 public:
 	UChannelDataView(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	FORCEINLINE void RegisterChannelDataTemplate(int ChannelType, const google::protobuf::Message* MsgTemplate)
+	FORCEINLINE void RegisterChannelDataTemplate(int ChannelType, google::protobuf::Message* MsgTemplate)
 	{
 		ChannelDataTemplates.Add(ChannelType, MsgTemplate);
 		if (AnyForTypeUrl == nullptr)
@@ -166,7 +166,7 @@ private:
 
 	TMap<int, const google::protobuf::Message*> ChannelDataTemplates;
 	google::protobuf::Any* AnyForTypeUrl;
-	TMap<FString, const google::protobuf::Message*> ChannelDataTemplatesByTypeUrl;
+	TMap<FString, google::protobuf::Message*> ChannelDataTemplatesByTypeUrl;
 
 	TMap<Channeld::ChannelId, TSet<FProviderInternal>> ChannelDataProviders;
 	TMap<Channeld::ChannelId, google::protobuf::Message*> RemovedProvidersData;

@@ -4,6 +4,7 @@ TMap<const UClass*, const FReplicatorCreateFunc> ChanneldReplication::Replicator
 TMap<const FString, const FReplicatorCreateFunc> ChanneldReplication::BPReplicatorRegistry;
 TArray<FReplicatorStateInProto> ChanneldReplication::ReplicatorStatesInProto;
 TMap<const UClass*, FReplicatorStateInProto> ChanneldReplication::ReplicatorTargetClassToStateInProto;
+TMap<const FName, IChannelDataProcessor*> ChanneldReplication::ChannelDataMergerRegistry;
 
 FReplicatorStateInProto* ChanneldReplication::FindReplicatorStateInProto(const UClass* TargetClass)
 {
@@ -117,4 +118,10 @@ TArray<FChanneldReplicatorBase*> ChanneldReplication::FindAndCreateReplicators(U
 	//	UE_LOG(LogChanneld, Log, TEXT("Unable to find replicator for %s, registry size: %d"), *ReplicatedObj->GetFullName(), ReplicatorRegistry.Num());
 	//}
 	return Result;
+}
+
+void ChanneldReplication::RegisterChannelDataMerger(const FName& MessageFullName, IChannelDataProcessor* Processor)
+{
+	ChannelDataMergerRegistry.Add(MessageFullName, Processor);
+	UE_LOG(LogChanneld, Log, TEXT("Registered merger for %s"), *MessageFullName.ToString());
 }

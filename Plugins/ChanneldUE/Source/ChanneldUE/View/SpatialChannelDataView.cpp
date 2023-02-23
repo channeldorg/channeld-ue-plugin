@@ -915,6 +915,15 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 	{
 		TryToResolveObjects(HandoverMsg->dstchannelid(), UnresolvedNetIds);
 	}
+
+	// Applies the channel data update to spawn the objects that just entered the client's interest areas.
+	if (HandoverMsg->has_data())
+	{
+		channeldpb::ChannelDataUpdateMessage UpdateMsg;
+		UpdateMsg.mutable_data()->CopyFrom(HandoverData.channeldata());
+		UE_LOG(LogChanneld, Verbose, TEXT("Applying handover channel data:"));
+		HandleChannelDataUpdate(_, ChId, &UpdateMsg);
+	}
 }
 
 void USpatialChannelDataView::InitClient()

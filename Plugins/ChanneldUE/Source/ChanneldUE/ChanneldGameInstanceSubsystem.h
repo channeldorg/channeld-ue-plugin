@@ -7,7 +7,7 @@
 #include "ChanneldTypes.h"
 #include "Tickable.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "ChannelDataProvider.h"
+#include "ChannelDataInterfaces.h"
 #include "ChanneldSettings.h"
 #include "Interest/ClientInterestManager.h"
 #include "UObject/WeakInterfacePtr.h"

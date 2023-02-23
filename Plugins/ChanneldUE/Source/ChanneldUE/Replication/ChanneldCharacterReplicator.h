@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ChannelDataProvider.h"
 #include "GameFramework\Character.h"
 #include "ChanneldReplicatorBase.h"
 
