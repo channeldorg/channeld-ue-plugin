@@ -4,7 +4,7 @@
 #include "ChanneldTypes.h"
 #include "channeld.pb.h"
 #include "ChanneldConnection.h"
-#include "ChannelDataProvider.h"
+#include "ChannelDataInterfaces.h"
 #include "ChanneldNetConnection.h"
 #include "google/protobuf/message.h"
 #include "UObject/WeakInterfacePtr.h"

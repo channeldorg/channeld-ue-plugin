@@ -1,6 +1,5 @@
 #include "ChanneldReplicationComponent.h"
 #include "ChanneldGameInstanceSubsystem.h"
-#include "ChannelDataProvider.h"
 #include "View/ChannelDataView.h"
 #include "Engine/ActorChannel.h"
 #include "Engine/PackageMapClient.h"
@@ -14,17 +13,6 @@ UChanneldReplicationComponent::UChanneldReplicationComponent(const FObjectInitia
 	: Super(ObjectInitializer)
 {
 	PrimaryComponentTick.bCanEverTick = false;
-}
-
-const google::protobuf::Message* UChanneldReplicationComponent::GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved)
-{
-	bIsRemoved = false;
-	return nullptr;
-}
-
-void UChanneldReplicationComponent::SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID)
-{
-
 }
 
 void UChanneldReplicationComponent::PostInitProperties()
@@ -199,6 +187,13 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 		return false;
 	}
 
+	auto Processor = ChanneldReplication::FindChannelDataProcessor(UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()));
+	ensureMsgf(Processor, TEXT("Unable to find channel data processor for message: %s"), UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()));
+	if (!Processor)
+	{
+		return false;
+	}
+	
 	bool bUpdated = IsRemoved();
 	for (auto& Replicator : Replicators)
 	{
@@ -211,14 +206,14 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 		
 		if (IsRemoved())
 		{
-			SetStateToChannelData(NULL, ChannelData, Replicator->GetTargetClass(), NetGUID);
+			Processor->SetStateToChannelData(nullptr, ChannelData, Replicator->GetTargetClass(), NetGUID);
 			continue;
 		}
 		
 		Replicator->Tick(FApp::GetDeltaTime());
 		if (Replicator->IsStateChanged())
 		{
-			SetStateToChannelData(Replicator->GetDeltaState(), ChannelData, Replicator->GetTargetClass(), NetGUID);
+			Processor->SetStateToChannelData(Replicator->GetDeltaState(), ChannelData, Replicator->GetTargetClass(), NetGUID);
 			Replicator->ClearState();
 			bUpdated = true;
 		}
@@ -239,6 +234,13 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 		return;
 	}
 
+	auto Processor = ChanneldReplication::FindChannelDataProcessor(UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()));
+	ensureMsgf(Processor, TEXT("Unable to find channel data processor for message: %s"), UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()));
+	if (!Processor)
+	{
+		return;
+	}
+	
 	GetOwner()->PreNetReceive();
 
 	for (auto& Replicator : Replicators)
@@ -258,7 +260,7 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 			continue;
 		}
 		bool bIsRemoved = false;
-		auto State = GetStateFromChannelData(ChannelData, Replicator->GetTargetClass(), NetGUID, bIsRemoved);
+		auto State = Processor->GetStateFromChannelData(ChannelData, Replicator->GetTargetClass(), NetGUID, bIsRemoved);
 		if (State)
 		{
 			if (bIsRemoved)

@@ -1,14 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ChannelDataProvider.h"
-#include "ChanneldTypes.h"
 #include "GameFramework\Character.h"
 #include "ChanneldReplicatorBase.h"
 #include "GameFramework/HUD.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/LocalMessage.h"
-#include "GameFramework/PlayerState.h"
 
 class CHANNELDUE_API FChanneldPlayerControllerReplicator : public FChanneldReplicatorBase
 {

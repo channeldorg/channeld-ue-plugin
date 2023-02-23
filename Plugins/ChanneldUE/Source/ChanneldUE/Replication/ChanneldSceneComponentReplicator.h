@@ -1,9 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ChannelDataProvider.h"
 #include "Components/SceneComponent.h"
 #include "ChanneldReplicatorBase.h"
+#include "unreal_common.pb.h"
 
 class CHANNELDUE_API FChanneldSceneComponentReplicator : public FChanneldReplicatorBase_AC
 {

@@ -1,18 +1,19 @@
-#include "FlatStatesRepComponent.h"
-
-#include "ChanneldReplication.h"
-#include "Protobuf/ThirdParty/google/protobuf/map_field.h"
-#include "Protobuf/ThirdParty/google/protobuf/reflection.h"
+#include "FFlatStatesChannelDataProcessor.h"
+#include "Replication/ChanneldReplication.h"
+#include "google/protobuf/map_field.h"
+#include "google/protobuf/reflection.h"
 
 using namespace google::protobuf;
 
-UFlatStatesRepComponent::UFlatStatesRepComponent(const FObjectInitializer& ObjectInitializer)
+bool FFlatStatesChannelDataProcessor::Merge(const Message* SrcMsg, Message* DstMsg)
 {
+	// TODO
+	return false;
 }
 
-const Message* UFlatStatesRepComponent::GetStateFromChannelData(Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved)
+const Message* FFlatStatesChannelDataProcessor::GetStateFromChannelData(Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved)
 {
-	bRemoved = false;
+	bIsRemoved = false;
 	auto StateInProto = ChanneldReplication::FindReplicatorStateInProto(TargetClass);
 	if (!StateInProto)
 	{
@@ -56,14 +57,14 @@ const Message* UFlatStatesRepComponent::GetStateFromChannelData(Message* Channel
 		// The "removed" field should always be the first field in the proto message if it exists
 		if (RemovedField && RemovedField->type() == FieldDescriptor::TYPE_BOOL)
 		{
-			bRemoved = State->GetReflection()->GetBool(*State, RemovedField);
+			bIsRemoved = State->GetReflection()->GetBool(*State, RemovedField);
 		}
 	}
 
 	return State;
 }
 
-void UFlatStatesRepComponent::SetStateToChannelData(const Message* State, Message* ChannelData, UClass* TargetClass, uint32 NetGUID)
+void FFlatStatesChannelDataProcessor::SetStateToChannelData(const Message* State,Message* ChannelData, UClass* TargetClass, uint32 NetGUID)
 {
 	auto StateInProto = ChanneldReplication::FindReplicatorStateInProto(TargetClass);
 	if (!StateInProto)

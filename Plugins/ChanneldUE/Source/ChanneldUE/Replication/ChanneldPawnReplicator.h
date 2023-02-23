@@ -1,9 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ChannelDataProvider.h"
 #include "GameFramework\Pawn.h"
-#include "GameFramework/PlayerState.h"
 #include "ChanneldReplicatorBase.h"
 
 class CHANNELDUE_API FChanneldPawnReplicator : public FChanneldReplicatorBase

@@ -852,11 +852,9 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 
 	UE_LOG(LogChanneld, Verbose, TEXT("Received %s channel %d update(%d B): %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), ChId, UpdateMsg->data().value().size(), UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
 
-	// Call ParsePartial instead of Parse to keep the existing value from being reset.
-
 	const FName MessageName = UTF8_TO_TCHAR(UpdateData->GetTypeName().c_str());
-	IChannelDataMerger* Merger = ChanneldReplication::FindChannelDataMerger(MessageName);
-	if (Merger)
+	auto Processor = ChanneldReplication::FindChannelDataProcessor(MessageName);
+	if (Processor)
 	{
 		// Use the message template as the temporary message to unpack the any data.
 		if (!UpdateMsg->data().UnpackTo(MsgTemplate))
@@ -864,7 +862,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 			UE_LOG(LogChanneld, Warning, TEXT("Failed to unpack %s channel data, typeUrl: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
 			return;
 		}
-		if (!Merger->Merge(MsgTemplate, UpdateData))
+		if (!Processor->Merge(MsgTemplate, UpdateData))
 		{
 			UE_LOG(LogChanneld, Warning, TEXT("Failed to merge %s channel data: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(MsgTemplate->DebugString().c_str()));
 			return;
@@ -873,6 +871,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	else
 	{
 		UE_LOG(LogChanneld, Log, TEXT("ChannelDataMerger not found for type: %s, fall back to ParsePartialFromString. Risk: The state with the same NetId will be overwritten instead of merged."), *MessageName.ToString());
+		// Call ParsePartial instead of Parse to keep the existing value from being reset.
 		if (!UpdateData->ParsePartialFromString(UpdateMsg->data().value()))
 		{
 			UE_LOG(LogChanneld, Error, TEXT("Failed to parse %s channel data, typeUrl: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));

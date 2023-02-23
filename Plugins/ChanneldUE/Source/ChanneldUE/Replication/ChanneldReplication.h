@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
-#include "ChannelDataProvider.h"
+#include "ChannelDataInterfaces.h"
 #include "ChanneldTypes.h"
 #include "UObject/SoftObjectPtr.h"
 
@@ -33,9 +33,9 @@ namespace ChanneldReplication
 	extern TMap<const UClass*, FReplicatorStateInProto> ReplicatorTargetClassToStateInProto;
 	CHANNELDUE_API FReplicatorStateInProto* FindReplicatorStateInProto(const UClass* TargetClass);
 
-	extern TMap<const FName, IChannelDataMerger*> ChannelDataMergerRegistry;
-	CHANNELDUE_API void RegisterChannelDataMerger(const FName& MessageFullName, IChannelDataMerger* Merger);
-	FORCEINLINE CHANNELDUE_API IChannelDataMerger* FindChannelDataMerger(const FName& MessageFullName)
+	extern TMap<const FName, IChannelDataProcessor*> ChannelDataMergerRegistry;
+	CHANNELDUE_API void RegisterChannelDataMerger(const FName& MessageFullName, IChannelDataProcessor* Processor);
+	FORCEINLINE CHANNELDUE_API IChannelDataProcessor* FindChannelDataProcessor(const FName& MessageFullName)
 	{
 		return ChannelDataMergerRegistry.FindRef(MessageFullName);
 	}
