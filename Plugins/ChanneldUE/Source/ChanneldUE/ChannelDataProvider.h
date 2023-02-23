@@ -36,3 +36,10 @@ public:
 	}
 
 };
+
+class CHANNELDUE_API IChannelDataMerger
+{
+public:
+	virtual bool Merge(const google::protobuf::Message* Src, google::protobuf::Message* Dst) = 0;
+	virtual ~IChannelDataMerger() {}
+};

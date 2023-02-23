@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
+#include "ChannelDataProvider.h"
 #include "ChanneldTypes.h"
 #include "UObject/SoftObjectPtr.h"
 
@@ -24,13 +25,20 @@ namespace ChanneldReplication
 {
 	extern TMap<const UClass*, const FReplicatorCreateFunc> ReplicatorRegistry;
 	extern TMap<const FString, const FReplicatorCreateFunc> BPReplicatorRegistry;
+	CHANNELDUE_API void RegisterReplicator(const UClass* TargetClass, const FReplicatorCreateFunc& Func, bool bOverride = true, bool bIsInMap = true);
+	CHANNELDUE_API void RegisterReplicator(const FString& PathName, const FReplicatorCreateFunc& Func, bool bOverride = true, bool bIsInMap = true);
+	CHANNELDUE_API TArray<FChanneldReplicatorBase*> FindAndCreateReplicators(UObject* ReplicatedObj);
+	
 	extern TArray<FReplicatorStateInProto> ReplicatorStatesInProto;
 	extern TMap<const UClass*, FReplicatorStateInProto> ReplicatorTargetClassToStateInProto;
 	CHANNELDUE_API FReplicatorStateInProto* FindReplicatorStateInProto(const UClass* TargetClass);
 
-	CHANNELDUE_API void RegisterReplicator(const UClass* TargetClass, const FReplicatorCreateFunc& Func, bool bOverride = true, bool bIsInMap = true);
-	CHANNELDUE_API void RegisterReplicator(const FString& PathName, const FReplicatorCreateFunc& Func, bool bOverride = true, bool bIsInMap = true);
-	CHANNELDUE_API TArray<FChanneldReplicatorBase*> FindAndCreateReplicators(UObject* ReplicatedObj);
+	extern TMap<const FName, IChannelDataMerger*> ChannelDataMergerRegistry;
+	CHANNELDUE_API void RegisterChannelDataMerger(const FName& MessageFullName, IChannelDataMerger* Merger);
+	FORCEINLINE CHANNELDUE_API IChannelDataMerger* FindChannelDataMerger(const FName& MessageFullName)
+	{
+		return ChannelDataMergerRegistry.FindRef(MessageFullName);
+	}
 }
 
 #define REGISTER_REPLICATOR_BASE(ReplicatorClass, TargetClass, bOverride, bIsInMap) \

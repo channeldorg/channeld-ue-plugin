@@ -7,6 +7,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
+#include "Replication/ChanneldReplication.h"
 #include "Replication/ChanneldReplicationComponent.h"
 
 UChannelDataView::UChannelDataView(const FObjectInitializer& ObjectInitializer)
@@ -829,6 +830,14 @@ void UChannelDataView::HandleUnsub(UChanneldConnection* _, Channeld::ChannelId C
 void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto UpdateMsg = static_cast<const channeldpb::ChannelDataUpdateMessage*>(Msg);
+	
+	FString TypeUrl(UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
+	auto MsgTemplate = ChannelDataTemplatesByTypeUrl.FindRef(TypeUrl);
+	if (MsgTemplate == nullptr)
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Unable to find channel data template by typeUrl: %s"), *TypeUrl);
+		return;
+	}
 
 	google::protobuf::Message* UpdateData;
 	if (ReceivedUpdateDataInChannels.Contains(ChId))
@@ -837,13 +846,6 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	}
 	else
 	{
-		FString TypeUrl(UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
-		auto MsgTemplate = ChannelDataTemplatesByTypeUrl.FindRef(TypeUrl);
-		if (MsgTemplate == nullptr)
-		{
-			UE_LOG(LogChanneld, Error, TEXT("Unable to find channel data parser by typeUrl: %s"), *TypeUrl);
-			return;
-		}
 		UpdateData = MsgTemplate->New();
 		ReceivedUpdateDataInChannels.Add(ChId, UpdateData);
 	}
@@ -851,14 +853,36 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	UE_LOG(LogChanneld, Verbose, TEXT("Received %s channel %d update(%d B): %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), ChId, UpdateMsg->data().value().size(), UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
 
 	// Call ParsePartial instead of Parse to keep the existing value from being reset.
-	if (!UpdateData->ParsePartialFromString(UpdateMsg->data().value()))
+
+	const FName MessageName = UTF8_TO_TCHAR(UpdateData->GetTypeName().c_str());
+	IChannelDataMerger* Merger = ChanneldReplication::FindChannelDataMerger(MessageName);
+	if (Merger)
 	{
-		UE_LOG(LogChanneld, Error, TEXT("Failed to parse %s channel data, typeUrl: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
-		return;
+		// Use the message template as the temporary message to unpack the any data.
+		if (!UpdateMsg->data().UnpackTo(MsgTemplate))
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to unpack %s channel data, typeUrl: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
+			return;
+		}
+		if (!Merger->Merge(MsgTemplate, UpdateData))
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to merge %s channel data: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(MsgTemplate->DebugString().c_str()));
+			return;
+		}
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Log, TEXT("ChannelDataMerger not found for type: %s, fall back to ParsePartialFromString. Risk: The state with the same NetId will be overwritten instead of merged."), *MessageName.ToString());
+		if (!UpdateData->ParsePartialFromString(UpdateMsg->data().value()))
+		{
+			UE_LOG(LogChanneld, Error, TEXT("Failed to parse %s channel data, typeUrl: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
+			return;
+		}
 	}
 
 	if (CheckUnspawnedObject(ChId, UpdateData))
 	{
+		UE_LOG(LogChanneld, Verbose, TEXT("Resolving unspawned object, the channel data will not be consumed."));
 		return;
 	}
 	
