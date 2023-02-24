@@ -3936,6 +3936,7 @@ class CHANNELDUE_API SceneComponentState final :
     kRelativeLocationFieldNumber = 12,
     kRelativeRotationFieldNumber = 13,
     kRelativeScaleFieldNumber = 14,
+    kRemovedFieldNumber = 1,
     kBAbsoluteLocationFieldNumber = 2,
     kBAbsoluteRotationFieldNumber = 3,
     kBAbsoluteScaleFieldNumber = 4,
@@ -4052,6 +4053,15 @@ class CHANNELDUE_API SceneComponentState final :
       ::unrealpb::FVector* relativescale);
   ::unrealpb::FVector* unsafe_arena_release_relativescale();
 
+  // bool removed = 1;
+  void clear_removed();
+  bool removed() const;
+  void set_removed(bool value);
+  private:
+  bool _internal_removed() const;
+  void _internal_set_removed(bool value);
+  public:
+
   // optional bool bAbsoluteLocation = 2;
   bool has_babsolutelocation() const;
   private:
@@ -4159,6 +4169,7 @@ class CHANNELDUE_API SceneComponentState final :
     ::unrealpb::FVector* relativelocation_;
     ::unrealpb::FVector* relativerotation_;
     ::unrealpb::FVector* relativescale_;
+    bool removed_;
     bool babsolutelocation_;
     bool babsoluterotation_;
     bool babsolutescale_;
@@ -13146,6 +13157,26 @@ inline void ActorComponentState::set_breplicated(bool value) {
 // -------------------------------------------------------------------
 
 // SceneComponentState
+
+// bool removed = 1;
+inline void SceneComponentState::clear_removed() {
+  _impl_.removed_ = false;
+}
+inline bool SceneComponentState::_internal_removed() const {
+  return _impl_.removed_;
+}
+inline bool SceneComponentState::removed() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SceneComponentState.removed)
+  return _internal_removed();
+}
+inline void SceneComponentState::_internal_set_removed(bool value) {
+  
+  _impl_.removed_ = value;
+}
+inline void SceneComponentState::set_removed(bool value) {
+  _internal_set_removed(value);
+  // @@protoc_insertion_point(field_set:unrealpb.SceneComponentState.removed)
+}
 
 // optional bool bAbsoluteLocation = 2;
 inline bool SceneComponentState::_internal_has_babsolutelocation() const {
