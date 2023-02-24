@@ -150,6 +150,8 @@ public:
 
 	virtual FString GetCode_OverrideGetNetGUID();
 
+	virtual bool IsMapInChannelData();
+
 protected:
 	const UClass* Target;
 	FString TargetActorCompilableName;
