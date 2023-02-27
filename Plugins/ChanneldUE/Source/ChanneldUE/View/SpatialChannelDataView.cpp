@@ -638,8 +638,16 @@ bool USpatialChannelDataView::TryToResolveObjects(Channeld::ChannelId ChId, TArr
 	TArray<uint32> UnresolvedNetGUIDs;
 	for (uint32 NetGUID : NetGUIDs)
 	{
-		if (!ResolvingNetGUIDs.Contains(NetGUID))// && !NetDriver->GuidCache->IsGUIDRegistered(FNetworkGUID(NetGUID)))
+		// The object has just been deleted, don't re-spawn it here.
+		if (SuppressedNetIdsToResolve.Contains(NetGUID))
 		{
+			UE_LOG(LogChanneld, Verbose, TEXT("The object has just been deleted during recent handover, ignore resolving it: %d"), NetGUID);
+			continue;
+		}
+		
+		if (!ResolvingNetGUIDs.Contains(NetGUID))
+		{
+			// Don't use IsGUIDRegistered - the object may still exist in GuidCache but has been deleted.
 			if (auto CacheObj = NetDriver->GuidCache->ObjectLookup.Find(FNetworkGUID(NetGUID)))
 			{
 				if (CacheObj->Object.IsValid())
@@ -846,9 +854,10 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 	}
 	UE_LOG(LogChanneld, Log, TEXT("ChannelDataHandover from channel %d to %d, object netIds: %s"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), *FString::Join(NetIds, TEXT(",")));
 
+	SuppressedNetIdsToResolve.Empty();
+
 	// Does the client has interest over the handover objects?
 	const bool bHasInterest = Connection->SubscribedChannels.Contains(HandoverMsg->dstchannelid());
-	TArray<uint32> UnresolvedNetIds;
 	
 	for (auto& HandoverContext : HandoverData.context())
 	{
@@ -861,11 +870,31 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 		if (!Obj)
 		{
 			/*
-				We can't wait the server to send the Spawn messages as it's suppressed in the handover process.
-				But we also don't want to spawn the PlayerState or PlayerController of other players:
-			UnresolvedNetIds.Add(NetId.Value);
+			We can't wait the server to send the Spawn messages as it's suppressed in the handover process.
+			But we also don't want to spawn the PlayerState or PlayerController of other players.
+			It's very difficult to check if the UObject to be spawned is a PlayerState or PlayerController.
+			
+			if (bHasInterest)
+			{
+				// Don't spawn PlayerState or PlayerController for handover in the client
+				if (HandoverContext.obj().objtype() == unrealpb::UOT_PlayerController || HandoverContext.obj().objtype() == unrealpb::UOT_PlayerState)
+				{
+					continue;
+				}
+				
+				Obj = ChanneldUtils::GetObjectByRef(&HandoverContext.obj(), GetWorld());
+				if (Obj)
+				{
+					AddObjectProvider(Obj);
+					OnClientSpawnedObject(Obj, HandoverMsg->dstchannelid());
+				}
+				else
+				{
+					UE_LOG(LogChanneld, Log, TEXT("[Client] Unable to spawn handover object, NetId: %d"), NetId.Value);
+				}
+			}
 			*/
-			UE_LOG(LogChanneld, Warning, TEXT("Unable to find data provider to move from channel %d to %d, NetId: %d"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), NetId.Value);
+			
 			continue;
 		}
 
@@ -903,6 +932,7 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 			if (ClientDeleteObject(Obj))
 			{
 				RemoveObjectProvider(Obj, false);
+				SuppressedNetIdsToResolve.Add(NetId.Value);
 			}
 			else
 			{
@@ -911,13 +941,8 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 		}
 	}
 
-	if (UnresolvedNetIds.Num() > 0)
-	{
-		TryToResolveObjects(HandoverMsg->dstchannelid(), UnresolvedNetIds);
-	}
-
 	// Applies the channel data update to spawn the objects that just entered the client's interest areas.
-	if (HandoverMsg->has_data())
+	if (HandoverMsg->has_data() && bHasInterest)
 	{
 		channeldpb::ChannelDataUpdateMessage UpdateMsg;
 		UpdateMsg.mutable_data()->CopyFrom(HandoverData.channeldata());

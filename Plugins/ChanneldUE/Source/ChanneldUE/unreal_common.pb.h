@@ -273,6 +273,37 @@ inline bool MessageType_Parse(
   return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<MessageType>(
     MessageType_descriptor(), name, value);
 }
+enum UnrealObjectType : int {
+  UOT_Unknown = 0,
+  UOT_GameState = 1,
+  UOT_Actor = 2,
+  UOT_Pawn = 3,
+  UOT_Character = 4,
+  UOT_PlayerState = 5,
+  UOT_Controller = 6,
+  UOT_PlayerController = 7,
+  UnrealObjectType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
+  UnrealObjectType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
+};
+CHANNELDUE_API bool UnrealObjectType_IsValid(int value);
+constexpr UnrealObjectType UnrealObjectType_MIN = UOT_Unknown;
+constexpr UnrealObjectType UnrealObjectType_MAX = UOT_PlayerController;
+constexpr int UnrealObjectType_ARRAYSIZE = UnrealObjectType_MAX + 1;
+
+CHANNELDUE_API const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* UnrealObjectType_descriptor();
+template<typename T>
+inline const std::string& UnrealObjectType_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, UnrealObjectType>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function UnrealObjectType_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    UnrealObjectType_descriptor(), enum_t_value);
+}
+inline bool UnrealObjectType_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, UnrealObjectType* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<UnrealObjectType>(
+    UnrealObjectType_descriptor(), name, value);
+}
 // ===================================================================
 
 class CHANNELDUE_API FVector final :
@@ -19994,6 +20025,11 @@ template <> struct is_proto_enum< ::unrealpb::MessageType> : ::std::true_type {}
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::unrealpb::MessageType>() {
   return ::unrealpb::MessageType_descriptor();
+}
+template <> struct is_proto_enum< ::unrealpb::UnrealObjectType> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::unrealpb::UnrealObjectType>() {
+  return ::unrealpb::UnrealObjectType_descriptor();
 }
 
 PROTOBUF_NAMESPACE_CLOSE
