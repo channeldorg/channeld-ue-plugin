@@ -7,7 +7,7 @@
 #include "ChanneldNetConnection.h"
 #include "ChanneldNetDriver.h"
 #include "ChanneldUtils.h"
-#include "Metrics.h"
+#include "ChanneldMetrics.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/DataChannel.h"
@@ -183,7 +183,7 @@ void USpatialChannelDataView::ServerHandleGetHandoverContext(UChanneldConnection
 	
 	Connection->Send(ChId, unrealpb::HANDOVER_CONTEXT, ResultMsg);
 
-	GEngine->GetEngineSubsystem<UMetrics>()->GetHandoverContexts->Add({{"objNum", std::to_string(ResultMsg.context_size())}}).Increment();
+	GEngine->GetEngineSubsystem<UChanneldMetrics>()->GetHandoverContexts->Add({{"objNum", std::to_string(ResultMsg.context_size())}}).Increment();
 }
 
 void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
@@ -498,7 +498,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 		}
 	}
 
-	GEngine->GetEngineSubsystem<UMetrics>()->Handovers->Add({{"objNum", std::to_string(HandoverData.context_size())}, {"hasData", std::to_string(HandoverData.has_channeldata())}}).Increment();
+	GEngine->GetEngineSubsystem<UChanneldMetrics>()->Handovers->Add({{"objNum", std::to_string(HandoverData.context_size())}, {"hasData", std::to_string(HandoverData.has_channeldata())}}).Increment();
 }
 
 void USpatialChannelDataView::ServerHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)

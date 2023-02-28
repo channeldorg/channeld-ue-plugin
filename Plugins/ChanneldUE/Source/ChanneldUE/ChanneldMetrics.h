@@ -1,22 +1,14 @@
 #pragma once
+#include "MetricsSubsystem.h"
+#include "ChanneldMetrics.generated.h"
 
-#include "CoreMinimal.h"
-
-#include "prometheus/counter.h"
-#include "prometheus/gauge.h"
-#include "prometheus/exposer.h"
-#include "prometheus/registry.h"
-
-#include "Metrics.generated.h"
-
-using namespace prometheus;
-
-UCLASS(transient, config = Engine)
-class CHANNELDUE_API UMetrics : public UEngineSubsystem, public FTickableGameObject
+UCLASS(transient)
+class CHANNELDUE_API UChanneldMetrics : public UEngineSubsystem, public FTickableGameObject
 {
 	GENERATED_BODY()
-
+	
 public:
+	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
@@ -26,27 +18,20 @@ public:
 	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UMetrics, STATGROUP_Tickables); }
 	//~ End FTickableGameObject Interface
 
-	Family<Counter>& AddCounter(const FName& Name, const FString& Help);
-	Family<Gauge>& AddGauge(const FName& Name, const FString& Help);
-
-	Counter& AddConnTypeLabel(Family<Counter>& Family);
-	Gauge& AddConnTypeLabel(Family<Gauge>& Family);
-
-	UPROPERTY(Config, EditAnywhere)
-	int32 ExposerPort = 8081;
-
+	Counter& AddConnTypeLabel(Family<Counter>* Family);
+	Gauge& AddConnTypeLabel(Family<Gauge>* Family);
+	
 	Family<Gauge>* FPS;
 	Family<Gauge>* CPU;
 	Family<Gauge>* Memory;
+	Gauge* FPS_Gauge;
+	Gauge* CPU_Gauge;
+	Gauge* MEM_Gauge;
 	Family<Counter>* UnfinishedPacket;
 	Family<Counter>* DroppedPacket;
 	Family<Counter>* ReplicatedProviders;
 	Family<Counter>* SentRPCs;
 	Family<Counter>* GetHandoverContexts;
 	Family<Counter>* Handovers;
-
-private:
-
-	TSharedPtr<Exposer> exposer;
-	std::shared_ptr<Registry> registry;
 };
+

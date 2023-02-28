@@ -3,7 +3,7 @@
 #include "ChanneldNetDriver.h"
 #include "ChanneldUtils.h"
 #include "EngineUtils.h"
-#include "Metrics.h"
+#include "ChanneldMetrics.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
@@ -756,8 +756,8 @@ int32 UChannelDataView::SendAllChannelUpdates()
 
 	if (TotalUpdateCount > 0)
 	{
-		UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
-		Metrics->AddConnTypeLabel(*Metrics->ReplicatedProviders).Increment(TotalUpdateCount);
+		UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+		Metrics->AddConnTypeLabel(Metrics->ReplicatedProviders).Increment(TotalUpdateCount);
 	}
 
 	return TotalUpdateCount;
