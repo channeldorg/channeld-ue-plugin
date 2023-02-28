@@ -54,17 +54,7 @@ FString FStructPropertyDecorator::GetCompilableCPPType()
 
 FString FStructPropertyDecorator::GetProtoFieldType()
 {
-	return FString::Printf(TEXT("%s.%s"), *GenManager_GlobalStructProtoPackage, *GetProtoStateMessageType());
-}
-
-FString FStructPropertyDecorator::GetProtoPackageName()
-{
-	return GenManager_GlobalStructProtoNamespace;
-}
-
-FString FStructPropertyDecorator::GetProtoNamespace()
-{
-	return GenManager_GlobalStructProtoNamespace;
+	return FString::Printf(TEXT("%s.%s"), *GetProtoPackageName(), *GetProtoStateMessageType());
 }
 
 FString FStructPropertyDecorator::GetProtoStateMessageType()

@@ -18,7 +18,7 @@ struct FReplicatorCode
 	FString CppCode;
 
 	FString ProtoFileName;
-	FString ProtoDefinitions;
+	FString ProtoDefinitionsFile;
 
 	FString IncludeActorCode;
 	FString RegisterReplicatorCode;
@@ -39,9 +39,8 @@ struct FGeneratedCodeBundle
 
 	FString GlobalStructProtoDefinitions;
 
-	FString ChannelDataProcessorClassName;
 	FString ChannelDataProcessorHeadCode;
-	FString ChannelDataProcessorProtoMsgFullName;
+	FString ChannelDataProtoDefsFile;
 };
 
 class REPLICATORGENERATOR_API FReplicatorCodeGenerator
@@ -67,28 +66,63 @@ public:
 	 * Generate replicator codes for the specified actors.
 	 *
 	 * @param TargetActors The actor classes to generate replicators for.
-	 * @param GetGoPackage The function to get the 'go_package' for proto file. The parameter is the package name of the proto file. If it is nullptr, the 'go_package' will be empty.
 	 * @param ReplicatorCodeBundle The generated replicator codes (.h, .cpp, .proto) .
 	 * @return true on success, false otherwise.
 	 */
 	bool Generate(
 		TArray<const UClass*> TargetActors,
-		const TFunction<FString(const FString& PackageName)>* GetGoPackage,
+		const FString& DefaultModuleDir,
+		const FString& ProtoPackageName,
+		const FString& GoPackageImportPath,
 		FGeneratedCodeBundle& ReplicatorCodeBundle
 	);
-
-	bool GenerateChannelDataProcessor(FGeneratedCodeBundle& GeneratedCodeBundle, TArray<const UClass*> TargetActors);
 
 	/**
 	 * Generate replicator code for the specified actor.
 	 *
 	 * @param TargetActorClass The actor to generate replicator for.
 	 * @param GeneratedResult The generated replicator code (.h, .cpp, .proto) .
-	 * @param GetGoPackage The function to get the 'go_package' for proto file.
 	 * @param ResultMessage The result message.
 	 * @return true on success, false otherwise.
 	 */
-	bool GenerateActorCode(const UClass* TargetActorClass, const TFunction<FString(const FString& PackageName)>* GetGoPackage, FReplicatorCode& GeneratedResult, FString& ResultMessage);
+	bool GenerateActorCode(
+		const UClass* TargetActorClass,
+		const FString& ProtoPackageName,
+		const FString& GoPackageImportPath,
+		FReplicatorCode& GeneratedResult,
+		FString& ResultMessage
+	);
+
+	bool GenerateChannelDataCode(
+		TArray<const UClass*> TargetActorClasses,
+		const FString& ChannelDataProtoMsgName,
+		const FString& ChannelDataProcessorNamespace,
+		const FString& ChannelDataProcessorClassName,
+		const FString& ChannelDataProtoHeadFileName,
+		const FString& ProtoPackageName,
+		const FString& GoPackageImportPath,
+		FGeneratedCodeBundle& GeneratedCodeBundle,
+		FString& ResultMessage
+	);
+
+	bool GenerateChannelDataProcessorCode(
+		const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
+		const TArray<TSharedPtr<FReplicatedActorDecorator>>& ChildrenOfAActor,
+		const FString& ChannelDataMessageName,
+		const FString& ChannelDataProcessorNamespace,
+		const FString& ChannelDataProcessorClassName,
+		const FString& ChannelDataProtoHeadFileName,
+		const FString& ProtoPackageName,
+		FString& ChannelDataProcessorCode
+	);
+
+	bool GenerateChannelDataProtoDefFile(
+		const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
+		const FString& ChannelDataMessageName,
+		const FString& ProtoPackageName,
+		const FString& GoPackageImportPath,
+		FString& ChannelDataProtoFile
+	);
 
 protected:
 	TMap<FString, FModuleInfo> ModuleInfoByClassName;
@@ -99,5 +133,13 @@ protected:
 
 	inline void ProcessHeaderFiles(const TArray<FString>& Files, const FManifestModule& ManifestModule);
 
-	inline bool CreateDecorateActor(TSharedPtr<FReplicatedActorDecorator>& OutActorDecorator, FString& OutResultMessage, const UClass* TargetActor, bool bInitPropertiesAndRPCs = true, bool bIncrementIfSameName = true);
+	inline bool CreateDecorateActor(
+		TSharedPtr<FReplicatedActorDecorator>& OutActorDecorator,
+		FString& OutResultMessage,
+		const UClass* TargetActor,
+		const FString& ProtoPackageName,
+		const FString& GoPackageImportPath,
+		bool bInitPropertiesAndRPCs = true,
+		bool bIncrementIfSameName = true
+	);
 };

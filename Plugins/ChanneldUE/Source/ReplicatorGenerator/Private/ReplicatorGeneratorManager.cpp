@@ -18,8 +18,6 @@ DEFINE_LOG_CATEGORY(LogChanneldRepGenerator);
 FReplicatorGeneratorManager::FReplicatorGeneratorManager()
 {
 	CodeGenerator = new FReplicatorCodeGenerator();
-	ReplicatorStorageDir = ChanneldReplicatorGeneratorUtils::GetDefaultModuleDir() / GenManager_GeneratedCodeDir;
-	FPaths::NormalizeDirectoryName(ReplicatorStorageDir);
 }
 
 FReplicatorGeneratorManager::~FReplicatorGeneratorManager()
@@ -37,14 +35,39 @@ FReplicatorGeneratorManager& FReplicatorGeneratorManager::Get()
 	return Singleton;
 }
 
+FString FReplicatorGeneratorManager::GetDefaultModuleDir()
+{
+	if (DefaultModuleDir.IsEmpty())
+	{
+		DefaultModuleDir = ChanneldReplicatorGeneratorUtils::GetDefaultModuleDir();
+		FPaths::NormalizeDirectoryName(DefaultModuleDir);
+	}
+	return DefaultModuleDir;
+}
+
 FString FReplicatorGeneratorManager::GetReplicatorStorageDir()
 {
+	if (ReplicatorStorageDir.IsEmpty())
+	{
+		ReplicatorStorageDir = GetDefaultModuleDir() / GenManager_GeneratedCodeDir;
+		FPaths::NormalizeDirectoryName(ReplicatorStorageDir);
+	}
 	return ReplicatorStorageDir;
 }
 
-bool FReplicatorGeneratorManager::HeaderFilesCanBeFound(UClass* TargetClass)
+FString FReplicatorGeneratorManager::GetDefaultProtoPackageName()
 {
-	FString TargetHeadFilePath = CodeGenerator->GetClassHeadFilePath(TargetClass->GetPrefixCPP() + TargetClass->GetName());
+	return DefaultProtoPackageName = FPaths::GetBaseFilename(GetDefaultModuleDir()).ToLower() + TEXT("pb");
+}
+
+FString FReplicatorGeneratorManager::GetDefaultModuleName()
+{
+	return FPaths::GetBaseFilename(GetDefaultModuleDir());
+}
+
+bool FReplicatorGeneratorManager::HeaderFilesCanBeFound(const UClass* TargetClass)
+{
+	const FString TargetHeadFilePath = CodeGenerator->GetClassHeadFilePath(TargetClass->GetPrefixCPP() + TargetClass->GetName());
 	return !TargetHeadFilePath.IsEmpty();
 }
 
@@ -62,7 +85,7 @@ void FReplicatorGeneratorManager::StopGenerateReplicator()
 {
 }
 
-bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<const UClass*> TargetClasses, const TFunction<FString(const FString& PackageName)>* GetGoPackage)
+bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass*>& TargetClasses, const FString GoPackageImportPathPrefix)
 {
 	UE_LOG(LogChanneldRepGenerator, Display, TEXT("Start generating %d replicators"), TargetClasses.Num());
 
@@ -70,9 +93,13 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<const UClass*> Tar
 
 	FGeneratedCodeBundle ReplicatorCodeBundle;
 
+	const FString ProtoPackageName = GetDefaultProtoPackageName();
+	const FString GoPackageImportPath = GoPackageImportPathPrefix + ProtoPackageName;
 	CodeGenerator->Generate(
 		TargetClasses,
-		GetGoPackage,
+		GetDefaultModuleDir(),
+		ProtoPackageName,
+		(GoPackageImportPathPrefix + ProtoPackageName),
 		ReplicatorCodeBundle
 	);
 	FString WriteCodeFileMessage;
@@ -80,9 +107,9 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<const UClass*> Tar
 	// Generate replicator code file
 	for (FReplicatorCode& ReplicatorCode : ReplicatorCodeBundle.ReplicatorCodes)
 	{
-		WriteCodeFile(ReplicatorStorageDir / ReplicatorCode.HeadFileName, ReplicatorCode.HeadCode, WriteCodeFileMessage);
-		WriteCodeFile(ReplicatorStorageDir / ReplicatorCode.CppFileName, ReplicatorCode.CppCode, WriteCodeFileMessage);
-		WriteProtoFile(ReplicatorStorageDir / ReplicatorCode.ProtoFileName, ReplicatorCode.ProtoDefinitions, WriteCodeFileMessage);
+		WriteCodeFile(GetReplicatorStorageDir() / ReplicatorCode.HeadFileName, ReplicatorCode.HeadCode, WriteCodeFileMessage);
+		WriteCodeFile(GetReplicatorStorageDir() / ReplicatorCode.CppFileName, ReplicatorCode.CppCode, WriteCodeFileMessage);
+		WriteProtoFile(GetReplicatorStorageDir() / ReplicatorCode.ProtoFileName, ReplicatorCode.ProtoDefinitionsFile, WriteCodeFileMessage);
 		UE_LOG(
 			LogChanneldRepGenerator,
 			Verbose,
@@ -95,15 +122,17 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<const UClass*> Tar
 		);
 	}
 	// Generate replicator register code file
-	WriteCodeFile(ReplicatorStorageDir / GenManager_RepRegisterFile, ReplicatorCodeBundle.RegisterReplicatorFileCode, WriteCodeFileMessage);
+	WriteCodeFile(GetReplicatorStorageDir() / GenManager_RepRegisterFile, ReplicatorCodeBundle.RegisterReplicatorFileCode, WriteCodeFileMessage);
 
-	// Generate global struct declarations file
-	WriteCodeFile(ReplicatorStorageDir / GenManager_GlobalStructHeaderFile, ReplicatorCodeBundle.GlobalStructCodes, WriteCodeFileMessage);
+	// Generate global struct declarations file and proto definitions file
+	WriteCodeFile(GetReplicatorStorageDir() / GenManager_GlobalStructHeaderFile, ReplicatorCodeBundle.GlobalStructCodes, WriteCodeFileMessage);
+	WriteProtoFile(GetReplicatorStorageDir() / GenManager_GlobalStructProtoFile, ReplicatorCodeBundle.GlobalStructProtoDefinitions, WriteCodeFileMessage);
 
-	WriteProtoFile(ReplicatorStorageDir / GenManager_GlobalStructProtoFile, ReplicatorCodeBundle.GlobalStructProtoDefinitions, WriteCodeFileMessage);
+	// Generate channel data processor code file
+	const FString DefaultModuleName = GetDefaultModuleName();
+	WriteCodeFile(GetReplicatorStorageDir() / TEXT("ChannelData_") + DefaultModuleName + CodeGen_HeadFileExtension, ReplicatorCodeBundle.ChannelDataProcessorHeadCode, WriteCodeFileMessage);
+	WriteProtoFile(GetReplicatorStorageDir() / TEXT("ChannelData_") + DefaultModuleName + CodeGen_ProtoFileExtension, ReplicatorCodeBundle.ChannelDataProtoDefsFile, WriteCodeFileMessage);
 
-	WriteCodeFile(ReplicatorStorageDir / TEXT("DefaultChannelDataProcessor.h"), ReplicatorCodeBundle.ChannelDataProcessorHeadCode, WriteCodeFileMessage);
-	
 	UE_LOG(
 		LogChanneldRepGenerator,
 		Display,
@@ -122,21 +151,13 @@ bool FReplicatorGeneratorManager::WriteCodeFile(const FString& FilePath, const F
 
 bool FReplicatorGeneratorManager::WriteProtoFile(const FString& FilePath, const FString& ProtoContent, FString& ResultMessage)
 {
-	bool bSuccess = WriteCodeFile(FilePath, ProtoContent, ResultMessage);
-	IModuleInterface* Module = FModuleManager::Get().GetModule(GenManager_ProtobufModuleName);
-	if (Module == nullptr)
-	{
-		ResultMessage = TEXT("\"ue4-protobuf\" plugin not found");
-		return false;
-	}
-
-	return bSuccess;
+	return WriteCodeFile(FilePath, ProtoContent, ResultMessage);
 }
 
 TArray<FString> FReplicatorGeneratorManager::GetGeneratedTargetClasses()
 {
 	TArray<FString> HeadFiles;
-	IFileManager::Get().FindFiles(HeadFiles, *ReplicatorStorageDir, *CodeGen_HeadFileExtension);
+	IFileManager::Get().FindFiles(HeadFiles, *GetReplicatorStorageDir(), *CodeGen_HeadFileExtension);
 
 	TArray<FString> Result;
 	for (const FString& HeadFile : HeadFiles)
@@ -155,7 +176,7 @@ TArray<FString> FReplicatorGeneratorManager::GetGeneratedTargetClasses()
 TArray<FString> FReplicatorGeneratorManager::GetGeneratedProtoFiles()
 {
 	TArray<FString> AllCodeFiles;
-	IFileManager::Get().FindFiles(AllCodeFiles, *ReplicatorStorageDir, *CodeGen_ProtoFileExtension);
+	IFileManager::Get().FindFiles(AllCodeFiles, *GetReplicatorStorageDir(), *CodeGen_ProtoFileExtension);
 	return AllCodeFiles;
 }
 
@@ -180,10 +201,10 @@ void FReplicatorGeneratorManager::RemoveGeneratedReplicators(const TArray<FStrin
 void FReplicatorGeneratorManager::RemoveGeneratedCode()
 {
 	TArray<FString> AllCodeFiles;
-	IFileManager::Get().FindFiles(AllCodeFiles, *ReplicatorStorageDir);
+	IFileManager::Get().FindFiles(AllCodeFiles, *GetReplicatorStorageDir());
 	for (const FString& FilePath : AllCodeFiles)
 	{
-		IFileManager::Get().Delete(*(ReplicatorStorageDir / FilePath));
+		IFileManager::Get().Delete(*(GetReplicatorStorageDir() / FilePath));
 	}
 }
 

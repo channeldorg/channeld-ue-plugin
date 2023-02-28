@@ -17,10 +17,11 @@ class REPLICATORGENERATOR_API FReplicatorGeneratorManager
 protected:
 	FReplicatorCodeGenerator* CodeGenerator;
 
+	FString DefaultModuleDir;
 	FString ReplicatorStorageDir;
+	FString DefaultProtoPackageName;
 
 public:
-
 	FReplicatorGeneratorManager();
 	~FReplicatorGeneratorManager();
 
@@ -29,18 +30,31 @@ public:
 	 */
 	static FReplicatorGeneratorManager& Get();
 
+	FString GetDefaultModuleDir();
+	
 	/**
 	 * Get the directory of the generated replicators.
 	 */
 	FString GetReplicatorStorageDir();
 
+
+	/**
+	 * Get the default proto package name. The name is used for the proto package name and proto cpp namespace.
+	 */
+	FString GetDefaultProtoPackageName();
+
+	/*
+	 * Get the name of the header file of the ChannelDataProcessor.
+	 */
+	FString GetDefaultModuleName();
+	
 	/**
 	 * Header files of the target class can be found or not.
 	 *
 	 * @param TargetClass The target class.
 	 * @return true if the header files of the target class can be found.
 	 */
-	bool HeaderFilesCanBeFound(UClass* TargetClass);
+	bool HeaderFilesCanBeFound(const UClass* TargetClass);
 
 	/**
 	 * Is the target class ignored or not. If the target class is ignored, we will not generate replicator for it.
@@ -62,10 +76,10 @@ public:
 	 * Generate replicators for the given target actors.
 	 *
 	 * @param TargetClasses The target actors.
-	 * @param GetGoPackage The function to get the 'go_package' for proto file.
+	 * @param GoPackageImportPathPrefix If the go package is "channeld.clewcat.com/channeld/examples/channeld-ue-tps/tpspb", the prefix is "channeld.clewcat.com/channeld/examples/channeld-ue-tps".
 	 * @return true if the replicators are generated successfully.
 	 */
-	bool GeneratedReplicators(TArray<const UClass*> TargetClasses, const TFunction<FString(const FString& PackageName)>* GetGoPackage = nullptr);
+	bool GeneratedReplicators(const TArray<const UClass*>& TargetClasses, const FString GoPackageImportPathPrefix);
 
 	/**
 	 * Write the given code to the disk.
@@ -125,7 +139,6 @@ public:
 	void SavePrevCodeGeneratedInfo(const FPrevCodeGeneratedInfo& Info, const FString& Filename, bool& Success);
 
 private:
-	
 	TSet<UClass*> IgnoreActorClasses{
 		AActor::StaticClass(),
 		ACharacter::StaticClass(),

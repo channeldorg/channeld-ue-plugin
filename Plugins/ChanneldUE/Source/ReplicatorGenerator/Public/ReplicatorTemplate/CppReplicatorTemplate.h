@@ -211,16 +211,14 @@ static const FString CodeGen_ChannelDataProcessorCPPTemp =
 #pragma once
 #include "ChannelDataInterfaces.h"
 
-// #include "{File_CDP_ProtoHeader}"
+#include "{File_CDP_ProtoHeader}"
 #include "unreal_common.pb.h"
 #include "ChanneldUE/ChanneldTypes.h"
 #include "Components/ActorComponent.h"
 #include "Replication/ChanneldReplication.h"
 {Code_IncludeAdditionHeaders}
 
-DEFINE_LOG_CATEGORY(LogChanneld)
-
-namespace {Declaration_ChanneldGeneratedNamespace}
+namespace {Declaration_CDP_Namespace}
 {
   class {Declaration_CDP_ClassName} : public IChannelDataProcessor
   {
@@ -244,9 +242,10 @@ namespace {Declaration_ChanneldGeneratedNamespace}
       auto Src = static_cast<const {Definition_CDP_ProtoNamespace}::{Definition_CDP_ProtoMsgName}*>(SrcMsg);
       auto Dst = static_cast<{Definition_CDP_ProtoNamespace}::{Definition_CDP_ProtoMsgName}*>(DstMsg);
     {Code_Merge}
+      return true;
     }
     
-    virtual const google::protobuf::Message* {Declaration_CDP_ClassName}::GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved) override
+    virtual const google::protobuf::Message* GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved) override
     {
       if(ChannelData == nullptr) {
         UE_LOG(LogChanneld, Error, TEXT("ChannelData is nullptr"));
@@ -264,7 +263,7 @@ namespace {Declaration_ChanneldGeneratedNamespace}
       return nullptr;
     }
     
-    virtual void {Declaration_CDP_ClassName}::SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID) override
+    virtual void SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID) override
     {
       if(ChannelData == nullptr) {
         UE_LOG(LogChanneld, Error, TEXT("ChannelData is nullptr"));
@@ -279,6 +278,4 @@ namespace {Declaration_ChanneldGeneratedNamespace}
     }
   };
 }
-
 )EOF";
-

@@ -99,10 +99,6 @@ public:
 
 	virtual FString GetProtoFieldType() override;
 	
-	virtual FString GetProtoPackageName() override;
-	
-	virtual FString GetProtoNamespace() override;
-
 	virtual FString GetProtoStateMessageType() override;
 	
 	virtual FString GetPropertyType() override;

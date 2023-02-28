@@ -34,7 +34,7 @@ uint32 {Declare_ReplicatorClassName}::GetNetGUID()
 static const TCHAR* ActorDecor_GetStateFromChannelData =
 	LR"EOF(
 if({Code_Condition}) {
-  auto States = {Declaration_ChanneldDataMessage}->mutable_{Definition_ChannelDataFieldName}();
+  auto States = {Declaration_ChannelDataMessage}->mutable_{Definition_ChannelDataFieldName}();
   if (States->contains(NetGUID))
   {
     bIsRemoved = false;
@@ -87,14 +87,14 @@ static const TCHAR* ActorDecor_GetStateFromChannelData_Singleton =
 	LR"EOF(
 if({Code_Condition}) {
   bIsRemoved = false;
-  return {Declaration_ChanneldDataMessage}->mutable_{Definition_ChannelDataFieldName}();
+  return {Declaration_ChannelDataMessage}->mutable_{Definition_ChannelDataFieldName}();
 }
 )EOF";
 
 static const TCHAR* ActorDecor_SetStateToChannelData =
 	LR"EOF(
 if({Code_Condition}) {
-    auto States = {Declaration_ChanneldDataMessage}->mutable_{Definition_ChannelDataFieldName}();
+    auto States = {Declaration_ChannelDataMessage}->mutable_{Definition_ChannelDataFieldName}();
     (*States)[NetGUID] = *static_cast<const {Definition_ProtoNamespace}::{Definition_ProtoStateMsgName}*>(State);
 }
 )EOF";
@@ -102,14 +102,20 @@ if({Code_Condition}) {
 static const TCHAR* ActorDecor_SetStateToChannelData_Singleton =
 	LR"EOF(
 if({Code_Condition}) {
-  {Declaration_ChanneldDataMessage}->mutable_{Definition_ChannelDataFieldName}()->MergeFrom(*static_cast<const {Definition_ProtoNamespace}::{Definition_ProtoStateMsgName}*>(State));
+  {Declaration_ChannelDataMessage}->mutable_{Definition_ChannelDataFieldName}()->MergeFrom(*static_cast<const {Definition_ProtoNamespace}::{Definition_ProtoStateMsgName}*>(State));
 }
 )EOF";
 
 class FReplicatedActorDecorator : public IPropertyDecoratorOwner
 {
 public:
-	FReplicatedActorDecorator(const UClass* TargetActorClass, const TFunction<void(FString& TargetActorName, bool IsActorNameCompilable)>& SetCompilableName);
+	FReplicatedActorDecorator(
+		const UClass* TargetActorClass,
+		const TFunction<void(FString& TargetActorName, bool IsActorNameCompilable)>& SetCompilableName,
+		FString ProtoPackageName,
+		FString GoPackageName
+	);
+
 
 	virtual ~FReplicatedActorDecorator() = default;
 
@@ -120,6 +126,25 @@ public:
 	 */
 	void InitPropertiesAndRPCs();
 
+	/**
+	 * Is target actor class a blueprint class
+	 */
+	virtual bool IsBlueprintType() override;
+	
+	/**
+	 * Some classes are only one instance in the whole server cluster, such as GameState.
+	 * Normally, the singleton instance is owned by the master server.
+	 */
+	virtual bool IsSingleton();
+
+	/**
+	 * Is the replicator of the target class has been implemented by ChanneldUE,
+	 * and the state message is contained in the unreal_common.proto.
+	 *
+	 * TODO: The list of builtin types should be maintained by ChanneldUE module.
+	 */
+	virtual bool IsChanneldUEBuiltinType();
+	
 	/**
 	 * Set module info if the target actor class is a cpp class.
 	 * Please call this function before calling GetActorHeaderIncludePath().
@@ -188,6 +213,16 @@ public:
 	virtual FString GetProtoNamespace() override;
 
 	/**
+	 * Get protobuf definitions file name
+	 */
+	virtual FString GetProtoDefinitionsFileName();
+	
+	/**
+	 * Get go package name. Used for go proto code generation
+	 */
+	virtual FString GetGoPackageImportPath();
+	
+	/**
 	 * Get message type for replicated actor properties mapping
 	 */
 	virtual FString GetProtoStateMessageType() override;
@@ -214,9 +249,7 @@ public:
 	FString GetDefinition_ProtoStateMessage();
 
 	FString GetDefinition_RPCParamsMessage();
-
-	virtual bool IsBlueprintType() override;
-
+	
 	int32 GetRPCNum();
 
 	FString GetCode_SerializeFunctionParams();
@@ -233,30 +266,28 @@ public:
 
 	virtual FString GetCode_OverrideGetNetGUID();
 
-	/**
-	 * Some classes are only one instance in the whole server cluster, such as GameState.
-	 * Normally, the singleton instance is owned by the master server.
-	 */
-	virtual bool IsSingleton();
-
 	virtual void SetConstClassPathFNameVarName(const FString& VarName);
 
 	virtual FString GetDefinition_ChannelDataFieldName();
-	
-	virtual FString GetCode_ConstPathFNameVarDecl();
-	
-	virtual FString GetCode_ChanneldDataProcessor_IsTargetClass();
-	
-	virtual FString GetCode_ChanneldDataProcessor_Merge(const TArray<TSharedPtr<FReplicatedActorDecorator>>& ActorChildren);
 
-	virtual FString GetCode_ChanneldDataProcessor_GetStateFromChannelData(const FString& ChanneldDataMessageName);
-	
-	virtual FString GetCode_ChanneldDataProcessor_SetStateToChannelData(const FString& ChanneldDataMessageName);
+	virtual FString GetCode_ConstPathFNameVarDecl();
+
+	virtual FString GetCode_ChannelDataProcessor_IsTargetClass();
+
+	virtual FString GetCode_ChannelDataProcessor_Merge(const TArray<TSharedPtr<FReplicatedActorDecorator>>& ActorChildren);
+
+	virtual FString GetCode_ChannelDataProcessor_GetStateFromChannelData(const FString& ChannelDataMessageName);
+
+	virtual FString GetCode_ChannelDataProcessor_SetStateToChannelData(const FString& ChannelDataMessageName);
+
+	virtual FString GetCode_ChannelDataProtoFieldDefinition(const int32& Index);
 
 protected:
 	const UClass* TargetClass;
 	FString TargetActorCompilableName;
 	FString InstanceRefName;
+	FString ProtoPackageName;
+	FString GoPackageImportPath;
 	FModuleInfo ModuleBelongTo;
 	TArray<TSharedPtr<FPropertyDecorator>> Properties;
 	TArray<TSharedPtr<FRPCDecorator>> RPCs;
@@ -264,5 +295,5 @@ protected:
 	bool bIsBlueprintGenerated;
 	FString ReplicatorClassName;
 
-	FString VariableName_ConstClassPathFName; 
+	FString VariableName_ConstClassPathFName;
 };

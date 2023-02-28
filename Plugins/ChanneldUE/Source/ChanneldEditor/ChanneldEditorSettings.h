@@ -56,7 +56,7 @@ public:
 	FString GameModuleExportAPIMacro;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator|Protobuf", meta = ( ToolTip = "Set go_package in generated .proto file to the specified value" ))
-	FString ChanneldGoPackage = TEXT("channeld.clewcat.com/channeld/examples/channeld-ue-tps/channeldgeneratedpb");
+	FString ChanneldGoPackageImportPathPrefix = TEXT("channeld.clewcat.com/channeld/examples/channeld-ue-tps/");
 	
 	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator|Protobuf", DisplayName = "Channeld Proto Files Storage Directory", meta = ( ToolTip = "Copy the .proto files to the specified directory after generating replicators, the directory is relative to CHANNELD_PATH" ))
 	FString ChanneldProtoFilesStorageDir = TEXT("examples/channeld-ue-tps/channeldgeneratedpb");

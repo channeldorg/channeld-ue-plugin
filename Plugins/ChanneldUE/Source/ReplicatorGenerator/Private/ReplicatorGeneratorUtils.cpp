@@ -79,7 +79,7 @@ namespace ChanneldReplicatorGeneratorUtils
 
 	bool HasRepComponent(const UClass* TargetClass)
 	{
-		if(!TargetClass->IsChildOf(AActor::StaticClass()))
+		if (!TargetClass->IsChildOf(AActor::StaticClass()))
 		{
 			return false;
 		}
