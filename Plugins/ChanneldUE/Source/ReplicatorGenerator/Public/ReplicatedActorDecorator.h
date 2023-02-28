@@ -31,6 +31,81 @@ uint32 {Declare_ReplicatorClassName}::GetNetGUID()
 }
 )EOF";
 
+static const TCHAR* ActorDecor_GetStateFromChannelData =
+	LR"EOF(
+if({Code_Condition}) {
+  auto States = {Declaration_ChanneldDataMessage}->mutable_{Definition_ChannelDataFieldName}();
+  if (States->contains(NetGUID))
+  {
+    bIsRemoved = false;
+    return &States->at(NetGUID);
+  }
+}
+)EOF";
+
+static const TCHAR* ActorDecor_ChannelDataProcessorMergeLoop =
+	LR"EOF(
+for (auto& Pair : Src->{Definition_ChannelDataFieldName}())
+{
+{Code_MergeLoopInner}
+}
+)EOF";
+
+static const TCHAR* ActorDecor_ChannelDataProcessorMerge_Erase =
+	LR"EOF(
+if (Pair.second.removed())
+{
+{Code_MergeEraseInner}
+}
+else
+{
+{Code_DoMerge}
+}
+)EOF";
+
+static const TCHAR* ActorDecor_ChannelDataProcessorMerge_DoMarge =
+	LR"EOF(
+if (Dst->{Definition_ChannelDataFieldName}().contains(Pair.first))
+{
+  Dst->mutable_{Definition_ChannelDataFieldName}()->at(Pair.first).MergeFrom(Pair.second);
+}
+else
+{
+  Dst->mutable_{Definition_ChannelDataFieldName}()->emplace(Pair.first, Pair.second);
+}
+)EOF";
+
+static const TCHAR* ActorDecor_ChannelDataProcessorMerge_Singleton =
+	LR"EOF(
+if (Src->has_{Definition_ChannelDataFieldName}())
+{
+  Dst->mutable_{Definition_ChannelDataFieldName}()->MergeFrom(Src->{Definition_ChannelDataFieldName}());
+}
+)EOF";
+
+static const TCHAR* ActorDecor_GetStateFromChannelData_Singleton =
+	LR"EOF(
+if({Code_Condition}) {
+  bIsRemoved = false;
+  return {Declaration_ChanneldDataMessage}->mutable_{Definition_ChannelDataFieldName}();
+}
+)EOF";
+
+static const TCHAR* ActorDecor_SetStateToChannelData =
+	LR"EOF(
+if({Code_Condition}) {
+    auto States = {Declaration_ChanneldDataMessage}->mutable_{Definition_ChannelDataFieldName}();
+    (*States)[NetGUID] = *static_cast<const {Definition_ProtoNamespace}::{Definition_ProtoStateMsgName}*>(State);
+}
+)EOF";
+
+static const TCHAR* ActorDecor_SetStateToChannelData_Singleton =
+	LR"EOF(
+if({Code_Condition}) {
+  {Declaration_ChanneldDataMessage}->mutable_{Definition_ChannelDataFieldName}()->MergeFrom(*static_cast<const {Definition_ProtoNamespace}::{Definition_ProtoStateMsgName}*>(State));
+}
+)EOF";
+
 class FReplicatedActorDecorator : public IPropertyDecoratorOwner
 {
 public:
@@ -40,8 +115,16 @@ public:
 
 	TArray<TSharedPtr<FPropertyDecorator>>& GetPropertyDecorators() { return Properties; }
 
-	void Init();
-	void Init(const FModuleInfo& InModuleBelongTo);
+	/**
+	 * Create property decorators and RPC decorators
+	 */
+	void InitPropertiesAndRPCs();
+
+	/**
+	 * Set module info if the target actor class is a cpp class.
+	 * Please call this function before calling GetActorHeaderIncludePath().
+	 */
+	void SetModuleInfo(const FModuleInfo& InModuleBelongTo);
 
 	/**
       * Get target actor name
@@ -66,7 +149,7 @@ public:
 	/**
 	 * Get code of include target actor header
 	 */
-	FString GetActorHeaderIncludePath();
+	FString GetIncludeActorHeaderPath();
 
 	/**
      * Get code of additional include files 
@@ -150,10 +233,28 @@ public:
 
 	virtual FString GetCode_OverrideGetNetGUID();
 
-	virtual bool IsMapInChannelData();
+	/**
+	 * Some classes are only one instance in the whole server cluster, such as GameState.
+	 * Normally, the singleton instance is owned by the master server.
+	 */
+	virtual bool IsSingleton();
+
+	virtual void SetConstClassPathFNameVarName(const FString& VarName);
+
+	virtual FString GetDefinition_ChannelDataFieldName();
+	
+	virtual FString GetCode_ConstPathFNameVarDecl();
+	
+	virtual FString GetCode_ChanneldDataProcessor_IsTargetClass();
+	
+	virtual FString GetCode_ChanneldDataProcessor_Merge(const TArray<TSharedPtr<FReplicatedActorDecorator>>& ActorChildren);
+
+	virtual FString GetCode_ChanneldDataProcessor_GetStateFromChannelData(const FString& ChanneldDataMessageName);
+	
+	virtual FString GetCode_ChanneldDataProcessor_SetStateToChannelData(const FString& ChanneldDataMessageName);
 
 protected:
-	const UClass* Target;
+	const UClass* TargetClass;
 	FString TargetActorCompilableName;
 	FString InstanceRefName;
 	FModuleInfo ModuleBelongTo;
@@ -162,4 +263,6 @@ protected:
 
 	bool bIsBlueprintGenerated;
 	FString ReplicatorClassName;
+
+	FString VariableName_ConstClassPathFName; 
 };

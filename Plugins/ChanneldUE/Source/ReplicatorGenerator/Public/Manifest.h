@@ -19,6 +19,8 @@ struct FModuleInfo
 	{
 		return FilePath.Replace(*BaseDirectory, *Name, ESearchCase::CaseSensitive);
 	}
+
+	bool bIsBuildInEngine;
 };
 
 struct FManifestModule

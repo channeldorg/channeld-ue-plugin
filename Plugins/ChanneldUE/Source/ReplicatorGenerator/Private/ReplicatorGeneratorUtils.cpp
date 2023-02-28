@@ -7,31 +7,45 @@
 
 namespace ChanneldReplicatorGeneratorUtils
 {
-	void FObjectLoadedListener::StartListen()
+	void FReplicationActorFilter::StartListen()
 	{
 		GUObjectArray.AddUObjectCreateListener(this);
 	}
 
-	void FObjectLoadedListener::StopListen()
+	void FReplicationActorFilter::StopListen()
 	{
 		GUObjectArray.RemoveUObjectCreateListener(this);
 	}
 
-	void FObjectLoadedListener::NotifyUObjectCreated(const UObjectBase* Object, int32 Index)
+	void FReplicationActorFilter::NotifyUObjectCreated(const UObjectBase* Object, int32 Index)
 	{
 		UClass* LoadedClass = Object->GetClass();
-		if (NeedToGenerateReplicator(LoadedClass))
+		bool Condition = false;
+		switch (FilterRule)
+		{
+		case EFilterRule::HasRepComponent:
+			Condition = HasRepComponent(LoadedClass);
+			break;
+		case EFilterRule::NeedToGenerateReplicator:
+			Condition = NeedToGenerateReplicator(LoadedClass, true);
+			break;
+		case EFilterRule::NeedToGenRepWithoutIgnore:
+			Condition = NeedToGenerateReplicator(LoadedClass, false);
+			break;
+		}
+		AllRepClasses.Add(LoadedClass);
+		if (Condition)
 		{
 			LoadedRepClasses.Add(LoadedClass);
 		}
 	}
 
-	void FObjectLoadedListener::OnUObjectArrayShutdown()
+	void FReplicationActorFilter::OnUObjectArrayShutdown()
 	{
 		GUObjectArray.RemoveUObjectCreateListener(this);
 	}
 
-	bool HasReplicatedProperty(UClass* TargetClass)
+	bool HasReplicatedProperty(const UClass* TargetClass)
 	{
 		for (TFieldIterator<FProperty> It(TargetClass, EFieldIteratorFlags::ExcludeSuper); It; ++It)
 		{
@@ -43,7 +57,7 @@ namespace ChanneldReplicatorGeneratorUtils
 		return false;
 	}
 
-	bool HasRPC(UClass* TargetClass)
+	bool HasRPC(const UClass* TargetClass)
 	{
 		TArray<FName> FunctionNames;
 		TargetClass->GenerateFunctionList(FunctionNames);
@@ -58,13 +72,17 @@ namespace ChanneldReplicatorGeneratorUtils
 		return false;
 	}
 
-	bool HasReplicatedPropertyOrRPC(UClass* TargetClass)
+	bool HasReplicatedPropertyOrRPC(const UClass* TargetClass)
 	{
 		return HasReplicatedProperty(TargetClass) || HasRPC(TargetClass);
 	}
 
-	bool HasRepComponent(UClass* TargetClass)
+	bool HasRepComponent(const UClass* TargetClass)
 	{
+		if(!TargetClass->IsChildOf(AActor::StaticClass()))
+		{
+			return false;
+		}
 		for (TFieldIterator<FProperty> It(TargetClass, EFieldIteratorFlags::ExcludeSuper); It; ++It)
 		{
 			FProperty* Property = *It;
@@ -78,7 +96,7 @@ namespace ChanneldReplicatorGeneratorUtils
 				}
 			}
 		}
-		if (UBlueprintGeneratedClass* TargetBPClass = Cast<UBlueprintGeneratedClass>(TargetClass))
+		if (const UBlueprintGeneratedClass* TargetBPClass = Cast<UBlueprintGeneratedClass>(TargetClass))
 		{
 			TArray<UActorComponent*> CompTemplates = TargetBPClass->ComponentTemplates;
 			if (CompTemplates.Num() > 0)
@@ -110,12 +128,59 @@ namespace ChanneldReplicatorGeneratorUtils
 		return false;
 	}
 
-	bool NeedToGenerateReplicator(UClass* TargetClass)
+	TArray<const UClass*> GetComponentClasses(const UClass* TargetClass)
+	{
+		TSet<const UClass*> ComponentClasses;
+		for (TFieldIterator<FProperty> It(TargetClass, EFieldIteratorFlags::ExcludeSuper); It; ++It)
+		{
+			FProperty* Property = *It;
+
+			if (Property->IsA<FObjectProperty>())
+			{
+				FObjectProperty* ObjProperty = CastFieldChecked<FObjectProperty>(Property);
+				if (ObjProperty->PropertyClass->IsChildOf(UActorComponent::StaticClass()))
+				{
+					ComponentClasses.Add(ObjProperty->PropertyClass);
+				}
+			}
+		}
+		if (const UBlueprintGeneratedClass* TargetBPClass = Cast<UBlueprintGeneratedClass>(TargetClass))
+		{
+			TArray<UActorComponent*> CompTemplates = TargetBPClass->ComponentTemplates;
+			if (CompTemplates.Num() > 0)
+			{
+				for (const UActorComponent* CompTemplate : CompTemplates)
+				{
+					if (CompTemplate->GetClass()->IsChildOf(UActorComponent::StaticClass()))
+					{
+						ComponentClasses.Add(CompTemplate->GetClass());
+					}
+				}
+			}
+
+			// Find UChanneldReplicationComponent added from component panel
+			const USimpleConstructionScript* CtorScript = TargetBPClass->SimpleConstructionScript;
+			if (CtorScript != nullptr)
+			{
+				TArray<USCS_Node*> Nodes = CtorScript->GetAllNodes();
+				for (const USCS_Node* Node : Nodes)
+				{
+					if (Node->ComponentClass->IsChildOf(UActorComponent::StaticClass()))
+					{
+						ComponentClasses.Add(Node->ComponentClass);
+					}
+				}
+			}
+		}
+		return ComponentClasses.Array();
+	}
+
+	bool NeedToGenerateReplicator(const UClass* TargetClass, bool bCheckIgnore /*= true*/)
 	{
 		const FString ClassName = TargetClass->GetName();
 		return
-			!FReplicatorGeneratorManager::Get().IsIgnoredActor(TargetClass) &&
-			TargetClass->IsChildOf(AActor::StaticClass()) &&
+			!(bCheckIgnore && FReplicatorGeneratorManager::Get().IsIgnoredActor(TargetClass)) &&
+			(TargetClass->IsChildOf(AActor::StaticClass()) || TargetClass->IsChildOf(UActorComponent::StaticClass())) &&
 			!TargetClass->IsChildOf(ALevelScriptActor::StaticClass()) &&
 			!(ClassName.StartsWith(TEXT("SKEL_")) || ClassName.StartsWith(TEXT("REINST_"))) &&
 			// HasRepComponent(TargetClass) &&
@@ -227,5 +292,4 @@ namespace ChanneldReplicatorGeneratorUtils
 #endif
 		return TEXT("");
 	}
-
 }

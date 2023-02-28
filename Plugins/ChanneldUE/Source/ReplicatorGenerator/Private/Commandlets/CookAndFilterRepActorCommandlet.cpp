@@ -23,18 +23,36 @@ int32 UCookAndFilterRepActorCommandlet::Main(const FString& CmdLineParams)
 {
 	FReplicatorGeneratorManager& GeneratorManager = FReplicatorGeneratorManager::Get();
 	GeneratorManager.StartGenerateReplicator();
-	
-	ChanneldReplicatorGeneratorUtils::FObjectLoadedListener ObjLoadedListener;
+
+	FString InFilterRule;
+	ChanneldReplicatorGeneratorUtils::EFilterRule FilterRule = ChanneldReplicatorGeneratorUtils::EFilterRule::NeedToGenerateReplicator;
+	if (FParse::Value(FCommandLine::Get(), TEXT("-FilterRule="), InFilterRule))
+	{
+		if (InFilterRule == TEXT("NeedToGenerateReplicator"))
+		{
+			FilterRule = ChanneldReplicatorGeneratorUtils::EFilterRule::NeedToGenerateReplicator;
+		}
+		if (InFilterRule == TEXT("NeedToGenRepWithoutIgnore"))
+		{
+			FilterRule = ChanneldReplicatorGeneratorUtils::EFilterRule::NeedToGenRepWithoutIgnore;
+		}
+		else if (InFilterRule == TEXT("HasReplicator"))
+		{
+			FilterRule = ChanneldReplicatorGeneratorUtils::EFilterRule::HasRepComponent;
+		}
+	}
+
+	ChanneldReplicatorGeneratorUtils::FReplicationActorFilter ObjLoadedListener(FilterRule);
 	ObjLoadedListener.StartListen();
-	
+
 	const FString AdditionalParam(TEXT(" -SkipShaderCompile"));
 	FString NewCmdLine = CmdLineParams;
 	NewCmdLine.Append(AdditionalParam);
 	FCommandLine::Append(*AdditionalParam);
-	
+
 	int32 Result = Super::Main(CmdLineParams);
 	ObjLoadedListener.StopListen();
-	
+
 	TArray<FString> LoadedRepClassPath;
 	for (const FSoftClassPath& ObjSoftPath : ObjLoadedListener.LoadedRepClasses)
 	{

@@ -2,6 +2,7 @@
 #include "AddCompToBPSubsystem.h"
 #include "ReplicatorCodeGenerator.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/GameState.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
@@ -47,7 +48,7 @@ public:
 	 * @param TargetClass The target class.
 	 * @return true if the target class is ignored.
 	 */
-	bool IsIgnoredActor(UClass* TargetClass);
+	bool IsIgnoredActor(const UClass* TargetClass);
 
 	/**
 	 * Invoke this function before generating replicators.
@@ -60,11 +61,11 @@ public:
 	/**
 	 * Generate replicators for the given target actors.
 	 *
-	 * @param Targets The target actors.
+	 * @param TargetClasses The target actors.
 	 * @param GetGoPackage The function to get the 'go_package' for proto file.
 	 * @return true if the replicators are generated successfully.
 	 */
-	bool GeneratedReplicators(TArray<UClass*> Targets, const TFunction<FString(const FString& PackageName)>* GetGoPackage = nullptr);
+	bool GeneratedReplicators(TArray<const UClass*> TargetClasses, const TFunction<FString(const FString& PackageName)>* GetGoPackage = nullptr);
 
 	/**
 	 * Write the given code to the disk.
@@ -131,8 +132,12 @@ private:
 		AController::StaticClass(),
 		AGameStateBase::StaticClass(),
 		AGameState::StaticClass(),
+		APawn::StaticClass(),
 		APlayerController::StaticClass(),
 		APlayerState::StaticClass(),
+		UActorComponent::StaticClass(),
+		USceneComponent::StaticClass(),
+		UCharacterMovementComponent::StaticClass(),
 	};
 
 	TSet<FString> IgnoreActorClassPaths{

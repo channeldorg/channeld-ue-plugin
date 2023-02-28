@@ -8,10 +8,10 @@
 
 FReplicatedActorDecorator::FReplicatedActorDecorator(const UClass* TargetActorClass, const TFunction<void(FString&, bool)>& SetCompilableName)
 {
-	Target = TargetActorClass;
-	bIsBlueprintGenerated = Target->HasAnyClassFlags(CLASS_CompiledFromBlueprint);
+	TargetClass = TargetActorClass;
+	bIsBlueprintGenerated = TargetClass->HasAnyClassFlags(CLASS_CompiledFromBlueprint);
 
-	TargetActorCompilableName = Target->GetName();
+	TargetActorCompilableName = TargetClass->GetName();
 	if (SetCompilableName != nullptr)
 	{
 		SetCompilableName(
@@ -21,15 +21,15 @@ FReplicatedActorDecorator::FReplicatedActorDecorator(const UClass* TargetActorCl
 	}
 }
 
-void FReplicatedActorDecorator::Init()
+void FReplicatedActorDecorator::InitPropertiesAndRPCs()
 {
 	FPropertyDecoratorFactory& PropertyDecoratorFactory = FPropertyDecoratorFactory::Get();
 
 	// Construct all property decorator
-	for (TFieldIterator<FProperty> It(Target, EFieldIteratorFlags::ExcludeSuper); It; ++It)
+	for (TFieldIterator<FProperty> It(TargetClass, EFieldIteratorFlags::ExcludeSuper); It; ++It)
 	{
 		FProperty* Property = *It;
-		if (Property->Owner != Target)
+		if (Property->Owner != TargetClass)
 		{
 			continue;
 		}
@@ -55,10 +55,10 @@ void FReplicatedActorDecorator::Init()
 
 	// Construct all rpc func decorator
 	TArray<FName> FunctionNames;
-	Target->GenerateFunctionList(FunctionNames);
+	TargetClass->GenerateFunctionList(FunctionNames);
 	for (const FName FuncName : FunctionNames)
 	{
-		UFunction* Func = Target->FindFunctionByName(FuncName, EIncludeSuperFlag::ExcludeSuper);
+		UFunction* Func = TargetClass->FindFunctionByName(FuncName, EIncludeSuperFlag::ExcludeSuper);
 		if (!Func->HasAnyFunctionFlags(FUNC_Net)) { continue; }
 
 		RPCs.Add(MakeShareable(new FRPCDecorator(Func, this)));
@@ -75,10 +75,9 @@ void FReplicatedActorDecorator::Init()
 	}
 }
 
-void FReplicatedActorDecorator::Init(const FModuleInfo& InModuleBelongTo)
+void FReplicatedActorDecorator::SetModuleInfo(const FModuleInfo& InModuleBelongTo)
 {
-	ModuleBelongTo = FModuleInfo(InModuleBelongTo);
-	Init();
+	ModuleBelongTo = InModuleBelongTo;
 }
 
 FString FReplicatedActorDecorator::GetActorName()
@@ -88,20 +87,20 @@ FString FReplicatedActorDecorator::GetActorName()
 
 FString FReplicatedActorDecorator::GetOriginActorName()
 {
-	return Target->GetName();
+	return TargetClass->GetName();
 }
 
 FString FReplicatedActorDecorator::GetPackagePathName()
 {
-	return Target->GetPackage()->GetPathName();
+	return TargetClass->GetPackage()->GetPathName();
 }
 
 FString FReplicatedActorDecorator::GetActorCPPClassName()
 {
-	return Target->GetPrefixCPP() + GetActorName();
+	return TargetClass->GetPrefixCPP() + GetOriginActorName();
 }
 
-FString FReplicatedActorDecorator::GetActorHeaderIncludePath()
+FString FReplicatedActorDecorator::GetIncludeActorHeaderPath()
 {
 	return ModuleBelongTo.RelativeToModule;
 }
@@ -118,7 +117,7 @@ FString FReplicatedActorDecorator::GetAdditionalIncludeFiles()
 		IncludeFileSet.Append(RPCDecorator->GetAdditionalIncludes());
 	}
 	TArray<FString> IncludeFiles = IncludeFileSet.Array();
-	if (Target->IsChildOf(UActorComponent::StaticClass()))
+	if (TargetClass->IsChildOf(UActorComponent::StaticClass()))
 	{
 		IncludeFiles.Add(TEXT("Engine/PackageMapClient.h"));
 	}
@@ -171,6 +170,24 @@ FString FReplicatedActorDecorator::GetCode_AssignPropertyPointers()
 
 FString FReplicatedActorDecorator::GetProtoPackageName()
 {
+	if (!IsBlueprintType() && (
+		TargetClass == AActor::StaticClass() ||
+		TargetClass == ACharacter::StaticClass() ||
+		TargetClass == AController::StaticClass() ||
+		TargetClass == AGameStateBase::StaticClass() ||
+		TargetClass == AGameState::StaticClass() ||
+		TargetClass == APawn::StaticClass() ||
+		TargetClass == APlayerController::StaticClass() ||
+		TargetClass == APlayerState::StaticClass() ||
+		TargetClass == UActorComponent::StaticClass() ||
+		TargetClass == USceneComponent::StaticClass() ||
+		TargetClass == UCharacterMovementComponent::StaticClass()
+	))
+	{
+		// If the target actor class is build-in channeld class, we should use the ChanneldUE proto namespace.
+		// Actually, ChanneldUE doesn't cover all the build-in engine replicated actor classes like 'UTimelineComponent',
+		return GenManager_ChanneldUEBuildInProtoNamespace;
+	}
 	// return GetActorName().ToLower() + "pb";
 	return GenManager_ProtoNamespace;
 }
@@ -328,11 +345,11 @@ FString FReplicatedActorDecorator::GetCode_OverrideGetNetGUID()
 {
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_ReplicatorClassName"), GetReplicatorClassName());
-	if (Target->IsChildOf(AGameStateBase::StaticClass()))
+	if (TargetClass->IsChildOf(AGameStateBase::StaticClass()))
 	{
 		return FString::Format(GameState_GetNetGUIDTemplate, FormatArgs);
 	}
-	else if (Target->IsChildOf(UActorComponent::StaticClass()))
+	else if (TargetClass->IsChildOf(UActorComponent::StaticClass()))
 	{
 		FormatArgs.Add(TEXT("Ref_TargetInstanceRef"), InstanceRefName);
 		return FString::Format(ActorComp_GetNetGUIDTemplate, FormatArgs);
@@ -340,8 +357,115 @@ FString FReplicatedActorDecorator::GetCode_OverrideGetNetGUID()
 	return TEXT("");
 }
 
-bool FReplicatedActorDecorator::IsMapInChannelData()
+bool FReplicatedActorDecorator::IsSingleton()
 {
 	// Currently, only replicator of GameState is singleton in ChanneldData.
-	return !Target->IsChildOf(AGameStateBase::StaticClass()) && true;
+	return TargetClass->IsChildOf(AGameStateBase::StaticClass()) || false;
+}
+
+void FReplicatedActorDecorator::SetConstClassPathFNameVarName(const FString& VarName)
+{
+	VariableName_ConstClassPathFName = VarName;
+}
+
+FString FReplicatedActorDecorator::GetDefinition_ChannelDataFieldName()
+{
+	return (GetProtoStateMessageType() + (IsSingleton() ? TEXT("") : TEXT("s"))).ToLower();
+}
+
+FString FReplicatedActorDecorator::GetCode_ConstPathFNameVarDecl()
+{
+	return FString::Printf(TEXT("const FName %s = FName(\"%s\");"), *VariableName_ConstClassPathFName, *TargetClass->GetPathName());
+}
+
+FString FReplicatedActorDecorator::GetCode_ChanneldDataProcessor_IsTargetClass()
+{
+	if (IsBlueprintType())
+	{
+		return FString::Printf(
+			TEXT("ChanneldReplication::FindReplicatorStateInProto(TargetClass)->TargetClassPathFName == %s"),
+			*VariableName_ConstClassPathFName
+		);
+	}
+	else
+	{
+		return FString::Printf(
+			TEXT("TargetClass == %s::StaticClass()"),
+			*GetActorCPPClassName()
+		);
+	}
+}
+
+FString FReplicatedActorDecorator::GetCode_ChanneldDataProcessor_Merge(const TArray<TSharedPtr<FReplicatedActorDecorator>>& ActorChildren)
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Definition_ChannelDataFieldName"), GetDefinition_ChannelDataFieldName());
+	if (IsSingleton())
+	{
+		return FString::Format(ActorDecor_ChannelDataProcessorMerge_Singleton, FormatArgs);
+	}
+	else
+	{
+		FString Code_MergeLoopInner;
+		if (TargetClass == AActor::StaticClass())
+		{
+			FString Code_MergeEraseInner;
+			for (const TSharedPtr<FReplicatedActorDecorator> ChildrenActor : ActorChildren)
+			{
+				// Singleton actors are not permanently removed from ChannelData.
+				if (ChildrenActor->IsSingleton())
+				{
+					continue;;
+				}
+				Code_MergeEraseInner.Append(
+					FString::Printf(
+						TEXT("Dst->mutable_%s()->erase(Pair.first);\n"),
+						*ChildrenActor->GetDefinition_ChannelDataFieldName()
+					)
+				);
+			}
+			FormatArgs.Add(TEXT("Code_MergeEraseInner"), Code_MergeEraseInner);
+			FormatArgs.Add(TEXT("Code_DoMerge"), FString::Format(ActorDecor_ChannelDataProcessorMerge_DoMarge, FormatArgs));
+			Code_MergeLoopInner = FString::Format(ActorDecor_ChannelDataProcessorMerge_Erase, FormatArgs);
+		}
+		else if (TargetClass->IsChildOf(UActorComponent::StaticClass()))
+		{
+			FormatArgs.Add(
+				TEXT("Code_MergeEraseInner"),
+				FString::Printf(
+					TEXT("Dst->mutable_%s()->erase(Pair.first);\n"),
+					*GetDefinition_ChannelDataFieldName()
+				)
+			);
+			FormatArgs.Add(TEXT("Code_DoMerge"), FString::Format(ActorDecor_ChannelDataProcessorMerge_DoMarge, FormatArgs));
+			Code_MergeLoopInner = FString::Format(ActorDecor_ChannelDataProcessorMerge_Erase, FormatArgs);
+		}
+		else
+		{
+			Code_MergeLoopInner = FString::Format(ActorDecor_ChannelDataProcessorMerge_DoMarge, FormatArgs);
+		}
+
+		FormatArgs.Add(TEXT("Code_MergeLoopInner"), Code_MergeLoopInner);
+		return FString::Format(ActorDecor_ChannelDataProcessorMergeLoop, FormatArgs);
+	}
+}
+
+FString FReplicatedActorDecorator::GetCode_ChanneldDataProcessor_GetStateFromChannelData(const FString& ChanneldDataMessageName)
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Code_Condition"), GetCode_ChanneldDataProcessor_IsTargetClass());
+	FormatArgs.Add(TEXT("Declaration_ChanneldDataMessage"), ChanneldDataMessageName);
+	FormatArgs.Add(TEXT("Definition_ChannelDataFieldName"), GetDefinition_ChannelDataFieldName());
+	return FString::Format(IsSingleton() ? ActorDecor_GetStateFromChannelData_Singleton : ActorDecor_GetStateFromChannelData, FormatArgs);
+}
+
+FString FReplicatedActorDecorator::GetCode_ChanneldDataProcessor_SetStateToChannelData(const FString& ChanneldDataMessageName)
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Code_Condition"), GetCode_ChanneldDataProcessor_IsTargetClass());
+	FormatArgs.Add(TEXT("Declaration_ChanneldDataMessage"), ChanneldDataMessageName);
+	FormatArgs.Add(TEXT("Definition_ChannelDataFieldName"), GetDefinition_ChannelDataFieldName());
+	FormatArgs.Add(TEXT("Definition_ProtoNamespace"), GetProtoNamespace());
+	FormatArgs.Add(TEXT("Definition_ProtoStateMsgName"), GetProtoStateMessageType());
+	return FString::Format(IsSingleton() ? ActorDecor_SetStateToChannelData_Singleton : ActorDecor_SetStateToChannelData, FormatArgs);
 }

@@ -9,7 +9,7 @@ struct FCPPClassInfo
 
 struct FReplicatorCode
 {
-	TSharedPtr<FReplicatedActorDecorator> Target;
+	TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
 
 	FString HeadFileName;
 	FString HeadCode;
@@ -22,9 +22,14 @@ struct FReplicatorCode
 
 	FString IncludeActorCode;
 	FString RegisterReplicatorCode;
+
+	FString ChannelDataProcessor_PathFNameVarDecl;
+	FString ChannelDataProcessor_MergeCode;
+	FString ChannelDataProcessor_GetStateCode;
+	FString ChannelDataProcessor_SetStateCode;
 };
 
-struct FReplicatorCodeBundle
+struct FGeneratedCodeBundle
 {
 	FString RegisterReplicatorFileCode;
 
@@ -33,6 +38,10 @@ struct FReplicatorCodeBundle
 	FString GlobalStructCodes;
 
 	FString GlobalStructProtoDefinitions;
+
+	FString ChannelDataProcessorClassName;
+	FString ChannelDataProcessorHeadCode;
+	FString ChannelDataProcessorProtoMsgFullName;
 };
 
 class REPLICATORGENERATOR_API FReplicatorCodeGenerator
@@ -57,23 +66,29 @@ public:
 	/**
 	 * Generate replicator codes for the specified actors.
 	 *
-	 * @param TargetActors The actors to generate replicators for.
+	 * @param TargetActors The actor classes to generate replicators for.
 	 * @param GetGoPackage The function to get the 'go_package' for proto file. The parameter is the package name of the proto file. If it is nullptr, the 'go_package' will be empty.
 	 * @param ReplicatorCodeBundle The generated replicator codes (.h, .cpp, .proto) .
 	 * @return true on success, false otherwise.
 	 */
-	bool Generate(TArray<UClass*> TargetActors, const TFunction<FString(const FString& PackageName)>* GetGoPackage, FReplicatorCodeBundle& ReplicatorCodeBundle);
+	bool Generate(
+		TArray<const UClass*> TargetActors,
+		const TFunction<FString(const FString& PackageName)>* GetGoPackage,
+		FGeneratedCodeBundle& ReplicatorCodeBundle
+	);
+
+	bool GenerateChannelDataProcessor(FGeneratedCodeBundle& GeneratedCodeBundle, TArray<const UClass*> TargetActors);
 
 	/**
 	 * Generate replicator code for the specified actor.
 	 *
-	 * @param TargetActor The actor to generate replicator for.
-	 * @param ReplicatorCode The generated replicator code (.h, .cpp, .proto) .
+	 * @param TargetActorClass The actor to generate replicator for.
+	 * @param GeneratedResult The generated replicator code (.h, .cpp, .proto) .
 	 * @param GetGoPackage The function to get the 'go_package' for proto file.
 	 * @param ResultMessage The result message.
 	 * @return true on success, false otherwise.
 	 */
-	bool GenerateActorCode(UClass* TargetActor, const TFunction<FString(const FString& PackageName)>* GetGoPackage, FReplicatorCode& ReplicatorCode, FString& ResultMessage);
+	bool GenerateActorCode(const UClass* TargetActorClass, const TFunction<FString(const FString& PackageName)>* GetGoPackage, FReplicatorCode& GeneratedResult, FString& ResultMessage);
 
 protected:
 	TMap<FString, FModuleInfo> ModuleInfoByClassName;
@@ -83,4 +98,6 @@ protected:
 	TMap<FString, int32> TargetActorSameNameCounter;
 
 	inline void ProcessHeaderFiles(const TArray<FString>& Files, const FManifestModule& ManifestModule);
+
+	inline bool CreateDecorateActor(TSharedPtr<FReplicatedActorDecorator>& OutActorDecorator, FString& OutResultMessage, const UClass* TargetActor, bool bInitPropertiesAndRPCs = true, bool bIncrementIfSameName = true);
 };

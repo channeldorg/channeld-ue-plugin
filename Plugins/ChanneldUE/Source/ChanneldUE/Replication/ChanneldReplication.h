@@ -13,11 +13,13 @@ struct FReplicatorStateInProto
 	uint32 FieldIndex;
 	const UClass* TargetClass;
 	FString TargetClassPathName;
+	FName TargetClassPathFName;
 	bool bIsInMap;
 	FReplicatorStateInProto(uint32 InIndex, const UClass* InClass, const FString* InPathName, bool InIsInMap)
 		: FieldIndex(InIndex)
 		, TargetClass(InClass)
 		, TargetClassPathName(InPathName ? *InPathName : TEXT(""))
+		, TargetClassPathFName(InPathName ? FName(*InPathName) : FName(NAME_None))
 		, bIsInMap(InIsInMap){}
 };
 

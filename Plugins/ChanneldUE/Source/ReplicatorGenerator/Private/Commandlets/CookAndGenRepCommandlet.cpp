@@ -21,7 +21,7 @@ int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
 
 	TSet<FSoftClassPath> LoadedRepClasses;
 
-	ChanneldReplicatorGeneratorUtils::FObjectLoadedListener ObjLoadedListener;
+	ChanneldReplicatorGeneratorUtils::FReplicationActorFilter ObjLoadedListener(ChanneldReplicatorGeneratorUtils::EFilterRule::NeedToGenerateReplicator);
 	ObjLoadedListener.StartListen();
 
 	const FString AdditionalParam(TEXT(" -SkipShaderCompile"));
@@ -33,10 +33,10 @@ int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
 	ObjLoadedListener.StopListen();
 
 	LoadedRepClasses.Append(ObjLoadedListener.LoadedRepClasses);
-	TArray<UClass*> TargetClasses;
+	TArray<const UClass*> TargetClasses;
 	for (const FSoftClassPath& ObjSoftPath : LoadedRepClasses)
 	{
-		if (UClass* LoadedClass = ObjSoftPath.TryLoadClass<UObject>())
+		if (const UClass* LoadedClass = ObjSoftPath.TryLoadClass<UObject>())
 		{
 			TargetClasses.Add(LoadedClass);
 		}

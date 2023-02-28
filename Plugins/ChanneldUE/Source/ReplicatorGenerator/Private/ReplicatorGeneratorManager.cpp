@@ -48,7 +48,7 @@ bool FReplicatorGeneratorManager::HeaderFilesCanBeFound(UClass* TargetClass)
 	return !TargetHeadFilePath.IsEmpty();
 }
 
-bool FReplicatorGeneratorManager::IsIgnoredActor(UClass* TargetClass)
+bool FReplicatorGeneratorManager::IsIgnoredActor(const UClass* TargetClass)
 {
 	return IgnoreActorClasses.Contains(TargetClass) || IgnoreActorClassPaths.Contains(TargetClass->GetPathName());
 }
@@ -62,15 +62,19 @@ void FReplicatorGeneratorManager::StopGenerateReplicator()
 {
 }
 
-bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<UClass*> Targets, const TFunction<FString(const FString& PackageName)>* GetGoPackage)
+bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<const UClass*> TargetClasses, const TFunction<FString(const FString& PackageName)>* GetGoPackage)
 {
-	UE_LOG(LogChanneldRepGenerator, Display, TEXT("Start generating %d replicators"), Targets.Num());
+	UE_LOG(LogChanneldRepGenerator, Display, TEXT("Start generating %d replicators"), TargetClasses.Num());
 
 	TArray<FString> IncludeActorCodes, RegisterReplicatorCodes;
 
-	FReplicatorCodeBundle ReplicatorCodeBundle;
+	FGeneratedCodeBundle ReplicatorCodeBundle;
 
-	CodeGenerator->Generate(Targets, GetGoPackage, ReplicatorCodeBundle);
+	CodeGenerator->Generate(
+		TargetClasses,
+		GetGoPackage,
+		ReplicatorCodeBundle
+	);
 	FString WriteCodeFileMessage;
 
 	// Generate replicator code file
@@ -83,8 +87,8 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<UClass*> Targets, 
 			LogChanneldRepGenerator,
 			Verbose,
 			TEXT("The replicator for the target class [%s] was generated successfully.\n    Package path: %s\n    Head file: %s\n    CPP file: %s\n    Proto file: %s\n"),
-			*ReplicatorCode.Target->GetOriginActorName(),
-			*ReplicatorCode.Target->GetPackagePathName(),
+			*ReplicatorCode.ActorDecorator->GetOriginActorName(),
+			*ReplicatorCode.ActorDecorator->GetPackagePathName(),
 			*ReplicatorCode.HeadFileName,
 			*ReplicatorCode.CppFileName,
 			*ReplicatorCode.ProtoFileName
@@ -98,11 +102,13 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(TArray<UClass*> Targets, 
 
 	WriteProtoFile(ReplicatorStorageDir / GenManager_GlobalStructProtoFile, ReplicatorCodeBundle.GlobalStructProtoDefinitions, WriteCodeFileMessage);
 
+	WriteCodeFile(ReplicatorStorageDir / TEXT("DefaultChannelDataProcessor.h"), ReplicatorCodeBundle.ChannelDataProcessorHeadCode, WriteCodeFileMessage);
+	
 	UE_LOG(
 		LogChanneldRepGenerator,
 		Display,
 		TEXT("The generation of replicators is completed, %d replicators need to be generated, a total of %d replicators are generated"),
-		Targets.Num(), ReplicatorCodeBundle.ReplicatorCodes.Num()
+		TargetClasses.Num(), ReplicatorCodeBundle.ReplicatorCodes.Num()
 	);
 
 	return true;
