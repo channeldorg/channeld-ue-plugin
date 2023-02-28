@@ -170,14 +170,12 @@ static const FString CodeGen_RegisterReplicatorTemplate =
 #include "Subsystems/EngineSubsystem.h"
 #include "Replication/ChanneldReplication.h"
 {Code_IncludeActorHeaders}
-#include "ChanneldReplicatorRegister.generated.h"
-
-DEFINE_LOG_CATEGORY(LogChanneld);
+#include "ChanneldReplicatorRegistration.generated.h"
 
 )EOF")
 	+ TEXT("UCLASS()")
 	+ LR"EOF(
-class UChanneldReplicatorRegister : public UEngineSubsystem
+class UChanneldReplicatorRegistration : public UEngineSubsystem
 {
   GENERATED_BODY()
   virtual void Initialize(FSubsystemCollectionBase& Collection) override
