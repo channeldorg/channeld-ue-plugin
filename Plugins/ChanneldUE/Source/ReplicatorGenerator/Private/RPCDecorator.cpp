@@ -104,7 +104,7 @@ FString FRPCDecorator::GetDeclaration_ProtoFields()
 
 TArray<FString> FRPCDecorator::GetAdditionalIncludes()
 {
-	TSet<FString> IncludeFileSet = {TEXT("ChanneldUE/ChanneldTypes.h")};
+	TSet<FString> IncludeFileSet;
 	for (auto PropDecorator : Properties)
 	{
 		IncludeFileSet.Append(PropDecorator->GetAdditionalIncludes());

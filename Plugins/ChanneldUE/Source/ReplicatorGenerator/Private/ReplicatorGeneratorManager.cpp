@@ -104,6 +104,10 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass
 	);
 	FString WriteCodeFileMessage;
 
+	// Generate type definitions file
+	WriteCodeFile(GetReplicatorStorageDir() / GenManager_TypeDefinitionHeadFile, ReplicatorCodeBundle.TypeDefinitionsHeadCode, WriteCodeFileMessage);
+	WriteCodeFile(GetReplicatorStorageDir() / GenManager_TypeDefinitionCppFile, ReplicatorCodeBundle.TypeDefinitionsCppCode, WriteCodeFileMessage);
+
 	// Generate replicator code file
 	for (FReplicatorCode& ReplicatorCode : ReplicatorCodeBundle.ReplicatorCodes)
 	{
@@ -121,8 +125,8 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass
 			*ReplicatorCode.ProtoFileName
 		);
 	}
-	// Generate replicator register code file
-	WriteCodeFile(GetReplicatorStorageDir() / GenManager_RepRegisterFile, ReplicatorCodeBundle.RegisterReplicatorFileCode, WriteCodeFileMessage);
+	// Generate replicator registration code file
+	WriteCodeFile(GetReplicatorStorageDir() / GenManager_RepRegistrationHeadFile, ReplicatorCodeBundle.ReplicatorRegistrationHeadCode, WriteCodeFileMessage);
 
 	// Generate global struct declarations file and proto definitions file
 	WriteCodeFile(GetReplicatorStorageDir() / GenManager_GlobalStructHeaderFile, ReplicatorCodeBundle.GlobalStructCodes, WriteCodeFileMessage);

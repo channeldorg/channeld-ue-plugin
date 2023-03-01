@@ -31,7 +31,10 @@ struct FReplicatorCode
 
 struct FGeneratedCodeBundle
 {
-	FString RegisterReplicatorFileCode;
+	FString TypeDefinitionsHeadCode;
+	FString TypeDefinitionsCppCode;
+	
+	FString ReplicatorRegistrationHeadCode;
 
 	TArray<FReplicatorCode> ReplicatorCodes;
 

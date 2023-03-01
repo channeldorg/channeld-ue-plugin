@@ -163,7 +163,13 @@ message {Declare_StateMessageType} {
 }
 )EOF";
 
-static const FString CodeGen_RegisterReplicatorTemplate =
+static const TCHAR* CodeGen_ChanneldGeneratedTypesHeadTemp =
+  LR"EOF(
+#pragma once
+DECLARE_LOG_CATEGORY_EXTERN(LogChanneldGen, Log, All);
+)EOF";
+
+static const FString CodeGen_ReplicatorRegistrationTemp =
 	FString(LR"EOF(
 #pragma once
 #include "CoreMinimal.h"
@@ -211,7 +217,6 @@ static const FString CodeGen_ChannelDataProcessorCPPTemp =
 
 #include "{File_CDP_ProtoHeader}"
 #include "unreal_common.pb.h"
-#include "ChanneldUE/ChanneldTypes.h"
 #include "Components/ActorComponent.h"
 #include "Replication/ChanneldReplication.h"
 {Code_IncludeAdditionHeaders}
@@ -246,7 +251,7 @@ namespace {Declaration_CDP_Namespace}
     virtual const google::protobuf::Message* GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved) override
     {
       if(ChannelData == nullptr) {
-        UE_LOG(LogChanneld, Error, TEXT("ChannelData is nullptr"));
+        UE_LOG(LogChanneldGen, Error, TEXT("ChannelData is nullptr"));
         bIsRemoved = false;
         return nullptr;
       }
@@ -254,7 +259,7 @@ namespace {Declaration_CDP_Namespace}
       {Code_GetStateFromChannelData}
       else
       {
-        UE_LOG(LogChanneld, Warning, TEXT("State of '%s' is not supported in the ChannelData, NetGUID: %d"), *TargetClass->GetName(), NetGUID);
+        UE_LOG(LogChanneldGen, Warning, TEXT("State of '%s' is not supported in the ChannelData, NetGUID: %d"), *TargetClass->GetName(), NetGUID);
       }
     
       bIsRemoved = false;
@@ -264,14 +269,14 @@ namespace {Declaration_CDP_Namespace}
     virtual void SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID) override
     {
       if(ChannelData == nullptr) {
-        UE_LOG(LogChanneld, Error, TEXT("ChannelData is nullptr"));
+        UE_LOG(LogChanneldGen, Error, TEXT("ChannelData is nullptr"));
         return;
       }
       auto {Declaration_CDP_ProtoVar} = static_cast<{Definition_CDP_ProtoNamespace}::{Definition_CDP_ProtoMsgName}*>(ChannelData);
       {Code_SetStateToChannelData}
       else
       {
-        UE_LOG(LogChanneld, Warning, TEXT("State of '%s' is not supported in the ChannelData, NetGUID: %d"), *TargetClass->GetName(), NetGUID);
+        UE_LOG(LogChanneldGen, Warning, TEXT("State of '%s' is not supported in the ChannelData, NetGUID: %d"), *TargetClass->GetName(), NetGUID);
       }
     }
   };

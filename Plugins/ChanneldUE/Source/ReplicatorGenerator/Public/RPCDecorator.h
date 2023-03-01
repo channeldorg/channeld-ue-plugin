@@ -20,7 +20,7 @@ if(Func->GetFName() == FName("{Declare_FuncName}"))
   {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName} Msg;
   if (!Msg.ParseFromString(ParamsPayload))
   {
-    UE_LOG(LogChanneld, Warning, TEXT("Failed to parse {Declare_FuncName} Params"));
+    UE_LOG(LogChanneldGen, Warning, TEXT("Failed to parse {Declare_FuncName} Params"));
     return nullptr;
   }
   {Declare_ParamStructNamespace}::{Declare_ParamStructCopy}* Params = new {Declare_ParamStructNamespace}::{Declare_ParamStructCopy}();

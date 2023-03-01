@@ -13,7 +13,9 @@ static const FString CodeGen_ProtoPbCPPExtension = TEXT(".pb.cpp");
 
 static const FString GenManager_GeneratedCodeDir = TEXT("ChanneldGenerated");
 static const FString GenManager_ChanneldUEBuildInProtoNamespace = TEXT("unrealpb");
-static const FString GenManager_RepRegisterFile = TEXT("ChanneldReplicatorRegister") + CodeGen_HeadFileExtension;
+static const FString GenManager_TypeDefinitionHeadFile = TEXT("ChanneldGeneratedTypes") + CodeGen_HeadFileExtension;
+static const FString GenManager_TypeDefinitionCppFile = TEXT("ChanneldGeneratedTypes") + CodeGen_CppFileExtension;
+static const FString GenManager_RepRegistrationHeadFile = TEXT("ChanneldReplicatorRegistration") + CodeGen_HeadFileExtension;
 static const FString GenManager_GlobalStructHeaderFile = TEXT("ChanneldGlobalStruct") + CodeGen_HeadFileExtension;
 static const FString GenManager_GlobalStructProtoFile = TEXT("ChanneldGlobalStruct") + CodeGen_ProtoFileExtension;
 static const FString GenManager_UnrealCommonProtoFile = TEXT("unreal_common") + CodeGen_ProtoFileExtension;

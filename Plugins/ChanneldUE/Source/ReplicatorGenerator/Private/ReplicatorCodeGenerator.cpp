@@ -111,7 +111,11 @@ bool FReplicatorCodeGenerator::Generate(
 	);
 	RegisterFormatArgs.Add(TEXT("Code_ChannelDataProcessorUnregister"), FString::Printf(TEXT("delete %s;"), *CDPVarNameInRegister));
 	RegisterFormatArgs.Add(TEXT("Declaration_Variables"), FString::Printf(TEXT("%s::%s* %s;\n"), *CDPNamespace, *CDPClassName, *CDPVarNameInRegister));
-	ReplicatorCodeBundle.RegisterReplicatorFileCode = FString::Format(*CodeGen_RegisterReplicatorTemplate, RegisterFormatArgs);
+	ReplicatorCodeBundle.ReplicatorRegistrationHeadCode = FString::Format(*CodeGen_ReplicatorRegistrationTemp, RegisterFormatArgs);
+
+	// Type definitions
+	ReplicatorCodeBundle.TypeDefinitionsHeadCode = CodeGen_ChanneldGeneratedTypesHeadTemp;
+	ReplicatorCodeBundle.TypeDefinitionsCppCode = FString::Printf(TEXT("#include \"%s\"\nDEFINE_LOG_CATEGORY(LogChanneldGen);"), *GenManager_TypeDefinitionHeadFile);
 
 	// Global struct codes
 	auto GlobalStructDecorators = FPropertyDecoratorFactory::Get().GetGlobalStructDecorators();
@@ -231,7 +235,8 @@ bool FReplicatorCodeGenerator::GenerateActorCode(
 
 	// ---------- Cpp code ----------
 	FString CppCodeBuilder;
-	CppCodeBuilder.Append(FString::Printf(TEXT("#include \"%s\"\n\n"), *GeneratedResult.HeadFileName));
+	CppCodeBuilder.Append(FString::Printf(TEXT("#include \"%s\"\n"), *GeneratedResult.HeadFileName));
+	CppCodeBuilder.Append(FString::Printf(TEXT("#include \"%s\"\n\n"), *GenManager_TypeDefinitionHeadFile));
 
 	FormatArgs.Add(
 		TEXT("Code_AssignPropertyPointers"),
@@ -421,11 +426,11 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	FString& ChannelDataProcessorCode
 )
 {
-	FString ChannelDataProcessor_IncludeCode,
-	        ChannelDataProcessor_ConstPathFNameVarDecl,
-	        ChannelDataProcessor_MergeCode,
-	        ChannelDataProcessor_GetStateCode,
-	        ChannelDataProcessor_SetStateCode;
+	FString ChannelDataProcessor_IncludeCode = FString::Printf(TEXT("#include \"%s\"\n"), *GenManager_TypeDefinitionHeadFile);
+	FString ChannelDataProcessor_ConstPathFNameVarDecl;
+	FString ChannelDataProcessor_MergeCode;
+	FString ChannelDataProcessor_GetStateCode;
+	FString ChannelDataProcessor_SetStateCode;
 
 	int32 ConstPathFNameVarDeclIndex = 0;
 	for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
