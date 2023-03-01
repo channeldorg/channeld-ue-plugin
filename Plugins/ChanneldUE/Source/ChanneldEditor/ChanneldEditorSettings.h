@@ -40,7 +40,7 @@ class UChanneldEditorSettings : public UObject
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(Config, EditAnywhere, Category= "Channeld", meta = ( ToolTip = "The .go source file to 'go run'. The working directory is CHANNELD_PATH." ))
+	UPROPERTY(Config, EditAnywhere, Category= "Channeld", meta = ( ToolTip = "The go source directory or file to build and run. The working directory is CHANNELD_PATH." ))
 	FString LaunchChanneldEntry = TEXT("examples/channeld-ue-tps/main.go");
 
 	UPROPERTY(Config, EditAnywhere, Category = "Channeld")

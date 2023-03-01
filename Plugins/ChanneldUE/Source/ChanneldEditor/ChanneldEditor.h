@@ -15,21 +15,21 @@ class FUICommandList;
 class FChanneldEditorModule : public IModuleInterface
 {
 public:
-
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
 private:
 	void AddToolbarButton(FToolBarBuilder& Builder);
-	void AddMenuEntry(FMenuBuilder& Builder);
-	void FillSubmenu(FMenuBuilder& Builder);
 
+	static bool IsNetworkingEnabled();
+	static void ToggleNetworkingAction();
 	void LaunchChanneldAction();
 	void StopChanneldAction();
 	FTimerManager* GetTimerManager();
 	void LaunchServersAction();
 	void StopServersAction();
+	void LaunchChanneldAndServersAction();
 
 	void GenerateReplicatorAction();
 	void AddRepCompsToBPsAction();

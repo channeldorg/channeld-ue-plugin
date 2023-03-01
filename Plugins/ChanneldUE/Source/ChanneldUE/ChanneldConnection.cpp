@@ -8,12 +8,6 @@
 
 void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 {
-
-//}
-//
-//UChanneldConnection::UChanneldConnection(const FObjectInitializer& ObjectInitializer)
-//	: Super(ObjectInitializer)
-//{
 	if (ReceiveBufferSize > Channeld::MaxPacketSize)
 		ReceiveBufferSize = Channeld::MaxPacketSize;
 	ReceiveBuffer = new uint8[ReceiveBufferSize];
