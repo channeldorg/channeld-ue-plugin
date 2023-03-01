@@ -78,7 +78,7 @@ bool FReplicatorCodeGenerator::Generate(
 	IncludeCode.Append(FString::Printf(TEXT("#include \"ChannelData_%s.h\"\n"), *DefaultModuleName));
 	const FString CDPNamespace = DefaultModuleName + TEXT("Processor");
 	const FString CDPClassName = TEXT("F") + CDPNamespace;
-	const FString ChanneldDataProtoMsgName = ProtoPackageName + TEXT("ChannelData");
+	const FString ChanneldDataProtoMsgName = GenManager_DefaultChannelDataMsgName;
 	if (!GenerateChannelDataCode(
 			TargetActors,
 			ChanneldDataProtoMsgName, CDPNamespace, CDPClassName,
@@ -465,7 +465,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	CDPFormatArgs.Add(TEXT("Declaration_CDP_ClassName"), ChannelDataProcessorClassName);
 	CDPFormatArgs.Add(TEXT("Definition_CDP_ProtoNamespace"), TEXT("generatedchanneldata"));
 	CDPFormatArgs.Add(TEXT("Code_ConstClassPathFNameVariable"), ChannelDataProcessor_ConstPathFNameVarDecl);
-	CDPFormatArgs.Add(TEXT("Definition_ChanneldUEBuildInProtoNamespace"), GenManager_ChanneldUEBuildInProtoNamespace);
+	CDPFormatArgs.Add(TEXT("Definition_ChanneldUEBuildInProtoNamespace"), GenManager_ChanneldUEBuildInProtoPackageName);
 	CDPFormatArgs.Add(TEXT("Definition_CDP_ProtoNamespace"), ProtoPackageName);
 	CDPFormatArgs.Add(TEXT("Definition_CDP_ProtoMsgName"), ChannelDataMessageName);
 	CDPFormatArgs.Add(TEXT("Code_Merge"), ChannelDataProcessor_MergeCode);

@@ -31,6 +31,10 @@ int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
 
 	int32 Result = Super::Main(CmdLineParams);
 	ObjLoadedListener.StopListen();
+	if (Result != 0)
+	{
+		return Result;
+	}
 
 	LoadedRepClasses.Append(ObjLoadedListener.LoadedRepClasses);
 	TArray<const UClass*> TargetClasses;
@@ -46,8 +50,12 @@ int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
 	FString GoPackageImportPathPrefix;
 	FParse::Value(*CmdLineParams, TEXT("-GoPackageImportPathPrefix="), GoPackageImportPathPrefix);
 
-	GeneratorManager.RemoveGeneratedCode();
-	GeneratorManager.GeneratedReplicators(TargetClasses, GoPackageImportPathPrefix);
+	GeneratorManager.RemoveGeneratedCodeFiles();
+
+	if(!GeneratorManager.GeneratedReplicators(TargetClasses, GoPackageImportPathPrefix))
+	{
+		Result = 1;
+	}
 
 	GeneratorManager.StopGenerateReplicator();
 

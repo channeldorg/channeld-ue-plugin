@@ -55,9 +55,9 @@ FString FReplicatorGeneratorManager::GetReplicatorStorageDir()
 	return ReplicatorStorageDir;
 }
 
-FString FReplicatorGeneratorManager::GetDefaultProtoPackageName()
+FString FReplicatorGeneratorManager::GetDefaultProtoPackageName() const
 {
-	return DefaultProtoPackageName = FPaths::GetBaseFilename(GetDefaultModuleDir()).ToLower() + TEXT("pb");
+	return GenManager_DefaultProtoPackageName;
 }
 
 FString FReplicatorGeneratorManager::GetDefaultModuleName()
@@ -102,18 +102,18 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass
 		(GoPackageImportPathPrefix + ProtoPackageName),
 		ReplicatorCodeBundle
 	);
-	FString WriteCodeFileMessage;
+	FString Message;
 
 	// Generate type definitions file
-	WriteCodeFile(GetReplicatorStorageDir() / GenManager_TypeDefinitionHeadFile, ReplicatorCodeBundle.TypeDefinitionsHeadCode, WriteCodeFileMessage);
-	WriteCodeFile(GetReplicatorStorageDir() / GenManager_TypeDefinitionCppFile, ReplicatorCodeBundle.TypeDefinitionsCppCode, WriteCodeFileMessage);
+	WriteCodeFile(GetReplicatorStorageDir() / GenManager_TypeDefinitionHeadFile, ReplicatorCodeBundle.TypeDefinitionsHeadCode, Message);
+	WriteCodeFile(GetReplicatorStorageDir() / GenManager_TypeDefinitionCppFile, ReplicatorCodeBundle.TypeDefinitionsCppCode, Message);
 
 	// Generate replicator code file
 	for (FReplicatorCode& ReplicatorCode : ReplicatorCodeBundle.ReplicatorCodes)
 	{
-		WriteCodeFile(GetReplicatorStorageDir() / ReplicatorCode.HeadFileName, ReplicatorCode.HeadCode, WriteCodeFileMessage);
-		WriteCodeFile(GetReplicatorStorageDir() / ReplicatorCode.CppFileName, ReplicatorCode.CppCode, WriteCodeFileMessage);
-		WriteProtoFile(GetReplicatorStorageDir() / ReplicatorCode.ProtoFileName, ReplicatorCode.ProtoDefinitionsFile, WriteCodeFileMessage);
+		WriteCodeFile(GetReplicatorStorageDir() / ReplicatorCode.HeadFileName, ReplicatorCode.HeadCode, Message);
+		WriteCodeFile(GetReplicatorStorageDir() / ReplicatorCode.CppFileName, ReplicatorCode.CppCode, Message);
+		WriteProtoFile(GetReplicatorStorageDir() / ReplicatorCode.ProtoFileName, ReplicatorCode.ProtoDefinitionsFile, Message);
 		UE_LOG(
 			LogChanneldRepGenerator,
 			Verbose,
@@ -126,16 +126,16 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass
 		);
 	}
 	// Generate replicator registration code file
-	WriteCodeFile(GetReplicatorStorageDir() / GenManager_RepRegistrationHeadFile, ReplicatorCodeBundle.ReplicatorRegistrationHeadCode, WriteCodeFileMessage);
+	WriteCodeFile(GetReplicatorStorageDir() / GenManager_RepRegistrationHeadFile, ReplicatorCodeBundle.ReplicatorRegistrationHeadCode, Message);
 
 	// Generate global struct declarations file and proto definitions file
-	WriteCodeFile(GetReplicatorStorageDir() / GenManager_GlobalStructHeaderFile, ReplicatorCodeBundle.GlobalStructCodes, WriteCodeFileMessage);
-	WriteProtoFile(GetReplicatorStorageDir() / GenManager_GlobalStructProtoFile, ReplicatorCodeBundle.GlobalStructProtoDefinitions, WriteCodeFileMessage);
+	WriteCodeFile(GetReplicatorStorageDir() / GenManager_GlobalStructHeaderFile, ReplicatorCodeBundle.GlobalStructCodes, Message);
+	WriteProtoFile(GetReplicatorStorageDir() / GenManager_GlobalStructProtoFile, ReplicatorCodeBundle.GlobalStructProtoDefinitions, Message);
 
 	// Generate channel data processor code file
 	const FString DefaultModuleName = GetDefaultModuleName();
-	WriteCodeFile(GetReplicatorStorageDir() / TEXT("ChannelData_") + DefaultModuleName + CodeGen_HeadFileExtension, ReplicatorCodeBundle.ChannelDataProcessorHeadCode, WriteCodeFileMessage);
-	WriteProtoFile(GetReplicatorStorageDir() / TEXT("ChannelData_") + DefaultModuleName + CodeGen_ProtoFileExtension, ReplicatorCodeBundle.ChannelDataProtoDefsFile, WriteCodeFileMessage);
+	WriteCodeFile(GetReplicatorStorageDir() / TEXT("ChannelData_") + DefaultModuleName + CodeGen_HeadFileExtension, ReplicatorCodeBundle.ChannelDataProcessorHeadCode, Message);
+	WriteProtoFile(GetReplicatorStorageDir() / TEXT("ChannelData_") + DefaultModuleName + CodeGen_ProtoFileExtension, ReplicatorCodeBundle.ChannelDataProtoDefsFile, Message);
 
 	UE_LOG(
 		LogChanneldRepGenerator,
@@ -143,6 +143,16 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass
 		TEXT("The generation of replicators is completed, %d replicators need to be generated, a total of %d replicators are generated"),
 		TargetClasses.Num(), ReplicatorCodeBundle.ReplicatorCodes.Num()
 	);
+
+	// Save the generated manifest file
+	FGeneratedManifest Manifest;
+	Manifest.GeneratedTime = FDateTime::Now();
+	Manifest.ProtoPackageName = ProtoPackageName;
+	if (SaveGeneratedManifest(Manifest, Message))
+	{
+		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save the generated manifest file, error message: %s"), *Message);
+		return false;
+	}
 
 	return true;
 }
@@ -202,7 +212,7 @@ void FReplicatorGeneratorManager::RemoveGeneratedReplicators(const TArray<FStrin
 	}
 }
 
-void FReplicatorGeneratorManager::RemoveGeneratedCode()
+void FReplicatorGeneratorManager::RemoveGeneratedCodeFiles()
 {
 	TArray<FString> AllCodeFiles;
 	IFileManager::Get().FindFiles(AllCodeFiles, *GetReplicatorStorageDir());
@@ -212,17 +222,27 @@ void FReplicatorGeneratorManager::RemoveGeneratedCode()
 	}
 }
 
-FPrevCodeGeneratedInfo FReplicatorGeneratorManager::LoadPrevCodeGeneratedInfo(const FString& Filename, bool& Success)
+inline void FReplicatorGeneratorManager::EnsureReplicatorGeneratedIntermediateDir()
 {
-	FPrevCodeGeneratedInfo Result;
-	Result.GeneratedTime = FDateTime(1970, 1, 1);
-	Success = false;
-	FString Json;
+	IFileManager& FileManager = IFileManager::Get();
+	if (!FileManager.DirectoryExists(*GenManager_IntermediateDir))
+	{
+		FileManager.MakeDirectory(*GenManager_IntermediateDir, true);
+	}
+}
 
+bool FReplicatorGeneratorManager::LoadLatestGeneratedManifest(FGeneratedManifest& Result, FString& Message) const
+{
+	return LoadLatestGeneratedManifest(GenManager_GeneratedManifestFilePath, Result, Message);
+}
+
+bool FReplicatorGeneratorManager::LoadLatestGeneratedManifest(const FString& Filename, FGeneratedManifest& Result, FString& Message) const
+{
+	FString Json;
 	if (!FFileHelper::LoadFileToString(Json, *Filename))
 	{
-		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Unable to load PrevCodeGeneratedInfo: %s"), *Filename);
-		return Result;
+		Message = FString::Printf(TEXT("Unable to load GeneratedManifest: %s"), *Filename);
+		return false;
 	}
 
 	TSharedPtr<FJsonObject> RootObject = TSharedPtr<FJsonObject>();
@@ -230,37 +250,51 @@ FPrevCodeGeneratedInfo FReplicatorGeneratorManager::LoadPrevCodeGeneratedInfo(co
 
 	if (!FJsonSerializer::Deserialize(Reader, RootObject))
 	{
-		UE_LOG(LogChanneldRepGenerator, Error, TEXT("PrevCodeGeneratedInfo is malformed: %s"), *Filename);
-		return Result;
+		Message = FString::Printf(TEXT("GeneratedManifest is malformed: %s"), *Filename);
+		return false;
 	}
-	TSharedPtr<FJsonValue>* JsonValue = RootObject->Values.Find(TEXT("GeneratedTime"));
-	if (!JsonValue)
-	{
-		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Unable to find field 'GeneratedTime'"));
-		return Result;
-	}
+
 	double GeneratedTime;
-	(*JsonValue)->AsArgumentType(GeneratedTime);
+	if (!RootObject->TryGetNumberField(TEXT("GeneratedTime"), GeneratedTime))
+	{
+		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'GeneratedTime'"));
+	}
 	Result.GeneratedTime = FDateTime::FromUnixTimestamp(GeneratedTime);
-	Success = true;
-	return Result;
+
+	if (!RootObject->TryGetStringField(TEXT("ProtoPackageName"), Result.ProtoPackageName))
+	{
+		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'ProtoPackageName'"));
+	}
+
+	return true;
 }
 
-void FReplicatorGeneratorManager::SavePrevCodeGeneratedInfo(const FPrevCodeGeneratedInfo& Info, const FString& Filename, bool& Success)
+bool FReplicatorGeneratorManager::SaveGeneratedManifest(const FGeneratedManifest& Manifest, FString& Message)
 {
-	Success = false;
+	EnsureReplicatorGeneratedIntermediateDir();
+	return SaveGeneratedManifest(Manifest, GenManager_GeneratedManifestFilePath, Message);
+}
+
+bool FReplicatorGeneratorManager::SaveGeneratedManifest(const FGeneratedManifest& Manifest, const FString& Filename, FString& Message)
+{
+	if (!FPaths::DirectoryExists(FPaths::GetPath(Filename)))
+	{
+		Message = FString::Printf(TEXT("Unable to find the directory of GeneratedManifest: %s"), *Filename);
+		return false;
+	}
 	FString Json;
 	TSharedPtr<FJsonObject> RootObject = TSharedPtr<FJsonObject>();
 
-	TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&Json);
+	const TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&Json);
 	JsonWriter->WriteObjectStart();
-	JsonWriter->WriteValue(TEXT("GeneratedTime"), FString::Printf(TEXT("%lld"), Info.GeneratedTime.ToUnixTimestamp()));
+	JsonWriter->WriteValue(TEXT("GeneratedTime"), Manifest.GeneratedTime.ToUnixTimestamp());
+	JsonWriter->WriteValue(TEXT("ProtoPackageName"), Manifest.ProtoPackageName);
 	JsonWriter->WriteObjectEnd();
 	JsonWriter->Close();
 	if (FFileHelper::SaveStringToFile(Json, *Filename))
 	{
-		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Unable to save PrevCodeGeneratedInfo: %s"), *Filename);
-		return;
+		Message = FString::Printf(TEXT("Unable to save GeneratedManifest: %s"), *Filename);
+		return false;
 	}
-	Success = true;
+	return true;
 }

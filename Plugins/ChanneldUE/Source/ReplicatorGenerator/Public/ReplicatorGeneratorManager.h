@@ -7,9 +7,13 @@
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 
-struct FPrevCodeGeneratedInfo
+/**
+ * Persistent info about latest generated codes.
+ */
+struct REPLICATORGENERATOR_API FGeneratedManifest
 {
 	FDateTime GeneratedTime;
+	FString ProtoPackageName;
 };
 
 class REPLICATORGENERATOR_API FReplicatorGeneratorManager
@@ -19,7 +23,6 @@ protected:
 
 	FString DefaultModuleDir;
 	FString ReplicatorStorageDir;
-	FString DefaultProtoPackageName;
 
 public:
 	FReplicatorGeneratorManager();
@@ -31,7 +34,7 @@ public:
 	static FReplicatorGeneratorManager& Get();
 
 	FString GetDefaultModuleDir();
-	
+
 	/**
 	 * Get the directory of the generated replicators.
 	 */
@@ -41,13 +44,13 @@ public:
 	/**
 	 * Get the default proto package name. The name is used for the proto package name and proto cpp namespace.
 	 */
-	FString GetDefaultProtoPackageName();
+	FString GetDefaultProtoPackageName() const;
 
 	/*
 	 * Get the name of the header file of the ChannelDataProcessor.
 	 */
 	FString GetDefaultModuleName();
-	
+
 	/**
 	 * Header files of the target class can be found or not.
 	 *
@@ -130,13 +133,17 @@ public:
 	void RemoveGeneratedReplicators(const TArray<FString>& ClassNames);
 
 	/**
-	 * Remove all the generated replicator files from 'GeneratedReplicators' directory.
+	 * Remove all the generated files from 'GeneratedReplicators' directory.
 	 */
-	void RemoveGeneratedCode();
+	void RemoveGeneratedCodeFiles();
 
-	FPrevCodeGeneratedInfo LoadPrevCodeGeneratedInfo(const FString& Filename, bool& Success);
+	inline void EnsureReplicatorGeneratedIntermediateDir();
 
-	void SavePrevCodeGeneratedInfo(const FPrevCodeGeneratedInfo& Info, const FString& Filename, bool& Success);
+	bool LoadLatestGeneratedManifest(FGeneratedManifest& Result, FString& Message) const;
+	bool LoadLatestGeneratedManifest(const FString& Filename, FGeneratedManifest& Result, FString& Message) const;
+
+	bool SaveGeneratedManifest(const FGeneratedManifest& Manifest, FString& Message);
+	bool SaveGeneratedManifest(const FGeneratedManifest& Manifest, const FString& Filename, FString& Message);
 
 private:
 	TSet<UClass*> IgnoreActorClasses{

@@ -207,7 +207,7 @@ FString FReplicatedActorDecorator::GetProtoPackageName()
 	{
 		// If the target actor class is build-in channeld class, we should use the ChanneldUE proto namespace.
 		// Actually, ChanneldUE doesn't cover all the build-in engine replicated actor classes like 'UTimelineComponent',
-		return GenManager_ChanneldUEBuildInProtoNamespace;
+		return GenManager_ChanneldUEBuildInProtoPackageName;
 	}
 	// return GetActorName().ToLower() + "pb";
 	return ProtoPackageName;

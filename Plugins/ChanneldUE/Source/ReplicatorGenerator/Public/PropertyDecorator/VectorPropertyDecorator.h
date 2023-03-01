@@ -27,13 +27,14 @@ unrealpb::FVector* NewOne = {Declare_DeltaStateName}->add_{Definition_ProtoName}
 ChanneldUtils::SetVectorToPB(NewOne, PropItem);
 if (!bPropChanged)
 {
-  bPropChanged = !(PropItem == ChanneldUtils::GetVector({Declare_FullStateName}->{Definition_ProtoName}()[i]));
+  bPropChanged = ChanneldUtils::CheckDifference(PropItem, {Declare_FullStateName}->{Definition_ProtoName}()[i]);
 }
 )EOF";
 
 const static TCHAR* VectorPropDeco_OnChangeStateArrayInnerTemp =
 	LR"EOF(
-FVector NewVector = ChanneldUtils::GetVector(MessageArr[i]);
+FVector NewVector;
+ChanneldUtils::SetVectorFromPB(NewVector, MessageArr[i]);
 if ((*{Declare_PropertyPtr})[i] != NewVector)
 {
   (*{Declare_PropertyPtr})[i] = NewVector;

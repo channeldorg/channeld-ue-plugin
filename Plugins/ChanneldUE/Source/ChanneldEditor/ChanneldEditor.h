@@ -34,9 +34,21 @@ private:
 	void GenerateReplicatorAction();
 	void AddRepCompsToBPsAction();
 
-	void RecompileGameCode() const;
+	/**
+	 * Using the protoc to generate c++ code in the project.
+	 */
+	void GenRepProtoCppCode(const TArray<FString>& ProtoFiles) const;
 
-	void GenReplicatorProto();
+	/**
+	 * Using the protoc to generate go code in the channeld.
+	 * The channeld directory is read from environment variable 'CHANNELD_PATH'.
+	 */
+	void GenRepProtoGoCode(const TArray<FString>& ProtoFiles) const;
+
+	/**
+	 * Recompile the game code. Copied from FLevelEditorActionCallbacks::RecompileGameCode_Clicked().
+	 */
+	void RecompileGameCode() const;
 
 	void OpenEditorSettingsAction();
 	
@@ -49,11 +61,11 @@ private:
 	TArray<FProcHandle> ServerProcHandles;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenRepWorkThread;
-	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoWorkThread;
-	UChanneldMissionNotiProxy* GenRepMissionNotifyProxy;
-	UChanneldMissionNotiProxy* GenProtoMissionNotifyProxy;
+	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoCppCodeWorkThread;
+	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoGoCodeWorkThread;
+	UChanneldMissionNotiProxy* GenRepNotify;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> AddRepCompWorkThread;
-	UChanneldMissionNotiProxy* AddRepCompMissionNotifyProxy;
+	UChanneldMissionNotiProxy* AddRepCompNotify;
 
 };
