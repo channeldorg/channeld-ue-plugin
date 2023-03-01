@@ -14,6 +14,7 @@ struct REPLICATORGENERATOR_API FGeneratedManifest
 {
 	FDateTime GeneratedTime;
 	FString ProtoPackageName;
+	FString TempChannelDataGolangMergeCodeFilePath;
 };
 
 class REPLICATORGENERATOR_API FReplicatorGeneratorManager
@@ -92,7 +93,7 @@ public:
 	 * @param ResultMessage The result message.
 	 * @return true if the code is written successfully.
 	 */
-	bool WriteCodeFile(const FString& FilePath, const FString& Code, FString& ResultMessage);
+	inline bool WriteCodeFile(const FString& FilePath, const FString& Code, FString& ResultMessage);
 
 	/**
 	 * Write the given proto definitions to the disk.
@@ -102,7 +103,7 @@ public:
 	 * @param ResultMessage The result message.
 	 * @return true if the proto definitions are written successfully.
 	 */
-	bool WriteProtoFile(const FString& FilePath, const FString& ProtoContent, FString& ResultMessage);
+	inline bool WriteProtoFile(const FString& FilePath, const FString& ProtoContent, FString& ResultMessage);
 
 	/**
 	 * Get the generated replicator classes in 'GeneratedReplicators' directory.
@@ -138,6 +139,9 @@ public:
 	void RemoveGeneratedCodeFiles();
 
 	inline void EnsureReplicatorGeneratedIntermediateDir();
+
+	inline FString GetTmpChannelDataGolangMergeCodeFilePath() const;
+	inline bool WriteTempChannelDataGolangMergeCodeFile(const FString& Code, FString& ResultMessage);
 
 	bool LoadLatestGeneratedManifest(FGeneratedManifest& Result, FString& Message) const;
 	bool LoadLatestGeneratedManifest(const FString& Filename, FGeneratedManifest& Result, FString& Message) const;

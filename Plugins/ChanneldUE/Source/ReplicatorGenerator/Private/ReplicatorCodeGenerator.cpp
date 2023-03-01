@@ -412,6 +412,14 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 		GeneratedCodeBundle.ChannelDataProtoDefsFile
 	);
 
+	GenerateGolangMergeCode(
+		ActorDecorators,
+		ChildrenOfAActor,
+		ChannelDataProtoMsgName,
+		ProtoPackageName,
+		GeneratedCodeBundle.ChannelDataGolangMergeCode
+	);
+
 	return true;
 }
 
@@ -501,6 +509,13 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProtoDefFile(
 	FormatArgs.Add(TEXT("Declare_ProtoPackageName"), ProtoPackageName);
 	FormatArgs.Add(TEXT("Definition_ProtoStateMsg"), FString::Printf(TEXT("message %s {\n%s}\n"), *ChannelDataMessageName, *ChannelDataFields));
 	ChannelDataProtoFile = FString::Format(CodeGen_ProtoTemplate, FormatArgs);
+	return true;
+}
+
+bool FReplicatorCodeGenerator::GenerateGolangMergeCode(const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors, const TArray<TSharedPtr<FReplicatedActorDecorator>>& ChildrenOfAActor, const FString& ChannelDataMessageName, const FString& ProtoPackageName, FString& GolangMergeCode)
+{
+	// TODO : Generate Golang Merge Code
+	GolangMergeCode = TEXT("");
 	return true;
 }
 

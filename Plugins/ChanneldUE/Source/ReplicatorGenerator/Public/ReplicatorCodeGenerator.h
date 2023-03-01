@@ -33,7 +33,7 @@ struct FGeneratedCodeBundle
 {
 	FString TypeDefinitionsHeadCode;
 	FString TypeDefinitionsCppCode;
-	
+
 	FString ReplicatorRegistrationHeadCode;
 
 	TArray<FReplicatorCode> ReplicatorCodes;
@@ -44,6 +44,8 @@ struct FGeneratedCodeBundle
 
 	FString ChannelDataProcessorHeadCode;
 	FString ChannelDataProtoDefsFile;
+
+	FString ChannelDataGolangMergeCode;
 };
 
 class REPLICATORGENERATOR_API FReplicatorCodeGenerator
@@ -69,6 +71,9 @@ public:
 	 * Generate replicator codes for the specified actors.
 	 *
 	 * @param TargetActors The actor classes to generate replicators for.
+	 * @param DefaultModuleDir The default module directory. The channel data processor will use default module name.
+	 * @param ProtoPackageName All generated proto files will use this package name.
+	 * @param GoPackageImportPath Be used to set 'option go_package='
 	 * @param ReplicatorCodeBundle The generated replicator codes (.h, .cpp, .proto) .
 	 * @return true on success, false otherwise.
 	 */
@@ -85,6 +90,8 @@ public:
 	 *
 	 * @param TargetActorClass The actor to generate replicator for.
 	 * @param GeneratedResult The generated replicator code (.h, .cpp, .proto) .
+	 * @param ProtoPackageName All replicator's proto files will use this package name.
+	 * @param GoPackageImportPath Be used to set 'option go_package='
 	 * @param ResultMessage The result message.
 	 * @return true on success, false otherwise.
 	 */
@@ -125,6 +132,14 @@ public:
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
 		FString& ChannelDataProtoFile
+	);
+
+	bool GenerateGolangMergeCode(
+		const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
+		const TArray<TSharedPtr<FReplicatedActorDecorator>>& ChildrenOfAActor,
+		const FString& ChannelDataMessageName,
+		const FString& ProtoPackageName,
+		FString& GolangMergeCode
 	);
 
 protected:
