@@ -11,6 +11,10 @@ public class PrometheusUE : ModuleRules
         PublicDependencyModuleNames.AddRange(new string[]
         {
             "Core",
+        });
+        
+        PrivateDependencyModuleNames.AddRange(new string[]
+        {
             "CoreUObject",
             "Engine",
         });

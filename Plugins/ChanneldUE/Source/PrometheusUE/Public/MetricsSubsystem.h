@@ -1,13 +1,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Programs/UnrealLightmass/Private/ImportExport/3DVisualizer.h"
-
 #include "prometheus/counter.h"
 #include "prometheus/gauge.h"
 #include "prometheus/exposer.h"
 #include "prometheus/registry.h"
-#include "Subsystems/EngineSubsystem.h"
 #include "MetricsSubsystem.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPrometheus, Log, All);
