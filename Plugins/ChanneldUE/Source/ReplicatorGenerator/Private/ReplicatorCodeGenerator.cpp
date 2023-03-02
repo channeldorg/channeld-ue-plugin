@@ -512,9 +512,23 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProtoDefFile(
 	return true;
 }
 
-bool FReplicatorCodeGenerator::GenerateGolangMergeCode(const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors, const TArray<TSharedPtr<FReplicatedActorDecorator>>& ChildrenOfAActor, const FString& ChannelDataMessageName, const FString& ProtoPackageName, FString& GolangMergeCode)
+bool FReplicatorCodeGenerator::GenerateGolangMergeCode(
+	const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
+	const TArray<TSharedPtr<FReplicatedActorDecorator>>& ChildrenOfAActor,
+	const FString& ChannelDataMessageName,
+	const FString& ProtoPackageName,
+	FString& GolangMergeCode
+)
 {
 	// TODO : Generate Golang Merge Code
+	for(const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
+	{
+		// unrealpb.xxxState
+		// {ActorDecorator->GetProtoPackageName()}.{ActorDecorator->GetProtoStateMessageType()}
+
+		// make(map[uint32]*unrealpb.ActorState) or &unrealpb.GameStateBase{}
+		// ActorDecorator->IsSingleton()
+	}
 	GolangMergeCode = TEXT("");
 	return true;
 }
