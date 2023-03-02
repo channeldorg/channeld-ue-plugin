@@ -68,6 +68,16 @@ func (dst *{Definition_ChannelDataMsgName}) Merge(src common.ChannelDataMessage,
 
 )EOF";
 
+static const TCHAR* CodeGen_Go_MergeStateTemplate = LR"EOF(
+	if srcData.{Definition_StateVarName} != nil {
+		if dst.{Definition_StateVarName} == nil {
+			dst.{Definition_StateVarName} = &{Definition_StatePackageName}.{Definition_StateClassName}{}
+		}
+		proto.Merge(dst.{Definition_StateVarName}, srcData.{Definition_StateVarName})
+	}
+
+)EOF";
+
 static const TCHAR* CodeGen_Go_MergeStateInMapTemplate = LR"EOF(
 	for netId, {Definition_NewStateVarName} := range srcData.{Definition_StateMapName} {
 		{Definition_OldStateVarName}, exists := dst.{Definition_StateMapName}[netId]
@@ -81,4 +91,47 @@ static const TCHAR* CodeGen_Go_MergeStateInMapTemplate = LR"EOF(
 		}
 	}
 
+)EOF";
+
+static const TCHAR* CodeGen_Go_MergeCompStateInMapTemplate = LR"EOF(
+	for netId, {Definition_NewStateVarName} := range srcData.{Definition_StateMapName} {
+		if {Definition_NewStateVarName}.Removed {
+			delete(dst.{Definition_StateMapName}, netId)
+		} else {
+			{Definition_OldStateVarName}, exists := dst.{Definition_StateMapName}[netId]
+			if exists {
+				proto.Merge({Definition_OldStateVarName}, {Definition_NewStateVarName})
+			} else {
+				if dst.{Definition_StateMapName} == nil {
+					dst.{Definition_StateMapName} = make(map[uint32]*{Definition_StatePackageName}.{Definition_StateClassName})
+				}
+				dst.{Definition_StateMapName}[netId] = {Definition_NewStateVarName}
+			}
+		}
+	}
+
+)EOF";
+
+static const TCHAR* CodeGen_Go_MergeActorStateInMapTemplate = LR"EOF(
+	for netId, {Definition_NewStateVarName} := range srcData.{Definition_StateMapName} {
+		if {Definition_NewStateVarName}.Removed {
+			{Code_DeleteFromStates}
+			channeld.RootLogger().Debug("removed actor state", zap.Uint32("netId", netId))
+			continue
+		} else {
+			{Definition_OldStateVarName}, exists := dst.{Definition_StateMapName}[netId]
+			if exists {
+				proto.Merge({Definition_OldStateVarName}, {Definition_NewStateVarName})
+			} else {
+				if dst.{Definition_StateMapName} == nil {
+					dst.{Definition_StateMapName} = make(map[uint32]*{Definition_StatePackageName}.{Definition_StateClassName})
+				}
+				dst.{Definition_StateMapName}[netId] = {Definition_NewStateVarName}
+			}
+	}
+
+)EOF";
+
+static const TCHAR* CodeGen_Go_DeleteStateInMapTemplate = LR"EOF(
+	delete(dst.{Definition_StateMapName}, netId)
 )EOF";

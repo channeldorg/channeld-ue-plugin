@@ -151,6 +151,8 @@ public:
 	 */
 	void SetModuleInfo(const FModuleInfo& InModuleBelongTo);
 
+	FORCEINLINE const UClass* GetTargetClass() const {return TargetClass;}
+	
 	/**
       * Get target actor name
       */

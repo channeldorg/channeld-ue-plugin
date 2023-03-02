@@ -531,10 +531,8 @@ bool FReplicatorCodeGenerator::GenerateGoProtoDataCode(
 
 		GoCode.Append(FString::Format(CodeGen_Go_CollectStatesTemplate, FormatArgs));
 	}
-
 	{
 		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add("Definition_StatePackageName", ProtoPackageName);
 		for(const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
 		{
 			// No need to collect singleton state for handover
@@ -542,6 +540,7 @@ bool FReplicatorCodeGenerator::GenerateGoProtoDataCode(
 			{
 				continue;
 			}
+			FormatArgs.Add("Definition_StatePackageName", ActorDecorator->GetProtoPackageName());
 			FString StateClassName = ActorDecorator->GetProtoStateMessageType();
 			FormatArgs.Add("Definition_StateClassName", StateClassName);
 			FormatArgs.Add("Definition_StateVarName", "new" + StateClassName);
@@ -562,25 +561,50 @@ bool FReplicatorCodeGenerator::GenerateGoProtoDataCode(
 	}	
 	{
 		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add("Definition_StatePackageName", ProtoPackageName);
+		
+		FString MergeActorStateCode = TEXT("");
+		
 		for(const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
 		{
+			FormatArgs.Add("Definition_StatePackageName", ActorDecorator->GetProtoPackageName());
 			FString StateClassName = ActorDecorator->GetProtoStateMessageType();
 			FormatArgs.Add("Definition_StateClassName", StateClassName);
-			
+
 			if (ActorDecorator->IsSingleton())
 			{
-				
+				FormatArgs.Add("Definition_StateVarName", StateClassName);
+
+				GoCode.Append(FString::Format(CodeGen_Go_MergeStateTemplate, FormatArgs));
 			}
 			else
 			{
 				FormatArgs.Add("Definition_NewStateVarName", "new" + StateClassName);
 				FormatArgs.Add("Definition_OldStateVarName", "old" + StateClassName);
 				FormatArgs.Add("Definition_StateMapName", ActorDecorator->GetDefinition_ChannelDataFieldNameGo());
-			}
 
-			GoCode.Append(FString::Format(CodeGen_Go_MergeStateInMapTemplate, FormatArgs));
+				if (ActorDecorator->GetTargetClass() == AActor::StaticClass())
+				{
+					FString DeleteStateCode = TEXT("");
+					FStringFormatNamedArguments DeletionFormatArgs;
+					for(const auto& Deletion: TargetActors)
+					{
+						DeletionFormatArgs.Add("Definition_StateMapName", Deletion->GetDefinition_ChannelDataFieldNameGo());
+						DeleteStateCode.Append(FString::Format(CodeGen_Go_DeleteStateInMapTemplate, DeletionFormatArgs));
+					}
+					FormatArgs.Add("Code_DeleteFromStates", DeleteStateCode);
+					// Don't add the code yet
+					MergeActorStateCode = FString::Format(CodeGen_Go_MergeActorStateInMapTemplate, FormatArgs);
+				}
+				else
+				{
+					GoCode.Append(FString::Format(ActorDecorator->GetTargetClass()->IsChildOf<UActorComponent>() ?
+						CodeGen_Go_MergeCompStateInMapTemplate : CodeGen_Go_MergeStateInMapTemplate, FormatArgs));
+				}
+			}
 		}
+			
+		// Add ActorState's merge code at last
+		GoCode.Append(MergeActorStateCode);
 	}
 	
 	return true;
