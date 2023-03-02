@@ -11,10 +11,10 @@ struct FServerGroup
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	bool bEnabled;
+	bool bEnabled = true;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "1", ClampMax = "16"))
-	int32 ServerNum;
+	int32 ServerNum = 1;
 
 	// How long to wait before launching the servers (in seconds)
 	UPROPERTY(EditAnywhere)
