@@ -272,7 +272,7 @@ FString FReplicatedActorDecorator::GetDefinition_ProtoStateMessage()
 	FString FieldDefinitions;
 
 	int32 Offset = 1;
-	if(TargetClass->IsChildOf(UActorComponent::StaticClass()))
+	if (TargetClass->IsChildOf(UActorComponent::StaticClass()))
 	{
 		FieldDefinitions.Append(TEXT("bool removed = 1;"));
 		Offset = 2;
@@ -401,14 +401,23 @@ void FReplicatedActorDecorator::SetConstClassPathFNameVarName(const FString& Var
 	VariableName_ConstClassPathFName = VarName;
 }
 
+FString FReplicatedActorDecorator::GetDefinition_ChannelDataFieldNameProto()
+{
+	FString ProtoStateMessageType = GetProtoStateMessageType();
+	ProtoStateMessageType[0] = tolower(ProtoStateMessageType[0]);
+	return ProtoStateMessageType + (IsSingleton() ? TEXT("") : TEXT("s"));
+}
+
 FString FReplicatedActorDecorator::GetDefinition_ChannelDataFieldNameGo()
 {
-	return (GetProtoStateMessageType() + (IsSingleton() ? TEXT("") : TEXT("s")));
+	FString ChannelDataFieldName = GetDefinition_ChannelDataFieldNameProto();
+	ChannelDataFieldName[0] = toupper(ChannelDataFieldName[0]);
+	return ChannelDataFieldName;
 }
 
 FString FReplicatedActorDecorator::GetDefinition_ChannelDataFieldNameCpp()
 {
-	return GetDefinition_ChannelDataFieldNameGo().ToLower();
+	return GetDefinition_ChannelDataFieldNameProto().ToLower();
 }
 
 FString FReplicatedActorDecorator::GetCode_ConstPathFNameVarDecl()
@@ -512,10 +521,10 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProtoFieldDefinition(const
 {
 	if (IsSingleton())
 	{
-		return FString::Printf(TEXT("%s.%s %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameCpp(), Index);
+		return FString::Printf(TEXT("%s.%s %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameProto(), Index);
 	}
 	else
 	{
-		return FString::Printf(TEXT("map<uint32, %s.%s> %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameCpp(), Index);
+		return FString::Printf(TEXT("map<uint32, %s.%s> %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameProto(), Index);
 	}
 }

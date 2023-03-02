@@ -451,7 +451,7 @@ void FChanneldEditorModule::GenRepProtoCppCode(const TArray<FString>& ProtoFiles
 
 void FChanneldEditorModule::GenRepProtoGoCode(const TArray<FString>& ProtoFiles) const
 {
-	FReplicatorGeneratorManager GeneratorManager = FReplicatorGeneratorManager::Get();
+	FReplicatorGeneratorManager& GeneratorManager = FReplicatorGeneratorManager::Get();
 	FGeneratedManifest LatestGeneratedManifest;
 	FString Message;
 	if (!GeneratorManager.LoadLatestGeneratedManifest(LatestGeneratedManifest, Message))
