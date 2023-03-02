@@ -330,10 +330,10 @@ void FChanneldEditorModule::GenerateReplicatorAction()
 	GenRepWorkThread->ProcFailedDelegate.AddUObject(GenRepNotify, &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
 	GenRepNotify->SetMissionName(TEXT("CookAndGenerateReplicators"));
 	GenRepNotify->SetMissionNotifyText(
-		FText::FromString(TEXT("Cooking And Generating Replicators...")),
+		FText::FromString(TEXT("Cooking And Generating Replication Code...")),
 		LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),
-		FText::FromString(TEXT("Successfully Generated Replicators.")),
-		FText::FromString(TEXT("Failed To Generate Replicators!"))
+		FText::FromString(TEXT("Successfully Generated Replication Code.")),
+		FText::FromString(TEXT("Failed To Generate Replication Code!"))
 	);
 	GenRepNotify->MissionCanceled.AddLambda([this]()
 	{

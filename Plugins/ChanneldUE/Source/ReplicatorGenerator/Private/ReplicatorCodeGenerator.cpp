@@ -540,7 +540,7 @@ bool FReplicatorCodeGenerator::GenerateGoProtoDataCode(
 			{
 				continue;
 			}
-			FormatArgs.Add("Definition_StatePackageName", ActorDecorator->GetProtoPackageName());
+			FormatArgs.Add("Definition_StatePackagePath", ActorDecorator->GetProtoPackagePathGo(ProtoPackageName));
 			FString StateClassName = ActorDecorator->GetProtoStateMessageType();
 			FormatArgs.Add("Definition_StateClassName", StateClassName);
 			FormatArgs.Add("Definition_StateVarName", "new" + StateClassName);
@@ -564,9 +564,9 @@ bool FReplicatorCodeGenerator::GenerateGoProtoDataCode(
 		
 		FString MergeActorStateCode = TEXT("");
 		
-		for(const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
+		for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
 		{
-			FormatArgs.Add("Definition_StatePackageName", ActorDecorator->GetProtoPackageName());
+			FormatArgs.Add("Definition_StatePackagePath", ActorDecorator->GetProtoPackagePathGo(ProtoPackageName));
 			FString StateClassName = ActorDecorator->GetProtoStateMessageType();
 			FormatArgs.Add("Definition_StateClassName", StateClassName);
 
@@ -586,8 +586,12 @@ bool FReplicatorCodeGenerator::GenerateGoProtoDataCode(
 				{
 					FString DeleteStateCode = TEXT("");
 					FStringFormatNamedArguments DeletionFormatArgs;
-					for(const auto& Deletion: TargetActors)
+					for (const auto& Deletion: TargetActors)
 					{
+						if (Deletion->GetTargetClass()->IsChildOf<UActorComponent>())
+						{
+							continue;
+						}
 						DeletionFormatArgs.Add("Definition_StateMapName", Deletion->GetDefinition_ChannelDataFieldNameGo());
 						DeleteStateCode.Append(FString::Format(CodeGen_Go_DeleteStateInMapTemplate, DeletionFormatArgs));
 					}
@@ -606,6 +610,8 @@ bool FReplicatorCodeGenerator::GenerateGoProtoDataCode(
 		// Add ActorState's merge code at last
 		GoCode.Append(MergeActorStateCode);
 	}
+
+	GoCode.Append(TEXT("\treturn nil\n}\n"));
 	
 	return true;
 }

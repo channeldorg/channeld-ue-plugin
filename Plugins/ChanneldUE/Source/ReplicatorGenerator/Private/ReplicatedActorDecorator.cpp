@@ -213,6 +213,16 @@ FString FReplicatedActorDecorator::GetProtoPackageName()
 	return ProtoPackageName;
 }
 
+FString FReplicatedActorDecorator::GetProtoPackagePathGo(const FString& ChannelDataPackageName)
+{
+	const FString PackageName = GetProtoPackageName();
+	if (PackageName == ChannelDataPackageName)
+	{
+		return TEXT("");
+	}
+	return PackageName + ".";
+}
+
 FString FReplicatedActorDecorator::GetProtoNamespace()
 {
 	return GetProtoPackageName();

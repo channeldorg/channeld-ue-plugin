@@ -210,6 +210,12 @@ public:
 	virtual FString GetProtoPackageName() override;
 
 	/**
+	 * Get protobuf package path for generated Go code.
+	 * If the state's package name equals the channel data's package name, return an empty string.
+	 */
+	FString GetProtoPackagePathGo(const FString& ChannelDataPackageName);
+
+	/**
 	 * Get protobuf c++ code namespace
 	 */
 	virtual FString GetProtoNamespace() override;

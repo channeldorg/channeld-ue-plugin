@@ -29,7 +29,7 @@ static const TCHAR* CodeGen_Go_CollectStateInMapTemplate = LR"EOF(
 {Definition_StateVarName}, exists := from.{Definition_StateMapName}[netId]
 if exists {
 	if to.{Definition_StateMapName} == nil {
-		to.{Definition_StateMapName} = make(map[uint32]*{Definition_StatePackageName}.{Definition_StateClassName})
+		to.{Definition_StateMapName} = make(map[uint32]*{Definition_StatePackagePath}{Definition_StateClassName})
 	}
 	to.{Definition_StateMapName}[netId] = {Definition_StateVarName}
 }
@@ -71,7 +71,7 @@ func (dst *{Definition_ChannelDataMsgName}) Merge(src common.ChannelDataMessage,
 static const TCHAR* CodeGen_Go_MergeStateTemplate = LR"EOF(
 	if srcData.{Definition_StateVarName} != nil {
 		if dst.{Definition_StateVarName} == nil {
-			dst.{Definition_StateVarName} = &{Definition_StatePackageName}.{Definition_StateClassName}{}
+			dst.{Definition_StateVarName} = &{Definition_StatePackagePath}{Definition_StateClassName}{}
 		}
 		proto.Merge(dst.{Definition_StateVarName}, srcData.{Definition_StateVarName})
 	}
@@ -85,7 +85,7 @@ static const TCHAR* CodeGen_Go_MergeStateInMapTemplate = LR"EOF(
 			proto.Merge({Definition_OldStateVarName}, {Definition_NewStateVarName})
 		} else {
 			if dst.{Definition_StateMapName} == nil {
-				dst.{Definition_StateMapName} = make(map[uint32]*{Definition_StatePackageName}.{Definition_StateClassName})
+				dst.{Definition_StateMapName} = make(map[uint32]*{Definition_StatePackagePath}{Definition_StateClassName})
 			}
 			dst.{Definition_StateMapName}[netId] = {Definition_NewStateVarName}
 		}
@@ -103,7 +103,7 @@ static const TCHAR* CodeGen_Go_MergeCompStateInMapTemplate = LR"EOF(
 				proto.Merge({Definition_OldStateVarName}, {Definition_NewStateVarName})
 			} else {
 				if dst.{Definition_StateMapName} == nil {
-					dst.{Definition_StateMapName} = make(map[uint32]*{Definition_StatePackageName}.{Definition_StateClassName})
+					dst.{Definition_StateMapName} = make(map[uint32]*{Definition_StatePackagePath}{Definition_StateClassName})
 				}
 				dst.{Definition_StateMapName}[netId] = {Definition_NewStateVarName}
 			}
@@ -124,10 +124,11 @@ static const TCHAR* CodeGen_Go_MergeActorStateInMapTemplate = LR"EOF(
 				proto.Merge({Definition_OldStateVarName}, {Definition_NewStateVarName})
 			} else {
 				if dst.{Definition_StateMapName} == nil {
-					dst.{Definition_StateMapName} = make(map[uint32]*{Definition_StatePackageName}.{Definition_StateClassName})
+					dst.{Definition_StateMapName} = make(map[uint32]*{Definition_StatePackagePath}{Definition_StateClassName})
 				}
 				dst.{Definition_StateMapName}[netId] = {Definition_NewStateVarName}
 			}
+		}
 	}
 
 )EOF";
