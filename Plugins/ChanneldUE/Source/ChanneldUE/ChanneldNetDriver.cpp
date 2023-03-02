@@ -13,7 +13,7 @@
 #include "ChanneldGameInstanceSubsystem.h"
 #include "ChanneldUtils.h"
 #include "ChanneldSettings.h"
-#include "Metrics.h"
+#include "ChanneldMetrics.h"
 #include "GameFramework/PlayerState.h"
 #include "Replication/ChanneldReplicationComponent.h"
 #include "GameFramework/GameModeBase.h"
@@ -642,7 +642,7 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	}
 	else
 	{
-		UE_LOG(LogChanneld, Warning, TEXT("ChannelDataView is not initialized yet. If the actor '%s' is a DataProvider, it will not be registered."), *Actor->GetName());
+		UE_LOG(LogChanneld, Log, TEXT("ChannelDataView is not initialized yet. If the actor '%s' is a DataProvider, it will not be registered."), *Actor->GetName());
 	}
 
 	// Send the spawn of PlayerController and PlayerState in OnClientPostLogin instead, because
@@ -926,8 +926,8 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 void UChanneldNetDriver::OnSentRPC(class AActor* Actor, FString FuncName)
 {
 	//UE_LOG(LogChanneld, Verbose, TEXT("Sent RPC %s::%s via channeld"), *Actor->GetName(), *FuncName);
-	UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
-	Metrics->AddConnTypeLabel(*Metrics->SentRPCs).Increment();
+	UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+	Metrics->AddConnTypeLabel(Metrics->SentRPCs).Increment();
 }
 
 void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDeferredRPC)

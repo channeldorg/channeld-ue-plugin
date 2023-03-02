@@ -15,15 +15,6 @@ UChanneldReplicationComponent::UChanneldReplicationComponent(const FObjectInitia
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UChanneldReplicationComponent::PostInitProperties()
-{
-	Super::PostInitProperties();
-
-//#if !WITH_EDITOR
-	//InitOnce();
-//#endif
-}
-
 void UChanneldReplicationComponent::InitOnce()
 {
 	if (!GetOwner())
@@ -43,7 +34,7 @@ void UChanneldReplicationComponent::InitOnce()
 	}
 
 	auto Settings = GetMutableDefault<UChanneldSettings>();
-	if (Settings->bSkipCustomReplication)
+	if (!Settings->bEnableNetworking || Settings->bSkipCustomReplication)
 	{
 		return;
 	}

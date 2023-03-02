@@ -21,6 +21,7 @@ public:
 
 public:
 	TSharedPtr<FUICommandInfo> PluginCommand;
+	TSharedPtr<FUICommandInfo> ToggleNetworkingCommand;
 	TSharedPtr<FUICommandInfo> LaunchChanneldCommand;
 	TSharedPtr<FUICommandInfo> StopChanneldCommand;
 	TSharedPtr<FUICommandInfo> LaunchServersCommand;

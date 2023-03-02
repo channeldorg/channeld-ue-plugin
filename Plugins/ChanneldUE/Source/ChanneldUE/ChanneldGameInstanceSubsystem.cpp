@@ -11,6 +11,7 @@
 
 void UChanneldGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
+	GetMutableDefault<UChanneldSettings>()->UpdateNetDriverDefinitions();
 	InitConnection();
 }
 

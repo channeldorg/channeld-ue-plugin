@@ -125,3 +125,41 @@ void ChanneldReplication::RegisterChannelDataMerger(const FName& MessageFullName
 	ChannelDataMergerRegistry.Add(MessageFullName, Processor);
 	UE_LOG(LogChanneld, Log, TEXT("Registered merger for %s"), *MessageFullName.ToString());
 }
+
+uint32 ChanneldReplication::GetUnrealObjectType(const UObject* Obj)
+{
+	if (Obj == nullptr)
+	{
+		return 0;
+	}
+	
+	const UClass* ObjClass = Obj->GetClass();
+	// Find in the descending order, so the most derived class will be found first
+	for (int i = ReplicatorStatesInProto.Num() - 1; i >= 0; i--)
+	{
+		FReplicatorStateInProto& State = ReplicatorStatesInProto[i];
+		
+		if (State.TargetClass)
+		{
+			for (const UClass* Class = ObjClass; Class != UObject::StaticClass(); Class = Class->GetSuperClass())
+			{
+				if (Class == State.TargetClass)
+				{
+					return State.FieldIndex + 1;
+				}
+			}
+		}
+		else
+		{
+			for (const UClass* Class = ObjClass; Class != UObject::StaticClass(); Class = Class->GetSuperClass())
+			{
+				if (Class->GetPathName() == State.TargetClassPathName)
+				{
+					return State.FieldIndex + 1;
+				}
+			}
+		}
+	}
+
+	return 0;
+}

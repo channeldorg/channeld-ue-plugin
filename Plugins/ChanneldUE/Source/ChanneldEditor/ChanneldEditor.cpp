@@ -20,7 +20,6 @@
 #include "PropertyEditorModule.h"
 #include "PropertyEditorDelegates.h"
 #include "ChanneldTypes.h"
-#include "ClientInterestSettingsCustomization.h"
 #include "ILiveCodingModule.h"
 #include "ProtocHelper.h"
 #include "Async/Async.h"
@@ -40,7 +39,12 @@ void FChanneldEditorModule::StartupModule()
 	PluginCommands = MakeShareable(new FUICommandList);
 	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().PluginCommand,
-		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::LaunchServersAction));
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::LaunchChanneldAndServersAction));
+	PluginCommands->MapAction(
+		FChanneldEditorCommands::Get().ToggleNetworkingCommand,
+		FExecuteAction::CreateStatic(&FChanneldEditorModule::ToggleNetworkingAction),
+		FCanExecuteAction(),
+		FIsActionChecked::CreateStatic(&FChanneldEditorModule::IsNetworkingEnabled));
 	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().LaunchChanneldCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::LaunchChanneldAction));
@@ -69,11 +73,6 @@ void FChanneldEditorModule::StartupModule()
 	ToolbarExtender->AddToolBarExtension("Compile", EExtensionHook::After, PluginCommands,
 	                                     FToolBarExtensionDelegate::CreateRaw(this, &FChanneldEditorModule::AddToolbarButton));
 	LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
-
-	//TSharedPtr<FExtender> MenuExtender = MakeShareable(new FExtender());
-	//MenuExtender->AddMenuExtension("LevelEditor", EExtensionHook::After, PluginCommands,
-	//	FMenuExtensionDelegate::CreateRaw(this, &FChanneldEditorModule::AddMenuEntry));
-	//LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(MenuExtender);
 
 	// Stop all services launched during the session 
 	FEditorDelegates::EditorModeIDExit.AddLambda([&](const FEditorModeID&)
@@ -137,87 +136,50 @@ void FChanneldEditorModule::AddToolbarButton(FToolBarBuilder& Builder)
 	);
 }
 
-void FChanneldEditorModule::AddMenuEntry(FMenuBuilder& Builder)
-{
-	Builder.BeginSection("Channeld", TAttribute<FText>(FText::FromString("Channeld")));
-
-	auto Cmd = FChanneldEditorCommands::Get().LaunchChanneldCommand;
-	Builder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchChanneldCommand);
-	Builder.AddSubMenu(FText::FromString("Channeld submenu"),
-	                   FText::FromString("Channeld submenu tooltip"),
-	                   FNewMenuDelegate::CreateRaw(this, &FChanneldEditorModule::FillSubmenu));
-
-	Builder.EndSection();
-}
-
-void FChanneldEditorModule::FillSubmenu(FMenuBuilder& Builder)
-{
-	Builder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchChanneldCommand);
-	Builder.AddMenuEntry(FChanneldEditorCommands::Get().StopChanneldCommand);
-	Builder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchServersCommand);
-	Builder.AddMenuEntry(FChanneldEditorCommands::Get().ServerSettingsCommand);
-	Builder.AddMenuEntry(FChanneldEditorCommands::Get().StopServersCommand);
-	Builder.AddMenuEntry(FChanneldEditorCommands::Get().GenerateReplicatorCommand);
-}
-
 TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUICommandList> Commands)
 {
 	FMenuBuilder MenuBuilder(true, Commands);
 
+	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().ToggleNetworkingCommand);
+	
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchChanneldCommand);
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().StopChanneldCommand);
 
 	MenuBuilder.AddSeparator();
-
-	/*
-	TSharedRef<SWidget> NumServers = SNew(SSpinBox<int32>)
-		.MinValue(1)
-		.MaxValue(16)
-		.MinSliderValue(1)
-		.MaxSliderValue(4)
-		.Delta(1)
-		.MinDesiredWidth(200)
-		.ContentPadding(FMargin(2, 0))
-		.ToolTipText(LOCTEXT("NumberOfServersToolTip", "How many server instances do you want to create?"))
-		.Value_Static(&UChanneldEditorSettings::GetServerNum)
-		.OnValueChanged_Static(&UChanneldEditorSettings::SetServerNum);
-	MenuBuilder.AddWidget(NumServers, LOCTEXT("NumServersLabel", "Number of Servers"));
-
-	//FEditableTextStyle* EditableTextStyle = new FEditableTextStyle;
-	//EditableTextStyle->ColorAndOpacity = FSlateColor(FLinearColor(1.0F, 1.0F, 1.0F));
-	TSharedRef<SWidget> ServerMapName = SNew(SEditableText)
-		//.Style(EditableTextStyle)
-		.Text_Static(&UChanneldEditorSettings::GetServerMapName)
-		.OnTextChanged_Static(&UChanneldEditorSettings::SetServerMapName);
-	MenuBuilder.AddWidget(ServerMapName, LOCTEXT("ServerMapNameLabel", "Server Map Name:"));
-
-	TSharedRef<SWidget> AdditonalArgs = SNew(SEditableText)
-		//.Style(EditableTextStyle)
-		.Text_Static(&UChanneldEditorSettings::GetAdditionalArgs)
-		.OnTextChanged_Static(&UChanneldEditorSettings::SetAdditionalArgs);
-	MenuBuilder.AddWidget(AdditonalArgs, LOCTEXT("AdditonalArgsLabel", "Additional Args:"));
-	*/
 
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchServersCommand);
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().ServerSettingsCommand);
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().StopServersCommand);
 
 	MenuBuilder.AddSeparator();
-
-	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand);
-
-	MenuBuilder.AddSeparator();
-
+	
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().GenerateReplicatorCommand);
 
+	MenuBuilder.AddSubMenu(LOCTEXT("ChanneldAdvancedHeading", "Advanced..."),
+		LOCTEXT("ChanneldAdvancedTooltip", ""), FNewMenuDelegate::CreateLambda([](FMenuBuilder& InMenuBuilder)
+		{
+			InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand);
+		}));
+	
 	return MenuBuilder.MakeWidget();
+}
+
+bool FChanneldEditorModule::IsNetworkingEnabled()
+{
+	return GetMutableDefault<UChanneldSettings>()->IsNetworkingEnabled();
+}
+
+void FChanneldEditorModule::ToggleNetworkingAction()
+{
+	GetMutableDefault<UChanneldSettings>()->ToggleNetworkingEnabled();
 }
 
 void FChanneldEditorModule::LaunchChanneldAction()
 {
-	if (ChanneldProcHandle.IsValid())
+	if (FPlatformProcess::IsProcRunning(ChanneldProcHandle))
 	{
 		UE_LOG(LogChanneldEditor, Warning, TEXT("Channeld is already running"));
+		return;
 	}
 	FString ChanneldPath = FPlatformMisc::GetEnvironmentVariable(TEXT("CHANNELD_PATH"));
 	if (ChanneldPath.IsEmpty())
@@ -229,22 +191,31 @@ void FChanneldEditorModule::LaunchChanneldAction()
 	const UChanneldEditorSettings* Settings = GetMutableDefault<UChanneldEditorSettings>();
 	const FString Params = FString::Printf(TEXT("run %s %s"), *Settings->LaunchChanneldEntry, *Settings->LaunchChanneldParameters);
 	uint32 ProcessId;
-	ChanneldProcHandle = FPlatformProcess::CreateProc(TEXT("go"), *Params, false, false, false, &ProcessId, 0, *WorkingDir, nullptr, nullptr);
-	if (!ChanneldProcHandle.IsValid())
-	{
-		ChanneldProcHandle.Reset();
-		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to launch channeld"));
-	}
-	else
+	void* ReadPipe = nullptr;
+	void* WritePipe = nullptr;
+	FPlatformProcess::CreatePipe(ReadPipe, WritePipe);
+	ChanneldProcHandle = FPlatformProcess::CreateProc(TEXT("go"), *Params, false, false, false, &ProcessId, 0, *WorkingDir, WritePipe, ReadPipe);
+	FPlatformProcess::Sleep(0.5f);
+	if (FPlatformProcess::IsProcRunning(ChanneldProcHandle))
 	{
 		UE_LOG(LogChanneldEditor, Log, TEXT("Launched channeld"));
 	}
+	else
+	{
+		ChanneldProcHandle.Reset();
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to launch channeld, output: %s"), *FPlatformProcess::ReadPipe(ReadPipe));
+	}
+	FPlatformProcess::ClosePipe(ReadPipe, WritePipe);
 }
 
 void FChanneldEditorModule::StopChanneldAction()
 {
-	FPlatformProcess::TerminateProc(ChanneldProcHandle, true);
-	ChanneldProcHandle.Reset();
+	if (FPlatformProcess::IsProcRunning(ChanneldProcHandle))
+	{
+		FPlatformProcess::TerminateProc(ChanneldProcHandle, true);
+		ChanneldProcHandle.Reset();
+		UE_LOG(LogChanneldEditor, Log, TEXT("Stopped channeld"));
+	}
 }
 
 FTimerManager* FChanneldEditorModule::GetTimerManager()
@@ -291,15 +262,16 @@ void FChanneldEditorModule::LaunchServerGroup(const FServerGroup& ServerGroup)
 {
 	const FString EditorPath = FString(FPlatformProcess::ExecutablePath());
 	const FString ProjectPath = FPaths::GetProjectFilePath();
+	auto Settings = GetMutableDefault<UChanneldSettings>();
 
 	// If server map is not set, use current level.
 	FString MapName = ServerGroup.ServerMap.IsValid() ? ServerGroup.ServerMap.GetLongPackageName() : GEditor->GetEditorWorldContext().World()->GetOuter()->GetName();
-	FString ViewClassName = ServerGroup.ServerViewClass ? ServerGroup.ServerViewClass->GetPathName() : GetMutableDefault<UChanneldSettings>()->ChannelDataViewClass->GetPathName();
+	FString ViewClassName = ServerGroup.ServerViewClass ? ServerGroup.ServerViewClass->GetPathName() : Settings->ChannelDataViewClass->GetPathName();
 
 	for (int i = 0; i < ServerGroup.ServerNum; i++)
 	{
-		FString Params = FString::Printf(TEXT("\"%s\" %s -game -PIEVIACONSOLE -Multiprocess -server -log -MultiprocessSaveConfig -forcepassthrough -SessionName=\"%s - Server %d\" -windowed ViewClass=%s %s"),
-			*ProjectPath, *MapName, *MapName, i, *ViewClassName, *ServerGroup.AdditionalArgs.ToString());
+		FString Params = FString::Printf(TEXT("\"%s\" %s -game -PIEVIACONSOLE -Multiprocess -server -log -MultiprocessSaveConfig -forcepassthrough -channeld=%s -SessionName=\"%s - Server %d\" -windowed ViewClass=%s %s"),
+			*ProjectPath, *MapName, Settings->bEnableNetworking ? TEXT("True") : TEXT("False"), *MapName, i, *ViewClassName, *ServerGroup.AdditionalArgs.ToString());
 		uint32 ProcessId;
 		FProcHandle ProcHandle = FPlatformProcess::CreateProc(*EditorPath, *Params, true, false, false, &ProcessId, 0, nullptr, nullptr, nullptr);
 		if (ProcHandle.IsValid())
@@ -324,6 +296,16 @@ void FChanneldEditorModule::StopServersAction()
 		FPlatformProcess::TerminateProc(ServerProc, true);
 	}
 	ServerProcHandles.Reset();
+}
+
+void FChanneldEditorModule::LaunchChanneldAndServersAction()
+{
+	LaunchChanneldAction();
+	if (ChanneldProcHandle.IsValid())
+	{
+		FPlatformProcess::Sleep(1.0f);
+	}
+	LaunchServersAction();
 }
 
 void FChanneldEditorModule::GenerateReplicatorAction()

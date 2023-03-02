@@ -46,7 +46,6 @@ protected:
 
 public:
 
-	virtual void PostInitProperties() override;
 	virtual void BeginPlay() override;
 	virtual void InitOnce();
 	virtual void UninitOnce();
