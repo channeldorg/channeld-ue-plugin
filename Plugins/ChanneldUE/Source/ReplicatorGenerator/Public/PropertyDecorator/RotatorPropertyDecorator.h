@@ -32,13 +32,10 @@ public:
 		: FVectorPropertyDecorator(InProperty, InOwner)
 	{
 	}
-
 	virtual FString GetPropertyType() override;
-	virtual FString GetCode_GetProtoFieldValueFrom(const FString& StateName) override;
-	virtual FString GetCode_SetProtoFieldValueTo(const FString& StateName, const FString& GetValueCode) override;
 
-	virtual FString GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull) override;
+	virtual FString GetFunctionName_SetXXXFromPB() const override;
+	virtual FString GetFunctionName_SetXXXToPB() const override;
 
-	virtual FString GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName) override;
 
 };
