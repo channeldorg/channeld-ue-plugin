@@ -138,7 +138,7 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass
 	WriteProtoFile(GetReplicatorStorageDir() / TEXT("ChannelData_") + DefaultModuleName + CodeGen_ProtoFileExtension, ReplicatorCodeBundle.ChannelDataProtoDefsFile, Message);
 
 	// Generate channel data golang merge code temporary file.
-	WriteTempChannelDataGolangMergeCodeFile(ReplicatorCodeBundle.ChannelDataGolangMergeCode, Message);
+	WriteTemporaryGoProtoData(ReplicatorCodeBundle.ChannelDataGolangMergeCode, Message);
 
 	UE_LOG(
 		LogChanneldRepGenerator,
@@ -151,7 +151,7 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass
 	FGeneratedManifest Manifest;
 	Manifest.GeneratedTime = FDateTime::Now();
 	Manifest.ProtoPackageName = ProtoPackageName;
-	Manifest.TempChannelDataGolangMergeCodeFilePath = GetTmpChannelDataGolangMergeCodeFilePath();
+	Manifest.TemporaryGoProtoDataCode = GetTemporaryGoProtoDataFilePath();
 	if (SaveGeneratedManifest(Manifest, Message))
 	{
 		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save the generated manifest file, error message: %s"), *Message);
@@ -235,15 +235,15 @@ inline void FReplicatorGeneratorManager::EnsureReplicatorGeneratedIntermediateDi
 	}
 }
 
-inline FString FReplicatorGeneratorManager::GetTmpChannelDataGolangMergeCodeFilePath() const
+inline FString FReplicatorGeneratorManager::GetTemporaryGoProtoDataFilePath() const
 {
-	return GenManager_TmpChannelDataGolangMergeCodeFilePath;
+	return GenManager_TemporaryGoProtoDataFilePath;
 }
 
-inline bool FReplicatorGeneratorManager::WriteTempChannelDataGolangMergeCodeFile(const FString& Code, FString& ResultMessage)
+inline bool FReplicatorGeneratorManager::WriteTemporaryGoProtoData(const FString& Code, FString& ResultMessage)
 {
 	EnsureReplicatorGeneratedIntermediateDir();
-	return WriteCodeFile(GetTmpChannelDataGolangMergeCodeFilePath(), Code, ResultMessage);
+	return WriteCodeFile(GetTemporaryGoProtoDataFilePath(), Code, ResultMessage);
 }
 
 bool FReplicatorGeneratorManager::LoadLatestGeneratedManifest(FGeneratedManifest& Result, FString& Message) const
@@ -281,7 +281,7 @@ bool FReplicatorGeneratorManager::LoadLatestGeneratedManifest(const FString& Fil
 		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'ProtoPackageName'"));
 	}
 
-	if (!RootObject->TryGetStringField(TEXT("TempChannelDataGolangMergeCodeFilePath"), Result.TempChannelDataGolangMergeCodeFilePath))
+	if (!RootObject->TryGetStringField(TEXT("TempGoProtoDataCode"), Result.TemporaryGoProtoDataCode))
 	{
 		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'ProtoPackageName'"));
 	}
@@ -309,7 +309,7 @@ bool FReplicatorGeneratorManager::SaveGeneratedManifest(const FGeneratedManifest
 	JsonWriter->WriteObjectStart();
 	JsonWriter->WriteValue(TEXT("GeneratedTime"), Manifest.GeneratedTime.ToUnixTimestamp());
 	JsonWriter->WriteValue(TEXT("ProtoPackageName"), Manifest.ProtoPackageName);
-	JsonWriter->WriteValue(TEXT("TempChannelDataGolangMergeCodeFilePath"), Manifest.TempChannelDataGolangMergeCodeFilePath);
+	JsonWriter->WriteValue(TEXT("TempGoProtoDataCode"), Manifest.TemporaryGoProtoDataCode);
 	JsonWriter->WriteObjectEnd();
 	JsonWriter->Close();
 	if (FFileHelper::SaveStringToFile(Json, *Filename))
