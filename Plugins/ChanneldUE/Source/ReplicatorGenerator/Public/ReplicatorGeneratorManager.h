@@ -14,7 +14,7 @@ struct REPLICATORGENERATOR_API FGeneratedManifest
 {
 	FDateTime GeneratedTime;
 	FString ProtoPackageName;
-	FString TempChannelDataGolangMergeCodeFilePath;
+	FString TemporaryGoProtoDataCode;
 };
 
 class REPLICATORGENERATOR_API FReplicatorGeneratorManager
@@ -140,8 +140,8 @@ public:
 
 	inline void EnsureReplicatorGeneratedIntermediateDir();
 
-	inline FString GetTmpChannelDataGolangMergeCodeFilePath() const;
-	inline bool WriteTempChannelDataGolangMergeCodeFile(const FString& Code, FString& ResultMessage);
+	inline FString GetTemporaryGoProtoDataFilePath() const;
+	inline bool WriteTemporaryGoProtoData(const FString& Code, FString& ResultMessage);
 
 	bool LoadLatestGeneratedManifest(FGeneratedManifest& Result, FString& Message) const;
 	bool LoadLatestGeneratedManifest(const FString& Filename, FGeneratedManifest& Result, FString& Message) const;

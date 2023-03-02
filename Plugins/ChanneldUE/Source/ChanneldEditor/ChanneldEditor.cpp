@@ -466,7 +466,7 @@ void FChanneldEditorModule::GenRepProtoGoCode(const TArray<FString>& ProtoFiles)
 			IFileManager::Get().Delete(*(DirToGenGoProto / FilePath));
 		}
 	}
-	FString ReplicatorStorageDir = FReplicatorGeneratorManager::Get().GetReplicatorStorageDir();
+	FString ReplicatorStorageDir = GeneratorManager.GetReplicatorStorageDir();
 	FString ChanneldUnrealpbPath = ChanneldPath / TEXT("pkg") / TEXT("unrealpb");
 	FPaths::NormalizeDirectoryName(ChanneldUnrealpbPath);
 
@@ -506,6 +506,8 @@ void FChanneldEditorModule::GenRepProtoGoCode(const TArray<FString>& ProtoFiles)
 		}
 	);
 	GenProtoGoCodeWorkThread->Execute();
+
+	IFileManager::Get().Move(*(DirToGenGoProto / TEXT("data.go")), *LatestGeneratedManifest.TemporaryGoProtoDataCode);
 }
 
 void FChanneldEditorModule::AddRepCompsToBPsAction()
