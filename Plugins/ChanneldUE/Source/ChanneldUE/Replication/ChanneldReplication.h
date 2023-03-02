@@ -41,6 +41,8 @@ namespace ChanneldReplication
 	{
 		return ChannelDataMergerRegistry.FindRef(MessageFullName);
 	}
+
+	uint32 GetUnrealObjectType(const UObject* Obj);
 }
 
 #define REGISTER_REPLICATOR_BASE(ReplicatorClass, TargetClass, bOverride, bIsInMap) \

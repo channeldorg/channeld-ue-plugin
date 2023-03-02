@@ -8,14 +8,23 @@ public class PrometheusUE : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core" });
+        PublicDependencyModuleNames.AddRange(new string[]
+        {
+            "Core",
+        });
+        
+        PrivateDependencyModuleNames.AddRange(new string[]
+        {
+            "CoreUObject",
+            "Engine",
+        });
 
         PublicSystemIncludePaths.AddRange(new string[] 
         {
             Path.Combine(ModuleDirectory, "ThirdParty"),
             Path.Combine(ModuleDirectory, "ThirdParty/civetweb"),
         });
-
+        
         PublicDefinitions.AddRange(
             new string[] {
                 "LANG_CXX11",

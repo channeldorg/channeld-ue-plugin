@@ -8,13 +8,15 @@
 
 //DEFINE_LOG_CATEGORY(LogChanneld)
 
+static const FName ChanneldNetDriverName("/Script/ChanneldUE.ChanneldNetDriver");
+static const FName FallbackNetDriverName("/Script/OnlineSubsystemUtils.IpNetDriver");
+
 UChanneldSettings::UChanneldSettings(const FObjectInitializer& ObjectInitializer) :
 	Super(ObjectInitializer),
 	RegionBoxMinSize(10, 10, 20),
 	RegionBoxMaxSize(100000, 100000, 1000)
 {
 }
-
 
 void UChanneldSettings::PostInitProperties()
 {
@@ -23,7 +25,12 @@ void UChanneldSettings::PostInitProperties()
 	// Command line arguments can override the INI settings
 	const TCHAR* CmdLine = FCommandLine::Get();
 	UE_LOG(LogChanneld, Log, TEXT("Parsing ChanneldSettings from command line args: %s"), CmdLine);
-
+		
+	if (FParse::Bool(CmdLine, TEXT("channeld="), bEnableNetworking))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed bEnableNetworking from CLI: %d"), bEnableNetworking);
+	}
+	
 	FString ViewClassName;
 	if (FParse::Value(CmdLine, TEXT("ViewClass="), ViewClassName))
 	{
@@ -88,6 +95,87 @@ void UChanneldSettings::PostInitProperties()
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bEnableSpatialVisualizer from CLI: %d"), bEnableSpatialVisualizer);
 	}
+}
+
+bool UChanneldSettings::IsNetworkingEnabled() const
+{
+	return bEnableNetworking && GEngine->NetDriverDefinitions.Num() > 0 &&
+		GEngine->NetDriverDefinitions[0].DriverClassName == ChanneldNetDriverName;
+}
+
+void UChanneldSettings::ToggleNetworkingEnabled()
+{
+	if (IsNetworkingEnabled())
+	{
+		bEnableNetworking = false;
+		GEngine->NetDriverDefinitions.RemoveAt(0);
+		
+		// Add a fallback driver if there are no drivers left
+		if (GEngine->NetDriverDefinitions.Num() == 0)
+		{
+			AddFallbackNetDriverDefinition();
+		}
+	}
+	else
+	{
+		bEnableNetworking = true;
+		AddChanneldNetDriverDefinition();
+	}
+	
+	SaveConfig();
+}
+
+void UChanneldSettings::AddChanneldNetDriverDefinition()
+{
+	FNetDriverDefinition Def;
+	Def.DefName = FName("GameNetDriver");
+	Def.DriverClassName = ChanneldNetDriverName;
+	Def.DriverClassNameFallback = FallbackNetDriverName;
+	GEngine->NetDriverDefinitions.Insert(Def, 0);
+}
+
+void UChanneldSettings::AddFallbackNetDriverDefinition()
+{
+	FNetDriverDefinition Def;
+	Def.DefName = FName("GameNetDriver");
+	Def.DriverClassName = FallbackNetDriverName;
+	Def.DriverClassNameFallback = FallbackNetDriverName;
+	GEngine->NetDriverDefinitions.Add(Def);
+}
+
+void UChanneldSettings::UpdateNetDriverDefinitions()
+{
+	if (GEngine == nullptr)
+	{
+		return;
+	}
+	
+	for (int i = GEngine->NetDriverDefinitions.Num() - 1; i >= 0; i--)
+	{
+		if (GEngine->NetDriverDefinitions[i].DriverClassName == ChanneldNetDriverName)
+		{
+			GEngine->NetDriverDefinitions.RemoveAt(i);
+		}
+	}
+	if (bEnableNetworking)
+	{
+		AddChanneldNetDriverDefinition();
+	}
+	else
+	{
+		// Add a fallback driver if there are no drivers left
+		if (GEngine->NetDriverDefinitions.Num() == 0)
+		{
+			AddFallbackNetDriverDefinition();
+		}
+	}
+
+	FString Defs;
+	for (auto& Def : GEngine->NetDriverDefinitions)
+	{
+		Defs += Def.DriverClassName.ToString() + TEXT(", ");
+	}
+	UE_LOG(LogChanneld, Log, TEXT("Channeld networking enabled: %d. Updated Engine's NetDriverDefinitions: %s"), bEnableNetworking, *Defs);
 }
 
 bool UChanneldSettings::ParseNetAddr(const FString& Addr, FString& OutIp, int32& OutPort)

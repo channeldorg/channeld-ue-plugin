@@ -127,6 +127,7 @@ unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnec
 	unrealpb::UnrealObjectRef ObjRef;
 	ObjRef.set_netguid(0);
 	ObjRef.set_bunchbitsnum(0);
+	// ObjRef.set_objtype(ChanneldReplication::GetUnrealObjectType(Obj));
 
 	if (!Obj)
 	{

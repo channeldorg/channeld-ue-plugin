@@ -229,4 +229,42 @@ public:
 		return UniqueNetId & ((1 << Channeld::ConnectionIdBitOffset) - 1);
 	}
 
+	/* CDO is not available yet after the RegisterNetGUIDFromPath is called. The class of the returned UObject is always UPackage!
+	// Get the context UObject from the UnrealObjectRef, which is used for checking the ClassDefaultObject.
+	static UObject* GetContextObjByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World)
+	{
+		if (!World || !World->GetNetDriver())
+		{
+			return nullptr;
+		}
+
+		auto ObjLookup = World->GetNetDriver()->GuidCache->ObjectLookup;
+
+		TArray<const unrealpb::UnrealObjectRef_GuidCachedObject*> ContextObjs;
+		for (auto& Context : Ref->context())
+		{
+			ContextObjs.Add(&Context);
+		}
+		// Sort by the NetGUID to register in descending order.
+		ContextObjs.Sort([](const unrealpb::UnrealObjectRef_GuidCachedObject& Obj1, const unrealpb::UnrealObjectRef_GuidCachedObject& Obj2)
+			{
+				return Obj1.netguid() > Obj2.netguid();
+			});
+
+		for (auto ContextObj : ContextObjs)
+		{
+			FNetworkGUID NetGUID = FNetworkGUID(ContextObj->netguid());
+			FString PathName = UTF8_TO_TCHAR(ContextObj->pathname().c_str());
+			// Remap name for PIE
+			GEngine->NetworkRemapPath(World->GetNetDriver()->ServerConnection, PathName, true);
+			World->GetNetDriver()->GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, ContextObj->outerguid(), 0, false, true);
+			if (UObject* Obj = World->GetNetDriver()->GuidCache->GetObjectFromNetGUID(NetGUID, false))
+			{
+				return Obj;
+			}
+		}
+
+		return nullptr;
+	}
+	*/
 };

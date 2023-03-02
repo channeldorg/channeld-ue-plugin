@@ -1,5 +1,3 @@
-// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
-
 #include "PrometheusUE.h"
 
 #define LOCTEXT_NAMESPACE "FPrometheusUEModule"

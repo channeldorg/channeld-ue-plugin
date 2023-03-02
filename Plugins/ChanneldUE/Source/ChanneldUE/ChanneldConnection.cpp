@@ -1,19 +1,13 @@
 #include "ChanneldConnection.h"
 #include "ChanneldNetDriver.h"
 #include "ChanneldSettings.h"
-#include "Metrics.h"
+#include "ChanneldMetrics.h"
 #include "SocketSubsystem.h"
 
 //DEFINE_LOG_CATEGORY(LogChanneld);
 
 void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 {
-
-//}
-//
-//UChanneldConnection::UChanneldConnection(const FObjectInitializer& ObjectInitializer)
-//	: Super(ObjectInitializer)
-//{
 	if (ReceiveBufferSize > Channeld::MaxPacketSize)
 		ReceiveBufferSize = Channeld::MaxPacketSize;
 	ReceiveBuffer = new uint8[ReceiveBufferSize];
@@ -208,8 +202,8 @@ void UChanneldConnection::Receive()
 		{
 			// Unfinished packet
 			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet header: %d"), BytesRead);
-			UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
-			Metrics->AddConnTypeLabel(*Metrics->UnfinishedPacket).Increment();
+			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+			Metrics->AddConnTypeLabel(Metrics->UnfinishedPacket).Increment();
 			return;
 		}
 
@@ -217,8 +211,8 @@ void UChanneldConnection::Receive()
 		{
 			ReceiveBufferOffset = 0;
 			UE_LOG(LogChanneld, Error, TEXT("Invalid tag: %d, the packet will be dropped"), ReceiveBuffer[0]);
-			UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
-			Metrics->AddConnTypeLabel(*Metrics->DroppedPacket).Increment();
+			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+			Metrics->AddConnTypeLabel(Metrics->DroppedPacket).Increment();
 			return;
 		}
 
@@ -232,8 +226,8 @@ void UChanneldConnection::Receive()
 		{
 			// Unfinished packet
 			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet body, read: %d, pos: %d/%d"), BytesRead, ReceiveBufferOffset, HeaderSize + PacketSize);
-			UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
-			Metrics->AddConnTypeLabel(*Metrics->UnfinishedPacket).Increment();
+			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+			Metrics->AddConnTypeLabel(Metrics->UnfinishedPacket).Increment();
 			return;
 		}
 
@@ -244,8 +238,8 @@ void UChanneldConnection::Receive()
 		{
 			ReceiveBufferOffset = 0;
 			UE_LOG(LogChanneld, Error, TEXT("UChanneldConnection::Receive: Failed to parse packet, size: %d"), PacketSize);
-			UMetrics* Metrics = GEngine->GetEngineSubsystem<UMetrics>();
-			Metrics->AddConnTypeLabel(*Metrics->DroppedPacket).Increment();
+			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+			Metrics->AddConnTypeLabel(Metrics->DroppedPacket).Increment();
 			return;
 		}
 

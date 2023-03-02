@@ -806,7 +806,7 @@ struct FClientAdjustmentDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FClientAdjustmentDefaultTypeInternal _FClientAdjustment_default_instance_;
 }  // namespace unrealpb
 static ::_pb::Metadata file_level_metadata_unreal_5fcommon_2eproto[47];
-static const ::_pb::EnumDescriptor* file_level_enum_descriptors_unreal_5fcommon_2eproto[1];
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_unreal_5fcommon_2eproto[2];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_unreal_5fcommon_2eproto = nullptr;
 
 const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
@@ -1786,15 +1786,20 @@ const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_
   "\003ANY\020e\022\007\n\003RPC\020f\022\t\n\005SPAWN\020g\022\013\n\007DESTROY\020h\022"
   "\024\n\020HANDOVER_CONTEXT\020i\022\031\n\025GET_UNREAL_OBJE"
   "CT_REF\020j\022\032\n\025SERVER_PLAYER_SPAWNED\020\311\001\022\030\n\023"
-  "SERVER_PLAYER_LEAVE\020\312\001B,Z*channeld.clewc"
-  "at.com/channeld/pkg/unrealpbb\006proto3"
+  "SERVER_PLAYER_LEAVE\020\312\001*\251\001\n\020UnrealObjectT"
+  "ype\022\017\n\013UOT_Unknown\020\000\022\021\n\rUOT_GameState\020\001\022"
+  "\r\n\tUOT_Actor\020\002\022\014\n\010UOT_Pawn\020\003\022\021\n\rUOT_Char"
+  "acter\020\004\022\023\n\017UOT_PlayerState\020\005\022\022\n\016UOT_Cont"
+  "roller\020\006\022\030\n\024UOT_PlayerController\020\007B,Z*ch"
+  "anneld.clewcat.com/channeld/pkg/unrealpb"
+  "b\006proto3"
   ;
 static const ::_pbi::DescriptorTable* const descriptor_table_unreal_5fcommon_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fany_2eproto,
 };
 static ::_pbi::once_flag descriptor_table_unreal_5fcommon_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_unreal_5fcommon_2eproto = {
-    false, false, 10676, descriptor_table_protodef_unreal_5fcommon_2eproto,
+    false, false, 10848, descriptor_table_protodef_unreal_5fcommon_2eproto,
     "unreal_common.proto",
     &descriptor_table_unreal_5fcommon_2eproto_once, descriptor_table_unreal_5fcommon_2eproto_deps, 1, 47,
     schemas_unreal_5fcommon_2eproto, file_default_instances_unreal_5fcommon_2eproto, TableStruct_unreal_5fcommon_2eproto::offsets,
@@ -1824,6 +1829,26 @@ bool MessageType_IsValid(int value) {
     case 106:
     case 201:
     case 202:
+      return true;
+    default:
+      return false;
+  }
+}
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* UnrealObjectType_descriptor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_unreal_5fcommon_2eproto);
+  return file_level_enum_descriptors_unreal_5fcommon_2eproto[1];
+}
+bool UnrealObjectType_IsValid(int value) {
+  switch (value) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
       return true;
     default:
       return false;

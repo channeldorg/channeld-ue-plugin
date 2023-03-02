@@ -20,10 +20,16 @@ class CHANNELDUE_API UChanneldSettings : public UObject
 public:
 	UChanneldSettings(const FObjectInitializer& ObjectInitializer);
 	virtual void PostInitProperties() override;
+	bool IsNetworkingEnabled() const;
+	void ToggleNetworkingEnabled();
+	void UpdateNetDriverDefinitions();
 
 	UPROPERTY(Config, EditAnywhere, Category="View")
 	TSubclassOf<class UChannelDataView> ChannelDataViewClass;
 
+	UPROPERTY(Config, EditAnywhere, Category = "Transport")
+	bool bEnableNetworking = true;
+	
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	FString ChanneldIpForClient = "127.0.0.1";
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
@@ -33,7 +39,7 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	int32 ChanneldPortForServer = 11288;
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
-	bool bUseReceiveThread = false;
+	bool bUseReceiveThread = true;
 
 	// If true, UE's default handshaking process will be skipped and the server will expect NMT_Hello as the first message.
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
@@ -82,6 +88,10 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Server|Debug")
 	float DelayViewInitInSeconds = 0;
 
+	
+	
 private:
+	void AddChanneldNetDriverDefinition();
+	void AddFallbackNetDriverDefinition();
 	bool ParseNetAddr(const FString& Addr, FString& OutIp, int32& OutPort);
 };
