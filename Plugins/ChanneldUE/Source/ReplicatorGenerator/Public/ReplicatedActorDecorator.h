@@ -268,7 +268,8 @@ public:
 
 	virtual void SetConstClassPathFNameVarName(const FString& VarName);
 
-	virtual FString GetDefinition_ChannelDataFieldName();
+	virtual FString GetDefinition_ChannelDataFieldNameCpp();
+	virtual FString GetDefinition_ChannelDataFieldNameGo();
 
 	virtual FString GetCode_ConstPathFNameVarDecl();
 

@@ -134,12 +134,12 @@ public:
 		FString& ChannelDataProtoFile
 	);
 
-	bool GenerateGolangMergeCode(
+	bool GenerateGoProtoDataCode(
 		const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
 		const TArray<TSharedPtr<FReplicatedActorDecorator>>& ChildrenOfAActor,
 		const FString& ChannelDataMessageName,
 		const FString& ProtoPackageName,
-		FString& GolangMergeCode
+		FString& GoCode
 	);
 
 protected:

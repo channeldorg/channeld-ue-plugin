@@ -401,9 +401,14 @@ void FReplicatedActorDecorator::SetConstClassPathFNameVarName(const FString& Var
 	VariableName_ConstClassPathFName = VarName;
 }
 
-FString FReplicatedActorDecorator::GetDefinition_ChannelDataFieldName()
+FString FReplicatedActorDecorator::GetDefinition_ChannelDataFieldNameGo()
 {
-	return (GetProtoStateMessageType() + (IsSingleton() ? TEXT("") : TEXT("s"))).ToLower();
+	return (GetProtoStateMessageType() + (IsSingleton() ? TEXT("") : TEXT("s")));
+}
+
+FString FReplicatedActorDecorator::GetDefinition_ChannelDataFieldNameCpp()
+{
+	return GetDefinition_ChannelDataFieldNameGo().ToLower();
 }
 
 FString FReplicatedActorDecorator::GetCode_ConstPathFNameVarDecl()
@@ -432,7 +437,7 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_IsTargetClass()
 FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_Merge(const TArray<TSharedPtr<FReplicatedActorDecorator>>& ActorChildren)
 {
 	FStringFormatNamedArguments FormatArgs;
-	FormatArgs.Add(TEXT("Definition_ChannelDataFieldName"), GetDefinition_ChannelDataFieldName());
+	FormatArgs.Add(TEXT("Definition_ChannelDataFieldName"), GetDefinition_ChannelDataFieldNameCpp());
 	if (IsSingleton())
 	{
 		return FString::Format(ActorDecor_ChannelDataProcessorMerge_Singleton, FormatArgs);
@@ -453,7 +458,7 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_Merge(const TArr
 				Code_MergeEraseInner.Append(
 					FString::Printf(
 						TEXT("Dst->mutable_%s()->erase(Pair.first);\n"),
-						*ChildrenActor->GetDefinition_ChannelDataFieldName()
+						*ChildrenActor->GetDefinition_ChannelDataFieldNameCpp()
 					)
 				);
 			}
@@ -467,7 +472,7 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_Merge(const TArr
 				TEXT("Code_MergeEraseInner"),
 				FString::Printf(
 					TEXT("Dst->mutable_%s()->erase(Pair.first);\n"),
-					*GetDefinition_ChannelDataFieldName()
+					*GetDefinition_ChannelDataFieldNameCpp()
 				)
 			);
 			FormatArgs.Add(TEXT("Code_DoMerge"), FString::Format(ActorDecor_ChannelDataProcessorMerge_DoMarge, FormatArgs));
@@ -488,7 +493,7 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_GetStateFromChan
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Code_Condition"), GetCode_ChannelDataProcessor_IsTargetClass());
 	FormatArgs.Add(TEXT("Declaration_ChannelDataMessage"), ChannelDataMessageName);
-	FormatArgs.Add(TEXT("Definition_ChannelDataFieldName"), GetDefinition_ChannelDataFieldName());
+	FormatArgs.Add(TEXT("Definition_ChannelDataFieldName"), GetDefinition_ChannelDataFieldNameCpp());
 	return FString::Format(IsSingleton() ? ActorDecor_GetStateFromChannelData_Singleton : ActorDecor_GetStateFromChannelData, FormatArgs);
 }
 
@@ -497,7 +502,7 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_SetStateToChanne
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Code_Condition"), GetCode_ChannelDataProcessor_IsTargetClass());
 	FormatArgs.Add(TEXT("Declaration_ChannelDataMessage"), ChannelDataMessageName);
-	FormatArgs.Add(TEXT("Definition_ChannelDataFieldName"), GetDefinition_ChannelDataFieldName());
+	FormatArgs.Add(TEXT("Definition_ChannelDataFieldName"), GetDefinition_ChannelDataFieldNameCpp());
 	FormatArgs.Add(TEXT("Definition_ProtoNamespace"), GetProtoNamespace());
 	FormatArgs.Add(TEXT("Definition_ProtoStateMsgName"), GetProtoStateMessageType());
 	return FString::Format(IsSingleton() ? ActorDecor_SetStateToChannelData_Singleton : ActorDecor_SetStateToChannelData, FormatArgs);
@@ -507,10 +512,10 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProtoFieldDefinition(const
 {
 	if (IsSingleton())
 	{
-		return FString::Printf(TEXT("%s.%s %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldName(), Index);
+		return FString::Printf(TEXT("%s.%s %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameCpp(), Index);
 	}
 	else
 	{
-		return FString::Printf(TEXT("map<uint32, %s.%s> %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldName(), Index);
+		return FString::Printf(TEXT("map<uint32, %s.%s> %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameCpp(), Index);
 	}
 }

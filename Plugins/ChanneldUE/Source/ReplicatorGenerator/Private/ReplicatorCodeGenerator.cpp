@@ -8,6 +8,7 @@
 #include "Misc/FileHelper.h"
 #include "ReplicatorTemplate/BlueprintReplicatorTemplate.h"
 #include "ReplicatorTemplate/CppReplicatorTemplate.h"
+#include "ReplicatorTemplate/GoProtoDataTemplate.h"
 
 bool FReplicatorCodeGenerator::RefreshModuleInfoByClassName()
 {
@@ -412,7 +413,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 		GeneratedCodeBundle.ChannelDataProtoDefsFile
 	);
 
-	GenerateGolangMergeCode(
+	GenerateGoProtoDataCode(
 		ActorDecorators,
 		ChildrenOfAActor,
 		ChannelDataProtoMsgName,
@@ -512,24 +513,76 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProtoDefFile(
 	return true;
 }
 
-bool FReplicatorCodeGenerator::GenerateGolangMergeCode(
+bool FReplicatorCodeGenerator::GenerateGoProtoDataCode(
 	const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
 	const TArray<TSharedPtr<FReplicatedActorDecorator>>& ChildrenOfAActor,
 	const FString& ChannelDataMessageName,
 	const FString& ProtoPackageName,
-	FString& GolangMergeCode
+	FString& GoCode
 )
 {
-	// TODO : Generate Golang Merge Code
-	for(const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
-	{
-		// unrealpb.xxxState
-		// {ActorDecorator->GetProtoPackageName()}.{ActorDecorator->GetProtoStateMessageType()}
+	GoCode = TEXT("");
+	GoCode.Append(FString::Printf(TEXT("package %s\n"), *ProtoPackageName));
+	GoCode.Append(CodeGen_Go_ImportTemplate);
 
-		// make(map[uint32]*unrealpb.ActorState) or &unrealpb.GameStateBase{}
-		// ActorDecorator->IsSingleton()
+	{
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataMessageName);
+
+		GoCode.Append(FString::Format(CodeGen_Go_CollectStatesTemplate, FormatArgs));
 	}
-	GolangMergeCode = TEXT("");
+
+	{
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add("Definition_StatePackageName", ProtoPackageName);
+		for(const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
+		{
+			// No need to collect singleton state for handover
+			if (ActorDecorator->IsSingleton())
+			{
+				continue;
+			}
+			FString StateClassName = ActorDecorator->GetProtoStateMessageType();
+			FormatArgs.Add("Definition_StateClassName", StateClassName);
+			FormatArgs.Add("Definition_StateVarName", "new" + StateClassName);
+			FormatArgs.Add("Definition_StateMapName", ActorDecorator->GetDefinition_ChannelDataFieldNameGo());
+
+			GoCode.Append(FString::Format(CodeGen_Go_CollectStateInMapTemplate, FormatArgs));
+		}
+	}
+
+	GoCode.Append(TEXT("\treturn nil\n}\n"));
+
+
+	{
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataMessageName);
+
+		GoCode.Append(FString::Format(CodeGen_Go_MergeTemplate, FormatArgs));
+	}	
+	{
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add("Definition_StatePackageName", ProtoPackageName);
+		for(const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
+		{
+			FString StateClassName = ActorDecorator->GetProtoStateMessageType();
+			FormatArgs.Add("Definition_StateClassName", StateClassName);
+			
+			if (ActorDecorator->IsSingleton())
+			{
+				
+			}
+			else
+			{
+				FormatArgs.Add("Definition_NewStateVarName", "new" + StateClassName);
+				FormatArgs.Add("Definition_OldStateVarName", "old" + StateClassName);
+				FormatArgs.Add("Definition_StateMapName", ActorDecorator->GetDefinition_ChannelDataFieldNameGo());
+			}
+
+			GoCode.Append(FString::Format(CodeGen_Go_MergeStateInMapTemplate, FormatArgs));
+		}
+	}
+	
 	return true;
 }
 
