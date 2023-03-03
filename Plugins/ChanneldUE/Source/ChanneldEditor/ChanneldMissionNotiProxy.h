@@ -24,13 +24,11 @@ public:
 	virtual void SpawnMissionFailedNotification(FChanneldProcWorkerThread* ProcWorker);
 	virtual void CancelMission();
 
-	virtual FName GetMissionName() const;
 	virtual FText GetRunningNotifyText() const;
 	virtual FText GetRunningNotifyCancelText() const;
 	virtual FText GetMissionSucceedNotifyText() const;
 	virtual FText GetMissionFailedNotifyText() const;
 
-	virtual void SetMissionName(FName NewMissionName);
 	virtual void SetRunningNotifyText(const FText& RunningNotifyText);
 	virtual void SetRunningNotifyCancelText(const FText& RunningNotifyCancelText);
 	virtual void SetMissionSucceedNotifyText(const FText& MissionSucceedNotifyText);

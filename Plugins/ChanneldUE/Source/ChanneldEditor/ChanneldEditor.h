@@ -60,6 +60,9 @@ private:
 	TSharedRef<SWidget> CreateMenuContent(TSharedPtr<FUICommandList> Commands);
 	TArray<FProcHandle> ServerProcHandles;
 
+	mutable TSharedPtr<FChanneldProcWorkerThread> BuildChanneldWorkThread;
+	UChanneldMissionNotiProxy* BuildChanneldNotify;
+
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenRepWorkThread;
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoCppCodeWorkThread;
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoGoCodeWorkThread;

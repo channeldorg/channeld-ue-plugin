@@ -98,6 +98,9 @@ void FChanneldEditorModule::StartupModule()
 
 	PropertyModule.NotifyCustomizationModuleChanged();
 
+	BuildChanneldNotify = NewObject<UChanneldMissionNotiProxy>();
+	BuildChanneldNotify->AddToRoot();
+
 	GenRepNotify = NewObject<UChanneldMissionNotiProxy>();
 	GenRepNotify->AddToRoot();
 
@@ -139,7 +142,7 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 	FMenuBuilder MenuBuilder(true, Commands);
 
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().ToggleNetworkingCommand);
-	
+
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().LaunchChanneldCommand);
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().StopChanneldCommand);
 
@@ -150,7 +153,7 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().StopServersCommand);
 
 	MenuBuilder.AddSeparator();
-	
+
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().GenerateReplicatorCommand);
 
 	MenuBuilder.AddSubMenu(LOCTEXT("ChanneldAdvancedHeading", "Advanced..."),
@@ -185,25 +188,41 @@ void FChanneldEditorModule::LaunchChanneldAction()
 		UE_LOG(LogChanneldEditor, Error, TEXT("CHANNELD_PATH environment variable is not set. Please set it to the path of the channeld source code directory."));
 		return;
 	}
+	FPaths::NormalizeDirectoryName(ChanneldPath);
 	const FString WorkingDir = ChanneldPath;
 	const UChanneldEditorSettings* Settings = GetMutableDefault<UChanneldEditorSettings>();
-	const FString Params = FString::Printf(TEXT("run %s %s"), *Settings->LaunchChanneldEntry, *Settings->LaunchChanneldParameters);
-	uint32 ProcessId;
-	void* ReadPipe = nullptr;
-	void* WritePipe = nullptr;
-	FPlatformProcess::CreatePipe(ReadPipe, WritePipe);
-	ChanneldProcHandle = FPlatformProcess::CreateProc(TEXT("go"), *Params, false, false, false, &ProcessId, 0, *WorkingDir, WritePipe, ReadPipe);
-	FPlatformProcess::Sleep(0.5f);
-	if (FPlatformProcess::IsProcRunning(ChanneldProcHandle))
+
+	const FString ChanneldBinPath = ChanneldPath / TEXT("channeld.exe");
+	const FString GoBuildArgs = FString::Printf(TEXT("build -o \"%s\" \"%s\""), *ChanneldBinPath, *(ChanneldPath / *Settings->LaunchChanneldEntry));
+	const FString RunChanneldArgs = FString::Printf(TEXT("%s"), *Settings->LaunchChanneldParameters);
+
+	BuildChanneldNotify->SetMissionNotifyText(
+		FText::FromString(TEXT("Building Channeld Gateway...")),
+		LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),
+		FText::FromString(TEXT("Launch Channeld Gateway")),
+		FText::FromString(TEXT("Failed To Build Channeld Gateway!"))
+	);
+
+	BuildChanneldWorkThread = MakeShareable(
+		new FChanneldProcWorkerThread(
+			TEXT("ChanneldBuildWorkThread"),
+			TEXT("go"),
+			GoBuildArgs,
+			WorkingDir
+		)
+	);
+	BuildChanneldWorkThread->ProcBeginDelegate.AddUObject(BuildChanneldNotify, &UChanneldMissionNotiProxy::SpawnRunningMissionNotification);
+	BuildChanneldWorkThread->ProcFailedDelegate.AddUObject(BuildChanneldNotify, &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
+	BuildChanneldWorkThread->ProcOutputMsgDelegate.BindUObject(BuildChanneldNotify, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
+	BuildChanneldWorkThread->ProcSucceedDelegate.AddLambda([this, ChanneldBinPath, RunChanneldArgs, WorkingDir](FChanneldProcWorkerThread*)
 	{
-		UE_LOG(LogChanneldEditor, Log, TEXT("Launched channeld"));
-	}
-	else
-	{
-		ChanneldProcHandle.Reset();
-		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to launch channeld, output: %s"), *FPlatformProcess::ReadPipe(ReadPipe));
-	}
-	FPlatformProcess::ClosePipe(ReadPipe, WritePipe);
+		BuildChanneldNotify->SpawnMissionSucceedNotification(nullptr);
+		const FString CmdArgs = FString::Printf(TEXT("/c \"\"%s\" %s\""), *ChanneldBinPath, *RunChanneldArgs);
+		uint32 ProcessId;
+		// ChanneldProcHandle = FPlatformProcess::CreateProc(*ChanneldBinPath, *RunChanneldArgs, true, false, false, &ProcessId, 1, *WorkingDir, nullptr, nullptr);
+		ChanneldProcHandle = FPlatformProcess::CreateProc(TEXT("C:\\Windows\\System32\\cmd.exe"), *CmdArgs, false, false, false, &ProcessId, 0, *WorkingDir, nullptr, nullptr);
+	});
+	BuildChanneldWorkThread->Execute();
 }
 
 void FChanneldEditorModule::StopChanneldAction()
@@ -328,7 +347,6 @@ void FChanneldEditorModule::GenerateReplicatorAction()
 		GenRepProtoGoCode(GeneratedProtoFiles);
 	});
 	GenRepWorkThread->ProcFailedDelegate.AddUObject(GenRepNotify, &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
-	GenRepNotify->SetMissionName(TEXT("CookAndGenerateReplicators"));
 	GenRepNotify->SetMissionNotifyText(
 		FText::FromString(TEXT("Cooking And Generating Replication Code...")),
 		LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),

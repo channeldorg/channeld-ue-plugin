@@ -14,12 +14,6 @@ UChanneldMissionNotiProxy::UChanneldMissionNotiProxy(const FObjectInitializer& I
 {
 }
 
-
-void UChanneldMissionNotiProxy::SetMissionName(FName NewMissionName)
-{
-	MissionName = NewMissionName; // TEXT("Cook");
-}
-
 void UChanneldMissionNotiProxy::SetMissionNotifyText(const FText& RunningText, const FText& CancelText,
                                                      const FText& SucceedText, const FText& FailedText)
 {
@@ -71,11 +65,6 @@ FText UChanneldMissionNotiProxy::GetMissionFailedNotifyText() const
 void UChanneldMissionNotiProxy::SetMissionFailedNotifyText(const FText& InMissionFailedNotifyText)
 {
 	this->MissionFailedNotifyText = InMissionFailedNotifyText;
-}
-
-FName UChanneldMissionNotiProxy::GetMissionName() const
-{
-	return MissionName;
 }
 
 #define COMMANDLET_LOG_PROXY(Type, Else) \

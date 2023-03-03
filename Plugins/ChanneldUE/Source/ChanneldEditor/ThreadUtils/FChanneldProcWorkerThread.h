@@ -19,14 +19,28 @@ public:
 	{
 	}
 
+	explicit FChanneldProcWorkerThread(const TCHAR* InThreadName, const FString& InProgramPath, const FString& InParams, const FString& InWorkingDirectory)
+		: FChanneldThreadWorker(InThreadName, []()
+		{
+		}), mProgramPath(InProgramPath), mProgramParams(InParams), WorkingDirectory(InWorkingDirectory)
+	{
+	}
+
+
 	virtual uint32 Run() override
 	{
-		if (FPaths::FileExists(mProgramPath))
+		if (true || FPaths::FileExists(mProgramPath))
 		{
 			FPlatformProcess::CreatePipe(mReadPipe, mWritePipe);
 			// std::cout << TCHAR_TO_ANSI(*mProgramPath) << " " << TCHAR_TO_ANSI(*mPragramParams) << std::endl;
 
-			mProcessHandle = FPlatformProcess::CreateProc(*mProgramPath, *mProgramParams, false, true, true, &mProcessID, 1, NULL, mWritePipe, mReadPipe);
+			mProcessHandle = FPlatformProcess::CreateProc(
+				*mProgramPath, *mProgramParams,
+				false, true, true,
+				&mProcessID, 1,
+				WorkingDirectory.IsEmpty() ? nullptr : *WorkingDirectory,
+				mWritePipe, mReadPipe
+			);
 			if (mProcessHandle.IsValid() && FPlatformProcess::IsApplicationRunning(mProcessID))
 			{
 				if (ProcBeginDelegate.IsBound())
@@ -66,7 +80,8 @@ public:
 			}
 			// The process has exited, so read the remaining output
 			ReadOutput();
-			if(Line.Len() > 0) {
+			if (Line.Len() > 0)
+			{
 				ProcOutputMsgDelegate.ExecuteIfBound(this, Line + TEXT("\n"));
 			}
 
@@ -136,6 +151,7 @@ private:
 	FRunnableThread* mThread;
 	FString mProgramPath;
 	FString mProgramParams;
+	FString WorkingDirectory;
 	void* mReadPipe;
 	void* mWritePipe;
 	uint32 mProcessID;
