@@ -525,6 +525,7 @@ bool FReplicatorCodeGenerator::GenerateGoProtoDataCode(
 	GoCode.Append(FString::Printf(TEXT("package %s\n"), *ProtoPackageName));
 	GoCode.Append(CodeGen_Go_ImportTemplate);
 
+	// Generate code: Implement [channeld.ChannelDataCollector]
 	{
 		FStringFormatNamedArguments FormatArgs;
 		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataMessageName);
@@ -553,6 +554,7 @@ bool FReplicatorCodeGenerator::GenerateGoProtoDataCode(
 	GoCode.Append(TEXT("\treturn nil\n}\n"));
 
 
+	// Generate code: Implement [channeld.MergeableChannelData]
 	{
 		FStringFormatNamedArguments FormatArgs;
 		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataMessageName);
@@ -588,6 +590,10 @@ bool FReplicatorCodeGenerator::GenerateGoProtoDataCode(
 					FStringFormatNamedArguments DeletionFormatArgs;
 					for (const auto& Deletion: TargetActors)
 					{
+						if (Deletion->IsSingleton())
+						{
+							continue;
+						}
 						if (Deletion->GetTargetClass()->IsChildOf<UActorComponent>())
 						{
 							continue;
