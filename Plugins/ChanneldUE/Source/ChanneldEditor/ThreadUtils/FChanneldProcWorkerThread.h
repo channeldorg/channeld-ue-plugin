@@ -26,6 +26,11 @@ public:
 	{
 	}
 
+	virtual ~FChanneldProcWorkerThread() override
+	{
+		Exit();
+	}
+
 
 	virtual uint32 Run() override
 	{
@@ -47,42 +52,46 @@ public:
 					ProcBeginDelegate.Broadcast(this);
 			}
 
-			FString Line;
-			auto ReadOutput = [this, &Line]()
+			FString Output;
+			auto ReadOutput = [this, &Output]()
 			{
-				FString NewLine = FPlatformProcess::ReadPipe(mReadPipe);
-				if (NewLine.Len() > 0)
+				FString NewOutput = FPlatformProcess::ReadPipe(mReadPipe);
+				if (NewOutput.Len() > 0)
 				{
 					// process the string to break it up in to lines
-					Line += NewLine;
-					TArray<FString> StringArray;
-					int32 count = Line.ParseIntoArray(StringArray, TEXT("\n"), true);
-					if (count > 1)
+					Output += NewOutput;
+					TArray<FString> SubLines;
+					const int32 Count = Output.ParseIntoArray(SubLines, TEXT("\n"), true);
+					if (Count > 1)
 					{
-						for (int32 Index = 0; Index < count - 1; ++Index)
+						for (int32 Index = 0; Index < Count; ++Index)
 						{
-							StringArray[Index].TrimEndInline();
-							ProcOutputMsgDelegate.ExecuteIfBound(this, StringArray[Index]);
-						}
-						Line = StringArray[count - 1];
-						if (NewLine.EndsWith(TEXT("\n")))
-						{
-							Line += TEXT("\n");
+							if (Index == Count - 1)
+							{
+								if(!NewOutput.EndsWith(TEXT("\n")))
+								{
+									Output = SubLines[Index];
+									continue;
+								}
+								Output = TEXT("");
+							}
+							SubLines[Index].TrimEndInline();
+							ProcOutputMsgDelegate.ExecuteIfBound(this, SubLines[Index]);
 						}
 					}
 				}
 			};
 
-			while (mProcessHandle.IsValid() && FPlatformProcess::IsApplicationRunning(mProcessID))
+			while (IsProcRunning())
 			{
 				ReadOutput();
 				FPlatformProcess::Sleep(0.2f);
 			}
 			// The process has exited, so read the remaining output
 			ReadOutput();
-			if (Line.Len() > 0)
+			if (Output.Len() > 0)
 			{
-				ProcOutputMsgDelegate.ExecuteIfBound(this, Line + TEXT("\n"));
+				ProcOutputMsgDelegate.ExecuteIfBound(this, Output + TEXT("\n"));
 			}
 
 			int32 ProcReturnCode;
@@ -140,6 +149,7 @@ public:
 
 	virtual uint32 GetProcessId() const { return mProcessID; }
 	virtual FProcHandle GetProcessHandle() const { return mProcessHandle; }
+	virtual bool IsProcRunning() const { return mProcessHandle.IsValid() && FPlatformProcess::IsApplicationRunning(mProcessID); }
 
 public:
 	FProcStatusDelegate ProcBeginDelegate;
