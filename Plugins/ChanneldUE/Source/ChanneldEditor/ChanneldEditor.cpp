@@ -233,15 +233,6 @@ void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchR
 				WorkingDir
 			)
 		);
-		// const FString CmdArgs = FString::Printf(TEXT("/c \"\"%s\" %s\""), *ChanneldBinPath, *RunChanneldArgs);
-		// ChanneldGatewayWorkThread = MakeShareable(
-		// 	new FChanneldProcWorkerThread(
-		// 		TEXT("ChanneldGatewayWorkThread"),
-		// 		TEXT("C:\\Windows\\System32\\cmd.exe"),
-		// 		CmdArgs,
-		// 		WorkingDir
-		// 	)
-		// );
 		if (PostChanneldLaunched != nullptr)
 		{
 			ChanneldGatewayWorkThread->ProcBeginDelegate.AddLambda([this, PostChanneldLaunched](FChanneldProcWorkerThread*)
@@ -259,31 +250,6 @@ void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchR
 		}
 		ChanneldGatewayWorkThread->ProcOutputMsgDelegate.BindUObject(ChanneldGatewayNotify, &UChanneldGetawayNotiProxy::ReceiveOutputMsg);
 		ChanneldGatewayWorkThread->Execute();
-		// uint32 ProcessId;
-		// void* ReadPipe = nullptr;
-		// void* WritePipe = nullptr;
-		// FPlatformProcess::CreatePipe(ReadPipe, WritePipe);
-		// // ChanneldProcHandle = FPlatformProcess::CreateProc(*ChanneldBinPath, *RunChanneldArgs, false, false, false, &ProcessId, 0, *WorkingDir, WritePipe, ReadPipe);
-		// ChanneldProcHandle = FPlatformProcess::CreateProc(TEXT("C:\\Windows\\System32\\cmd.exe"), *CmdArgs, false, false, false, &ProcessId, 0, *WorkingDir, WritePipe, ReadPipe);
-		//
-		// // TODO Sleep will block the main game thread, need to find a better way to do this later
-		// // Wait for the process to start
-		// FPlatformProcess::Sleep(0.5f);
-		// // If the child process is exited due to an error, we must first read out the remaining messages in ReadPipe,
-		// // and the child process window will exit automatically.
-		// const FString OutputMsg = FPlatformProcess::ReadPipe(ReadPipe);
-		// // Wait for the process to exit
-		// FPlatformProcess::Sleep(0.5f);
-		// if (FPlatformProcess::IsProcRunning(ChanneldProcHandle))
-		// {
-		// 	UE_LOG(LogChanneldEditor, Display, TEXT("Launched channeld, output:\n%s"), *OutputMsg);
-		// }
-		// else
-		// {
-		// 	ChanneldProcHandle.Reset();
-		// 	UE_LOG(LogChanneldEditor, Error, TEXT("Failed to launch channeld, output:\n%s"), *OutputMsg);
-		// }
-		// FPlatformProcess::ClosePipe(ReadPipe, WritePipe);
 	});
 	BuildChanneldWorkThread->Execute();
 }
