@@ -100,6 +100,8 @@ void FChanneldEditorModule::StartupModule()
 
 	BuildChanneldNotify = NewObject<UChanneldMissionNotiProxy>();
 	BuildChanneldNotify->AddToRoot();
+	ChanneldGatewayNotify = NewObject<UChanneldGetawayNotiProxy>();
+	ChanneldGatewayNotify->AddToRoot();
 
 	GenRepNotify = NewObject<UChanneldMissionNotiProxy>();
 	GenRepNotify->AddToRoot();
@@ -157,11 +159,11 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().GenerateReplicatorCommand);
 
 	MenuBuilder.AddSubMenu(LOCTEXT("ChanneldAdvancedHeading", "Advanced..."),
-		LOCTEXT("ChanneldAdvancedTooltip", ""), FNewMenuDelegate::CreateLambda([](FMenuBuilder& InMenuBuilder)
-		{
-			InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand);
-		}));
-	
+	                       LOCTEXT("ChanneldAdvancedTooltip", ""), FNewMenuDelegate::CreateLambda([](FMenuBuilder& InMenuBuilder)
+	                       {
+		                       InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand);
+	                       }));
+
 	return MenuBuilder.MakeWidget();
 }
 
@@ -177,9 +179,15 @@ void FChanneldEditorModule::ToggleNetworkingAction()
 
 void FChanneldEditorModule::LaunchChanneldAction()
 {
-	if (FPlatformProcess::IsProcRunning(ChanneldProcHandle))
+	LaunchChanneldAction(nullptr);
+}
+
+void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchResult Result)> PostChanneldLaunched /* nullptr*/)
+{
+	if (ChanneldGatewayWorkThread.IsValid() && ChanneldGatewayWorkThread->IsProcRunning())
 	{
 		UE_LOG(LogChanneldEditor, Warning, TEXT("Channeld is already running"));
+		PostChanneldLaunched(EChanneldLaunchResult::AlreadyLaunched);
 		return;
 	}
 	FString ChanneldPath = FPlatformMisc::GetEnvironmentVariable(TEXT("CHANNELD_PATH"));
@@ -214,23 +222,77 @@ void FChanneldEditorModule::LaunchChanneldAction()
 	BuildChanneldWorkThread->ProcBeginDelegate.AddUObject(BuildChanneldNotify, &UChanneldMissionNotiProxy::SpawnRunningMissionNotification);
 	BuildChanneldWorkThread->ProcFailedDelegate.AddUObject(BuildChanneldNotify, &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
 	BuildChanneldWorkThread->ProcOutputMsgDelegate.BindUObject(BuildChanneldNotify, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
-	BuildChanneldWorkThread->ProcSucceedDelegate.AddLambda([this, ChanneldBinPath, RunChanneldArgs, WorkingDir](FChanneldProcWorkerThread*)
+	BuildChanneldWorkThread->ProcSucceedDelegate.AddLambda([this, ChanneldBinPath, RunChanneldArgs, WorkingDir, PostChanneldLaunched](FChanneldProcWorkerThread*)
 	{
 		BuildChanneldNotify->SpawnMissionSucceedNotification(nullptr);
-		const FString CmdArgs = FString::Printf(TEXT("/c \"\"%s\" %s\""), *ChanneldBinPath, *RunChanneldArgs);
-		uint32 ProcessId;
-		// ChanneldProcHandle = FPlatformProcess::CreateProc(*ChanneldBinPath, *RunChanneldArgs, true, false, false, &ProcessId, 1, *WorkingDir, nullptr, nullptr);
-		ChanneldProcHandle = FPlatformProcess::CreateProc(TEXT("C:\\Windows\\System32\\cmd.exe"), *CmdArgs, false, false, false, &ProcessId, 0, *WorkingDir, nullptr, nullptr);
+		ChanneldGatewayWorkThread = MakeShareable(
+			new FChanneldProcWorkerThread(
+				TEXT("ChanneldGatewayWorkThread"),
+				ChanneldBinPath,
+				RunChanneldArgs,
+				WorkingDir
+			)
+		);
+		// const FString CmdArgs = FString::Printf(TEXT("/c \"\"%s\" %s\""), *ChanneldBinPath, *RunChanneldArgs);
+		// ChanneldGatewayWorkThread = MakeShareable(
+		// 	new FChanneldProcWorkerThread(
+		// 		TEXT("ChanneldGatewayWorkThread"),
+		// 		TEXT("C:\\Windows\\System32\\cmd.exe"),
+		// 		CmdArgs,
+		// 		WorkingDir
+		// 	)
+		// );
+		if (PostChanneldLaunched != nullptr)
+		{
+			ChanneldGatewayWorkThread->ProcBeginDelegate.AddLambda([this, PostChanneldLaunched](FChanneldProcWorkerThread*)
+			{
+				FPlatformProcess::Sleep(0.5f);
+				if (ChanneldGatewayWorkThread->IsProcRunning())
+				{
+					PostChanneldLaunched(EChanneldLaunchResult::Launched);
+				}
+				else
+				{
+					PostChanneldLaunched(EChanneldLaunchResult::Failed);
+				}
+			});
+		}
+		ChanneldGatewayWorkThread->ProcOutputMsgDelegate.BindUObject(ChanneldGatewayNotify, &UChanneldGetawayNotiProxy::ReceiveOutputMsg);
+		ChanneldGatewayWorkThread->Execute();
+		// uint32 ProcessId;
+		// void* ReadPipe = nullptr;
+		// void* WritePipe = nullptr;
+		// FPlatformProcess::CreatePipe(ReadPipe, WritePipe);
+		// // ChanneldProcHandle = FPlatformProcess::CreateProc(*ChanneldBinPath, *RunChanneldArgs, false, false, false, &ProcessId, 0, *WorkingDir, WritePipe, ReadPipe);
+		// ChanneldProcHandle = FPlatformProcess::CreateProc(TEXT("C:\\Windows\\System32\\cmd.exe"), *CmdArgs, false, false, false, &ProcessId, 0, *WorkingDir, WritePipe, ReadPipe);
+		//
+		// // TODO Sleep will block the main game thread, need to find a better way to do this later
+		// // Wait for the process to start
+		// FPlatformProcess::Sleep(0.5f);
+		// // If the child process is exited due to an error, we must first read out the remaining messages in ReadPipe,
+		// // and the child process window will exit automatically.
+		// const FString OutputMsg = FPlatformProcess::ReadPipe(ReadPipe);
+		// // Wait for the process to exit
+		// FPlatformProcess::Sleep(0.5f);
+		// if (FPlatformProcess::IsProcRunning(ChanneldProcHandle))
+		// {
+		// 	UE_LOG(LogChanneldEditor, Display, TEXT("Launched channeld, output:\n%s"), *OutputMsg);
+		// }
+		// else
+		// {
+		// 	ChanneldProcHandle.Reset();
+		// 	UE_LOG(LogChanneldEditor, Error, TEXT("Failed to launch channeld, output:\n%s"), *OutputMsg);
+		// }
+		// FPlatformProcess::ClosePipe(ReadPipe, WritePipe);
 	});
 	BuildChanneldWorkThread->Execute();
 }
 
 void FChanneldEditorModule::StopChanneldAction()
 {
-	if (FPlatformProcess::IsProcRunning(ChanneldProcHandle))
+	if (ChanneldGatewayWorkThread.IsValid() && ChanneldGatewayWorkThread->IsProcRunning())
 	{
-		FPlatformProcess::TerminateProc(ChanneldProcHandle, true);
-		ChanneldProcHandle.Reset();
+		ChanneldGatewayWorkThread->Exit();
 		UE_LOG(LogChanneldEditor, Log, TEXT("Stopped channeld"));
 	}
 }
@@ -288,7 +350,7 @@ void FChanneldEditorModule::LaunchServerGroup(const FServerGroup& ServerGroup)
 	for (int i = 0; i < ServerGroup.ServerNum; i++)
 	{
 		FString Params = FString::Printf(TEXT("\"%s\" %s -game -PIEVIACONSOLE -Multiprocess -server -log -MultiprocessSaveConfig -forcepassthrough -channeld=%s -SessionName=\"%s - Server %d\" -windowed ViewClass=%s %s"),
-			*ProjectPath, *MapName, Settings->bEnableNetworking ? TEXT("True") : TEXT("False"), *MapName, i, *ViewClassName, *ServerGroup.AdditionalArgs.ToString());
+		                                 *ProjectPath, *MapName, Settings->bEnableNetworking ? TEXT("True") : TEXT("False"), *MapName, i, *ViewClassName, *ServerGroup.AdditionalArgs.ToString());
 		uint32 ProcessId;
 		FProcHandle ProcHandle = FPlatformProcess::CreateProc(*EditorPath, *Params, true, false, false, &ProcessId, 0, nullptr, nullptr, nullptr);
 		if (ProcHandle.IsValid())
@@ -317,12 +379,16 @@ void FChanneldEditorModule::StopServersAction()
 
 void FChanneldEditorModule::LaunchChanneldAndServersAction()
 {
-	LaunchChanneldAction();
-	if (ChanneldProcHandle.IsValid())
+	LaunchChanneldAction([this](EChanneldLaunchResult Result)
 	{
-		FPlatformProcess::Sleep(1.0f);
-	}
-	LaunchServersAction();
+		if (Result < EChanneldLaunchResult::Failed)
+		{
+			AsyncTask(ENamedThreads::GameThread, [this]()
+			{
+				LaunchServersAction();
+			});
+		}
+	});
 }
 
 void FChanneldEditorModule::GenerateReplicatorAction()

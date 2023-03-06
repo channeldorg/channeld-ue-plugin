@@ -8,6 +8,8 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogMissionNotificationProxy, All, All);
 
+DEFINE_LOG_CATEGORY_STATIC(LogChanneldGateway, All, All);
+
 #define LOCTEXT_NAMESPACE "MissionNotificationPorxy"
 
 UChanneldMissionNotiProxy::UChanneldMissionNotiProxy(const FObjectInitializer& Initializer): Super(Initializer)
@@ -72,6 +74,7 @@ Else if ((MsgIndex = InMsg.Find(TEXT(#Type ":"))) != INDEX_NONE) \
 { \
 UE_LOG(LogMissionNotificationProxy, Type, TEXT("[Proxy]%s"), *InMsg.Replace(TEXT(#Type ":"), TEXT(""))); \
 }
+
 void UChanneldMissionNotiProxy::ReceiveOutputMsg(FChanneldProcWorkerThread* Worker, const FString& InMsg)
 {
 	int32 MsgIndex;
@@ -84,7 +87,7 @@ void UChanneldMissionNotiProxy::ReceiveOutputMsg(FChanneldProcWorkerThread* Work
 	COMMANDLET_LOG_PROXY(Fatal, else)
 	else
 	{
-		UE_LOG(LogMissionNotificationProxy, Display, TEXT("[Proxy]%s"), *InMsg); \
+		UE_LOG(LogMissionNotificationProxy, Display, TEXT("[Proxy]%s"), *InMsg);
 	}
 }
 
@@ -158,6 +161,62 @@ void UChanneldMissionNotiProxy::SpawnMissionFailedNotification(FChanneldProcWork
 void UChanneldMissionNotiProxy::CancelMission()
 {
 	MissionCanceled.Broadcast();
+}
+
+
+#define CHANNELD_GATEWAY_LOG_PROXY(GOLogLevel, UELogLevel, Else) \
+Else if ((MsgIndex = InMsg.Find(TEXT("\t"GOLogLevel"\t"))) != INDEX_NONE) \
+{ \
+	PrevLogLevel = TEXT(GOLogLevel); \
+	UE_LOG(LogChanneldGateway, UELogLevel, TEXT("[%s] %s"), TEXT(GOLogLevel), *InMsg.Mid(MsgIndex + FCString::Strlen(TEXT("\t"GOLogLevel"\t")))); \
+}
+
+void UChanneldGetawayNotiProxy::ReceiveOutputMsg(FChanneldProcWorkerThread* Worker, const FString& InMsg)
+{
+	int32 MsgIndex;
+	// DEBUG INFO WARN ERROR DPANIC PANIC FATAL
+	CHANNELD_GATEWAY_LOG_PROXY(GO_ZAP_LOGGER_LEVEL_DEBUG, Verbose,)
+	CHANNELD_GATEWAY_LOG_PROXY(GO_ZAP_LOGGER_LEVEL_INFO, Display, else)
+	CHANNELD_GATEWAY_LOG_PROXY(GO_ZAP_LOGGER_LEVEL_WARN, Warning, else)
+	CHANNELD_GATEWAY_LOG_PROXY(GO_ZAP_LOGGER_LEVEL_ERROR, Error, else)
+	CHANNELD_GATEWAY_LOG_PROXY(GO_ZAP_LOGGER_LEVEL_DPANIC, Error, else)
+	CHANNELD_GATEWAY_LOG_PROXY(GO_ZAP_LOGGER_LEVEL_PANIC, Error, else)
+	CHANNELD_GATEWAY_LOG_PROXY(GO_ZAP_LOGGER_LEVEL_FATAL, Error, else)
+	else
+	{
+		if (PrevLogLevel == TEXT(GO_ZAP_LOGGER_LEVEL_DEBUG))
+		{
+			UE_LOG(LogChanneldGateway, Verbose, TEXT("%s"), *InMsg);
+		}
+		else if (PrevLogLevel == TEXT(GO_ZAP_LOGGER_LEVEL_INFO))
+		{
+			UE_LOG(LogChanneldGateway, Display, TEXT("%s"), *InMsg);
+		}
+		else if (PrevLogLevel == TEXT(GO_ZAP_LOGGER_LEVEL_WARN))
+		{
+			UE_LOG(LogChanneldGateway, Warning, TEXT("%s"), *InMsg);
+		}
+		else if (PrevLogLevel == TEXT(GO_ZAP_LOGGER_LEVEL_ERROR))
+		{
+			UE_LOG(LogChanneldGateway, Error, TEXT("%s"), *InMsg);
+		}
+		else if (PrevLogLevel == TEXT(GO_ZAP_LOGGER_LEVEL_DPANIC))
+		{
+			UE_LOG(LogChanneldGateway, Error, TEXT("%s"), *InMsg);
+		}
+		else if (PrevLogLevel == TEXT(GO_ZAP_LOGGER_LEVEL_PANIC))
+		{
+			UE_LOG(LogChanneldGateway, Error, TEXT("%s"), *InMsg);
+		}
+		else if (PrevLogLevel == TEXT(GO_ZAP_LOGGER_LEVEL_FATAL))
+		{
+			UE_LOG(LogChanneldGateway, Error, TEXT("%s"), *InMsg);
+		}
+		else
+		{
+			UE_LOG(LogChanneldGateway, Display, TEXT("%s"), *InMsg);
+		}
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

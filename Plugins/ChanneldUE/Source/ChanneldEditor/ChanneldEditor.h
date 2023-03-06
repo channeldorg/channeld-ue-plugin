@@ -7,10 +7,18 @@ DECLARE_LOG_CATEGORY_CLASS(LogChanneldEditor, Log, All);
 
 class FChanneldProcWorkerThread;
 class UChanneldMissionNotiProxy;
+class UChanneldGetawayNotiProxy;
 class FToolBarBuilder;
 class FMenuBuilder;
 class SWidget;
 class FUICommandList;
+
+enum EChanneldLaunchResult
+{
+	Launched,
+	AlreadyLaunched,
+	Failed,
+};
 
 class FChanneldEditorModule : public IModuleInterface
 {
@@ -25,6 +33,7 @@ private:
 	static bool IsNetworkingEnabled();
 	static void ToggleNetworkingAction();
 	void LaunchChanneldAction();
+	void LaunchChanneldAction(TFunction<void(EChanneldLaunchResult Result)> PostChanneldLaunched = nullptr);
 	void StopChanneldAction();
 	FTimerManager* GetTimerManager();
 	void LaunchServersAction();
@@ -61,7 +70,9 @@ private:
 	TArray<FProcHandle> ServerProcHandles;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> BuildChanneldWorkThread;
+	mutable TSharedPtr<FChanneldProcWorkerThread> ChanneldGatewayWorkThread;
 	UChanneldMissionNotiProxy* BuildChanneldNotify;
+	UChanneldGetawayNotiProxy* ChanneldGatewayNotify;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenRepWorkThread;
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoCppCodeWorkThread;
