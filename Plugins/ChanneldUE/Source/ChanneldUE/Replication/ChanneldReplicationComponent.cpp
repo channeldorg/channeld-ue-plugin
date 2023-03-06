@@ -95,10 +95,12 @@ void UChanneldReplicationComponent::UninitOnce()
 	if (bUninitialized)
 		return;
 
-	auto View = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>()->GetChannelDataView();
-	if (View)
+	if (auto ChanneldSubsystem = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>())
 	{
-		View->RemoveProviderFromAllChannels(this, GetNetMode() == ENetMode::NM_DedicatedServer);
+		if (auto View = ChanneldSubsystem->GetChannelDataView())
+		{
+			View->RemoveProviderFromAllChannels(this, GetNetMode() == ENetMode::NM_DedicatedServer);
+		}
 	}
 	
 	bUninitialized = true;
