@@ -15,6 +15,8 @@ struct REPLICATORGENERATOR_API FGeneratedManifest
 	FDateTime GeneratedTime;
 	FString ProtoPackageName;
 	FString TemporaryGoProtoDataCode;
+	// TODO: FString -> TMap<EChanneldChannelType, FString>
+	FString ChannelDataMsgName;
 };
 
 class REPLICATORGENERATOR_API FReplicatorGeneratorManager

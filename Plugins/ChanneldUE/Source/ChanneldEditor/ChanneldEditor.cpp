@@ -374,9 +374,32 @@ void FChanneldEditorModule::GenerateReplicatorAction()
 	GenRepWorkThread->ProcBeginDelegate.AddUObject(GenRepNotify, &UChanneldMissionNotiProxy::SpawnRunningMissionNotification);
 	GenRepWorkThread->ProcSucceedDelegate.AddLambda([this](FChanneldProcWorkerThread* ProcWorkerThread)
 	{
+		FReplicatorGeneratorManager& GeneratorManager = FReplicatorGeneratorManager::Get();
+		FGeneratedManifest LatestGeneratedManifest;
+		FString Message;
+		if (!GeneratorManager.LoadLatestGeneratedManifest(LatestGeneratedManifest, Message))
+		{
+			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load latest generated manifest: %s"), *Message);
+			return;
+		}
+
 		const TArray<FString> GeneratedProtoFiles = FReplicatorGeneratorManager::Get().GetGeneratedProtoFiles();
 		GenRepProtoCppCode(GeneratedProtoFiles);
-		GenRepProtoGoCode(GeneratedProtoFiles);
+		GenRepProtoGoCode(GeneratedProtoFiles, LatestGeneratedManifest, GeneratorManager.GetReplicatorStorageDir());
+
+		
+		// Update UChanneldSettings::DefaultChannelDataMsgNames
+		auto Settings = GetMutableDefault<UChanneldSettings>();
+		TMap<EChanneldChannelType, FString> NewChannelDataMsgNames;
+		for (auto& Pair : Settings->DefaultChannelDataMsgNames)
+		{
+			NewChannelDataMsgNames.Add(Pair.Key, LatestGeneratedManifest.ChannelDataMsgName);
+		}
+		Settings->DefaultChannelDataMsgNames = NewChannelDataMsgNames;
+		Settings->SaveConfig();
+		UE_LOG(LogChanneldEditor, Log, TEXT("Updated the default channel data message names in the channeld settings."));
+
+		GetMutableDefault<UChanneldSettings>()->ReloadConfig();
 	});
 	GenRepWorkThread->ProcFailedDelegate.AddUObject(GenRepNotify, &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
 	GenRepNotify->SetMissionNotifyText(
@@ -482,17 +505,8 @@ void FChanneldEditorModule::GenRepProtoCppCode(const TArray<FString>& ProtoFiles
 	GenProtoCppCodeWorkThread->Execute();
 }
 
-void FChanneldEditorModule::GenRepProtoGoCode(const TArray<FString>& ProtoFiles) const
+void FChanneldEditorModule::GenRepProtoGoCode(const TArray<FString>& ProtoFiles, const FGeneratedManifest& LatestGeneratedManifest, const FString& ReplicatorStorageDir) const
 {
-	FReplicatorGeneratorManager& GeneratorManager = FReplicatorGeneratorManager::Get();
-	FGeneratedManifest LatestGeneratedManifest;
-	FString Message;
-	if (!GeneratorManager.LoadLatestGeneratedManifest(LatestGeneratedManifest, Message))
-	{
-		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load latest generated manifest: %s"), *Message);
-		return;
-	}
-
 	const FString ChanneldPath = FPlatformMisc::GetEnvironmentVariable(TEXT("CHANNELD_PATH"));
 	if (ChanneldPath.IsEmpty())
 	{
@@ -516,7 +530,6 @@ void FChanneldEditorModule::GenRepProtoGoCode(const TArray<FString>& ProtoFiles)
 			IFileManager::Get().Delete(*(DirToGenGoProto / FilePath));
 		}
 	}
-	FString ReplicatorStorageDir = GeneratorManager.GetReplicatorStorageDir();
 	FString ChanneldUnrealpbPath = ChanneldPath / TEXT("pkg") / TEXT("unrealpb");
 	FPaths::NormalizeDirectoryName(ChanneldUnrealpbPath);
 

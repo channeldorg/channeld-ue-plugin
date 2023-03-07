@@ -3,6 +3,8 @@
 
 #include "Commandlets/CookAndGenRepCommandlet.h"
 
+#include "ChanneldSettings.h"
+#include "ReplicatorGeneratorDefinition.h"
 #include "ReplicatorGeneratorManager.h"
 #include "ReplicatorGeneratorUtils.h"
 

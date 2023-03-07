@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldEditorSettings.h"
+#include "ReplicatorGeneratorManager.h"
 
 DECLARE_LOG_CATEGORY_CLASS(LogChanneldEditor, Log, All);
 
@@ -52,7 +53,7 @@ private:
 	 * Using the protoc to generate go code in the channeld.
 	 * The channeld directory is read from environment variable 'CHANNELD_PATH'.
 	 */
-	void GenRepProtoGoCode(const TArray<FString>& ProtoFiles) const;
+	void GenRepProtoGoCode(const TArray<FString>& ProtoFiles, const FGeneratedManifest& Manifest, const FString& ReplicatorStorageDir) const;
 
 	/**
 	 * Recompile the game code. Copied from FLevelEditorActionCallbacks::RecompileGameCode_Clicked().

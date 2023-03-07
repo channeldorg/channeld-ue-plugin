@@ -41,9 +41,16 @@ void UChannelDataView::Initialize(UChanneldConnection* InConn)
 		Connection->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this, &UChannelDataView::HandleUnsub);
 	}
 
+	const auto Settings = GetMutableDefault<UChanneldSettings>();
+
+	for (auto& Pair : Settings->DefaultChannelDataMsgNames)
+	{
+		RegisterChannelDataType(Pair.Key, Pair.Value);
+	}
+
 	if (Connection->IsServer())
 	{
-		const float InitDelay = GetMutableDefault<UChanneldSettings>()->DelayViewInitInSeconds;
+		const float InitDelay = Settings->DelayViewInitInSeconds;
 		if (InitDelay > 0)
 		{
 			FTimerHandle Handle;

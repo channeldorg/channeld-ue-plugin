@@ -21,6 +21,11 @@ public:
 
 	FORCEINLINE void RegisterChannelDataTemplate(int ChannelType, google::protobuf::Message* MsgTemplate)
 	{
+		if (ChannelDataTemplates.Contains(ChannelType))
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Channel data template for channel type %d already exists, will be overwritten."), ChannelType);
+		}
+		
 		ChannelDataTemplates.Add(ChannelType, MsgTemplate);
 		if (AnyForTypeUrl == nullptr)
 			AnyForTypeUrl = new google::protobuf::Any;

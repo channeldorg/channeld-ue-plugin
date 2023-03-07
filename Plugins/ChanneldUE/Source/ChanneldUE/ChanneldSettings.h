@@ -26,6 +26,15 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category="View")
 	TSubclassOf<class UChannelDataView> ChannelDataViewClass;
+	// The default channel data message name for each channel type. The entries will be registered in UChannelDataView::Initialize.
+	// Every time the replication code is generated, the entries will be updated with the message names in the generated code.
+	UPROPERTY(Config, EditAnywhere, Category="View")
+	TMap<EChanneldChannelType, FString> DefaultChannelDataMsgNames =
+	{
+		{EChanneldChannelType::ECT_Global, TEXT("tpspb.TestRepChannelData")},
+		{EChanneldChannelType::ECT_SubWorld, TEXT("tpspb.TestRepChannelData")},
+		{EChanneldChannelType::ECT_Spatial, TEXT("tpspb.TestRepChannelData")},
+	};
 
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	bool bEnableNetworking = true;

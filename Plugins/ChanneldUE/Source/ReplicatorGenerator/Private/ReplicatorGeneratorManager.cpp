@@ -152,6 +152,7 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass
 	Manifest.GeneratedTime = FDateTime::Now();
 	Manifest.ProtoPackageName = ProtoPackageName;
 	Manifest.TemporaryGoProtoDataCode = GetTemporaryGoProtoDataFilePath();
+	Manifest.ChannelDataMsgName = GetDefaultProtoPackageName() + "." + GenManager_DefaultChannelDataMsgName;
 	if (SaveGeneratedManifest(Manifest, Message))
 	{
 		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save the generated manifest file, error message: %s"), *Message);
@@ -286,6 +287,11 @@ bool FReplicatorGeneratorManager::LoadLatestGeneratedManifest(const FString& Fil
 		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'ProtoPackageName'"));
 	}
 
+	if (!RootObject->TryGetStringField(TEXT("ChannelDataMsgName"), Result.ChannelDataMsgName))
+	{
+		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'ChannelDataMsgName'"));
+	}
+
 	return true;
 }
 
@@ -310,6 +316,7 @@ bool FReplicatorGeneratorManager::SaveGeneratedManifest(const FGeneratedManifest
 	JsonWriter->WriteValue(TEXT("GeneratedTime"), Manifest.GeneratedTime.ToUnixTimestamp());
 	JsonWriter->WriteValue(TEXT("ProtoPackageName"), Manifest.ProtoPackageName);
 	JsonWriter->WriteValue(TEXT("TempGoProtoDataCode"), Manifest.TemporaryGoProtoDataCode);
+	JsonWriter->WriteValue(TEXT("ChannelDataMsgName"), Manifest.ChannelDataMsgName);
 	JsonWriter->WriteObjectEnd();
 	JsonWriter->Close();
 	if (FFileHelper::SaveStringToFile(Json, *Filename))
