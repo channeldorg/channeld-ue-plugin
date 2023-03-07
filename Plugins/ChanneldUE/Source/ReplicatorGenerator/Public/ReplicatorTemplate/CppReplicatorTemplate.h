@@ -40,11 +40,6 @@ private:
 {Declare_IndirectlyAccessiblePropertyPtrs}
 
 };
-
-namespace {Declare_RPCParamStructNamespace}
-{
-{Declare_RPCParamStructs}
-}
 )EOF";
 
 static const TCHAR* CodeGen_SerializeAndDeserializeFunctionParams =

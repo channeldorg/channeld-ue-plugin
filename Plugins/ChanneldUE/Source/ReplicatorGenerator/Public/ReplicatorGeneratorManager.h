@@ -155,7 +155,6 @@ private:
 		ACharacter::StaticClass(),
 		AController::StaticClass(),
 		AGameStateBase::StaticClass(),
-		AGameState::StaticClass(),
 		APawn::StaticClass(),
 		APlayerController::StaticClass(),
 		APlayerState::StaticClass(),

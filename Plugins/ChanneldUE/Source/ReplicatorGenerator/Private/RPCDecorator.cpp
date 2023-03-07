@@ -35,6 +35,17 @@ bool FRPCDecorator::Init(const TFunction<FString()>& SetNameForIllegalPropName)
 	{
 		CompilablePropName = *SetNameForIllegalPropName();
 	}
+	// The generated params struct name will be added to 'ChanneldGlobalStruct.h'.
+	// Add ActorNameHash to avoid name conflict.
+	const int32 ActorNameHash = GetTypeHash(OwnerActor->GetActorName());
+	if(ActorNameHash < 0)
+	{
+		CompilablePropName = FString::Printf(TEXT("%s__%d"), *CompilablePropName, -ActorNameHash);
+	}
+	else
+	{
+		CompilablePropName = FString::Printf(TEXT("%s_%d"), *CompilablePropName, ActorNameHash);
+	}
 
 	PostInit();
 	bInitialized = true;
@@ -48,29 +59,18 @@ bool FRPCDecorator::IsDirectlyAccessible()
 
 FString FRPCDecorator::GetCPPType()
 {
-	return FString::Printf(TEXT("%sParamStruct"), *GetPropertyName());
-}
-
-FString FRPCDecorator::GetProtoPackageName()
-{
-	return Owner->GetProtoPackageName() + TEXT("::") + Owner->GetProtoStateMessageType();
-}
-
-FString FRPCDecorator::GetProtoNamespace()
-{
-	return Owner->GetProtoNamespace() + TEXT("::") + Owner->GetProtoStateMessageType();
+	return FString::Printf(TEXT("RPCParamStruct%s"), *GetPropertyName());
 }
 
 FString FRPCDecorator::GetProtoStateMessageType()
 {
-	return FString::Printf(TEXT("Func%sParams"), *GetPropertyName());
+	return FString::Printf(TEXT("RPCParams%s"), *GetPropertyName());
 }
 
 FString FRPCDecorator::GetCode_SerializeFunctionParams()
 {
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_FuncName"), OriginalFunction->GetName());
-	FormatArgs.Add(TEXT("Declare_ParamStructNamespace"), OwnerActor->GetDeclaration_RPCParamStructNamespace());
 	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
 	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), GetProtoNamespace());
 	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), GetProtoStateMessageType());
@@ -82,7 +82,6 @@ FString FRPCDecorator::GetCode_DeserializeFunctionParams()
 {
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_FuncName"), OriginalFunction->GetName());
-	FormatArgs.Add(TEXT("Declare_ParamStructNamespace"), OwnerActor->GetDeclaration_RPCParamStructNamespace());
 	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
 	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), GetProtoNamespace());
 	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), GetProtoStateMessageType());
@@ -100,16 +99,6 @@ FString FRPCDecorator::GetDeclaration_ProtoFields()
 		FieldDefinitions += Property->GetDefinition_ProtoField(i + 1) + TEXT(";\n");
 	}
 	return FieldDefinitions;
-}
-
-TArray<FString> FRPCDecorator::GetAdditionalIncludes()
-{
-	TSet<FString> IncludeFileSet;
-	for (auto PropDecorator : Properties)
-	{
-		IncludeFileSet.Append(PropDecorator->GetAdditionalIncludes());
-	}
-	return IncludeFileSet.Array();
 }
 
 FString FRPCDecorator::GetCode_GetWorldRef()

@@ -13,7 +13,7 @@ bool FPropertyDecorator::Init(const TFunction<FString()>& SetNameForIllegalPropN
 	{
 		return false;
 	}
-	
+
 	if (OriginalProperty != nullptr)
 	{
 		CompilablePropName = OriginalProperty->GetName();
