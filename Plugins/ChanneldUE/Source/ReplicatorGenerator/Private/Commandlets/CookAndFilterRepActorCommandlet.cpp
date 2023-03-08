@@ -48,9 +48,7 @@ int32 UCookAndFilterRepActorCommandlet::Main(const FString& CmdLineParams)
 	const FString AdditionalParam(TEXT(" -SkipShaderCompile"));
 	FString NewCmdLine = CmdLineParams;
 	NewCmdLine.Append(AdditionalParam);
-	FCommandLine::Append(*AdditionalParam);
-
-	int32 Result = Super::Main(CmdLineParams);
+	int32 Result = Super::Main(NewCmdLine);
 	ObjLoadedListener.StopListen();
 
 	TArray<FString> LoadedRepClassPath;
