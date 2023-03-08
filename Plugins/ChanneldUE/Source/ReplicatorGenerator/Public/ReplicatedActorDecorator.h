@@ -256,16 +256,13 @@ public:
 	 */
 	FString GetDefinition_ProtoStateMessage();
 
-	FString GetDefinition_RPCParamsMessage();
-	
 	int32 GetRPCNum();
 
 	FString GetCode_SerializeFunctionParams();
 	FString GetCode_DeserializeFunctionParams();
 
-	FString GetDeclaration_RPCParamStructNamespace();
-
 	FString GetDeclaration_RPCParamStructs();
+	FString GetDefinition_RPCParamProtoDefinitions();
 
 	FString GetInstanceRefName() const;
 	void SetInstanceRefName(const FString& InstanceRefName);

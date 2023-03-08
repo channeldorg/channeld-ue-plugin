@@ -86,7 +86,12 @@ FString FStructPropertyDecorator::GetCode_AssignPropPointer(const FString& Conta
 
 TArray<FString> FStructPropertyDecorator::GetAdditionalIncludes()
 {
-	return TArray<FString>{GenManager_GlobalStructHeaderFile, GenManager_GlobalStructProtoHeaderFile};
+	TSet<FString> IncludeFileSet {GenManager_GlobalStructHeaderFile, GenManager_GlobalStructProtoHeaderFile};
+	for (auto PropDecorator : Properties)
+	{
+		IncludeFileSet.Append(PropDecorator->GetAdditionalIncludes());
+	}
+	return IncludeFileSet.Array();
 }
 
 FString FStructPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState)

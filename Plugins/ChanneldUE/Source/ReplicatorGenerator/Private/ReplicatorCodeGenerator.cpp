@@ -128,6 +128,11 @@ bool FReplicatorCodeGenerator::Generate(
 		ReplicatorCodeBundle.GlobalStructCodes.Append(StructDecorator->GetDeclaration_PropPtrGroupStruct());
 		ReplicatorCodeBundle.GlobalStructProtoDefinitions.Append(StructDecorator->GetDefinition_ProtoStateMessage());
 	}
+	for(auto ActorDecorator : ActorDecorators)
+	{
+		ReplicatorCodeBundle.GlobalStructCodes.Append(ActorDecorator->GetDeclaration_RPCParamStructs());
+		ReplicatorCodeBundle.GlobalStructProtoDefinitions.Append(ActorDecorator->GetDefinition_RPCParamProtoDefinitions());
+	}
 	FStringFormatNamedArguments ProtoFormatArgs;
 	ProtoFormatArgs.Add(TEXT("Declare_ProtoPackageName"), ProtoPackageName);
 	ProtoFormatArgs.Add(TEXT("Code_Import"), TEXT("import \"unreal_common.proto\";"));
@@ -227,8 +232,6 @@ bool FReplicatorCodeGenerator::GenerateActorCode(
 
 	// RPC
 	FormatArgs.Add(TEXT("Declare_OverrideSerializeAndDeserializeFunctionParams"), ActorDecorator->GetRPCNum() > 0 ? CodeGen_SerializeAndDeserializeFunctionParams : TEXT(""));
-	FormatArgs.Add(TEXT("Declare_RPCParamStructNamespace"), ActorDecorator->GetDeclaration_RPCParamStructNamespace());
-	FormatArgs.Add(TEXT("Declare_RPCParamStructs"), ActorDecorator->GetDeclaration_RPCParamStructs());
 
 	GeneratedResult.HeadCode = FString::Format(bIsBlueprint ? CodeGen_BP_HeadCodeTemplate : CodeGen_CPP_HeadCodeTemplate, FormatArgs);
 	GeneratedResult.HeadFileName = ActorDecorator->GetReplicatorClassName(false) + CodeGen_HeadFileExtension;

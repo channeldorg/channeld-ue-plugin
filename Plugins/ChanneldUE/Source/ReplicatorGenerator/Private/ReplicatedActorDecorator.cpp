@@ -98,7 +98,6 @@ bool FReplicatedActorDecorator::IsChanneldUEBuiltinType()
 		TargetClass == ACharacter::StaticClass() ||
 		TargetClass == AController::StaticClass() ||
 		TargetClass == AGameStateBase::StaticClass() ||
-		TargetClass == AGameState::StaticClass() ||
 		TargetClass == APawn::StaticClass() ||
 		TargetClass == APlayerController::StaticClass() ||
 		TargetClass == APlayerState::StaticClass() ||
@@ -295,25 +294,9 @@ FString FReplicatedActorDecorator::GetDefinition_ProtoStateMessage()
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_StateMessageType"), GetProtoStateMessageType());
 	FormatArgs.Add(TEXT("Declare_ProtoFields"), FieldDefinitions);
-	FormatArgs.Add(TEXT("Declare_SubProtoFields"), GetDefinition_RPCParamsMessage());
+	FormatArgs.Add(TEXT("Declare_SubProtoFields"), TEXT(""));
 
 	return FString::Format(CodeGen_ProtoStateMessageTemplate, FormatArgs);
-}
-
-FString FReplicatedActorDecorator::GetDefinition_RPCParamsMessage()
-{
-	FString RPCParamMessages;
-	for (int32 i = 0; i < RPCs.Num(); i++)
-	{
-		const TSharedPtr<FRPCDecorator> RPC = RPCs[i];
-		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add(TEXT("Declare_StateMessageType"), RPC->GetProtoStateMessageType());
-		FormatArgs.Add(TEXT("Declare_ProtoFields"), RPC->GetDeclaration_ProtoFields());
-		FormatArgs.Add(TEXT("Declare_SubProtoFields"), TEXT(""));
-
-		RPCParamMessages.Append(FString::Format(CodeGen_ProtoStateMessageTemplate, FormatArgs));
-	}
-	return RPCParamMessages;
 }
 
 int32 FReplicatedActorDecorator::GetRPCNum()
@@ -355,11 +338,6 @@ FString FReplicatedActorDecorator::GetCode_DeserializeFunctionParams()
 	return DeserializeParamCodes;
 }
 
-FString FReplicatedActorDecorator::GetDeclaration_RPCParamStructNamespace()
-{
-	return (GetReplicatorClassName(false) + TEXT("_rpcparamstruct")).ToLower();
-}
-
 FString FReplicatedActorDecorator::GetDeclaration_RPCParamStructs()
 {
 	FString RPCParamStructsDeclarations = TEXT("");
@@ -373,6 +351,22 @@ FString FReplicatedActorDecorator::GetDeclaration_RPCParamStructs()
 		}
 	}
 	return RPCParamStructsDeclarations;
+}
+
+FString FReplicatedActorDecorator::GetDefinition_RPCParamProtoDefinitions()
+{
+	FString RPCParamMessages;
+	for (int32 i = 0; i < RPCs.Num(); i++)
+	{
+		const TSharedPtr<FRPCDecorator> RPC = RPCs[i];
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("Declare_StateMessageType"), RPC->GetProtoStateMessageType());
+		FormatArgs.Add(TEXT("Declare_ProtoFields"), RPC->GetDeclaration_ProtoFields());
+		FormatArgs.Add(TEXT("Declare_SubProtoFields"), TEXT(""));
+
+		RPCParamMessages.Append(FString::Format(CodeGen_ProtoStateMessageTemplate, FormatArgs));
+	}
+	return RPCParamMessages;
 }
 
 FString FReplicatedActorDecorator::GetInstanceRefName() const

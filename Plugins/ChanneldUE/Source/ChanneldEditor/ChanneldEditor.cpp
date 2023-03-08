@@ -425,6 +425,7 @@ void FChanneldEditorModule::GenRepProtoCppCode(const TArray<FString>& ProtoFiles
 	if (ChanneldPath.IsEmpty())
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("Environment variable \"CHANNELD_PATH\" is empty, please set user environment variable \"CHANNELD_PATH\" to Channeld root directory"));
+		GenRepNotify->SpawnMissionFailedNotification(nullptr);
 		return;
 	}
 
@@ -454,8 +455,11 @@ void FChanneldEditorModule::GenRepProtoCppCode(const TArray<FString>& ProtoFiles
 	if (!FileManager.FileExists(*ProtocPath))
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("Protoc path is invaild: %s"), *ProtocPath);
+		GenRepNotify->SpawnMissionFailedNotification(nullptr);
 		return;
 	}
+
+	UE_LOG(LogChanneldEditor, Display, TEXT("\"%s\" %s"), *ProtocPath, *Args);
 
 	GenProtoCppCodeWorkThread = MakeShareable(new FChanneldProcWorkerThread(TEXT("GenerateReplicatorProtoThread"), ProtocPath, Args));
 	GenProtoCppCodeWorkThread->ProcOutputMsgDelegate.BindUObject(GenRepNotify, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
@@ -464,9 +468,10 @@ void FChanneldEditorModule::GenRepProtoCppCode(const TArray<FString>& ProtoFiles
 			UE_LOG(LogChanneldEditor, Display, TEXT("Start generating cpp prototype code..."));
 		}
 	);
-	GenProtoCppCodeWorkThread->ProcFailedDelegate.AddLambda([](FChanneldProcWorkerThread*)
+	GenProtoCppCodeWorkThread->ProcFailedDelegate.AddLambda([this](FChanneldProcWorkerThread*)
 		{
 			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to generate cpp proto codes!"));
+			GenRepNotify->SpawnMissionFailedNotification(nullptr);
 		}
 	);
 	GenRepNotify->MissionCanceled.AddLambda([this]()
