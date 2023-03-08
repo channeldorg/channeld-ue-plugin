@@ -382,7 +382,6 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	TArray<TSharedPtr<FReplicatedActorDecorator>> ChildrenOfAActor;
 	for (const UClass* TargetActorClass : TargetClassWithParentArr)
 	{
-		FString ResultMessage;
 		TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
 		// It's not necessary to initialize property decorators and rpc decorators, because ChannelDataProcessor doesn't need them
 		if (!CreateDecorateActor(ActorDecorator, ResultMessage, TargetActorClass, ProtoPackageName, GoPackageImportPath, false, false))
@@ -398,7 +397,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	}
 
 	// Generate ChannelDataProcessor CPP code
-	GenerateChannelDataProcessorCode(
+	if (!GenerateChannelDataProcessorCode(
 		ActorDecorators,
 		ChildrenOfAActor,
 		ChannelDataProtoMsgName,
@@ -407,22 +406,46 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 		ChannelDataProtoHeadFileName,
 		ProtoPackageName,
 		GeneratedCodeBundle.ChannelDataProcessorHeadCode
-	);
+	))
+	{
+		ResultMessage = TEXT("Failed to generate ChannelDataProcessor code");
+		return false;
+	}
+	
 	// Generate ChannelDataProcessor Proto definition file
-	GenerateChannelDataProtoDefFile(
+	if (!GenerateChannelDataProtoDefFile(
 		ActorDecorators,
 		ChannelDataProtoMsgName,
 		ProtoPackageName, GoPackageImportPath,
 		GeneratedCodeBundle.ChannelDataProtoDefsFile
-	);
+	))
+	{
+		ResultMessage = TEXT("Failed to generate channel data proto definition file");
+		return false;
+	}
 
-	GenerateGoProtoDataCode(
+	if (!GenerateChannelDataMerge_GoCode(
 		ActorDecorators,
 		ChildrenOfAActor,
 		ChannelDataProtoMsgName,
 		ProtoPackageName,
-		GeneratedCodeBundle.ChannelDataGolangMergeCode
-	);
+		GeneratedCodeBundle.ChannelDataMerge_GoCode
+	))
+	{
+		ResultMessage = TEXT("Failed to generate channel data merge go code");
+		return false;
+	}
+
+	if (!GenerateChannelDataRegistration_GoCode(
+		GoPackageImportPath,
+		ChannelDataProtoMsgName,
+		ProtoPackageName,
+		GeneratedCodeBundle.ChannelDataRegistration_GoCode
+	))
+	{
+		ResultMessage = TEXT("Failed to generate channel data registration go code");
+		return false;
+	}
 
 	return true;
 }
@@ -533,7 +556,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProtoDefFile(
 	return true;
 }
 
-bool FReplicatorCodeGenerator::GenerateGoProtoDataCode(
+bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 	const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
 	const TArray<TSharedPtr<FReplicatedActorDecorator>>& ChildrenOfAActor,
 	const FString& ChannelDataMessageName,
@@ -543,7 +566,7 @@ bool FReplicatorCodeGenerator::GenerateGoProtoDataCode(
 {
 	GoCode = TEXT("");
 	GoCode.Append(FString::Printf(TEXT("package %s\n"), *ProtoPackageName));
-	GoCode.Append(CodeGen_Go_ImportTemplate);
+	GoCode.Append(CodeGen_Go_Data_ImportTemplate);
 
 	// Generate code: Implement [channeld.ChannelDataCollector]
 	{
@@ -639,6 +662,22 @@ bool FReplicatorCodeGenerator::GenerateGoProtoDataCode(
 
 	GoCode.Append(TEXT("\treturn nil\n}\n"));
 	
+	return true;
+}
+
+bool FReplicatorCodeGenerator::GenerateChannelDataRegistration_GoCode(
+	const FString& GoImportPath,
+	const FString& ChannelDataMessageName,
+	const FString& ProtoPackageName,
+	FString& GoCode
+)
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add("Definition_GoImportPath", GoImportPath);
+	FormatArgs.Add("Definition_GenPackageName", ProtoPackageName);
+	FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataMessageName);
+	GoCode = FString::Format(CodeGen_Go_RegistrationTemplate, FormatArgs);
+
 	return true;
 }
 

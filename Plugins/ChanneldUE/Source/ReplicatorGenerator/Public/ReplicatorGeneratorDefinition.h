@@ -31,5 +31,6 @@ static const FString GenManager_UnrealCommonProtoFile = TEXT("unreal_common") + 
 
 static const FString GenManager_IntermediateDir = FPaths::ProjectIntermediateDir() / TEXT("ChanneldReplicatorGenerator");
 static const FString GenManager_GeneratedManifestFilePath = GenManager_IntermediateDir / TEXT("ReplicatorGeneratedManifest.json");
-static const FString GenManager_TemporaryGoProtoDataFilePath = GenManager_IntermediateDir / TEXT("Tmp_ChannelDataGoMergeCode.go");
+static const FString GenManager_TemporaryGoMergeCodePath = GenManager_IntermediateDir / TEXT("Tmp_ChannelDataGoMergeCode.go");
+static const FString GenManager_TemporaryGoRegistrationCodePath = GenManager_IntermediateDir / TEXT("Tmp_ChannelDataGoRegCode.go");
 static const FString GenManager_RepClassInfoPath = GenManager_IntermediateDir / TEXT("RepAssetInfoPath.json");

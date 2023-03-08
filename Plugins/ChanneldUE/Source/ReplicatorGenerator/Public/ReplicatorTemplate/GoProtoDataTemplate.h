@@ -1,6 +1,6 @@
 #pragma once
 
-static const TCHAR* CodeGen_Go_ImportTemplate =
+static const TCHAR* CodeGen_Go_Data_ImportTemplate =
 	LR"EOF(
 import (
 	"errors"
@@ -135,4 +135,18 @@ static const TCHAR* CodeGen_Go_MergeActorStateInMapTemplate = LR"EOF(
 
 static const TCHAR* CodeGen_Go_DeleteStateInMapTemplate = LR"EOF(
 	delete(dst.{Definition_StateMapName}, netId)
+)EOF";
+
+static const TCHAR* CodeGen_Go_RegistrationTemplate = LR"EOF(
+package main
+
+import (
+	"{Definition_GoImportPath}"
+	"channeld.clewcat.com/channeld/pkg/channeld"
+	"channeld.clewcat.com/channeld/pkg/channeldpb"
+)
+
+func InitChannelDataTypes() {
+	channeld.RegisterChannelDataType(channeldpb.ChannelType_GLOBAL, &{Definition_GenPackageName}.{Definition_ChannelDataMsgName}{})
+}
 )EOF";

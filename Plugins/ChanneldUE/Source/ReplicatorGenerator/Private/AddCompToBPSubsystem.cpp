@@ -400,7 +400,7 @@ void UAddCompToBPSubsystem::SpawnRunningFilterRepActorNotification()
 		FNotificationInfo Info(FText::FromString(TEXT("Adding replicaiton components")));
 
 		Info.bFireAndForget = false;
-		Info.Hyperlink = FSimpleDelegate::CreateStatic([]() { FGlobalTabmanager::Get()->InvokeTab(FName("OutputLog")); });
+		Info.Hyperlink = FSimpleDelegate::CreateStatic([]() { FGlobalTabmanager::Get()->TryInvokeTab(FName("OutputLog")); });
 		Info.HyperlinkText = LOCTEXT("ShowOutputLogHyperlink", "Show Output Log");
 		Info.ButtonDetails.Add(FNotificationButtonInfo(LOCTEXT("RunningFilterRepActorNotificationCancelButton", "Cancel"), FText(),
 		                                               FSimpleDelegate::CreateLambda([AddCompToBPSubsystem]() { AddCompToBPSubsystem->CancelFilterRepActor(); }),

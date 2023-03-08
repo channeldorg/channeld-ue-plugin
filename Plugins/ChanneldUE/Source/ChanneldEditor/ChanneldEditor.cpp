@@ -519,7 +519,8 @@ void FChanneldEditorModule::GenRepProtoGoCode(const TArray<FString>& ProtoFiles,
 		return;
 	}
 
-	FString DirToGenGoProto = ChanneldPath / GetMutableDefault<UChanneldEditorSettings>()->ChanneldProtoFilesStorageDir / LatestGeneratedManifest.ProtoPackageName;
+	FString DirToGoMain = ChanneldPath / GetMutableDefault<UChanneldEditorSettings>()->ChanneldProtoFilesStorageDir;
+	FString DirToGenGoProto = DirToGoMain / LatestGeneratedManifest.ProtoPackageName;
 	FPaths::NormalizeDirectoryName(DirToGenGoProto);
 	if (!IFileManager::Get().DirectoryExists(*DirToGenGoProto))
 	{
@@ -575,7 +576,8 @@ void FChanneldEditorModule::GenRepProtoGoCode(const TArray<FString>& ProtoFiles,
 	);
 	GenProtoGoCodeWorkThread->Execute();
 
-	IFileManager::Get().Move(*(DirToGenGoProto / TEXT("data.go")), *LatestGeneratedManifest.TemporaryGoProtoDataCode);
+	IFileManager::Get().Move(*(DirToGenGoProto / TEXT("data.go")), *LatestGeneratedManifest.TemporaryGoMergeCodePath);
+	IFileManager::Get().Move(*(DirToGoMain / TEXT("channeldue.gen.go")), *LatestGeneratedManifest.TemporaryGoRegistrationCodePath);
 }
 
 void FChanneldEditorModule::AddRepCompsToBPsAction()

@@ -45,7 +45,8 @@ struct FGeneratedCodeBundle
 	FString ChannelDataProcessorHeadCode;
 	FString ChannelDataProtoDefsFile;
 
-	FString ChannelDataGolangMergeCode;
+	FString ChannelDataMerge_GoCode;
+	FString ChannelDataRegistration_GoCode;
 };
 
 class REPLICATORGENERATOR_API FReplicatorCodeGenerator
@@ -134,9 +135,16 @@ public:
 		FString& ChannelDataProtoFile
 	);
 
-	bool GenerateGoProtoDataCode(
+	bool GenerateChannelDataMerge_GoCode(
 		const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
 		const TArray<TSharedPtr<FReplicatedActorDecorator>>& ChildrenOfAActor,
+		const FString& ChannelDataMessageName,
+		const FString& ProtoPackageName,
+		FString& GoCode
+	);
+
+	bool GenerateChannelDataRegistration_GoCode(
+		const FString& GoImportPath,
 		const FString& ChannelDataMessageName,
 		const FString& ProtoPackageName,
 		FString& GoCode

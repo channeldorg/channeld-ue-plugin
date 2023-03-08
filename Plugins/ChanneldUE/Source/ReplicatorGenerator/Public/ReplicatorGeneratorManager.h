@@ -14,7 +14,8 @@ struct REPLICATORGENERATOR_API FGeneratedManifest
 {
 	FDateTime GeneratedTime;
 	FString ProtoPackageName;
-	FString TemporaryGoProtoDataCode;
+	FString TemporaryGoMergeCodePath;
+	FString TemporaryGoRegistrationCodePath;
 	// TODO: FString -> TMap<EChanneldChannelType, FString>
 	FString ChannelDataMsgName;
 };
