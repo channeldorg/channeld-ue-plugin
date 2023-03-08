@@ -440,6 +440,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	FString ChannelDataProcessor_MergeCode;
 	FString ChannelDataProcessor_GetStateCode;
 	FString ChannelDataProcessor_SetStateCode;
+	FString ChannelDataProcessor_GetRelevantNetGUIDsCode;
 
 	int32 ConstPathFNameVarDeclIndex = 0;
 	for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
@@ -466,6 +467,21 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 				*ActorDecorator->GetCode_ChannelDataProcessor_SetStateToChannelData(ChannelDataMessageName)
 			)
 		);
+
+		const UClass* TargetClass = ActorDecorator->GetTargetClass();
+		if ((TargetClass != AActor::StaticClass() &&
+			TargetClass != UActorComponent::StaticClass() &&
+			!TargetClass->IsChildOf(AGameStateBase::StaticClass()) &&
+			!TargetClass->IsChildOf(APlayerState::StaticClass()) &&
+			!TargetClass->IsChildOf(AController::StaticClass())) ||
+			TargetClass->IsChildOf(USceneComponent::StaticClass())
+		)
+		{
+			FStringFormatNamedArguments FormatArgs;
+			FormatArgs.Add(TEXT("Declaration_CDP_ProtoVar"), ChannelDataMessageName);
+			FormatArgs.Add(TEXT("Definition_StateMapName"), ActorDecorator->GetDefinition_ChannelDataFieldNameCpp());
+			ChannelDataProcessor_GetRelevantNetGUIDsCode.Append(FString::Format(CodeGen_GetRelevantNetIdByStateTemplate, FormatArgs));
+		}
 	}
 	FStringFormatNamedArguments CDPFormatArgs;
 	CDPFormatArgs.Add(TEXT("Code_IncludeAdditionHeaders"), ChannelDataProcessor_IncludeCode);
@@ -481,6 +497,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	CDPFormatArgs.Add(TEXT("Declaration_CDP_ProtoVar"), ChannelDataMessageName);
 	CDPFormatArgs.Add(TEXT("Code_GetStateFromChannelData"), ChannelDataProcessor_GetStateCode);
 	CDPFormatArgs.Add(TEXT("Code_SetStateToChannelData"), ChannelDataProcessor_SetStateCode);
+	CDPFormatArgs.Add(TEXT("Code_GetRelevantNetGUIDs"), ChannelDataProcessor_GetRelevantNetGUIDsCode);
 	ChannelDataProcessorCode = FString::Format(*CodeGen_ChannelDataProcessorCPPTemp, CDPFormatArgs);
 	return true;
 }

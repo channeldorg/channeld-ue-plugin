@@ -18,6 +18,7 @@
 #include "GameFramework/PlayerState.h"
 #include "Interest/ClientInterestManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Replication/ChanneldReplication.h"
 
 USpatialChannelDataView::USpatialChannelDataView(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -689,7 +690,15 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 		return false;
 	}
 
-	TArray<uint32> NetGUIDs = GetRelevantNetGUIDsFromChannelData(ChannelData);
+	const FName MessageName = UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str());
+	auto Processor = ChanneldReplication::FindChannelDataProcessor(MessageName);
+	ensureMsgf(Processor, TEXT("Unable to find channel data processor for message: %s"), UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()));
+	if (!Processor)
+	{
+		return false;
+	}
+	
+	TArray<uint32> NetGUIDs = Processor->GetRelevantNetGUIDsFromChannelData(ChannelData);
 	if (NetGUIDs.Num() == 0)
 	{
 		return false;

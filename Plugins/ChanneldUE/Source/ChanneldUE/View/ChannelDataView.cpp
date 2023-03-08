@@ -877,7 +877,7 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 	}
 	else
 	{
-		UE_LOG(LogChanneld, Log, TEXT("ChannelDataMerger not found for type: %s, fall back to ParsePartialFromString. Risk: The state with the same NetId will be overwritten instead of merged."), *MessageName.ToString());
+		UE_LOG(LogChanneld, Log, TEXT("ChannelDataProcessor not found for type: %s, fall back to ParsePartialFromString. Risk: The state with the same NetId will be overwritten instead of merged."), *MessageName.ToString());
 		// Call ParsePartial instead of Parse to keep the existing value from being reset.
 		if (!UpdateData->ParsePartialFromString(UpdateMsg->data().value()))
 		{

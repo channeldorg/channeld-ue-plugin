@@ -279,6 +279,28 @@ namespace {Declaration_CDP_Namespace}
         UE_LOG(LogChanneldGen, Warning, TEXT("State of '%s' is not supported in the ChannelData, NetGUID: %d"), *TargetClass->GetName(), NetGUID);
       }
     }
+
+    virtual TArray<uint32> GetRelevantNetGUIDsFromChannelData(const google::protobuf::Message* ChannelData) override
+    {
+      const auto {Declaration_CDP_ProtoVar} = static_cast<const {Definition_CDP_ProtoNamespace}::{Definition_CDP_ProtoMsgName}*>(ChannelData);
+      TArray<uint32> NetGUIDs;
+      for (auto& Pair : {Declaration_CDP_ProtoVar}->actorstates())
+      {
+		    if (Pair.second.has_replicatedmovement())
+		    {
+			    NetGUIDs.Add(Pair.first);
+		    }
+        {Code_GetRelevantNetGUIDs}
+      }
+	    return NetGUIDs;
+    }
   };
 }
+)EOF";
+
+static const TCHAR* CodeGen_GetRelevantNetIdByStateTemplate = LR"EOF(
+        else if ({Declaration_CDP_ProtoVar}->{Definition_StateMapName}_size() > 0 && {Declaration_CDP_ProtoVar}->{Definition_StateMapName}().contains(Pair.first))
+        {
+          NetGUIDs.Add(Pair.first);
+        }
 )EOF";
