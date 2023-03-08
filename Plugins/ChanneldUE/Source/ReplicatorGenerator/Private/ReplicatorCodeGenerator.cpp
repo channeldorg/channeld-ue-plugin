@@ -103,7 +103,7 @@ bool FReplicatorCodeGenerator::Generate(
 	RegisterFormatArgs.Add(
 		TEXT("Code_ChannelDataProcessorRegister"),
 		FString::Printf(
-			TEXT("%s = new %s::%s();\nChanneldReplication::RegisterChannelDataMerger(TEXT(\"%s.%s\"), %s);\n"),
+			TEXT("%s = new %s::%s();\nChanneldReplication::RegisterChannelDataProcessor(TEXT(\"%s.%s\"), %s);\n"),
 			*CDPVarNameInRegister,
 			*CDPNamespace, *CDPClassName,
 			*ProtoPackageName, *ChanneldDataProtoMsgName,
