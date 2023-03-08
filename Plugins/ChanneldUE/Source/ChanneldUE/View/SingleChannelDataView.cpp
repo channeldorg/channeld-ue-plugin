@@ -17,8 +17,35 @@ Channeld::ChannelId USingleChannelDataView::GetOwningChannelId(const FNetworkGUI
 	return Channeld::GlobalChannelId;
 }
 
+void USingleChannelDataView::InitServer()
+{
+	Super::InitServer();
+
+	Connection->CreateChannel(channeldpb::GLOBAL, Metadata, nullptr, nullptr, nullptr,
+		[&](const channeldpb::CreateChannelResultMessage* ResultMsg)
+		{
+			GetChanneldSubsystem()->SetLowLevelSendToChannelId(ResultMsg->channelid());
+		});
+}
+
+void USingleChannelDataView::InitClient()
+{
+	Super::InitClient();
+
+	
+	channeldpb::ChannelSubscriptionOptions GlobalSubOptions;
+	GlobalSubOptions.set_dataaccess(channeldpb::READ_ACCESS);
+	GlobalSubOptions.set_fanoutintervalms(GlobalChannelFanOutIntervalMs);
+	GlobalSubOptions.set_fanoutdelayms(GlobalChannelFanOutDelayMs);
+	Connection->SubToChannel(Channeld::GlobalChannelId, &GlobalSubOptions, [&](const channeldpb::SubscribedToChannelResultMessage* ResultMsg)
+	{
+		GetChanneldSubsystem()->SetLowLevelSendToChannelId(Channeld::GlobalChannelId);
+	});
+}
+
 void USingleChannelDataView::ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId)
 {
+	/* Moved to the base class (exception calling Destroy on the Pawn)
 	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
 	{
 		UChanneldNetConnection* ClientConn;
@@ -40,5 +67,7 @@ void USingleChannelDataView::ServerHandleClientUnsub(Channeld::ConnectionId Clie
 			//~ End copy
 		}
 	}
+	*/
+	Super::ServerHandleClientUnsub(ClientConnId, ChannelType, ChId);
 }
 

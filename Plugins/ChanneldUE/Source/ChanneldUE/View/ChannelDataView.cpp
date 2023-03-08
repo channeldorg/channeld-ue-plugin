@@ -834,6 +834,15 @@ void UChannelDataView::HandleUnsub(UChanneldConnection* _, Channeld::ChannelId C
 	}
 }
 
+void UChannelDataView::ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId)
+{
+	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Client leaves the game, removing the connection: %d"), ClientConnId);
+		NetDriver->RemoveChanneldClientConnection(ClientConnId);
+	}
+}
+
 void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto UpdateMsg = static_cast<const channeldpb::ChannelDataUpdateMessage*>(Msg);

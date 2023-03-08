@@ -14,7 +14,9 @@ static const FName FallbackNetDriverName("/Script/OnlineSubsystemUtils.IpNetDriv
 UChanneldSettings::UChanneldSettings(const FObjectInitializer& ObjectInitializer) :
 	Super(ObjectInitializer),
 	RegionBoxMinSize(10, 10, 20),
-	RegionBoxMaxSize(100000, 100000, 1000)
+	RegionBoxMaxSize(100000, 100000, 1000),
+	SubscriptionBoxMinSize(10, 10, 100),
+	SubscriptionBoxMaxSize(100000, 100000, 1000)
 {
 }
 
