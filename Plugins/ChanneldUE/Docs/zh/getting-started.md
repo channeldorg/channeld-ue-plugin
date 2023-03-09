@@ -18,12 +18,22 @@ protoc-gen-go - Protobuf的go代码生成工具
 
 # 2.创建第三人称模板项目
 ## 2.1.创建项目并复制插件
-新建一个基于第三人称模板的UE蓝图项目：在Unreal Project Browser中选择"Game" -> "Third Person" -> "Blueprint"。
+新建一个基于第三人称模板的UE蓝图项目：在Unreal Project Browser中选择"Game" -> "Third Person" -> "C++"。
+
+```
+注意：ChannelUE插件只支持C++项目。如果您使用的是纯蓝图项目，需要先转换为C++项目。
+```
 
 项目创建后，关闭UE编辑器。将1.1.步骤中克隆的插件代码仓库目录复制到项目的`Plugins`目录下。
 
-## 2.2.编译运行项目并开启插件
-双击项目的`*.uproject`文件，再次打开项目。UE编辑器会提示编译插件中的模块。编译完成后，编辑器工具栏会出现插件图标：
+修改项目Build.cs文件，添加插件的模块`ChanneldUE`和`ProtobufUE`：
+```csharp
+PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ChanneldUE", "ProtobufUE" });
+```
+
+## 2.2.重新编译运行项目并开启插件
+在文件浏览器中右键点击项目的`*.uproject`文件，选择"Generate Visual Studio project files"，重新生成项目的解决方案文件。
+在Visual Studio中重新加载解决方案，并编译运行项目。当UE编辑器再次打开时，工具栏会出现插件图标：
 
 ![](../images/toolbar_channeld.png)
 
@@ -36,17 +46,23 @@ protoc-gen-go - Protobuf的go代码生成工具
 
 ![](../images/character_rep_component.png)
 
-然后，新建第三人称控制器的蓝图`ThirdPersonPlayerController`，并为其添加同步组件。
+然后，新建第三人称控制器的蓝图`ThirdPersonPlayerController`，在类默认值中勾选`复制(Replicates)`，并为其添加同步组件：
 
-因为`GameStateBase`和`PlayerState`分别负责同步游戏和玩家中的状态，还需要创建分别为它们创建添加了同步组件的蓝图类：
+![](../images/player_controller_bp.png)
+
+接下来，因为`GameStateBase`和`PlayerState`分别负责同步游戏和玩家中的状态，还需要创建分别为它们创建蓝图类，并同样地，开启`复制(Replicates)`，添加同步组件：
 
 ![](../images/game_state_base.png)
+
+```
+提示：此处选择GameStateBase或ChanneldGameState都可以。如果要在之后的开发中使用到跨服的GameState功能，则需要选择ChanneldGameState。
+```
 
 ![](../images/player_state.png)
 
 
 ```
-提示：记得在添加同步组件后，编译和保存上述蓝图！
+小贴士：记得在开启Relicates和添加同步组件后，编译和保存上述蓝图！
 ```
 
 最后，添加一个新的GameMode蓝图`ThirdPersonGameMode`（如果已存在，则打开），并为其设置Game State Class, Player Controller Class, Player State Class和Default Pawn Class：
@@ -64,15 +80,15 @@ protoc-gen-go - Protobuf的go代码生成工具
 
 ![](../images/settings_view_class.png)
 
-`BP_SingleChannelView`是插件中内置的视图蓝图类，它会在服务端创建**全局频道**，并在客户端连接成功后订阅到该频道。订阅成功后，客户端发送的网络数据会通过channeld转发到全局频道的所有者，即创建该频道的服务端。
+`SingleChannelDataView`是插件中内置的视图蓝图类，它会在服务端创建**全局频道**，并在客户端连接成功后订阅到该频道。订阅成功后，客户端发送的网络数据会通过channeld转发到全局频道的所有者，即创建该频道的服务端。
 
-## 3.2.配置服务器组
+## 3.2.配置服务器组提示
 作为UE的分布式架构扩展，ChanneldUE插件支持同时启动多个UE服务器进程，每个进程可以配置自己的视图和启动参数。
 要添加一个服务器组，打开主菜单`编辑 -> 编辑器偏好设置 -> 插件 -> Channeld Editor`。点击`Server Groups`一栏的加号按钮，并展开设置项：
 
 ![](../images/settings_server_group.png)
 
-确保Enabled为勾选，Server Num为1，并设置Server View Class同样为`BP_SingleChannelView`。Server Map留空则表示启动服务器时，会使用编辑器当前打开的地图。
+确保Enabled为勾选，Server Num为1，并设置Server View Class同样为`SingleChannelDataView`。Server Map留空则表示启动服务器时，会使用编辑器当前打开的地图。
 
 # 4.启动channeld服务和游戏服务器
 点击工具栏中插件图标的下拉按钮，确保`Enable Channeld Networking`为选中状态：
@@ -90,12 +106,28 @@ protoc-gen-go - Protobuf的go代码生成工具
 ```
 
 # 5.运行游戏并测试
-在Play Standalone模式下运行游戏。此时客户端尚未连接到channeld，需要手动连接。在客户端的控制台中输入`connect 127.0.0.1`并回车。观察到客户端重新加载地图并创建角色，说明连接成功。
+## 5.1.测试单个客户端
+确保在`运行Standalone`网络模式下运行游戏。此时客户端尚未连接到channeld，需要手动连接。在客户端的控制台中输入`connect 127.0.0.1`并回车。观察到客户端重新加载地图并创建角色，说明连接成功。
 
 在地图中移动角色，并观察服务器的控制台中打印的日志，会出现对应的同步数据输出：
 
 ![](../images/server_replication_output.png)
 
+## 5.2.测试多个客户端
+如果要同时开启多个客户端，需要对默认的编辑器设置做一些修改。打开主菜单`编辑 -> 编辑器偏好设置 -> 关卡编辑器 -> 播放`，在`Multiplayer options`中，**取消**`单进程下的运行`的勾选：
+
+![](../images/settings_run_under_one_process.png)
+
+```
+原理：在网络底层，ChanneldConnection类负责和channeld网关服务进行连接，并进行创建、订阅、退订频道等操作。
+因为一个UE或UE编辑器进程只能存在一个ChanneldConnection对象，所以在单进程下，同时存在多个客户端或服务端会出现错误。
+```
+
+此时，增加玩家数量并运行游戏。第一个客户端窗口会立刻出现；其它客户端窗口会稍后出现，因为它们都是单独的UE进程，需要一些时间启动。
+
+在每个客户端窗口中，打开控制台并输入`connect 127.0.0.1`。观察多个客户端之间的同步。
+
+在入门教程中，客户端都需要通过这种方式手动连接。*频道数据视图*的章节中，将会介绍如何通过扩展视图，在蓝图中建立连接。
 
 # 6.基本的开发工作流
 ## 6.1.创建有同步变量的Actor
@@ -140,7 +172,7 @@ protoc-gen-go - Protobuf的go代码生成工具
 
 在ChanneldUE中，已经内置了Actor，Character，PlayerController等常用类的同步代码，所以我们只需要为新添加的`BP_TestActor`和`BP_ThirdPersonPlayerController`生成同步代码。
 
-首先，点击插件工具栏中的`Stop Serveres`关闭之前开启的游戏服务器。然后，点击`Stop Channeld`关闭之前开启的channeld服务：
+首先，点击插件工具栏中的`Stop Servers`关闭之前开启的游戏服务器。然后，点击`Stop Channeld`关闭之前开启的channeld服务：
 
 // TODO 截图
 
@@ -175,18 +207,47 @@ protoc-gen-go - Protobuf的go代码生成工具
 下面将介绍如何在UE中通过配置的方式使用空间频道。
 
 ## 7.2.在项目设置中配置空间频道
+打开主菜单`编辑 -> 项目设置 -> 插件 -> Channeld`，将Channel Data View Class改为`SpatialChannelDataView`。该类会成为客户端使用的频道数据视图类。为了让空间频道更直观地显示出来，还需要对ChannelUE内置的空间频道可视化工具进行配置。
 
 
-## 7.3.在编辑器设置中配置空间频道服务器
+接下来，还需要配置服务端使用的频道数据视图类。
 
-## 7.4 运行游戏并测试
+## 7.3.在编辑器设置中配置主服务器和空间服务器
+在7.1.中介绍过，空间频道运行于空间服务器上，一个空间服务器可以对应一到多个空间频道。然而一个游戏世界背后的服务器往往不止有空间服务器，因为像玩家进入游戏后初始位置（即所属空间频道）的分配、全局的状态管理（如GameState）等逻辑，都需要一个跨越空间的服务器来处理，这个服务器在channeld中被称为**主服务器**。主服务器即全局频道的所有者。
 
-# 故障排查
+打开主菜单`编辑 -> 编辑器偏好设置 -> 插件 -> Channeld Editor`。在`Server Groups`中，将第一服务器组的视图类(Server View Class)改为`SpatialChannelDataView`。
+
+接下来，点击`Server Groups`右侧的加号，添加一个新的服务器组。将新的服务器组的视图类(Server View Class)改为`SpatialSpaceServerView`。将服务器数量(Server Num)改为2，表示有两个空间服务器。将启动延时(Delay Time)改为2.0秒，保证主服务器启动后，再启动空间服务器。设置好的服务器组如下图所示：
+
+![](../images/settings_server_groups_spatial.png)
+
+
+## 7.4.运行游戏并测试
+重复步骤4，重启channeld服务和游戏服务器。可以观察到，3个UE服务器进程依次启动。其中2个空间服务器进程在启动成功后，会打印出创建空间频道成功的日志：
+
+```log
+LogChanneld: Created spatial channels: 65536,65537 （空间服务器1）
+LogChanneld: Created spatial channels: 65538,65539 （空间服务器2）
+```
+
+重复步骤5，运行游戏并连接到服务器。
+
+# 8.总结
+以上是ChanneldUE的基本功能展示。如果您想要深入理解channeld的概念，可以浏览[基本概念](../concepts.md)章节；如果您想要动手尝试更多的功能，比如：
+- 配置更多空间服务来运行更多的空间频道
+- 控制客户端接收的同步范围
+- 让GameState在多个空间服务器上同步属性
+
+可以浏览后面的进阶主题；也可以下载[ChanneldUE示例项目](https://github.com/channeld/channeld-ue-demos)。
+
+# 9.故障排查
 ## 无法启动channeld服务
 
 ## 游戏服务器启动后自动退出
 
 ## 无法保存蓝图
+
+## 项目中存在其它Protobuf库或模块的冲突
 
 ## Setup脚本没有下载channeld
 如果您在运行Setup前，已经配置了环境变量%CHANNELD_PATH%，Setup脚本会认为您已经安装了channeld，并跳过下载安装步骤。插件会根据环境变量%CHANNELD_PATH%来运行channeld。

@@ -7,6 +7,7 @@
 #include "Tools/TintActor.h"
 #include "Tools/OutlinerActor.h"
 #include "View/PlayerStartLocator.h"
+#include "View/SingleChannelDataView.h"
 #include "ChanneldSettings.generated.h"
 
 /**
@@ -25,7 +26,7 @@ public:
 	void UpdateNetDriverDefinitions();
 
 	UPROPERTY(Config, EditAnywhere, Category="View")
-	TSubclassOf<class UChannelDataView> ChannelDataViewClass;
+	TSubclassOf<class UChannelDataView> ChannelDataViewClass = USingleChannelDataView::StaticClass();
 	// The default channel data message name for each channel type. The entries will be registered in UChannelDataView::Initialize.
 	// Every time the replication code is generated, the entries will be updated with the message names in the generated code.
 	UPROPERTY(Config, EditAnywhere, Category="View")
@@ -37,7 +38,7 @@ public:
 	};
 
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
-	bool bEnableNetworking = true;
+	bool bEnableNetworking = false;
 	
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	FString ChanneldIpForClient = "127.0.0.1";
