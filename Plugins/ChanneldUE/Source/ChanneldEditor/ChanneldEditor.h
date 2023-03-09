@@ -18,6 +18,7 @@ enum EChanneldLaunchResult
 {
 	Launched,
 	AlreadyLaunched,
+	Building,
 	Failed,
 };
 
@@ -71,9 +72,7 @@ private:
 	TArray<FProcHandle> ServerProcHandles;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> BuildChanneldWorkThread;
-	mutable TSharedPtr<FChanneldProcWorkerThread> ChanneldGatewayWorkThread;
 	UChanneldMissionNotiProxy* BuildChanneldNotify;
-	UChanneldGetawayNotiProxy* ChanneldGatewayNotify;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenRepWorkThread;
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoCppCodeWorkThread;
