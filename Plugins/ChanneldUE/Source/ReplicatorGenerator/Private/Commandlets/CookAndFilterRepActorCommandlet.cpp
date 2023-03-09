@@ -36,7 +36,7 @@ int32 UCookAndFilterRepActorCommandlet::Main(const FString& CmdLineParams)
 		{
 			FilterRule = ChanneldReplicatorGeneratorUtils::EFilterRule::Replication;
 		}
-		else if (InFilterRule == TEXT("HasReplicatorComponent"))
+		else if (InFilterRule == TEXT("HasReplicator"))
 		{
 			FilterRule = ChanneldReplicatorGeneratorUtils::EFilterRule::HasRepComponent;
 		}

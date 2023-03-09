@@ -319,4 +319,17 @@ namespace ChanneldReplicatorGeneratorUtils
 #endif
 		return TEXT("");
 	}
+
+	FString GetHashString(const FString& Target)
+	{
+		const int32 Hash = GetTypeHash(Target);
+		if (Hash < 0)
+		{
+			return FString::Printf(TEXT("_%d"), -Hash);
+		}
+		else
+		{
+			return FString::Printf(TEXT("%d"), Hash);
+		}
+	}
 }

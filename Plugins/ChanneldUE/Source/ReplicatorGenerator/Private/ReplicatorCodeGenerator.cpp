@@ -58,24 +58,39 @@ bool FReplicatorCodeGenerator::Generate(
 	FPropertyDecoratorFactory::Get().ClearGlobalStruct();
 
 	FString Message, IncludeCode, RegisterCode;
-	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecorators;
+	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecoratorsToGenReplicator;
+	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecoratorsToGenChannelData;
 	for (const UClass* ReplicationActorClass : ReplicationActorClasses)
 	{
-		if (ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinClass(ReplicationActorClass))
+		TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
+		if (!ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinClass(ReplicationActorClass))
 		{
-			continue;
+			if (!CreateDecorateActor(ActorDecorator, Message, ReplicationActorClass, ProtoPackageName, GoPackageImportPath))
+			{
+				UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
+				continue;
+			}
+			FReplicatorCode GeneratedResult;
+			if (!GenerateActorCode(ActorDecorator, GeneratedResult, Message))
+			{
+				UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
+				continue;
+			}
+			ReplicatorCodeBundle.ReplicatorCodes.Add(GeneratedResult);
+			ActorDecoratorsToGenReplicator.Add(ActorDecorator);
+			IncludeCode.Append(GeneratedResult.IncludeActorCode + TEXT("\n"));
+			IncludeCode.Append(FString::Printf(TEXT("#include \"%s\"\n"), *GeneratedResult.HeadFileName));
+			RegisterCode.Append(GeneratedResult.RegisterReplicatorCode + TEXT("\n"));
 		}
-		FReplicatorCode GeneratedResult;
-		if (!GenerateActorCode(ReplicationActorClass, ProtoPackageName, GoPackageImportPath, GeneratedResult, Message))
+		else
 		{
-			UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
-			continue;
+			if (!CreateDecorateActor(ActorDecorator, Message, ReplicationActorClass, ProtoPackageName, GoPackageImportPath, false))
+			{
+				UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
+				continue;
+			}
 		}
-		ReplicatorCodeBundle.ReplicatorCodes.Add(GeneratedResult);
-		ActorDecorators.Add(GeneratedResult.ActorDecorator);
-		IncludeCode.Append(GeneratedResult.IncludeActorCode + TEXT("\n"));
-		IncludeCode.Append(FString::Printf(TEXT("#include \"%s\"\n"), *GeneratedResult.HeadFileName));
-		RegisterCode.Append(GeneratedResult.RegisterReplicatorCode + TEXT("\n"));
+		ActorDecoratorsToGenChannelData.Add(ActorDecorator);
 	}
 
 	// Channel data processor
@@ -85,7 +100,7 @@ bool FReplicatorCodeGenerator::Generate(
 	const FString CDPClassName = TEXT("F") + CDPNamespace;
 	const FString ChanneldDataProtoMsgName = GenManager_DefaultChannelDataMsgName;
 	if (!GenerateChannelDataCode(
-			ReplicationActorClasses,
+			ActorDecoratorsToGenChannelData,
 			ChanneldDataProtoMsgName, CDPNamespace, CDPClassName,
 			TEXT("ChannelData_") + DefaultModuleName + CodeGen_ProtoPbHeadExtension,
 			ProtoPackageName, GoPackageImportPath,
@@ -132,7 +147,7 @@ bool FReplicatorCodeGenerator::Generate(
 		ReplicatorCodeBundle.GlobalStructCodes.Append(StructDecorator->GetDeclaration_PropPtrGroupStruct());
 		ReplicatorCodeBundle.GlobalStructProtoDefinitions.Append(StructDecorator->GetDefinition_ProtoStateMessage());
 	}
-	for (auto ActorDecorator : ActorDecorators)
+	for (auto ActorDecorator : ActorDecoratorsToGenReplicator)
 	{
 		ReplicatorCodeBundle.GlobalStructCodes.Append(ActorDecorator->GetDeclaration_RPCParamStructs());
 		ReplicatorCodeBundle.GlobalStructProtoDefinitions.Append(ActorDecorator->GetDefinition_RPCParamProtoDefinitions());
@@ -151,20 +166,13 @@ bool FReplicatorCodeGenerator::Generate(
 }
 
 bool FReplicatorCodeGenerator::GenerateActorCode(
-	const UClass* TargetActorClass,
-	const FString& ProtoPackageName,
-	const FString& GoPackageImportPath,
+	const TSharedPtr<FReplicatedActorDecorator>& ActorDecorator,
 	FReplicatorCode& GeneratedResult,
 	FString& ResultMessage
 )
 {
-	TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
-	if (!CreateDecorateActor(ActorDecorator, ResultMessage, TargetActorClass, ProtoPackageName, GoPackageImportPath))
-	{
-		return false;
-	}
-
 	GeneratedResult.ActorDecorator = ActorDecorator;
+	const UClass* TargetActorClass = ActorDecorator->GetTargetClass();
 
 	bool bIsBlueprint = ActorDecorator->IsBlueprintType();
 
@@ -336,7 +344,7 @@ bool FReplicatorCodeGenerator::GenerateActorCode(
 }
 
 bool FReplicatorCodeGenerator::GenerateChannelDataCode(
-	TArray<const UClass*> ReplicationActorClasses,
+	const TArray<TSharedPtr<FReplicatedActorDecorator>>& ReplicationActorDecorators,
 	const FString& ChannelDataProtoMsgName,
 	const FString& ChannelDataProcessorNamespace,
 	const FString& ChannelDataProcessorClassName,
@@ -348,38 +356,33 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 )
 {
 	// Get all actor class decorator  with their parent classes
-	TArray<const UClass*> SortedReplicationActorClasses;
+	TArray<TSharedPtr<FReplicatedActorDecorator>> SortedReplicationActorClasses = ReplicationActorDecorators;
+	TArray<TSharedPtr<FReplicatedActorDecorator>> ChildrenOfAActor;
 
-	for (const UClass* ReplicationActorClass : ReplicationActorClasses)
-	{
-		if (ReplicationActorClass != AActor::StaticClass())
+	int32 AActorIndex = INDEX_NONE;
+	for(int32 i = 0; i< SortedReplicationActorClasses.Num(); ++i) {
+		const UClass* TargetClass = SortedReplicationActorClasses[i]->GetTargetClass();
+		if (TargetClass == AActor::StaticClass())
 		{
-			SortedReplicationActorClasses.Add(ReplicationActorClass);
+			AActorIndex = i;
+		}
+		else if(TargetClass->IsChildOf(AActor::StaticClass()))
+		{
+			ChildrenOfAActor.Add(SortedReplicationActorClasses[i]);
 		}
 	}
-	SortedReplicationActorClasses.Add(AActor::StaticClass());
-
-	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecorators;
-	TArray<TSharedPtr<FReplicatedActorDecorator>> ChildrenOfAActor;
-	for (const UClass* TargetActorClass : SortedReplicationActorClasses)
+	if(AActorIndex == INDEX_NONE)
 	{
-		TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
-		// It's not necessary to initialize property decorators and rpc decorators, because ChannelDataProcessor doesn't need them
-		if (!CreateDecorateActor(ActorDecorator, ResultMessage, TargetActorClass, ProtoPackageName, GoPackageImportPath, false, false))
-		{
-			UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *ResultMessage);
-			continue;
-		}
-		ActorDecorators.Add(ActorDecorator);
-		if (TargetActorClass->IsChildOf(AActor::StaticClass()))
-		{
-			ChildrenOfAActor.Add(ActorDecorator);
-		}
+		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("AActor is not included in channel data"));
+	}
+	else
+	{
+		Swap(SortedReplicationActorClasses[AActorIndex], SortedReplicationActorClasses[SortedReplicationActorClasses.Num() - 1]);
 	}
 
 	// Generate ChannelDataProcessor CPP code
 	if (!GenerateChannelDataProcessorCode(
-		ActorDecorators,
+		SortedReplicationActorClasses,
 		ChildrenOfAActor,
 		ChannelDataProtoMsgName,
 		ChannelDataProcessorNamespace,
@@ -395,7 +398,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 
 	// Generate ChannelDataProcessor Proto definition file
 	if (!GenerateChannelDataProtoDefFile(
-		ActorDecorators,
+		SortedReplicationActorClasses,
 		ChannelDataProtoMsgName,
 		ProtoPackageName, GoPackageImportPath,
 		GeneratedCodeBundle.ChannelDataProtoDefsFile
@@ -406,7 +409,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	}
 
 	if (!GenerateChannelDataMerge_GoCode(
-		ActorDecorators,
+		SortedReplicationActorClasses,
 		ChildrenOfAActor,
 		ChannelDataProtoMsgName,
 		ProtoPackageName,
@@ -477,10 +480,10 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 
 		const UClass* TargetClass = ActorDecorator->GetTargetClass();
 		if ((TargetClass != AActor::StaticClass() &&
-			TargetClass != UActorComponent::StaticClass() &&
-			!TargetClass->IsChildOf(AGameStateBase::StaticClass()) &&
-			!TargetClass->IsChildOf(APlayerState::StaticClass()) &&
-			!TargetClass->IsChildOf(AController::StaticClass())) ||
+				TargetClass != UActorComponent::StaticClass() &&
+				!TargetClass->IsChildOf(AGameStateBase::StaticClass()) &&
+				!TargetClass->IsChildOf(APlayerState::StaticClass()) &&
+				!TargetClass->IsChildOf(AController::StaticClass())) ||
 			TargetClass->IsChildOf(USceneComponent::StaticClass())
 		)
 		{
@@ -706,29 +709,26 @@ bool FReplicatorCodeGenerator::CreateDecorateActor(
 	const UClass* TargetActor,
 	const FString& ProtoPackageName,
 	const FString& GoPackageImportPath,
-	bool bInitPropertiesAndRPCs,
-	bool bIncrementIfSameName
+	bool bInitPropertiesAndRPCs
 )
 {
 	FReplicatedActorDecorator* ActorDecorator = new FReplicatedActorDecorator(
 		TargetActor,
-		[this, bIncrementIfSameName](FString& TargetActorName, bool IsActorNameCompilable)
+		[this, TargetActor](FString& TargetActorName, bool IsActorNameCompilable)
 		{
 			if (!IsActorNameCompilable)
 			{
 				TargetActorName = FString::Printf(TEXT("_IllegalNameClass_%d_"), ++IllegalClassNameIndex);
 			}
-			else if (bIncrementIfSameName)
+			int32* SameNameCount;
+			if ((SameNameCount = TargetActorSameNameCounter.Find(TargetActorName)) != nullptr)
 			{
-				int32* SameNameCount;
-				if ((SameNameCount = TargetActorSameNameCounter.Find(TargetActorName)) != nullptr)
-				{
-					TargetActorName = FString::Printf(TEXT("%s_%d"), *TargetActorName, (*SameNameCount)++);
-				}
-				else
-				{
-					TargetActorSameNameCounter.Add(TargetActorName, 1);
-				}
+				*SameNameCount += 1;
+				TargetActorName = FString::Printf(TEXT("%s_%s"), *TargetActorName, *ChanneldReplicatorGeneratorUtils::GetHashString(TargetActor->GetPathName()));
+			}
+			else
+			{
+				TargetActorSameNameCounter.Add(TargetActorName, 1);
 			}
 		},
 		ProtoPackageName,

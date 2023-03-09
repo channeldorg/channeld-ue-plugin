@@ -59,4 +59,6 @@ namespace ChanneldReplicatorGeneratorUtils
 	REPLICATORGENERATOR_API FString GetDefaultModuleDir();
 
 	REPLICATORGENERATOR_API FString GetUECmdBinary();
+	
+	REPLICATORGENERATOR_API FString GetHashString(const FString& Target);
 }

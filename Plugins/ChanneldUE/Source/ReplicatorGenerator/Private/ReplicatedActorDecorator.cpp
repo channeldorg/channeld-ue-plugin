@@ -117,6 +117,11 @@ FString FReplicatedActorDecorator::GetActorName()
 	return TargetActorCompilableName;
 }
 
+FString FReplicatedActorDecorator::GetActorPathName()
+{
+	return TargetClass->GetPathName();
+}
+
 FString FReplicatedActorDecorator::GetOriginActorName()
 {
 	return TargetClass->GetName();

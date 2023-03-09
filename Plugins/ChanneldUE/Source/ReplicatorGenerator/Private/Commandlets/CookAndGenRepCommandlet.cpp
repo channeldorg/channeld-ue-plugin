@@ -20,7 +20,7 @@ void FLoadedObjectListener::StopListen()
 void FLoadedObjectListener::NotifyUObjectCreated(const UObjectBase* Object, int32 Index)
 {
 	const UClass* LoadedClass = Object->GetClass();
-	while (LoadedClass != nullptr && LoadedClass != AActor::StaticClass() && LoadedClass != UActorComponent::StaticClass())
+	while (LoadedClass != nullptr)
 	{
 		const FString ClassPath = LoadedClass->GetPathName();
 		if (CheckedClasses.Contains(ClassPath))
@@ -28,6 +28,11 @@ void FLoadedObjectListener::NotifyUObjectCreated(const UObjectBase* Object, int3
 			break;
 		}
 		CheckedClasses.Add(ClassPath);
+		if(LoadedClass == AActor::StaticClass() || LoadedClass == UActorComponent::StaticClass())
+		{
+			FilteredClasses.Add(LoadedClass);
+			break;
+		}
 		if (ChanneldReplicatorGeneratorUtils::TargetToGenerateRepState(LoadedClass))
 		{
 			FilteredClasses.Add(LoadedClass);

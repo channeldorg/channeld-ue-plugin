@@ -144,4 +144,6 @@ public:
 	bool SaveGeneratedManifest(const FGeneratedManifest& Manifest, FString& Message);
 	bool SaveGeneratedManifest(const FGeneratedManifest& Manifest, const FString& Filename, FString& Message);
 
+private:
+
 };
