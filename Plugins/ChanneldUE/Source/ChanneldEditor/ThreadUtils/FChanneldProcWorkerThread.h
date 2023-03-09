@@ -34,7 +34,7 @@ public:
 
 	virtual uint32 Run() override
 	{
-		if (true || FPaths::FileExists(mProgramPath))
+		if (FPaths::FileExists(mProgramPath))
 		{
 			FPlatformProcess::CreatePipe(mReadPipe, mWritePipe);
 			// std::cout << TCHAR_TO_ANSI(*mProgramPath) << " " << TCHAR_TO_ANSI(*mPragramParams) << std::endl;

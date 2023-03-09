@@ -85,9 +85,9 @@ void FReplicatorGeneratorManager::StopGenerateReplicator()
 {
 }
 
-bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass*>& TargetClasses, const FString GoPackageImportPathPrefix)
+bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*>& ReplicationActorClasses, const FString GoPackageImportPathPrefix)
 {
-	UE_LOG(LogChanneldRepGenerator, Display, TEXT("Start generating %d replicators"), TargetClasses.Num());
+	UE_LOG(LogChanneldRepGenerator, Display, TEXT("Start generating %d replicators"), ReplicationActorClasses.Num());
 
 	TArray<FString> IncludeActorCodes, RegisterReplicatorCodes;
 
@@ -96,7 +96,7 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass
 	const FString ProtoPackageName = GetDefaultProtoPackageName();
 	const FString GoPackageImportPath = GoPackageImportPathPrefix + ProtoPackageName;
 	CodeGenerator->Generate(
-		TargetClasses,
+		ReplicationActorClasses,
 		GetDefaultModuleDir(),
 		ProtoPackageName,
 		(GoPackageImportPathPrefix + ProtoPackageName),
@@ -147,7 +147,7 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass
 		LogChanneldRepGenerator,
 		Display,
 		TEXT("The generation of replicators is completed, %d replicators need to be generated, a total of %d replicators are generated"),
-		TargetClasses.Num(), ReplicatorCodeBundle.ReplicatorCodes.Num()
+		ReplicationActorClasses.Num(), ReplicatorCodeBundle.ReplicatorCodes.Num()
 	);
 
 	// Save the generated manifest file

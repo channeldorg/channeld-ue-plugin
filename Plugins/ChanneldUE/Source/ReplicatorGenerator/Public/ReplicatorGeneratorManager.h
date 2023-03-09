@@ -86,7 +86,7 @@ public:
 	 * @param GoPackageImportPathPrefix If the go package is "channeld.clewcat.com/channeld/examples/channeld-ue-tps/tpspb", the prefix is "channeld.clewcat.com/channeld/examples/channeld-ue-tps".
 	 * @return true if the replicators are generated successfully.
 	 */
-	bool GeneratedReplicators(const TArray<const UClass*>& TargetClasses, const FString GoPackageImportPathPrefix);
+	bool GenerateReplication(const TArray<const UClass*>& ReplicationActorClasses, const FString GoPackageImportPathPrefix);
 
 	/**
 	 * Write the given code to the disk.

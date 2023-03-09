@@ -8,6 +8,7 @@ namespace ChanneldReplicatorGeneratorUtils
 		NeedToGenerateReplicator,
 		NeedToGenRepWithoutIgnore,
 		HasRepComponent,
+		Replication,
 	};
 	
 	class FReplicationActorFilter : public FUObjectArray::FUObjectCreateListener
@@ -26,8 +27,8 @@ namespace ChanneldReplicatorGeneratorUtils
 
 		virtual void OnUObjectArrayShutdown() override;
 
-		TSet<FSoftClassPath> LoadedRepClasses;
-		TSet<FSoftClassPath> AllRepClasses;
+		TSet<FSoftClassPath> FilteredClasses;
+		TSet<FSoftClassPath> AllLoadedClasses;
 
 	private:
 		EFilterRule FilterRule;

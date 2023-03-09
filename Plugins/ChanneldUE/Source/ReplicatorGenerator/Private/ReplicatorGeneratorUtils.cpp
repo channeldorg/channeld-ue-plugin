@@ -32,11 +32,33 @@ namespace ChanneldReplicatorGeneratorUtils
 		case EFilterRule::NeedToGenRepWithoutIgnore:
 			Condition = NeedToGenerateReplicator(LoadedClass, false);
 			break;
+		case EFilterRule::Replication:
+			if (NeedToGenerateReplicator(LoadedClass, true))
+			{
+				Condition = true;
+			}
+			else if (LoadedClass->IsChildOf(AActor::StaticClass()))
+			{
+				const AActor* Actor = static_cast<const AActor*>(Object);
+				if (Actor->GetIsReplicated() && HasRepComponent(LoadedClass))
+				{
+					Condition = true;
+				}
+			}
+			else if (LoadedClass->IsChildOf(UActorComponent::StaticClass()))
+			{
+				const UActorComponent* ActorComponent = static_cast<const UActorComponent*>(Object);
+				if (ActorComponent->GetIsReplicated() && HasRepComponent(LoadedClass))
+				{
+					Condition = true;
+				}
+			}
+			break;
 		}
-		AllRepClasses.Add(LoadedClass);
+		AllLoadedClasses.Add(LoadedClass);
 		if (Condition)
 		{
-			LoadedRepClasses.Add(LoadedClass);
+			FilteredClasses.Add(LoadedClass);
 		}
 	}
 

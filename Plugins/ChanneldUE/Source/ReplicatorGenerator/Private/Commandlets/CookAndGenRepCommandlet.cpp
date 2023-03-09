@@ -23,7 +23,7 @@ int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
 
 	TSet<FSoftClassPath> LoadedRepClasses;
 
-	ChanneldReplicatorGeneratorUtils::FReplicationActorFilter ObjLoadedListener(ChanneldReplicatorGeneratorUtils::EFilterRule::NeedToGenerateReplicator);
+	ChanneldReplicatorGeneratorUtils::FReplicationActorFilter ObjLoadedListener(ChanneldReplicatorGeneratorUtils::EFilterRule::Replication);
 	ObjLoadedListener.StartListen();
 
 	const FString AdditionalParam(TEXT(" -SkipShaderCompile"));
@@ -36,7 +36,7 @@ int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
 		return Result;
 	}
 
-	LoadedRepClasses.Append(ObjLoadedListener.LoadedRepClasses);
+	LoadedRepClasses.Append(ObjLoadedListener.FilteredClasses);
 	TArray<const UClass*> TargetClasses;
 	for (const FSoftClassPath& ObjSoftPath : LoadedRepClasses)
 	{
@@ -52,7 +52,7 @@ int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
 
 	GeneratorManager.RemoveGeneratedCodeFiles();
 
-	if(!GeneratorManager.GeneratedReplicators(TargetClasses, GoPackageImportPathPrefix))
+	if(!GeneratorManager.GenerateReplication(TargetClasses, GoPackageImportPathPrefix))
 	{
 		Result = 1;
 	}
