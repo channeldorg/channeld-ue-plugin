@@ -82,7 +82,7 @@ public:
 	/**
 	 * Generate replicators for the given target actors.
 	 *
-	 * @param TargetClasses The target actors.
+	 * @param ReplicationActorClasses The actor classes to generate replicators and channeld data fields.
 	 * @param GoPackageImportPathPrefix If the go package is "channeld.clewcat.com/channeld/examples/channeld-ue-tps/tpspb", the prefix is "channeld.clewcat.com/channeld/examples/channeld-ue-tps".
 	 * @return true if the replicators are generated successfully.
 	 */
