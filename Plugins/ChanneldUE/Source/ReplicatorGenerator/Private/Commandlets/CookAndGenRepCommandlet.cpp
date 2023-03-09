@@ -3,10 +3,9 @@
 
 #include "Commandlets/CookAndGenRepCommandlet.h"
 
-#include "ChanneldSettings.h"
-#include "ReplicatorGeneratorDefinition.h"
 #include "ReplicatorGeneratorManager.h"
 #include "ReplicatorGeneratorUtils.h"
+#include "Components/TimelineComponent.h"
 
 UCookAndGenRepCommandlet::UCookAndGenRepCommandlet()
 {
@@ -38,11 +37,24 @@ int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
 
 	LoadedRepClasses.Append(ObjLoadedListener.FilteredClasses);
 	TArray<const UClass*> TargetClasses;
+	bool bHasTimelineComponent = false;
 	for (const FSoftClassPath& ObjSoftPath : LoadedRepClasses)
 	{
 		if (const UClass* LoadedClass = ObjSoftPath.TryLoadClass<UObject>())
 		{
 			TargetClasses.Add(LoadedClass);
+			if (LoadedClass == UTimelineComponent::StaticClass())
+			{
+				bHasTimelineComponent = true;
+			}
+			else if (!bHasTimelineComponent)
+			{
+				if (ChanneldReplicatorGeneratorUtils::HasTimelineComponent(LoadedClass))
+				{
+					TargetClasses.Add(UTimelineComponent::StaticClass());
+					bHasTimelineComponent = true;
+				}
+			}
 		}
 	}
 
@@ -52,7 +64,7 @@ int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
 
 	GeneratorManager.RemoveGeneratedCodeFiles();
 
-	if(!GeneratorManager.GenerateReplication(TargetClasses, GoPackageImportPathPrefix))
+	if (!GeneratorManager.GenerateReplication(TargetClasses, GoPackageImportPathPrefix))
 	{
 		Result = 1;
 	}

@@ -39,6 +39,8 @@ namespace ChanneldReplicatorGeneratorUtils
 	REPLICATORGENERATOR_API bool HasRPC(const UClass* TargetClass);
 
 	REPLICATORGENERATOR_API bool HasReplicatedPropertyOrRPC(const UClass* TargetClass);
+	
+	REPLICATORGENERATOR_API bool HasTimelineComponent(const UClass* TargetClass);
 
 	REPLICATORGENERATOR_API bool HasRepComponent(const UClass* TargetClass);
 
