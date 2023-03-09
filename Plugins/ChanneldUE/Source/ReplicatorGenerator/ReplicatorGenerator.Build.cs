@@ -24,7 +24,7 @@ public class ReplicatorGenerator : ModuleRules
                 "Json",
                 "EditorSubsystem",
                 "ChanneldUE",
-                "AnalyticsET"
+                "AnalyticsET",
             }
         );
         

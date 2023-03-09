@@ -359,6 +359,7 @@ void FChanneldEditorModule::LaunchChanneldAndServersAction()
 
 void FChanneldEditorModule::GenerateReplicatorAction()
 {
+	CollectGarbage(RF_NoFlags);
 	GenRepWorkThread = MakeShareable(
 		new FChanneldProcWorkerThread(
 			TEXT("CookAndGenRepThread"),

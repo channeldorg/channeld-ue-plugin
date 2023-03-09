@@ -10,8 +10,10 @@ FReplicatedActorDecorator::FReplicatedActorDecorator(
 	const UClass* TargetActorClass,
 	const TFunction<void(FString&, bool)>& SetCompilableName,
 	FString InProtoPackageName,
-	FString InGoPackageImportPath
-) : TargetClass(TargetActorClass), ProtoPackageName(InProtoPackageName), GoPackageImportPath(InGoPackageImportPath)
+	FString InGoPackageImportPath,
+	bool IsSingleton,
+	bool IsChanneldUEBuiltinType
+) : TargetClass(TargetActorClass), ProtoPackageName(InProtoPackageName), GoPackageImportPath(InGoPackageImportPath), bSingleton(IsSingleton), bChanneldUEBuiltinType(IsChanneldUEBuiltinType)
 {
 	TargetClass = TargetActorClass;
 	bIsBlueprintGenerated = TargetClass->HasAnyClassFlags(CLASS_CompiledFromBlueprint);
@@ -87,24 +89,12 @@ bool FReplicatedActorDecorator::IsBlueprintType()
 
 bool FReplicatedActorDecorator::IsSingleton()
 {
-	// Currently, only replicator of GameState is singleton in ChannelData.
-	return TargetClass->IsChildOf(AGameStateBase::StaticClass()) || false;
+	return bSingleton;
 }
 
 bool FReplicatedActorDecorator::IsChanneldUEBuiltinType()
 {
-	return (
-		TargetClass == AActor::StaticClass() ||
-		TargetClass == ACharacter::StaticClass() ||
-		TargetClass == AController::StaticClass() ||
-		TargetClass == AGameStateBase::StaticClass() ||
-		TargetClass == APawn::StaticClass() ||
-		TargetClass == APlayerController::StaticClass() ||
-		TargetClass == APlayerState::StaticClass() ||
-		TargetClass == UActorComponent::StaticClass() ||
-		TargetClass == USceneComponent::StaticClass() ||
-		TargetClass == UCharacterMovementComponent::StaticClass()
-	);
+	return bChanneldUEBuiltinType;
 }
 
 void FReplicatedActorDecorator::SetModuleInfo(const FModuleInfo& InModuleBelongTo)

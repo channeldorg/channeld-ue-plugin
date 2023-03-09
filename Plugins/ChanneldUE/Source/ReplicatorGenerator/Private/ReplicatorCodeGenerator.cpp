@@ -12,7 +12,7 @@
 
 bool FReplicatorCodeGenerator::RefreshModuleInfoByClassName()
 {
-	FString BuildConfiguration = ANSI_TO_TCHAR(COMPILER_CONFIGURATION_NAME);
+	const FString BuildConfiguration = ANSI_TO_TCHAR(COMPILER_CONFIGURATION_NAME);
 	const FString ManifestFilePath = FPaths::ProjectIntermediateDir() / TEXT("Build") / TEXT(CHANNELD_EXPAND_AND_QUOTE(UBT_COMPILED_PLATFORM)) / TEXT(CHANNELD_EXPAND_AND_QUOTE(UE_TARGET_NAME)) / BuildConfiguration / TEXT(CHANNELD_EXPAND_AND_QUOTE(UE_TARGET_NAME)) + TEXT(".uhtmanifest");
 
 	bool bManifestSuccessfullyLoaded;
@@ -30,6 +30,14 @@ bool FReplicatorCodeGenerator::RefreshModuleInfoByClassName()
 	}
 
 	return true;
+}
+
+void FReplicatorCodeGenerator::SetTargetActorRepOptions(const TArray<FTargetActorReplicationOption>& TargetActorReplicationOptions)
+{
+	for (const FTargetActorReplicationOption& Option : TargetActorReplicationOptions)
+	{
+		TargetActorRepOptions.Add(Option.TargetActorClass, Option);
+	}
 }
 
 FString FReplicatorCodeGenerator::GetClassHeadFilePath(const FString& ClassName)
@@ -128,7 +136,7 @@ bool FReplicatorCodeGenerator::Generate(
 		ReplicatorCodeBundle.GlobalStructCodes.Append(StructDecorator->GetDeclaration_PropPtrGroupStruct());
 		ReplicatorCodeBundle.GlobalStructProtoDefinitions.Append(StructDecorator->GetDefinition_ProtoStateMessage());
 	}
-	for(auto ActorDecorator : ActorDecorators)
+	for (auto ActorDecorator : ActorDecorators)
 	{
 		ReplicatorCodeBundle.GlobalStructCodes.Append(ActorDecorator->GetDeclaration_RPCParamStructs());
 		ReplicatorCodeBundle.GlobalStructProtoDefinitions.Append(ActorDecorator->GetDefinition_RPCParamProtoDefinitions());
@@ -411,7 +419,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 		ResultMessage = TEXT("Failed to generate ChannelDataProcessor code");
 		return false;
 	}
-	
+
 	// Generate ChannelDataProcessor Proto definition file
 	if (!GenerateChannelDataProtoDefFile(
 		ActorDecorators,
@@ -577,7 +585,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 	}
 	{
 		FStringFormatNamedArguments FormatArgs;
-		for(const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
+		for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
 		{
 			// No need to collect singleton state for handover
 			if (ActorDecorator->IsSingleton())
@@ -603,12 +611,12 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataMessageName);
 
 		GoCode.Append(FString::Format(CodeGen_Go_MergeTemplate, FormatArgs));
-	}	
+	}
 	{
 		FStringFormatNamedArguments FormatArgs;
-		
+
 		FString MergeActorStateCode = TEXT("");
-		
+
 		for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
 		{
 			FormatArgs.Add("Definition_StatePackagePath", ActorDecorator->GetProtoPackagePathGo(ProtoPackageName));
@@ -631,7 +639,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 				{
 					FString DeleteStateCode = TEXT("");
 					FStringFormatNamedArguments DeletionFormatArgs;
-					for (const auto& Deletion: TargetActors)
+					for (const auto& Deletion : TargetActors)
 					{
 						if (Deletion->IsSingleton())
 						{
@@ -650,18 +658,17 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 				}
 				else
 				{
-					GoCode.Append(FString::Format(ActorDecorator->GetTargetClass()->IsChildOf<UActorComponent>() ?
-						CodeGen_Go_MergeCompStateInMapTemplate : CodeGen_Go_MergeStateInMapTemplate, FormatArgs));
+					GoCode.Append(FString::Format(ActorDecorator->GetTargetClass()->IsChildOf<UActorComponent>() ? CodeGen_Go_MergeCompStateInMapTemplate : CodeGen_Go_MergeStateInMapTemplate, FormatArgs));
 				}
 			}
 		}
-			
+
 		// Add ActorState's merge code at last
 		GoCode.Append(MergeActorStateCode);
 	}
 
 	GoCode.Append(TEXT("\treturn nil\n}\n"));
-	
+
 	return true;
 }
 
@@ -730,6 +737,7 @@ bool FReplicatorCodeGenerator::CreateDecorateActor(
 	bool bIncrementIfSameName
 )
 {
+	FTargetActorReplicationOption Option = TargetActorRepOptions.FindRef(TargetActor);
 	FReplicatedActorDecorator* ActorDecorator = new FReplicatedActorDecorator(
 		TargetActor,
 		[this, bIncrementIfSameName](FString& TargetActorName, bool IsActorNameCompilable)
@@ -752,7 +760,9 @@ bool FReplicatorCodeGenerator::CreateDecorateActor(
 			}
 		},
 		ProtoPackageName,
-		GoPackageImportPath
+		GoPackageImportPath,
+		Option.bSingleton,
+		Option.bChanneldUEBuiltinType
 	);
 	// If the target class is c++ class, we need to find the module it belongs to.
 	// The module info is used to generate the include code in head file.

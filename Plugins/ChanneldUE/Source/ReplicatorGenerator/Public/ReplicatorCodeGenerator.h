@@ -49,6 +49,33 @@ struct FGeneratedCodeBundle
 	FString ChannelDataRegistration_GoCode;
 };
 
+struct FTargetActorReplicationOption
+{
+	int32 Index;
+	const UClass* TargetActorClass;
+	bool bSingleton;
+	bool bChanneldUEBuiltinType;
+	bool bSkipGenReplicator;
+
+	FTargetActorReplicationOption()
+		: Index(-1)
+		, TargetActorClass(nullptr)
+		, bSingleton(false)
+		, bChanneldUEBuiltinType(false)
+		, bSkipGenReplicator(true)
+	{
+	}
+	
+	FTargetActorReplicationOption(int32 InIndex, const UClass* InTargetActorClass, bool bSingleton, bool bChanneldUEBuiltinType, bool bSkipGenReplicator)
+		: Index(InIndex),
+		  TargetActorClass(InTargetActorClass)
+		  , bSingleton(bSingleton)
+		  , bChanneldUEBuiltinType(bChanneldUEBuiltinType)
+		  , bSkipGenReplicator(bSkipGenReplicator)
+	{
+	}
+};
+
 class REPLICATORGENERATOR_API FReplicatorCodeGenerator
 {
 public:
@@ -58,6 +85,8 @@ public:
 	 * @return true on success, false otherwise.
 	 */
 	bool RefreshModuleInfoByClassName();
+
+	void SetTargetActorRepOptions(const TArray<FTargetActorReplicationOption>& FTargetActorReplicationOption);
 
 	/**
 	 * Get the path of the header file by class name.
@@ -153,6 +182,7 @@ public:
 protected:
 	TMap<FString, FModuleInfo> ModuleInfoByClassName;
 	TMap<FString, FCPPClassInfo> CPPClassInfoMap;
+	TMap<const UClass*, FTargetActorReplicationOption> TargetActorRepOptions;
 
 	int32 IllegalClassNameIndex = 0;
 	TMap<FString, int32> TargetActorSameNameCounter;

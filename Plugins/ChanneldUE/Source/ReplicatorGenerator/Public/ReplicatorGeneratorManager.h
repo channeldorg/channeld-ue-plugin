@@ -153,7 +153,7 @@ public:
 	bool SaveGeneratedManifest(const FGeneratedManifest& Manifest, const FString& Filename, FString& Message);
 
 private:
-	TSet<UClass*> IgnoreActorClasses{
+	TSet<UClass*> ChanneldUEBuiltinActorClasses{
 		AActor::StaticClass(),
 		ACharacter::StaticClass(),
 		AController::StaticClass(),
@@ -165,6 +165,12 @@ private:
 		USceneComponent::StaticClass(),
 		UCharacterMovementComponent::StaticClass(),
 	};
+
+	TSet<UClass*> ChanneldUEBuiltinSingletonClasses{
+		AGameStateBase::StaticClass(),
+	};
+	
+	TSet<UClass*> IgnoreActorClasses = ChanneldUEBuiltinActorClasses;
 
 	TSet<FString> IgnoreActorClassPaths{
 		TEXT("/Script/Engine.SkyLight"),

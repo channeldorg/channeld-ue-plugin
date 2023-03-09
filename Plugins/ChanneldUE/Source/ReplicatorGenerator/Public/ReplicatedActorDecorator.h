@@ -113,9 +113,10 @@ public:
 		const UClass* TargetActorClass,
 		const TFunction<void(FString& TargetActorName, bool IsActorNameCompilable)>& SetCompilableName,
 		FString ProtoPackageName,
-		FString GoPackageName
+		FString GoPackageName,
+		bool IsSingleton,
+		bool IsChanneldUEBuiltinType
 	);
-
 
 	virtual ~FReplicatedActorDecorator() = default;
 
@@ -130,7 +131,7 @@ public:
 	 * Is target actor class a blueprint class
 	 */
 	virtual bool IsBlueprintType() override;
-	
+
 	/**
 	 * Some classes are only one instance in the whole server cluster, such as GameState.
 	 * Normally, the singleton instance is owned by the master server.
@@ -144,15 +145,15 @@ public:
 	 * TODO: The list of builtin types should be maintained by ChanneldUE module.
 	 */
 	virtual bool IsChanneldUEBuiltinType();
-	
+
 	/**
 	 * Set module info if the target actor class is a cpp class.
 	 * Please call this function before calling GetActorHeaderIncludePath().
 	 */
 	void SetModuleInfo(const FModuleInfo& InModuleBelongTo);
 
-	FORCEINLINE const UClass* GetTargetClass() const {return TargetClass;}
-	
+	FORCEINLINE const UClass* GetTargetClass() const { return TargetClass; }
+
 	/**
       * Get target actor name
       */
@@ -224,12 +225,12 @@ public:
 	 * Get protobuf definitions file name
 	 */
 	virtual FString GetProtoDefinitionsFileName();
-	
+
 	/**
 	 * Get go package name. Used for go proto code generation
 	 */
 	virtual FString GetGoPackageImportPath();
-	
+
 	/**
 	 * Get message type for replicated actor properties mapping
 	 */
@@ -298,6 +299,9 @@ protected:
 	FModuleInfo ModuleBelongTo;
 	TArray<TSharedPtr<FPropertyDecorator>> Properties;
 	TArray<TSharedPtr<FRPCDecorator>> RPCs;
+
+	bool bSingleton;
+	bool bChanneldUEBuiltinType;
 
 	bool bIsBlueprintGenerated;
 	FString ReplicatorClassName;
