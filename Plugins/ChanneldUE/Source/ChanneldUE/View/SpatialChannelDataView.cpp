@@ -543,11 +543,7 @@ void USpatialChannelDataView::ServerHandleClientUnsub(Channeld::ConnectionId Cli
 	// A client leaves the game - close and remove the client connection.
 	else if (ChannelType == channeldpb::GLOBAL)
 	{
-		if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
-		{
-			UE_LOG(LogChanneld, Log, TEXT("Client leaves the game, removing the connection: %d"), ClientConnId);
-			NetDriver->RemoveChanneldClientConnection(ClientConnId);
-		}
+		Super::ServerHandleClientUnsub(ClientConnId, ChannelType, ChId);
 	}
 }
 
@@ -970,9 +966,8 @@ void USpatialChannelDataView::InitClient()
 	
 	channeldpb::ChannelSubscriptionOptions GlobalSubOptions;
 	GlobalSubOptions.set_dataaccess(channeldpb::READ_ACCESS);
-	GlobalSubOptions.set_fanoutintervalms(50);
-	// Make the first fan-out of GLOBAL channel data update (GameStateBase) a bit slower, so the GameState is spawned from the spatial server and ready.
-	GlobalSubOptions.set_fanoutdelayms(2000);
+	GlobalSubOptions.set_fanoutintervalms(GlobalChannelFanOutIntervalMs);
+	GlobalSubOptions.set_fanoutdelayms(GlobalChannelFanOutDelayMs);
 	Connection->SubToChannel(Channeld::GlobalChannelId, &GlobalSubOptions, [&](const channeldpb::SubscribedToChannelResultMessage* Msg)
 	{
 		// GetChanneldSubsystem()->SetLowLevelSendToChannelId(Channeld::GlobalChannelId);

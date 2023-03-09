@@ -19,7 +19,7 @@ namespace ChanneldReplicatorGeneratorUtils
 
 	void FReplicationActorFilter::NotifyUObjectCreated(const UObjectBase* Object, int32 Index)
 	{
-		UClass* LoadedClass = Object->GetClass();
+		const UClass* LoadedClass = Object->GetClass();
 		bool Condition = false;
 		switch (FilterRule)
 		{
@@ -32,11 +32,33 @@ namespace ChanneldReplicatorGeneratorUtils
 		case EFilterRule::NeedToGenRepWithoutIgnore:
 			Condition = NeedToGenerateReplicator(LoadedClass, false);
 			break;
+		case EFilterRule::Replication:
+			if (NeedToGenerateReplicator(LoadedClass, true))
+			{
+				Condition = true;
+			}
+			else if (LoadedClass->IsChildOf(AActor::StaticClass()))
+			{
+				const AActor* Actor = static_cast<const AActor*>(Object);
+				if (Actor->GetIsReplicated() && HasRepComponent(LoadedClass))
+				{
+					Condition = true;
+				}
+			}
+			else if (LoadedClass->IsChildOf(UActorComponent::StaticClass()))
+			{
+				const UActorComponent* ActorComponent = static_cast<const UActorComponent*>(Object);
+				if (ActorComponent->GetIsReplicated() && HasRepComponent(LoadedClass))
+				{
+					Condition = true;
+				}
+			}
+			break;
 		}
-		AllRepClasses.Add(LoadedClass);
+		AllLoadedClasses.Add(LoadedClass);
 		if (Condition)
 		{
-			LoadedRepClasses.Add(LoadedClass);
+			FilteredClasses.Add(LoadedClass);
 		}
 	}
 
@@ -77,6 +99,12 @@ namespace ChanneldReplicatorGeneratorUtils
 		return HasReplicatedProperty(TargetClass) || HasRPC(TargetClass);
 	}
 
+	bool HasTimelineComponent(const UClass* TargetClass)
+	{
+		const UBlueprintGeneratedClass* BPClass = Cast<UBlueprintGeneratedClass>(TargetClass);
+		return BPClass != nullptr && BPClass->Timelines.Num() > 0;
+	}
+
 	bool HasRepComponent(const UClass* TargetClass)
 	{
 		if (!TargetClass->IsChildOf(AActor::StaticClass()))
@@ -89,7 +117,7 @@ namespace ChanneldReplicatorGeneratorUtils
 
 			if (Property->IsA<FObjectProperty>())
 			{
-				FObjectProperty* ObjProperty = CastFieldChecked<FObjectProperty>(Property);
+				const FObjectProperty* ObjProperty = CastFieldChecked<FObjectProperty>(Property);
 				if (ObjProperty->PropertyClass->IsChildOf(UChanneldReplicationComponent::StaticClass()))
 				{
 					return true;
@@ -137,7 +165,7 @@ namespace ChanneldReplicatorGeneratorUtils
 
 			if (Property->IsA<FObjectProperty>())
 			{
-				FObjectProperty* ObjProperty = CastFieldChecked<FObjectProperty>(Property);
+				const FObjectProperty* ObjProperty = CastFieldChecked<FObjectProperty>(Property);
 				if (ObjProperty->PropertyClass->IsChildOf(UActorComponent::StaticClass()))
 				{
 					ComponentClasses.Add(ObjProperty->PropertyClass);
@@ -183,13 +211,12 @@ namespace ChanneldReplicatorGeneratorUtils
 			(TargetClass->IsChildOf(AActor::StaticClass()) || TargetClass->IsChildOf(UActorComponent::StaticClass())) &&
 			!TargetClass->IsChildOf(ALevelScriptActor::StaticClass()) &&
 			!(ClassName.StartsWith(TEXT("SKEL_")) || ClassName.StartsWith(TEXT("REINST_"))) &&
-			// HasRepComponent(TargetClass) &&
-			HasReplicatedPropertyOrRPC(TargetClass);
+			(HasReplicatedPropertyOrRPC(TargetClass) || HasTimelineComponent(TargetClass));
 	}
 
 	bool IsCompilableClassName(const FString& ClassName)
 	{
-		FRegexPattern MatherPatter(TEXT("[^a-zA-Z0-9_]"));
+		const FRegexPattern MatherPatter(TEXT("[^a-zA-Z0-9_]"));
 		FRegexMatcher Matcher(MatherPatter, ClassName);
 		if (Matcher.FindNext())
 		{
@@ -267,8 +294,8 @@ namespace ChanneldReplicatorGeneratorUtils
 		Binary = TEXT("UE4Editor");
 #endif
 
-		FString ConfigutationName = ANSI_TO_TCHAR(COMPILER_CONFIGURATION_NAME);
-		bool bIsDevelopment = ConfigutationName.Equals(TEXT("Development"));
+		const FString ConfigurationName = ANSI_TO_TCHAR(COMPILER_CONFIGURATION_NAME);
+		bool bIsDevelopment = ConfigurationName.Equals(TEXT("Development"));
 
 #if PLATFORM_WINDOWS
 		FString PlatformName;
@@ -280,7 +307,7 @@ namespace ChanneldReplicatorGeneratorUtils
 
 		return FPaths::Combine(
 			FPaths::ConvertRelativePathToFull(FPaths::EngineDir()),
-			TEXT("Binaries"), PlatformName, FString::Printf(TEXT("%s%s-Cmd.exe"), *Binary, bIsDevelopment ? TEXT("") : *FString::Printf(TEXT("-%s-%s"), *PlatformName, *ConfigutationName)));
+			TEXT("Binaries"), PlatformName, FString::Printf(TEXT("%s%s-Cmd.exe"), *Binary, bIsDevelopment ? TEXT("") : *FString::Printf(TEXT("-%s-%s"), *PlatformName, *ConfigurationName)));
 #endif
 
 #if PLATFORM_MAC

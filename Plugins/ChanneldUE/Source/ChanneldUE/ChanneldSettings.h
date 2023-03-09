@@ -62,7 +62,7 @@ public:
 	bool bSkipCustomReplication = false;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial")
-	TSubclassOf<UPlayerStartLocatorBase> PlayerStartLocatorClass;
+	TSubclassOf<UPlayerStartLocatorBase> PlayerStartLocatorClass = UPlayerStartLocator_ModByConnId::StaticClass();
 	
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Client Interest")
 	bool bUseNetRelevantForUninterestedActors = false;

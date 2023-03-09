@@ -51,7 +51,7 @@ FString FReplicatorCodeGenerator::GetClassHeadFilePath(const FString& ClassName)
 }
 
 bool FReplicatorCodeGenerator::Generate(
-	TArray<const UClass*> TargetActors,
+	TArray<const UClass*> ReplicationActorClasses,
 	const FString& DefaultModuleDir,
 	const FString& ProtoPackageName,
 	const FString& GoPackageImportPath,
@@ -60,17 +60,21 @@ bool FReplicatorCodeGenerator::Generate(
 {
 	// Clean global variables, make sure it's empty for this generation
 	IllegalClassNameIndex = 0;
-	TargetActorSameNameCounter.Empty(TargetActors.Num());
+	TargetActorSameNameCounter.Empty(ReplicationActorClasses.Num());
 
 	// Clear global struct decorators, make sure it's empty for this generation
 	FPropertyDecoratorFactory::Get().ClearGlobalStruct();
-
+	
 	FString Message, IncludeCode, RegisterCode;
 	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecorators;
-	for (const UClass* TargetActor : TargetActors)
+	for (const UClass* ReplicationActorClass : ReplicationActorClasses)
 	{
+		if (!ChanneldReplicatorGeneratorUtils::NeedToGenerateReplicator(ReplicationActorClass))
+		{
+			continue;
+		}
 		FReplicatorCode GeneratedResult;
-		if (!GenerateActorCode(TargetActor, ProtoPackageName, GoPackageImportPath, GeneratedResult, Message))
+		if (!GenerateActorCode(ReplicationActorClass, ProtoPackageName, GoPackageImportPath, GeneratedResult, Message))
 		{
 			UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
 			continue;
@@ -89,7 +93,7 @@ bool FReplicatorCodeGenerator::Generate(
 	const FString CDPClassName = TEXT("F") + CDPNamespace;
 	const FString ChanneldDataProtoMsgName = GenManager_DefaultChannelDataMsgName;
 	if (!GenerateChannelDataCode(
-			TargetActors,
+			ReplicationActorClasses,
 			ChanneldDataProtoMsgName, CDPNamespace, CDPClassName,
 			TEXT("ChannelData_") + DefaultModuleName + CodeGen_ProtoPbHeadExtension,
 			ProtoPackageName, GoPackageImportPath,
@@ -111,7 +115,7 @@ bool FReplicatorCodeGenerator::Generate(
 	RegisterFormatArgs.Add(
 		TEXT("Code_ChannelDataProcessorRegister"),
 		FString::Printf(
-			TEXT("%s = new %s::%s();\nChanneldReplication::RegisterChannelDataMerger(TEXT(\"%s.%s\"), %s);\n"),
+			TEXT("%s = new %s::%s();\nChanneldReplication::RegisterChannelDataProcessor(TEXT(\"%s.%s\"), %s);\n"),
 			*CDPVarNameInRegister,
 			*CDPNamespace, *CDPClassName,
 			*ProtoPackageName, *ChanneldDataProtoMsgName,

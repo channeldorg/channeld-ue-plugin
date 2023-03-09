@@ -52,7 +52,7 @@ int32 UCookAndFilterRepActorCommandlet::Main(const FString& CmdLineParams)
 	ObjLoadedListener.StopListen();
 
 	TArray<FString> LoadedRepClassPath;
-	for (const FSoftClassPath& ObjSoftPath : ObjLoadedListener.LoadedRepClasses)
+	for (const FSoftClassPath& ObjSoftPath : ObjLoadedListener.FilteredClasses)
 	{
 		FString AssetPath = ObjSoftPath.GetAssetPathName().ToString();
 		// AssetPath.RemoveFromEnd(TEXT("_C"));

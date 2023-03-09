@@ -100,7 +100,7 @@ public:
 	/**
 	 * Generate replicator codes for the specified actors.
 	 *
-	 * @param TargetActors The actor classes to generate replicators for.
+	 * @param ReplicationActorClasses The actor classes to generate replicators and channeld data fields.
 	 * @param DefaultModuleDir The default module directory. The channel data processor will use default module name.
 	 * @param ProtoPackageName All generated proto files will use this package name.
 	 * @param GoPackageImportPath Be used to set 'option go_package='
@@ -108,7 +108,7 @@ public:
 	 * @return true on success, false otherwise.
 	 */
 	bool Generate(
-		TArray<const UClass*> TargetActors,
+		TArray<const UClass*> ReplicationActorClasses,
 		const FString& DefaultModuleDir,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,

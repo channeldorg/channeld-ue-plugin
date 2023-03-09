@@ -88,8 +88,8 @@ public:
 
 	void OnDisconnect();
 
-	UPROPERTY(EditAnywhere)
-	EChanneldChannelType DefaultChannelType = EChanneldChannelType::ECT_Global;
+	// UPROPERTY(EditAnywhere)
+	// EChanneldChannelType DefaultChannelType = EChanneldChannelType::ECT_Global;
 
 	// DO NOT loop-reference, otherwise the destruction can cause exception.
 	// TSharedPtr< class UChanneldNetDriver > NetDriver;
@@ -139,7 +139,7 @@ protected:
 	bool ConsumeChannelUpdateData(Channeld::ChannelId ChId, google::protobuf::Message* UpdateData);
 
 	void HandleUnsub(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
-	virtual void ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId){}
+	virtual void ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId);
 	
 	// Give the subclass a chance to mess with the removed providers, e.g. add a provider back to a channel.
 	virtual void OnRemovedProvidersFromChannel(Channeld::ChannelId ChId, channeldpb::ChannelType ChannelType, const TSet<FProviderInternal>& RemovedProviders) {}

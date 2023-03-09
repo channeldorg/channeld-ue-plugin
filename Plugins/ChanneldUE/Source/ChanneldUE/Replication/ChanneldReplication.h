@@ -35,11 +35,11 @@ namespace ChanneldReplication
 	extern TMap<const UClass*, FReplicatorStateInProto> ReplicatorTargetClassToStateInProto;
 	CHANNELDUE_API FReplicatorStateInProto* FindReplicatorStateInProto(const UClass* TargetClass);
 
-	extern TMap<const FName, IChannelDataProcessor*> ChannelDataMergerRegistry;
-	CHANNELDUE_API void RegisterChannelDataMerger(const FName& MessageFullName, IChannelDataProcessor* Processor);
+	extern TMap<const FName, IChannelDataProcessor*> ChannelDataProcessorRegistry;
+	CHANNELDUE_API void RegisterChannelDataProcessor(const FName& MessageFullName, IChannelDataProcessor* Processor);
 	FORCEINLINE CHANNELDUE_API IChannelDataProcessor* FindChannelDataProcessor(const FName& MessageFullName)
 	{
-		return ChannelDataMergerRegistry.FindRef(MessageFullName);
+		return ChannelDataProcessorRegistry.FindRef(MessageFullName);
 	}
 
 	uint32 GetUnrealObjectType(const UObject* Obj);

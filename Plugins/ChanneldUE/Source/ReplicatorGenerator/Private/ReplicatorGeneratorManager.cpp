@@ -85,9 +85,9 @@ void FReplicatorGeneratorManager::StopGenerateReplicator()
 {
 }
 
-bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass*>& TargetClasses, const FString GoPackageImportPathPrefix)
+bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*>& ReplicationActorClasses, const FString GoPackageImportPathPrefix)
 {
-	UE_LOG(LogChanneldRepGenerator, Display, TEXT("Start generating %d replicators"), TargetClasses.Num());
+	UE_LOG(LogChanneldRepGenerator, Display, TEXT("Start generating %d replicators"), ReplicationActorClasses.Num());
 
 	TArray<FString> IncludeActorCodes, RegisterReplicatorCodes;
 
@@ -114,7 +114,7 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass
 
 	// Use map and set to improve the performance of searching
 	TMap<FString, const UClass*> TargetActorClassesMap;
-	TargetActorClassesMap.Reserve(TargetClasses.Num());
+	TargetActorClassesMap.Reserve(ReplicationActorClasses.Num());
 	TSet<FString> RegisteredClassPathsSet;
 	RegisteredClassPathsSet.Reserve(RegistryTableData.Num());
 
@@ -122,7 +122,7 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass
 	TArray<FString> TargetClassPathsToRegister;
 	// Array of actor classes that is registered in the registry table but not in the target classes
 	TArray<FString> TargetClassPathsToUnregister;
-	for (const UClass* TargetActorClass : TargetClasses)
+	for (const UClass* TargetActorClass : ReplicationActorClasses)
 	{
 		TargetActorClassesMap.Add(TargetActorClass->GetPathName(), TargetActorClass);
 	}
@@ -146,7 +146,7 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass
 			);
 		}
 	}
-	for (const UClass* TargetActorClass : TargetClasses)
+	for (const UClass* TargetActorClass : ReplicationActorClasses)
 	{
 		if (!RegisteredClassPathsSet.Contains(TargetActorClass->GetPathName()))
 		{
@@ -240,7 +240,7 @@ bool FReplicatorGeneratorManager::GeneratedReplicators(const TArray<const UClass
 		LogChanneldRepGenerator,
 		Display,
 		TEXT("The generation of replicators is completed, %d replicators need to be generated, a total of %d replicators are generated"),
-		TargetClasses.Num(), ReplicatorCodeBundle.ReplicatorCodes.Num()
+		ReplicationActorClasses.Num(), ReplicatorCodeBundle.ReplicatorCodes.Num()
 	);
 
 	// Save the generated manifest file

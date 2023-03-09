@@ -40,6 +40,13 @@ public:
 	virtual void SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId) override;
 	virtual void SendSpawnToClients(UObject* Obj, uint32 OwningConnId) override;
 	virtual void SendDestroyToClients(UObject* Obj, const FNetworkGUID NetId) override;
+	
+	UPROPERTY(EditAnywhere)
+	int GlobalChannelFanOutIntervalMs = 50;
+	
+	// Make the first fan-out of GLOBAL channel data update (GameStateBase) a bit slower, so the GameState is spawned from the spatial server and ready.
+	UPROPERTY(EditAnywhere)
+	int GlobalChannelFanOutDelayMs = 2000;
 
 	UPROPERTY(EditAnywhere)
 	UProtoMessageObject* ChannelInitData;
