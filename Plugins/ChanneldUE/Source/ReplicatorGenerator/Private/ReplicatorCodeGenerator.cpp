@@ -56,12 +56,12 @@ bool FReplicatorCodeGenerator::Generate(
 
 	// Clear global struct decorators, make sure it's empty for this generation
 	FPropertyDecoratorFactory::Get().ClearGlobalStruct();
-	
+
 	FString Message, IncludeCode, RegisterCode;
 	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecorators;
 	for (const UClass* ReplicationActorClass : ReplicationActorClasses)
 	{
-		if (!ChanneldReplicatorGeneratorUtils::NeedToGenerateReplicator(ReplicationActorClass))
+		if (ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinClass(ReplicationActorClass))
 		{
 			continue;
 		}
@@ -132,7 +132,7 @@ bool FReplicatorCodeGenerator::Generate(
 		ReplicatorCodeBundle.GlobalStructCodes.Append(StructDecorator->GetDeclaration_PropPtrGroupStruct());
 		ReplicatorCodeBundle.GlobalStructProtoDefinitions.Append(StructDecorator->GetDefinition_ProtoStateMessage());
 	}
-	for(auto ActorDecorator : ActorDecorators)
+	for (auto ActorDecorator : ActorDecorators)
 	{
 		ReplicatorCodeBundle.GlobalStructCodes.Append(ActorDecorator->GetDeclaration_RPCParamStructs());
 		ReplicatorCodeBundle.GlobalStructProtoDefinitions.Append(ActorDecorator->GetDefinition_RPCParamProtoDefinitions());
@@ -336,7 +336,7 @@ bool FReplicatorCodeGenerator::GenerateActorCode(
 }
 
 bool FReplicatorCodeGenerator::GenerateChannelDataCode(
-	TArray<const UClass*> TargetActorClasses,
+	TArray<const UClass*> ReplicationActorClasses,
 	const FString& ChannelDataProtoMsgName,
 	const FString& ChannelDataProcessorNamespace,
 	const FString& ChannelDataProcessorClassName,
@@ -348,43 +348,20 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 )
 {
 	// Get all actor class decorator  with their parent classes
-	TSet<const UClass*> TargetClassWithParent;
-	TArray<const UClass*> Stack = TargetActorClasses;
-	const UClass* CurrentClass;
-	while (Stack.Num() > 0)
-	{
-		CurrentClass = Stack.Pop();
+	TArray<const UClass*> SortedReplicationActorClasses;
 
-		if (CurrentClass == nullptr || CurrentClass == AActor::StaticClass() || TargetClassWithParent.Contains(CurrentClass))
+	for (const UClass* ReplicationActorClass : ReplicationActorClasses)
+	{
+		if (ReplicationActorClass != AActor::StaticClass())
 		{
-			continue;
-		}
-		if (ChanneldReplicatorGeneratorUtils::HasReplicatedProperty(CurrentClass))
-		{
-			TargetClassWithParent.Add(CurrentClass);
-		}
-		if (CurrentClass != AActor::StaticClass() || CurrentClass != UActorComponent::StaticClass())
-		{
-			if (CurrentClass->GetSuperClass() != AActor::StaticClass())
-			{
-				Stack.Add(CurrentClass->GetSuperClass());
-			}
-			if (!CurrentClass->IsChildOf(UActorComponent::StaticClass()))
-			{
-				TArray<const UClass*> CompClasses = ChanneldReplicatorGeneratorUtils::GetComponentClasses(CurrentClass);
-				if (CompClasses.Num() > 0)
-				{
-					Stack.Append(CompClasses);
-				}
-			}
+			SortedReplicationActorClasses.Add(ReplicationActorClass);
 		}
 	}
-	TArray<const UClass*> TargetClassWithParentArr = TargetClassWithParent.Array();
-	TargetClassWithParentArr.Add(AActor::StaticClass());
+	SortedReplicationActorClasses.Add(AActor::StaticClass());
 
 	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecorators;
 	TArray<TSharedPtr<FReplicatedActorDecorator>> ChildrenOfAActor;
-	for (const UClass* TargetActorClass : TargetClassWithParentArr)
+	for (const UClass* TargetActorClass : SortedReplicationActorClasses)
 	{
 		TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
 		// It's not necessary to initialize property decorators and rpc decorators, because ChannelDataProcessor doesn't need them
@@ -415,7 +392,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 		ResultMessage = TEXT("Failed to generate ChannelDataProcessor code");
 		return false;
 	}
-	
+
 	// Generate ChannelDataProcessor Proto definition file
 	if (!GenerateChannelDataProtoDefFile(
 		ActorDecorators,
@@ -581,7 +558,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 	}
 	{
 		FStringFormatNamedArguments FormatArgs;
-		for(const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
+		for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
 		{
 			// No need to collect singleton state for handover
 			if (ActorDecorator->IsSingleton())
@@ -607,12 +584,12 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataMessageName);
 
 		GoCode.Append(FString::Format(CodeGen_Go_MergeTemplate, FormatArgs));
-	}	
+	}
 	{
 		FStringFormatNamedArguments FormatArgs;
-		
+
 		FString MergeActorStateCode = TEXT("");
-		
+
 		for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
 		{
 			FormatArgs.Add("Definition_StatePackagePath", ActorDecorator->GetProtoPackagePathGo(ProtoPackageName));
@@ -635,7 +612,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 				{
 					FString DeleteStateCode = TEXT("");
 					FStringFormatNamedArguments DeletionFormatArgs;
-					for (const auto& Deletion: TargetActors)
+					for (const auto& Deletion : TargetActors)
 					{
 						if (Deletion->IsSingleton())
 						{
@@ -654,18 +631,17 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 				}
 				else
 				{
-					GoCode.Append(FString::Format(ActorDecorator->GetTargetClass()->IsChildOf<UActorComponent>() ?
-						CodeGen_Go_MergeCompStateInMapTemplate : CodeGen_Go_MergeStateInMapTemplate, FormatArgs));
+					GoCode.Append(FString::Format(ActorDecorator->GetTargetClass()->IsChildOf<UActorComponent>() ? CodeGen_Go_MergeCompStateInMapTemplate : CodeGen_Go_MergeStateInMapTemplate, FormatArgs));
 				}
 			}
 		}
-			
+
 		// Add ActorState's merge code at last
 		GoCode.Append(MergeActorStateCode);
 	}
 
 	GoCode.Append(TEXT("\treturn nil\n}\n"));
-	
+
 	return true;
 }
 

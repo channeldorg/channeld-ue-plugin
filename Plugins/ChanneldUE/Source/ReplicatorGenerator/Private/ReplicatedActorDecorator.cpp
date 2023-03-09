@@ -245,6 +245,10 @@ FString FReplicatedActorDecorator::GetProtoStateMessageType()
 	{
 		return TEXT("GameStateBase");
 	}
+	if (TargetClass == APlayerState::StaticClass())
+	{
+		return TEXT("PlayerState");
+	}
 	return GetActorName() + TEXT("State");
 }
 

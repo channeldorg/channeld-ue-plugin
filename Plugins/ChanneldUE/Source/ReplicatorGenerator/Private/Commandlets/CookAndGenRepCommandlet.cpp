@@ -7,6 +7,40 @@
 #include "ReplicatorGeneratorUtils.h"
 #include "Components/TimelineComponent.h"
 
+void FLoadedObjectListener::StartListen()
+{
+	GUObjectArray.AddUObjectCreateListener(this);
+}
+
+void FLoadedObjectListener::StopListen()
+{
+	GUObjectArray.RemoveUObjectCreateListener(this);
+}
+
+void FLoadedObjectListener::NotifyUObjectCreated(const UObjectBase* Object, int32 Index)
+{
+	const UClass* LoadedClass = Object->GetClass();
+	while (LoadedClass != nullptr && LoadedClass != AActor::StaticClass() && LoadedClass != UActorComponent::StaticClass())
+	{
+		const FString ClassPath = LoadedClass->GetPathName();
+		if (CheckedClasses.Contains(ClassPath))
+		{
+			break;
+		}
+		CheckedClasses.Add(ClassPath);
+		if (ChanneldReplicatorGeneratorUtils::TargetToGenerateRepState(LoadedClass))
+		{
+			FilteredClasses.Add(LoadedClass);
+		}
+		LoadedClass = LoadedClass->GetSuperClass();
+	}
+}
+
+void FLoadedObjectListener::OnUObjectArrayShutdown()
+{
+	GUObjectArray.RemoveUObjectCreateListener(this);
+}
+
 UCookAndGenRepCommandlet::UCookAndGenRepCommandlet()
 {
 	IsClient = false;
@@ -22,7 +56,7 @@ int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
 
 	TSet<FSoftClassPath> LoadedRepClasses;
 
-	ChanneldReplicatorGeneratorUtils::FReplicationActorFilter ObjLoadedListener(ChanneldReplicatorGeneratorUtils::EFilterRule::Replication);
+	FLoadedObjectListener ObjLoadedListener;
 	ObjLoadedListener.StartListen();
 
 	const FString AdditionalParam(TEXT(" -SkipShaderCompile"));

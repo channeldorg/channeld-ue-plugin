@@ -71,11 +71,6 @@ bool FReplicatorGeneratorManager::HeaderFilesCanBeFound(const UClass* TargetClas
 	return !TargetHeadFilePath.IsEmpty();
 }
 
-bool FReplicatorGeneratorManager::IsIgnoredActor(const UClass* TargetClass)
-{
-	return IgnoreActorClasses.Contains(TargetClass) || IgnoreActorClassPaths.Contains(TargetClass->GetPathName());
-}
-
 void FReplicatorGeneratorManager::StartGenerateReplicator()
 {
 	CodeGenerator->RefreshModuleInfoByClassName();

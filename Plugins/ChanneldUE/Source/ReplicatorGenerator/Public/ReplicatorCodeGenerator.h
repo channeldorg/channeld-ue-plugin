@@ -105,7 +105,7 @@ public:
 	);
 
 	bool GenerateChannelDataCode(
-		TArray<const UClass*> TargetActorClasses,
+		TArray<const UClass*> ReplicationActorClasses,
 		const FString& ChannelDataProtoMsgName,
 		const FString& ChannelDataProcessorNamespace,
 		const FString& ChannelDataProcessorClassName,
