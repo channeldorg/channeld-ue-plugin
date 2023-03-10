@@ -405,6 +405,7 @@ FString FReplicatedActorDecorator::GetCode_OverrideGetNetGUID()
 {
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_ReplicatorClassName"), GetReplicatorClassName());
+	// Only GameState will return 1.
 	if (TargetClass->IsChildOf(AGameStateBase::StaticClass()))
 	{
 		return FString::Format(GameState_GetNetGUIDTemplate, FormatArgs);

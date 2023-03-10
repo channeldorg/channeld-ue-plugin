@@ -500,7 +500,8 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 				TargetClass != UActorComponent::StaticClass() &&
 				!TargetClass->IsChildOf(AGameStateBase::StaticClass()) &&
 				!TargetClass->IsChildOf(APlayerState::StaticClass()) &&
-				!TargetClass->IsChildOf(AController::StaticClass())) ||
+				!TargetClass->IsChildOf(AController::StaticClass()) &&
+				!ActorDecorator->IsSingleton()) ||
 			TargetClass->IsChildOf(USceneComponent::StaticClass())
 		)
 		{
