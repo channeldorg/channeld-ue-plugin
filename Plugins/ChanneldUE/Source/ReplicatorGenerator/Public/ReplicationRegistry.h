@@ -53,5 +53,5 @@ namespace ReplicationRegistryUtils
 
 	REPLICATORGENERATOR_API inline bool SaveRegistryTable(const UDataTable* RegistryTable);
 
-	REPLICATORGENERATOR_API inline bool PromptForSaveRegistryTable(const UDataTable* RegistryTable);
+	REPLICATORGENERATOR_API inline bool PromptForSaveAndCloseRegistryTable();
 };

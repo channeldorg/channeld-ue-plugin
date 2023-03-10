@@ -1,6 +1,7 @@
 ﻿#include "ReplicationRegistry.h"
 #include "AssetToolsModule.h"
 #include "FileHelpers.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/DataTable.h"
 #include "Factories/DataTableFactory.h"
 
@@ -90,23 +91,28 @@ bool ReplicationRegistryUtils::SaveRegistryTable(const UDataTable* RegistryTable
 	return SaveRegistryPackage(RegistryTable->GetOutermost());
 }
 
-bool ReplicationRegistryUtils::PromptForSaveRegistryTable(const UDataTable* RegistryTable)
+bool ReplicationRegistryUtils::PromptForSaveAndCloseRegistryTable()
 {
-	UPackage* RegistryPackage = RegistryTable->GetOutermost();
-	if (RegistryPackage->IsDirty())
+	const UObject* RegistryTable = StaticFindObjectFast(
+		nullptr, nullptr,
+		*FString::Printf(TEXT("%s/%s"), *GetRegistryTablePackagePath(), *GetRegistryTableAssetName())
+	);
+	if (RegistryTable == nullptr)
 	{
-		const FText DialogText = LOCTEXT("SaveRegistryTableDialogText", "The ReplicationRegistry has been modified. Do you want to save it?");
-		const EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::OkCancel, DialogText);
+		return true;
+	}
+	if (RegistryTable->GetPackage()->IsDirty())
+	{
+		const FText SaveDialogText = LOCTEXT("SaveRegistryTableDialogText", "The DataTable: \"ReplicationRegistry\" has been modified. Do you want to save it?");
+		const EAppReturnType::Type ReturnType = FMessageDialog::Open(EAppMsgType::OkCancel, SaveDialogText);
 		if (ReturnType == EAppReturnType::Type::Ok)
 		{
-			return SaveRegistryPackage(RegistryPackage);
-		}
-		else
-		{
-			return false;
+			return SaveRegistryPackage(RegistryTable->GetPackage());
 		}
 	}
-	return true;
+	const FText HitDialogText = LOCTEXT("SaveRegistryTableDialogText", "Please save and close DataTable: \"ReplicationRegistry\" first, and then try again.");
+	FMessageDialog::Open(EAppMsgType::Ok, HitDialogText);
+	return false;
 }
 
 #undef LOCTEXT_NAMESPACE
