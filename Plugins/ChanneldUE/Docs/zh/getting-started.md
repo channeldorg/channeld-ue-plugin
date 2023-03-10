@@ -254,9 +254,9 @@ LogChanneld: Created spatial channels: 65538,65539 （空间服务器2）
 
 # 9.故障排查
 ## Setup脚本没有下载channeld
-如果您在运行Setup前，已经配置了环境变量`%CHANNELD_PATH%`，Setup脚本会认为您已经安装了channeld，并跳过下载安装步骤。插件会根据环境变量%CHANNELD_PATH%来运行channeld。
+如果您在运行Setup前，已经配置了环境变量`%CHANNELD_PATH%`，Setup脚本会认为您已经安装了channeld，并跳过下载安装步骤。插件会根据环境变量`%CHANNELD_PATH%`来运行channeld。
 
-如果您需要下载安装channeld到插件目录中，请先删除环境变量%CHANNELD_PATH%。
+如果您需要下载安装channeld到插件目录中，请先删除环境变量`%CHANNELD_PATH%`。
 
 ## 无法启动channeld服务
 - 检查任务管理器中是否存在channeld进程，如果存在，请手动“结束任务”
