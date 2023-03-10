@@ -26,6 +26,7 @@ struct REPLICATORGENERATOR_API FChanneldReplicationRegistryItem : public FTableR
 	}
 };
 
+// TODO: Wrap the methods with a facade class, rather than this DataTable-dependent, procedure-oriented style.
 namespace ReplicationRegistryUtils
 {
 	REPLICATORGENERATOR_API inline FString GetRegistryTableAssetFullName();
