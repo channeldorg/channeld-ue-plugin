@@ -392,7 +392,7 @@ void FChanneldEditorModule::GenerateReplicatorAction()
 	// If the editor process is still holding the ReplicationRegistryTable, the CookAndGenRepCommandLet process will fail to write the ReplicationRegistryTable.
 	if(!ReplicationRegistryUtils::PromptForSaveAndCloseRegistryTable())
 	{
-		UE_LOG(LogChanneldEditor, Error, TEXT("Please save and close ReplicationRegistryTable first"));
+		UE_LOG(LogChanneldEditor, Error, TEXT("Please save and close the Replication Registry data table first"));
 		return;
 	}
 	GenRepWorkThread = MakeShareable(
