@@ -49,7 +49,7 @@ struct FGeneratedCodeBundle
 	FString ChannelDataRegistration_GoCode;
 };
 
-struct FActorInfoToGenerateReplication
+struct FRepGenActorInfo
 {
 	int32 Index;
 	const UClass* TargetActorClass;
@@ -58,7 +58,7 @@ struct FActorInfoToGenerateReplication
 	bool bSkipGenReplicator;
 	bool bSkipGenChannelDataState;
 
-	FActorInfoToGenerateReplication()
+	FRepGenActorInfo()
 		: Index(-1)
 		  , TargetActorClass(nullptr)
 		  , bSingleton(false)
@@ -68,7 +68,7 @@ struct FActorInfoToGenerateReplication
 	{
 	}
 
-	FActorInfoToGenerateReplication(int32 InIndex, const UClass* InTargetActorClass, bool bSingleton, bool bChanneldUEBuiltinType, bool bSkipGenReplicator, bool bSkipGenChannelDataState)
+	FRepGenActorInfo(int32 InIndex, const UClass* InTargetActorClass, bool bSingleton, bool bChanneldUEBuiltinType, bool bSkipGenReplicator, bool bSkipGenChannelDataState)
 		: Index(InIndex)
 		  , TargetActorClass(InTargetActorClass)
 		  , bSingleton(bSingleton)
@@ -109,7 +109,7 @@ public:
 	 * @return true on success, false otherwise.
 	 */
 	bool Generate(
-		const TArray<FActorInfoToGenerateReplication>& ReplicationActorInfos,
+		const TArray<FRepGenActorInfo>& ReplicationActorInfos,
 		const FString& DefaultModuleDir,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
@@ -188,7 +188,7 @@ protected:
 	inline bool CreateDecorateActor(
 		TSharedPtr<FReplicatedActorDecorator>& OutActorDecorator,
 		FString& OutResultMessage,
-		const FActorInfoToGenerateReplication& ReplicationActorInfo,
+		const FRepGenActorInfo& ReplicationActorInfo,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
 		bool bInitPropertiesAndRPCs = true

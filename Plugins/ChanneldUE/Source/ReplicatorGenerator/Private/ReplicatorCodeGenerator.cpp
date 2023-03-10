@@ -43,7 +43,7 @@ FString FReplicatorCodeGenerator::GetClassHeadFilePath(const FString& ClassName)
 }
 
 bool FReplicatorCodeGenerator::Generate(
-	const TArray<FActorInfoToGenerateReplication>& ReplicationActorInfos,
+	const TArray<FRepGenActorInfo>& ReplicationActorInfos,
 	const FString& DefaultModuleDir,
 	const FString& ProtoPackageName,
 	const FString& GoPackageImportPath,
@@ -60,7 +60,7 @@ bool FReplicatorCodeGenerator::Generate(
 	FString Message, IncludeCode, RegisterCode;
 	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecoratorsToGenReplicator;
 	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecoratorsToGenChannelData;
-	for (const FActorInfoToGenerateReplication& Info : ReplicationActorInfos)
+	for (const FRepGenActorInfo& Info : ReplicationActorInfos)
 	{
 		const UClass* ReplicationActorClass = Info.TargetActorClass;
 		TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
@@ -724,7 +724,7 @@ void FReplicatorCodeGenerator::ProcessHeaderFiles(const TArray<FString>& Files, 
 bool FReplicatorCodeGenerator::CreateDecorateActor(
 	TSharedPtr<FReplicatedActorDecorator>& OutActorDecorator,
 	FString& OutResultMessage,
-	const FActorInfoToGenerateReplication& ReplicationActorInfo,
+	const FRepGenActorInfo& ReplicationActorInfo,
 	const FString& ProtoPackageName,
 	const FString& GoPackageImportPath,
 	bool bInitPropertiesAndRPCs

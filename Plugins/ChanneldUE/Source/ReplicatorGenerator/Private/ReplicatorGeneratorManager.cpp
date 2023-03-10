@@ -89,7 +89,7 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 	FGeneratedCodeBundle ReplicatorCodeBundle;
 
 	// Read generate replication options from ReplicationRegistryTable. and sort the ActorInfosToGenRep by the order in the table
-	TArray<FActorInfoToGenerateReplication> ActorInfosToGenRep;
+	TArray<FRepGenActorInfo> ActorInfosToGenRep;
 	int32 Index = 0;
 
 	UDataTable* RegistryTable = ReplicationRegistryUtils::LoadRegistryTable();
@@ -119,7 +119,7 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 		else
 		{
 			ActorInfosToGenRep.Add(
-				FActorInfoToGenerateReplication(
+				FRepGenActorInfo(
 					++Index
 					, ReplicationActorClassesMap.FindRef(RegistryItem->TargetClassPath)
 					, RegistryItem->Singleton
@@ -136,7 +136,7 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 		{
 			TargetClassPathsToRegister.Add(TargetActorClass->GetPathName());
 			ActorInfosToGenRep.Add(
-				FActorInfoToGenerateReplication(
+				FRepGenActorInfo(
 					++Index
 					, TargetActorClass
 					, false
@@ -152,7 +152,7 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 	for (const UClass* BuiltinClass : ChanneldReplicatorGeneratorUtils::GetChanneldUEBuiltinClasses())
 	{
 		ActorInfosToGenRep.Add(
-			FActorInfoToGenerateReplication(
+			FRepGenActorInfo(
 				++Index
 				, BuiltinClass
 				, ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinSingletonClass(BuiltinClass)
