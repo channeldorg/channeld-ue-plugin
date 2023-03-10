@@ -27,32 +27,10 @@ namespace ChanneldReplicatorGeneratorUtils
 			Condition = HasRepComponent(LoadedClass);
 			break;
 		case EFilterRule::NeedToGenerateReplicator:
-			Condition = NeedToGenerateReplicator(LoadedClass, true);
-			break;
-		case EFilterRule::NeedToGenRepWithoutIgnore:
-			Condition = NeedToGenerateReplicator(LoadedClass, false);
+			Condition = TargetToGenerateReplicator(LoadedClass);
 			break;
 		case EFilterRule::Replication:
-			if (NeedToGenerateReplicator(LoadedClass, true))
-			{
-				Condition = true;
-			}
-			else if (LoadedClass->IsChildOf(AActor::StaticClass()))
-			{
-				const AActor* Actor = static_cast<const AActor*>(Object);
-				if (Actor->GetIsReplicated() && HasRepComponent(LoadedClass))
-				{
-					Condition = true;
-				}
-			}
-			else if (LoadedClass->IsChildOf(UActorComponent::StaticClass()))
-			{
-				const UActorComponent* ActorComponent = static_cast<const UActorComponent*>(Object);
-				if (ActorComponent->GetIsReplicated() && HasRepComponent(LoadedClass))
-				{
-					Condition = true;
-				}
-			}
+			Condition = TargetToGenerateChannelDataField(LoadedClass);
 			break;
 		}
 		AllLoadedClasses.Add(LoadedClass);
@@ -65,6 +43,34 @@ namespace ChanneldReplicatorGeneratorUtils
 	void FReplicationActorFilter::OnUObjectArrayShutdown()
 	{
 		GUObjectArray.RemoveUObjectCreateListener(this);
+	}
+
+	TSet<UClass*> ChanneldUEBuiltinClasses{
+		AActor::StaticClass(),
+		ACharacter::StaticClass(),
+		AController::StaticClass(),
+		AGameStateBase::StaticClass(),
+		APawn::StaticClass(),
+		APlayerController::StaticClass(),
+		APlayerState::StaticClass(),
+		UActorComponent::StaticClass(),
+		USceneComponent::StaticClass(),
+		UCharacterMovementComponent::StaticClass(),
+	};
+
+	TArray<UClass*> GetChanneldUEBuiltinClasses()
+	{
+		return ChanneldUEBuiltinClasses.Array();
+	}
+
+	bool IsChanneldUEBuiltinClass(const UClass* TargetClass)
+	{
+		return ChanneldUEBuiltinClasses.Contains(TargetClass);
+	}
+
+	bool IsChanneldUEBuiltinSingletonClass(const UClass* TargetClass)
+	{
+		return TargetClass == AGameStateBase::StaticClass();
 	}
 
 	bool HasReplicatedProperty(const UClass* TargetClass)
@@ -203,15 +209,19 @@ namespace ChanneldReplicatorGeneratorUtils
 		return ComponentClasses.Array();
 	}
 
-	bool NeedToGenerateReplicator(const UClass* TargetClass, bool bCheckIgnore /*= true*/)
+	bool TargetToGenerateReplicator(const UClass* TargetClass)
+	{
+		return !IsChanneldUEBuiltinClass(TargetClass) && TargetToGenerateChannelDataField(TargetClass);
+	}
+
+	bool TargetToGenerateChannelDataField(const UClass* TargetClass)
 	{
 		const FString ClassName = TargetClass->GetName();
 		return
-			!(bCheckIgnore && FReplicatorGeneratorManager::Get().IsIgnoredActor(TargetClass)) &&
 			(TargetClass->IsChildOf(AActor::StaticClass()) || TargetClass->IsChildOf(UActorComponent::StaticClass())) &&
 			!TargetClass->IsChildOf(ALevelScriptActor::StaticClass()) &&
 			!(ClassName.StartsWith(TEXT("SKEL_")) || ClassName.StartsWith(TEXT("REINST_"))) &&
-			(HasReplicatedPropertyOrRPC(TargetClass) || HasTimelineComponent(TargetClass));
+			HasReplicatedPropertyOrRPC(TargetClass);
 	}
 
 	bool IsCompilableClassName(const FString& ClassName)
@@ -318,5 +328,18 @@ namespace ChanneldReplicatorGeneratorUtils
 					bIsDevelopment ? TEXT("") : *FString::Printf(TEXT("-Mac-%s"),*ConfigutationName)));
 #endif
 		return TEXT("");
+	}
+
+	FString GetHashString(const FString& Target)
+	{
+		const int32 Hash = GetTypeHash(Target);
+		if (Hash < 0)
+		{
+			return FString::Printf(TEXT("_%d"), -Hash);
+		}
+		else
+		{
+			return FString::Printf(TEXT("%d"), Hash);
+		}
 	}
 }

@@ -71,11 +71,6 @@ bool FReplicatorGeneratorManager::HeaderFilesCanBeFound(const UClass* TargetClas
 	return !TargetHeadFilePath.IsEmpty();
 }
 
-bool FReplicatorGeneratorManager::IsIgnoredActor(const UClass* TargetClass)
-{
-	return IgnoreActorClasses.Contains(TargetClass) || IgnoreActorClassPaths.Contains(TargetClass->GetPathName());
-}
-
 void FReplicatorGeneratorManager::StartGenerateReplicator()
 {
 	CodeGenerator->RefreshModuleInfoByClassName();
@@ -96,15 +91,16 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 	// Sort the target classes by ReplicationRegistryTable
 	TArray<FTargetActorReplicationOption> TargetActorRepOptions;
 	int32 Index = 0;
-	for (const UClass* BuiltinActorClass : ChanneldUEBuiltinActorClasses.Array())
+	for (const UClass* BuiltinActorClass : ChanneldReplicatorGeneratorUtils::GetChanneldUEBuiltinClasses())
 	{
 		TargetActorRepOptions.Add(
 			FTargetActorReplicationOption(
 				++Index,
 				BuiltinActorClass,
-				ChanneldUEBuiltinSingletonClasses.Contains(BuiltinActorClass),
+				ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinSingletonClass(BuiltinActorClass),
 				true,
-				true
+				true,
+				false
 			)
 		);
 	}
@@ -141,6 +137,7 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 					TargetActorClassesMap.FindRef(RegistryItem->TargetClassPath),
 					RegistryItem->Singleton,
 					false,
+					RegistryItem->Skip,
 					RegistryItem->Skip
 				)
 			);
@@ -155,6 +152,7 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 				FTargetActorReplicationOption(
 					++Index,
 					TargetActorClass,
+					false,
 					false,
 					false,
 					false

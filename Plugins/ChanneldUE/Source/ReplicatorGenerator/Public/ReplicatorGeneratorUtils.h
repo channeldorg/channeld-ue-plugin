@@ -6,11 +6,10 @@ namespace ChanneldReplicatorGeneratorUtils
 	enum class EFilterRule: uint8
 	{
 		NeedToGenerateReplicator,
-		NeedToGenRepWithoutIgnore,
 		HasRepComponent,
 		Replication,
 	};
-	
+
 	class FReplicationActorFilter : public FUObjectArray::FUObjectCreateListener
 	{
 	public:
@@ -18,7 +17,7 @@ namespace ChanneldReplicatorGeneratorUtils
 			: FilterRule(InFilterRule)
 		{
 		}
-		
+
 		void StartListen();
 
 		void StopListen();
@@ -34,19 +33,27 @@ namespace ChanneldReplicatorGeneratorUtils
 		EFilterRule FilterRule;
 	};
 
+	REPLICATORGENERATOR_API TArray<UClass*> GetChanneldUEBuiltinClasses();
+	
+	REPLICATORGENERATOR_API bool IsChanneldUEBuiltinClass(const UClass* TargetClass);
+	
+	REPLICATORGENERATOR_API bool IsChanneldUEBuiltinSingletonClass(const UClass* TargetClass);
+
 	REPLICATORGENERATOR_API bool HasReplicatedProperty(const UClass* TargetClass);
 
 	REPLICATORGENERATOR_API bool HasRPC(const UClass* TargetClass);
 
 	REPLICATORGENERATOR_API bool HasReplicatedPropertyOrRPC(const UClass* TargetClass);
-	
+
 	REPLICATORGENERATOR_API bool HasTimelineComponent(const UClass* TargetClass);
 
 	REPLICATORGENERATOR_API bool HasRepComponent(const UClass* TargetClass);
 
 	REPLICATORGENERATOR_API TArray<const UClass*> GetComponentClasses(const UClass* TargetClass);
-	
-	REPLICATORGENERATOR_API bool NeedToGenerateReplicator(const UClass* TargetClass, bool bCheckIgnore = true);
+
+	REPLICATORGENERATOR_API bool TargetToGenerateReplicator(const UClass* TargetClass);
+
+	REPLICATORGENERATOR_API bool TargetToGenerateChannelDataField(const UClass* TargetClass);
 
 	REPLICATORGENERATOR_API bool IsCompilableClassName(const FString& ClassName);
 
@@ -56,5 +63,6 @@ namespace ChanneldReplicatorGeneratorUtils
 	REPLICATORGENERATOR_API FString GetDefaultModuleDir();
 
 	REPLICATORGENERATOR_API FString GetUECmdBinary();
-
+	
+	REPLICATORGENERATOR_API FString GetHashString(const FString& Target);
 }

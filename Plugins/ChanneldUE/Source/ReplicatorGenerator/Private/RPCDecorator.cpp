@@ -37,15 +37,7 @@ bool FRPCDecorator::Init(const TFunction<FString()>& SetNameForIllegalPropName)
 	}
 	// The generated params struct name will be added to 'ChanneldGlobalStruct.h'.
 	// Add ActorNameHash to avoid name conflict.
-	const int32 ActorNameHash = GetTypeHash(OwnerActor->GetActorName());
-	if(ActorNameHash < 0)
-	{
-		CompilablePropName = FString::Printf(TEXT("%s__%d"), *CompilablePropName, -ActorNameHash);
-	}
-	else
-	{
-		CompilablePropName = FString::Printf(TEXT("%s_%d"), *CompilablePropName, ActorNameHash);
-	}
+	CompilablePropName = FString::Printf(TEXT("%s_%s"), *CompilablePropName, *ChanneldReplicatorGeneratorUtils::GetHashString(OwnerActor->GetActorPathName()));
 
 	PostInit();
 	bInitialized = true;

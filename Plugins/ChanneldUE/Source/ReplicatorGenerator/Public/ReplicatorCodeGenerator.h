@@ -56,22 +56,25 @@ struct FTargetActorReplicationOption
 	bool bSingleton;
 	bool bChanneldUEBuiltinType;
 	bool bSkipGenReplicator;
+	bool bSkipGenChannelDataField;
 
 	FTargetActorReplicationOption()
 		: Index(-1)
-		, TargetActorClass(nullptr)
-		, bSingleton(false)
-		, bChanneldUEBuiltinType(false)
-		, bSkipGenReplicator(true)
+		  , TargetActorClass(nullptr)
+		  , bSingleton(false)
+		  , bChanneldUEBuiltinType(false)
+		  , bSkipGenReplicator(true)
+		  , bSkipGenChannelDataField(true)
 	{
 	}
-	
-	FTargetActorReplicationOption(int32 InIndex, const UClass* InTargetActorClass, bool bSingleton, bool bChanneldUEBuiltinType, bool bSkipGenReplicator)
-		: Index(InIndex),
-		  TargetActorClass(InTargetActorClass)
+
+	FTargetActorReplicationOption(int32 InIndex, const UClass* InTargetActorClass, bool bSingleton, bool bChanneldUEBuiltinType, bool bSkipGenReplicator, bool bSkipGenChannelDataField)
+		: Index(InIndex)
+		  , TargetActorClass(InTargetActorClass)
 		  , bSingleton(bSingleton)
 		  , bChanneldUEBuiltinType(bChanneldUEBuiltinType)
 		  , bSkipGenReplicator(bSkipGenReplicator)
+		  , bSkipGenChannelDataField(bSkipGenChannelDataField)
 	{
 	}
 };
@@ -118,23 +121,19 @@ public:
 	/**
 	 * Generate replicator code for the specified actor.
 	 *
-	 * @param TargetActorClass The actor to generate replicator for.
+	 * @param ActorDecorator The actor to generate replicator for.
 	 * @param GeneratedResult The generated replicator code (.h, .cpp, .proto) .
-	 * @param ProtoPackageName All replicator's proto files will use this package name.
-	 * @param GoPackageImportPath Be used to set 'option go_package='
 	 * @param ResultMessage The result message.
 	 * @return true on success, false otherwise.
 	 */
 	bool GenerateActorCode(
-		const UClass* TargetActorClass,
-		const FString& ProtoPackageName,
-		const FString& GoPackageImportPath,
+		const TSharedPtr<FReplicatedActorDecorator>& ActorDecorator,
 		FReplicatorCode& GeneratedResult,
 		FString& ResultMessage
 	);
 
 	bool GenerateChannelDataCode(
-		TArray<const UClass*> TargetActorClasses,
+		const TArray<TSharedPtr<FReplicatedActorDecorator>>& ReplicationActorDecorators,
 		const FString& ChannelDataProtoMsgName,
 		const FString& ChannelDataProcessorNamespace,
 		const FString& ChannelDataProcessorClassName,
@@ -195,7 +194,6 @@ protected:
 		const UClass* TargetActor,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
-		bool bInitPropertiesAndRPCs = true,
-		bool bIncrementIfSameName = true
+		bool bInitPropertiesAndRPCs = true
 	);
 };

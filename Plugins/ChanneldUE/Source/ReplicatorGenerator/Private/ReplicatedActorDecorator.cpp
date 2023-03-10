@@ -107,6 +107,11 @@ FString FReplicatedActorDecorator::GetActorName()
 	return TargetActorCompilableName;
 }
 
+FString FReplicatedActorDecorator::GetActorPathName()
+{
+	return TargetClass->GetPathName();
+}
+
 FString FReplicatedActorDecorator::GetOriginActorName()
 {
 	return TargetClass->GetName();
@@ -234,6 +239,10 @@ FString FReplicatedActorDecorator::GetProtoStateMessageType()
 	if (TargetClass == AGameStateBase::StaticClass())
 	{
 		return TEXT("GameStateBase");
+	}
+	if (TargetClass == APlayerState::StaticClass())
+	{
+		return TEXT("PlayerState");
 	}
 	return GetActorName() + TEXT("State");
 }

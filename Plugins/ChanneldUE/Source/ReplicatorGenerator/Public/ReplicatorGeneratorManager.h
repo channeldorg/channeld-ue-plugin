@@ -64,14 +64,6 @@ public:
 	bool HeaderFilesCanBeFound(const UClass* TargetClass);
 
 	/**
-	 * Is the target class ignored or not. If the target class is ignored, we will not generate replicator for it.
-	 *
-	 * @param TargetClass The target class.
-	 * @return true if the target class is ignored.
-	 */
-	bool IsIgnoredActor(const UClass* TargetClass);
-
-	/**
 	 * Invoke this function before generating replicators.
 	 * We need to include the header file of the target class in 'ChanneldReplicatorRegister.h'. so we need to know the include path of the target class from 'uhtmanifest' file.
 	 * But the 'uhtmanifest' file is a large json file, so we need to read and parser it only once.
@@ -151,32 +143,4 @@ public:
 
 	bool SaveGeneratedManifest(const FGeneratedManifest& Manifest, FString& Message);
 	bool SaveGeneratedManifest(const FGeneratedManifest& Manifest, const FString& Filename, FString& Message);
-
-private:
-	TSet<UClass*> ChanneldUEBuiltinActorClasses{
-		AActor::StaticClass(),
-		ACharacter::StaticClass(),
-		AController::StaticClass(),
-		AGameStateBase::StaticClass(),
-		APawn::StaticClass(),
-		APlayerController::StaticClass(),
-		APlayerState::StaticClass(),
-		UActorComponent::StaticClass(),
-		USceneComponent::StaticClass(),
-		UCharacterMovementComponent::StaticClass(),
-	};
-
-	TSet<UClass*> ChanneldUEBuiltinSingletonClasses{
-		AGameStateBase::StaticClass(),
-	};
-	
-	TSet<UClass*> IgnoreActorClasses = ChanneldUEBuiltinActorClasses;
-
-	TSet<FString> IgnoreActorClassPaths{
-		TEXT("/Script/Engine.SkyLight"),
-		TEXT("/Script/Engine.WorldSettings"),
-		TEXT("/Script/Engine.ExponentialHeightFog"),
-		TEXT("/Script/Engine.Emitter"),
-		TEXT("/Script/Engine.SkeletalMeshActor"),
-	};
 };
