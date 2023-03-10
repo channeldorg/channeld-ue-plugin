@@ -159,6 +159,11 @@ public:
 	FString GetActorName();
 
 	/**
+	 * Get target actor asset path
+	 */
+	FString GetActorPathName();
+
+	/**
       * Get target origin actor name
       */
 	FString GetOriginActorName();

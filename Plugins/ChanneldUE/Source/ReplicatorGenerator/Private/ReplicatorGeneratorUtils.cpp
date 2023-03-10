@@ -19,7 +19,7 @@ namespace ChanneldReplicatorGeneratorUtils
 
 	void FReplicationActorFilter::NotifyUObjectCreated(const UObjectBase* Object, int32 Index)
 	{
-		UClass* LoadedClass = Object->GetClass();
+		const UClass* LoadedClass = Object->GetClass();
 		bool Condition = false;
 		switch (FilterRule)
 		{
@@ -27,22 +27,40 @@ namespace ChanneldReplicatorGeneratorUtils
 			Condition = HasRepComponent(LoadedClass);
 			break;
 		case EFilterRule::NeedToGenerateReplicator:
-			Condition = NeedToGenerateReplicator(LoadedClass, true);
+			Condition = TargetToGenerateReplicator(LoadedClass);
 			break;
-		case EFilterRule::NeedToGenRepWithoutIgnore:
-			Condition = NeedToGenerateReplicator(LoadedClass, false);
+		case EFilterRule::Replication:
+			Condition = TargetToGenerateRepState(LoadedClass);
 			break;
 		}
-		AllRepClasses.Add(LoadedClass);
+		AllLoadedClasses.Add(LoadedClass);
 		if (Condition)
 		{
-			LoadedRepClasses.Add(LoadedClass);
+			FilteredClasses.Add(LoadedClass);
 		}
 	}
 
 	void FReplicationActorFilter::OnUObjectArrayShutdown()
 	{
 		GUObjectArray.RemoveUObjectCreateListener(this);
+	}
+
+	TSet<UClass*> ChanneldUEBuiltinClasses{
+		AActor::StaticClass(),
+		ACharacter::StaticClass(),
+		AController::StaticClass(),
+		AGameStateBase::StaticClass(),
+		APawn::StaticClass(),
+		APlayerController::StaticClass(),
+		APlayerState::StaticClass(),
+		UActorComponent::StaticClass(),
+		USceneComponent::StaticClass(),
+		UCharacterMovementComponent::StaticClass(),
+	};
+
+	bool IsChanneldUEBuiltinClass(const UClass* TargetClass)
+	{
+		return ChanneldUEBuiltinClasses.Contains(TargetClass);
 	}
 
 	bool HasReplicatedProperty(const UClass* TargetClass)
@@ -77,6 +95,12 @@ namespace ChanneldReplicatorGeneratorUtils
 		return HasReplicatedProperty(TargetClass) || HasRPC(TargetClass);
 	}
 
+	bool HasTimelineComponent(const UClass* TargetClass)
+	{
+		const UBlueprintGeneratedClass* BPClass = Cast<UBlueprintGeneratedClass>(TargetClass);
+		return BPClass != nullptr && BPClass->Timelines.Num() > 0;
+	}
+
 	bool HasRepComponent(const UClass* TargetClass)
 	{
 		if (!TargetClass->IsChildOf(AActor::StaticClass()))
@@ -89,7 +113,7 @@ namespace ChanneldReplicatorGeneratorUtils
 
 			if (Property->IsA<FObjectProperty>())
 			{
-				FObjectProperty* ObjProperty = CastFieldChecked<FObjectProperty>(Property);
+				const FObjectProperty* ObjProperty = CastFieldChecked<FObjectProperty>(Property);
 				if (ObjProperty->PropertyClass->IsChildOf(UChanneldReplicationComponent::StaticClass()))
 				{
 					return true;
@@ -137,7 +161,7 @@ namespace ChanneldReplicatorGeneratorUtils
 
 			if (Property->IsA<FObjectProperty>())
 			{
-				FObjectProperty* ObjProperty = CastFieldChecked<FObjectProperty>(Property);
+				const FObjectProperty* ObjProperty = CastFieldChecked<FObjectProperty>(Property);
 				if (ObjProperty->PropertyClass->IsChildOf(UActorComponent::StaticClass()))
 				{
 					ComponentClasses.Add(ObjProperty->PropertyClass);
@@ -175,21 +199,24 @@ namespace ChanneldReplicatorGeneratorUtils
 		return ComponentClasses.Array();
 	}
 
-	bool NeedToGenerateReplicator(const UClass* TargetClass, bool bCheckIgnore /*= true*/)
+	bool TargetToGenerateReplicator(const UClass* TargetClass)
+	{
+		return !IsChanneldUEBuiltinClass(TargetClass) && TargetToGenerateRepState(TargetClass);
+	}
+
+	bool TargetToGenerateRepState(const UClass* TargetClass)
 	{
 		const FString ClassName = TargetClass->GetName();
 		return
-			!(bCheckIgnore && FReplicatorGeneratorManager::Get().IsIgnoredActor(TargetClass)) &&
 			(TargetClass->IsChildOf(AActor::StaticClass()) || TargetClass->IsChildOf(UActorComponent::StaticClass())) &&
 			!TargetClass->IsChildOf(ALevelScriptActor::StaticClass()) &&
 			!(ClassName.StartsWith(TEXT("SKEL_")) || ClassName.StartsWith(TEXT("REINST_"))) &&
-			// HasRepComponent(TargetClass) &&
 			HasReplicatedPropertyOrRPC(TargetClass);
 	}
 
 	bool IsCompilableClassName(const FString& ClassName)
 	{
-		FRegexPattern MatherPatter(TEXT("[^a-zA-Z0-9_]"));
+		const FRegexPattern MatherPatter(TEXT("[^a-zA-Z0-9_]"));
 		FRegexMatcher Matcher(MatherPatter, ClassName);
 		if (Matcher.FindNext())
 		{
@@ -267,8 +294,8 @@ namespace ChanneldReplicatorGeneratorUtils
 		Binary = TEXT("UE4Editor");
 #endif
 
-		FString ConfigutationName = ANSI_TO_TCHAR(COMPILER_CONFIGURATION_NAME);
-		bool bIsDevelopment = ConfigutationName.Equals(TEXT("Development"));
+		const FString ConfigurationName = ANSI_TO_TCHAR(COMPILER_CONFIGURATION_NAME);
+		bool bIsDevelopment = ConfigurationName.Equals(TEXT("Development"));
 
 #if PLATFORM_WINDOWS
 		FString PlatformName;
@@ -280,7 +307,7 @@ namespace ChanneldReplicatorGeneratorUtils
 
 		return FPaths::Combine(
 			FPaths::ConvertRelativePathToFull(FPaths::EngineDir()),
-			TEXT("Binaries"), PlatformName, FString::Printf(TEXT("%s%s-Cmd.exe"), *Binary, bIsDevelopment ? TEXT("") : *FString::Printf(TEXT("-%s-%s"), *PlatformName, *ConfigutationName)));
+			TEXT("Binaries"), PlatformName, FString::Printf(TEXT("%s%s-Cmd.exe"), *Binary, bIsDevelopment ? TEXT("") : *FString::Printf(TEXT("-%s-%s"), *PlatformName, *ConfigurationName)));
 #endif
 
 #if PLATFORM_MAC
@@ -291,5 +318,18 @@ namespace ChanneldReplicatorGeneratorUtils
 					bIsDevelopment ? TEXT("") : *FString::Printf(TEXT("-Mac-%s"),*ConfigutationName)));
 #endif
 		return TEXT("");
+	}
+
+	FString GetHashString(const FString& Target)
+	{
+		const int32 Hash = GetTypeHash(Target);
+		if (Hash < 0)
+		{
+			return FString::Printf(TEXT("_%d"), -Hash);
+		}
+		else
+		{
+			return FString::Printf(TEXT("%d"), Hash);
+		}
 	}
 }

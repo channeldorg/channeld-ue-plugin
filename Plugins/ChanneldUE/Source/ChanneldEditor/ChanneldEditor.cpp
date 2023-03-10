@@ -100,8 +100,6 @@ void FChanneldEditorModule::StartupModule()
 
 	BuildChanneldNotify = NewObject<UChanneldMissionNotiProxy>();
 	BuildChanneldNotify->AddToRoot();
-	ChanneldGatewayNotify = NewObject<UChanneldGetawayNotiProxy>();
-	ChanneldGatewayNotify->AddToRoot();
 
 	GenRepNotify = NewObject<UChanneldMissionNotiProxy>();
 	GenRepNotify->AddToRoot();
@@ -184,10 +182,16 @@ void FChanneldEditorModule::LaunchChanneldAction()
 
 void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchResult Result)> PostChanneldLaunched /* nullptr*/)
 {
-	if (ChanneldGatewayWorkThread.IsValid() && ChanneldGatewayWorkThread->IsProcRunning())
+	if (FPlatformProcess::IsProcRunning(ChanneldProcHandle))
 	{
 		UE_LOG(LogChanneldEditor, Warning, TEXT("Channeld is already running"));
 		PostChanneldLaunched(EChanneldLaunchResult::AlreadyLaunched);
+		return;
+	}
+	if (BuildChanneldWorkThread.IsValid() && BuildChanneldWorkThread->IsProcRunning())
+	{
+		UE_LOG(LogChanneldEditor, Warning, TEXT("Channeld is already building"));
+		PostChanneldLaunched(EChanneldLaunchResult::Building);
 		return;
 	}
 	FString ChanneldPath = FPlatformMisc::GetEnvironmentVariable(TEXT("CHANNELD_PATH"));
@@ -225,40 +229,61 @@ void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchR
 	BuildChanneldWorkThread->ProcSucceedDelegate.AddLambda([this, ChanneldBinPath, RunChanneldArgs, WorkingDir, PostChanneldLaunched](FChanneldProcWorkerThread*)
 	{
 		BuildChanneldNotify->SpawnMissionSucceedNotification(nullptr);
-		ChanneldGatewayWorkThread = MakeShareable(
-			new FChanneldProcWorkerThread(
-				TEXT("ChanneldGatewayWorkThread"),
-				ChanneldBinPath,
-				RunChanneldArgs,
-				WorkingDir
-			)
+		uint32 ProcessId;
+		ChanneldProcHandle = FPlatformProcess::CreateProc(
+			*ChanneldBinPath,
+			*RunChanneldArgs,
+			false, false, false, &ProcessId, 0, *WorkingDir, nullptr, nullptr
 		);
-		if (PostChanneldLaunched != nullptr)
+
+		FPlatformProcess::Sleep(0.5f);
+		if (!FPlatformProcess::IsProcRunning(ChanneldProcHandle))
 		{
-			ChanneldGatewayWorkThread->ProcBeginDelegate.AddLambda([this, PostChanneldLaunched](FChanneldProcWorkerThread*)
+			// If the channeld process is not running, it means that it failed to launch.
+			// We need to run again and read the error.
+			void* ReadPipe = nullptr;
+			void* WritePipe = nullptr;
+			FPlatformProcess::CreatePipe(ReadPipe, WritePipe);
+			ChanneldProcHandle = FPlatformProcess::CreateProc(
+				*ChanneldBinPath,
+				*RunChanneldArgs,
+				false, false, false, &ProcessId, 0, *WorkingDir, WritePipe, ReadPipe
+			);
+			FPlatformProcess::Sleep(0.5f);
+			const FString ErrOutput = FPlatformProcess::ReadPipe(ReadPipe);
+			FPlatformProcess::ClosePipe(ReadPipe, WritePipe);
+			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to launch channeld:\n%s"), *ErrOutput)
+			// Open message dialog on game thread, because we are in a worker thread.
+			AsyncTask(ENamedThreads::GameThread, [this, ErrOutput, PostChanneldLaunched]()
 			{
-				FPlatformProcess::Sleep(0.5f);
-				if (ChanneldGatewayWorkThread->IsProcRunning())
-				{
-					PostChanneldLaunched(EChanneldLaunchResult::Launched);
-				}
-				else
-				{
+				const FText Title = LOCTEXT("ChanneldLaunchFailedTitle", "Launch Channeld Failed");
+				FMessageDialog::Open(
+					EAppMsgType::Ok,
+					FText::Format(
+						LOCTEXT("ChanneldLaunchFailedText", "Failed to launch channeld:\n{0}"),
+						FText::FromString(ErrOutput)
+					),
+					&Title
+				);
+				if (PostChanneldLaunched != nullptr)
 					PostChanneldLaunched(EChanneldLaunchResult::Failed);
-				}
 			});
 		}
-		ChanneldGatewayWorkThread->ProcOutputMsgDelegate.BindUObject(ChanneldGatewayNotify, &UChanneldGetawayNotiProxy::ReceiveOutputMsg);
-		ChanneldGatewayWorkThread->Execute();
+		else
+		{
+			if (PostChanneldLaunched != nullptr)
+				PostChanneldLaunched(EChanneldLaunchResult::Launched);
+		}
 	});
 	BuildChanneldWorkThread->Execute();
 }
 
 void FChanneldEditorModule::StopChanneldAction()
 {
-	if (ChanneldGatewayWorkThread.IsValid() && ChanneldGatewayWorkThread->IsProcRunning())
+	if (FPlatformProcess::IsProcRunning(ChanneldProcHandle))
 	{
-		ChanneldGatewayWorkThread->Exit();
+		FPlatformProcess::TerminateProc(ChanneldProcHandle, true);
+		ChanneldProcHandle.Reset();
 		UE_LOG(LogChanneldEditor, Log, TEXT("Stopped channeld"));
 	}
 }
@@ -387,7 +412,7 @@ void FChanneldEditorModule::GenerateReplicatorAction()
 		GenRepProtoCppCode(GeneratedProtoFiles);
 		GenRepProtoGoCode(GeneratedProtoFiles, LatestGeneratedManifest, GeneratorManager.GetReplicatorStorageDir());
 
-		
+
 		// Update UChanneldSettings::DefaultChannelDataMsgNames
 		auto Settings = GetMutableDefault<UChanneldSettings>();
 		TMap<EChanneldChannelType, FString> NewChannelDataMsgNames;

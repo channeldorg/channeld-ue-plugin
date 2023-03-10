@@ -71,7 +71,7 @@ public:
 	/**
 	 * Generate replicator codes for the specified actors.
 	 *
-	 * @param TargetActors The actor classes to generate replicators for.
+	 * @param ReplicationActorClasses The actor classes to generate replicators and channeld data fields.
 	 * @param DefaultModuleDir The default module directory. The channel data processor will use default module name.
 	 * @param ProtoPackageName All generated proto files will use this package name.
 	 * @param GoPackageImportPath Be used to set 'option go_package='
@@ -79,7 +79,7 @@ public:
 	 * @return true on success, false otherwise.
 	 */
 	bool Generate(
-		TArray<const UClass*> TargetActors,
+		TArray<const UClass*> ReplicationActorClasses,
 		const FString& DefaultModuleDir,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
@@ -89,23 +89,19 @@ public:
 	/**
 	 * Generate replicator code for the specified actor.
 	 *
-	 * @param TargetActorClass The actor to generate replicator for.
+	 * @param ActorDecorator The actor to generate replicator for.
 	 * @param GeneratedResult The generated replicator code (.h, .cpp, .proto) .
-	 * @param ProtoPackageName All replicator's proto files will use this package name.
-	 * @param GoPackageImportPath Be used to set 'option go_package='
 	 * @param ResultMessage The result message.
 	 * @return true on success, false otherwise.
 	 */
 	bool GenerateActorCode(
-		const UClass* TargetActorClass,
-		const FString& ProtoPackageName,
-		const FString& GoPackageImportPath,
+		const TSharedPtr<FReplicatedActorDecorator>& ActorDecorator,
 		FReplicatorCode& GeneratedResult,
 		FString& ResultMessage
 	);
 
 	bool GenerateChannelDataCode(
-		TArray<const UClass*> TargetActorClasses,
+		const TArray<TSharedPtr<FReplicatedActorDecorator>>& ReplicationActorDecorators,
 		const FString& ChannelDataProtoMsgName,
 		const FString& ChannelDataProcessorNamespace,
 		const FString& ChannelDataProcessorClassName,
@@ -165,7 +161,6 @@ protected:
 		const UClass* TargetActor,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
-		bool bInitPropertiesAndRPCs = true,
-		bool bIncrementIfSameName = true
+		bool bInitPropertiesAndRPCs = true
 	);
 };
