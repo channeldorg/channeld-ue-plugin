@@ -78,10 +78,13 @@ public:
 	FVector RegionBoxMinSize;
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
 	FVector RegionBoxMaxSize;
+	// If set to true, the region boxes will be spawned on the floor. The actual Z value will be set to the floor height.
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
-	FVector RegionBoxOffset;
+	bool bRegionBoxOnFloor = true;
+	// FVector RegionBoxOffset;
+	
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
-	TSubclassOf<AActor> SubscriptionBoxClass;
+	TSubclassOf<ATintActor> SubscriptionBoxClass;
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))
 	FVector SubscriptionBoxMinSize;
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Debug", meta=(EditCondition="bEnableSpatialVisualizer"))

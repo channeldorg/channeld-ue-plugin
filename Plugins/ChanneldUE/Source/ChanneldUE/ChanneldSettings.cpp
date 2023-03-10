@@ -13,10 +13,14 @@ static const FName FallbackNetDriverName("/Script/OnlineSubsystemUtils.IpNetDriv
 
 UChanneldSettings::UChanneldSettings(const FObjectInitializer& ObjectInitializer) :
 	Super(ObjectInitializer),
-	RegionBoxMinSize(10, 10, 20),
-	RegionBoxMaxSize(100000, 100000, 1000),
+	RegionBoxClass(LoadClass<ATintActor>(NULL, TEXT("BlueprintGeneratedClass'/ChanneldUE/Blueprints/BP_SpatialRegionBox.BP_SpatialRegionBox_C'"))),
+	RegionBoxMinSize(10, 10, 10),
+	RegionBoxMaxSize(100000, 100000, 20),
+	// RegionBoxOffset(0, 0, 20),
+	SubscriptionBoxClass(LoadClass<ATintActor>(NULL, TEXT("BlueprintGeneratedClass'/ChanneldUE/Blueprints/BP_SpatialSubscriptionBox.BP_SpatialSubscriptionBox_C'"))),
 	SubscriptionBoxMinSize(10, 10, 100),
-	SubscriptionBoxMaxSize(100000, 100000, 1000)
+	SubscriptionBoxMaxSize(100000, 100000, 1000),
+	SpatialOutlinerClass(LoadClass<AOutlinerActor>(NULL, TEXT("BlueprintGeneratedClass'/ChanneldUE/Blueprints/BP_SpatialOutliner.BP_SpatialOutliner_C'")))
 {
 }
 

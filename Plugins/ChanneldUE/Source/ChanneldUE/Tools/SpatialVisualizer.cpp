@@ -6,6 +6,8 @@
 #include "ChanneldConnection.h"
 #include "ChanneldSettings.h"
 #include "Engine/RendererSettings.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 USpatialVisualizer::USpatialVisualizer(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -76,13 +78,51 @@ void USpatialVisualizer::SpawnRegionBoxes()
 		GetWorld()->DestroyActor(Pair.Value);
 	}
 	RegionBoxes.Empty();
-		
+
+	// Get the default character movement component for finding the floor.
+	UCharacterMovementComponent* CharMove = nullptr;
+	FVector DefaultFloorLoc = FVector::ZeroVector;
+	if (Settings->bRegionBoxOnFloor)
+	{
+		if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+		{
+			if (ACharacter* Char = PlayerController->GetCharacter())
+			{
+				CharMove = Char->GetCharacterMovement();
+				if (CharMove)
+				{
+					FFindFloorResult FloorResult;
+					CharMove->FindFloor(CharMove->GetActorLocation(), FloorResult, true);
+					if (FloorResult.bBlockingHit)
+					{
+						DefaultFloorLoc = FloorResult.HitResult.ImpactPoint;
+					}
+				}
+			}
+		}
+	}
+	
 	for (auto Region : Regions)
 	{
 		// Swap the Y and Z as UE uses the Z-Up rule but channeld uses the Y-up rule.
-		FVector BoundsMin = FVector(Region.min().x(), Region.min().z(), Region.min().y());//Settings->RegionBoxMinSize.Z);
-		FVector BoundsMax = FVector(Region.max().x(), Region.max().z(), Region.max().y()); //Settings->RegionBoxMinSize.Z);
-		FVector Location = 0.5f * (BoundsMin + BoundsMax) + Settings->RegionBoxOffset;
+		FVector BoundsMin = FVector(Region.min().x(), Region.min().z(), Region.min().y());
+		FVector BoundsMax = FVector(Region.max().x(), Region.max().z(), Region.max().y());
+		FVector Location = 0.5f * (BoundsMin + BoundsMax);
+		
+		if (Settings->bRegionBoxOnFloor && CharMove)
+		{
+			FFindFloorResult FloorResult;
+			CharMove->FindFloor(FVector(Location.X, Location.Y, CharMove->GetActorLocation().Z), FloorResult, true);
+			if (FloorResult.bBlockingHit)
+			{
+				Location = FloorResult.HitResult.ImpactPoint;
+			}
+			else if (DefaultFloorLoc != FVector::ZeroVector)
+			{
+				Location = FVector(Location.X, Location.Y, DefaultFloorLoc.Z);
+			}
+		}
+		
 		ATintActor* Box = CastChecked<ATintActor>(GetWorld()->SpawnActor(Settings->RegionBoxClass, &Location));
 		FVector BoundsSize = ClampVector(BoundsMax - BoundsMin, Settings->RegionBoxMinSize, Settings->RegionBoxMaxSize);
 		FVector BoxSize = Box->GetRootComponent()->Bounds.BoxExtent * 2;
