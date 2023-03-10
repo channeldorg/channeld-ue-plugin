@@ -7,13 +7,21 @@
 #include "ReplicatorTemplate/CppReplicatorTemplate.h"
 
 FReplicatedActorDecorator::FReplicatedActorDecorator(
-	const UClass* TargetActorClass,
-	const TFunction<void(FString&, bool)>& SetCompilableName,
-	FString InProtoPackageName,
-	FString InGoPackageImportPath,
-	bool IsSingleton,
-	bool IsChanneldUEBuiltinType
-) : TargetClass(TargetActorClass), ProtoPackageName(InProtoPackageName), GoPackageImportPath(InGoPackageImportPath), bSingleton(IsSingleton), bChanneldUEBuiltinType(IsChanneldUEBuiltinType)
+	const UClass* TargetActorClass
+	, const TFunction<void(FString&, bool)>& SetCompilableName
+	, FString InProtoPackageName
+	, FString InGoPackageImportPath
+	, bool IsSingleton
+	, bool IsChanneldUEBuiltinType
+	, bool IsSkipGenReplicator
+	, bool IsSkipGenChannelDataState
+) : TargetClass(TargetActorClass)
+    , ProtoPackageName(InProtoPackageName)
+    , GoPackageImportPath(InGoPackageImportPath)
+    , bSingleton(IsSingleton)
+    , bChanneldUEBuiltinType(IsChanneldUEBuiltinType)
+    , bSkipGenReplicator(IsSkipGenReplicator)
+    , bSkipGenChannelDataState(IsSkipGenChannelDataState)
 {
 	TargetClass = TargetActorClass;
 	bIsBlueprintGenerated = TargetClass->HasAnyClassFlags(CLASS_CompiledFromBlueprint);
@@ -95,6 +103,16 @@ bool FReplicatedActorDecorator::IsSingleton()
 bool FReplicatedActorDecorator::IsChanneldUEBuiltinType()
 {
 	return bChanneldUEBuiltinType;
+}
+
+bool FReplicatedActorDecorator::IsSkipGenReplicator()
+{
+	return bSkipGenReplicator;
+}
+
+bool FReplicatedActorDecorator::IsSkipGenChannelDataState()
+{
+	return bSkipGenChannelDataState;
 }
 
 void FReplicatedActorDecorator::SetModuleInfo(const FModuleInfo& InModuleBelongTo)

@@ -32,14 +32,6 @@ bool FReplicatorCodeGenerator::RefreshModuleInfoByClassName()
 	return true;
 }
 
-void FReplicatorCodeGenerator::SetTargetActorRepOptions(const TArray<FTargetActorReplicationOption>& TargetActorReplicationOptions)
-{
-	for (const FTargetActorReplicationOption& Option : TargetActorReplicationOptions)
-	{
-		TargetActorRepOptions.Add(Option.TargetActorClass, Option);
-	}
-}
-
 FString FReplicatorCodeGenerator::GetClassHeadFilePath(const FString& ClassName)
 {
 	FCPPClassInfo* Result = CPPClassInfoMap.Find(ClassName);
@@ -51,7 +43,7 @@ FString FReplicatorCodeGenerator::GetClassHeadFilePath(const FString& ClassName)
 }
 
 bool FReplicatorCodeGenerator::Generate(
-	TArray<const UClass*> ReplicationActorClasses,
+	const TArray<FActorInfoToGenerateReplication>& ReplicationActorInfos,
 	const FString& DefaultModuleDir,
 	const FString& ProtoPackageName,
 	const FString& GoPackageImportPath,
@@ -60,7 +52,7 @@ bool FReplicatorCodeGenerator::Generate(
 {
 	// Clean global variables, make sure it's empty for this generation
 	IllegalClassNameIndex = 0;
-	TargetActorSameNameCounter.Empty(ReplicationActorClasses.Num());
+	TargetActorSameNameCounter.Empty(ReplicationActorInfos.Num());
 
 	// Clear global struct decorators, make sure it's empty for this generation
 	FPropertyDecoratorFactory::Get().ClearGlobalStruct();
@@ -68,14 +60,20 @@ bool FReplicatorCodeGenerator::Generate(
 	FString Message, IncludeCode, RegisterCode;
 	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecoratorsToGenReplicator;
 	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecoratorsToGenChannelData;
-	for (const UClass* ReplicationActorClass : ReplicationActorClasses)
+	for (const FActorInfoToGenerateReplication& Info : ReplicationActorInfos)
 	{
+		const UClass* ReplicationActorClass = Info.TargetActorClass;
 		TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
 		if (!ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinClass(ReplicationActorClass))
 		{
-			if (!CreateDecorateActor(ActorDecorator, Message, ReplicationActorClass, ProtoPackageName, GoPackageImportPath))
+			if (!CreateDecorateActor(ActorDecorator, Message, Info, ProtoPackageName, GoPackageImportPath))
 			{
 				UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
+				continue;
+			}
+			if (ActorDecorator->IsSkipGenReplicator())
+			{
+				UE_LOG(LogChanneldRepGenerator, Display, TEXT("Skip generate replicator for %s"), *ActorDecorator->GetActorPathName());
 				continue;
 			}
 			FReplicatorCode GeneratedResult;
@@ -92,13 +90,20 @@ bool FReplicatorCodeGenerator::Generate(
 		}
 		else
 		{
-			if (!CreateDecorateActor(ActorDecorator, Message, ReplicationActorClass, ProtoPackageName, GoPackageImportPath, false))
+			if (!CreateDecorateActor(ActorDecorator, Message, Info, ProtoPackageName, GoPackageImportPath, false))
 			{
 				UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
 				continue;
 			}
 		}
-		ActorDecoratorsToGenChannelData.Add(ActorDecorator);
+		if (ActorDecorator->IsSkipGenChannelDataState())
+		{
+			UE_LOG(LogChanneldRepGenerator, Display, TEXT("Skip generate channel data field for %s"), *ActorDecorator->GetActorPathName());
+		}
+		else
+		{
+			ActorDecoratorsToGenChannelData.Add(ActorDecorator);
+		}
 	}
 
 	// Channel data processor
@@ -368,18 +373,22 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	TArray<TSharedPtr<FReplicatedActorDecorator>> ChildrenOfAActor;
 
 	int32 AActorIndex = INDEX_NONE;
-	for(int32 i = 0; i< SortedReplicationActorClasses.Num(); ++i) {
+	for (int32 i = 0; i < SortedReplicationActorClasses.Num(); ++i)
+	{
 		const UClass* TargetClass = SortedReplicationActorClasses[i]->GetTargetClass();
 		if (TargetClass == AActor::StaticClass())
 		{
 			AActorIndex = i;
 		}
-		else if(TargetClass->IsChildOf(AActor::StaticClass()))
+		else if (TargetClass->IsChildOf(AActor::StaticClass()))
 		{
 			ChildrenOfAActor.Add(SortedReplicationActorClasses[i]);
 		}
 	}
-	if(AActorIndex == INDEX_NONE)
+	// In runtime, all AActor children's state will be removed from channel data while AActor's state is removed.
+	// If we remove AActor children's states before merge them, the AActor's state will add to channel data again.
+	// So we need to make sure AActor is the last one in the list for generating merge channel data code.
+	if (AActorIndex == INDEX_NONE)
 	{
 		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("AActor is not included in channel data"));
 	}
@@ -714,16 +723,15 @@ void FReplicatorCodeGenerator::ProcessHeaderFiles(const TArray<FString>& Files, 
 bool FReplicatorCodeGenerator::CreateDecorateActor(
 	TSharedPtr<FReplicatedActorDecorator>& OutActorDecorator,
 	FString& OutResultMessage,
-	const UClass* TargetActor,
+	const FActorInfoToGenerateReplication& ReplicationActorInfo,
 	const FString& ProtoPackageName,
 	const FString& GoPackageImportPath,
 	bool bInitPropertiesAndRPCs
 )
 {
-	FTargetActorReplicationOption Option = TargetActorRepOptions.FindRef(TargetActor);
 	FReplicatedActorDecorator* ActorDecorator = new FReplicatedActorDecorator(
-		TargetActor,
-		[this, TargetActor](FString& TargetActorName, bool IsActorNameCompilable)
+		ReplicationActorInfo.TargetActorClass
+		, [this, ReplicationActorInfo](FString& TargetActorName, bool IsActorNameCompilable)
 		{
 			if (!IsActorNameCompilable)
 			{
@@ -733,17 +741,19 @@ bool FReplicatorCodeGenerator::CreateDecorateActor(
 			if ((SameNameCount = TargetActorSameNameCounter.Find(TargetActorName)) != nullptr)
 			{
 				*SameNameCount += 1;
-				TargetActorName = FString::Printf(TEXT("%s_%s"), *TargetActorName, *ChanneldReplicatorGeneratorUtils::GetHashString(TargetActor->GetPathName()));
+				TargetActorName = FString::Printf(TEXT("%s_%s"), *TargetActorName, *ChanneldReplicatorGeneratorUtils::GetHashString(ReplicationActorInfo.TargetActorClass->GetPathName()));
 			}
 			else
 			{
 				TargetActorSameNameCounter.Add(TargetActorName, 1);
 			}
-		},
-		ProtoPackageName,
-		GoPackageImportPath,
-		Option.bSingleton,
-		Option.bChanneldUEBuiltinType
+		}
+		, ProtoPackageName
+		, GoPackageImportPath
+		, ReplicationActorInfo.bSingleton
+		, ReplicationActorInfo.bChanneldUEBuiltinType
+		, ReplicationActorInfo.bSkipGenReplicator
+		, ReplicationActorInfo.bSkipGenChannelDataState
 	);
 	// If the target class is c++ class, we need to find the module it belongs to.
 	// The module info is used to generate the include code in head file.

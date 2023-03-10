@@ -55,7 +55,6 @@ namespace ChanneldReplicatorGeneratorUtils
 		APlayerState::StaticClass(),
 		UActorComponent::StaticClass(),
 		USceneComponent::StaticClass(),
-		UCharacterMovementComponent::StaticClass(),
 	};
 
 	TArray<UClass*> GetChanneldUEBuiltinClasses()

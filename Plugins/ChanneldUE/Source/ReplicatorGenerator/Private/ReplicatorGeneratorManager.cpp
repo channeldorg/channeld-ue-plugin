@@ -88,29 +88,16 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 
 	FGeneratedCodeBundle ReplicatorCodeBundle;
 
-	// Sort the target classes by ReplicationRegistryTable
-	TArray<FTargetActorReplicationOption> TargetActorRepOptions;
+	// Read generate replication options from ReplicationRegistryTable. and sort the ActorInfosToGenRep by the order in the table
+	TArray<FActorInfoToGenerateReplication> ActorInfosToGenRep;
 	int32 Index = 0;
-	for (const UClass* BuiltinActorClass : ChanneldReplicatorGeneratorUtils::GetChanneldUEBuiltinClasses())
-	{
-		TargetActorRepOptions.Add(
-			FTargetActorReplicationOption(
-				++Index,
-				BuiltinActorClass,
-				ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinSingletonClass(BuiltinActorClass),
-				true,
-				true,
-				false
-			)
-		);
-	}
 
 	UDataTable* RegistryTable = ReplicationRegistryUtils::LoadRegistryTable();
 	TArray<FChanneldReplicationRegistryItem*> RegistryTableData = ReplicationRegistryUtils::GetRegistryTableData(RegistryTable);
 
 	// Use map and set to improve the performance of searching
-	TMap<FString, const UClass*> TargetActorClassesMap;
-	TargetActorClassesMap.Reserve(ReplicationActorClasses.Num());
+	TMap<FString, const UClass*> ReplicationActorClassesMap;
+	ReplicationActorClassesMap.Reserve(ReplicationActorClasses.Num());
 	TSet<FString> RegisteredClassPathsSet;
 	RegisteredClassPathsSet.Reserve(RegistryTableData.Num());
 
@@ -120,46 +107,62 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 	TArray<FString> TargetClassPathsToUnregister;
 	for (const UClass* TargetActorClass : ReplicationActorClasses)
 	{
-		TargetActorClassesMap.Add(TargetActorClass->GetPathName(), TargetActorClass);
+		ReplicationActorClassesMap.Add(TargetActorClass->GetPathName(), TargetActorClass);
 	}
 	for (FChanneldReplicationRegistryItem* RegistryItem : RegistryTableData)
 	{
 		RegisteredClassPathsSet.Add(RegistryItem->TargetClassPath);
-		if (!TargetActorClassesMap.Contains(RegistryItem->TargetClassPath))
+		if (!ReplicationActorClassesMap.Contains(RegistryItem->TargetClassPath))
 		{
 			TargetClassPathsToUnregister.Add(RegistryItem->TargetClassPath);
 		}
 		else
 		{
-			TargetActorRepOptions.Add(
-				FTargetActorReplicationOption(
-					++Index,
-					TargetActorClassesMap.FindRef(RegistryItem->TargetClassPath),
-					RegistryItem->Singleton,
-					false,
-					RegistryItem->Skip,
-					RegistryItem->Skip
+			ActorInfosToGenRep.Add(
+				FActorInfoToGenerateReplication(
+					++Index
+					, ReplicationActorClassesMap.FindRef(RegistryItem->TargetClassPath)
+					, RegistryItem->Singleton
+					, false
+					, RegistryItem->Skip
+					, RegistryItem->Skip
 				)
 			);
 		}
 	}
 	for (const UClass* TargetActorClass : ReplicationActorClasses)
 	{
-		if (!RegisteredClassPathsSet.Contains(TargetActorClass->GetPathName()))
+		if (!ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinClass(TargetActorClass) && !RegisteredClassPathsSet.Contains(TargetActorClass->GetPathName()))
 		{
 			TargetClassPathsToRegister.Add(TargetActorClass->GetPathName());
-			TargetActorRepOptions.Add(
-				FTargetActorReplicationOption(
-					++Index,
-					TargetActorClass,
-					false,
-					false,
-					false,
-					false
+			ActorInfosToGenRep.Add(
+				FActorInfoToGenerateReplication(
+					++Index
+					, TargetActorClass
+					, false
+					, false
+					, false
+					, false
 				)
 			);
 		}
 	}
+	// ChanneldUEBuiltinClasses are not included in the registry table.
+	// For making sure that the order of the channel data state is fixed every time, we get them from a fixed order array.
+	for (const UClass* BuiltinClass : ChanneldReplicatorGeneratorUtils::GetChanneldUEBuiltinClasses())
+	{
+		ActorInfosToGenRep.Add(
+			FActorInfoToGenerateReplication(
+				++Index
+				, BuiltinClass
+				, ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinSingletonClass(BuiltinClass)
+				, true
+				, true
+				, false
+			)
+		);
+	}
+
 	// Register and unregister and save the RegistryTable
 	if (TargetClassPathsToRegister.Num() > 0 || TargetClassPathsToUnregister.Num() > 0)
 	{
@@ -172,22 +175,10 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 		}
 	}
 
-	// Filter out the classes that should be skipped
-	TArray<const UClass*> NotSkipTargetActorClasses;
-	NotSkipTargetActorClasses.Reserve(TargetActorRepOptions.Num());
-	for (const FTargetActorReplicationOption& TargetActorRepOption : TargetActorRepOptions)
-	{
-		if (!TargetActorRepOption.bSkipGenReplicator)
-		{
-			NotSkipTargetActorClasses.Add(TargetActorRepOption.TargetActorClass);
-		}
-	}
-	CodeGenerator->SetTargetActorRepOptions(TargetActorRepOptions);
-
 	const FString ProtoPackageName = GetDefaultProtoPackageName();
 	const FString GoPackageImportPath = GoPackageImportPathPrefix + ProtoPackageName;
 	CodeGenerator->Generate(
-		NotSkipTargetActorClasses,
+		ActorInfosToGenRep,
 		GetDefaultModuleDir(),
 		ProtoPackageName,
 		(GoPackageImportPathPrefix + ProtoPackageName),

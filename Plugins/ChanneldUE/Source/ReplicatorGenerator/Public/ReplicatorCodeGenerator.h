@@ -49,32 +49,32 @@ struct FGeneratedCodeBundle
 	FString ChannelDataRegistration_GoCode;
 };
 
-struct FTargetActorReplicationOption
+struct FActorInfoToGenerateReplication
 {
 	int32 Index;
 	const UClass* TargetActorClass;
 	bool bSingleton;
 	bool bChanneldUEBuiltinType;
 	bool bSkipGenReplicator;
-	bool bSkipGenChannelDataField;
+	bool bSkipGenChannelDataState;
 
-	FTargetActorReplicationOption()
+	FActorInfoToGenerateReplication()
 		: Index(-1)
 		  , TargetActorClass(nullptr)
 		  , bSingleton(false)
 		  , bChanneldUEBuiltinType(false)
 		  , bSkipGenReplicator(true)
-		  , bSkipGenChannelDataField(true)
+		  , bSkipGenChannelDataState(true)
 	{
 	}
 
-	FTargetActorReplicationOption(int32 InIndex, const UClass* InTargetActorClass, bool bSingleton, bool bChanneldUEBuiltinType, bool bSkipGenReplicator, bool bSkipGenChannelDataField)
+	FActorInfoToGenerateReplication(int32 InIndex, const UClass* InTargetActorClass, bool bSingleton, bool bChanneldUEBuiltinType, bool bSkipGenReplicator, bool bSkipGenChannelDataState)
 		: Index(InIndex)
 		  , TargetActorClass(InTargetActorClass)
 		  , bSingleton(bSingleton)
 		  , bChanneldUEBuiltinType(bChanneldUEBuiltinType)
 		  , bSkipGenReplicator(bSkipGenReplicator)
-		  , bSkipGenChannelDataField(bSkipGenChannelDataField)
+		  , bSkipGenChannelDataState(bSkipGenChannelDataState)
 	{
 	}
 };
@@ -89,8 +89,6 @@ public:
 	 */
 	bool RefreshModuleInfoByClassName();
 
-	void SetTargetActorRepOptions(const TArray<FTargetActorReplicationOption>& FTargetActorReplicationOption);
-
 	/**
 	 * Get the path of the header file by class name.
 	 * Before calling this function, you need to call RefreshModuleInfoByClassName() at least once.
@@ -103,7 +101,7 @@ public:
 	/**
 	 * Generate replicator codes for the specified actors.
 	 *
-	 * @param ReplicationActorClasses The actor classes to generate replicators and channeld data fields.
+	 * @param ReplicationActorInfos The actor information to generate replicators and channeld data fields.
 	 * @param DefaultModuleDir The default module directory. The channel data processor will use default module name.
 	 * @param ProtoPackageName All generated proto files will use this package name.
 	 * @param GoPackageImportPath Be used to set 'option go_package='
@@ -111,7 +109,7 @@ public:
 	 * @return true on success, false otherwise.
 	 */
 	bool Generate(
-		TArray<const UClass*> ReplicationActorClasses,
+		const TArray<FActorInfoToGenerateReplication>& ReplicationActorInfos,
 		const FString& DefaultModuleDir,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
@@ -181,7 +179,6 @@ public:
 protected:
 	TMap<FString, FModuleInfo> ModuleInfoByClassName;
 	TMap<FString, FCPPClassInfo> CPPClassInfoMap;
-	TMap<const UClass*, FTargetActorReplicationOption> TargetActorRepOptions;
 
 	int32 IllegalClassNameIndex = 0;
 	TMap<FString, int32> TargetActorSameNameCounter;
@@ -191,7 +188,7 @@ protected:
 	inline bool CreateDecorateActor(
 		TSharedPtr<FReplicatedActorDecorator>& OutActorDecorator,
 		FString& OutResultMessage,
-		const UClass* TargetActor,
+		const FActorInfoToGenerateReplication& ReplicationActorInfo,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
 		bool bInitPropertiesAndRPCs = true

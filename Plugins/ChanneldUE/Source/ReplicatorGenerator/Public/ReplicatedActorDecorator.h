@@ -115,7 +115,9 @@ public:
 		FString ProtoPackageName,
 		FString GoPackageName,
 		bool IsSingleton,
-		bool IsChanneldUEBuiltinType
+		bool IsChanneldUEBuiltinType,
+		bool IsSkipGenReplicator,
+		bool IsSkipGenChannelDataState
 	);
 
 	virtual ~FReplicatedActorDecorator() = default;
@@ -145,6 +147,10 @@ public:
 	 * TODO: The list of builtin types should be maintained by ChanneldUE module.
 	 */
 	virtual bool IsChanneldUEBuiltinType();
+
+	virtual bool IsSkipGenReplicator();
+
+	virtual bool IsSkipGenChannelDataState();
 
 	/**
 	 * Set module info if the target actor class is a cpp class.
@@ -307,7 +313,9 @@ protected:
 
 	bool bSingleton;
 	bool bChanneldUEBuiltinType;
-
+	bool bSkipGenReplicator;
+	bool bSkipGenChannelDataState;
+	
 	bool bIsBlueprintGenerated;
 	FString ReplicatorClassName;
 
