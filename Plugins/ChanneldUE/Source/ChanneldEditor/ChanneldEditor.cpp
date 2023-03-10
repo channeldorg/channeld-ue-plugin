@@ -247,7 +247,7 @@ void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchR
 			ChanneldProcHandle = FPlatformProcess::CreateProc(
 				*ChanneldBinPath,
 				*RunChanneldArgs,
-				false, false, false, &ProcessId, 0, *WorkingDir, WritePipe, ReadPipe
+				false, true, true, &ProcessId, 0, *WorkingDir, WritePipe, ReadPipe
 			);
 			FPlatformProcess::Sleep(0.5f);
 			const FString ErrOutput = FPlatformProcess::ReadPipe(ReadPipe);
@@ -275,6 +275,15 @@ void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchR
 				PostChanneldLaunched(EChanneldLaunchResult::Launched);
 		}
 	});
+
+	BuildChanneldNotify->MissionCanceled.AddLambda([this]()
+	{
+		if (BuildChanneldWorkThread.IsValid() && BuildChanneldWorkThread->GetThreadStatus() == EChanneldThreadStatus::Busy)
+		{
+			BuildChanneldWorkThread->Cancel();
+		}
+	});
+
 	BuildChanneldWorkThread->Execute();
 }
 
