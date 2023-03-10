@@ -41,7 +41,7 @@ class UChanneldEditorSettings : public UObject
 
 public:
 	UPROPERTY(Config, EditAnywhere, Category= "Channeld", meta = ( ToolTip = "The go source directory or file to build and run. The working directory is CHANNELD_PATH." ))
-	FString LaunchChanneldEntry = TEXT("examples/channeld-ue-tps/main.go");
+	FString LaunchChanneldEntry = TEXT("examples/channeld-ue-tps");
 
 	UPROPERTY(Config, EditAnywhere, Category = "Channeld")
 	FString LaunchChanneldParameters = TEXT("-cfsm=\"config/client_authoratative_fsm.json\" -dev -loglevel=-1 -ct=0 -mcb=13 -scc=\"config/spatial_static_2x2.json\"");
@@ -62,7 +62,7 @@ public:
 	FString ChanneldProtoFilesStorageDir = TEXT("examples/channeld-ue-tps/");
 
 	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator|Tools", DisplayName = "Default Replication Component", meta = ( ToolTip = "Using to add the replicator component to all replicated blueprint actors without replicator" ))
-	TSubclassOf<UChanneldReplicationComponent> DefaultReplicationComponent;
+	TSubclassOf<UChanneldReplicationComponent> DefaultReplicationComponent = UChanneldReplicationComponent::StaticClass();
 	/*
     static int32 GetServerNum()
     {
