@@ -33,7 +33,11 @@ namespace ChanneldReplicatorGeneratorUtils
 		EFilterRule FilterRule;
 	};
 
+	REPLICATORGENERATOR_API TArray<UClass*> GetChanneldUEBuiltinClasses();
+	
 	REPLICATORGENERATOR_API bool IsChanneldUEBuiltinClass(const UClass* TargetClass);
+	
+	REPLICATORGENERATOR_API bool IsChanneldUEBuiltinSingletonClass(const UClass* TargetClass);
 
 	REPLICATORGENERATOR_API bool HasReplicatedProperty(const UClass* TargetClass);
 
@@ -49,7 +53,7 @@ namespace ChanneldReplicatorGeneratorUtils
 
 	REPLICATORGENERATOR_API bool TargetToGenerateReplicator(const UClass* TargetClass);
 
-	REPLICATORGENERATOR_API bool TargetToGenerateRepState(const UClass* TargetClass);
+	REPLICATORGENERATOR_API bool TargetToGenerateChannelDataField(const UClass* TargetClass);
 
 	REPLICATORGENERATOR_API bool IsCompilableClassName(const FString& ClassName);
 

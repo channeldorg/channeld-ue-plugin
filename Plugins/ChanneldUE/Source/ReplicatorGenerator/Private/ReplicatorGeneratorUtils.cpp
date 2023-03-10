@@ -30,7 +30,7 @@ namespace ChanneldReplicatorGeneratorUtils
 			Condition = TargetToGenerateReplicator(LoadedClass);
 			break;
 		case EFilterRule::Replication:
-			Condition = TargetToGenerateRepState(LoadedClass);
+			Condition = TargetToGenerateChannelDataField(LoadedClass);
 			break;
 		}
 		AllLoadedClasses.Add(LoadedClass);
@@ -55,12 +55,21 @@ namespace ChanneldReplicatorGeneratorUtils
 		APlayerState::StaticClass(),
 		UActorComponent::StaticClass(),
 		USceneComponent::StaticClass(),
-		UCharacterMovementComponent::StaticClass(),
 	};
+
+	TArray<UClass*> GetChanneldUEBuiltinClasses()
+	{
+		return ChanneldUEBuiltinClasses.Array();
+	}
 
 	bool IsChanneldUEBuiltinClass(const UClass* TargetClass)
 	{
 		return ChanneldUEBuiltinClasses.Contains(TargetClass);
+	}
+
+	bool IsChanneldUEBuiltinSingletonClass(const UClass* TargetClass)
+	{
+		return TargetClass == AGameStateBase::StaticClass();
 	}
 
 	bool HasReplicatedProperty(const UClass* TargetClass)
@@ -201,10 +210,10 @@ namespace ChanneldReplicatorGeneratorUtils
 
 	bool TargetToGenerateReplicator(const UClass* TargetClass)
 	{
-		return !IsChanneldUEBuiltinClass(TargetClass) && TargetToGenerateRepState(TargetClass);
+		return !IsChanneldUEBuiltinClass(TargetClass) && TargetToGenerateChannelDataField(TargetClass);
 	}
 
-	bool TargetToGenerateRepState(const UClass* TargetClass)
+	bool TargetToGenerateChannelDataField(const UClass* TargetClass)
 	{
 		const FString ClassName = TargetClass->GetName();
 		return

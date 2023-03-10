@@ -22,6 +22,7 @@
 #include "ChanneldTypes.h"
 #include "ILiveCodingModule.h"
 #include "ProtocHelper.h"
+#include "ReplicationRegistry.h"
 #include "Async/Async.h"
 #include "Misc/HotReloadInterface.h"
 
@@ -393,6 +394,16 @@ void FChanneldEditorModule::LaunchChanneldAndServersAction()
 
 void FChanneldEditorModule::GenerateReplicatorAction()
 {
+	// If developer has closed the ReplicationRegistryTable, we need to collect garbage to make sure the ReplicationRegistryTable asset is released.
+	CollectGarbage(RF_NoFlags);
+	// Make sure the ReplicationRegistryTable is saved and closed.
+	// The CookAndGenRepCommandLet process will read and write ReplicationRegistryTable,
+	// If the editor process is still holding the ReplicationRegistryTable, the CookAndGenRepCommandLet process will fail to write the ReplicationRegistryTable.
+	if(!ReplicationRegistryUtils::PromptForSaveAndCloseRegistryTable())
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Please save and close the Replication Registry data table first"));
+		return;
+	}
 	GenRepWorkThread = MakeShareable(
 		new FChanneldProcWorkerThread(
 			TEXT("CookAndGenRepThread"),

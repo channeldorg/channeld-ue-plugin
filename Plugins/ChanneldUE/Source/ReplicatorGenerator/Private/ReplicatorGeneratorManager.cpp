@@ -2,7 +2,6 @@
 
 #include "ReplicatorGeneratorDefinition.h"
 #include "ReplicatorGeneratorUtils.h"
-#include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/AssetManager.h"
 #include "Engine/SCS_Node.h"
 #include "GameFramework/Character.h"
@@ -12,6 +11,7 @@
 #include "Replication/ChanneldReplicationComponent.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "ReplicationRegistry.h"
 
 DEFINE_LOG_CATEGORY(LogChanneldRepGenerator);
 
@@ -88,10 +88,97 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 
 	FGeneratedCodeBundle ReplicatorCodeBundle;
 
+	// Read generate replication options from ReplicationRegistryTable. and sort the ActorInfosToGenRep by the order in the table
+	TArray<FRepGenActorInfo> ActorInfosToGenRep;
+	int32 Index = 0;
+
+	UDataTable* RegistryTable = ReplicationRegistryUtils::LoadRegistryTable();
+	TArray<FChanneldReplicationRegistryItem*> RegistryTableData = ReplicationRegistryUtils::GetRegistryTableData(RegistryTable);
+
+	// Use map and set to improve the performance of searching
+	TMap<FString, const UClass*> ReplicationActorClassesMap;
+	ReplicationActorClassesMap.Reserve(ReplicationActorClasses.Num());
+	TSet<FString> RegisteredClassPathsSet;
+	RegisteredClassPathsSet.Reserve(RegistryTableData.Num());
+
+	// Array of actor classes that is not registered in the registry table
+	TArray<FString> TargetClassPathsToRegister;
+	// Array of actor classes that is registered in the registry table but not in the target classes
+	TArray<FString> TargetClassPathsToUnregister;
+	for (const UClass* TargetActorClass : ReplicationActorClasses)
+	{
+		ReplicationActorClassesMap.Add(TargetActorClass->GetPathName(), TargetActorClass);
+	}
+	for (FChanneldReplicationRegistryItem* RegistryItem : RegistryTableData)
+	{
+		RegisteredClassPathsSet.Add(RegistryItem->TargetClassPath);
+		if (!ReplicationActorClassesMap.Contains(RegistryItem->TargetClassPath))
+		{
+			TargetClassPathsToUnregister.Add(RegistryItem->TargetClassPath);
+		}
+		else
+		{
+			ActorInfosToGenRep.Add(
+				FRepGenActorInfo(
+					++Index
+					, ReplicationActorClassesMap.FindRef(RegistryItem->TargetClassPath)
+					, RegistryItem->Singleton
+					, false
+					, RegistryItem->Skip
+					, RegistryItem->Skip
+				)
+			);
+		}
+	}
+	for (const UClass* TargetActorClass : ReplicationActorClasses)
+	{
+		if (!ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinClass(TargetActorClass) && !RegisteredClassPathsSet.Contains(TargetActorClass->GetPathName()))
+		{
+			TargetClassPathsToRegister.Add(TargetActorClass->GetPathName());
+			ActorInfosToGenRep.Add(
+				FRepGenActorInfo(
+					++Index
+					, TargetActorClass
+					, false
+					, false
+					, false
+					, false
+				)
+			);
+		}
+	}
+	// ChanneldUEBuiltinClasses are not included in the registry table.
+	// For making sure that the order of the channel data state is fixed every time, we get them from a fixed order array.
+	for (const UClass* BuiltinClass : ChanneldReplicatorGeneratorUtils::GetChanneldUEBuiltinClasses())
+	{
+		ActorInfosToGenRep.Add(
+			FRepGenActorInfo(
+				++Index
+				, BuiltinClass
+				, ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinSingletonClass(BuiltinClass)
+				, true
+				, true
+				, false
+			)
+		);
+	}
+
+	// Register and unregister and save the RegistryTable
+	if (TargetClassPathsToRegister.Num() > 0 || TargetClassPathsToUnregister.Num() > 0)
+	{
+		ReplicationRegistryUtils::AddItemsToRegistryTable(RegistryTable, TargetClassPathsToRegister);
+		ReplicationRegistryUtils::RemoveItemsFromRegistryTable(RegistryTable, TargetClassPathsToUnregister);
+		if (!ReplicationRegistryUtils::SaveRegistryTable(RegistryTable))
+		{
+			UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save the RegistryTable"));
+			return false;
+		}
+	}
+
 	const FString ProtoPackageName = GetDefaultProtoPackageName();
 	const FString GoPackageImportPath = GoPackageImportPathPrefix + ProtoPackageName;
 	CodeGenerator->Generate(
-		ReplicationActorClasses,
+		ActorInfosToGenRep,
 		GetDefaultModuleDir(),
 		ProtoPackageName,
 		(GoPackageImportPathPrefix + ProtoPackageName),

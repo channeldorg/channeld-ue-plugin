@@ -49,6 +49,36 @@ struct FGeneratedCodeBundle
 	FString ChannelDataRegistration_GoCode;
 };
 
+struct FRepGenActorInfo
+{
+	int32 Index;
+	const UClass* TargetActorClass;
+	bool bSingleton;
+	bool bChanneldUEBuiltinType;
+	bool bSkipGenReplicator;
+	bool bSkipGenChannelDataState;
+
+	FRepGenActorInfo()
+		: Index(-1)
+		  , TargetActorClass(nullptr)
+		  , bSingleton(false)
+		  , bChanneldUEBuiltinType(false)
+		  , bSkipGenReplicator(true)
+		  , bSkipGenChannelDataState(true)
+	{
+	}
+
+	FRepGenActorInfo(int32 InIndex, const UClass* InTargetActorClass, bool bSingleton, bool bChanneldUEBuiltinType, bool bSkipGenReplicator, bool bSkipGenChannelDataState)
+		: Index(InIndex)
+		  , TargetActorClass(InTargetActorClass)
+		  , bSingleton(bSingleton)
+		  , bChanneldUEBuiltinType(bChanneldUEBuiltinType)
+		  , bSkipGenReplicator(bSkipGenReplicator)
+		  , bSkipGenChannelDataState(bSkipGenChannelDataState)
+	{
+	}
+};
+
 class REPLICATORGENERATOR_API FReplicatorCodeGenerator
 {
 public:
@@ -71,7 +101,7 @@ public:
 	/**
 	 * Generate replicator codes for the specified actors.
 	 *
-	 * @param ReplicationActorClasses The actor classes to generate replicators and channeld data fields.
+	 * @param ReplicationActorInfos The actor information to generate replicators and channeld data fields.
 	 * @param DefaultModuleDir The default module directory. The channel data processor will use default module name.
 	 * @param ProtoPackageName All generated proto files will use this package name.
 	 * @param GoPackageImportPath Be used to set 'option go_package='
@@ -79,7 +109,7 @@ public:
 	 * @return true on success, false otherwise.
 	 */
 	bool Generate(
-		TArray<const UClass*> ReplicationActorClasses,
+		const TArray<FRepGenActorInfo>& ReplicationActorInfos,
 		const FString& DefaultModuleDir,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
@@ -158,7 +188,7 @@ protected:
 	inline bool CreateDecorateActor(
 		TSharedPtr<FReplicatedActorDecorator>& OutActorDecorator,
 		FString& OutResultMessage,
-		const UClass* TargetActor,
+		const FRepGenActorInfo& ReplicationActorInfo,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
 		bool bInitPropertiesAndRPCs = true

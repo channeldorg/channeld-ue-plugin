@@ -33,7 +33,7 @@ void FLoadedObjectListener::NotifyUObjectCreated(const UObjectBase* Object, int3
 			FilteredClasses.Add(LoadedClass);
 			break;
 		}
-		if (ChanneldReplicatorGeneratorUtils::TargetToGenerateRepState(LoadedClass))
+		if (ChanneldReplicatorGeneratorUtils::TargetToGenerateChannelDataField(LoadedClass))
 		{
 			FilteredClasses.Add(LoadedClass);
 		}
