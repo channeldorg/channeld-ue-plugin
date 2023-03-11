@@ -204,9 +204,9 @@ void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchR
 	FPaths::NormalizeDirectoryName(ChanneldPath);
 	const FString WorkingDir = ChanneldPath;
 	const UChanneldEditorSettings* Settings = GetMutableDefault<UChanneldEditorSettings>();
-
-	const FString ChanneldBinPath = ChanneldPath / TEXT("channeld.exe");
-	const FString GoBuildArgs = FString::Printf(TEXT("build -o \"%s\" \"%s\""), *ChanneldBinPath, *(ChanneldPath / *Settings->LaunchChanneldEntry));
+	
+	const FString ChanneldBinPath = ChanneldPath / (FPaths::GetCleanFilename(Settings->LaunchChanneldEntry) + TEXT(".exe"));
+	const FString GoBuildArgs = FString::Printf(TEXT("build -o . \"%s/...\""), *(ChanneldPath / *Settings->LaunchChanneldEntry));
 	const FString RunChanneldArgs = FString::Printf(TEXT("%s"), *Settings->LaunchChanneldParameters);
 
 	BuildChanneldNotify->SetMissionNotifyText(

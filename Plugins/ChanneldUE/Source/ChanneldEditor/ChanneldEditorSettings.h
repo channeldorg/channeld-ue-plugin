@@ -44,7 +44,7 @@ public:
 	FString LaunchChanneldEntry = TEXT("examples/channeld-ue-tps");
 
 	UPROPERTY(Config, EditAnywhere, Category = "Channeld")
-	FString LaunchChanneldParameters = TEXT("-cfsm=\"config/client_authoratative_fsm.json\" -dev -loglevel=-1 -ct=0 -mcb=13 -scc=\"config/spatial_static_2x2.json\"");
+	FString LaunchChanneldParameters = TEXT("-dev -loglevel=-1 -ct=0 -mcb=13 -cfsm=\"config/client_authoratative_fsm.json\" -chs=\"config/channel_settings_ue.json\" -scc=\"config/spatial_static_2x2.json\"");
 
 	UPROPERTY(Config, EditAnywhere, Category = "Channeld")
 	TArray<FServerGroup> ServerGroups;
