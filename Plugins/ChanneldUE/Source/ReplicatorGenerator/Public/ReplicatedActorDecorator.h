@@ -213,6 +213,8 @@ public:
 	 */
 	FString GetActorCPPClassName();
 
+	virtual UFunction* FindFunctionByName(const FName& FuncName) override;
+	
 	/**
 	 * Get code of include target actor header
 	 */

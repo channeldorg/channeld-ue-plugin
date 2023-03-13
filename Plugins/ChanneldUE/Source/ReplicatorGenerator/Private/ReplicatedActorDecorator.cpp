@@ -145,6 +145,11 @@ FString FReplicatedActorDecorator::GetActorCPPClassName()
 	return TargetClass->GetPrefixCPP() + GetOriginActorName();
 }
 
+UFunction* FReplicatedActorDecorator::FindFunctionByName(const FName& FuncName)
+{
+	return TargetClass->FindFunctionByName(FuncName, EIncludeSuperFlag::ExcludeSuper);
+}
+
 FString FReplicatedActorDecorator::GetIncludeActorHeaderPath()
 {
 	return ModuleBelongTo.RelativeToModule;

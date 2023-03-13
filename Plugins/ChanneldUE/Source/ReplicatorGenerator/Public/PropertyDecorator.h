@@ -45,7 +45,7 @@ if (!bPropChanged)
 
 const static TCHAR* PropDecorator_CallRepNotifyTemplate =
 	LR"EOF(
-{Declare_TargetInstance}->ProcessEvent({Declare_TargetInstance}->GetClass()->FindFunctionByName(FName(TEXT("{Declare_FunctionName}"))), nullptr);
+{Declare_TargetInstance}->ProcessEvent({Declare_TargetInstance}->GetClass()->FindFunctionByName(FName(TEXT("{Declare_FunctionName}"))), {Code_OnRepParams});
 )EOF";
 
 
@@ -174,6 +174,8 @@ public:
 	{
 		return ProtoFieldType;
 	}
+
+	virtual UFunction* FindFunctionByName(const FName& FuncName) override;
 
 	/**
 	 * Get the protobuf field definition

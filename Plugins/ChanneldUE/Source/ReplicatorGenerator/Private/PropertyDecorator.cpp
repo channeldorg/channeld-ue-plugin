@@ -126,6 +126,11 @@ FString FPropertyDecorator::GetProtoFieldName()
 	return FString::Printf(TEXT("prop_%s"), *GetPropertyName().ToLower());
 }
 
+UFunction* FPropertyDecorator::FindFunctionByName(const FName& FuncName)
+{
+	return Owner->FindFunctionByName(FuncName);
+}
+
 FString FPropertyDecorator::GetDefinition_ProtoField()
 {
 	const FString& FieldRule = GetProtoFieldRule();
@@ -250,6 +255,11 @@ FString FPropertyDecorator::GetCode_CallRepNotify(const FString& TargetInstanceN
 		FStringFormatNamedArguments FormatArgs;
 		FormatArgs.Add(TEXT("Declare_TargetInstance"), TargetInstanceName);
 		FormatArgs.Add(TEXT("Declare_FunctionName"), OriginalProperty->RepNotifyFunc.ToString());
+		const UFunction* RepNotifyFunc = Owner->FindFunctionByName(OriginalProperty->RepNotifyFunc);
+		FormatArgs.Add(
+			TEXT("Code_OnRepParams"),
+			RepNotifyFunc->NumParms > 0 ? FString::Printf(TEXT("&(%s)"), *GetCode_GetPropertyValueFrom(TargetInstanceName)) : TEXT("nullptr")
+		);
 		return FString::Format(PropDecorator_CallRepNotifyTemplate, FormatArgs);
 	}
 	return TEXT("");
