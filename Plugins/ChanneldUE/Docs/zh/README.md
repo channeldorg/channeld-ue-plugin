@@ -1,14 +1,14 @@
 # 文档目录
 ## [入门指南](getting-started.md)
 ## 插件介绍
-### [基本概念](concepts.md)
-### [配置channeld](config_channeld.md)
+### [基本概念](basic-concepts.md)
+### [配置channeld](config-channeld.md)
 ### 通过C++和蓝图调用channeld的API
 ### 本地开发测试工作流
 ### 生成同步代码
 ## 进阶主题
 ### ChannelUE的网络同步实现
-### [和原生UE的差异以及替代方案](getting-started.md)
+### [和原生UE的差异以及替代方案](native-ue-comparison.md)
 ### 频道数据视图
 ### 客户端兴趣管理
 ### 跨服交互
