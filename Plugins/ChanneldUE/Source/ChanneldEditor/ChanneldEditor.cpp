@@ -183,10 +183,19 @@ void FChanneldEditorModule::LaunchChanneldAction()
 
 void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchResult Result)> PostChanneldLaunched /* nullptr*/)
 {
+	BuildChanneldNotify->SetMissionNotifyText(
+		FText::FromString(TEXT("Building Channeld Gateway...")),
+		LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),
+		FText::FromString(TEXT("Launch Channeld Gateway")),
+		FText::FromString(TEXT("Failed To Build Channeld Gateway!"))
+	);
+	BuildChanneldNotify->SpawnRunningMissionNotification(nullptr);
+
 	if (FPlatformProcess::IsProcRunning(ChanneldProcHandle))
 	{
 		UE_LOG(LogChanneldEditor, Warning, TEXT("Channeld is already running"));
 		PostChanneldLaunched(EChanneldLaunchResult::AlreadyLaunched);
+		BuildChanneldNotify->SpawnMissionSucceedNotification(nullptr);
 		return;
 	}
 	if (BuildChanneldWorkThread.IsValid() && BuildChanneldWorkThread->IsProcRunning())
@@ -199,22 +208,24 @@ void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchR
 	if (ChanneldPath.IsEmpty())
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("CHANNELD_PATH environment variable is not set. Please set it to the path of the channeld source code directory."));
+		BuildChanneldNotify->SpawnMissionFailedNotification(nullptr);
 		return;
 	}
 	FPaths::NormalizeDirectoryName(ChanneldPath);
 	const FString WorkingDir = ChanneldPath;
 	const UChanneldEditorSettings* Settings = GetMutableDefault<UChanneldEditorSettings>();
-	
-	const FString ChanneldBinPath = ChanneldPath / (FPaths::GetCleanFilename(Settings->LaunchChanneldEntry) + TEXT(".exe"));
-	const FString GoBuildArgs = FString::Printf(TEXT("build -o . \"%s/...\""), *(ChanneldPath / *Settings->LaunchChanneldEntry));
-	const FString RunChanneldArgs = FString::Printf(TEXT("%s"), *Settings->LaunchChanneldParameters);
 
-	BuildChanneldNotify->SetMissionNotifyText(
-		FText::FromString(TEXT("Building Channeld Gateway...")),
-		LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),
-		FText::FromString(TEXT("Launch Channeld Gateway")),
-		FText::FromString(TEXT("Failed To Build Channeld Gateway!"))
-	);
+	FString LaunchChanneldEntryDir = ChanneldPath / Settings->LaunchChanneldEntry;
+	FPaths::NormalizeDirectoryName(LaunchChanneldEntryDir);
+	if (!FPaths::DirectoryExists(LaunchChanneldEntryDir))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Launch channeld entry is not a valid folder. %s"), *(LaunchChanneldEntryDir));
+		BuildChanneldNotify->SpawnMissionFailedNotification(nullptr);
+		return;
+	}
+	const FString GoBuildArgs = FString::Printf(TEXT("build -o . \"%s\""), *(LaunchChanneldEntryDir / TEXT("...")));
+	const FString RunChanneldArgs = FString::Printf(TEXT("%s"), *Settings->LaunchChanneldParameters);
+	const FString ChanneldBinPath = ChanneldPath / FPaths::GetCleanFilename(LaunchChanneldEntryDir) + TEXT(".exe");
 
 	BuildChanneldWorkThread = MakeShareable(
 		new FChanneldProcWorkerThread(
@@ -224,7 +235,6 @@ void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchR
 			WorkingDir
 		)
 	);
-	BuildChanneldWorkThread->ProcBeginDelegate.AddUObject(BuildChanneldNotify, &UChanneldMissionNotiProxy::SpawnRunningMissionNotification);
 	BuildChanneldWorkThread->ProcFailedDelegate.AddUObject(BuildChanneldNotify, &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
 	BuildChanneldWorkThread->ProcOutputMsgDelegate.BindUObject(BuildChanneldNotify, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
 	BuildChanneldWorkThread->ProcSucceedDelegate.AddLambda([this, ChanneldBinPath, RunChanneldArgs, WorkingDir, PostChanneldLaunched](FChanneldProcWorkerThread*)
