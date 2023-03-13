@@ -25,7 +25,7 @@ public:
 	FString Metadata;
 	
 	UPROPERTY(EditAnywhere)
-	int GlobalChannelFanOutIntervalMs = 50;
+	int GlobalChannelFanOutIntervalMs = 20;
 	
 	UPROPERTY(EditAnywhere)
 	int GlobalChannelFanOutDelayMs = 2000;

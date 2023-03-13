@@ -42,7 +42,7 @@ public:
 	virtual void SendDestroyToClients(UObject* Obj, const FNetworkGUID NetId) override;
 	
 	UPROPERTY(EditAnywhere)
-	int GlobalChannelFanOutIntervalMs = 50;
+	int GlobalChannelFanOutIntervalMs = 20;
 	
 	// Make the first fan-out of GLOBAL channel data update (GameStateBase) a bit slower, so the GameState is spawned from the spatial server and ready.
 	UPROPERTY(EditAnywhere)
