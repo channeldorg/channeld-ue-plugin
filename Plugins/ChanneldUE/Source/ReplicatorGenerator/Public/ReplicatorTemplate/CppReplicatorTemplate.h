@@ -221,8 +221,7 @@ namespace {Declaration_CDP_Namespace}
   class {Declaration_CDP_ClassName} : public IChannelDataProcessor
   {
   protected:
-  	TUniquePtr<unrealpb::ActorState> RemovedActorState;
-  	TUniquePtr<unrealpb::ActorComponentState> RemovedActorComponentState;
+  	{Declaration_RemovedState}
   
   public:
 
@@ -230,10 +229,7 @@ namespace {Declaration_CDP_Namespace}
     
     {Declaration_CDP_ClassName}()
     {
-      RemovedActorState = MakeUnique<{Definition_ChanneldUEBuildInProtoNamespace}::ActorState>();
-      RemovedActorState->set_removed(true);
-      RemovedActorComponentState = MakeUnique<{Definition_ChanneldUEBuildInProtoNamespace}::ActorComponentState>();
-      RemovedActorComponentState->set_removed(true);
+      {Code_InitRemovedState}
     }
     virtual bool Merge(const google::protobuf::Message* SrcMsg, google::protobuf::Message* DstMsg) override
     {

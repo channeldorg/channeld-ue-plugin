@@ -6,12 +6,6 @@
 static const TCHAR* PropDecorator_AssignPropPtrTemp =
 	LR"EOF({Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + {Num_PropMemOffset}))EOF";
 
-static const TCHAR* PropDecorator_AssignPropPtrDispersedlyTemp =
-	LR"EOF({Ref_AssignTo} = {Ref_ContainerTemplate}->FindPropertyByName(FName(TEXT("{Declare_PropertyName}")))->ContainerPtrToValuePtr<{Declare_PropertyCPPType}>({Ref_ContainerAddr}))EOF";
-
-static const TCHAR* PropDecorator_AssignPropPtrOrderlyTemp =
-	LR"EOF({Ref_AssignTo} = {Ref_ContainerTemplate}->ContainerPtrToValuePtr<{Declare_PropertyCPPType}>({Ref_ContainerAddr}))EOF";
-
 const static TCHAR* PropDecorator_SetDeltaStateTemplate =
 	LR"EOF(
 if ({Code_BeforeCondition}!({Code_ActorPropEqualToProtoState}))
