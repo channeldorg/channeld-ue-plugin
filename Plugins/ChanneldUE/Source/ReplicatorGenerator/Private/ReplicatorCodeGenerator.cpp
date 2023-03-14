@@ -464,6 +464,8 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 {
 	FString ChannelDataProcessor_IncludeCode = FString::Printf(TEXT("#include \"%s\"\n"), *GenManager_TypeDefinitionHeadFile);
 	FString ChannelDataProcessor_ConstPathFNameVarDecl;
+	FString ChannelDataProcessor_RemovedStateDecl;
+	FString ChannelDataProcessor_InitRemovedStateCode;
 	FString ChannelDataProcessor_MergeCode;
 	FString ChannelDataProcessor_GetStateCode;
 	FString ChannelDataProcessor_SetStateCode;
@@ -478,6 +480,8 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 		}
 		ActorDecorator->SetConstClassPathFNameVarName(FString::Printf(TEXT("PathFName_%d"), ++ConstPathFNameVarDeclIndex));
 		ChannelDataProcessor_ConstPathFNameVarDecl.Append(ActorDecorator->GetCode_ConstPathFNameVarDecl() + TEXT("\n"));
+		ChannelDataProcessor_RemovedStateDecl.Append(ActorDecorator->GetDeclaration_ChanneldDataProcessor_RemovedStata() + TEXT("\n"));
+		ChannelDataProcessor_InitRemovedStateCode.Append(ActorDecorator->GetCode_ChanneldDataProcessor_InitRemovedState());
 		ChannelDataProcessor_MergeCode.Append(ActorDecorator->GetCode_ChannelDataProcessor_Merge(ChildrenOfAActor));
 
 		ChannelDataProcessor_GetStateCode.Append(
@@ -520,7 +524,10 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	CDPFormatArgs.Add(TEXT("Code_ConstClassPathFNameVariable"), ChannelDataProcessor_ConstPathFNameVarDecl);
 	CDPFormatArgs.Add(TEXT("Definition_ChanneldUEBuildInProtoNamespace"), GenManager_ChanneldUEBuildInProtoPackageName);
 	CDPFormatArgs.Add(TEXT("Definition_CDP_ProtoNamespace"), ProtoPackageName);
+	CDPFormatArgs.Add(TEXT("Declaration_RemovedState"), ChannelDataProcessor_RemovedStateDecl);
+	CDPFormatArgs.Add(TEXT("Code_InitRemovedState"), ChannelDataProcessor_InitRemovedStateCode);
 	CDPFormatArgs.Add(TEXT("Definition_CDP_ProtoMsgName"), ChannelDataMessageName);
+
 	CDPFormatArgs.Add(TEXT("Code_Merge"), ChannelDataProcessor_MergeCode);
 	CDPFormatArgs.Add(TEXT("Declaration_CDP_ProtoVar"), ChannelDataMessageName);
 	CDPFormatArgs.Add(TEXT("Code_GetStateFromChannelData"), ChannelDataProcessor_GetStateCode);

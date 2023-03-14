@@ -15,4 +15,5 @@ public:
 
 	virtual FString GetCode_GetWorldRef() = 0;
 
+	virtual UFunction* FindFunctionByName(const FName& FuncName) = 0;
 };

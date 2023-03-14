@@ -145,6 +145,11 @@ FString FReplicatedActorDecorator::GetActorCPPClassName()
 	return TargetClass->GetPrefixCPP() + GetOriginActorName();
 }
 
+UFunction* FReplicatedActorDecorator::FindFunctionByName(const FName& FuncName)
+{
+	return TargetClass->FindFunctionByName(FuncName, EIncludeSuperFlag::ExcludeSuper);
+}
+
 FString FReplicatedActorDecorator::GetIncludeActorHeaderPath()
 {
 	return ModuleBelongTo.RelativeToModule;
@@ -465,6 +470,27 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_IsTargetClass()
 	}
 }
 
+FString FReplicatedActorDecorator::GetDeclaration_ChanneldDataProcessor_RemovedStata()
+{
+	if (TargetClass == AActor::StaticClass() || TargetClass->IsChildOf(UActorComponent::StaticClass()))
+	{
+		return FString::Printf(TEXT("TUniquePtr<%s::%s> Removed%s;"), *GetProtoNamespace(), *GetProtoStateMessageType(), *GetProtoStateMessageType());
+	}
+	else
+	{
+		return TEXT("");
+	}
+}
+
+FString FReplicatedActorDecorator::GetCode_ChanneldDataProcessor_InitRemovedState()
+{
+	if (TargetClass == AActor::StaticClass() || TargetClass->IsChildOf(UActorComponent::StaticClass()))
+	{
+		return FString::Printf(TEXT("Removed%s = MakeUnique<%s::%s>();\nRemoved%s->set_removed(true);\n"), *GetProtoStateMessageType(), *GetProtoNamespace(), *GetProtoStateMessageType(), *GetProtoStateMessageType());
+	}
+	return TEXT("");
+}
+
 FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_Merge(const TArray<TSharedPtr<FReplicatedActorDecorator>>& ActorChildren)
 {
 	FStringFormatNamedArguments FormatArgs;
@@ -525,7 +551,15 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_GetStateFromChan
 	FormatArgs.Add(TEXT("Code_Condition"), GetCode_ChannelDataProcessor_IsTargetClass());
 	FormatArgs.Add(TEXT("Declaration_ChannelDataMessage"), ChannelDataMessageName);
 	FormatArgs.Add(TEXT("Definition_ChannelDataFieldName"), GetDefinition_ChannelDataFieldNameCpp());
-	return FString::Format(IsSingleton() ? ActorDecor_GetStateFromChannelData_Singleton : ActorDecor_GetStateFromChannelData, FormatArgs);
+	if (TargetClass == AActor::StaticClass() || TargetClass->IsChildOf(UActorComponent::StaticClass()))
+	{
+		return FString::Format(ActorDecor_GetStateFromChannelData_Removable, FormatArgs);
+	}
+	else if (IsSingleton())
+	{
+		return FString::Format(ActorDecor_GetStateFromChannelData_Singleton, FormatArgs);
+	}
+	return FString::Format(ActorDecor_GetStateFromChannelData, FormatArgs);
 }
 
 FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_SetStateToChannelData(const FString& ChannelDataMessageName)
@@ -536,7 +570,15 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_SetStateToChanne
 	FormatArgs.Add(TEXT("Definition_ChannelDataFieldName"), GetDefinition_ChannelDataFieldNameCpp());
 	FormatArgs.Add(TEXT("Definition_ProtoNamespace"), GetProtoNamespace());
 	FormatArgs.Add(TEXT("Definition_ProtoStateMsgName"), GetProtoStateMessageType());
-	return FString::Format(IsSingleton() ? ActorDecor_SetStateToChannelData_Singleton : ActorDecor_SetStateToChannelData, FormatArgs);
+	if (TargetClass == AActor::StaticClass() || TargetClass->IsChildOf(UActorComponent::StaticClass()))
+	{
+		return FString::Format(ActorDecor_SetStateToChannelData_Removable, FormatArgs);
+	}
+	else if (IsSingleton())
+	{
+		return FString::Format(ActorDecor_SetStateToChannelData_Singleton, FormatArgs);
+	}
+	return FString::Format(ActorDecor_SetStateToChannelData, FormatArgs);
 }
 
 FString FReplicatedActorDecorator::GetCode_ChannelDataProtoFieldDefinition(const int32& Index)

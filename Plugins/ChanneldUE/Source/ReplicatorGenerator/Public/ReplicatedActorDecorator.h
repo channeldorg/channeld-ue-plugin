@@ -43,6 +43,27 @@ if({Code_Condition}) {
 }
 )EOF";
 
+static const TCHAR* ActorDecor_GetStateFromChannelData_Singleton =
+	LR"EOF(
+if({Code_Condition}) {
+  bIsRemoved = false;
+  return {Declaration_ChannelDataMessage}->mutable_{Definition_ChannelDataFieldName}();
+}
+)EOF";
+
+static const TCHAR* ActorDecor_GetStateFromChannelData_Removable =
+	LR"EOF(
+if({Code_Condition}) {
+  auto States = {Declaration_ChannelDataMessage}->mutable_{Definition_ChannelDataFieldName}();
+  if (States->contains(NetGUID))
+  {
+    auto State = &States->at(NetGUID);
+    bIsRemoved = State->removed();
+    return State;
+  }
+}
+)EOF";
+
 static const TCHAR* ActorDecor_ChannelDataProcessorMergeLoop =
 	LR"EOF(
 for (auto& Pair : Src->{Definition_ChannelDataFieldName}())
@@ -83,19 +104,14 @@ if (Src->has_{Definition_ChannelDataFieldName}())
 }
 )EOF";
 
-static const TCHAR* ActorDecor_GetStateFromChannelData_Singleton =
-	LR"EOF(
-if({Code_Condition}) {
-  bIsRemoved = false;
-  return {Declaration_ChannelDataMessage}->mutable_{Definition_ChannelDataFieldName}();
-}
-)EOF";
-
 static const TCHAR* ActorDecor_SetStateToChannelData =
 	LR"EOF(
 if({Code_Condition}) {
+  if (State)
+  {
     auto States = {Declaration_ChannelDataMessage}->mutable_{Definition_ChannelDataFieldName}();
     (*States)[NetGUID] = *static_cast<const {Definition_ProtoNamespace}::{Definition_ProtoStateMsgName}*>(State);
+  }
 }
 )EOF";
 
@@ -103,6 +119,18 @@ static const TCHAR* ActorDecor_SetStateToChannelData_Singleton =
 	LR"EOF(
 if({Code_Condition}) {
   {Declaration_ChannelDataMessage}->mutable_{Definition_ChannelDataFieldName}()->MergeFrom(*static_cast<const {Definition_ProtoNamespace}::{Definition_ProtoStateMsgName}*>(State));
+}
+)EOF";
+
+static const TCHAR* ActorDecor_SetStateToChannelData_Removable =
+	LR"EOF(
+if({Code_Condition}) {
+  auto AccessibleState = State != nullptr ? State : Removed{Definition_ProtoStateMsgName}.Get();
+  if (AccessibleState)
+  {
+  	auto States = {Declaration_ChannelDataMessage}->mutable_{Definition_ChannelDataFieldName}();
+    (*States)[NetGUID] = *static_cast<const {Definition_ProtoNamespace}::{Definition_ProtoStateMsgName}*>(AccessibleState);
+  }
 }
 )EOF";
 
@@ -185,6 +213,8 @@ public:
 	 */
 	FString GetActorCPPClassName();
 
+	virtual UFunction* FindFunctionByName(const FName& FuncName) override;
+	
 	/**
 	 * Get code of include target actor header
 	 */
@@ -292,6 +322,10 @@ public:
 	virtual FString GetCode_ConstPathFNameVarDecl();
 
 	virtual FString GetCode_ChannelDataProcessor_IsTargetClass();
+	
+	virtual FString GetDeclaration_ChanneldDataProcessor_RemovedStata();
+	
+	virtual FString GetCode_ChanneldDataProcessor_InitRemovedState();
 
 	virtual FString GetCode_ChannelDataProcessor_Merge(const TArray<TSharedPtr<FReplicatedActorDecorator>>& ActorChildren);
 
