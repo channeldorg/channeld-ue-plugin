@@ -64,9 +64,10 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial")
 	TSubclassOf<UPlayerStartLocatorBase> PlayerStartLocatorClass = UPlayerStartLocator_ModByConnId::StaticClass();
-	
+
+	// If true, Actor::IsNetRelevantFor() will be called to determine whether an actor should be destroyed on the client when leaving player's the interest area.
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Client Interest")
-	bool bUseNetRelevantForUninterestedActors = false;
+	bool bUseNetRelevancyForUninterestedActors = false;
 	UPROPERTY(Config, EditAnywhere, Category = "Spatial|Client Interest")
 	TArray<FClientInterestSettingsPreset> ClientInterestPresets;
 	
