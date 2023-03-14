@@ -11,6 +11,22 @@ FChanneldPlayerStateReplicator::FChanneldPlayerStateReplicator(UObject* InTarget
 
 	FullState = new unrealpb::PlayerState;
 	DeltaState = new unrealpb::PlayerState;
+
+	{
+		auto Property = CastFieldChecked<const FFloatProperty>(PlayerState->GetClass()->FindPropertyByName(FName("Score")));
+		ScorePtr = Property->ContainerPtrToValuePtr<float>(PlayerState.Get());
+		check(ScorePtr);
+	}
+	{
+		auto Property = CastFieldChecked<const FIntProperty>(PlayerState->GetClass()->FindPropertyByName(FName("PlayerId")));
+		PlayerIdPtr = Property->ContainerPtrToValuePtr<int32>(PlayerState.Get());
+		check(PlayerIdPtr);
+	}
+	{
+		auto Property = CastFieldChecked<const FByteProperty>(PlayerState->GetClass()->FindPropertyByName(FName("Ping")));
+		PingPtr = Property->ContainerPtrToValuePtr<uint8>(PlayerState.Get());
+		check(PingPtr);
+	}
 }
 
 FChanneldPlayerStateReplicator::~FChanneldPlayerStateReplicator()
@@ -43,20 +59,20 @@ void FChanneldPlayerStateReplicator::Tick(float DeltaTime)
 		return;
 	}
 
-	if (PlayerState->Score != FullState->score())
+	if (PlayerState->GetScore() != FullState->score())
 	{
-		DeltaState->set_score(PlayerState->Score);
+		DeltaState->set_score(PlayerState->GetScore());
 		bStateChanged = true;
 	}
-	if (PlayerState->PlayerId != FullState->playerid())
+	if (PlayerState->GetPlayerId() != FullState->playerid())
 	{
-		DeltaState->set_playerid(PlayerState->PlayerId);
+		DeltaState->set_playerid(PlayerState->GetPlayerId());
 		bStateChanged = true;
 	}
-	if (PlayerState->Ping != FullState->ping())
+	if (PlayerState->GetPing() != FullState->ping())
 	{
 #if UE_BUILD_SHIPPING
-		DeltaState->set_ping(PlayerState->Ping);
+		DeltaState->set_ping(PlayerState->GetPing());
 		bStateChanged = true;
 #endif
 	}
@@ -91,17 +107,17 @@ void FChanneldPlayerStateReplicator::OnStateChanged(const google::protobuf::Mess
 
 	if (NewState->has_score())
 	{
-		PlayerState->Score = NewState->score();
+		*ScorePtr = NewState->score();
 		PlayerState->OnRep_Score();
 	}
 	if (NewState->has_playerid())
 	{
-		PlayerState->PlayerId = NewState->playerid();
+		*PlayerIdPtr = NewState->playerid();
 		PlayerState->OnRep_PlayerId();
 	}
 	if (NewState->has_ping())
 	{
-		PlayerState->Ping = NewState->ping();
+		*PingPtr = NewState->ping();
 	}
 	if (NewState->has_playername())
 	{

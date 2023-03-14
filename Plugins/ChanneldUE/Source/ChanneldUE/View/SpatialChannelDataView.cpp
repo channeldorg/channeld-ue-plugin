@@ -589,7 +589,7 @@ bool USpatialChannelDataView::ClientDeleteObject(UObject* Obj)
 		}
 		
 		// Call the actor's IsNetRelevantFor() to determine if the actor should be deleted or not.
-		if (GetMutableDefault<UChanneldSettings>()->bUseNetRelevantForUninterestedActors)
+		if (GetMutableDefault<UChanneldSettings>()->bUseNetRelevancyForUninterestedActors)
 		{
 			if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
 			{
