@@ -25,6 +25,8 @@
 UChanneldNetDriver::UChanneldNetDriver(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	// Set default values so the plugin users don't have to set them in the INI.
+	NetServerMaxTickRate = 30;
 }
 
 UChanneldNetConnection* UChanneldNetDriver::AddChanneldClientConnection(Channeld::ConnectionId ClientConnId, Channeld::ChannelId ChId)

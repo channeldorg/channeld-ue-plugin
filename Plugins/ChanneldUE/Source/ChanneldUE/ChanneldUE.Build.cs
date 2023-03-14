@@ -22,7 +22,7 @@ public class ChanneldUE : ModuleRules
             "Sockets",
             "PacketHandler",
             "ProtobufUE",
-            "ReplicationGraph",
+            // "ReplicationGraph",
             "PrometheusUE",
             }
         );
