@@ -17,21 +17,44 @@ protoc-gen-go - Protobuf的go代码生成工具
 ```
 
 # 2.创建第三人称模板项目
-## 2.1.创建项目并复制插件
-新建一个基于第三人称模板的UE蓝图项目：在Unreal Project Browser中选择"Game" -> "Third Person" -> "C++"。
+## 2.1.创建项目
+##### 1. 新建一个基于第三人称模板的UE项目
+使用第三人称模板的创建UE项目。
+![](../images/create_project.png)
 
 ```
 注意：ChannelUE插件只支持C++项目。如果您使用的是纯蓝图项目，需要先转换为C++项目。
 ```
 
-项目创建后，关闭UE编辑器。将1.1.步骤中克隆的插件代码仓库目录复制到项目的`Plugins`目录下。
+##### 2. 复制插件
 
-修改项目Build.cs文件，添加插件的模块`ChanneldUE`和`ProtobufUE`：
+将1.1.步骤中克隆的插件代码仓库目录复制到项目的`Plugins`目录下。
+
+##### 3. 修改项目Build.cs文件
+
+为项目添加插件的模块`ChanneldUE`和`ProtobufUE`：
+
 ```csharp
 PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ChanneldUE", "ProtobufUE" });
 ```
 
+##### 4. 修改项目的配置文件
+
+打开项目的配置文件`Config/DefaultEngine.ini`，并添加插件相关的日志输出等级：
+
+```
+[Core.log]
+LogChanneld=All
+LogChanneldEditor=All
+LogChanneldRepGenerator=All
+```
+
+```
+提示：该配置用于设置插件的日志输出级别。如果不需要查看插件的日志信息，可以不进行此步骤。但是建议开发者在开发过程中开启日志输出，以便查看插件的运行情况。
+```
+
 ## 2.2.重新编译运行项目并开启插件
+
 在文件浏览器中右键点击项目的`*.uproject`文件，选择"Generate Visual Studio project files"，重新生成项目的解决方案文件。
 在Visual Studio中重新加载解决方案，并编译运行项目。当UE编辑器再次打开时，工具栏会出现插件图标：
 
@@ -40,36 +63,37 @@ PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engi
 如果插件图标未显示，在编辑器的顶部菜单栏中选择"Plugins" -> "ChanneldUE" -> "Enable"，启用插件。
 
 ## 2.3.为项目创建基础同步类和Game Mode
-接下来，因为项目默认用到Gameplay框架并不支持基于channeld的网络同步，所以需要创建一批添加了同步组件的蓝图类。
+因为项目默认用到Gameplay框架并不支持基于channeld的网络同步，所以需要创建一批添加了同步组件的蓝图类。
 
-首先，打开第三人称角色的蓝图`ThirdPersonCharacter`，并为其添加同步组件`ChanneldReplicationComponent`：
+##### 1. 为第三人称角色蓝图添加同步组件
+
+打开第三人称角色的蓝图`ThirdPersonCharacter`，并为其添加同步组件`ChanneldReplicationComponent`：
 
 ![](../images/character_rep_component.png)
 
-然后，新建第三人称控制器的蓝图`ThirdPersonPlayerController`，在类默认值中勾选`复制(Replicates)`，并为其添加同步组件：
+##### 2. 创建`PlayerController`、`GameState`和`PlayerState`蓝图
 
-![](../images/player_controller_bp.png)
+创建三个蓝图，他们分别继承自`PlayerController`、`ChanneldGameState`和`PlayerState`，并分别将它们命名为`ThirdPersonPlayerController`、`ThirdPersonGameState`和`ThirdPersonPlayerState`：
 
-接下来，因为`GameStateBase`和`PlayerState`分别负责同步游戏和玩家中的状态，还需要创建分别为它们创建蓝图类，并同样地，开启`复制(Replicates)`，添加同步组件：
-
-![](../images/game_state_base.png)
+![](../images/new_blueprints.png)
 
 ```
 提示：此处选择GameStateBase或ChanneldGameState都可以。如果要在之后的开发中使用到跨服的GameState功能，则需要选择ChanneldGameState。
 ```
 
-![](../images/player_state.png)
-
+##### 3. 为新创建的三个蓝图开启`复制(Replicates)`，并添加同步组件`ChanneldReplicationComponent`。
 
 ```
 小贴士：记得在开启Relicates和添加同步组件后，编译和保存上述蓝图！
 ```
 
-最后，添加一个新的GameMode蓝图`ThirdPersonGameMode`（如果已存在，则打开），并为其设置Game State Class, Player Controller Class, Player State Class和Default Pawn Class：
+ ##### 4. 创建`GameMode`蓝图
+ 
+ 创建一个新的GameMode蓝图`ThirdPersonGameMode`（如果已存在，则打开），将设置Game State Class, Player Controller Class, Player State Class和Default Pawn Class分别设置为`ThirdPersonGameState`、`ThirdPersonPlayerController`、`ThirdPersonPlayerState`和`ThirdPersonCharacter`。
 
 ![](../images/game_mode.png)
 
-在项目设置中,将`ThirdPersonGameMode`设置为默认Game Mode：
+##### 5. 在项目设置中将`ThirdPersonGameMode`设置为默认Game Mode
 
 ![](../images/project_settings_game_mode.png)
 
@@ -82,16 +106,21 @@ PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engi
 
 `SingleChannelDataView`是插件中内置的视图蓝图类，它会在服务端创建**全局频道**，并在客户端连接成功后订阅到该频道。订阅成功后，客户端发送的网络数据会通过channeld转发到全局频道的所有者，即创建该频道的服务端。
 
-## 3.2.配置服务器组提示
-作为UE的分布式架构扩展，ChanneldUE插件支持同时启动多个UE服务器进程，每个进程可以配置自己的视图和启动参数。
-要添加一个服务器组，打开主菜单`编辑 -> 编辑器偏好设置 -> 插件 -> Channeld Editor`。点击`Server Groups`一栏的加号按钮，并展开设置项：
+## 3.2.配置服务器组
+作为UE的分布式架构扩展，为了方便调试，在开发过程中ChanneldUE插件支持同时启动多个UE服务器进程，每个进程可以配置自己的视图和启动参数。
+
+首先添加一个服务器组，打开主菜单`编辑 -> 编辑器偏好设置 -> 插件 -> Channeld Editor`。点击`Server Groups`一栏的加号按钮，并展开设置项：
 
 ![](../images/settings_server_group.png)
 
 确保Enabled为勾选，Server Num为1，并设置Server View Class同样为`SingleChannelDataView`。Server Map留空则表示启动服务器时，会使用编辑器当前打开的地图。
 
 # 4.启动channeld服务和游戏服务器
-点击工具栏中插件图标的下拉按钮，确保`Enable Channeld Networking`为选中状态：
+
+第一次启动channeld服务和游戏服务器前需要生成同步器代码，点击`Generate Replication Code`选项，生成同步代码。首次生成时间要遍历项目中所有的代码和蓝图，所以可能较长，请耐心等待。
+![](../images/generate_replicaiton_code.png)
+
+等待代码生成成功后，点击工具栏中插件图标的下拉按钮，确保`Enable Channeld Networking`为选中状态：
 
 ![](../images/toolbar_menu.png)
 
@@ -107,7 +136,7 @@ PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engi
 
 # 5.运行游戏并测试
 ## 5.1.测试单个客户端
-确保在`运行Standalone`网络模式下运行游戏。此时客户端尚未连接到channeld，需要手动连接。在客户端的控制台中输入`connect 127.0.0.1`并回车。观察到客户端重新加载地图并创建角色，说明连接成功。
+确保在`运行Standalone`网络模式下运行游戏。此时客户端尚未连接到channeld，需要手动连接。在客户端的控制台中输入`open 127.0.0.1`并回车。观察到客户端重新加载地图并创建角色，说明连接成功。
 
 在地图中移动角色，并观察服务器的控制台中打印的日志，会出现对应的同步数据输出：
 
@@ -125,7 +154,7 @@ PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engi
 
 此时，增加玩家数量并运行游戏。第一个客户端窗口会立刻出现；其它客户端窗口会稍后出现，因为它们都是单独的UE进程，需要一些时间启动。
 
-在每个客户端窗口中，打开控制台并输入`connect 127.0.0.1`。观察多个客户端之间的同步。
+在每个客户端窗口中，打开控制台并输入`open 127.0.0.1`。观察多个客户端之间的同步。
 
 在入门教程中，客户端都需要通过这种方式手动连接。*频道数据视图*的章节中，将会介绍如何通过扩展视图，在蓝图中建立连接。
 
@@ -157,7 +186,7 @@ PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engi
 ```
 
 ## 6.3.在玩家控制器中实现创建Actor的逻辑
-在`BP_ThirdPersonPlayerController`中，添加如下节点，使玩家按下`F`键时，在角色前方创建一个`BP_TestActor`，并为其设置一个随机的Size：
+在`ThirdPersonPlayerController`中，添加如下节点，使玩家按下`F`键时，在角色前方创建一个`BP_TestActor`，并为其设置一个随机的Size：
 
 ![](../images/pc_spawn_cube.png)
 
@@ -174,7 +203,7 @@ PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engi
 
 首先，点击插件工具栏中的`Stop Servers`关闭之前开启的游戏服务器。然后，点击`Stop Channeld`关闭之前开启的channeld服务：
 
-// TODO 截图
+![](../images/stop_servers_and_channeld.png)
 
 然后，点击`Generate Replication Code`选项，生成同步代码。首次生成时间要遍历项目中所有的代码和蓝图，所以可能较长，请耐心等待。
 
