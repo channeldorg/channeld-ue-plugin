@@ -102,7 +102,7 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 	RegisteredClassPathsSet.Reserve(RegistryTableData.Num());
 
 	// Array of actor classes that is not registered in the registry table
-	TArray<FString> TargetClassPathsToRegister;
+	TArray<FChanneldReplicationRegistryItem> TargetClassPathsToRegister;
 	// Array of actor classes that is registered in the registry table but not in the target classes
 	TArray<FString> TargetClassPathsToUnregister;
 	for (const UClass* TargetActorClass : ReplicationActorClasses)
@@ -134,15 +134,18 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 	{
 		if (!ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinClass(TargetActorClass) && !RegisteredClassPathsSet.Contains(TargetActorClass->GetPathName()))
 		{
-			TargetClassPathsToRegister.Add(TargetActorClass->GetPathName());
+			FChanneldReplicationRegistryItem RegistryItem;
+			RegistryItem.TargetClassPath = TargetActorClass->GetPathName();
+			RegistryItem.Skip = DefaultSkipGenRep.Contains(RegistryItem.TargetClassPath);
+			TargetClassPathsToRegister.Add(RegistryItem);
 			ActorInfosToGenRep.Add(
 				FRepGenActorInfo(
 					++Index
 					, TargetActorClass
 					, false
 					, false
-					, false
-					, false
+					, RegistryItem.Skip
+					, RegistryItem.Skip
 				)
 			);
 		}

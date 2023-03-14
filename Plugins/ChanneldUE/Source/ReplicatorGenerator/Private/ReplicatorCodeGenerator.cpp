@@ -202,7 +202,7 @@ bool FReplicatorCodeGenerator::GenerateActorCode(
 		{
 			TargetBaseClassName = TEXT("USceneComponent");
 		}
-		TargetInstanceRef = TEXT("SenceComp");
+		TargetInstanceRef = TEXT("SceneComp");
 		OnStateChangedAdditionalCondition = FString::Printf(TEXT(" || !%s->GetOwner()"), *TargetInstanceRef);
 		TickAdditionalCondition = FString::Printf(TEXT(" || !%s->GetOwner()"), *TargetInstanceRef);
 		IsClientCode = FString::Printf(TEXT("%s->GetOwner()->HasAuthority()"), *TargetInstanceRef);
