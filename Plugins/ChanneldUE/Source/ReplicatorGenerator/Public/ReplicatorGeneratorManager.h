@@ -143,4 +143,11 @@ public:
 
 	bool SaveGeneratedManifest(const FGeneratedManifest& Manifest, FString& Message);
 	bool SaveGeneratedManifest(const FGeneratedManifest& Manifest, const FString& Filename, FString& Message);
+
+	TSet<FString> DefaultSkipGenRep = {
+		TEXT("/Script/Engine.WorldSettings"),
+		TEXT("/Script/Engine.Light"),
+		TEXT("/Script/Engine.SkyLight"),
+		TEXT("/Script/Engine.StaticMeshComponent"),
+	};
 };

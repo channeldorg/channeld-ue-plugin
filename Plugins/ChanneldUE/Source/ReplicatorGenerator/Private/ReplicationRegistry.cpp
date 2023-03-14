@@ -55,6 +55,19 @@ TArray<FChanneldReplicationRegistryItem*> ReplicationRegistryUtils::GetRegistryT
 	return Result;
 }
 
+void ReplicationRegistryUtils::AddItemsToRegistryTable(UDataTable* RegistryTable, const TArray<FChanneldReplicationRegistryItem>& RegistryItems)
+{
+	for (const FChanneldReplicationRegistryItem& RegistryItem : RegistryItems)
+	{
+		AddItemToRegistryTable(RegistryTable, RegistryItem);
+	}
+}
+
+void ReplicationRegistryUtils::AddItemToRegistryTable(UDataTable* RegistryTable, const FChanneldReplicationRegistryItem& RegistryItem)
+{
+	RegistryTable->AddRow(FName(RegistryItem.TargetClassPath), RegistryItem);
+}
+
 void ReplicationRegistryUtils::AddItemsToRegistryTable(UDataTable* RegistryTable, const TArray<FString>& TargetClassPaths)
 {
 	for (const FString& TargetClassPath : TargetClassPaths)

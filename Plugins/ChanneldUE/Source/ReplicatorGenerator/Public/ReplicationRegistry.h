@@ -42,6 +42,10 @@ namespace ReplicationRegistryUtils
 
 	REPLICATORGENERATOR_API inline TArray<FChanneldReplicationRegistryItem*> GetRegistryTableData(const UDataTable* RegistryTable);
 
+	REPLICATORGENERATOR_API inline void AddItemsToRegistryTable(UDataTable* RegistryTable, const TArray<FChanneldReplicationRegistryItem>& RegistryItems);
+
+	REPLICATORGENERATOR_API inline void AddItemToRegistryTable(UDataTable* RegistryTable, const FChanneldReplicationRegistryItem& RegistryItem);
+	
 	REPLICATORGENERATOR_API inline void AddItemsToRegistryTable(UDataTable* RegistryTable, const TArray<FString>& TargetClassPaths);
 
 	REPLICATORGENERATOR_API inline void AddItemToRegistryTable(UDataTable* RegistryTable, const FString& TargetClassPath);
