@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "ChanneldReplicatorBase.h"
 #include "GameFramework/PlayerState.h"
+#include "unreal_common.pb.h"
 
 class CHANNELDUE_API FChanneldPlayerStateReplicator : public FChanneldReplicatorBase
 {
@@ -26,4 +27,9 @@ protected:
 	// [Server] The accumulated delta change before next send
 	unrealpb::PlayerState* DeltaState;
 
+	
+private:
+	float* ScorePtr;
+	int32* PlayerIdPtr;
+	uint8* PingPtr;
 };
