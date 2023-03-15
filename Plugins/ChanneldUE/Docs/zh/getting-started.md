@@ -85,19 +85,19 @@ LogChanneldRepGenerator=Verbose
  ##### 2.3.4.创建`GameMode`蓝图
 创建一个新的GameMode蓝图`ThirdPersonGameMode`（如果已存在，则打开），将`Game State Class`, `Player Controller Class`, `Player State Class`和`Default Pawn Class`分别设置为`ThirdPersonGameState`、`ThirdPersonPlayerController`、`ThirdPersonPlayerState`和`ThirdPersonCharacter`：
 
-![](../images/game_mode.png)
+<img height="300" src="../images/game_mode.png"/>
 
 ##### 2.3.5.应用GameMode蓝图
 在项目设置中将`ThirdPersonGameMode`设置为默认Game Mode
 
-![](../images/project_settings_game_mode.png)
+<img height="300" src="../images/project_settings_game_mode.png"/>
 
 # 3.配置插件
 ## 3.1.配置频道数据视图
 频道数据视图是ChanneldUE插件的核心概念之一。它主要用于关联同步对象（角色，控制器，Game State等）与频道数据。UE客户端和服务端都会存在一个视图对象。
 接下来，打开主菜单`编辑 -> 项目设置 -> 插件 -> Channeld`，我们需要为项目设置一个默认视图：
 
-![](../images/settings_view_class.png)
+<img height="200" src="../images/settings_view_class.png"/>
 
 `SingleChannelDataView`是插件中内置的视图蓝图类，它会在服务端创建**全局频道**，并在客户端连接成功后订阅到该频道。订阅成功后，客户端发送的网络数据会通过channeld转发到全局频道的所有者，即创建该频道的服务端。
 
@@ -106,23 +106,24 @@ LogChanneldRepGenerator=Verbose
 
 要添加一个服务器组，打开主菜单`编辑 -> 编辑器偏好设置 -> 插件 -> Channeld Editor`。点击`Server Groups`一栏的加号按钮，并展开设置项：
 
-![](../images/settings_server_group.png)
+<img height="300" src="../images/settings_server_group.png"/>
 
 确保Enabled为勾选，Server Num为1，并设置Server View Class同样为`SingleChannelDataView`。Server Map留空则表示启动服务器时，会使用编辑器当前打开的地图。
 
 # 4.启动channeld服务和游戏服务器
 第一次启动channeld服务和游戏服务器前需要生成同步代码，点击`Generate Replication Code`选项，生成同步代码。首次生成时要遍历项目中所有的代码和蓝图，所以可能较长，请耐心等待。
-![](../images/generate_replicaiton_code.png)
+
+<img height="200" src="../images/generate_replicaiton_code.png"/>
 
 等待代码生成成功后，点击工具栏中插件图标的下拉按钮，确保`Enable Channeld Networking`为选中状态：
 
-![](../images/toolbar_menu.png)
+<img height="200" src="../images/toolbar_menu.png"/>
 
 然后，点击`Launch Channeld`选项，启动channeld服务（如上图中标记2所示）。如果弹出Windows防火墙提示，请允许channeld通过防火墙。
 
 最后，点击`Launch Servers`选择，启动游戏服务器（如上图中标记3所示）。此时每一个命令行窗口，都对应一个UE服务器进程。正常启动的UE服务器进程，会在控制台中打印以下类似信息：
 
-![](../images/server_view_initialized.png)
+<img height="200" src="../images/server_view_initialized.png"/>
 
 ```
 注意：如果UE服务器连接channeld失败，则会退出。
@@ -134,7 +135,7 @@ LogChanneldRepGenerator=Verbose
 
 在地图中移动角色，并观察服务器的控制台中打印的日志，会出现对应的同步数据输出：
 
-![](../images/server_replication_output.png)
+<img height="300" src="../images/server_replication_output.png"/>
 
 ## 5.2.测试多个客户端
 如果要同时开启多个客户端，需要对默认的编辑器设置做一些修改。打开主菜单`编辑 -> 编辑器偏好设置 -> 关卡编辑器 -> 播放`，在`Multiplayer options`中，**取消**`单进程下的运行`的勾选：
@@ -158,24 +159,24 @@ LogChanneldRepGenerator=Verbose
 ## 6.1.创建有同步变量的Actor
 新建一个Actor蓝图`BP_TestActor`，并为其添加同步组件`ChanneldReplicationComponent`。Actor默认不开启同步，需要在组件中手动勾选`Replicate`选项：
 
-![](../images/actor_replicates.png)
+<img height="300" src="../images/actor_replicates.png"/>
 
 接下来，为该Actor添加一个`Cube`组件，使其可见。由于接下来要通过蓝图实现该Cube的位移和旋转，所以需要开启Cube组件的网络同步：
 
-![](../images/cube_component_replicates.png)
+<img height="300" src="../images/cube_component_replicates.png"/>
 
 然后，为该Actor添加一个同步变量`Size`，类型为Float，设置Replication为`RepNotify`，开启同步及回调：
 
-![](../images/test_actor_size.png)
+<img height="300" src="../images/test_actor_size.png"/>
 
 在Size的同步回调函数`On Rep Size`中，打印出同步的值：
 
-![](../images/test_actor_size_on_rep.png)
+<img height="300" src="../images/test_actor_size_on_rep.png"/>
 
 ## 6.2.在蓝图中实现移动逻辑
 在`BP_TestActor`的事件图表中，为Tick事件添加如下节点，使`Cube`组件可以随着时间上下移动和旋转：
 
-![](../images/test_actor_tick.png)
+<img height="300" src="../images/test_actor_tick.png"/>
 
 ```
 注意：添加IsServer节点，确保只有服务端才会执行该逻辑。
@@ -184,7 +185,7 @@ LogChanneldRepGenerator=Verbose
 ## 6.3.在玩家控制器中实现创建Actor的逻辑
 在`ThirdPersonPlayerController`中，添加如下节点，使玩家按下`F`键时，在角色前方创建一个`BP_TestActor`，并为其设置一个随机的Size：
 
-![](../images/pc_spawn_cube.png)
+<img height="300" src="../images/pc_spawn_cube.png"/>
 
 ```
 注意：ServerSpawnCube函数需要设置为“在服务器上运行”。这样创建出来的Actor才会出现在其它客户端。
@@ -199,7 +200,7 @@ LogChanneldRepGenerator=Verbose
 
 首先，点击插件工具栏中的`Stop Servers`关闭之前开启的游戏服务器。然后，点击`Stop Channeld`关闭之前开启的channeld服务：
 
-![](../images/stop_servers_and_channeld.png)
+<img height="200" src="../images/stop_servers_and_channeld.png"/>
 
 然后，点击`Generate Replication Code`选项，生成同步代码。首次生成时间要遍历项目中所有的代码和蓝图，所以可能较长，请耐心等待。
 
@@ -214,7 +215,7 @@ LogChanneldRepGenerator=Verbose
 
 连接成功后，按下`F`键，可以看到在角色前方创建了一个`BP_TestActor`，并在屏幕左上方打印出`Size`的值：
 
-![](../images/test_actor_spawn.png)
+<img height="300" src="../images/test_actor_spawn.png"/>
 
 # 7.使用空间频道运行地图
 ## 7.1.空间频道简介
@@ -236,12 +237,11 @@ LogChanneldRepGenerator=Verbose
 
 为了让空间频道更直观地显示出来，在相同的设置界面中勾选`Spatial -> Debug -> Enable Spatial Visualizer`，开启ChannelUE内置的空间频道可视化工具：
 
-![](../images/settings_spatial_visualizer.png)
+<img height="200" src="../images/settings_spatial_visualizer.png"/>
 
 空间频道可视化工具可以为角色增加不同颜色的描边，已区分角色所在的空间频道。要开启描边功能，需要在主菜单`编辑 -> 项目设置 -> 引擎 -> 渲染 -> Postprocessing`中设置`自定义深度-模具通道`为`以模具启用`：
 
-![](../images/settings_stencil.png)
-
+<img height="200" src="../images/settings_stencil.png"/>
 
 接下来，还需要配置服务端使用的频道数据视图类。
 
@@ -252,15 +252,14 @@ LogChanneldRepGenerator=Verbose
 
 接下来，点击`Server Groups`右侧的加号，添加一个新的服务器组。将新的服务器组的视图类(Server View Class)改为`SpatialSpaceServerView`。将服务器数量(Server Num)改为2，表示有两个空间服务器。将启动延时(Delay Time)改为2.0秒，保证主服务器启动后，再启动空间服务器。设置好的服务器组如下图所示：
 
-![](../images/settings_server_groups_spatial.png)
-
+<img height="300" src="../images/settings_server_groups_spatial.png"/>
 
 ## 7.4.修改玩家控制器蓝图，实现自动连接channeld
 在步骤5中，介绍了通过控制台输入`connect 127.0.0.1`连接channeld的方法。在空间频道的场景中，这种方式就不再适用了。事实上，大部分情况下都推荐使用C++或蓝图实现自动连接channeld。下面是通过蓝图连接channeld的示例：
 
 打开`ThirdPersonPlayerController`蓝图，先添加一个`Get ChanneldGameInstanceSubsystem`节点。然后在`BeginPlay`事件中添加以下节点：
 
-![](../images/player_controller_connect.png)
+<img height="200" src="../images/player_controller_connect.png"/>
 
 
 ## 7.5.运行游戏并测试
