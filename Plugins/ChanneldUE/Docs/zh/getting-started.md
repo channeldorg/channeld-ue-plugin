@@ -255,7 +255,7 @@ LogChanneldRepGenerator=Verbose
 <img height="300" src="../images/settings_server_groups_spatial.png"/>
 
 ## 7.4.修改玩家控制器蓝图，实现自动连接channeld
-在步骤5中，介绍了通过控制台输入`connect 127.0.0.1`连接channeld的方法。在空间频道的场景中，这种方式就不再适用了。事实上，大部分情况下都推荐使用C++或蓝图实现自动连接channeld。下面是通过蓝图连接channeld的示例：
+在步骤5中，介绍了通过控制台输入`open 127.0.0.1`连接channeld的方法。在空间频道的场景中，这种方式就不再适用了。事实上，大部分情况下都推荐使用C++或蓝图实现自动连接channeld。下面是通过蓝图连接channeld的示例：
 
 打开`ThirdPersonPlayerController`蓝图，先添加一个`Get ChanneldGameInstanceSubsystem`节点。然后在`BeginPlay`事件中添加以下节点：
 
