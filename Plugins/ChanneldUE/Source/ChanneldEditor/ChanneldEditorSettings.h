@@ -40,29 +40,36 @@ class UChanneldEditorSettings : public UObject
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(Config, EditAnywhere, Category= "Channeld", meta = ( ToolTip = "The go source folder to build and run. The working directory is CHANNELD_PATH." ))
+	//The go source folder to build and run. The working directory is "CHANNELD_PATH".
+	UPROPERTY(Config, EditAnywhere, Category= "Channeld")
 	FString LaunchChanneldEntry = TEXT("examples/channeld-ue-tps");
 
 	UPROPERTY(Config, EditAnywhere, Category = "Channeld")
-	FString LaunchChanneldParameters = TEXT("-dev -loglevel=-1 -ct=0 -mcb=13 -cfsm=\"config/client_authoratative_fsm.json\" -chs=\"config/channel_settings_ue.json\" -scc=\"config/spatial_static_2x2.json\"");
+	TArray<FString> LaunchChanneldParameters = {TEXT("-dev"),TEXT("-loglevel=-1"),TEXT("-ct=0"),TEXT("-mcb=13"),TEXT("-cfsm=\"config/client_authoratative_fsm.json\""),TEXT("-chs=\"config/channel_settings_ue.json\""),TEXT("-scc=\"config/spatial_static_2x2.json\"")};
 
-	UPROPERTY(Config, EditAnywhere, Category = "Channeld")
+	UPROPERTY(Config, EditAnywhere, Category = "Server")
 	TArray<FServerGroup> ServerGroups;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator", DisplayName = "Automatically Recompile After Generating Replication Code", meta = ( ToolTip = "Repilcator Generator will automatically recompile the game code after generating the replicators. if you want to disable this feature, set the item to be false" ))
+	//Using to add the replication component to all replicated blueprint actors
+	UPROPERTY(Config, EditAnywhere, Category = "Tools")
+	TSubclassOf<UChanneldReplicationComponent> DefaultReplicationComponent = UChanneldReplicationComponent::StaticClass();
+
+	// Replication Generator will automatically recompile the game code after generating the replicators. if you want to disable this feature, set the item to be false
+	UPROPERTY(Config, EditAnywhere, Category = "Replication Generator", DisplayName = "Automatically Recompile After Generating Replication Code")
 	bool bAutoRecompileAfterGenerate = true;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator|Protobuf", DisplayName = "Game Module Export API Macro", meta = ( ToolTip = "If developer wants to export replicators from the default game module, set the item to be the same as the default game module API Macro. For Example \"CHANNELDUE_API\"" ))
+	// Generate go replication code to the specified folder after generating replication code, the folder is relative to "CHANNELD_PATH"
+	UPROPERTY(Config, EditAnywhere, Category = "Replication Generator")
+	FString GeneratedGoReplicationCodeStorageFolder = TEXT("examples/channeld-ue-tps");
+
+	// Set go_package in generated .proto file to the specified value
+	UPROPERTY(Config, EditAnywhere, Category = "Replication Generator|Protobuf", DisplayName= "Go Package Import Path Prefix")
+	FString ChanneldGoPackageImportPathPrefix = TEXT("channeld.clewcat.com/channeld/examples/channeld-ue-tps");
+
+	// If developer wants to export replicators from the default game module, set the item to be the same as the default game module API Macro. For Example "CHANNELDUE_API"
+	UPROPERTY(Config, EditAnywhere, Category = "Replication Generator|Protobuf", DisplayName = "Game Module Export API Macro")
 	FString GameModuleExportAPIMacro;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator|Protobuf", meta = ( ToolTip = "Set go_package in generated .proto file to the specified value" ))
-	FString ChanneldGoPackageImportPathPrefix = TEXT("channeld.clewcat.com/channeld/examples/channeld-ue-tps/");
-	
-	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator|Protobuf", DisplayName = "Channeld Proto Files Storage Directory", meta = ( ToolTip = "Generate go proto files to the specified directory after generating replicators, the directory is relative to CHANNELD_PATH" ))
-	FString ChanneldProtoFilesStorageDir = TEXT("examples/channeld-ue-tps/");
-
-	UPROPERTY(Config, EditAnywhere, Category = "Replicator Generator|Tools", DisplayName = "Default Replication Component", meta = ( ToolTip = "Using to add the replicator component to all replicated blueprint actors without replicator" ))
-	TSubclassOf<UChanneldReplicationComponent> DefaultReplicationComponent = UChanneldReplicationComponent::StaticClass();
 	/*
     static int32 GetServerNum()
     {

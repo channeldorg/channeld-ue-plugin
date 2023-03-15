@@ -179,12 +179,12 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 	}
 
 	const FString ProtoPackageName = GetDefaultProtoPackageName();
-	const FString GoPackageImportPath = GoPackageImportPathPrefix + ProtoPackageName;
+	const FString GoPackageImportPath = GoPackageImportPathPrefix / ProtoPackageName;
 	CodeGenerator->Generate(
 		ActorInfosToGenRep,
 		GetDefaultModuleDir(),
 		ProtoPackageName,
-		(GoPackageImportPathPrefix + ProtoPackageName),
+		GoPackageImportPath,
 		ReplicatorCodeBundle
 	);
 	FString Message;
