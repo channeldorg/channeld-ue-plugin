@@ -1,5 +1,3 @@
-// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
-
 #include "ChanneldEditorStyle.h"
 #include "ChanneldEditor.h"
 #include "Framework/Application/SlateApplication.h"

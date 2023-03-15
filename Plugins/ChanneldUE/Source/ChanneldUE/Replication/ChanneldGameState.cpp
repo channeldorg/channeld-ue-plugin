@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ChanneldGameState.h"
 
 int32 AChanneldGameState::GetFunctionCallspace(UFunction* Function, FFrame* Stack)

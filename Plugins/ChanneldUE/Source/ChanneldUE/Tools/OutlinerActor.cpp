@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Tools/OutlinerActor.h"
 
 AOutlinerActor::AOutlinerActor(const FObjectInitializer& ObjectInitializer)

@@ -1,7 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "ChanneldNetDriver.h"
+﻿#include "ChanneldNetDriver.h"
 
 #include "Net/DataReplication.h"
 #include "Net/RepLayout.h"
