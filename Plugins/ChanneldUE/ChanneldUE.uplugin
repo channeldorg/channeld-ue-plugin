@@ -41,9 +41,5 @@
     }
    ],
   "Plugins": [
-    {
-      "Name": "ReplicationGraph",
-      "Enabled": false
-    }
   ]
 }

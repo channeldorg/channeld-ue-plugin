@@ -150,7 +150,9 @@ LogChanneldRepGenerator=Verbose
 
 在每个客户端窗口中，打开控制台并输入`open 127.0.0.1`。观察多个客户端之间的同步。
 
-在入门教程中，客户端都需要通过这种方式手动连接。*频道数据视图*的章节中，将会介绍如何通过扩展视图，在蓝图中建立连接。
+```
+提示：在本章后面的空间频道示例中，会介绍如何在蓝图中建立连接。
+```
 
 # 6.基本的开发工作流
 ## 6.1.创建有同步变量的Actor
@@ -236,6 +238,10 @@ LogChanneldRepGenerator=Verbose
 
 ![](../images/settings_spatial_visualizer.png)
 
+空间频道可视化工具可以为角色增加不同颜色的描边，已区分角色所在的空间频道。要开启描边功能，需要在主菜单`编辑 -> 项目设置 -> 引擎 -> 渲染 -> Postprocessing`中设置`自定义深度-模具通道`为`以模具启用`：
+
+![](../images/settings_stencil.png)
+
 
 接下来，还需要配置服务端使用的频道数据视图类。
 
@@ -249,7 +255,15 @@ LogChanneldRepGenerator=Verbose
 ![](../images/settings_server_groups_spatial.png)
 
 
-## 7.4.运行游戏并测试
+## 7.4.修改玩家控制器蓝图，实现自动连接channeld
+在步骤5中，介绍了通过控制台输入`connect 127.0.0.1`连接channeld的方法。在空间频道的场景中，这种方式就不再适用了。事实上，大部分情况下都推荐使用C++或蓝图实现自动连接channeld。下面是通过蓝图连接channeld的示例：
+
+打开`ThirdPersonPlayerController`蓝图，先添加一个`Get ChanneldGameInstanceSubsystem`节点。然后在`BeginPlay`事件中添加以下节点：
+
+![](../images/player_controller_connect.png)
+
+
+## 7.5.运行游戏并测试
 重复步骤4，重启channeld服务和游戏服务器。可以观察到，3个UE服务器进程依次启动。其中2个空间服务器进程在启动成功后，会打印出创建空间频道成功的日志：
 
 ```log
@@ -257,13 +271,12 @@ LogChanneld: Created spatial channels: 65536,65537 （空间服务器1）
 LogChanneld: Created spatial channels: 65538,65539 （空间服务器2）
 ```
 
-重复步骤5，运行游戏并连接到服务器。进入场景后，可以观察到空间频道可视化工具带来的效果：
+运行游戏后，客户端会自动连接到channeld并进入游戏服务器。可以观察到空间频道可视化工具带来的效果：
 - 地板上会显示不同颜色的色块和网格。一种颜色表示同一个空间服务器；每个网格表示一个空间频道。
 - 空气中会填充不同的半透明颜色，表示客户端所订阅的空间频道，即兴趣范围。**客户端接收不到兴趣范围之外的同步**。
 - 玩家角色的身上会出现亮边，颜色对应该角色所属的空间服务器。
 
-// TODO: 截图
-
+![](../images/spatial.gif)
 
 在场景中移动，跨过地板上的网格。可以观察到：跨过同一颜色的网格，兴趣范围也会随着移动；角色的亮边颜色不会改变，因为并没有发生跨服；而跨过不同颜色的网格，角色的亮边会改变为所在空间服务器的颜色，因为发生了跨服。
 

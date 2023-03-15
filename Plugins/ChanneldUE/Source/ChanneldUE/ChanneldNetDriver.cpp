@@ -375,6 +375,14 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 				// InView->NetDriver = TSharedPtr<UChanneldNetDriver>(this);
 			});
 		}
+
+		if (bInitAsClient)
+		{
+			Subsystem->OnSetLowLevelSendChannelId.AddWeakLambda(this, [&]()
+			{
+				GetServerConnection()->FlushUnauthData();
+			});
+		}
 	}
 
 	ConnToChanneld = GEngine->GetEngineSubsystem<UChanneldConnection>();
@@ -1010,7 +1018,12 @@ void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 		auto MyServerConnection = GetServerConnection();
 		MyServerConnection->RemoteAddr = ConnIdToAddr(ConnToChanneld->GetConnId());
 		MyServerConnection->bChanneldAuthenticated = true;
-		MyServerConnection->FlushUnauthData();
+
+		if (*LowLevelSendToChannelId != Channeld::InvalidChannelId)
+		{
+			MyServerConnection->FlushUnauthData();
+		}
+		// Otherwise, wait OnSetLowLevelSendChannelId event to flush the data.
 	}
 }
 
