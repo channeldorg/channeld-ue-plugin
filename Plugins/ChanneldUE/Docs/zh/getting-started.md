@@ -18,61 +18,55 @@ protoc-gen-go - Protobuf的go代码生成工具
 
 # 2.创建第三人称模板项目
 ## 2.1.创建项目
-##### 1. 新建一个基于第三人称模板的UE项目
-使用第三人称模板的创建UE项目。
+#### 2.1.1.新建一个基于第三人称模板的UE项目
+使用第三人称模板的创建UE项目。选择项目类型为`C++`：
 ![](../images/create_project.png)
 
 ```
 注意：ChannelUE插件只支持C++项目。如果您使用的是纯蓝图项目，需要先转换为C++项目。
 ```
 
-##### 2. 复制插件
-
+##### 2.1.2.复制插件
 将1.1.步骤中克隆的插件代码仓库目录复制到项目的`Plugins`目录下。
 
-##### 3. 修改项目Build.cs文件
-
+##### 2.1.3.修改项目Build.cs文件
 为项目添加插件的模块`ChanneldUE`和`ProtobufUE`：
 
 ```csharp
 PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ChanneldUE", "ProtobufUE" });
 ```
 
-##### 4. 修改项目的配置文件
-
+##### 2.1.4.修改项目的配置文件
 打开项目的配置文件`Config/DefaultEngine.ini`，并添加插件相关的日志输出等级：
 
 ```
 [Core.log]
-LogChanneld=All
-LogChanneldEditor=All
-LogChanneldRepGenerator=All
+LogChanneld=Verbose
+LogChanneldEditor=Verbose
+LogChanneldRepGenerator=Verbose
 ```
 
 ```
-提示：该配置用于设置插件的日志输出级别。如果不需要查看插件的日志信息，可以不进行此步骤。但是建议开发者在开发过程中开启日志输出，以便查看插件的运行情况。
+提示：该配置使用较低的日志输出级别。建议在开发阶段开启Verbose日志，以方便排查和报告问题。在发布阶段，建议将日志等级改为Log或Warn以减少性能和文件存储开销。
 ```
 
 ## 2.2.重新编译运行项目并开启插件
-
 在文件浏览器中右键点击项目的`*.uproject`文件，选择"Generate Visual Studio project files"，重新生成项目的解决方案文件。
 在Visual Studio中重新加载解决方案，并编译运行项目。当UE编辑器再次打开时，工具栏会出现插件图标：
 
 ![](../images/toolbar_channeld.png)
 
-如果插件图标未显示，在编辑器的顶部菜单栏中选择"Plugins" -> "ChanneldUE" -> "Enable"，启用插件。
+如果插件图标未显示，在编辑器的顶部菜单栏中选择`编辑 -> 插件 -> Other -> ChanneldUE -> 已启用`，启用插件。
 
 ## 2.3.为项目创建基础同步类和Game Mode
 因为项目默认用到Gameplay框架并不支持基于channeld的网络同步，所以需要创建一批添加了同步组件的蓝图类。
 
-##### 1. 为第三人称角色蓝图添加同步组件
-
+##### 2.3.1.为第三人称角色蓝图添加同步组件
 打开第三人称角色的蓝图`ThirdPersonCharacter`，并为其添加同步组件`ChanneldReplicationComponent`：
 
 ![](../images/character_rep_component.png)
 
-##### 2. 创建`PlayerController`、`GameState`和`PlayerState`蓝图
-
+##### 2.3.2.创建`PlayerController`、`GameState`和`PlayerState`蓝图
 创建三个蓝图，他们分别继承自`PlayerController`、`ChanneldGameState`和`PlayerState`，并分别将它们命名为`ThirdPersonPlayerController`、`ThirdPersonGameState`和`ThirdPersonPlayerState`：
 
 ![](../images/new_blueprints.png)
@@ -81,19 +75,20 @@ LogChanneldRepGenerator=All
 提示：此处选择GameStateBase或ChanneldGameState都可以。如果要在之后的开发中使用到跨服的GameState功能，则需要选择ChanneldGameState。
 ```
 
-##### 3. 为新创建的三个蓝图开启`复制(Replicates)`，并添加同步组件`ChanneldReplicationComponent`。
+##### 2.3.3.为新创建的蓝图开启同步
+仿照2.3.1.步骤，为新创建的三个蓝图开启`复制(Replicates)`，并添加同步组件`ChanneldReplicationComponent`。
 
 ```
 小贴士：记得在开启Relicates和添加同步组件后，编译和保存上述蓝图！
 ```
 
- ##### 4. 创建`GameMode`蓝图
- 
- 创建一个新的GameMode蓝图`ThirdPersonGameMode`（如果已存在，则打开），将设置Game State Class, Player Controller Class, Player State Class和Default Pawn Class分别设置为`ThirdPersonGameState`、`ThirdPersonPlayerController`、`ThirdPersonPlayerState`和`ThirdPersonCharacter`。
+ ##### 2.3.4.创建`GameMode`蓝图
+创建一个新的GameMode蓝图`ThirdPersonGameMode`（如果已存在，则打开），将`Game State Class`, `Player Controller Class`, `Player State Class`和`Default Pawn Class`分别设置为`ThirdPersonGameState`、`ThirdPersonPlayerController`、`ThirdPersonPlayerState`和`ThirdPersonCharacter`：
 
 ![](../images/game_mode.png)
 
-##### 5. 在项目设置中将`ThirdPersonGameMode`设置为默认Game Mode
+##### 2.3.5.应用GameMode蓝图
+在项目设置中将`ThirdPersonGameMode`设置为默认Game Mode
 
 ![](../images/project_settings_game_mode.png)
 
@@ -107,17 +102,16 @@ LogChanneldRepGenerator=All
 `SingleChannelDataView`是插件中内置的视图蓝图类，它会在服务端创建**全局频道**，并在客户端连接成功后订阅到该频道。订阅成功后，客户端发送的网络数据会通过channeld转发到全局频道的所有者，即创建该频道的服务端。
 
 ## 3.2.配置服务器组
-作为UE的分布式架构扩展，为了方便调试，在开发过程中ChanneldUE插件支持同时启动多个UE服务器进程，每个进程可以配置自己的视图和启动参数。
+作为UE的分布式架构扩展，ChanneldUE插件支持同时启动多个UE服务器进程，每个进程可以配置自己的视图和启动参数。
 
-首先添加一个服务器组，打开主菜单`编辑 -> 编辑器偏好设置 -> 插件 -> Channeld Editor`。点击`Server Groups`一栏的加号按钮，并展开设置项：
+要添加一个服务器组，打开主菜单`编辑 -> 编辑器偏好设置 -> 插件 -> Channeld Editor`。点击`Server Groups`一栏的加号按钮，并展开设置项：
 
 ![](../images/settings_server_group.png)
 
 确保Enabled为勾选，Server Num为1，并设置Server View Class同样为`SingleChannelDataView`。Server Map留空则表示启动服务器时，会使用编辑器当前打开的地图。
 
 # 4.启动channeld服务和游戏服务器
-
-第一次启动channeld服务和游戏服务器前需要生成同步器代码，点击`Generate Replication Code`选项，生成同步代码。首次生成时间要遍历项目中所有的代码和蓝图，所以可能较长，请耐心等待。
+第一次启动channeld服务和游戏服务器前需要生成同步代码，点击`Generate Replication Code`选项，生成同步代码。首次生成时要遍历项目中所有的代码和蓝图，所以可能较长，请耐心等待。
 ![](../images/generate_replicaiton_code.png)
 
 等待代码生成成功后，点击工具栏中插件图标的下拉按钮，确保`Enable Channeld Networking`为选中状态：
