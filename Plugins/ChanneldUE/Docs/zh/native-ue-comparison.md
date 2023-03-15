@@ -1,5 +1,5 @@
 # ChanneldUE和原生UE的差异
-本章介绍了ChanneldUE和虚幻引擎自带的网络同步机制的差异。部分差异可以通过替代方案解决，但是部分差异目前还没有替代方案。如果你的游戏需要使用这些功能，请在[Issues](/issues)中提出。
+本章介绍了ChanneldUE和虚幻引擎自带的网络同步机制的差异。部分差异可以通过替代方案解决，但是部分差异目前还没有替代方案。如果你的游戏需要使用这些功能，请在[Issues](/../../issues)中提出。
 
 ## 条件属性复制
 ChanneldUE尚不支持[条件属性复制](https://docs.unrealengine.com/4.27/zh-CN/InteractiveExperiences/Networking/Actors/Properties/Conditions/)。
