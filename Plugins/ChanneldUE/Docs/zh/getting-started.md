@@ -42,6 +42,7 @@ PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engi
 ```
 [Core.log]
 LogChanneld=Verbose
+LogChanneldGen=Verbose
 LogChanneldEditor=Verbose
 LogChanneldRepGenerator=Verbose
 ```
