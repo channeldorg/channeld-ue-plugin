@@ -224,7 +224,12 @@ void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchR
 		return;
 	}
 	const FString GoBuildArgs = FString::Printf(TEXT("build -o . \"%s\""), *(LaunchChanneldEntryDir / TEXT("...")));
-	const FString RunChanneldArgs = FString::Printf(TEXT("%s"), *Settings->LaunchChanneldParameters);
+	FString LaunchChanneldParameterStr = TEXT("");
+	for (const FString& LaunchChanneldParameter : Settings->LaunchChanneldParameters)
+	{
+		LaunchChanneldParameterStr.Append(LaunchChanneldParameter + TEXT(" "));
+	}
+	const FString RunChanneldArgs = FString::Printf(TEXT("%s"), *LaunchChanneldParameterStr);
 	const FString ChanneldBinPath = ChanneldPath / FPaths::GetCleanFilename(LaunchChanneldEntryDir) + TEXT(".exe");
 
 	BuildChanneldWorkThread = MakeShareable(
@@ -409,7 +414,7 @@ void FChanneldEditorModule::GenerateReplicatorAction()
 	// Make sure the ReplicationRegistryTable is saved and closed.
 	// The CookAndGenRepCommandLet process will read and write ReplicationRegistryTable,
 	// If the editor process is still holding the ReplicationRegistryTable, the CookAndGenRepCommandLet process will fail to write the ReplicationRegistryTable.
-	if(!ReplicationRegistryUtils::PromptForSaveAndCloseRegistryTable())
+	if (!ReplicationRegistryUtils::PromptForSaveAndCloseRegistryTable())
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("Please save and close the Replication Registry data table first"));
 		return;
@@ -574,7 +579,7 @@ void FChanneldEditorModule::GenRepProtoGoCode(const TArray<FString>& ProtoFiles,
 		return;
 	}
 
-	FString DirToGoMain = ChanneldPath / GetMutableDefault<UChanneldEditorSettings>()->ChanneldProtoFilesStorageDir;
+	FString DirToGoMain = ChanneldPath / GetMutableDefault<UChanneldEditorSettings>()->GeneratedGoReplicationCodeStorageFolder;
 	FString DirToGenGoProto = DirToGoMain / LatestGeneratedManifest.ProtoPackageName;
 	FPaths::NormalizeDirectoryName(DirToGenGoProto);
 	if (!IFileManager::Get().DirectoryExists(*DirToGenGoProto))
