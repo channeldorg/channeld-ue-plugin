@@ -44,7 +44,7 @@ class CHANNELDUE_API UChanneldGameInstanceSubsystem : public UGameInstanceSubsys
 
 public:
 
-	TSharedRef<Channeld::ChannelId> LowLevelSendToChannelId = MakeShared<Channeld::ChannelId>(Channeld::GlobalChannelId);
+	TSharedRef<Channeld::ChannelId> LowLevelSendToChannelId = MakeShared<Channeld::ChannelId>(Channeld::InvalidChannelId);
 
 	UPROPERTY(BlueprintAssignable)
 		FOnAuth OnAuth;

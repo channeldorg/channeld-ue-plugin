@@ -22,6 +22,11 @@ UChanneldSettings::UChanneldSettings(const FObjectInitializer& ObjectInitializer
 	SubscriptionBoxMaxSize(100000, 100000, 1000),
 	SpatialOutlinerClass(LoadClass<AOutlinerActor>(NULL, TEXT("BlueprintGeneratedClass'/ChanneldUE/Blueprints/BP_SpatialOutliner.BP_SpatialOutliner_C'")))
 {
+	FClientInterestSettingsPreset DefaultInterestPreset;
+	DefaultInterestPreset.AreaType = EClientInterestAreaType::Sphere;
+	DefaultInterestPreset.PresetName = "ThirdPerson";
+	DefaultInterestPreset.Radius = 1000;
+	ClientInterestPresets.Add(DefaultInterestPreset);
 }
 
 void UChanneldSettings::PostInitProperties()

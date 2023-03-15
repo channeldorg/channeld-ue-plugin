@@ -96,7 +96,7 @@ public:
 	void OnServerSpawnedActor(AActor* Actor);
 
 protected:
-	TSharedRef<Channeld::ChannelId> LowLevelSendToChannelId = MakeShared<Channeld::ChannelId>(Channeld::GlobalChannelId);
+	TSharedRef<Channeld::ChannelId> LowLevelSendToChannelId = MakeShared<Channeld::ChannelId>(Channeld::InvalidChannelId);
 
 private:
 	

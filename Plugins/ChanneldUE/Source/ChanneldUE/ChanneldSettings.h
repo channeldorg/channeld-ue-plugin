@@ -53,7 +53,7 @@ public:
 
 	// If true, UE's default handshaking process will be skipped and the server will expect NMT_Hello as the first message.
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
-	bool bDisableHandshaking = true;
+	bool bDisableHandshaking = false;
 	// If true, UNetConnection::SetInternalAck() will be called to internally ack all packets. Should be turned on for reliable connection (TCP) to save bandwidth.
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	bool bSetInternalAck = true;

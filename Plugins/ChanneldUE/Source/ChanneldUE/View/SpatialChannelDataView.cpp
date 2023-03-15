@@ -1041,14 +1041,20 @@ void USpatialChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* 
 				// Add the PlayerController and the PlayerState to the same spatial channel as the Pawn.
 				if (const APawn* Pawn = Cast<APawn>(Actor))
 				{
-					// Should make sure the PlayerController and the PlayerState are not added to other channels.
-					RemoveActorProvider(Pawn->GetController(), false);
-					SetOwningChannelId(GetNetId(Pawn->GetController()), SpatialChId);
-					AddActorProvider(SpatialChId, Pawn->GetController());
-					
-					RemoveActorProvider(Pawn->GetPlayerState(), false);
-					SetOwningChannelId(GetNetId(Pawn->GetPlayerState()), SpatialChId);
-					AddActorProvider(SpatialChId, Pawn->GetPlayerState());
+					if (auto Controller = Pawn->GetController())
+					{
+						// Should make sure the PlayerController and the PlayerState are not added to other channels.
+						RemoveActorProvider(Controller, false);
+						SetOwningChannelId(GetNetId(Controller), SpatialChId);
+						AddActorProvider(SpatialChId, Controller);
+					}
+
+					if (auto PlayerState = Pawn->GetPlayerState())
+					{
+						RemoveActorProvider(PlayerState, false);
+						SetOwningChannelId(GetNetId(PlayerState), SpatialChId);
+						AddActorProvider(SpatialChId, PlayerState);
+					}
 				}
 				
 				//SendSpawnToAdjacentChannels(Provider->GetTargetObject(), SpatialChId);
