@@ -75,6 +75,8 @@ private:
 	UChanneldMissionNotiProxy* BuildChanneldNotify;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenRepWorkThread;
+	mutable bool bGeneratingReplication;
+
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoCppCodeWorkThread;
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoGoCodeWorkThread;
 	UChanneldMissionNotiProxy* GenRepNotify;

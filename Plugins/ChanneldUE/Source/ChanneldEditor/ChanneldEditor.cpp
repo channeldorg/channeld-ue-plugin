@@ -409,6 +409,13 @@ void FChanneldEditorModule::LaunchChanneldAndServersAction()
 
 void FChanneldEditorModule::GenerateReplicationAction()
 {
+	if (bGeneratingReplication)
+	{
+		UE_LOG(LogChanneldEditor, Warning, TEXT("Replication is already being generated"));
+		return;
+	}
+	bGeneratingReplication = true;
+
 	// Make sure the ReplicationRegistryTable is saved and closed.
 	// The CookAndGenRepCommandLet process will read and write ReplicationRegistryTable,
 	// If the editor process is still holding the ReplicationRegistryTable, the CookAndGenRepCommandLet process will fail to write the ReplicationRegistryTable.
@@ -459,7 +466,12 @@ void FChanneldEditorModule::GenerateReplicationAction()
 
 		GetMutableDefault<UChanneldSettings>()->ReloadConfig();
 	});
-	GenRepWorkThread->ProcFailedDelegate.AddUObject(GenRepNotify, &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
+	GenRepWorkThread->ProcFailedDelegate.AddLambda([this](FChanneldProcWorkerThread*)
+		{
+			bGeneratingReplication = false;
+			GenRepNotify->SpawnMissionFailedNotification(nullptr);
+		}
+	);
 	GenRepNotify->SetMissionNotifyText(
 		FText::FromString(TEXT("Cooking And Generating Replication Code...")),
 		LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),
@@ -468,6 +480,7 @@ void FChanneldEditorModule::GenerateReplicationAction()
 	);
 	GenRepNotify->MissionCanceled.AddLambda([this]()
 	{
+		bGeneratingReplication = false;
 		if (GenRepWorkThread.IsValid() && GenRepWorkThread->GetThreadStatus() == EChanneldThreadStatus::Busy)
 		{
 			GenRepWorkThread->Cancel();
@@ -562,6 +575,7 @@ void FChanneldEditorModule::GenRepProtoCppCode(const TArray<FString>& ProtoFiles
 					RecompileGameCode();
 				});
 			}
+			bGeneratingReplication = false;
 		}
 	);
 
