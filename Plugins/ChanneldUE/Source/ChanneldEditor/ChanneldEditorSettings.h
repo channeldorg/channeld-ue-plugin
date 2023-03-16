@@ -40,12 +40,20 @@ class UChanneldEditorSettings : public UObject
 	GENERATED_BODY()
 
 public:
-	//The go source folder to build and run. The working directory is "CHANNELD_PATH".
+	// The go source folder to build and run. The working directory is %CHANNELD_PATH%.
 	UPROPERTY(Config, EditAnywhere, Category= "Channeld")
 	FString LaunchChanneldEntry = TEXT("examples/channeld-ue-tps");
 
+	// The parameters to run channeld. The working directory is %CHANNELD_PATH%.
 	UPROPERTY(Config, EditAnywhere, Category = "Channeld")
-	TArray<FString> LaunchChanneldParameters = {TEXT("-dev"),TEXT("-loglevel=-1"),TEXT("-ct=0"),TEXT("-mcb=13"),TEXT("-cfsm=\"config/client_authoratative_fsm.json\""),TEXT("-chs=\"config/channel_settings_ue.json\""),TEXT("-scc=\"config/spatial_static_2x2.json\"")};
+	TArray<FString> LaunchChanneldParameters = {
+		TEXT("-dev"),
+		TEXT("-loglevel=-1"),
+		TEXT("-mcb=13"),
+		TEXT("-cfsm=config/client_authoratative_fsm.json"),
+		TEXT("-chs=config/channel_settings_ue.json"),
+		TEXT("-scc=config/spatial_static_2x2.json")
+	};
 
 	UPROPERTY(Config, EditAnywhere, Category = "Server")
 	TArray<FServerGroup> ServerGroups;

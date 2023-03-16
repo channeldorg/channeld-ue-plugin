@@ -8,8 +8,12 @@ channeld网关服务是一个独立于UE客户端和服务端运行的进程。�
 注意：FanOutIntervalMs越小，频道的CPU负载越大。
 ```
 
+channeld网关服务使用Go语言编写。ChanneldUE插件的`Setup.bat`初始化脚本会自动克隆[channeld的代码仓库](https://github.com/metaworking/channeld)到插件的`Source/ThirdParty/channeld`目录。如果在运行`Setup.bat`之间已经克隆了channeld的代码仓库，并配置了`%CHANNELD_PATH%`环境变量，则会跳过自动克隆。
+
 ## 连接
 对于channeld而言，无论是客户端还是服务端，都是一种连接。channeld支持TCP、KCP、WebSocket等协议；目前ChanneldUE的客户端和服务端都通过TCP连接channeld。
+
+每个连接都有一个uint32类型的ID，作为唯一标识。
 
 连接层在ChanneldUE中被封装到了`UChanneldConnection`类。
 
@@ -49,7 +53,7 @@ message DefaultChannelData {
 ```
 
 频道维护一份订阅列表，包括每个订阅的连接以及连接的订阅参数。
-频道数据发生变化后，会根据订阅参数中的频率，依次将累积的更新发送到所有订阅的连接。这个过程叫做扇出（Fan Out）。
+频道数据发生变化后，会根据订阅参数中的频率，依次将累积的更新发送到所有订阅的连接。这个过程叫做扇出（fan-out）。
 
 ## 频道数据中的状态
 状态是频道数据中更细粒度的概念，一个状态与一个同步Actor对应。事实上，一个同步Actor的实例往往包含多个状态，比如一个Character会包含一个CharacterState，一个PawnState，以及一个ActorState。你会发现这三个状态恰好对应从ACharacter往上的三个基类。每个状态只关心对应基类的同步属性。通过这种方式，可以将状态自由地组合来实现任何Actor的同步，而不用担心同步代码的重复或同步属性的冗余。
