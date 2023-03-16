@@ -42,7 +42,7 @@ private:
 	void StopServersAction();
 	void LaunchChanneldAndServersAction();
 
-	void GenerateReplicatorAction();
+	void GenerateReplicationAction();
 	void AddRepCompsToBPsAction();
 
 	/**

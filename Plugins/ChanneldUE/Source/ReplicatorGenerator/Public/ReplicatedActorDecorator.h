@@ -27,7 +27,7 @@ static const TCHAR* GameState_GetNetGUIDTemplate =
 	LR"EOF(
 uint32 {Declare_ReplicatorClassName}::GetNetGUID()
 {
-  return 1;
+  return Channeld::GameStateNetId;
 }
 )EOF";
 

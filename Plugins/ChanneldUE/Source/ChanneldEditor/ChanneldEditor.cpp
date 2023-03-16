@@ -63,7 +63,7 @@ void FChanneldEditorModule::StartupModule()
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::StopServersAction));
 	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().GenerateReplicatorCommand,
-		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::GenerateReplicatorAction));
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::GenerateReplicationAction));
 	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::AddRepCompsToBPsAction));
@@ -407,10 +407,8 @@ void FChanneldEditorModule::LaunchChanneldAndServersAction()
 	});
 }
 
-void FChanneldEditorModule::GenerateReplicatorAction()
+void FChanneldEditorModule::GenerateReplicationAction()
 {
-	// If developer has closed the ReplicationRegistryTable, we need to collect garbage to make sure the ReplicationRegistryTable asset is released.
-	CollectGarbage(RF_NoFlags);
 	// Make sure the ReplicationRegistryTable is saved and closed.
 	// The CookAndGenRepCommandLet process will read and write ReplicationRegistryTable,
 	// If the editor process is still holding the ReplicationRegistryTable, the CookAndGenRepCommandLet process will fail to write the ReplicationRegistryTable.
