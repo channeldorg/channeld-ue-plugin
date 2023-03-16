@@ -1,9 +1,14 @@
 # 文档目录
-## [入门指南](getting-started.md)
+## 快速开始
+### [安装并启用插件](installation.md)
+### [运行第三人称模板项目](third-person-template.md)
+### [添加网络同步Actor](add-replication.md)
+### [使用空间频道](use-spatial-channel.md)
+### [故障排查](troubleshooting.md)
 ## 插件介绍
 ### [基本概念](basic-concepts.md)
 ### [配置ChanneldUE](settings.md)
-### 通过C++和蓝图调用channeld的API
+### C++和蓝图API
 ### 本地开发测试工作流
 ### 生成同步代码
 ## 进阶主题
