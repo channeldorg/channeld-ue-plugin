@@ -8,13 +8,13 @@ unrealpb::ActorComponentRef* NewOne = {Declare_DeltaStateName}->add_{Definition_
 *NewOne = ChanneldUtils::GetRefOfActorComponent(PropItem);
 if (!bPropChanged)
 {
-  bPropChanged = !(PropItem == ChanneldUtils::GetActorComponentByRef<UActorComponent>(&{Declare_FullStateName}->{Definition_ProtoName}()[i], {Code_GetWorldRef}));
+  bPropChanged = !(PropItem == ChanneldUtils::GetActorComponentByRef(&{Declare_FullStateName}->{Definition_ProtoName}()[i], {Code_GetWorldRef}));
 }
 )EOF";
 
 const static TCHAR* ActorCompPropDeco_OnChangeStateArrayInnerTemp =
 	LR"EOF(
-UActorComponent* NewCompRef = ChanneldUtils::GetActorComponentByRef<UActorComponent>(&MessageArr[i], {Code_GetWorldRef});
+UActorComponent* NewCompRef = ChanneldUtils::GetActorComponentByRef(&MessageArr[i], {Code_GetWorldRef});
 if ((*{Declare_PropertyPtr})[i] != NewCompRef)
 {
   (*{Declare_PropertyPtr})[i] = NewCompRef;

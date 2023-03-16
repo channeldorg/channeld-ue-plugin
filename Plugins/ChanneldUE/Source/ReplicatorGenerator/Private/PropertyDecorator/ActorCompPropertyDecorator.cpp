@@ -13,7 +13,7 @@ FString FActorCompPropertyDecorator::GetProtoStateMessageType()
 FString FActorCompPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState)
 {
 	return FString::Printf(
-		TEXT("%s == ChanneldUtils::GetActorComponentByRef<UActorComponent>(&%s->%s(), %s)"),
+		TEXT("%s == ChanneldUtils::GetActorComponentByRef(&%s->%s(), %s)"),
 		*GetCode_GetPropertyValueFrom(FromActor),
 		*FromState, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef()
 	);
@@ -22,7 +22,7 @@ FString FActorCompPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FS
 FString FActorCompPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState, bool ForceFromPointer)
 {
 	return FString::Printf(
-		TEXT("%s == ChanneldUtils::GetActorComponentByRef<UActorComponent>(&%s->%s(), %s)"),
+		TEXT("%s == ChanneldUtils::GetActorComponentByRef(&%s->%s(), %s)"),
 		*GetCode_GetPropertyValueFrom(FromActor, ForceFromPointer),
 		*FromState, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef()
 	);
@@ -31,7 +31,7 @@ FString FActorCompPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FS
 FString FActorCompPropertyDecorator::GetCode_GetProtoFieldValueFrom(const FString& StateName)
 {
 	return FString::Printf(
-		TEXT("ChanneldUtils::GetActorComponentByRef<UActorComponent>(&%s->%s(), %s)"),
+		TEXT("ChanneldUtils::GetActorComponentByRef(&%s->%s(), %s)"),
 		*StateName, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef()
 	);
 }
@@ -44,7 +44,7 @@ FString FActorCompPropertyDecorator::GetCode_SetProtoFieldValueTo(const FString&
 FString FActorCompPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode)
 {
 	return FString::Printf(
-		TEXT("%s = ChanneldUtils::GetActorComponentByRef<UActorComponent>(&%s->%s(), %s);\n  bStateChanged = true;\n%s"),
+		TEXT("%s = ChanneldUtils::GetActorComponentByRef(&%s->%s(), %s);\n  bStateChanged = true;\n%s"),
 		*GetCode_GetPropertyValueFrom(TargetInstance),
 		*NewStateName, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef(),
 		*AfterSetValueCode

@@ -62,9 +62,8 @@ bool FReplicatorCodeGenerator::Generate(
 	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecoratorsToGenChannelData;
 	for (const FRepGenActorInfo& Info : ReplicationActorInfos)
 	{
-		const UClass* ReplicationActorClass = Info.TargetActorClass;
 		TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
-		if (!ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinClass(ReplicationActorClass))
+		if (!Info.bChanneldUEBuiltinType)
 		{
 			if (!CreateDecorateActor(ActorDecorator, Message, Info, ProtoPackageName, GoPackageImportPath))
 			{
