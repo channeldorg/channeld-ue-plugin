@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "AddCompToBPSubsystem.h"
 #include "ReplicatorGeneratorUtils.h"
 #include "Async/Async.h"

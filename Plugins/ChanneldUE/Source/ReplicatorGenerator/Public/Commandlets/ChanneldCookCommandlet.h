@@ -1,5 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 /*=============================================================================
 	CookCommandlet.cpp: Commandlet for cooking content
 =============================================================================*/

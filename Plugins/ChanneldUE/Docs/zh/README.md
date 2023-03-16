@@ -2,7 +2,7 @@
 ## [入门指南](getting-started.md)
 ## 插件介绍
 ### [基本概念](basic-concepts.md)
-### [配置channeld](config-channeld.md)
+### [配置ChanneldUE](settings.md)
 ### 通过C++和蓝图调用channeld的API
 ### 本地开发测试工作流
 ### 生成同步代码

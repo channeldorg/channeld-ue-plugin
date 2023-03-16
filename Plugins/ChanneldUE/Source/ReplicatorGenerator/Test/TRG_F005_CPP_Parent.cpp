@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "TRG_F005_CPP_Parent.h"
 
 #include "Net/UnrealNetwork.h"
