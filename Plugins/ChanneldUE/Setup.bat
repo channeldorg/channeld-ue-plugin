@@ -1,10 +1,10 @@
 @echo off
-SET ChanneldVersion=v0.4.0
-SET ChanneldRepoUrl=git@github.com:metaworking/channeld.git
-SET WorkspaceDir=%~dp0
-SET ChanneldLocalSourceDir=%~dp0Source\ThirdParty\channeld
+set ChanneldVersion=v0.4.0
+set ChanneldRepoUrl=git@github.com:metaworking/channeld.git
+set WorkspaceDir=%~dp0
+set ChanneldLocalSourceDir=%~dp0Source\ThirdParty\channeld
 
-SET ErrorMessages=run %~dp0%~n0.bat again
+set ErrorMessages=run %~dp0%~n0.bat again
 
 echo Start setup
 
@@ -20,7 +20,7 @@ echo Checking golang...
 where go
 if %ERRORLEVEL% == 0 (
     echo 'golang' is installed.
-    goto SkipInstallGo
+    goto skipInstallGo
 )
 :prompt
     : If go is not installed, prompt to install golang.
@@ -69,8 +69,18 @@ if %ERRORLEVEL% == 0 (
 :installGoFinfished
     echo Installing Golang is complete.
 
-:SkipInstallGo
+:skipInstallGo
 
+if NOT DEFINED CHANNELD_PATH (
+    goto cloneChanneld
+) else if NOT EXIST "%CHANNELD_PATH%\.git" (
+    set ChanneldLocalSourceDir=%CHANNELD_PATH%
+    goto cloneChanneld
+) else (
+    goto skipCloneChanneld
+)
+
+:cloneChanneld
 :: Clone channeld from github
 if NOT EXIST "%ChanneldLocalSourceDir%\.git" (
     echo Clone channeld:%ChanneldVersion% from %ChanneldRepoUrl% ...
@@ -88,30 +98,31 @@ if NOT EXIST "%ChanneldLocalSourceDir%\.git" (
     echo Clone channeld:%ChanneldVersion% successfully, the source code is at %ChanneldLocalSourceDir%
 )
 
-echo Set post-merge hook to .git\hooks
-
-SET PostMergeHook=%~dp0..\..\.git\hooks\post-merge
-:: SET PostMergeHook=%~dp0.git\hooks\post-merge
-echo #!/bin/sh > "%PostMergeHook%"
-echo "$(cd $(dirname ${BASH_SOURCE[0]}); pwd)/../../Plugins/ChanneldUE/Source/ThirdParty/update_channeld.sh" >> "%PostMergeHook%"
-:: echo "$(cd $(dirname ${BASH_SOURCE[0]}); pwd)/Source/ThirdParty/update_channeld.sh" > "%PostMergeHook%"
-echo exit 0 >> "%PostMergeHook%"
+:skipCloneChanneld
 
 :: Set CHANNELD_PATH user env to channeld source dir when the CHANNELD_PATH is not set
 if NOT DEFINED CHANNELD_PATH (
-    echo Set CHANNELD_PATH to %ChanneldLocalSourceDir%
+    echo Set user environment variable CHANNELD_PATH to %ChanneldLocalSourceDir%
     setx CHANNELD_PATH %ChanneldLocalSourceDir%
     :: invoke refreshenv.bat to make the CHANNELD_PATH take effect
     call "%~dp0Source\ThirdParty\refrenv.bat"
-    echo Set user environment variable CHANNELD_PATH to %ChanneldLocalSourceDir%
     echo If you are not running the script via cmd.exe, please restart your shell before update ChanneldUE source code !!!
 ) else (
     echo CHANNELD_PATH is already set to %CHANNELD_PATH%
 )
 
+:setupPostMergeHook
+echo Set post-merge hook to .git\hooks
+set PostMergeHook=%~dp0..\..\.git\hooks\post-merge
+:: set PostMergeHook=%~dp0.git\hooks\post-merge
+echo #!/bin/sh > "%PostMergeHook%"
+echo "$(cd $(dirname ${BASH_SOURCE[0]}); pwd)/../../Plugins/ChanneldUE/Source/ThirdParty/update_channeld.sh" >> "%PostMergeHook%"
+:: echo "$(cd $(dirname ${BASH_SOURCE[0]}); pwd)/Source/ThirdParty/update_channeld.sh" > "%PostMergeHook%"
+echo exit 0 >> "%PostMergeHook%"
+
 echo Downloading channeld dependencies...
 cd "%ChanneldLocalSourceDir%"
-SET GOPROXY=https://goproxy.io,direct
+set GOPROXY=https://goproxy.io,direct
 go mod download -x
 go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
