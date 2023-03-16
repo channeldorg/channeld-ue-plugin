@@ -67,4 +67,4 @@ LogChanneld: Created spatial channels: 65538,65539 （空间服务器2）
 - 控制客户端接收的同步范围
 - 让GameState在多个空间服务器上同步属性
 
-可以浏览后面的进阶主题；也可以下载[ChanneldUE示例项目](https://github.com/channeld/channeld-ue-demos)。
+可以浏览后面的进阶主题；也可以下载[ChanneldUE示例项目](https://github.com/metaworking/channeld-ue-demos)。

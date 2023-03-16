@@ -8,7 +8,7 @@ channeld网关服务是一个独立于UE客户端和服务端运行的进程。�
 注意：FanOutIntervalMs越小，频道的CPU负载越大。
 ```
 
-channeld网关服务使用Go语言编写。ChanneldUE插件的`Setup.bat`初始化脚本会自动克隆[channeld的代码仓库](https://github.com/channeld/channeld)到插件的`Source/ThirdParty/channeld`目录。如果在运行`Setup.bat`之间已经克隆了channeld的代码仓库，并配置了`%CHANNELD_PATH%`环境变量，则会跳过自动克隆。
+channeld网关服务使用Go语言编写。ChanneldUE插件的`Setup.bat`初始化脚本会自动克隆[channeld的代码仓库](https://github.com/metaworking/channeld)到插件的`Source/ThirdParty/channeld`目录。如果在运行`Setup.bat`之间已经克隆了channeld的代码仓库，并配置了`%CHANNELD_PATH%`环境变量，则会跳过自动克隆。
 
 ## 连接
 对于channeld而言，无论是客户端还是服务端，都是一种连接。channeld支持TCP、KCP、WebSocket等协议；目前ChanneldUE的客户端和服务端都通过TCP连接channeld。

@@ -89,7 +89,7 @@ ChannelUE插件在编辑器运行时的相关设置。可以在`编辑 > 编辑�
 | ------ | ------ | ------ |
 | `Automatically Repcompile After Generating Replication Code` | true | 是否在生成同步代码成功后进行重编译 |
 | `Generated Go Replication Code Storage Folder` | examples/channeld-ue-tps | 生成的go相关的同步代码存放的路径，该路径相对与环境变量`CHANNELD_PATH`所配置的路径 |
-| `Go Package Import Path Prefix` | github.com/channeld/channeld/examples/channeld-ue-tps | 同步代码相关的proto中`go_package`的前缀 |
+| `Go Package Import Path Prefix` | github.com/metaworking/channeld/examples/channeld-ue-tps | 同步代码相关的proto中`go_package`的前缀 |
 
 ## 同步Actor注册表 `Replication Registry Data Table` 设置
 在生成同步代码后会将所有同步Actor类型注册到同步Actor注册表中。注册表会生成在`Content/ChanneldUE/ReplicationRegistry`。
