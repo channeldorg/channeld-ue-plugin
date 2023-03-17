@@ -21,7 +21,31 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 - 灵活且可扩展的客户端兴趣管理机制
 - 支持跨服交互（目前仅支持跨服RPC；物理、AI、GAS等系统的跨服需要额外集成）
 - 基于云计算的动态负载均衡能够极大节省服务器成本（开发中）
+
+## Links
+[ChanneldUE Example Project](https://github.com/metaworking/channeld-ue-demos)
+
+[Code repo of channeld, the Gateway Service behind ChanneldUE](https://github.com/metaworking/channeld)
+
 ## 链接
 [快速开始](Docs/zh/installation.md)
 
-[channeld代码仓库](https://github.com/metaworking/channeld)
+[中文文档](Docs/zh/README.md)
+
+[ChanneldUE示例项目](https://github.com/metaworking/channeld-ue-demos)
+
+[channeld网关服务代码仓库](https://github.com/metaworking/channeld)
+
+## License and Disclaimer
+- ChanneldUE plugin is licensed under the Apache 2.0 license, see [LICENSE](LICENSE) for details.
+- ChanneldUE plugin and channeld gateway service are free to use for any purpose, including commercial use.
+- The user is responsible for all risks when using this plugin and channeld gateway service.
+- We (Metaworking) provide basic technical support in the form of GitHub [Issues](/../../issues) and [Discussions](/../../discussions), but do not guarantee to solve all problems in time.
+
+[]: # (Path: Plugins\ChanneldUE\README.md)
+
+## 使用许可和免责声明
+- ChanneldUE插件使用Apache 2.0许可证，详情请参考[LICENSE](LICENSE)文件。
+- ChanneldUE插件及channeld网关服务的代码供所有人免费使用，可以用于任何目的，包括商业用途。
+- 使用者在使用本插件及channeld网关服务时，应自行承担所有风险。
+- 我们以GitHub [Issues](/../../issues)和[[Discussions](/../../discussions)的形式提供基本的技术支持，但不保证能够及时解决所有问题。
