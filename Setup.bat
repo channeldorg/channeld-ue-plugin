@@ -114,8 +114,8 @@ if NOT DEFINED CHANNELD_PATH (
 :setupPostMergeHook
 echo Set post-merge hook to .git\hooks
 set PostMergeHook=%~dp0.git\hooks\post-merge
-echo #!/bin/sh > "%PostMergeHook%"
-echo "$(cd $(dirname ${BASH_SOURCE[0]}); pwd)/Source/ThirdParty/update_channeld.sh" > "%PostMergeHook%"
+echo #!/bin/bash > "%PostMergeHook%"
+echo "$(cd $(dirname ${BASH_SOURCE[0]}); pwd)/../../Source/ThirdParty/update_channeld.sh" >> "%PostMergeHook%"
 echo exit 0 >> "%PostMergeHook%"
 
 echo Downloading channeld dependencies...
