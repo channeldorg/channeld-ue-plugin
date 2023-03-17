@@ -42,8 +42,6 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 - The user is responsible for all risks when using this plugin and channeld gateway service.
 - We (Metaworking) provide basic technical support in the form of GitHub [Issues](/../../issues) and [Discussions](/../../discussions), but do not guarantee to solve all problems in time.
 
-[]: # (Path: Plugins\ChanneldUE\README.md)
-
 ## 使用许可和免责声明
 - ChanneldUE插件使用Apache 2.0许可证，详情请参考[LICENSE](LICENSE)文件。
 - ChanneldUE插件及channeld网关服务的代码供所有人免费使用，可以用于任何目的，包括商业用途。
