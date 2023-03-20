@@ -745,14 +745,16 @@ bool FReplicatorCodeGenerator::CreateDecorateActor(
 				TargetActorName = FString::Printf(TEXT("_IllegalNameClass_%d_"), ++IllegalClassNameIndex);
 			}
 			int32* SameNameCount;
-			if ((SameNameCount = TargetActorSameNameCounter.Find(TargetActorName)) != nullptr)
+			// TargetActorName is case sensitive
+			const FString TargetActorNameLower = TargetActorName.ToLower();
+			if ((SameNameCount = TargetActorSameNameCounter.Find(TargetActorNameLower)) != nullptr)
 			{
 				*SameNameCount += 1;
 				TargetActorName = FString::Printf(TEXT("%s_%s"), *TargetActorName, *ChanneldReplicatorGeneratorUtils::GetHashString(ReplicationActorInfo.TargetActorClass->GetPathName()));
 			}
 			else
 			{
-				TargetActorSameNameCounter.Add(TargetActorName, 1);
+				TargetActorSameNameCounter.Add(TargetActorNameLower, 1);
 			}
 		}
 		, ProtoPackageName
