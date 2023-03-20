@@ -188,16 +188,16 @@ struct CHANNELDUE_API FSubscribedChannelInfo
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	int32 ConnId;
+	int32 ConnId = 0;
 
 	UPROPERTY(BlueprintReadWrite)
 	FChannelSubscriptionOptions SubOptions;
 
 	UPROPERTY(BlueprintReadWrite)
-	EChanneldConnectionType ConnType;
+	EChanneldConnectionType ConnType = EChanneldConnectionType::ECoT_NO_CONNECTION;
 
 	UPROPERTY(BlueprintReadWrite)
-	EChanneldChannelType ChannelType;
+	EChanneldChannelType ChannelType = EChanneldChannelType::ECT_Unknown;
 
 	void Merge(const channeldpb::SubscribedToChannelResultMessage& Target)
 	{
@@ -233,16 +233,16 @@ struct CHANNELDUE_API FOwnedChannelInfo
 	TMap<int32, FSubscribedChannelInfo> Subscribeds;
 
 	UPROPERTY(BlueprintReadWrite)
-	EChanneldChannelType ChannelType;
+	EChanneldChannelType ChannelType = EChanneldChannelType::ECT_Unknown;
 
 	UPROPERTY(BlueprintReadWrite)
-	int32 ChannelId;
+	int32 ChannelId = 0;
 
 	UPROPERTY(BlueprintReadWrite)
 	FString Metadata;
 
 	UPROPERTY(BlueprintReadWrite)
-	int32 OwnerConnId;
+	int32 OwnerConnId = 0;
 };
 
 USTRUCT(BlueprintType)
@@ -251,10 +251,10 @@ struct CHANNELDUE_API FListedChannelInfo
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	EChanneldChannelType ChannelType;
+	EChanneldChannelType ChannelType = EChanneldChannelType::ECT_Unknown;
 
 	UPROPERTY(BlueprintReadWrite)
-	int32 ChannelId;
+	int32 ChannelId = 0;
 
 	UPROPERTY(BlueprintReadWrite)
 	FString Metadata;

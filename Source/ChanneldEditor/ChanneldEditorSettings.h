@@ -18,7 +18,7 @@ struct FServerGroup
 
 	// How long to wait before launching the servers (in seconds)
 	UPROPERTY(EditAnywhere)
-	float DelayTime;
+	float DelayTime = 0.f;
 
 	// If not set, the open map in the Editor will be used.
 	UPROPERTY(EditAnywhere, meta=(AllowedClasses="World"))
