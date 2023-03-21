@@ -51,8 +51,8 @@ bool FReplicatorCodeGenerator::Generate(
 )
 {
 	// Clean global variables, make sure it's empty for this generation
-	IllegalClassNameIndex = 0;
 	TargetActorSameNameCounter.Empty(ReplicationActorInfos.Num());
+	TargetClassSameNameNumber.Empty(ReplicationActorInfos.Num());
 
 	// Clear global struct decorators, make sure it's empty for this generation
 	FPropertyDecoratorFactory::Get().ClearGlobalStruct();
@@ -742,19 +742,31 @@ bool FReplicatorCodeGenerator::CreateDecorateActor(
 		{
 			if (!IsActorNameCompilable)
 			{
-				TargetActorName = FString::Printf(TEXT("_IllegalNameClass_%d_"), ++IllegalClassNameIndex);
+				TargetActorName = TEXT("l_") + ChanneldReplicatorGeneratorUtils::ReplaceUncompilableChar(TargetActorName, TEXT("_"));
 			}
-			int32* SameNameCount;
-			// TargetActorName is case sensitive
-			const FString TargetActorNameLower = TargetActorName.ToLower();
-			if ((SameNameCount = TargetActorSameNameCounter.Find(TargetActorNameLower)) != nullptr)
+			int32* SameNameNumberPtr;
+			if ((SameNameNumberPtr = TargetClassSameNameNumber.Find(ReplicationActorInfo.TargetActorClass)) != nullptr)
 			{
-				*SameNameCount += 1;
-				TargetActorName = FString::Printf(TEXT("%s_%s"), *TargetActorName, *ChanneldReplicatorGeneratorUtils::GetHashString(ReplicationActorInfo.TargetActorClass->GetPathName()));
+				if (*SameNameNumberPtr > 0)
+				{
+					TargetActorName = FString::Printf(TEXT("%s_%d"), *TargetActorName, *SameNameNumberPtr);
+				}
 			}
 			else
 			{
-				TargetActorSameNameCounter.Add(TargetActorNameLower, 1);
+				// TargetActorName is case sensitive
+				const FString TargetActorNameLower = TargetActorName.ToLower();
+				if (TargetActorSameNameCounter.Contains(TargetActorNameLower))
+				{
+					TargetActorName = FString::Printf(TEXT("%s_%d"), *TargetActorName, TargetActorSameNameCounter[TargetActorNameLower]);
+					TargetClassSameNameNumber.Add(ReplicationActorInfo.TargetActorClass, TargetActorSameNameCounter[TargetActorNameLower]);
+					++TargetActorSameNameCounter[TargetActorNameLower];
+				}
+				else
+				{
+					TargetClassSameNameNumber.Add(ReplicationActorInfo.TargetActorClass, 0);
+					TargetActorSameNameCounter.Add(TargetActorNameLower, 1);
+				}
 			}
 		}
 		, ProtoPackageName

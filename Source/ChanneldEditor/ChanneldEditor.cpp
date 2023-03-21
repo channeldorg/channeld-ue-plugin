@@ -65,6 +65,9 @@ void FChanneldEditorModule::StartupModule()
 		FChanneldEditorCommands::Get().GenerateReplicatorCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::GenerateReplicationAction));
 	PluginCommands->MapAction(
+		FChanneldEditorCommands::Get().UpdateRepRegistryTableCommand,
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::UpdateRepRegistryTableAction));
+	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::AddRepCompsToBPsAction));
 
@@ -104,6 +107,9 @@ void FChanneldEditorModule::StartupModule()
 
 	GenRepNotify = NewObject<UChanneldMissionNotiProxy>();
 	GenRepNotify->AddToRoot();
+
+	UpdateRepRegistryTableNotify = NewObject<UChanneldMissionNotiProxy>();
+	UpdateRepRegistryTableNotify->AddToRoot();
 
 	AddRepCompNotify = NewObject<UChanneldMissionNotiProxy>();
 	AddRepCompNotify->AddToRoot();
@@ -160,6 +166,7 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 	MenuBuilder.AddSubMenu(LOCTEXT("ChanneldAdvancedHeading", "Advanced..."),
 	                       LOCTEXT("ChanneldAdvancedTooltip", ""), FNewMenuDelegate::CreateLambda([](FMenuBuilder& InMenuBuilder)
 	                       {
+		                       InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().UpdateRepRegistryTableCommand);
 		                       InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand);
 	                       }));
 
@@ -194,14 +201,14 @@ void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchR
 	if (FPlatformProcess::IsProcRunning(ChanneldProcHandle))
 	{
 		UE_LOG(LogChanneldEditor, Warning, TEXT("Channeld is already running"));
-		PostChanneldLaunched(EChanneldLaunchResult::AlreadyLaunched);
+		PostChanneldLaunched(EChanneldLaunchResult::CLR_AlreadyLaunched);
 		BuildChanneldNotify->SpawnMissionSucceedNotification(nullptr);
 		return;
 	}
 	if (BuildChanneldWorkThread.IsValid() && BuildChanneldWorkThread->IsProcRunning())
 	{
 		UE_LOG(LogChanneldEditor, Warning, TEXT("Channeld is already building"));
-		PostChanneldLaunched(EChanneldLaunchResult::Building);
+		PostChanneldLaunched(EChanneldLaunchResult::CLR_Building);
 		return;
 	}
 	FString ChanneldPath = FPlatformMisc::GetEnvironmentVariable(TEXT("CHANNELD_PATH"));
@@ -282,13 +289,13 @@ void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchR
 					&Title
 				);
 				if (PostChanneldLaunched != nullptr)
-					PostChanneldLaunched(EChanneldLaunchResult::Failed);
+					PostChanneldLaunched(EChanneldLaunchResult::CLR_Failed);
 			});
 		}
 		else
 		{
 			if (PostChanneldLaunched != nullptr)
-				PostChanneldLaunched(EChanneldLaunchResult::Launched);
+				PostChanneldLaunched(EChanneldLaunchResult::CLR_Launched);
 		}
 	});
 
@@ -397,7 +404,7 @@ void FChanneldEditorModule::LaunchChanneldAndServersAction()
 {
 	LaunchChanneldAction([this](EChanneldLaunchResult Result)
 	{
-		if (Result < EChanneldLaunchResult::Failed)
+		if (Result < EChanneldLaunchResult::CLR_Failed)
 		{
 			AsyncTask(ENamedThreads::GameThread, [this]()
 			{
@@ -416,78 +423,62 @@ void FChanneldEditorModule::GenerateReplicationAction()
 	}
 	bGeneratingReplication = true;
 
-	// Make sure the ReplicationRegistryTable is saved and closed.
-	// The CookAndGenRepCommandLet process will read and write ReplicationRegistryTable,
-	// If the editor process is still holding the ReplicationRegistryTable, the CookAndGenRepCommandLet process will fail to write the ReplicationRegistryTable.
-	if (!ReplicationRegistryUtils::PromptForSaveAndCloseRegistryTable())
-	{
-		UE_LOG(LogChanneldEditor, Error, TEXT("Please save and close the Replication Registry data table first"));
-		return;
-	}
-	GenRepWorkThread = MakeShareable(
-		new FChanneldProcWorkerThread(
-			TEXT("CookAndGenRepThread"),
-			ChanneldReplicatorGeneratorUtils::GetUECmdBinary(),
-			CommandletHelpers::BuildCommandletProcessArguments(
-				TEXT("CookAndGenRep"),
-				*FString::Printf(TEXT("\"%s\""), *FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())),
-				*FString::Printf(TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout -GoPackageImportPathPrefix=%s"), *GetMutableDefault<UChanneldEditorSettings>()->ChanneldGoPackageImportPathPrefix)
-			)
-		)
-	);
-	GenRepWorkThread->ProcOutputMsgDelegate.BindUObject(GenRepNotify, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
-	GenRepWorkThread->ProcBeginDelegate.AddUObject(GenRepNotify, &UChanneldMissionNotiProxy::SpawnRunningMissionNotification);
-	GenRepWorkThread->ProcSucceedDelegate.AddLambda([this](FChanneldProcWorkerThread* ProcWorkerThread)
-	{
-		FReplicatorGeneratorManager& GeneratorManager = FReplicatorGeneratorManager::Get();
-		FGeneratedManifest LatestGeneratedManifest;
-		FString Message;
-		if (!GeneratorManager.LoadLatestGeneratedManifest(LatestGeneratedManifest, Message))
-		{
-			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load latest generated manifest: %s"), *Message);
-			return;
-		}
-
-		const TArray<FString> GeneratedProtoFiles = FReplicatorGeneratorManager::Get().GetGeneratedProtoFiles();
-		GenRepProtoCppCode(GeneratedProtoFiles);
-		GenRepProtoGoCode(GeneratedProtoFiles, LatestGeneratedManifest, GeneratorManager.GetReplicatorStorageDir());
-
-
-		// Update UChanneldSettings::DefaultChannelDataMsgNames
-		auto Settings = GetMutableDefault<UChanneldSettings>();
-		TMap<EChanneldChannelType, FString> NewChannelDataMsgNames;
-		for (auto& Pair : Settings->DefaultChannelDataMsgNames)
-		{
-			NewChannelDataMsgNames.Add(Pair.Key, LatestGeneratedManifest.ChannelDataMsgName);
-		}
-		Settings->DefaultChannelDataMsgNames = NewChannelDataMsgNames;
-		Settings->SaveConfig();
-		UE_LOG(LogChanneldEditor, Log, TEXT("Updated the default channel data message names in the channeld settings."));
-
-		GetMutableDefault<UChanneldSettings>()->ReloadConfig();
-	});
-	GenRepWorkThread->ProcFailedDelegate.AddLambda([this](FChanneldProcWorkerThread*)
-		{
-			bGeneratingReplication = false;
-			GenRepNotify->SpawnMissionFailedNotification(nullptr);
-		}
-	);
 	GenRepNotify->SetMissionNotifyText(
 		FText::FromString(TEXT("Cooking And Generating Replication Code...")),
 		LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),
 		FText::FromString(TEXT("Successfully Generated Replication Code.")),
 		FText::FromString(TEXT("Failed To Generate Replication Code!"))
 	);
-	GenRepNotify->MissionCanceled.AddLambda([this]()
-	{
-		bGeneratingReplication = false;
-		if (GenRepWorkThread.IsValid() && GenRepWorkThread->GetThreadStatus() == EChanneldThreadStatus::Busy)
+	GenRepNotify->SpawnRunningMissionNotification(nullptr);
+	UpdateRepRegistryTable(
+		[this](EUpdateRepRegistryTableResult Result)
 		{
-			GenRepWorkThread->Cancel();
+			if (Result == EUpdateRepRegistryTableResult::URRT_Updated)
+			{
+				AsyncTask(ENamedThreads::GameThread, [this]()
+				{
+					GenerateReplication();
+				});
+				GenRepNotify->SpawnMissionSucceedNotification(nullptr);
+			}
+			else
+			{
+				GenRepNotify->SpawnMissionFailedNotification(nullptr);
+			}
+			bGeneratingReplication = false;
 		}
-	});
+		, &GenRepNotify->MissionCanceled
+	);
+}
 
-	GenRepWorkThread->Execute();
+void FChanneldEditorModule::GenerateReplication()
+{
+	FReplicatorGeneratorManager& GeneratorManager = FReplicatorGeneratorManager::Get();
+	GeneratorManager.RemoveGeneratedCodeFiles();
+	GeneratorManager.GenerateReplication(GetMutableDefault<UChanneldEditorSettings>()->ChanneldGoPackageImportPathPrefix);
+	FGeneratedManifest LatestGeneratedManifest;
+	FString Message;
+	if (!GeneratorManager.LoadLatestGeneratedManifest(LatestGeneratedManifest, Message))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load latest generated manifest: %s"), *Message);
+		return;
+	}
+
+	const TArray<FString> GeneratedProtoFiles = GeneratorManager.GetGeneratedProtoFiles();
+	GenRepProtoCppCode(GeneratedProtoFiles);
+	GenRepProtoGoCode(GeneratedProtoFiles, LatestGeneratedManifest, GeneratorManager.GetReplicatorStorageDir());
+
+	auto Settings = GetMutableDefault<UChanneldSettings>();
+	TMap<EChanneldChannelType, FString> NewChannelDataMsgNames;
+	for (auto& Pair : Settings->DefaultChannelDataMsgNames)
+	{
+		NewChannelDataMsgNames.Add(Pair.Key, LatestGeneratedManifest.ChannelDataMsgName);
+	}
+	Settings->DefaultChannelDataMsgNames = NewChannelDataMsgNames;
+	Settings->SaveConfig();
+	UE_LOG(LogChanneldEditor, Log, TEXT("Updated the default channel data message names in the channeld settings."));
+
+	GetMutableDefault<UChanneldSettings>()->ReloadConfig();
 }
 
 void FChanneldEditorModule::GenRepProtoCppCode(const TArray<FString>& ProtoFiles) const
@@ -692,6 +683,88 @@ void FChanneldEditorModule::RecompileGameCode() const
 		// We want compiling to happen asynchronously
 		HotReloadSupport.DoHotReloadFromEditor(EHotReloadFlags::None);
 	}
+}
+
+void FChanneldEditorModule::UpdateRepRegistryTableAction()
+{
+	UpdateRepRegistryTableNotify->SetMissionNotifyText(
+		FText::FromString(TEXT("Cooking And Updating Replication Registry Table...")),
+		LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),
+		FText::FromString(TEXT("Successfully Updated Replication Registry Table.")),
+		FText::FromString(TEXT("Failed To Update Replication Registry Table!"))
+	);
+	UpdateRepRegistryTableNotify->SpawnRunningMissionNotification(nullptr);
+	UpdateRepRegistryTable(
+		[this](EUpdateRepRegistryTableResult Result)
+		{
+			if (Result == EUpdateRepRegistryTableResult::URRT_Updated)
+			{
+				UpdateRepRegistryTableNotify->SpawnMissionSucceedNotification(nullptr);
+			}
+			else
+			{
+				UpdateRepRegistryTableNotify->SpawnMissionFailedNotification(nullptr);
+			}
+		}
+		, &UpdateRepRegistryTableNotify->MissionCanceled
+	);
+}
+
+void FChanneldEditorModule::UpdateRepRegistryTable(TFunction<void(EUpdateRepRegistryTableResult Result)> PostUpdateRegRegistryTable, FMissionCanceled* CanceledDelegate)
+{
+	if (bUpdatingRepRegistryTable)
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Already updating Replication Registry data table"));
+		PostUpdateRegRegistryTable(EUpdateRepRegistryTableResult::URRT_Updating);
+		return;
+	}
+	bUpdatingRepRegistryTable = true;
+
+	// Make sure the ReplicationRegistryTable is saved and closed.
+	// The CookAndGenRepCommandLet process will read and write ReplicationRegistryTable,
+	// If the editor process is still holding the ReplicationRegistryTable, the CookAndGenRepCommandLet process will fail to write the ReplicationRegistryTable.
+	if (!ReplicationRegistryUtils::PromptForSaveAndCloseRegistryTable())
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Please save and close the Replication Registry data table first"));
+		bUpdatingRepRegistryTable = false;
+		PostUpdateRegRegistryTable(EUpdateRepRegistryTableResult::URRT_Editing);
+		return;
+	}
+	UpdateRepRegistryTableWorkThread = MakeShareable(
+		new FChanneldProcWorkerThread(
+			TEXT("CookAndUpdateRepRegistryThread"),
+			ChanneldReplicatorGeneratorUtils::GetUECmdBinary(),
+			CommandletHelpers::BuildCommandletProcessArguments(
+				TEXT("CookAndUpdateRepRegistry"),
+				*FString::Printf(TEXT("\"%s\""), *FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())),
+				*FString::Printf(TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout"))
+			)
+		)
+	);
+	UpdateRepRegistryTableWorkThread->ProcOutputMsgDelegate.BindUObject(UpdateRepRegistryTableNotify, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
+	UpdateRepRegistryTableWorkThread->ProcSucceedDelegate.AddLambda([this, PostUpdateRegRegistryTable](FChanneldProcWorkerThread*)
+	{
+		bUpdatingRepRegistryTable = false;
+		PostUpdateRegRegistryTable(EUpdateRepRegistryTableResult::URRT_Updated);
+	});
+	UpdateRepRegistryTableWorkThread->ProcFailedDelegate.AddLambda([this, PostUpdateRegRegistryTable](FChanneldProcWorkerThread*)
+	{
+		bUpdatingRepRegistryTable = false;
+		PostUpdateRegRegistryTable(EUpdateRepRegistryTableResult::URRT_Failed);
+	});
+	if (CanceledDelegate)
+	{
+		CanceledDelegate->AddLambda([this]()
+		{
+			bUpdatingRepRegistryTable = false;
+			if (UpdateRepRegistryTableWorkThread.IsValid() && UpdateRepRegistryTableWorkThread->GetThreadStatus() == EChanneldThreadStatus::Busy)
+			{
+				UpdateRepRegistryTableWorkThread->Cancel();
+			}
+		});
+	}
+
+	UpdateRepRegistryTableWorkThread->Execute();
 }
 
 #undef LOCTEXT_NAMESPACE

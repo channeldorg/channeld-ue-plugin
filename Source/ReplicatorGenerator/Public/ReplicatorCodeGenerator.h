@@ -180,8 +180,8 @@ protected:
 	TMap<FString, FModuleInfo> ModuleInfoByClassName;
 	TMap<FString, FCPPClassInfo> CPPClassInfoMap;
 
-	int32 IllegalClassNameIndex = 0;
 	TMap<FString, int32> TargetActorSameNameCounter;
+	TMap<const UClass*, int32> TargetClassSameNameNumber;
 
 	inline void ProcessHeaderFiles(const TArray<FString>& Files, const FManifestModule& ManifestModule);
 

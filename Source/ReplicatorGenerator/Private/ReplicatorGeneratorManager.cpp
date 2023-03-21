@@ -45,6 +45,11 @@ FString FReplicatorGeneratorManager::GetDefaultModuleDir()
 	return DefaultModuleDir;
 }
 
+FString FReplicatorGeneratorManager::GetDefaultModuleName()
+{
+	return FPaths::GetBaseFilename(GetDefaultModuleDir());
+}
+
 FString FReplicatorGeneratorManager::GetReplicatorStorageDir()
 {
 	if (ReplicatorStorageDir.IsEmpty())
@@ -60,38 +65,14 @@ FString FReplicatorGeneratorManager::GetDefaultProtoPackageName() const
 	return GenManager_DefaultProtoPackageName;
 }
 
-FString FReplicatorGeneratorManager::GetDefaultModuleName()
-{
-	return FPaths::GetBaseFilename(GetDefaultModuleDir());
-}
-
 bool FReplicatorGeneratorManager::HeaderFilesCanBeFound(const UClass* TargetClass)
 {
 	const FString TargetHeadFilePath = CodeGenerator->GetClassHeadFilePath(TargetClass->GetPrefixCPP() + TargetClass->GetName());
 	return !TargetHeadFilePath.IsEmpty();
 }
 
-void FReplicatorGeneratorManager::StartGenerateReplicator()
+bool FReplicatorGeneratorManager::UpdateReplicationRegistryTable(const TArray<const UClass*>& ReplicationActorClasses)
 {
-	CodeGenerator->RefreshModuleInfoByClassName();
-}
-
-void FReplicatorGeneratorManager::StopGenerateReplicator()
-{
-}
-
-bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*>& ReplicationActorClasses, const FString GoPackageImportPathPrefix)
-{
-	UE_LOG(LogChanneldRepGenerator, Display, TEXT("Start generating %d replicators"), ReplicationActorClasses.Num());
-
-	TArray<FString> IncludeActorCodes, RegisterReplicatorCodes;
-
-	FGeneratedCodeBundle ReplicatorCodeBundle;
-
-	// Read generate replication options from ReplicationRegistryTable. and sort the ActorInfosToGenRep by the order in the table
-	TArray<FRepGenActorInfo> ActorInfosToGenRep;
-	int32 Index = 0;
-
 	UDataTable* RegistryTable = ReplicationRegistryUtils::LoadRegistryTable();
 	TArray<FChanneldReplicationRegistryItem*> RegistryTableData = ReplicationRegistryUtils::GetRegistryTableData(RegistryTable);
 
@@ -109,25 +90,12 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 	{
 		ReplicationActorClassesMap.Add(TargetActorClass->GetPathName(), TargetActorClass);
 	}
-	for (FChanneldReplicationRegistryItem* RegistryItem : RegistryTableData)
+	for (const FChanneldReplicationRegistryItem* RegistryItem : RegistryTableData)
 	{
 		RegisteredClassPathsSet.Add(RegistryItem->TargetClassPath);
 		if (!ReplicationActorClassesMap.Contains(RegistryItem->TargetClassPath))
 		{
 			TargetClassPathsToUnregister.Add(RegistryItem->TargetClassPath);
-		}
-		else
-		{
-			ActorInfosToGenRep.Add(
-				FRepGenActorInfo(
-					++Index
-					, ReplicationActorClassesMap.FindRef(RegistryItem->TargetClassPath)
-					, RegistryItem->Singleton
-					, false
-					, RegistryItem->Skip
-					, RegistryItem->Skip
-				)
-			);
 		}
 	}
 	for (const UClass* TargetActorClass : ReplicationActorClasses)
@@ -138,14 +106,65 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 			RegistryItem.TargetClassPath = TargetActorClass->GetPathName();
 			RegistryItem.Skip = DefaultSkipGenRep.Contains(RegistryItem.TargetClassPath);
 			TargetClassPathsToRegister.Add(RegistryItem);
+		}
+	}
+
+	// Register and unregister and save the RegistryTable
+	if (TargetClassPathsToRegister.Num() > 0 || TargetClassPathsToUnregister.Num() > 0)
+	{
+		ReplicationRegistryUtils::AddItemsToRegistryTable(RegistryTable, TargetClassPathsToRegister);
+		ReplicationRegistryUtils::RemoveItemsFromRegistryTable(RegistryTable, TargetClassPathsToUnregister);
+		if (!ReplicationRegistryUtils::SaveRegistryTable(RegistryTable))
+		{
+			UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save the RegistryTable"));
+			return false;
+		}
+	}
+	return true;
+}
+
+bool FReplicatorGeneratorManager::GenerateReplication(const FString GoPackageImportPathPrefix)
+{
+	TArray<const UClass*> ReplicationActorClasses;
+
+	const UDataTable* RegistryTable = ReplicationRegistryUtils::LoadRegistryTable();
+	TArray<FChanneldReplicationRegistryItem*> RegistryData = ReplicationRegistryUtils::GetRegistryTableData(RegistryTable);
+	for (const FChanneldReplicationRegistryItem* RegistryItem : RegistryData)
+	{
+		if (const UClass* TargetClass = LoadClass<UObject>(nullptr, *RegistryItem->TargetClassPath, nullptr, LOAD_None, nullptr))
+		{
+			ReplicationActorClasses.Add(TargetClass);
+		}
+	}
+	// Release replication registry table
+	CollectGarbage(RF_NoFlags);
+	const bool Result = GenerateReplication(ReplicationActorClasses, GoPackageImportPathPrefix);
+	return Result;
+}
+
+bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*>& ReplicationActorClasses, const FString GoPackageImportPathPrefix)
+{
+	UE_LOG(LogChanneldRepGenerator, Display, TEXT("Start generating %d replicators"), ReplicationActorClasses.Num());
+
+	TArray<FString> IncludeActorCodes, RegisterReplicatorCodes;
+
+	FGeneratedCodeBundle ReplicatorCodeBundle;
+
+	TArray<FRepGenActorInfo> ActorInfosToGenRep;
+	int32 Index = 0;
+
+	for (const UClass* TargetActorClass : ReplicationActorClasses)
+	{
+		if (!ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinClass(TargetActorClass))
+		{
 			ActorInfosToGenRep.Add(
 				FRepGenActorInfo(
 					++Index
 					, TargetActorClass
 					, false
 					, false
-					, RegistryItem.Skip
-					, RegistryItem.Skip
+					, false
+					, false
 				)
 			);
 		}
@@ -166,20 +185,13 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 		);
 	}
 
-	// Register and unregister and save the RegistryTable
-	if (TargetClassPathsToRegister.Num() > 0 || TargetClassPathsToUnregister.Num() > 0)
-	{
-		ReplicationRegistryUtils::AddItemsToRegistryTable(RegistryTable, TargetClassPathsToRegister);
-		ReplicationRegistryUtils::RemoveItemsFromRegistryTable(RegistryTable, TargetClassPathsToUnregister);
-		if (!ReplicationRegistryUtils::SaveRegistryTable(RegistryTable))
-		{
-			UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save the RegistryTable"));
-			return false;
-		}
-	}
-
 	const FString ProtoPackageName = GetDefaultProtoPackageName();
 	const FString GoPackageImportPath = GoPackageImportPathPrefix / ProtoPackageName;
+	
+	// We need to include the header file of the target class in 'ChanneldReplicatorRegister.h'. so we need to know the include path of the target class from 'uhtmanifest' file.
+	// But the 'uhtmanifest' file is a large json file, so we need to read and parser it only once.
+	CodeGenerator->RefreshModuleInfoByClassName();
+	
 	CodeGenerator->Generate(
 		ActorInfosToGenRep,
 		GetDefaultModuleDir(),

@@ -37,23 +37,25 @@ public:
 	 */
 	static FReplicatorGeneratorManager& Get();
 
+	/*
+	 * Get the directory of the default game module.
+	 */
 	FString GetDefaultModuleDir();
+	
+	/*
+	 * Get the name of the default game module.
+	 */
+	FString GetDefaultModuleName();
 
 	/**
 	 * Get the directory of the generated replicators.
 	 */
 	FString GetReplicatorStorageDir();
 
-
 	/**
 	 * Get the default proto package name. The name is used for the proto package name and proto cpp namespace.
 	 */
 	FString GetDefaultProtoPackageName() const;
-
-	/*
-	 * Get the name of the header file of the ChannelDataProcessor.
-	 */
-	FString GetDefaultModuleName();
 
 	/**
 	 * Header files of the target class can be found or not.
@@ -64,13 +66,22 @@ public:
 	bool HeaderFilesCanBeFound(const UClass* TargetClass);
 
 	/**
-	 * Invoke this function before generating replicators.
-	 * We need to include the header file of the target class in 'ChanneldReplicatorRegister.h'. so we need to know the include path of the target class from 'uhtmanifest' file.
-	 * But the 'uhtmanifest' file is a large json file, so we need to read and parser it only once.
+	 * Update the registry table of the replication actors.
+	 * Normally, the function is called by "CookAndUpdateRepRegistryCommandlet".
+	 *
+	 * @param ReplicationActorClasses The target actor classes.
+	 * @return true if successfully updated the registry table.
 	 */
-	void StartGenerateReplicator();
-	void StopGenerateReplicator();
+	bool UpdateReplicationRegistryTable(const TArray<const UClass*>& ReplicationActorClasses);
 
+	/**
+	 * Generate replicators for the replication actors from registry table.
+	 *
+	 * @param GoPackageImportPathPrefix If the go package is "github.com/metaworking/channeld/examples/channeld-ue-tps/tpspb", the prefix is "github.com/metaworking/channeld/examples/channeld-ue-tps".
+	 * @return true if the replicators are generated successfully.
+	 */
+	bool GenerateReplication(const FString GoPackageImportPathPrefix);
+	
 	/**
 	 * Generate replicators for the given target actors.
 	 *

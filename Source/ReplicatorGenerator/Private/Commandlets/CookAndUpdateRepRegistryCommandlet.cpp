@@ -1,6 +1,8 @@
-#include "Commandlets/CookAndGenRepCommandlet.h"
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "ReplicatorGeneratorManager.h"
+
+#include "Commandlets/CookAndUpdateRepRegistryCommandlet.h"
+
 #include "ReplicatorGeneratorUtils.h"
 #include "Components/TimelineComponent.h"
 
@@ -25,7 +27,7 @@ void FLoadedObjectListener::NotifyUObjectCreated(const UObjectBase* Object, int3
 			break;
 		}
 		CheckedClasses.Add(ClassPath);
-		if(LoadedClass == AActor::StaticClass() || LoadedClass == UActorComponent::StaticClass())
+		if (LoadedClass == AActor::StaticClass() || LoadedClass == UActorComponent::StaticClass())
 		{
 			FilteredClasses.Add(LoadedClass);
 			break;
@@ -43,7 +45,7 @@ void FLoadedObjectListener::OnUObjectArrayShutdown()
 	GUObjectArray.RemoveUObjectCreateListener(this);
 }
 
-UCookAndGenRepCommandlet::UCookAndGenRepCommandlet()
+UCookAndUpdateRepRegistryCommandlet::UCookAndUpdateRepRegistryCommandlet()
 {
 	IsClient = false;
 	IsEditor = true;
@@ -51,10 +53,9 @@ UCookAndGenRepCommandlet::UCookAndGenRepCommandlet()
 	LogToConsole = true;
 }
 
-int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
+int32 UCookAndUpdateRepRegistryCommandlet::Main(const FString& CmdLineParams)
 {
 	FReplicatorGeneratorManager& GeneratorManager = FReplicatorGeneratorManager::Get();
-	GeneratorManager.StartGenerateReplicator();
 
 	TSet<FSoftClassPath> LoadedRepClasses;
 
@@ -94,18 +95,10 @@ int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
 		}
 	}
 
-	//Get parameter '-GoPackageImportPathPrefix' from command line
-	FString GoPackageImportPathPrefix;
-	FParse::Value(*CmdLineParams, TEXT("-GoPackageImportPathPrefix="), GoPackageImportPathPrefix);
-
-	GeneratorManager.RemoveGeneratedCodeFiles();
-
-	if (!GeneratorManager.GenerateReplication(TargetClasses, GoPackageImportPathPrefix))
+	if (!GeneratorManager.UpdateReplicationRegistryTable(TargetClasses))
 	{
 		Result = 1;
 	}
-
-	GeneratorManager.StopGenerateReplicator();
 
 	return Result;
 }

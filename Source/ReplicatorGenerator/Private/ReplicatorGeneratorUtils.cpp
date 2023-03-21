@@ -223,15 +223,36 @@ namespace ChanneldReplicatorGeneratorUtils
 			HasReplicatedPropertyOrRPC(TargetClass);
 	}
 
-	bool IsCompilableClassName(const FString& ClassName)
+	bool ContainsUncompilableChar(const FString& Test)
 	{
 		const FRegexPattern MatherPatter(TEXT("[^a-zA-Z0-9_]"));
-		FRegexMatcher Matcher(MatherPatter, ClassName);
+		FRegexMatcher Matcher(MatherPatter, Test);
 		if (Matcher.FindNext())
+		{
+			return true;
+		}
+		return false;
+	}
+
+	bool IsCompilableClassName(const FString& ClassName)
+	{
+		if (!iswalpha(ClassName[0]))
 		{
 			return false;
 		}
-		return true;
+		return !ContainsUncompilableChar(ClassName);
+	}
+
+	FString ReplaceUncompilableChar(const FString& String, const FString& ReplaceTo)
+	{
+		const FRegexPattern MatherPatter(TEXT("[^a-zA-Z0-9_]"));
+		FRegexMatcher Matcher(MatherPatter, String);
+		FString Result = String;
+		while (Matcher.FindNext())
+		{
+			Result.ReplaceInline(*Matcher.GetCaptureGroup(0), *ReplaceTo);
+		}
+		return Result;
 	}
 
 	FString GetDefaultModuleDir()

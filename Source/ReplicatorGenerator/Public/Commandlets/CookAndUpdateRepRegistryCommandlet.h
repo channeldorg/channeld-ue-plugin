@@ -1,9 +1,11 @@
+﻿// Fill out your copyright notice in the Description page of Project Settings.
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "ChanneldCookCommandlet.h"
-#include "CookAndGenRepCommandlet.generated.h"
 
+#include "CookAndUpdateRepRegistryCommandlet.generated.h"
 
 class FLoadedObjectListener : public FUObjectArray::FUObjectCreateListener
 {
@@ -22,12 +24,12 @@ public:
 };
 
 UCLASS()
-class REPLICATORGENERATOR_API UCookAndGenRepCommandlet : public UChanneldCookCommandlet
+class REPLICATORGENERATOR_API UCookAndUpdateRepRegistryCommandlet : public UChanneldCookCommandlet
 {
 	GENERATED_BODY()
 
 public:
-	UCookAndGenRepCommandlet();
+	UCookAndUpdateRepRegistryCommandlet();
 
 	virtual int32 Main(const FString& CmdLineParams) override;
 };

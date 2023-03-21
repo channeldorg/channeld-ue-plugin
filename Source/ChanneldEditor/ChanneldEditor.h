@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldEditorSettings.h"
+#include "ChanneldMissionNotiProxy.h"
 #include "ReplicatorGeneratorManager.h"
 
 DECLARE_LOG_CATEGORY_CLASS(LogChanneldEditor, Log, All);
@@ -14,12 +15,20 @@ class FMenuBuilder;
 class SWidget;
 class FUICommandList;
 
-enum EChanneldLaunchResult
+enum EChanneldLaunchResult : uint8
 {
-	Launched,
-	AlreadyLaunched,
-	Building,
-	Failed,
+	CLR_Launched,
+	CLR_AlreadyLaunched,
+	CLR_Building,
+	CLR_Failed,
+};
+
+enum EUpdateRepRegistryTableResult : uint8
+{
+	URRT_Updated,
+	URRT_Updating,
+	URRT_Editing,
+	URRT_Failed,
 };
 
 class FChanneldEditorModule : public IModuleInterface
@@ -43,6 +52,10 @@ private:
 	void LaunchChanneldAndServersAction();
 
 	void GenerateReplicationAction();
+	void GenerateReplication();
+	
+	void UpdateRepRegistryTableAction();
+	
 	void AddRepCompsToBPsAction();
 
 	/**
@@ -65,6 +78,8 @@ private:
 	
 	void LaunchServerGroup(const FServerGroup& ServerGroup);
 
+	void UpdateRepRegistryTable(TFunction<void(EUpdateRepRegistryTableResult Result)> PostUpdateRegRegistryTable, FMissionCanceled* CanceledDelegate);
+
 	FProcHandle ChanneldProcHandle;
 	
 	TSharedPtr<class FUICommandList> PluginCommands;
@@ -75,11 +90,15 @@ private:
 	UChanneldMissionNotiProxy* BuildChanneldNotify;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenRepWorkThread;
+	UChanneldMissionNotiProxy* GenRepNotify;
 	mutable bool bGeneratingReplication;
+	
+	mutable TSharedPtr<FChanneldProcWorkerThread> UpdateRepRegistryTableWorkThread;
+	UChanneldMissionNotiProxy* UpdateRepRegistryTableNotify;
+	mutable bool bUpdatingRepRegistryTable;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoCppCodeWorkThread;
 	mutable TSharedPtr<FChanneldProcWorkerThread> GenProtoGoCodeWorkThread;
-	UChanneldMissionNotiProxy* GenRepNotify;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> AddRepCompWorkThread;
 	UChanneldMissionNotiProxy* AddRepCompNotify;
