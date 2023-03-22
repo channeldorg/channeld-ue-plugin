@@ -5,7 +5,7 @@ The open source plugin that enables distributed simulation with Unreal Engine's 
 ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源插件。
 
 ## Features
-- Easily increase the maximum capacity of a single UE dedicated server to 100-200 players.
+- Increase the maximum capacity of a single UE dedicated server to 100-200 players without modifying the engine code.
 - Can combine multiple dedicated servers into one large world, supporting thousands of players online concurrently.
 - Support a variety of application scenarios, including seamless large worlds, as well as traditional multi-room architecture and relay server architecture.
 - Out-of-the-box synchronization solution that seamlessly integrates with the native UE's networking framework.
@@ -14,7 +14,7 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 - Cloud-based dynamic load balancing can greatly save server costs (under development).
 
 ## 特性
-- 轻松将单个UE专用服务器的最大承载人数提升到100-200人
+- 无需修改引擎代码，便可将单个UE专用服务器的最大承载人数提升到100-200人
 - 可以将多个UE专用服务器组合成一个大世界，支持上千玩家同时在线
 - 支持多种应用场景，包括无缝大世界，以及传统的多房间架构和中转服务器架构
 - 开箱即用的同步方案，与原生UE的开发方式无缝集成
@@ -48,4 +48,6 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 - ChanneldUE插件及channeld网关服务的代码供所有人免费使用，可以用于任何目的，包括商业用途。
 - 使用者在使用本插件及channeld网关服务时，应自行承担所有风险。
 - 我们以GitHub [Issues](/../../issues)和[Discussions](/../../discussions)的形式提供基本的技术支持，但不保证能够及时解决所有问题。
-- 联系开发者：[dev@metaworking.com.cn](mailto:dev@metaworking.com.cn)
+- 联系开发者：
+  - [dev@metaworking.com.cn](mailto:dev@metaworking.com.cn)
+  - QQ群：664754097
