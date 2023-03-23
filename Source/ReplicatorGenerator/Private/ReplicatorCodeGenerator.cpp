@@ -246,7 +246,7 @@ bool FReplicatorCodeGenerator::GenerateActorCode(
 
 	// ---------- Head code ----------
 	FormatArgs.Add(TEXT("Code_IncludeActorHeader"), GeneratedResult.IncludeActorCode);
-	FormatArgs.Add(TEXT("File_ProtoPbHead"), ActorDecorator->GetActorName() + CodeGen_ProtoPbHeadExtension);
+	FormatArgs.Add(TEXT("File_ProtoPbHead"), ActorDecorator->GetProtoDefinitionsFileClearName() + CodeGen_ProtoPbHeadExtension);
 	FormatArgs.Add(TEXT("Code_AdditionalInclude"), ActorDecorator->GetAdditionalIncludeFiles());
 	FormatArgs.Add(TEXT("Declare_IndirectlyAccessiblePropertyPtrs"), ActorDecorator->GetCode_IndirectlyAccessiblePropertyPtrDeclarations());
 	FormatArgs.Add(
