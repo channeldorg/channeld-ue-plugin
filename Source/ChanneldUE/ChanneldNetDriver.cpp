@@ -81,8 +81,9 @@ void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMes
 	UObject* OldObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld(), false);
 	if (OldObj)
 	{
-		UE_LOG(LogChanneld, Log, TEXT("[Client] Found spawned object %s of duplicated NetId: %d, will be destroyed."), *GetNameSafe(OldObj), SpawnMsg->obj().netguid());
-		
+		UE_LOG(LogChanneld, Log, TEXT("[Client] Found spawned object %s of duplicated NetId: %d, will skip."), *GetNameSafe(OldObj), SpawnMsg->obj().netguid());
+
+		/* Found a lot of duplicated WorldSettings and Character in the log, so just skip them for now.
 		GuidCache->ObjectLookup.Remove(NetId);
 		GuidCache->NetGUIDLookup.Remove(OldObj);
 			
@@ -90,6 +91,8 @@ void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMes
 		{
 			GetWorld()->DestroyActor(OldActor, true);
 		}
+		*/
+		return;
 	}
 
 	if (ChannelDataView.IsValid() && SpawnMsg->has_channelid())
