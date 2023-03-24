@@ -22,9 +22,9 @@
 #include "ChanneldTypes.h"
 #include "ILiveCodingModule.h"
 #include "ProtocHelper.h"
-#include "ReplicationRegistry.h"
 #include "Async/Async.h"
 #include "Misc/HotReloadInterface.h"
+#include "ReplicationDataTable/ReplicationRegistryController.h"
 
 IMPLEMENT_MODULE(FChanneldEditorModule, ChanneldEditor);
 
@@ -723,7 +723,7 @@ void FChanneldEditorModule::UpdateRepRegistryTable(TFunction<void(EUpdateRepRegi
 	// Make sure the ReplicationRegistryTable is saved and closed.
 	// The CookAndGenRepCommandLet process will read and write ReplicationRegistryTable,
 	// If the editor process is still holding the ReplicationRegistryTable, the CookAndGenRepCommandLet process will fail to write the ReplicationRegistryTable.
-	if (!ReplicationRegistryUtils::PromptForSaveAndCloseRegistryTable())
+	if (!FReplicationRegistryController::Get().PromptForSaveAndCloseRegistryTable())
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("Please save and close the Replication Registry data table first"));
 		bUpdatingRepRegistryTable = false;
