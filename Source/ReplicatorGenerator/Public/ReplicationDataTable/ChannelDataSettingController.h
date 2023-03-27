@@ -101,7 +101,13 @@ struct REPLICATORGENERATOR_API FChannelDataSetting
 	TArray<FChannelDataStateSetting> StateSettings;
 
 	FChannelDataSetting() = default;
-	
+
+	FChannelDataSetting(EChanneldChannelType InChannelType, int32 InChannelTypeOrder)
+		: ChannelType(InChannelType)
+		  , ChannelTypeOrder(InChannelTypeOrder)
+	{
+	}
+
 	FChannelDataSetting(int32 InChannelType, int32 InChannelTypeOrder)
 		: ChannelType(static_cast<EChanneldChannelType>(InChannelType))
 		  , ChannelTypeOrder(InChannelTypeOrder)
@@ -118,7 +124,7 @@ struct REPLICATORGENERATOR_API FChannelDataStateOption
 	FString ReplicationClassPath;
 
 	FChannelDataStateOption() = default;
-	
+
 	FChannelDataStateOption(const FString& InReplicationClassPath) : ReplicationClassPath(InReplicationClassPath)
 	{
 	}
@@ -150,4 +156,6 @@ private:
 
 	FReplicationRegistryController* ReplicationRegistryController;
 	TReplicationDataTable<FChannelDataStateSettingRow> ChannelDataStateSettingModal;
+
+	void GetDefaultChannelDataSettings(TArray<FChannelDataSetting>& ChannelDataSettings);
 };

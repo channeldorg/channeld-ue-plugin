@@ -28,4 +28,5 @@ public:
 	TSharedPtr<FUICommandInfo> GenerateReplicatorCommand;
 	TSharedPtr<FUICommandInfo> UpdateRepRegistryTableCommand;
 	TSharedPtr<FUICommandInfo> AddRepComponentsToBPsCommand;
+	TSharedPtr<FUICommandInfo> OpenChannelDataEditorCommand;
 };

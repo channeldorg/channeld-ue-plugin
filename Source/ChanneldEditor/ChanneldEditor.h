@@ -57,6 +57,8 @@ private:
 	void UpdateRepRegistryTableAction();
 	
 	void AddRepCompsToBPsAction();
+	
+	void OpenChannelDataEditorAction();
 
 	/**
 	 * Using the protoc to generate c++ code in the project.

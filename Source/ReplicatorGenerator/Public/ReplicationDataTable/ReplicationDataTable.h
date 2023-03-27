@@ -16,6 +16,8 @@ public:
 
 	virtual bool StopOccupancy();
 
+	virtual bool IsExist();
+
 	virtual FString GetDataTableAssetFullName();
 
 	virtual FString GetDataTableOuterPackagePath();

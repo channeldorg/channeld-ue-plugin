@@ -47,7 +47,7 @@ public class ChanneldEditor : ModuleRules
                 "ReplicatorGenerator",
                 "UATHelper",
                 "Kismet",
-                "LiveCoding",
+                "LiveCoding", "Blutility", "UMGEditor",
                 // ... add private dependencies that you statically link with here ...	
 			}
         );

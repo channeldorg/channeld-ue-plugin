@@ -20,6 +20,8 @@
 #include "PropertyEditorModule.h"
 #include "PropertyEditorDelegates.h"
 #include "ChanneldTypes.h"
+#include "EditorUtilitySubsystem.h"
+#include "EditorUtilityWidgetBlueprint.h"
 #include "ILiveCodingModule.h"
 #include "ProtocHelper.h"
 #include "Async/Async.h"
@@ -70,6 +72,9 @@ void FChanneldEditorModule::StartupModule()
 	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::AddRepCompsToBPsAction));
+	PluginCommands->MapAction(
+		FChanneldEditorCommands::Get().OpenChannelDataEditorCommand,
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::OpenChannelDataEditorAction));
 
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
@@ -168,6 +173,7 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 	                       {
 		                       InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().UpdateRepRegistryTableCommand);
 		                       InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand);
+		                       InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().OpenChannelDataEditorCommand);
 	                       }));
 
 	return MenuBuilder.MakeWidget();
@@ -647,6 +653,11 @@ void FChanneldEditorModule::AddRepCompsToBPsAction()
 {
 	TSubclassOf<class UChanneldReplicationComponent> CompClass = GetMutableDefault<UChanneldEditorSettings>()->DefaultReplicationComponent;
 	GEditor->GetEditorSubsystem<UAddCompToBPSubsystem>()->AddComponentToBlueprints(CompClass, FName(TEXT("ChanneldRepComp")));
+}
+
+void FChanneldEditorModule::OpenChannelDataEditorAction()
+{
+	GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>()->SpawnAndRegisterTab(LoadObject<UEditorUtilityWidgetBlueprint>(nullptr, L"/ChanneldUE/EditorUtilityWidgets/EUW_ChannelDataEditor"));
 }
 
 void FChanneldEditorModule::OpenEditorSettingsAction()

@@ -42,6 +42,14 @@ bool TReplicationDataTable<InDataTableRowType>::StopOccupancy()
 }
 
 template <typename InDataTableRowType>
+bool TReplicationDataTable<InDataTableRowType>::IsExist()
+{
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	const FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(*FString::Printf(TEXT("%s/%s.%s"), *GetDataTableOuterPackagePath(), *GetDataTableAssetName(), *GetDataTableAssetName()));
+	return AssetData.IsValid();
+}
+
+template <typename InDataTableRowType>
 FString TReplicationDataTable<InDataTableRowType>::GetDataTableAssetFullName()
 {
 	return FString::Printf(TEXT("DataTable\'%s/%s.%s\'"), *GetDataTableOuterPackagePath(), *GetDataTableAssetName(), *GetDataTableAssetName());
