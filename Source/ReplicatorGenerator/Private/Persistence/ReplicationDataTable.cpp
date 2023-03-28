@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "ReplicationDataTable/ReplicationDataTable.h"
+#include "Persistence/ReplicationDataTable.h"
 #include "AssetToolsModule.h"
 #include "FileHelpers.h"
 #include "Factories/DataTableFactory.h"

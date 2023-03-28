@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "ReplicationDataTable/ReplicationRegistryController.h"
+#include "Persistence/ReplicationRegistryController.h"
 
 #define LOCTEXT_NAMESPACE "ReplicationRegistryController"
 

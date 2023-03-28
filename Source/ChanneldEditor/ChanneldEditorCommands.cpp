@@ -12,7 +12,6 @@ void FChanneldEditorCommands::RegisterCommands()
 	UI_COMMAND(ServerSettingsCommand, "Server Settings...", "Configure server numbers, map, view, and additioanl args", EUserInterfaceActionType::Button, FInputChord());
 	UI_COMMAND(StopServersCommand, "Stop Servers", "Stop launched PIE servers", EUserInterfaceActionType::Button, FInputChord());
 	UI_COMMAND(GenerateReplicatorCommand, "Generate Replication Code", "Generate replication code for all replicated actors", EUserInterfaceActionType::Button, FInputChord());
-	UI_COMMAND(UpdateRepRegistryTableCommand, "Update Replication Registry Table", "Update replication registry table", EUserInterfaceActionType::Button, FInputChord());
 	UI_COMMAND(AddRepComponentsToBPsCommand, "Add Replication Components To Blueprint Actors", "Add replication components to blueprint actors", EUserInterfaceActionType::Button, FInputChord());
 	UI_COMMAND(OpenChannelDataEditorCommand, "Open Channel Data Editor", "Open channel data settings editor", EUserInterfaceActionType::Button, FInputChord());
 }

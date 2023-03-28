@@ -41,13 +41,16 @@ public class ChanneldEditor : ModuleRules
                 "LevelEditor",
                 "CoreUObject",
                 "Engine",
+                "EditorSubsystem",
                 "Slate",
                 "SlateCore",
                 "EditorStyle", 
                 "ReplicatorGenerator",
                 "UATHelper",
                 "Kismet",
-                "LiveCoding", "Blutility", "UMGEditor",
+                "LiveCoding",
+                "Blutility",
+                "UMGEditor",
                 // ... add private dependencies that you statically link with here ...	
 			}
         );

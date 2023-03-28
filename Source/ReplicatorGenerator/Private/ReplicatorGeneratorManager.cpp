@@ -9,7 +9,7 @@
 #include "Internationalization/Regex.h"
 #include "Misc/FileHelper.h"
 #include "Replication/ChanneldReplicationComponent.h"
-#include "ReplicationDataTable/ReplicationRegistryController.h"
+#include "Persistence/ReplicationRegistryController.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 

@@ -30,7 +30,6 @@ struct REPLICATORGENERATOR_API FChanneldReplicationRegistryRow : public FTableRo
 };
 
 class REPLICATORGENERATOR_API FReplicationRegistryController
-
 {
 	FReplicationRegistryController();
 	~FReplicationRegistryController() = default;

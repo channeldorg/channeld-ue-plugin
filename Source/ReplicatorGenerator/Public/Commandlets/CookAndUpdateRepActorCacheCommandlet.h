@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "ChanneldCookCommandlet.h"
 
-#include "CookAndUpdateRepRegistryCommandlet.generated.h"
+#include "CookAndUpdateRepActorCacheCommandlet.generated.h"
 
 class FLoadedObjectListener : public FUObjectArray::FUObjectCreateListener
 {
@@ -24,12 +24,12 @@ public:
 };
 
 UCLASS()
-class REPLICATORGENERATOR_API UCookAndUpdateRepRegistryCommandlet : public UChanneldCookCommandlet
+class REPLICATORGENERATOR_API UCookAndUpdateRepActorCacheCommandlet : public UChanneldCookCommandlet
 {
 	GENERATED_BODY()
 
 public:
-	UCookAndUpdateRepRegistryCommandlet();
+	UCookAndUpdateRepActorCacheCommandlet();
 
 	virtual int32 Main(const FString& CmdLineParams) override;
 };

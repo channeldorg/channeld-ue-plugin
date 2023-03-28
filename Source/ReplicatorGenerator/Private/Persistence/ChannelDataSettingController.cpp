@@ -1,28 +1,28 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "ReplicationDataTable/ChannelDataSettingController.h"
+#include "Persistence/ChannelDataSettingController.h"
+
+#include "Persistence/RepActorCacheController.h"
 
 void UChannelDataSettingController::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	ReplicationRegistryController = &FReplicationRegistryController::Get();
 	ChannelDataStateSettingModal.SetDataTableAssetName(TEXT("ChannelDataSetting"));
-
-	RefreshChannelDataStateOption();
 }
 
 void UChannelDataSettingController::RefreshChannelDataStateOption()
 {
-	TArray<FChanneldReplicationRegistryRow*> RegistryTableRows;
-	ReplicationRegistryController->GetItems_Unsafe(RegistryTableRows);
-	ChannelDataStateOptions.Empty(RegistryTableRows.Num());
+	URepActorCacheController* RepActorCacheController = GEditor->GetEngineSubsystem<URepActorCacheController>();
+	RepActorCacheController->LoadRepActorCache();
+	TArray<FString> RepActorClassPaths;
+	RepActorCacheController->GetRepActorClassPaths(RepActorClassPaths);
+	ChannelDataStateOptions.Empty(RepActorClassPaths.Num());
 
-	for (const FChanneldReplicationRegistryRow* RegistryTableRow : RegistryTableRows)
+	for (const FString& RepActorClassPath : RepActorClassPaths)
 	{
-		FChannelDataStateOption NewOption(RegistryTableRow->TargetClassPath);
-		ChannelDataStateOptions.Add(NewOption);
+		ChannelDataStateOptions.Add(FChannelDataStateOption(RepActorClassPath));
 	}
 }
 

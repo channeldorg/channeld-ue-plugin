@@ -1,10 +1,11 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Commandlets/CookAndUpdateRepRegistryCommandlet.h"
+#include "Commandlets/CookAndUpdateRepActorCacheCommandlet.h"
 
 #include "ReplicatorGeneratorUtils.h"
 #include "Components/TimelineComponent.h"
+#include "Persistence/RepActorCacheController.h"
 
 void FLoadedObjectListener::StartListen()
 {
@@ -45,7 +46,7 @@ void FLoadedObjectListener::OnUObjectArrayShutdown()
 	GUObjectArray.RemoveUObjectCreateListener(this);
 }
 
-UCookAndUpdateRepRegistryCommandlet::UCookAndUpdateRepRegistryCommandlet()
+UCookAndUpdateRepActorCacheCommandlet::UCookAndUpdateRepActorCacheCommandlet()
 {
 	IsClient = false;
 	IsEditor = true;
@@ -53,7 +54,7 @@ UCookAndUpdateRepRegistryCommandlet::UCookAndUpdateRepRegistryCommandlet()
 	LogToConsole = true;
 }
 
-int32 UCookAndUpdateRepRegistryCommandlet::Main(const FString& CmdLineParams)
+int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 {
 	FReplicatorGeneratorManager& GeneratorManager = FReplicatorGeneratorManager::Get();
 
@@ -94,11 +95,11 @@ int32 UCookAndUpdateRepRegistryCommandlet::Main(const FString& CmdLineParams)
 			}
 		}
 	}
-
-	if (!GeneratorManager.UpdateReplicationRegistryTable(TargetClasses))
+	URepActorCacheController* RepActorCacheController = GEditor->GetEngineSubsystem<URepActorCacheController>();
+	if (RepActorCacheController == nullptr || !RepActorCacheController->SaveRepActorCache(TargetClasses))
 	{
-		Result = 1;
+		return 1;
 	}
 
-	return Result;
+	return 0;
 }

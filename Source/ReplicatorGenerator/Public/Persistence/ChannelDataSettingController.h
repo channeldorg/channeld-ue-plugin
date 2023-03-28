@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "ReplicationDataTable.h"
 #include "ChanneldTypes.h"
-#include "ReplicationRegistryController.h"
 #include "ChannelDataSettingController.generated.h"
 
 USTRUCT(BlueprintType)
@@ -154,7 +153,6 @@ public:
 private:
 	TArray<FChannelDataStateOption> ChannelDataStateOptions;
 
-	FReplicationRegistryController* ReplicationRegistryController;
 	TReplicationDataTable<FChannelDataStateSettingRow> ChannelDataStateSettingModal;
 
 	void GetDefaultChannelDataSettings(TArray<FChannelDataSetting>& ChannelDataSettings);
