@@ -38,6 +38,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Interest")
 	void UnfollowActor(AActor* Target, int IndexOfAOI = -1);
 
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Interest")
+	void ForceUpdate();
+	
 private:
 	
 	TWeakObjectPtr<UChanneldNetConnection> ClientNetConn;
