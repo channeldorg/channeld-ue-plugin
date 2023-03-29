@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "ReplicationDataTable.h"
 #include "ChanneldTypes.h"
+#include "JsonModel.h"
 #include "ChannelDataSettingController.generated.h"
 
 USTRUCT(BlueprintType)
@@ -112,6 +112,14 @@ struct REPLICATORGENERATOR_API FChannelDataSetting
 		  , ChannelTypeOrder(InChannelTypeOrder)
 	{
 	}
+
+	void Sort()
+	{
+		StateSettings.Sort([](const FChannelDataStateSetting& A, const FChannelDataStateSetting& B)
+		{
+			return A.StateOrder < B.StateOrder;
+		});
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -139,9 +147,6 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	UFUNCTION(BlueprintCallable)
-	void RefreshChannelDataStateOption();
-
-	UFUNCTION(BlueprintCallable)
 	void GetChannelDataStateOptions(TArray<FChannelDataStateOption>& Options) const;
 
 	UFUNCTION(BlueprintCallable)
@@ -150,10 +155,20 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SaveChannelDataSettings(const TArray<FChannelDataSetting>& ChannelDataSettings);
 
-private:
-	TArray<FChannelDataStateOption> ChannelDataStateOptions;
+	UFUNCTION(BlueprintCallable)
+	void ImportChannelDataSettingsFrom(const FString& FilePath, TArray<FChannelDataSetting>& ChannelDataSettings, bool& Success);
 
-	TReplicationDataTable<FChannelDataStateSettingRow> ChannelDataStateSettingModal;
+	UFUNCTION(BlueprintCallable)
+	void ExportChannelDataSettingsTo(const FString& FilePath, const TArray<FChannelDataSetting>& ChannelDataSettings, bool& Success);
+
+	inline TArray<FChannelDataStateSettingRow> ConvertChannelDataSettingsToRows(const TArray<FChannelDataSetting>& ChannelDataSettings);
+
+	inline TArray<FChannelDataSetting> ConvertRowsToChannelDataSettings(const TArray<FChannelDataStateSettingRow>& ChannelDataSettingRows);
+
+	inline void SortChannelDataSettings(TArray<FChannelDataSetting>& ChannelDataSettings);
+
+private:
+	TJsonModel<FChannelDataStateSettingRow> ChannelDataStateSettingModal;
 
 	void GetDefaultChannelDataSettings(TArray<FChannelDataSetting>& ChannelDataSettings);
 };

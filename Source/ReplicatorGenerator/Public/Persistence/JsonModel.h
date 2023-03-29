@@ -6,16 +6,31 @@ class TJsonModel
 protected:
 	FString DataFilePath;
 
+	FDateTime LastLoadTime;
+	bool bLastLoadExisting = true;
+
+	OutStructType Data;
+
+	TArray<OutStructType> DataArray;
+
 public:
 	TJsonModel() = default;
 
 	void SetDataFilePath(const FString& InDataFilePath);
 
-	void LoadData(OutStructType& OutData);
+	bool IsExist() const;
 
-	void LoadData(TArray<OutStructType>& OutData);
+	bool GetData(OutStructType& OutData, bool ForceLoad = false);
+
+	bool GetDataArray(TArray<OutStructType>& OutData, bool ForceLoad = false);
+
+	bool LoadData();
+
+	bool LoadDataArray();
 
 	bool SaveData(const OutStructType& InData);
 
-	bool SaveData(const TArray<OutStructType>& InDataArray);
+	bool SaveDataArray(const TArray<OutStructType>& InDataArray);
+
+	bool IsNewer() const;
 };

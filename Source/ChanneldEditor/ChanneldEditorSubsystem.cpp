@@ -1,8 +1,12 @@
 ﻿#include "ChanneldEditorSubsystem.h"
+
+#include "ActiveSocket.h"
 #include "ReplicatorGeneratorUtils.h"
 #include "Commandlets/CommandletHelpers.h"
 #include "ThreadUtils/FChanneldProcWorkerThread.h"
 #include "ChanneldEditorTypes.h"
+#include "Developer/DesktopPlatform/Public/IDesktopPlatform.h"
+#include "Developer/DesktopPlatform/Public/DesktopPlatformModule.h"
 #include "Async/Async.h"
 
 #define LOCTEXT_NAMESPACE "UChanneldEditorSubsystem"
@@ -17,10 +21,10 @@ void UChanneldEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 void UChanneldEditorSubsystem::UpdateRepActorCacheAction(FPostRepActorCache PostUpdatedRepActorCache)
 {
 	UpdateRepActorCacheNotify->SetMissionNotifyText(
-		FText::FromString(TEXT("Cooking And Updating Replication Registry Table...")),
+		FText::FromString(TEXT("Cooking And Updating Replication Actor Cache...")),
 		LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),
-		FText::FromString(TEXT("Successfully Updated Replication Registry Table.")),
-		FText::FromString(TEXT("Failed To Update Replication Registry Table!"))
+		FText::FromString(TEXT("Successfully Updated Replication Actor Cache.")),
+		FText::FromString(TEXT("Failed To Update Replication Actor Cache!"))
 	);
 	if (!bUpdatingRepActorCache)
 	{
@@ -50,12 +54,11 @@ void UChanneldEditorSubsystem::UpdateRepActorCacheAction(FPostRepActorCache Post
 	}
 }
 
-
 void UChanneldEditorSubsystem::UpdateRepActorCache(TFunction<void(EUpdateRepActorCacheResult Result)> PostUpdateRegActorCache, FMissionCanceled* CanceledDelegate)
 {
 	if (bUpdatingRepActorCache)
 	{
-		UE_LOG(LogChanneldEditor, Error, TEXT("Already updating Replication Registry data table"));
+		UE_LOG(LogChanneldEditor, Error, TEXT("Already updating replication actor cache"));
 		PostUpdateRegActorCache(EUpdateRepActorCacheResult::URRT_Updating);
 		return;
 	}
@@ -96,6 +99,30 @@ void UChanneldEditorSubsystem::UpdateRepActorCache(TFunction<void(EUpdateRepActo
 	}
 
 	UpdateRepActorCacheWorkThread->Execute();
+}
+
+void UChanneldEditorSubsystem::ChooseFile(FString& FilePath, bool& Success, const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes)
+{
+	Success = false;
+	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+	TArray<FString> OutFiles;
+	if (DesktopPlatform->OpenFileDialog(GetActiveWindow(), DialogTitle, DefaultPath, TEXT(""), FileTypes, EFileDialogFlags::None, OutFiles))
+	{
+		Success = true;
+		FilePath = OutFiles[0];
+	}
+}
+
+void UChanneldEditorSubsystem::ChooseFilePathToSave(FString& FilePath, bool& Success, const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes)
+{
+	Success = false;
+	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
+	TArray<FString> OutFiles;
+	if (DesktopPlatform->SaveFileDialog(GetActiveWindow(), DialogTitle, DefaultPath, TEXT(""), FileTypes, EFileDialogFlags::None, OutFiles))
+	{
+		Success = true;
+		FilePath = OutFiles[0];
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -8,8 +8,8 @@
 #include "HAL/FileManagerGeneric.h"
 #include "Internationalization/Regex.h"
 #include "Misc/FileHelper.h"
+#include "Persistence/RepActorCacheController.h"
 #include "Replication/ChanneldReplicationComponent.h"
-#include "Persistence/ReplicationRegistryController.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 
@@ -71,71 +71,20 @@ bool FReplicatorGeneratorManager::HeaderFilesCanBeFound(const UClass* TargetClas
 	return !TargetHeadFilePath.IsEmpty();
 }
 
-bool FReplicatorGeneratorManager::UpdateReplicationRegistryTable(const TArray<const UClass*>& ReplicationActorClasses)
-{
-	TArray<FChanneldReplicationRegistryRow*> RegistryRows;
-	FReplicationRegistryController::Get().GetItems(RegistryRows);
-
-	// Use map and set to improve the performance of searching
-	TMap<FString, const UClass*> ReplicationActorClassesMap;
-	ReplicationActorClassesMap.Reserve(ReplicationActorClasses.Num());
-	TSet<FString> RegisteredClassPathsSet;
-	RegisteredClassPathsSet.Reserve(RegistryRows.Num());
-
-	// Array of actor classes that is not registered in the registry table
-	TArray<FChanneldReplicationRegistryRow> TargetClassPathsToRegister;
-	// Array of actor classes that is registered in the registry table but not in the target classes
-	TArray<FString> TargetClassPathsToUnregister;
-	for (const UClass* TargetActorClass : ReplicationActorClasses)
-	{
-		ReplicationActorClassesMap.Add(TargetActorClass->GetPathName(), TargetActorClass);
-	}
-	for (const FChanneldReplicationRegistryRow* RegistryRow : RegistryRows)
-	{
-		RegisteredClassPathsSet.Add(RegistryRow->TargetClassPath);
-		if (!ReplicationActorClassesMap.Contains(RegistryRow->TargetClassPath))
-		{
-			TargetClassPathsToUnregister.Add(RegistryRow->TargetClassPath);
-		}
-	}
-	for (const UClass* TargetActorClass : ReplicationActorClasses)
-	{
-		if (!ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinClass(TargetActorClass) && !RegisteredClassPathsSet.Contains(TargetActorClass->GetPathName()))
-		{
-			FChanneldReplicationRegistryRow RegistryItem;
-			RegistryItem.TargetClassPath = TargetActorClass->GetPathName();
-			RegistryItem.Skip = DefaultSkipGenRep.Contains(RegistryItem.TargetClassPath);
-			TargetClassPathsToRegister.Add(RegistryItem);
-		}
-	}
-
-	// Register and unregister and save the RegistryTable
-	if (TargetClassPathsToRegister.Num() > 0 || TargetClassPathsToUnregister.Num() > 0)
-	{
-		if (!FReplicationRegistryController::Get().UpdateRegistryTable(TargetClassPathsToRegister, TargetClassPathsToUnregister))
-		{
-			UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save the RegistryTable"));
-			return false;
-		}
-	}
-	return true;
-}
-
 bool FReplicatorGeneratorManager::GenerateReplication(const FString GoPackageImportPathPrefix)
 {
 	TArray<const UClass*> ReplicationActorClasses;
 
-	TArray<FChanneldReplicationRegistryRow*> RegistryRows;
-	FReplicationRegistryController::Get().GetItems_Unsafe(RegistryRows);
-	for (const FChanneldReplicationRegistryRow* RegistryRow : RegistryRows)
+	URepActorCacheController* RepActorCacheController = GEditor->GetEngineSubsystem<URepActorCacheController>();
+	TArray<FString>RepActorClassPaths;
+	RepActorCacheController->GetRepActorClassPaths(RepActorClassPaths);
+	for (const FString RepActorClassPath : RepActorClassPaths)
 	{
-		if (const UClass* TargetClass = LoadClass<UObject>(nullptr, *RegistryRow->TargetClassPath, nullptr, LOAD_None, nullptr))
+		if (const UClass* TargetClass = LoadClass<UObject>(nullptr, *RepActorClassPath, nullptr, LOAD_None, nullptr))
 		{
 			ReplicationActorClasses.Add(TargetClass);
 		}
 	}
-	// Release replication registry table
-	CollectGarbage(RF_NoFlags);
 	const bool Result = GenerateReplication(ReplicationActorClasses, GoPackageImportPathPrefix);
 	return Result;
 }

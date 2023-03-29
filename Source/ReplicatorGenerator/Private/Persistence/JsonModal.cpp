@@ -10,52 +10,144 @@ void TJsonModel<OutStructType>::SetDataFilePath(const FString& InDataFilePath)
 }
 
 template <typename OutStructType>
-void TJsonModel<OutStructType>::LoadData(OutStructType& OutData)
+bool TJsonModel<OutStructType>::IsExist() const
 {
-	FString JsonString;
-	FFileHelper::LoadFileToString(JsonString, *DataFilePath);
-	FJsonObjectConverter::JsonObjectStringToUStruct<OutStructType>(JsonString, &OutData, 0, 0);
+	return FPaths::FileExists(DataFilePath);
 }
 
 template <typename OutStructType>
-void TJsonModel<OutStructType>::LoadData(TArray<OutStructType>& OutData)
+bool TJsonModel<OutStructType>::GetData(OutStructType& OutData, bool ForceLoad)
 {
-	FString JsonString;
-	FFileHelper::LoadFileToString(JsonString, *DataFilePath);
-	FJsonObjectConverter::JsonArrayStringToUStruct<OutStructType>(JsonString, &OutData, 0, 0);
+	OutData = OutStructType();
+	if (ForceLoad || IsNewer())
+	{
+		if (!LoadData())
+		{
+			return false;
+		}
+	}
+	OutData = Data;
+	return true;
+}
+
+template <typename OutStructType>
+bool TJsonModel<OutStructType>::GetDataArray(TArray<OutStructType>& OutData, bool ForceLoad)
+{
+	OutData.Empty();
+	if (ForceLoad || IsNewer())
+	{
+		if (!LoadDataArray())
+		{
+			return false;
+		}
+	}
+	OutData = DataArray;
+	return true;
+}
+
+template <typename OutStructType>
+bool TJsonModel<OutStructType>::LoadData()
+{
+	if (!IsExist())
+	{
+		Data = OutStructType();
+		bLastLoadExisting = false;
+	}
+	else
+	{
+		FString JsonString;
+		if (!FFileHelper::LoadFileToString(JsonString, *DataFilePath))
+		{
+			UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to load data from file: %s"), *DataFilePath);
+			return false;
+		}
+		if (!FJsonObjectConverter::JsonObjectStringToUStruct<OutStructType>(JsonString, &Data, 0, 0))
+		{
+			UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to parse json from file: %s"), *DataFilePath);
+			return false;
+		}
+		bLastLoadExisting = true;
+	}
+	LastLoadTime = FDateTime::UtcNow();
+	return true;
+}
+
+template <typename OutStructType>
+bool TJsonModel<OutStructType>::LoadDataArray()
+{
+	if (!IsExist())
+	{
+		DataArray.Empty();
+		bLastLoadExisting = false;
+	}
+	else
+	{
+		FString JsonString;
+		if (!FFileHelper::LoadFileToString(JsonString, *DataFilePath))
+		{
+			UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to load data from file: %s"), *DataFilePath);
+			return false;
+		}
+		if (!FJsonObjectConverter::JsonArrayStringToUStruct<OutStructType>(JsonString, &DataArray, 0, 0))
+		{
+			UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to parse json from file: %s"), *DataFilePath);
+			return false;
+		}
+		bLastLoadExisting = true;
+	}
+	LastLoadTime = FDateTime::UtcNow();
+	return true;
 }
 
 template <typename OutStructType>
 bool TJsonModel<OutStructType>::SaveData(const OutStructType& InData)
 {
 	FString JsonString;
-	if (!FJsonObjectConverter::UStructToJsonObjectString(InData, JsonString, 0, 0)) return;
-	if(FFileHelper::SaveStringToFile(JsonString, *DataFilePath))
+	if (!FJsonObjectConverter::UStructToJsonObjectString(InData, JsonString, 0, 0))
 	{
-		return true;
+		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to convert data to json: %s"), *DataFilePath);
+		return false;
 	}
-	UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save data to file: %s"), *DataFilePath);
-	return false;
+	if (!FFileHelper::SaveStringToFile(JsonString, *DataFilePath))
+	{
+		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save data to file: %s"), *DataFilePath);
+		return false;
+	}
+	return true;
 }
 
 template <typename OutStructType>
-bool TJsonModel<OutStructType>::SaveData(const TArray<OutStructType>& InDataArray)
+bool TJsonModel<OutStructType>::SaveDataArray(const TArray<OutStructType>& InDataArray)
 {
 	FString JsonArrayString;
 	for (const OutStructType& InData : InDataArray)
 	{
 		FString JsonString;
-		if (!FJsonObjectConverter::UStructToJsonObjectString(InData, JsonString, 0, 0)) continue;
+		if (!FJsonObjectConverter::UStructToJsonObjectString(InData, JsonString, 0, 0))
+		{
+			UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Failed to convert data to json: %s"), *DataFilePath);
+			continue;
+		}
 		if (!JsonArrayString.IsEmpty())
 		{
 			JsonArrayString.Append(TEXT(",\n"));
 		}
 		JsonArrayString.Append(JsonString);
 	}
-	if(FFileHelper::SaveStringToFile(FString::Printf(TEXT("[\n%s\n]"), *JsonArrayString), *DataFilePath))
+	if (!FFileHelper::SaveStringToFile(FString::Printf(TEXT("[\n%s\n]"), *JsonArrayString), *DataFilePath))
+	{
+		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save data to file: %s"), *DataFilePath);
+		return false;
+	}
+	return true;
+}
+
+template <typename OutStructType>
+bool TJsonModel<OutStructType>::IsNewer() const
+{
+	if (bLastLoadExisting && !IsExist())
 	{
 		return true;
 	}
-	UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save data to file: %s"), *DataFilePath);
-	return false;
+	return IFileManager::Get().GetTimeStamp(*DataFilePath) > LastLoadTime;
 }

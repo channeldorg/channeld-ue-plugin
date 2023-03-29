@@ -1,34 +1,25 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "Persistence/ChannelDataSettingController.h"
-
+﻿#include "Persistence/ChannelDataSettingController.h"
+#include "ReplicatorGeneratorDefinition.h"
 #include "Persistence/RepActorCacheController.h"
 
 void UChannelDataSettingController::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	ChannelDataStateSettingModal.SetDataTableAssetName(TEXT("ChannelDataSetting"));
-}
-
-void UChannelDataSettingController::RefreshChannelDataStateOption()
-{
-	URepActorCacheController* RepActorCacheController = GEditor->GetEngineSubsystem<URepActorCacheController>();
-	RepActorCacheController->LoadRepActorCache();
-	TArray<FString> RepActorClassPaths;
-	RepActorCacheController->GetRepActorClassPaths(RepActorClassPaths);
-	ChannelDataStateOptions.Empty(RepActorClassPaths.Num());
-
-	for (const FString& RepActorClassPath : RepActorClassPaths)
-	{
-		ChannelDataStateOptions.Add(FChannelDataStateOption(RepActorClassPath));
-	}
+	ChannelDataStateSettingModal.SetDataFilePath(GenManager_ChannelDataSettingsPath);
 }
 
 void UChannelDataSettingController::GetChannelDataStateOptions(TArray<FChannelDataStateOption>& Options) const
 {
-	Options = ChannelDataStateOptions;
+	URepActorCacheController* RepActorCacheController = GEditor->GetEngineSubsystem<URepActorCacheController>();
+	TArray<FString> RepActorClassPaths;
+	RepActorCacheController->GetRepActorClassPaths(RepActorClassPaths);
+
+	Options.Empty(RepActorClassPaths.Num());
+	for (const FString& RepActorClassPath : RepActorClassPaths)
+	{
+		Options.Add(FChannelDataStateOption(RepActorClassPath));
+	}
 }
 
 void UChannelDataSettingController::GetChannelDataSettings(TArray<FChannelDataSetting>& ChannelDataSettings)
@@ -36,54 +27,54 @@ void UChannelDataSettingController::GetChannelDataSettings(TArray<FChannelDataSe
 	if (!ChannelDataStateSettingModal.IsExist())
 	{
 		GetDefaultChannelDataSettings(ChannelDataSettings);
-		SaveChannelDataSettings(ChannelDataSettings);
+		// SaveChannelDataSettings(ChannelDataSettings);
 	}
 	else
 	{
-		TArray<FChannelDataStateSettingRow*> DataStateSettingRows;
-		ChannelDataStateSettingModal.GetItems_Unsafe(DataStateSettingRows);
+		TArray<FChannelDataStateSettingRow> DataStateSettingRows;
+		ChannelDataStateSettingModal.GetDataArray(DataStateSettingRows);
 
 		if (DataStateSettingRows.Num() == 0)
 		{
+			ChannelDataSettings.Empty();
 			return;
 		}
-		TMap<int32, FChannelDataSetting> ChannelDataSettingMap;
-		for (const FChannelDataStateSettingRow* DataStateSettingRow : DataStateSettingRows)
-		{
-			FChannelDataSetting* ChannelDataSetting;
-
-			if ((ChannelDataSetting = ChannelDataSettingMap.Find(DataStateSettingRow->ChannelType)) == nullptr)
-			{
-				ChannelDataSettingMap.Add(
-					DataStateSettingRow->ChannelType,
-					FChannelDataSetting(DataStateSettingRow->ChannelType, DataStateSettingRow->ChannelTypeOrder)
-				);
-				ChannelDataSetting = ChannelDataSettingMap.Find(DataStateSettingRow->ChannelType);
-			}
-			ChannelDataSetting->StateSettings.Add(FChannelDataStateSetting(
-				ChannelDataSetting->ChannelType
-				, DataStateSettingRow->ReplicationClassPath
-				, DataStateSettingRow->StateOrder
-				, DataStateSettingRow->bSkip
-				, DataStateSettingRow->bSingleton
-			));
-		}
-		ChannelDataSettingMap.GenerateValueArray(ChannelDataSettings);
-	}
-	ChannelDataSettings.Sort([](const FChannelDataSetting& A, const FChannelDataSetting& B)
-	{
-		return A.ChannelTypeOrder < B.ChannelTypeOrder;
-	});
-	for (FChannelDataSetting& DataSetting : ChannelDataSettings)
-	{
-		DataSetting.StateSettings.Sort([](const FChannelDataStateSetting& A, const FChannelDataStateSetting& B)
-		{
-			return A.StateOrder < B.StateOrder;
-		});
+		ChannelDataSettings = ConvertRowsToChannelDataSettings(DataStateSettingRows);
 	}
 }
 
 void UChannelDataSettingController::SaveChannelDataSettings(const TArray<FChannelDataSetting>& ChannelDataSettings)
+{
+	ChannelDataStateSettingModal.SaveDataArray(ConvertChannelDataSettingsToRows(ChannelDataSettings));
+}
+
+void UChannelDataSettingController::ImportChannelDataSettingsFrom(const FString& FilePath, TArray<FChannelDataSetting>& ChannelDataSettings, bool& Success)
+{
+	TJsonModel<FChannelDataStateSettingRow> TmpModel;
+	TmpModel.SetDataFilePath(FilePath);
+	TArray<FChannelDataStateSettingRow> DataStateSettingRows;
+	if (!TmpModel.GetDataArray(DataStateSettingRows))
+	{
+		Success = false;
+		return;
+	}
+	ChannelDataSettings = ConvertRowsToChannelDataSettings(DataStateSettingRows);
+	Success = true;
+}
+
+void UChannelDataSettingController::ExportChannelDataSettingsTo(const FString& FilePath, const TArray<FChannelDataSetting>& ChannelDataSettings, bool& Success)
+{
+	TJsonModel<FChannelDataStateSettingRow> TmpModel;
+	TmpModel.SetDataFilePath(FilePath);
+	if (!TmpModel.SaveDataArray(ConvertChannelDataSettingsToRows(ChannelDataSettings)))
+	{
+		Success = false;
+		return;
+	}
+	Success = true;
+}
+
+TArray<FChannelDataStateSettingRow> UChannelDataSettingController::ConvertChannelDataSettingsToRows(const TArray<FChannelDataSetting>& ChannelDataSettings)
 {
 	TArray<FChannelDataStateSettingRow> DataStateSettingRows;
 	for (const FChannelDataSetting& ChannelDataSetting : ChannelDataSettings)
@@ -100,8 +91,48 @@ void UChannelDataSettingController::SaveChannelDataSettings(const TArray<FChanne
 			));
 		}
 	}
-	ChannelDataStateSettingModal.SetAll(DataStateSettingRows);
-	ChannelDataStateSettingModal.SaveDataTable();
+	return DataStateSettingRows;
+}
+
+inline TArray<FChannelDataSetting> UChannelDataSettingController::ConvertRowsToChannelDataSettings(const TArray<FChannelDataStateSettingRow>& ChannelDataSettingRows)
+{
+	TArray<FChannelDataSetting> ChannelDataSettings;
+	TMap<int32, FChannelDataSetting> ChannelDataSettingMap;
+	for (const FChannelDataStateSettingRow& DataStateSettingRow : ChannelDataSettingRows)
+	{
+		FChannelDataSetting* ChannelDataSetting;
+
+		if ((ChannelDataSetting = ChannelDataSettingMap.Find(DataStateSettingRow.ChannelType)) == nullptr)
+		{
+			ChannelDataSettingMap.Add(
+				DataStateSettingRow.ChannelType,
+				FChannelDataSetting(DataStateSettingRow.ChannelType, DataStateSettingRow.ChannelTypeOrder)
+			);
+			ChannelDataSetting = ChannelDataSettingMap.Find(DataStateSettingRow.ChannelType);
+		}
+		ChannelDataSetting->StateSettings.Add(FChannelDataStateSetting(
+			ChannelDataSetting->ChannelType
+			, DataStateSettingRow.ReplicationClassPath
+			, DataStateSettingRow.StateOrder
+			, DataStateSettingRow.bSkip
+			, DataStateSettingRow.bSingleton
+		));
+	}
+	ChannelDataSettingMap.GenerateValueArray(ChannelDataSettings);
+	SortChannelDataSettings(ChannelDataSettings);
+	return ChannelDataSettings;
+}
+
+void UChannelDataSettingController::SortChannelDataSettings(TArray<FChannelDataSetting>& ChannelDataSettings)
+{
+	ChannelDataSettings.Sort([](const FChannelDataSetting& A, const FChannelDataSetting& B)
+	{
+		return A.ChannelTypeOrder < B.ChannelTypeOrder;
+	});
+	for (FChannelDataSetting& DataSetting : ChannelDataSettings)
+	{
+		DataSetting.Sort();
+	}
 }
 
 void UChannelDataSettingController::GetDefaultChannelDataSettings(TArray<FChannelDataSetting>& ChannelDataSettings)
@@ -123,4 +154,5 @@ void UChannelDataSettingController::GetDefaultChannelDataSettings(TArray<FChanne
 		));
 	}
 	ChannelDataSettings.Add(DefaultChannelDataSetting);
+	SortChannelDataSettings(ChannelDataSettings);
 }

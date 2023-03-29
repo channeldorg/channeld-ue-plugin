@@ -66,15 +66,6 @@ public:
 	bool HeaderFilesCanBeFound(const UClass* TargetClass);
 
 	/**
-	 * Update the registry table of the replication actors.
-	 * Normally, the function is called by "CookAndUpdateRepRegistryCommandlet".
-	 *
-	 * @param ReplicationActorClasses The target actor classes.
-	 * @return true if successfully updated the registry table.
-	 */
-	bool UpdateReplicationRegistryTable(const TArray<const UClass*>& ReplicationActorClasses);
-
-	/**
 	 * Generate replicators for the replication actors from registry table.
 	 *
 	 * @param GoPackageImportPathPrefix If the go package is "github.com/metaworking/channeld/examples/channeld-ue-tps/tpspb", the prefix is "github.com/metaworking/channeld/examples/channeld-ue-tps".

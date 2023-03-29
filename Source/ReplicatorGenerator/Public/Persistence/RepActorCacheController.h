@@ -30,6 +30,26 @@ struct REPLICATORGENERATOR_API FRepActorCacheRow
 	}
 };
 
+USTRUCT(BlueprintType)
+struct REPLICATORGENERATOR_API FRepActorCache
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	FDateTime CacheTime;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	TArray<FRepActorCacheRow> RepActorCacheRows;
+
+	FRepActorCache() = default;
+
+	FRepActorCache(const TArray<FRepActorCacheRow>& InRepActorCacheRows)
+		: RepActorCacheRows(InRepActorCacheRows)
+	{
+		CacheTime = FDateTime::UtcNow();
+	}
+};
+
 struct FRepActorDependency
 {
 	FString TargetClassPath;
@@ -52,18 +72,19 @@ class REPLICATORGENERATOR_API URepActorCacheController : public UEngineSubsystem
 	GENERATED_BODY()
 
 protected:
+	FDateTime LatestRepActorCacheTime;
 	TArray<FRepActorCacheRow> RepActorCacheRows;
 	TMap<FString, TSharedRef<FRepActorDependency>> RepActorDependencyMap;
 
-	TJsonModel<FRepActorCacheRow> RepActorCacheModal;
+	TJsonModel<FRepActorCache> RepActorCacheModel;
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	bool SaveRepActorCache(const TArray<const UClass*>& InRepActorClasses);
-
+	
 	UFUNCTION(BlueprintCallable)
-	void LoadRepActorCache();
+	bool NeedToRefreshCache();
 
 	UFUNCTION(BlueprintCallable)
 	void GetRepActorClassPaths(TArray<FString>& OutRepActorClassPaths);
@@ -76,4 +97,6 @@ public:
 
 protected:
 	void SetRepActorCacheRows(const TArray<FRepActorCacheRow>& InRepActorCacheRows);
+
+	void EnsureLatestRepActorCache();
 };

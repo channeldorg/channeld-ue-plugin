@@ -28,6 +28,12 @@ public:
 
 	void UpdateRepActorCache(TFunction<void(EUpdateRepActorCacheResult Result)> PostUpdateRegActorCache, FMissionCanceled* CanceledDelegate);
 
+	UFUNCTION(BlueprintCallable)
+	void ChooseFile(FString& FilePath, bool& Success, const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes = TEXT("All files (*.*)|*.*"));
+
+	UFUNCTION(BlueprintCallable)
+	void ChooseFilePathToSave(FString& FilePath, bool& Success, const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes = TEXT("All files (*.*)|*.*"));
+
 private:
 	TSharedPtr<FChanneldProcWorkerThread> UpdateRepActorCacheWorkThread;
 
