@@ -1,29 +1,60 @@
 ﻿#pragma once
 #include "AddCompToBPSubsystem.h"
 #include "ReplicatorCodeGenerator.h"
-#include "GameFramework/Character.h"
+#include "ReplicatorGeneratorDefinition.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/GameState.h"
 #include "GameFramework/GameStateBase.h"
-#include "GameFramework/PlayerState.h"
+#include "Persistence/JsonModel.h"
+#include "ReplicatorGeneratorManager.generated.h"
 
 /**
  * Persistent info about latest generated codes.
  */
+USTRUCT(BlueprintType)
 struct REPLICATORGENERATOR_API FGeneratedManifest
 {
+	GENERATED_BODY()
+
+	UPROPERTY()
 	FDateTime GeneratedTime;
+
+	UPROPERTY()
 	FString ProtoPackageName;
+
+	UPROPERTY()
 	FString TemporaryGoMergeCodePath;
+
+	UPROPERTY()
 	FString TemporaryGoRegistrationCodePath;
+
 	// TODO: FString -> TMap<EChanneldChannelType, FString>
+
+	UPROPERTY()
 	FString ChannelDataMsgName;
+
+	FGeneratedManifest() = default;
+
+	FGeneratedManifest(
+		const FDateTime& InGeneratedTime
+		, const FString& InProtoPackageName
+		, const FString& InTemporaryGoMergeCodePath
+		, const FString& InTemporaryGoRegistrationCodePath
+		, const FString& InChannelDataMsgName
+	)
+		: GeneratedTime(InGeneratedTime)
+		  , ProtoPackageName(InProtoPackageName)
+		  , TemporaryGoMergeCodePath(InTemporaryGoMergeCodePath)
+		  , TemporaryGoRegistrationCodePath(InTemporaryGoRegistrationCodePath)
+		  , ChannelDataMsgName(InChannelDataMsgName)
+	{
+	}
 };
 
 class REPLICATORGENERATOR_API FReplicatorGeneratorManager
 {
 protected:
 	FReplicatorCodeGenerator* CodeGenerator;
+	TJsonModel<FGeneratedManifest> GeneratedManifestModel = GenManager_GeneratedManifestFilePath;
 
 	FString DefaultModuleDir;
 	FString ReplicatorStorageDir;
@@ -41,7 +72,7 @@ public:
 	 * Get the directory of the default game module.
 	 */
 	FString GetDefaultModuleDir();
-	
+
 	/*
 	 * Get the name of the default game module.
 	 */
@@ -72,7 +103,7 @@ public:
 	 * @return true if the replicators are generated successfully.
 	 */
 	bool GenerateReplication(const FString GoPackageImportPathPrefix);
-	
+
 	/**
 	 * Generate replicators for the given target actors.
 	 *
@@ -135,16 +166,12 @@ public:
 	 */
 	void RemoveGeneratedCodeFiles();
 
-	inline void EnsureReplicatorGeneratedIntermediateDir();
-
 	inline FString GetTemporaryGoProtoDataFilePath() const;
 	inline bool WriteTemporaryGoProtoData(const FString& Code, FString& ResultMessage);
 
-	bool LoadLatestGeneratedManifest(FGeneratedManifest& Result, FString& Message) const;
-	bool LoadLatestGeneratedManifest(const FString& Filename, FGeneratedManifest& Result, FString& Message) const;
+	bool LoadLatestGeneratedManifest(FGeneratedManifest& Result);
 
-	bool SaveGeneratedManifest(const FGeneratedManifest& Manifest, FString& Message);
-	bool SaveGeneratedManifest(const FGeneratedManifest& Manifest, const FString& Filename, FString& Message);
+	bool SaveGeneratedManifest(const FGeneratedManifest& Manifest);
 
 	TSet<FString> DefaultSkipGenRep = {
 		TEXT("/Script/Engine.WorldSettings"),

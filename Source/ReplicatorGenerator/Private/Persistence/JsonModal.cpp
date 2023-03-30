@@ -3,6 +3,12 @@
 #include "JsonObjectConverter.h"
 
 template <typename OutStructType>
+TJsonModel<OutStructType>::TJsonModel(const FString& InDataFilePath)
+{
+	SetDataFilePath(InDataFilePath);
+}
+
+template <typename OutStructType>
 void TJsonModel<OutStructType>::SetDataFilePath(const FString& InDataFilePath)
 {
 	DataFilePath = InDataFilePath;

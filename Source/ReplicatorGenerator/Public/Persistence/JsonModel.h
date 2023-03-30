@@ -16,6 +16,8 @@ protected:
 public:
 	TJsonModel() = default;
 
+	TJsonModel(const FString& InDataFilePath);
+
 	void SetDataFilePath(const FString& InDataFilePath);
 
 	bool IsExist() const;

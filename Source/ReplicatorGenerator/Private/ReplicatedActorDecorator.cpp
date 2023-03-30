@@ -4,6 +4,7 @@
 #include "ReplicatorGeneratorDefinition.h"
 #include "ReplicatorGeneratorUtils.h"
 #include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerState.h"
 #include "ReplicatorTemplate/CppReplicatorTemplate.h"
 
 FReplicatedActorDecorator::FReplicatedActorDecorator(

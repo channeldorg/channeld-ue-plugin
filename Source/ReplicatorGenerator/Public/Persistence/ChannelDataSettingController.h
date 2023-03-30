@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "ChanneldTypes.h"
 #include "JsonModel.h"
+#include "ReplicatorGeneratorDefinition.h"
 #include "ChannelDataSettingController.generated.h"
 
 USTRUCT(BlueprintType)
@@ -143,6 +144,9 @@ class REPLICATORGENERATOR_API UChannelDataSettingController : public UEditorSubs
 {
 	GENERATED_BODY()
 
+protected:
+	TJsonModel<FChannelDataStateSettingRow> ChannelDataStateSettingModal = GenManager_ChannelDataSettingsPath;
+
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
@@ -167,8 +171,6 @@ public:
 
 	inline void SortChannelDataSettings(TArray<FChannelDataSetting>& ChannelDataSettings);
 
-private:
-	TJsonModel<FChannelDataStateSettingRow> ChannelDataStateSettingModal;
-
+protected:
 	void GetDefaultChannelDataSettings(TArray<FChannelDataSetting>& ChannelDataSettings);
 };

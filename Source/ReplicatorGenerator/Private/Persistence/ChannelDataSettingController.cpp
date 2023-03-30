@@ -1,12 +1,9 @@
 ﻿#include "Persistence/ChannelDataSettingController.h"
-#include "ReplicatorGeneratorDefinition.h"
 #include "Persistence/RepActorCacheController.h"
 
 void UChannelDataSettingController::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-
-	ChannelDataStateSettingModal.SetDataFilePath(GenManager_ChannelDataSettingsPath);
 }
 
 void UChannelDataSettingController::GetChannelDataStateOptions(TArray<FChannelDataStateOption>& Options) const
@@ -50,8 +47,7 @@ void UChannelDataSettingController::SaveChannelDataSettings(const TArray<FChanne
 
 void UChannelDataSettingController::ImportChannelDataSettingsFrom(const FString& FilePath, TArray<FChannelDataSetting>& ChannelDataSettings, bool& Success)
 {
-	TJsonModel<FChannelDataStateSettingRow> TmpModel;
-	TmpModel.SetDataFilePath(FilePath);
+	TJsonModel<FChannelDataStateSettingRow> TmpModel(FilePath);
 	TArray<FChannelDataStateSettingRow> DataStateSettingRows;
 	if (!TmpModel.GetDataArray(DataStateSettingRows))
 	{
@@ -64,8 +60,7 @@ void UChannelDataSettingController::ImportChannelDataSettingsFrom(const FString&
 
 void UChannelDataSettingController::ExportChannelDataSettingsTo(const FString& FilePath, const TArray<FChannelDataSetting>& ChannelDataSettings, bool& Success)
 {
-	TJsonModel<FChannelDataStateSettingRow> TmpModel;
-	TmpModel.SetDataFilePath(FilePath);
+	TJsonModel<FChannelDataStateSettingRow> TmpModel(FilePath);
 	if (!TmpModel.SaveDataArray(ConvertChannelDataSettingsToRows(ChannelDataSettings)))
 	{
 		Success = false;

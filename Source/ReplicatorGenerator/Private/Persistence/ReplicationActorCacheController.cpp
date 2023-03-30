@@ -1,11 +1,9 @@
-﻿#include "ReplicatorGeneratorDefinition.h"
+﻿#include "ReplicatorGeneratorUtils.h"
 #include "Persistence/RepActorCacheController.h"
 
 void URepActorCacheController::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-
-	RepActorCacheModel.SetDataFilePath(GenManager_IntermediateDir / TEXT("ReplicationActorCache.json"));
 }
 
 bool URepActorCacheController::SaveRepActorCache(const TArray<const UClass*>& InRepActorClasses)
@@ -40,6 +38,7 @@ bool URepActorCacheController::SaveRepActorCache(const TArray<const UClass*>& In
 			ParentClass = ParentClass->GetSuperClass();
 		}
 	}
+	ChanneldReplicatorGeneratorUtils::EnsureRepGenIntermediateDir();
 	return RepActorCacheModel.SaveData(FRepActorCache(NewRepActorCacheRows));
 }
 

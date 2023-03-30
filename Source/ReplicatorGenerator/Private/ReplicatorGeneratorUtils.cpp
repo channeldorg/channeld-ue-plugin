@@ -362,4 +362,13 @@ namespace ChanneldReplicatorGeneratorUtils
 			return FString::Printf(TEXT("%d"), Hash);
 		}
 	}
+
+	void EnsureRepGenIntermediateDir()
+	{
+		IFileManager& FileManager = IFileManager::Get();
+		if (!FileManager.DirectoryExists(*GenManager_IntermediateDir))
+		{
+			FileManager.MakeDirectory(*GenManager_IntermediateDir, true);
+		}
+	}
 }

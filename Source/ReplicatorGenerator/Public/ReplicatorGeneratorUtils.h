@@ -69,4 +69,6 @@ namespace ChanneldReplicatorGeneratorUtils
 	REPLICATORGENERATOR_API FString GetUECmdBinary();
 
 	REPLICATORGENERATOR_API FString GetHashString(const FString& Target);
+
+	REPLICATORGENERATOR_API void EnsureRepGenIntermediateDir();
 }

@@ -1,6 +1,5 @@
 ﻿#include "ReplicatorGeneratorManager.h"
 
-#include "ReplicatorGeneratorDefinition.h"
 #include "ReplicatorGeneratorUtils.h"
 #include "Engine/AssetManager.h"
 #include "Engine/SCS_Node.h"
@@ -10,8 +9,6 @@
 #include "Misc/FileHelper.h"
 #include "Persistence/RepActorCacheController.h"
 #include "Replication/ChanneldReplicationComponent.h"
-#include "Serialization/JsonReader.h"
-#include "Serialization/JsonSerializer.h"
 
 DEFINE_LOG_CATEGORY(LogChanneldRepGenerator);
 
@@ -76,7 +73,7 @@ bool FReplicatorGeneratorManager::GenerateReplication(const FString GoPackageImp
 	TArray<const UClass*> ReplicationActorClasses;
 
 	URepActorCacheController* RepActorCacheController = GEditor->GetEngineSubsystem<URepActorCacheController>();
-	TArray<FString>RepActorClassPaths;
+	TArray<FString> RepActorClassPaths;
 	RepActorCacheController->GetRepActorClassPaths(RepActorClassPaths);
 	for (const FString RepActorClassPath : RepActorClassPaths)
 	{
@@ -134,11 +131,11 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 
 	const FString ProtoPackageName = GetDefaultProtoPackageName();
 	const FString GoPackageImportPath = GoPackageImportPathPrefix / ProtoPackageName;
-	
+
 	// We need to include the header file of the target class in 'ChanneldReplicatorRegister.h'. so we need to know the include path of the target class from 'uhtmanifest' file.
 	// But the 'uhtmanifest' file is a large json file, so we need to read and parser it only once.
 	CodeGenerator->RefreshModuleInfoByClassName();
-	
+
 	CodeGenerator->Generate(
 		ActorInfosToGenRep,
 		GetDefaultModuleDir(),
@@ -183,27 +180,23 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 
 	// Generate channel data golang merge code temporary file.
 	// WriteTemporaryGoProtoData(ReplicatorCodeBundle.ChannelDataMerge_GoCode, Message);
-	EnsureReplicatorGeneratedIntermediateDir();
+	ChanneldReplicatorGeneratorUtils::EnsureRepGenIntermediateDir();
 	WriteCodeFile(GenManager_TemporaryGoMergeCodePath, ReplicatorCodeBundle.ChannelDataMerge_GoCode, Message);
 	WriteCodeFile(GenManager_TemporaryGoRegistrationCodePath, ReplicatorCodeBundle.ChannelDataRegistration_GoCode, Message);
 
-	UE_LOG(
-		LogChanneldRepGenerator,
-		Display,
-		TEXT("The generation of replicators is completed, %d replicators need to be generated, a total of %d replicators are generated"),
-		ReplicationActorClasses.Num(), ReplicatorCodeBundle.ReplicatorCodes.Num()
-	);
 
 	// Save the generated manifest file
-	FGeneratedManifest Manifest;
-	Manifest.GeneratedTime = FDateTime::Now();
-	Manifest.ProtoPackageName = ProtoPackageName;
-	Manifest.TemporaryGoMergeCodePath = GenManager_TemporaryGoMergeCodePath;
-	Manifest.TemporaryGoRegistrationCodePath = GenManager_TemporaryGoRegistrationCodePath;
-	Manifest.ChannelDataMsgName = GetDefaultProtoPackageName() + "." + GenManager_DefaultChannelDataMsgName;
-	if (SaveGeneratedManifest(Manifest, Message))
+	FGeneratedManifest Manifest(
+		FDateTime::UtcNow()
+		, ProtoPackageName
+		, GenManager_TemporaryGoMergeCodePath
+		, GenManager_TemporaryGoRegistrationCodePath
+		, GetDefaultProtoPackageName() + "." + GenManager_DefaultChannelDataMsgName
+	);
+
+	if (!SaveGeneratedManifest(Manifest))
 	{
-		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save the generated manifest file, error message: %s"), *Message);
+		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save the generated manifest file"));
 		return false;
 	}
 
@@ -276,15 +269,6 @@ void FReplicatorGeneratorManager::RemoveGeneratedCodeFiles()
 	}
 }
 
-inline void FReplicatorGeneratorManager::EnsureReplicatorGeneratedIntermediateDir()
-{
-	IFileManager& FileManager = IFileManager::Get();
-	if (!FileManager.DirectoryExists(*GenManager_IntermediateDir))
-	{
-		FileManager.MakeDirectory(*GenManager_IntermediateDir, true);
-	}
-}
-
 inline FString FReplicatorGeneratorManager::GetTemporaryGoProtoDataFilePath() const
 {
 	return GenManager_TemporaryGoMergeCodePath;
@@ -292,92 +276,17 @@ inline FString FReplicatorGeneratorManager::GetTemporaryGoProtoDataFilePath() co
 
 inline bool FReplicatorGeneratorManager::WriteTemporaryGoProtoData(const FString& Code, FString& ResultMessage)
 {
-	EnsureReplicatorGeneratedIntermediateDir();
+	ChanneldReplicatorGeneratorUtils::EnsureRepGenIntermediateDir();
 	return WriteCodeFile(GetTemporaryGoProtoDataFilePath(), Code, ResultMessage);
 }
 
-bool FReplicatorGeneratorManager::LoadLatestGeneratedManifest(FGeneratedManifest& Result, FString& Message) const
+bool FReplicatorGeneratorManager::LoadLatestGeneratedManifest(FGeneratedManifest& Result)
 {
-	return LoadLatestGeneratedManifest(GenManager_GeneratedManifestFilePath, Result, Message);
+	return GeneratedManifestModel.GetData(Result, true);
 }
 
-bool FReplicatorGeneratorManager::LoadLatestGeneratedManifest(const FString& Filename, FGeneratedManifest& Result, FString& Message) const
+bool FReplicatorGeneratorManager::SaveGeneratedManifest(const FGeneratedManifest& Manifest)
 {
-	FString Json;
-	if (!FFileHelper::LoadFileToString(Json, *Filename))
-	{
-		Message = FString::Printf(TEXT("Unable to load GeneratedManifest: %s"), *Filename);
-		return false;
-	}
-
-	TSharedPtr<FJsonObject> RootObject = TSharedPtr<FJsonObject>();
-	TSharedRef<TJsonReader<TCHAR>> Reader = TJsonReaderFactory<TCHAR>::Create(Json);
-
-	if (!FJsonSerializer::Deserialize(Reader, RootObject))
-	{
-		Message = FString::Printf(TEXT("GeneratedManifest is malformed: %s"), *Filename);
-		return false;
-	}
-
-	double GeneratedTime;
-	if (!RootObject->TryGetNumberField(TEXT("GeneratedTime"), GeneratedTime))
-	{
-		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'GeneratedTime'"));
-	}
-	Result.GeneratedTime = FDateTime::FromUnixTimestamp(GeneratedTime);
-
-	if (!RootObject->TryGetStringField(TEXT("ProtoPackageName"), Result.ProtoPackageName))
-	{
-		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'ProtoPackageName'"));
-	}
-
-	if (!RootObject->TryGetStringField(TEXT("TemporaryGoMergeCodePath"), Result.TemporaryGoMergeCodePath))
-	{
-		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'TemporaryGoMergeCodePath'"));
-	}
-
-	if (!RootObject->TryGetStringField(TEXT("TemporaryGoRegistrationCodePath"), Result.TemporaryGoRegistrationCodePath))
-	{
-		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'TemporaryGoRegistrationCodePath'"));
-	}
-
-	if (!RootObject->TryGetStringField(TEXT("ChannelDataMsgName"), Result.ChannelDataMsgName))
-	{
-		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'ChannelDataMsgName'"));
-	}
-
-	return true;
-}
-
-bool FReplicatorGeneratorManager::SaveGeneratedManifest(const FGeneratedManifest& Manifest, FString& Message)
-{
-	EnsureReplicatorGeneratedIntermediateDir();
-	return SaveGeneratedManifest(Manifest, GenManager_GeneratedManifestFilePath, Message);
-}
-
-bool FReplicatorGeneratorManager::SaveGeneratedManifest(const FGeneratedManifest& Manifest, const FString& Filename, FString& Message)
-{
-	if (!FPaths::DirectoryExists(FPaths::GetPath(Filename)))
-	{
-		Message = FString::Printf(TEXT("Unable to find the directory of GeneratedManifest: %s"), *Filename);
-		return false;
-	}
-	FString Json;
-	TSharedPtr<FJsonObject> RootObject = TSharedPtr<FJsonObject>();
-
-	const TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&Json);
-	JsonWriter->WriteObjectStart();
-	JsonWriter->WriteValue(TEXT("GeneratedTime"), Manifest.GeneratedTime.ToUnixTimestamp());
-	JsonWriter->WriteValue(TEXT("ProtoPackageName"), Manifest.ProtoPackageName);
-	JsonWriter->WriteValue(TEXT("TemporaryGoMergeCodePath"), Manifest.TemporaryGoMergeCodePath);
-	JsonWriter->WriteValue(TEXT("TemporaryGoRegistrationCodePath"), Manifest.TemporaryGoRegistrationCodePath);
-	JsonWriter->WriteValue(TEXT("ChannelDataMsgName"), Manifest.ChannelDataMsgName);
-	JsonWriter->WriteObjectEnd();
-	JsonWriter->Close();
-	if (FFileHelper::SaveStringToFile(Json, *Filename))
-	{
-		Message = FString::Printf(TEXT("Unable to save GeneratedManifest: %s"), *Filename);
-		return false;
-	}
-	return true;
+	ChanneldReplicatorGeneratorUtils::EnsureRepGenIntermediateDir();
+	return GeneratedManifestModel.SaveData(Manifest);
 }

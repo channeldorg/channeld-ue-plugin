@@ -455,10 +455,9 @@ void FChanneldEditorModule::GenerateReplication()
 	GeneratorManager.RemoveGeneratedCodeFiles();
 	GeneratorManager.GenerateReplication(GetMutableDefault<UChanneldEditorSettings>()->ChanneldGoPackageImportPathPrefix);
 	FGeneratedManifest LatestGeneratedManifest;
-	FString Message;
-	if (!GeneratorManager.LoadLatestGeneratedManifest(LatestGeneratedManifest, Message))
+	if (!GeneratorManager.LoadLatestGeneratedManifest(LatestGeneratedManifest))
 	{
-		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load latest generated manifest: %s"), *Message);
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load latest generated manifest"));
 		return;
 	}
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "JsonModel.h"
+#include "ReplicatorGeneratorDefinition.h"
 #include "RepActorCacheController.generated.h"
 
 USTRUCT(BlueprintType)
@@ -76,13 +77,13 @@ protected:
 	TArray<FRepActorCacheRow> RepActorCacheRows;
 	TMap<FString, TSharedRef<FRepActorDependency>> RepActorDependencyMap;
 
-	TJsonModel<FRepActorCache> RepActorCacheModel;
+	TJsonModel<FRepActorCache> RepActorCacheModel = GenManager_RepActorCachePath;
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	bool SaveRepActorCache(const TArray<const UClass*>& InRepActorClasses);
-	
+
 	UFUNCTION(BlueprintCallable)
 	bool NeedToRefreshCache();
 
