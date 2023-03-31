@@ -239,7 +239,7 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 		return;
 	}
 
-	if (Processor->OnChannelDataUpdated(GetOwner(), ChannelData))
+	if (!Processor->OnChannelDataUpdated(GetOwner(), ChannelData))
 	{
 		return;
 	}

@@ -215,6 +215,7 @@ unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnec
 	}
 
 	ObjRef.set_netguid(NetGUID.Value);
+	ObjRef.set_classpath(std::string(TCHAR_TO_UTF8(*Obj->GetClass()->GetPathName())));
 	// ObjRef.set_connid(GEngine->GetEngineSubsystem<UChanneldConnection>()->GetConnId());
 	return ObjRef;
 }
