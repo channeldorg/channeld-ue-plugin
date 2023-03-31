@@ -800,6 +800,7 @@ class CHANNELDUE_API UnrealObjectRef final :
   enum : int {
     kContextFieldNumber = 2,
     kNetGUIDBunchFieldNumber = 3,
+    kClassPathFieldNumber = 6,
     kNetGUIDFieldNumber = 1,
     kBunchBitsNumFieldNumber = 4,
   };
@@ -837,6 +838,24 @@ class CHANNELDUE_API UnrealObjectRef final :
   const std::string& _internal_netguidbunch() const;
   inline PROTOBUF_ALWAYS_INLINE void _internal_set_netguidbunch(const std::string& value);
   std::string* _internal_mutable_netguidbunch();
+  public:
+
+  // optional string classPath = 6;
+  bool has_classpath() const;
+  private:
+  bool _internal_has_classpath() const;
+  public:
+  void clear_classpath();
+  const std::string& classpath() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_classpath(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_classpath();
+  PROTOBUF_NODISCARD std::string* release_classpath();
+  void set_allocated_classpath(std::string* classpath);
+  private:
+  const std::string& _internal_classpath() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_classpath(const std::string& value);
+  std::string* _internal_mutable_classpath();
   public:
 
   // optional uint32 netGUID = 1;
@@ -877,6 +896,7 @@ class CHANNELDUE_API UnrealObjectRef final :
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef_GuidCachedObject > context_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr netguidbunch_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr classpath_;
     uint32_t netguid_;
     uint32_t bunchbitsnum_;
   };
@@ -10310,7 +10330,7 @@ inline void UnrealObjectRef_GuidCachedObject::set_outerguid(uint32_t value) {
 
 // optional uint32 netGUID = 1;
 inline bool UnrealObjectRef::_internal_has_netguid() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
 inline bool UnrealObjectRef::has_netguid() const {
@@ -10318,7 +10338,7 @@ inline bool UnrealObjectRef::has_netguid() const {
 }
 inline void UnrealObjectRef::clear_netguid() {
   _impl_.netguid_ = 0u;
-  _impl_._has_bits_[0] &= ~0x00000002u;
+  _impl_._has_bits_[0] &= ~0x00000004u;
 }
 inline uint32_t UnrealObjectRef::_internal_netguid() const {
   return _impl_.netguid_;
@@ -10328,7 +10348,7 @@ inline uint32_t UnrealObjectRef::netguid() const {
   return _internal_netguid();
 }
 inline void UnrealObjectRef::_internal_set_netguid(uint32_t value) {
-  _impl_._has_bits_[0] |= 0x00000002u;
+  _impl_._has_bits_[0] |= 0x00000004u;
   _impl_.netguid_ = value;
 }
 inline void UnrealObjectRef::set_netguid(uint32_t value) {
@@ -10446,7 +10466,7 @@ inline void UnrealObjectRef::set_allocated_netguidbunch(std::string* netguidbunc
 
 // optional uint32 bunchBitsNum = 4;
 inline bool UnrealObjectRef::_internal_has_bunchbitsnum() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool UnrealObjectRef::has_bunchbitsnum() const {
@@ -10454,7 +10474,7 @@ inline bool UnrealObjectRef::has_bunchbitsnum() const {
 }
 inline void UnrealObjectRef::clear_bunchbitsnum() {
   _impl_.bunchbitsnum_ = 0u;
-  _impl_._has_bits_[0] &= ~0x00000004u;
+  _impl_._has_bits_[0] &= ~0x00000008u;
 }
 inline uint32_t UnrealObjectRef::_internal_bunchbitsnum() const {
   return _impl_.bunchbitsnum_;
@@ -10464,12 +10484,80 @@ inline uint32_t UnrealObjectRef::bunchbitsnum() const {
   return _internal_bunchbitsnum();
 }
 inline void UnrealObjectRef::_internal_set_bunchbitsnum(uint32_t value) {
-  _impl_._has_bits_[0] |= 0x00000004u;
+  _impl_._has_bits_[0] |= 0x00000008u;
   _impl_.bunchbitsnum_ = value;
 }
 inline void UnrealObjectRef::set_bunchbitsnum(uint32_t value) {
   _internal_set_bunchbitsnum(value);
   // @@protoc_insertion_point(field_set:unrealpb.UnrealObjectRef.bunchBitsNum)
+}
+
+// optional string classPath = 6;
+inline bool UnrealObjectRef::_internal_has_classpath() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool UnrealObjectRef::has_classpath() const {
+  return _internal_has_classpath();
+}
+inline void UnrealObjectRef::clear_classpath() {
+  _impl_.classpath_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& UnrealObjectRef::classpath() const {
+  // @@protoc_insertion_point(field_get:unrealpb.UnrealObjectRef.classPath)
+  return _internal_classpath();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void UnrealObjectRef::set_classpath(ArgT0&& arg0, ArgT... args) {
+ _impl_._has_bits_[0] |= 0x00000002u;
+ _impl_.classpath_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:unrealpb.UnrealObjectRef.classPath)
+}
+inline std::string* UnrealObjectRef::mutable_classpath() {
+  std::string* _s = _internal_mutable_classpath();
+  // @@protoc_insertion_point(field_mutable:unrealpb.UnrealObjectRef.classPath)
+  return _s;
+}
+inline const std::string& UnrealObjectRef::_internal_classpath() const {
+  return _impl_.classpath_.Get();
+}
+inline void UnrealObjectRef::_internal_set_classpath(const std::string& value) {
+  _impl_._has_bits_[0] |= 0x00000002u;
+  _impl_.classpath_.Set(value, GetArenaForAllocation());
+}
+inline std::string* UnrealObjectRef::_internal_mutable_classpath() {
+  _impl_._has_bits_[0] |= 0x00000002u;
+  return _impl_.classpath_.Mutable(GetArenaForAllocation());
+}
+inline std::string* UnrealObjectRef::release_classpath() {
+  // @@protoc_insertion_point(field_release:unrealpb.UnrealObjectRef.classPath)
+  if (!_internal_has_classpath()) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000002u;
+  auto* p = _impl_.classpath_.Release();
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.classpath_.IsDefault()) {
+    _impl_.classpath_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return p;
+}
+inline void UnrealObjectRef::set_allocated_classpath(std::string* classpath) {
+  if (classpath != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000002u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002u;
+  }
+  _impl_.classpath_.SetAllocated(classpath, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.classpath_.IsDefault()) {
+    _impl_.classpath_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.UnrealObjectRef.classPath)
 }
 
 // -------------------------------------------------------------------
