@@ -366,7 +366,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 				HandoverObjs.Add(HandoverObj);
 				
 				// Now the NetId is properly set, call AddProviderToDefaultChannel().
-				AddObjectProvider(HandoverObj);
+				AddObjectProviderToDefaultChannel(HandoverObj);
 				// MoveObjectProvider(HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), HandoverObj, true);
 				// bUpdateSourceChannel = true;
 				
@@ -628,6 +628,20 @@ bool USpatialChannelDataView::ClientDeleteObject(UObject* Obj)
 	return true;
 }
 
+bool USpatialChannelDataView::ConsumeChannelUpdateData(Channeld::ChannelId ChId, google::protobuf::Message* UpdateData)
+{
+	// We can't consume the spatial channel update data in the normal merge process.
+	if (auto ChannelInfo = Connection->SubscribedChannels.Find(ChId))
+	{
+		if (ChannelInfo->ChannelType == EChanneldChannelType::ECT_Spatial)
+		{
+			return false;
+		}
+	}
+	
+	return Super::ConsumeChannelUpdateData(ChId, UpdateData);
+}
+
 bool USpatialChannelDataView::TryToResolveObjects(Channeld::ChannelId ChId, TArray<uint32> NetGUIDs)
 {
 	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
@@ -725,8 +739,8 @@ void USpatialChannelDataView::ClientHandleGetUnrealObjectRef(UChanneldConnection
 		UObject* NewObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld());
 		if (NewObj)
 		{
-			AddObjectProvider(NewObj);
-			OnClientSpawnedObject(NewObj, ChId);
+			AddObjectProviderToDefaultChannel(NewObj);
+			OnNetSpawnedObject(NewObj, ChId);
 		}
 		
 		ResolvingNetGUIDs.Remove(ObjRef.netguid());
@@ -1101,11 +1115,27 @@ void USpatialChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayer
 	}
 }
 
-void USpatialChannelDataView::OnClientSpawnedObject(UObject* Obj, const Channeld::ChannelId ChId)
+void USpatialChannelDataView::OnNetSpawnedObject(UObject* Obj, const Channeld::ChannelId ChId)
 {
 	if (Visualizer)
 	{
 		Visualizer->OnSpawnedObject(Obj, ChId);
+	}
+
+	if (Obj->IsA<AGameStateBase>())
+	{
+		return;
+	}
+		
+	uint32 NetId = GetNetId(Obj).Value;
+	if (!Connection->SubscribedChannels.Contains(NetId))
+	{
+		// Sub to the entity channel which channelId equals to the NetId
+		// TODO: subOptions should reflect the RepConditions of the properties
+		Connection->SubToChannel(NetId, nullptr, [this, Obj, NetId](const channeldpb::SubscribedToChannelResultMessage* ResultMsg)
+		{
+			AddObjectProvider(NetId, Obj);
+		});
 	}
 }
 
@@ -1130,7 +1160,7 @@ bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetwork
 	
 	// Don't set the NetId-ChannelId mapping, as we don't have the spatial channelId of the object yet.
 	// The spatial channelId will be queried in AddProviderToDefaultChannel()
-	AddObjectProvider(Obj);
+	AddObjectProviderToDefaultChannel(Obj);
 	
 	return true;
 }
@@ -1147,14 +1177,9 @@ void USpatialChannelDataView::OnDestroyedActor(AActor* Actor, const FNetworkGUID
 	Super::OnDestroyedActor(Actor, NetId);
 }
 
-void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId)
+void USpatialChannelDataView::SendSpawnToConn_EntityChannelReady(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId)
 {
-	// GameState is spawned via GLOBAL channel
-	if (Obj->IsA<AGameStateBase>())
-	{
-		NetConn->SendSpawnMessage(Obj, ROLE_SimulatedProxy, Channeld::GlobalChannelId);
-	}
-	else if (AActor* Actor = Cast<AActor>(Obj))
+	if (AActor* Actor = Cast<AActor>(Obj))
 	{
 		// Location must be set for channeld to update the spatial channelId.
 		FVector Location = Actor->GetActorLocation();
@@ -1188,6 +1213,37 @@ void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnecti
 	}
 }
 
+void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId)
+{
+	// GameState is spawned via GLOBAL channel
+	if (Obj->IsA<AGameStateBase>())
+	{
+		NetConn->SendSpawnMessage(Obj, ROLE_SimulatedProxy, Channeld::GlobalChannelId);
+		return;
+	}
+
+	const uint32 NetId = GetNetId(Obj).Value;
+	// The entity channel already exists, send directly
+	if (Connection->SubscribedChannels.Contains(NetId))
+	{
+		SendSpawnToConn_EntityChannelReady(Obj, NetConn, OwningConnId);
+		return;
+	}
+
+	// Create the entity channel before sending
+	channeldpb::ChannelSubscriptionOptions SubOptions;
+	SubOptions.set_skipselfupdatefanout(true);
+	Connection->CreateEntityChannel(Channeld::GlobalChannelId, Obj, NetId, TEXT(""), &SubOptions, /*GetEntityData(Obj)*/nullptr, nullptr,
+		[this, NetId, Obj, NetConn, OwningConnId](const channeldpb::CreateChannelResultMessage* ResultMsg)
+		{
+			AddObjectProvider(NetId, Obj);
+
+			SendSpawnToConn_EntityChannelReady(Obj, NetConn, OwningConnId);
+		});
+
+	UE_LOG(LogChanneld, Verbose, TEXT("Creating entity channel for obj: %s, netId: %d"), *Obj->GetName(), NetId);
+}
+
 void USpatialChannelDataView::ResetNetConnForSpawn()
 {
 	auto PacketMapClient = CastChecked<UPackageMapClient>(NetConnForSpawn->PackageMap);
@@ -1213,32 +1269,55 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 	{
 		SpatialChId = GetChanneldSubsystem()->LowLevelSendToChannelId.Get();
 	}
-	
-	unrealpb::SpawnObjectMessage SpawnMsg;
-	
-	// As we don't have any specific NetConnection to export the NetId, use a virtual one.
-	SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Obj, NetConnForSpawn));
-	// Clear the export map and ack state so everytime we can get a full export.
-	ResetNetConnForSpawn();
-	
-	if (Obj->IsA<AActor>())
-	{
-		AActor* Actor = Cast<AActor>(Obj);
-		SpawnMsg.set_localrole(Actor->GetRemoteRole());
-		if (OwningConnId > 0)
-		{
-			SpawnMsg.set_owningconnid(OwningConnId);
-		}
-		// The spatial info must be set for channeld to adjust the spatial channelId
-		SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(Actor->GetActorLocation()));
-	}
-	
-	SpawnMsg.set_channelid(SpatialChId);
-	
-	Connection->Broadcast(SpatialChId, unrealpb::SPAWN, SpawnMsg, /*channeldpb::ADJACENT_CHANNELS |*/ channeldpb::ALL_BUT_SENDER);
-	UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message to spatial channel %d, obj: %s, netId: %d"), SpatialChId, *Obj->GetName(), NetId.Value);
 
-	NetDriver->SetAllSentSpawn(NetId);
+	channeldpb::ChannelSubscriptionOptions SubOptions;
+	SubOptions.set_skipselfupdatefanout(true);
+
+	Connection->CreateEntityChannel(SpatialChId, Obj, NetId.Value, TEXT(""), &SubOptions, /*GetEntityData(Obj)*/nullptr, nullptr,
+		[this, NetId, Obj, OwningConnId, SpatialChId, NetDriver](const channeldpb::CreateChannelResultMessage* _)
+		{
+			AddObjectProvider(NetId.Value, Obj);
+			
+	
+			unrealpb::SpawnObjectMessage SpawnMsg;
+	
+			// As we don't have any specific NetConnection to export the NetId, use a virtual one.
+			SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Obj, NetConnForSpawn));
+			// Clear the export map and ack state so everytime we can get a full export.
+			ResetNetConnForSpawn();
+	
+			bool bWellKnown = false;
+			if (const AActor* Actor = Cast<AActor>(Obj))
+			{
+				bWellKnown = Actor->bAlwaysRelevant;
+				
+				SpawnMsg.set_localrole(Actor->GetRemoteRole());
+				if (OwningConnId > 0)
+				{
+					SpawnMsg.set_owningconnid(OwningConnId);
+				}
+				// The spatial info must be set for channeld to adjust the spatial channelId
+				SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(Actor->GetActorLocation()));
+			}
+	
+			SpawnMsg.set_channelid(SpatialChId);
+
+			// Broadcast the spawn message to all other connections if it's a Well-Known Object.
+			if (bWellKnown)
+			{
+				Connection->Broadcast(Channeld::GlobalChannelId, unrealpb::SPAWN, SpawnMsg, channeldpb::ALL_BUT_SENDER);
+				UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message of well-known obj: %s, netId: %d"), *Obj->GetName(), NetId.Value);
+			}
+			else
+			{
+				Connection->Broadcast(SpatialChId,unrealpb::SPAWN, SpawnMsg, /*channeldpb::ADJACENT_CHANNELS |*/ channeldpb::ALL_BUT_SENDER);
+				UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message to spatial channel %d, obj: %s, netId: %d"), SpatialChId, *Obj->GetName(), NetId.Value);
+			}
+			
+			NetDriver->SetAllSentSpawn(NetId);
+		});
+
+	UE_LOG(LogChanneld, Verbose, TEXT("Creating entity channel for obj: %s, netId: %d, spatial channelId: %d"), *Obj->GetName(), NetId.Value, SpatialChId);
 }
 
 void USpatialChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkGUID NetId)

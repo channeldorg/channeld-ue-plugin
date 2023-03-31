@@ -46,7 +46,8 @@ public:
 	virtual void AddProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider);
 	virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider);
 	void AddActorProvider(Channeld::ChannelId ChId, AActor* Actor);
-	void AddObjectProvider(UObject* Obj);
+	void AddObjectProvider(Channeld::ChannelId ChId, UObject* Obj);
+	void AddObjectProviderToDefaultChannel(UObject* Obj);
 	void RemoveActorProvider(AActor* Actor, bool bSendRemoved);
 	void RemoveObjectProvider(UObject* Obj, bool bSendRemoved);
 	virtual void RemoveProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
@@ -61,8 +62,11 @@ public:
 	virtual FNetworkGUID GetNetId(IChannelDataProvider* Provider) const;
 	
 	/**
-	 * @brief Added the object to the NetId-ChannelId mapping. If the object is an IChannelDataProvider, also add it to the providers set.\n
+	 * @brief Added the object to the NetId-ChannelId mapping. If the object is an IChannelDataProvider, also add it to the providers set.
+	 * <br/>
 	 * By default, the channelId used for adding is the LowLevelSendToChannelId in the UChanneldNetDriver / UChanneldGameInstanceSubsystem.
+	 * <br/>
+	 * Executed on the authoritative servers.
 	 * @param Obj The object just spawned on the server, passed from UChanneldNetDriver::OnServerSpawnedActor.
 	 * @param NetId The NetworkGUID assigned for the object.
 	 * @return Should the NetDriver send the spawn message to the clients?
@@ -75,7 +79,8 @@ public:
 	// Send the Spawn message to a single client connection.
 	// Gives the view a chance to override the NetRole, OwningChannelId, OwningConnId, or the Location parameter.
 	virtual void SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId);
-	virtual void OnClientSpawnedObject(UObject* Obj, const Channeld::ChannelId ChId) {}
+	// The NetDriver spawned an object from the Spawn message. Executed on clients and interested servers.
+	virtual void OnNetSpawnedObject(UObject* Obj, const Channeld::ChannelId ChId) {}
 	virtual void OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId);
 	virtual void SetOwningChannelId(const FNetworkGUID NetId, Channeld::ChannelId ChId);
 	virtual Channeld::ChannelId GetOwningChannelId(const FNetworkGUID NetId) const;
@@ -136,7 +141,9 @@ protected:
 	void ReceiveUninitClient();
 
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
-	bool ConsumeChannelUpdateData(Channeld::ChannelId ChId, google::protobuf::Message* UpdateData);
+	virtual bool ConsumeChannelUpdateData(Channeld::ChannelId ChId, google::protobuf::Message* UpdateData);
+
+	const google::protobuf::Message* GetEntityData(UObject* Obj);
 
 	void HandleUnsub(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	virtual void ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId);
