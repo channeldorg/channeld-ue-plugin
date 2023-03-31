@@ -52,6 +52,9 @@ class CHANNELDUE_API IChannelDataProcessor
 {
 public:
 	virtual bool Merge(const google::protobuf::Message* SrcMsg, google::protobuf::Message* DstMsg) = 0;
+
+	virtual bool UpdateChannelData(UObject* TargetObj, google::protobuf::Message* ChannelData) {return true;}
+	virtual bool OnChannelDataUpdated(UObject* TargetObj, google::protobuf::Message* ChannelData) {return true;}
 	
 	virtual const google::protobuf::Message* GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved) = 0;
 	/**

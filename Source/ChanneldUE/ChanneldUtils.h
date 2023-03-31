@@ -183,6 +183,34 @@ public:
 		SpatialInfo->set_z(Vector.Y);
 	}
 
+	static FNetworkGUID GetNetId(UObject* Obj)
+	{
+		FNetworkGUID NetId;
+		if (!Obj)
+		{
+			return NetId;
+		}
+		auto World = Obj->GetWorld();
+		if (!World)
+		{
+			return NetId;
+		}
+
+		if (const auto NetDriver = World->GetNetDriver())
+		{
+			if (NetDriver->IsServer())
+			{
+				NetId = NetDriver->GuidCache->GetOrAssignNetGUID(Obj);
+			}
+			else
+			{
+				NetId = NetDriver->GuidCache->GetNetGUID(Obj);
+			}
+		}
+		
+		return NetId;
+	}
+	
 	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr)
 	{
 		bool bUnmapped;
