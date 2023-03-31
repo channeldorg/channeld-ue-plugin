@@ -247,7 +247,25 @@ void UChannelDataView::AddActorProvider(Channeld::ChannelId ChId, AActor* Actor)
 	}
 }
 
-void UChannelDataView::AddObjectProvider(UObject* Obj)
+void UChannelDataView::AddObjectProvider(Channeld::ChannelId ChId, UObject* Obj)
+{
+	if (Obj == nullptr)
+		return;
+	
+	if (Obj->Implements<UChannelDataProvider>())
+	{
+		AddProvider(ChId, Cast<IChannelDataProvider>(Obj));
+	}
+	if (AActor* Actor = Cast<AActor>(Obj))
+	{
+		for (auto Comp : Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+		{
+			AddProvider(ChId, Cast<IChannelDataProvider>(Comp));
+		}
+	}
+}
+
+void UChannelDataView::AddObjectProviderToDefaultChannel(UObject* Obj)
 {
 	if (Obj->Implements<UChannelDataProvider>())
 	{
@@ -303,13 +321,14 @@ void UChannelDataView::RemoveProvider(Channeld::ChannelId ChId, IChannelDataProv
 	{
 		UE_LOG(LogChanneld, Verbose, TEXT("Removing channel data provider %s from channel %d"), *IChannelDataProvider::GetName(Provider), ChId);
 		
-		if (bSendRemoved)
+		EChanneldChannelType ChannelType = GetChanneldSubsystem()->GetChannelTypeByChId(ChId);
+		
+		if (bSendRemoved && ChannelType != EChanneldChannelType::ECT_Spatial)
 		{
 			// Collect the removed states immediately (before the provider gets destroyed completely)
 			google::protobuf::Message* RemovedData = RemovedProvidersData.FindRef(ChId);
 			if (!RemovedData)
 			{
-				EChanneldChannelType ChannelType = GetChanneldSubsystem()->GetChannelTypeByChId(ChId);
 				if (ChannelType == EChanneldChannelType::ECT_Unknown)
 				{
 					UE_LOG(LogChanneld, Error, TEXT("Can't map channel type from channel id: %d. Removed states won't be created for provider: %s"), ChId, *IChannelDataProvider::GetName(Provider));
@@ -752,6 +771,10 @@ int32 UChannelDataView::SendAllChannelUpdates()
 	int32 TotalUpdateCount = 0;
 	for (auto& Pair : Connection->SubscribedChannels)
 	{
+		if (Pair.Value.ChannelType == EChanneldChannelType::ECT_Spatial)
+		{
+			continue;
+		}
 		if (static_cast<channeldpb::ChannelDataAccess>(Pair.Value.SubOptions.DataAccess) == channeldpb::WRITE_ACCESS)
 		{
 			Channeld::ChannelId ChId = Pair.Key;
@@ -940,5 +963,38 @@ bool UChannelDataView::ConsumeChannelUpdateData(Channeld::ChannelId ChId, google
 	}
 	
 	return bConsumed;
+}
+
+const google::protobuf::Message* UChannelDataView::GetEntityData(UObject* Obj)
+{
+	IChannelDataProvider* Provider= nullptr;
+	if (Obj->GetClass()->ImplementsInterface(UChannelDataProvider::StaticClass()))
+	{
+		Provider = Cast<IChannelDataProvider>(Obj);
+	}
+	else if (AActor* Actor = Cast<AActor>(Obj))
+	{
+		auto Comps = Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass());
+		if (Comps.Num() > 0)
+		{
+			Provider = Cast<IChannelDataProvider>(Comps[0]);
+		}
+	}
+
+	if (Provider == nullptr)
+	{
+		return nullptr;
+	}
+
+	auto MsgTemplate = ChannelDataTemplates.FindRef(channeldpb::ENTITY);
+	if (!ensureMsgf(MsgTemplate, TEXT("Can't find channel data message template of entity channel.")))
+	{
+		return nullptr;
+	}
+
+	auto ChannelData = MsgTemplate->New(&ArenaForSend);
+	Provider->UpdateChannelData(ChannelData);
+
+	return ChannelData;
 }
 

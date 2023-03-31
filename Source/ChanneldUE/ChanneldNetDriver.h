@@ -125,7 +125,7 @@ private:
 
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
 	void OnUserSpaceMessageReceived(uint32 MsgType, Channeld::ChannelId ChId, Channeld::ConnectionId ClientConnId, const std::string& Payload);
-	void OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg);
+	void HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg);
 	void HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
 	void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer);
 

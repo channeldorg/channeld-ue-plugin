@@ -500,6 +500,24 @@ struct UpdateSpatialInterestMessageDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UpdateSpatialInterestMessageDefaultTypeInternal _UpdateSpatialInterestMessage_default_instance_;
+PROTOBUF_CONSTEXPR CreateEntityChannelMessage::CreateEntityChannelMessage(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.metadata_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.suboptions_)*/nullptr
+  , /*decltype(_impl_.data_)*/nullptr
+  , /*decltype(_impl_.mergeoptions_)*/nullptr
+  , /*decltype(_impl_.entityid_)*/0u
+  , /*decltype(_impl_.iswellknown_)*/false
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct CreateEntityChannelMessageDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR CreateEntityChannelMessageDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~CreateEntityChannelMessageDefaultTypeInternal() {}
+  union {
+    CreateEntityChannelMessage _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 CreateEntityChannelMessageDefaultTypeInternal _CreateEntityChannelMessage_default_instance_;
 PROTOBUF_CONSTEXPR DebugGetSpatialRegionsMessage::DebugGetSpatialRegionsMessage(
     ::_pbi::ConstantInitialized) {}
 struct DebugGetSpatialRegionsMessageDefaultTypeInternal {
@@ -512,7 +530,7 @@ struct DebugGetSpatialRegionsMessageDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DebugGetSpatialRegionsMessageDefaultTypeInternal _DebugGetSpatialRegionsMessage_default_instance_;
 }  // namespace channeldpb
-static ::_pb::Metadata file_level_metadata_channeld_2eproto[33];
+static ::_pb::Metadata file_level_metadata_channeld_2eproto[34];
 static const ::_pb::EnumDescriptor* file_level_enum_descriptors_channeld_2eproto[7];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_channeld_2eproto = nullptr;
 
@@ -803,6 +821,18 @@ const uint32_t TableStruct_channeld_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
   PROTOBUF_FIELD_OFFSET(::channeldpb::UpdateSpatialInterestMessage, _impl_.connid_),
   PROTOBUF_FIELD_OFFSET(::channeldpb::UpdateSpatialInterestMessage, _impl_.query_),
   ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::CreateEntityChannelMessage, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::CreateEntityChannelMessage, _impl_.entityid_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::CreateEntityChannelMessage, _impl_.metadata_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::CreateEntityChannelMessage, _impl_.suboptions_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::CreateEntityChannelMessage, _impl_.data_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::CreateEntityChannelMessage, _impl_.mergeoptions_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::CreateEntityChannelMessage, _impl_.iswellknown_),
+  ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::channeldpb::DebugGetSpatialRegionsMessage, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -842,7 +872,8 @@ static const ::_pbi::MigrationSchema schemas_channeld_2eproto[] PROTOBUF_SECTION
   { 253, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_ConeAOI)},
   { 263, 273, -1, sizeof(::channeldpb::SpatialInterestQuery)},
   { 277, -1, -1, sizeof(::channeldpb::UpdateSpatialInterestMessage)},
-  { 285, -1, -1, sizeof(::channeldpb::DebugGetSpatialRegionsMessage)},
+  { 285, -1, -1, sizeof(::channeldpb::CreateEntityChannelMessage)},
+  { 297, -1, -1, sizeof(::channeldpb::DebugGetSpatialRegionsMessage)},
 };
 
 static const ::_pb::Message* const file_default_instances_channeld_2eproto[] = {
@@ -878,6 +909,7 @@ static const ::_pb::Message* const file_default_instances_channeld_2eproto[] = {
   &::channeldpb::_SpatialInterestQuery_ConeAOI_default_instance_._instance,
   &::channeldpb::_SpatialInterestQuery_default_instance_._instance,
   &::channeldpb::_UpdateSpatialInterestMessage_default_instance_._instance,
+  &::channeldpb::_CreateEntityChannelMessage_default_instance_._instance,
   &::channeldpb::_DebugGetSpatialRegionsMessage_default_instance_._instance,
 };
 
@@ -975,40 +1007,47 @@ const char descriptor_table_protodef_channeld_2eproto[] PROTOBUF_SECTION_VARIABL
   "_boxAOIB\014\n\n_sphereAOIB\n\n\010_coneAOI\"_\n\034Upd"
   "ateSpatialInterestMessage\022\016\n\006connId\030\001 \001("
   "\r\022/\n\005query\030\002 \001(\0132 .channeldpb.SpatialInt"
-  "erestQuery\"\037\n\035DebugGetSpatialRegionsMess"
-  "age*\247\001\n\rBroadcastType\022\020\n\014NO_BROADCAST\020\000\022"
-  "\025\n\021SINGLE_CONNECTION\020\001\022\007\n\003ALL\020\002\022\022\n\016ALL_B"
-  "UT_SENDER\020\004\022\021\n\rALL_BUT_OWNER\020\010\022\022\n\016ALL_BU"
-  "T_CLIENT\020\020\022\022\n\016ALL_BUT_SERVER\020 \022\025\n\021ADJACE"
-  "NT_CHANNELS\020@*;\n\016ConnectionType\022\021\n\rNO_CO"
-  "NNECTION\020\000\022\n\n\006SERVER\020\001\022\n\n\006CLIENT\020\002*\204\001\n\013C"
-  "hannelType\022\013\n\007UNKNOWN\020\000\022\n\n\006GLOBAL\020\001\022\013\n\007P"
-  "RIVATE\020\002\022\014\n\010SUBWORLD\020\003\022\013\n\007SPATIAL\020\004\022\010\n\004T"
-  "EST\020d\022\t\n\005TEST1\020e\022\t\n\005TEST2\020f\022\t\n\005TEST3\020g\022\t"
-  "\n\005TEST4\020h*\363\002\n\013MessageType\022\013\n\007INVALID\020\000\022\010"
-  "\n\004AUTH\020\001\022\022\n\016CREATE_CHANNEL\020\003\022\022\n\016REMOVE_C"
-  "HANNEL\020\004\022\020\n\014LIST_CHANNEL\020\005\022\022\n\016SUB_TO_CHA"
-  "NNEL\020\006\022\026\n\022UNSUB_FROM_CHANNEL\020\007\022\027\n\023CHANNE"
-  "L_DATA_UPDATE\020\010\022\016\n\nDISCONNECT\020\t\022\032\n\026CREAT"
-  "E_SPATIAL_CHANNEL\020\n\022\031\n\025QUERY_SPATIAL_CHA"
-  "NNEL\020\013\022\031\n\025CHANNEL_DATA_HANDOVER\020\014\022\032\n\026SPA"
-  "TIAL_REGIONS_UPDATE\020\r\022\033\n\027UPDATE_SPATIAL_"
-  "INTEREST\020\016\022\035\n\031DEBUG_GET_SPATIAL_REGIONS\020"
-  "c\022\024\n\020USER_SPACE_START\020d*1\n\017CompressionTy"
-  "pe\022\022\n\016NO_COMPRESSION\020\000\022\n\n\006SNAPPY\020\001*E\n\021Ch"
-  "annelDataAccess\022\r\n\tNO_ACCESS\020\000\022\017\n\013READ_A"
-  "CCESS\020\001\022\020\n\014WRITE_ACCESS\020\002B.Z,channeld.cl"
-  "ewcat.com/channeld/pkg/channeldpbb\006proto"
-  "3"
+  "erestQuery\"\360\001\n\032CreateEntityChannelMessag"
+  "e\022\020\n\010entityId\030\001 \001(\r\022\020\n\010metadata\030\002 \001(\t\022:\n"
+  "\nsubOptions\030\003 \001(\0132&.channeldpb.ChannelSu"
+  "bscriptionOptions\022\"\n\004data\030\004 \001(\0132\024.google"
+  ".protobuf.Any\0229\n\014mergeOptions\030\005 \001(\0132#.ch"
+  "anneldpb.ChannelDataMergeOptions\022\023\n\013isWe"
+  "llKnown\030\006 \001(\010\"\037\n\035DebugGetSpatialRegionsM"
+  "essage*\247\001\n\rBroadcastType\022\020\n\014NO_BROADCAST"
+  "\020\000\022\025\n\021SINGLE_CONNECTION\020\001\022\007\n\003ALL\020\002\022\022\n\016AL"
+  "L_BUT_SENDER\020\004\022\021\n\rALL_BUT_OWNER\020\010\022\022\n\016ALL"
+  "_BUT_CLIENT\020\020\022\022\n\016ALL_BUT_SERVER\020 \022\025\n\021ADJ"
+  "ACENT_CHANNELS\020@*;\n\016ConnectionType\022\021\n\rNO"
+  "_CONNECTION\020\000\022\n\n\006SERVER\020\001\022\n\n\006CLIENT\020\002*\220\001"
+  "\n\013ChannelType\022\013\n\007UNKNOWN\020\000\022\n\n\006GLOBAL\020\001\022\013"
+  "\n\007PRIVATE\020\002\022\014\n\010SUBWORLD\020\003\022\013\n\007SPATIAL\020\004\022\n"
+  "\n\006ENTITY\020\005\022\010\n\004TEST\020d\022\t\n\005TEST1\020e\022\t\n\005TEST2"
+  "\020f\022\t\n\005TEST3\020g\022\t\n\005TEST4\020h*\216\003\n\013MessageType"
+  "\022\013\n\007INVALID\020\000\022\010\n\004AUTH\020\001\022\022\n\016CREATE_CHANNE"
+  "L\020\003\022\022\n\016REMOVE_CHANNEL\020\004\022\020\n\014LIST_CHANNEL\020"
+  "\005\022\022\n\016SUB_TO_CHANNEL\020\006\022\026\n\022UNSUB_FROM_CHAN"
+  "NEL\020\007\022\027\n\023CHANNEL_DATA_UPDATE\020\010\022\016\n\nDISCON"
+  "NECT\020\t\022\032\n\026CREATE_SPATIAL_CHANNEL\020\n\022\031\n\025QU"
+  "ERY_SPATIAL_CHANNEL\020\013\022\031\n\025CHANNEL_DATA_HA"
+  "NDOVER\020\014\022\032\n\026SPATIAL_REGIONS_UPDATE\020\r\022\033\n\027"
+  "UPDATE_SPATIAL_INTEREST\020\016\022\031\n\025CREATE_ENTI"
+  "TY_CHANNEL\020\017\022\035\n\031DEBUG_GET_SPATIAL_REGION"
+  "S\020c\022\024\n\020USER_SPACE_START\020d*1\n\017Compression"
+  "Type\022\022\n\016NO_COMPRESSION\020\000\022\n\n\006SNAPPY\020\001*E\n\021"
+  "ChannelDataAccess\022\r\n\tNO_ACCESS\020\000\022\017\n\013READ"
+  "_ACCESS\020\001\022\020\n\014WRITE_ACCESS\020\002B0Z.github.co"
+  "m/metaworking/channeld/pkg/channeldpbb\006p"
+  "roto3"
   ;
 static const ::_pbi::DescriptorTable* const descriptor_table_channeld_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fany_2eproto,
 };
 static ::_pbi::once_flag descriptor_table_channeld_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_channeld_2eproto = {
-    false, false, 4681, descriptor_table_protodef_channeld_2eproto,
+    false, false, 4965, descriptor_table_protodef_channeld_2eproto,
     "channeld.proto",
-    &descriptor_table_channeld_2eproto_once, descriptor_table_channeld_2eproto_deps, 1, 33,
+    &descriptor_table_channeld_2eproto_once, descriptor_table_channeld_2eproto_deps, 1, 34,
     schemas_channeld_2eproto, file_default_instances_channeld_2eproto, TableStruct_channeld_2eproto::offsets,
     file_level_metadata_channeld_2eproto, file_level_enum_descriptors_channeld_2eproto,
     file_level_service_descriptors_channeld_2eproto,
@@ -1089,6 +1128,7 @@ bool ChannelType_IsValid(int value) {
     case 2:
     case 3:
     case 4:
+    case 5:
     case 100:
     case 101:
     case 102:
@@ -1120,6 +1160,7 @@ bool MessageType_IsValid(int value) {
     case 12:
     case 13:
     case 14:
+    case 15:
     case 99:
     case 100:
       return true;
@@ -9074,6 +9115,398 @@ void UpdateSpatialInterestMessage::InternalSwap(UpdateSpatialInterestMessage* ot
 
 // ===================================================================
 
+class CreateEntityChannelMessage::_Internal {
+ public:
+  static const ::channeldpb::ChannelSubscriptionOptions& suboptions(const CreateEntityChannelMessage* msg);
+  static const ::PROTOBUF_NAMESPACE_ID::Any& data(const CreateEntityChannelMessage* msg);
+  static const ::channeldpb::ChannelDataMergeOptions& mergeoptions(const CreateEntityChannelMessage* msg);
+};
+
+const ::channeldpb::ChannelSubscriptionOptions&
+CreateEntityChannelMessage::_Internal::suboptions(const CreateEntityChannelMessage* msg) {
+  return *msg->_impl_.suboptions_;
+}
+const ::PROTOBUF_NAMESPACE_ID::Any&
+CreateEntityChannelMessage::_Internal::data(const CreateEntityChannelMessage* msg) {
+  return *msg->_impl_.data_;
+}
+const ::channeldpb::ChannelDataMergeOptions&
+CreateEntityChannelMessage::_Internal::mergeoptions(const CreateEntityChannelMessage* msg) {
+  return *msg->_impl_.mergeoptions_;
+}
+void CreateEntityChannelMessage::clear_data() {
+  if (GetArenaForAllocation() == nullptr && _impl_.data_ != nullptr) {
+    delete _impl_.data_;
+  }
+  _impl_.data_ = nullptr;
+}
+CreateEntityChannelMessage::CreateEntityChannelMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:channeldpb.CreateEntityChannelMessage)
+}
+CreateEntityChannelMessage::CreateEntityChannelMessage(const CreateEntityChannelMessage& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  CreateEntityChannelMessage* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.metadata_){}
+    , decltype(_impl_.suboptions_){nullptr}
+    , decltype(_impl_.data_){nullptr}
+    , decltype(_impl_.mergeoptions_){nullptr}
+    , decltype(_impl_.entityid_){}
+    , decltype(_impl_.iswellknown_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _impl_.metadata_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.metadata_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_metadata().empty()) {
+    _this->_impl_.metadata_.Set(from._internal_metadata(), 
+      _this->GetArenaForAllocation());
+  }
+  if (from._internal_has_suboptions()) {
+    _this->_impl_.suboptions_ = new ::channeldpb::ChannelSubscriptionOptions(*from._impl_.suboptions_);
+  }
+  if (from._internal_has_data()) {
+    _this->_impl_.data_ = new ::PROTOBUF_NAMESPACE_ID::Any(*from._impl_.data_);
+  }
+  if (from._internal_has_mergeoptions()) {
+    _this->_impl_.mergeoptions_ = new ::channeldpb::ChannelDataMergeOptions(*from._impl_.mergeoptions_);
+  }
+  ::memcpy(&_impl_.entityid_, &from._impl_.entityid_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.iswellknown_) -
+    reinterpret_cast<char*>(&_impl_.entityid_)) + sizeof(_impl_.iswellknown_));
+  // @@protoc_insertion_point(copy_constructor:channeldpb.CreateEntityChannelMessage)
+}
+
+inline void CreateEntityChannelMessage::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.metadata_){}
+    , decltype(_impl_.suboptions_){nullptr}
+    , decltype(_impl_.data_){nullptr}
+    , decltype(_impl_.mergeoptions_){nullptr}
+    , decltype(_impl_.entityid_){0u}
+    , decltype(_impl_.iswellknown_){false}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.metadata_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.metadata_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+}
+
+CreateEntityChannelMessage::~CreateEntityChannelMessage() {
+  // @@protoc_insertion_point(destructor:channeldpb.CreateEntityChannelMessage)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void CreateEntityChannelMessage::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.metadata_.Destroy();
+  if (this != internal_default_instance()) delete _impl_.suboptions_;
+  if (this != internal_default_instance()) delete _impl_.data_;
+  if (this != internal_default_instance()) delete _impl_.mergeoptions_;
+}
+
+void CreateEntityChannelMessage::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void CreateEntityChannelMessage::Clear() {
+// @@protoc_insertion_point(message_clear_start:channeldpb.CreateEntityChannelMessage)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.metadata_.ClearToEmpty();
+  if (GetArenaForAllocation() == nullptr && _impl_.suboptions_ != nullptr) {
+    delete _impl_.suboptions_;
+  }
+  _impl_.suboptions_ = nullptr;
+  if (GetArenaForAllocation() == nullptr && _impl_.data_ != nullptr) {
+    delete _impl_.data_;
+  }
+  _impl_.data_ = nullptr;
+  if (GetArenaForAllocation() == nullptr && _impl_.mergeoptions_ != nullptr) {
+    delete _impl_.mergeoptions_;
+  }
+  _impl_.mergeoptions_ = nullptr;
+  ::memset(&_impl_.entityid_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.iswellknown_) -
+      reinterpret_cast<char*>(&_impl_.entityid_)) + sizeof(_impl_.iswellknown_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* CreateEntityChannelMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // uint32 entityId = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.entityid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // string metadata = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          auto str = _internal_mutable_metadata();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "channeldpb.CreateEntityChannelMessage.metadata"));
+        } else
+          goto handle_unusual;
+        continue;
+      // .channeldpb.ChannelSubscriptionOptions subOptions = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_suboptions(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .google.protobuf.Any data = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+          ptr = ctx->ParseMessage(_internal_mutable_data(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // .channeldpb.ChannelDataMergeOptions mergeOptions = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
+          ptr = ctx->ParseMessage(_internal_mutable_mergeoptions(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // bool isWellKnown = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 48)) {
+          _impl_.iswellknown_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* CreateEntityChannelMessage::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:channeldpb.CreateEntityChannelMessage)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // uint32 entityId = 1;
+  if (this->_internal_entityid() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(1, this->_internal_entityid(), target);
+  }
+
+  // string metadata = 2;
+  if (!this->_internal_metadata().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_metadata().data(), static_cast<int>(this->_internal_metadata().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "channeldpb.CreateEntityChannelMessage.metadata");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_metadata(), target);
+  }
+
+  // .channeldpb.ChannelSubscriptionOptions subOptions = 3;
+  if (this->_internal_has_suboptions()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(3, _Internal::suboptions(this),
+        _Internal::suboptions(this).GetCachedSize(), target, stream);
+  }
+
+  // .google.protobuf.Any data = 4;
+  if (this->_internal_has_data()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(4, _Internal::data(this),
+        _Internal::data(this).GetCachedSize(), target, stream);
+  }
+
+  // .channeldpb.ChannelDataMergeOptions mergeOptions = 5;
+  if (this->_internal_has_mergeoptions()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(5, _Internal::mergeoptions(this),
+        _Internal::mergeoptions(this).GetCachedSize(), target, stream);
+  }
+
+  // bool isWellKnown = 6;
+  if (this->_internal_iswellknown() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(6, this->_internal_iswellknown(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:channeldpb.CreateEntityChannelMessage)
+  return target;
+}
+
+size_t CreateEntityChannelMessage::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:channeldpb.CreateEntityChannelMessage)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string metadata = 2;
+  if (!this->_internal_metadata().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_metadata());
+  }
+
+  // .channeldpb.ChannelSubscriptionOptions subOptions = 3;
+  if (this->_internal_has_suboptions()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.suboptions_);
+  }
+
+  // .google.protobuf.Any data = 4;
+  if (this->_internal_has_data()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.data_);
+  }
+
+  // .channeldpb.ChannelDataMergeOptions mergeOptions = 5;
+  if (this->_internal_has_mergeoptions()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.mergeoptions_);
+  }
+
+  // uint32 entityId = 1;
+  if (this->_internal_entityid() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_entityid());
+  }
+
+  // bool isWellKnown = 6;
+  if (this->_internal_iswellknown() != 0) {
+    total_size += 1 + 1;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData CreateEntityChannelMessage::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    CreateEntityChannelMessage::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*CreateEntityChannelMessage::GetClassData() const { return &_class_data_; }
+
+
+void CreateEntityChannelMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<CreateEntityChannelMessage*>(&to_msg);
+  auto& from = static_cast<const CreateEntityChannelMessage&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:channeldpb.CreateEntityChannelMessage)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_metadata().empty()) {
+    _this->_internal_set_metadata(from._internal_metadata());
+  }
+  if (from._internal_has_suboptions()) {
+    _this->_internal_mutable_suboptions()->::channeldpb::ChannelSubscriptionOptions::MergeFrom(
+        from._internal_suboptions());
+  }
+  if (from._internal_has_data()) {
+    _this->_internal_mutable_data()->::PROTOBUF_NAMESPACE_ID::Any::MergeFrom(
+        from._internal_data());
+  }
+  if (from._internal_has_mergeoptions()) {
+    _this->_internal_mutable_mergeoptions()->::channeldpb::ChannelDataMergeOptions::MergeFrom(
+        from._internal_mergeoptions());
+  }
+  if (from._internal_entityid() != 0) {
+    _this->_internal_set_entityid(from._internal_entityid());
+  }
+  if (from._internal_iswellknown() != 0) {
+    _this->_internal_set_iswellknown(from._internal_iswellknown());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void CreateEntityChannelMessage::CopyFrom(const CreateEntityChannelMessage& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:channeldpb.CreateEntityChannelMessage)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool CreateEntityChannelMessage::IsInitialized() const {
+  return true;
+}
+
+void CreateEntityChannelMessage::InternalSwap(CreateEntityChannelMessage* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.metadata_, lhs_arena,
+      &other->_impl_.metadata_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(CreateEntityChannelMessage, _impl_.iswellknown_)
+      + sizeof(CreateEntityChannelMessage::_impl_.iswellknown_)
+      - PROTOBUF_FIELD_OFFSET(CreateEntityChannelMessage, _impl_.suboptions_)>(
+          reinterpret_cast<char*>(&_impl_.suboptions_),
+          reinterpret_cast<char*>(&other->_impl_.suboptions_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata CreateEntityChannelMessage::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
+      file_level_metadata_channeld_2eproto[32]);
+}
+
+// ===================================================================
+
 class DebugGetSpatialRegionsMessage::_Internal {
  public:
 };
@@ -9109,7 +9542,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*DebugGetSpatialRegionsMessage:
 ::PROTOBUF_NAMESPACE_ID::Metadata DebugGetSpatialRegionsMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[32]);
+      file_level_metadata_channeld_2eproto[33]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -9242,6 +9675,10 @@ Arena::CreateMaybeMessage< ::channeldpb::SpatialInterestQuery >(Arena* arena) {
 template<> PROTOBUF_NOINLINE ::channeldpb::UpdateSpatialInterestMessage*
 Arena::CreateMaybeMessage< ::channeldpb::UpdateSpatialInterestMessage >(Arena* arena) {
   return Arena::CreateMessageInternal< ::channeldpb::UpdateSpatialInterestMessage >(arena);
+}
+template<> PROTOBUF_NOINLINE ::channeldpb::CreateEntityChannelMessage*
+Arena::CreateMaybeMessage< ::channeldpb::CreateEntityChannelMessage >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::channeldpb::CreateEntityChannelMessage >(arena);
 }
 template<> PROTOBUF_NOINLINE ::channeldpb::DebugGetSpatialRegionsMessage*
 Arena::CreateMaybeMessage< ::channeldpb::DebugGetSpatialRegionsMessage >(Arena* arena) {

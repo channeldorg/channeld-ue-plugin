@@ -73,7 +73,7 @@ void UChanneldNetDriver::RemoveChanneldClientConnection(Channeld::ConnectionId C
 	}
 }
 
-void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg)
+void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg)
 {
 	FNetworkGUID NetId = FNetworkGUID(SpawnMsg->obj().netguid());
 	
@@ -145,8 +145,8 @@ void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMes
 
 		if (ChannelDataView.IsValid())
 		{
-			ChannelDataView->AddObjectProvider(NewObj);
-			ChannelDataView->OnClientSpawnedObject(NewObj, SpawnMsg->channelid());
+			ChannelDataView->AddObjectProviderToDefaultChannel(NewObj);
+			ChannelDataView->OnNetSpawnedObject(NewObj, SpawnMsg->channelid());
 		}
 
 		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %d, owning channel: %d, local role: %d"), *NewObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), LocalRole);
@@ -210,7 +210,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, Channeld::Ch
 			return;
 		}
 
-		OnClientSpawnObject(SpawnMsg);
+		HandleSpawnObject(SpawnMsg);
 	}
 	else if (MsgType == unrealpb::DESTROY)
 	{
@@ -698,24 +698,6 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	{
 		OwningConnId = NetConn->GetConnId();
 	}
-
-	// Send the spawning to the clients
-	/*
-	for (auto& Pair : ClientConnectionMap)
-	{
-		if (IsValid(Pair.Value))
-		{
-			if (ChannelDataView.IsValid())
-			{
-				ChannelDataView->SendSpawnToConn(Actor, Pair.Value, OwningConnId);
-			}
-			else
-			{
-				Pair.Value->SendSpawnMessage(Actor, Actor->GetRemoteRole(), Channeld::InvalidChannelId, OwningConnId);
-			}
-		}
-	}
-	*/
 
 	if (ChannelDataView.IsValid())
 	{

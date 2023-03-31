@@ -31,7 +31,7 @@ public:
 	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, Channeld::ChannelId ChId) override;
 	virtual void OnRemoveClientConnection(UChanneldNetConnection* ClientConn) override;
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
-	virtual void OnClientSpawnedObject(UObject* Obj, const Channeld::ChannelId ChId) override;
+	virtual void OnNetSpawnedObject(UObject* Obj, const Channeld::ChannelId ChId) override;
 	
 	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId) override;
 	virtual void OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId) override;
@@ -52,9 +52,12 @@ public:
 protected:
 	virtual void ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId) override;
 
+	virtual void SendSpawnToConn_EntityChannelReady(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId);
 	// The client need to destroy the objects that are no longer relevant to the client.
 	virtual void OnRemovedProvidersFromChannel(Channeld::ChannelId ChId, channeldpb::ChannelType ChannelType, const TSet<FProviderInternal>& RemovedProviders) override;
 	bool ClientDeleteObject(UObject* Obj);
+
+	virtual bool ConsumeChannelUpdateData(Channeld::ChannelId ChId, google::protobuf::Message* UpdateData) override;
 
 	bool TryToResolveObjects(Channeld::ChannelId ChId, TArray<uint32> NetGUIDs);
 	// The client may have subscribed to the spatial channels that go beyond the interest area of the client's authoritative server.

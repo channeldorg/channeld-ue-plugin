@@ -37,7 +37,7 @@ namespace Channeld
 	constexpr ChannelId GlobalChannelId = 0;
 	constexpr ChannelId InvalidChannelId = 0xffffffff;
 
-	constexpr uint32 GameStateNetId = 1;
+	constexpr uint32 GameStateNetId = 0x00080000;
 
 	constexpr uint32 MaxPacketSize = 0x00ffff;
 	constexpr uint32 MinPacketSize = 20;
@@ -53,6 +53,7 @@ enum class EChanneldChannelType : uint8
 	ECT_Private = 2 UMETA(DisplayName = "Private"),
 	ECT_SubWorld = 3 UMETA(DisplayName = "Subworld"),
 	ECT_Spatial = 4 UMETA(DisplayName = "Spatial"),
+	ECT_Entity = 5 UMETA(DisplayName = "Entity"),
 
 	/* Customized ChannelType */
 	ECT_CDChannelType1 = 100 UMETA(Hidden),
