@@ -2,7 +2,6 @@
 #include "AddCompToBPSubsystem.h"
 #include "ReplicatorCodeGenerator.h"
 #include "ReplicatorGeneratorDefinition.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/GameStateBase.h"
 #include "Persistence/JsonModel.h"
 #include "ReplicatorGeneratorManager.generated.h"
@@ -103,15 +102,6 @@ public:
 	 * @return true if the replicators are generated successfully.
 	 */
 	bool GenerateReplication(const FString GoPackageImportPathPrefix);
-
-	/**
-	 * Generate replicators for the given target actors.
-	 *
-	 * @param ReplicationActorClasses The actor classes to generate replicators and channeld data fields.
-	 * @param GoPackageImportPathPrefix If the go package is "github.com/metaworking/channeld/examples/channeld-ue-tps/tpspb", the prefix is "github.com/metaworking/channeld/examples/channeld-ue-tps".
-	 * @return true if the replicators are generated successfully.
-	 */
-	bool GenerateReplication(const TArray<const UClass*>& ReplicationActorClasses, const FString GoPackageImportPathPrefix);
 
 	/**
 	 * Write the given code to the disk.

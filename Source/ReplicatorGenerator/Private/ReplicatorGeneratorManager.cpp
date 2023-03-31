@@ -70,78 +70,29 @@ bool FReplicatorGeneratorManager::HeaderFilesCanBeFound(const UClass* TargetClas
 
 bool FReplicatorGeneratorManager::GenerateReplication(const FString GoPackageImportPathPrefix)
 {
-	TArray<const UClass*> ReplicationActorClasses;
+	TArray<FChannelDataInfo> ChannelDataInfos;
 
-	URepActorCacheController* RepActorCacheController = GEditor->GetEngineSubsystem<URepActorCacheController>();
-	TArray<FString> RepActorClassPaths;
-	RepActorCacheController->GetRepActorClassPaths(RepActorClassPaths);
-	for (const FString RepActorClassPath : RepActorClassPaths)
+	UChannelDataSettingController* ChannelDataSettingController = GEditor->GetEditorSubsystem<UChannelDataSettingController>();
+	TArray<FChannelDataSetting> ChannelDataSettings;
+	ChannelDataSettingController->GetChannelDataSettings(ChannelDataSettings);
+	for (const FChannelDataSetting& ChannelDataSetting : ChannelDataSettings)
 	{
-		if (const UClass* TargetClass = LoadClass<UObject>(nullptr, *RepActorClassPath, nullptr, LOAD_None, nullptr))
-		{
-			ReplicationActorClasses.Add(TargetClass);
-		}
+		ChannelDataInfos.Add(FChannelDataInfo(ChannelDataSetting));
 	}
-	const bool Result = GenerateReplication(ReplicationActorClasses, GoPackageImportPathPrefix);
-	return Result;
-}
-
-bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*>& ReplicationActorClasses, const FString GoPackageImportPathPrefix)
-{
-	UE_LOG(LogChanneldRepGenerator, Display, TEXT("Start generating %d replicators"), ReplicationActorClasses.Num());
-
-	TArray<FString> IncludeActorCodes, RegisterReplicatorCodes;
-
-	FGeneratedCodeBundle ReplicatorCodeBundle;
-
-	TArray<FRepGenActorInfo> ActorInfosToGenRep;
-	int32 Index = 0;
-
-	for (const UClass* TargetActorClass : ReplicationActorClasses)
-	{
-		if (!ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinClass(TargetActorClass))
-		{
-			ActorInfosToGenRep.Add(
-				FRepGenActorInfo(
-					++Index
-					, TargetActorClass
-					, false
-					, false
-					, false
-					, false
-				)
-			);
-		}
-	}
-	// ChanneldUEBuiltinClasses are not included in the registry table.
-	// For making sure that the order of the channel data state is fixed every time, we get them from a fixed order array.
-	for (const UClass* BuiltinClass : ChanneldReplicatorGeneratorUtils::GetChanneldUEBuiltinClasses())
-	{
-		ActorInfosToGenRep.Add(
-			FRepGenActorInfo(
-				++Index
-				, BuiltinClass
-				, ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinSingletonClass(BuiltinClass)
-				, true
-				, true
-				, false
-			)
-		);
-	}
-
-	const FString ProtoPackageName = GetDefaultProtoPackageName();
-	const FString GoPackageImportPath = GoPackageImportPathPrefix / ProtoPackageName;
 
 	// We need to include the header file of the target class in 'ChanneldReplicatorRegister.h'. so we need to know the include path of the target class from 'uhtmanifest' file.
 	// But the 'uhtmanifest' file is a large json file, so we need to read and parser it only once.
 	CodeGenerator->RefreshModuleInfoByClassName();
 
+	FGeneratedCodeBundle ReplicatorCodeBundle;
+	const FString ProtoPackageName = GetDefaultProtoPackageName();
+	const FString GoPackageImportPath = GoPackageImportPathPrefix / ProtoPackageName;
 	CodeGenerator->Generate(
-		ActorInfosToGenRep,
-		GetDefaultModuleDir(),
-		ProtoPackageName,
-		GoPackageImportPath,
-		ReplicatorCodeBundle
+		ChannelDataInfos
+		, GetDefaultModuleDir()
+		, ProtoPackageName
+		, GoPackageImportPath
+		, ReplicatorCodeBundle
 	);
 	FString Message;
 
@@ -173,16 +124,20 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 	WriteCodeFile(GetReplicatorStorageDir() / GenManager_GlobalStructHeaderFile, ReplicatorCodeBundle.GlobalStructCodes, Message);
 	WriteProtoFile(GetReplicatorStorageDir() / GenManager_GlobalStructProtoFile, ReplicatorCodeBundle.GlobalStructProtoDefinitions, Message);
 
-	// Generate channel data processor code file
-	const FString DefaultModuleName = GetDefaultModuleName();
-	WriteCodeFile(GetReplicatorStorageDir() / TEXT("ChannelData_") + DefaultModuleName + CodeGen_HeadFileExtension, ReplicatorCodeBundle.ChannelDataProcessorHeadCode, Message);
-	WriteProtoFile(GetReplicatorStorageDir() / TEXT("ChannelData_") + DefaultModuleName + CodeGen_ProtoFileExtension, ReplicatorCodeBundle.ChannelDataProtoDefsFile, Message);
+	for (const FChannelDataCode& ChannelDataCode : ReplicatorCodeBundle.ChannelDataCodes)
+	{
+		// Generate channel data processor code file
+		const FString DefaultModuleName = GetDefaultModuleName();
+		WriteCodeFile(GetReplicatorStorageDir() / ChannelDataCode.ProcessorHeadFileName, ChannelDataCode.ProcessorHeadCode, Message);
+		WriteProtoFile(GetReplicatorStorageDir() / ChannelDataCode.ProtoFileName, ChannelDataCode.ProtoDefsFile, Message);
 
-	// Generate channel data golang merge code temporary file.
-	// WriteTemporaryGoProtoData(ReplicatorCodeBundle.ChannelDataMerge_GoCode, Message);
-	ChanneldReplicatorGeneratorUtils::EnsureRepGenIntermediateDir();
-	WriteCodeFile(GenManager_TemporaryGoMergeCodePath, ReplicatorCodeBundle.ChannelDataMerge_GoCode, Message);
-	WriteCodeFile(GenManager_TemporaryGoRegistrationCodePath, ReplicatorCodeBundle.ChannelDataRegistration_GoCode, Message);
+		// Generate channel data golang merge code temporary file.
+		// WriteTemporaryGoProtoData(ReplicatorCodeBundle.ChannelDataMerge_GoCode, Message);
+		ChanneldReplicatorGeneratorUtils::EnsureRepGenIntermediateDir();
+		// TODO
+		WriteCodeFile(GenManager_TemporaryGoMergeCodePath, ChannelDataCode.Merge_GoCode, Message);
+		WriteCodeFile(GenManager_TemporaryGoRegistrationCodePath, ChannelDataCode.Registration_GoCode, Message);
+	}
 
 
 	// Save the generated manifest file

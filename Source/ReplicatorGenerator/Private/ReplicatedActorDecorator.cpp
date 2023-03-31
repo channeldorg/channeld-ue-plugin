@@ -12,27 +12,24 @@ FReplicatedActorDecorator::FReplicatedActorDecorator(
 	, const TFunction<void(FString&, bool)>& SetCompilableName
 	, FString InProtoPackageName
 	, FString InGoPackageImportPath
-	, bool IsSingleton
-	, bool IsChanneldUEBuiltinType
-	, bool IsSkipGenReplicator
+	, bool IsSingletonInChannelData
 	, bool IsSkipGenChannelDataState
 ) : TargetClass(TargetActorClass)
     , ProtoPackageName(InProtoPackageName)
     , GoPackageImportPath(InGoPackageImportPath)
-    , bSingleton(IsSingleton)
-    , bChanneldUEBuiltinType(IsChanneldUEBuiltinType)
-    , bSkipGenReplicator(IsSkipGenReplicator)
+    , bSingletonInChannelData(IsSingletonInChannelData)
     , bSkipGenChannelDataState(IsSkipGenChannelDataState)
 {
 	TargetClass = TargetActorClass;
-	bIsBlueprintGenerated = TargetClass->HasAnyClassFlags(CLASS_CompiledFromBlueprint);
+	bChanneldUEBuiltinType = ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinClass(TargetClass);
+	bBlueprintGenerated = TargetClass->HasAnyClassFlags(CLASS_CompiledFromBlueprint);
 
 	TargetActorCompilableName = TargetClass->GetName();
 	if (SetCompilableName != nullptr)
 	{
 		SetCompilableName(
 			TargetActorCompilableName,
-			bIsBlueprintGenerated ? ChanneldReplicatorGeneratorUtils::IsCompilableClassName(TargetActorCompilableName) : true
+			bBlueprintGenerated ? ChanneldReplicatorGeneratorUtils::IsCompilableClassName(TargetActorCompilableName) : true
 		);
 	}
 }
@@ -93,22 +90,17 @@ void FReplicatedActorDecorator::InitPropertiesAndRPCs()
 
 bool FReplicatedActorDecorator::IsBlueprintType()
 {
-	return bIsBlueprintGenerated;
+	return bBlueprintGenerated;
 }
 
-bool FReplicatedActorDecorator::IsSingleton()
+bool FReplicatedActorDecorator::IsSingletonInChannelData()
 {
-	return bSingleton;
+	return bSingletonInChannelData;
 }
 
 bool FReplicatedActorDecorator::IsChanneldUEBuiltinType()
 {
 	return bChanneldUEBuiltinType;
-}
-
-bool FReplicatedActorDecorator::IsSkipGenReplicator()
-{
-	return bSkipGenReplicator;
 }
 
 bool FReplicatedActorDecorator::IsSkipGenChannelDataState()
@@ -362,37 +354,6 @@ FString FReplicatedActorDecorator::GetCode_DeserializeFunctionParams()
 	return DeserializeParamCodes;
 }
 
-FString FReplicatedActorDecorator::GetDeclaration_RPCParamStructs()
-{
-	FString RPCParamStructsDeclarations = TEXT("");
-
-	if (GetRPCNum() > 0)
-	{
-		for (int32 i = 0; i < RPCs.Num(); i++)
-		{
-			const TSharedPtr<FRPCDecorator> RPC = RPCs[i];
-			RPCParamStructsDeclarations.Append(RPC->GetDeclaration_PropPtrGroupStruct());
-		}
-	}
-	return RPCParamStructsDeclarations;
-}
-
-FString FReplicatedActorDecorator::GetDefinition_RPCParamProtoDefinitions()
-{
-	FString RPCParamMessages;
-	for (int32 i = 0; i < RPCs.Num(); i++)
-	{
-		const TSharedPtr<FRPCDecorator> RPC = RPCs[i];
-		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add(TEXT("Declare_StateMessageType"), RPC->GetProtoStateMessageType());
-		FormatArgs.Add(TEXT("Declare_ProtoFields"), RPC->GetDeclaration_ProtoFields());
-		FormatArgs.Add(TEXT("Declare_SubProtoFields"), TEXT(""));
-
-		RPCParamMessages.Append(FString::Format(CodeGen_ProtoStateMessageTemplate, FormatArgs));
-	}
-	return RPCParamMessages;
-}
-
 FString FReplicatedActorDecorator::GetInstanceRefName() const
 {
 	return InstanceRefName;
@@ -434,7 +395,7 @@ FString FReplicatedActorDecorator::GetDefinition_ChannelDataFieldNameProto()
 {
 	FString ProtoStateMessageType = GetProtoStateMessageType();
 	ProtoStateMessageType[0] = tolower(ProtoStateMessageType[0]);
-	return ProtoStateMessageType + (IsSingleton() ? TEXT("") : TEXT("s"));
+	return ProtoStateMessageType + (IsSingletonInChannelData() ? TEXT("") : TEXT("s"));
 }
 
 FString FReplicatedActorDecorator::GetDefinition_ChannelDataFieldNameGo()
@@ -497,7 +458,7 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_Merge(const TArr
 {
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Definition_ChannelDataFieldName"), GetDefinition_ChannelDataFieldNameCpp());
-	if (IsSingleton())
+	if (IsSingletonInChannelData())
 	{
 		return FString::Format(ActorDecor_ChannelDataProcessorMerge_Singleton, FormatArgs);
 	}
@@ -510,7 +471,7 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_Merge(const TArr
 			for (const TSharedPtr<FReplicatedActorDecorator> ChildrenActor : ActorChildren)
 			{
 				// Singleton actors are not permanently removed from ChannelData.
-				if (ChildrenActor->IsSingleton())
+				if (ChildrenActor->IsSingletonInChannelData())
 				{
 					continue;;
 				}
@@ -557,7 +518,7 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_GetStateFromChan
 	{
 		return FString::Format(ActorDecor_GetStateFromChannelData_Removable, FormatArgs);
 	}
-	else if (IsSingleton())
+	else if (IsSingletonInChannelData())
 	{
 		return FString::Format(ActorDecor_GetStateFromChannelData_Singleton, FormatArgs);
 	}
@@ -576,7 +537,7 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_SetStateToChanne
 	{
 		return FString::Format(ActorDecor_SetStateToChannelData_Removable, FormatArgs);
 	}
-	else if (IsSingleton())
+	else if (IsSingletonInChannelData())
 	{
 		return FString::Format(ActorDecor_SetStateToChannelData_Singleton, FormatArgs);
 	}
@@ -585,7 +546,7 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_SetStateToChanne
 
 FString FReplicatedActorDecorator::GetCode_ChannelDataProtoFieldDefinition(const int32& Index)
 {
-	if (IsSingleton())
+	if (IsSingletonInChannelData())
 	{
 		return FString::Printf(TEXT("%s.%s %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameProto(), Index);
 	}
@@ -593,4 +554,39 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProtoFieldDefinition(const
 	{
 		return FString::Printf(TEXT("map<uint32, %s.%s> %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameProto(), Index);
 	}
+}
+
+bool FReplicatedActorDecorator::IsStruct()
+{
+	return false;
+}
+
+TArray<TSharedPtr<FStructPropertyDecorator>> FReplicatedActorDecorator::GetStructPropertyDecorators()
+{
+	TArray<TSharedPtr<FStructPropertyDecorator>> StructPropertyDecorators;
+	for(TSharedPtr<FPropertyDecorator>& Property : Properties)
+	{
+		if (Property->IsStruct())
+		{
+			StructPropertyDecorators.Add(StaticCastSharedPtr<FStructPropertyDecorator>(Property));
+		}
+		StructPropertyDecorators.Append(Property->GetStructPropertyDecorators());
+	}
+	for(TSharedPtr<FRPCDecorator> RPC : RPCs)
+	{
+		// The RPC parameters be seen as numbers of struct, so the RPC decorator be seen as a struct decorator. 
+		StructPropertyDecorators.Add(RPC);
+		StructPropertyDecorators.Append(RPC->GetStructPropertyDecorators());
+	}
+	TArray<TSharedPtr<FStructPropertyDecorator>> NonRepetitionStructPropertyDecorators;
+	TSet<FString> StructPropertyDecoratorNames;
+	for (TSharedPtr<FStructPropertyDecorator>& StructPropertyDecorator : StructPropertyDecorators)
+	{
+		if (!StructPropertyDecoratorNames.Contains(StructPropertyDecorator->GetPropertyName()))
+		{
+			StructPropertyDecoratorNames.Add(StructPropertyDecorator->GetPropertyName());
+			NonRepetitionStructPropertyDecorators.Add(StructPropertyDecorator);
+		}
+	}
+	return NonRepetitionStructPropertyDecorators;
 }

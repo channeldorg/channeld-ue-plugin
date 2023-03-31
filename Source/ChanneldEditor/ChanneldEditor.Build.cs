@@ -51,7 +51,6 @@ public class ChanneldEditor : ModuleRules
                 "LiveCoding",
                 "Blutility",
                 "UMGEditor",
-                "RD",
                 // ... add private dependencies that you statically link with here ...	
 			}
         );

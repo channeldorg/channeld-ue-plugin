@@ -138,14 +138,12 @@ class FReplicatedActorDecorator : public IPropertyDecoratorOwner
 {
 public:
 	FReplicatedActorDecorator(
-		const UClass* TargetActorClass,
-		const TFunction<void(FString& TargetActorName, bool IsActorNameCompilable)>& SetCompilableName,
-		FString ProtoPackageName,
-		FString GoPackageName,
-		bool IsSingleton,
-		bool IsChanneldUEBuiltinType,
-		bool IsSkipGenReplicator,
-		bool IsSkipGenChannelDataState
+		const UClass* TargetActorClass
+		, const TFunction<void(FString& TargetActorName, bool IsActorNameCompilable)>& SetCompilableName
+		, FString ProtoPackageName
+		, FString GoPackageName
+		, bool IsSingletonInChannelData = false
+		, bool IsSkipGenChannelDataState = false
 	);
 
 	virtual ~FReplicatedActorDecorator() = default;
@@ -166,7 +164,7 @@ public:
 	 * Some classes are only one instance in the whole server cluster, such as GameState.
 	 * Normally, the singleton instance is owned by the master server.
 	 */
-	virtual bool IsSingleton();
+	virtual bool IsSingletonInChannelData();
 
 	/**
 	 * Is the replicator of the target class has been implemented by ChanneldUE,
@@ -175,8 +173,6 @@ public:
 	 * TODO: The list of builtin types should be maintained by ChanneldUE module.
 	 */
 	virtual bool IsChanneldUEBuiltinType();
-
-	virtual bool IsSkipGenReplicator();
 
 	virtual bool IsSkipGenChannelDataState();
 
@@ -214,7 +210,7 @@ public:
 	FString GetActorCPPClassName();
 
 	virtual UFunction* FindFunctionByName(const FName& FuncName) override;
-	
+
 	/**
 	 * Get code of include target actor header
 	 */
@@ -303,9 +299,6 @@ public:
 	FString GetCode_SerializeFunctionParams();
 	FString GetCode_DeserializeFunctionParams();
 
-	FString GetDeclaration_RPCParamStructs();
-	FString GetDefinition_RPCParamProtoDefinitions();
-
 	FString GetInstanceRefName() const;
 	void SetInstanceRefName(const FString& InstanceRefName);
 
@@ -322,9 +315,9 @@ public:
 	virtual FString GetCode_ConstPathFNameVarDecl();
 
 	virtual FString GetCode_ChannelDataProcessor_IsTargetClass();
-	
+
 	virtual FString GetDeclaration_ChanneldDataProcessor_RemovedStata();
-	
+
 	virtual FString GetCode_ChanneldDataProcessor_InitRemovedState();
 
 	virtual FString GetCode_ChannelDataProcessor_Merge(const TArray<TSharedPtr<FReplicatedActorDecorator>>& ActorChildren);
@@ -334,6 +327,10 @@ public:
 	virtual FString GetCode_ChannelDataProcessor_SetStateToChannelData(const FString& ChannelDataMessageName);
 
 	virtual FString GetCode_ChannelDataProtoFieldDefinition(const int32& Index);
+
+	virtual bool IsStruct() override;
+
+	virtual TArray<TSharedPtr<FStructPropertyDecorator>> GetStructPropertyDecorators() override;
 
 protected:
 	const UClass* TargetClass;
@@ -345,12 +342,11 @@ protected:
 	TArray<TSharedPtr<FPropertyDecorator>> Properties;
 	TArray<TSharedPtr<FRPCDecorator>> RPCs;
 
-	bool bSingleton;
+	bool bSingletonInChannelData;
 	bool bChanneldUEBuiltinType;
-	bool bSkipGenReplicator;
 	bool bSkipGenChannelDataState;
-	
-	bool bIsBlueprintGenerated;
+
+	bool bBlueprintGenerated;
 	FString ReplicatorClassName;
 
 	FString VariableName_ConstClassPathFName;

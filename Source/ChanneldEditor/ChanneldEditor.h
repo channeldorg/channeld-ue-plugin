@@ -40,25 +40,22 @@ private:
 	void LaunchServersAction();
 	void StopServersAction();
 	void LaunchChanneldAndServersAction();
+	void LaunchServerGroup(const FServerGroup& ServerGroup);
 
 	void GenerateReplicationAction();
-	void GenerateReplication();
-	
-	void AddRepCompsToBPsAction();
-
-	void OpenChannelDataEditorAction();
-
 	/**
 	 * Using the protoc to generate c++ code in the project.
 	 */
-	void GenRepProtoCppCode(const TArray<FString>& ProtoFiles) const;
+	void GenRepProtoCppCode(const TArray<FString>& ProtoFiles, TFunction<void()> PostGenRepProtoCppCodeSuccess = nullptr) const;
 
 	/**
 	 * Using the protoc to generate go code in the channeld.
 	 * The channeld directory is read from environment variable 'CHANNELD_PATH'.
 	 */
-	void GenRepProtoGoCode(const TArray<FString>& ProtoFiles, const FGeneratedManifest& Manifest, const FString& ReplicatorStorageDir) const;
+	void GenRepProtoGoCode(const TArray<FString>& ProtoFiles, TFunction<void()> PostGenRepProtoGoCodeSuccess = nullptr) const;
 
+	void FailedToGenRepCode() const;
+	
 	/**
 	 * Recompile the game code. Copied from FLevelEditorActionCallbacks::RecompileGameCode_Clicked().
 	 */
@@ -66,8 +63,10 @@ private:
 
 	void OpenEditorSettingsAction();
 
-	void LaunchServerGroup(const FServerGroup& ServerGroup);
+	void AddRepCompsToBPsAction();
 
+	void OpenChannelDataEditorAction();
+	
 	FProcHandle ChanneldProcHandle;
 
 	TSharedPtr<class FUICommandList> PluginCommands;

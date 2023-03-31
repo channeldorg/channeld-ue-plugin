@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "ReplicatedActorDecorator.h"
+#include "Persistence/ChannelDataSettingController.h"
 
 struct FCPPClassInfo
 {
@@ -22,11 +23,23 @@ struct FReplicatorCode
 
 	FString IncludeActorCode;
 	FString RegisterReplicatorCode;
+};
 
-	FString ChannelDataProcessor_PathFNameVarDecl;
-	FString ChannelDataProcessor_MergeCode;
-	FString ChannelDataProcessor_GetStateCode;
-	FString ChannelDataProcessor_SetStateCode;
+struct FChannelDataCode
+{
+	FString ProcessorHeadFileName;
+	FString ProcessorHeadCode;
+
+	FString ProtoFileName;
+	FString ProtoDefsFile;
+
+	FString IncludeProcessorCode;
+	FString RegisterProcessorCode;
+	FString DeleteProcessorPtrCode;
+	FString ProcessorPtrDecl;
+
+	FString Merge_GoCode;
+	FString Registration_GoCode;
 };
 
 struct FGeneratedCodeBundle
@@ -42,42 +55,52 @@ struct FGeneratedCodeBundle
 
 	FString GlobalStructProtoDefinitions;
 
-	FString ChannelDataProcessorHeadCode;
-	FString ChannelDataProtoDefsFile;
+	TArray<FChannelDataCode> ChannelDataCodes;
 
-	FString ChannelDataMerge_GoCode;
-	FString ChannelDataRegistration_GoCode;
+	// FString ChannelDataProcessorHeadCode;
+	// FString ChannelDataProtoDefsFile;
+	//
+	// FString ChannelDataMerge_GoCode;
+	// FString ChannelDataRegistration_GoCode;
 };
 
-struct FRepGenActorInfo
+
+struct FChannelDataInfo
 {
-	int32 Index;
-	const UClass* TargetActorClass;
-	bool bSingleton;
-	bool bChanneldUEBuiltinType;
-	bool bSkipGenReplicator;
-	bool bSkipGenChannelDataState;
-
-	FRepGenActorInfo()
-		: Index(-1)
-		  , TargetActorClass(nullptr)
-		  , bSingleton(false)
-		  , bChanneldUEBuiltinType(false)
-		  , bSkipGenReplicator(true)
-		  , bSkipGenChannelDataState(true)
+	struct FStateInfo
 	{
-	}
+		const UClass* RepActorClass;
+		FChannelDataStateSetting Setting;
 
-	FRepGenActorInfo(int32 InIndex, const UClass* InTargetActorClass, bool bSingleton, bool bChanneldUEBuiltinType, bool bSkipGenReplicator, bool bSkipGenChannelDataState)
-		: Index(InIndex)
-		  , TargetActorClass(InTargetActorClass)
-		  , bSingleton(bSingleton)
-		  , bChanneldUEBuiltinType(bChanneldUEBuiltinType)
-		  , bSkipGenReplicator(bSkipGenReplicator)
-		  , bSkipGenChannelDataState(bSkipGenChannelDataState)
+		FStateInfo() = default;
+
+		FStateInfo(const UClass* InRepActorClass, const FChannelDataStateSetting& InSetting) : RepActorClass(InRepActorClass), Setting(InSetting)
+		{
+		}
+	};
+
+	FChannelDataSetting Setting;
+
+	TArray<FStateInfo> StateInfos;
+
+	FChannelDataInfo() = default;
+
+	FChannelDataInfo(const FChannelDataSetting& InSetting) : Setting(InSetting)
 	{
+		for (const FChannelDataStateSetting& StateSetting : InSetting.StateSettings)
+		{
+			if (const UClass* TargetClass = LoadClass<UObject>(nullptr, *StateSetting.ReplicationClassPath, nullptr, LOAD_None, nullptr))
+			{
+				StateInfos.Add(FStateInfo(TargetClass, StateSetting));
+			}
+			else
+			{
+				UE_LOG(LogChanneldRepGenerator, Warning, TEXT("The target class [%s] was not found."), *StateSetting.ReplicationClassPath);
+			}
+		}
 	}
 };
+
 
 class REPLICATORGENERATOR_API FReplicatorCodeGenerator
 {
@@ -101,7 +124,6 @@ public:
 	/**
 	 * Generate replicator codes for the specified actors.
 	 *
-	 * @param ReplicationActorInfos The actor information to generate replicators and channeld data fields.
 	 * @param DefaultModuleDir The default module directory. The channel data processor will use default module name.
 	 * @param ProtoPackageName All generated proto files will use this package name.
 	 * @param GoPackageImportPath Be used to set 'option go_package='
@@ -109,12 +131,19 @@ public:
 	 * @return true on success, false otherwise.
 	 */
 	bool Generate(
-		const TArray<FRepGenActorInfo>& ReplicationActorInfos,
+		const TArray<FChannelDataInfo>& ChannelDataInfos,
 		const FString& DefaultModuleDir,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
 		FGeneratedCodeBundle& ReplicatorCodeBundle
 	);
+
+protected:
+	TMap<FString, FModuleInfo> ModuleInfoByClassName;
+	TMap<FString, FCPPClassInfo> CPPClassInfoMap;
+
+	TMap<FString, int32> TargetActorSameNameCounter;
+	TMap<const UClass*, int32> TargetClassSameNameNumber;
 
 	/**
 	 * Generate replicator code for the specified actor.
@@ -124,21 +153,17 @@ public:
 	 * @param ResultMessage The result message.
 	 * @return true on success, false otherwise.
 	 */
-	bool GenerateActorCode(
+	bool GenerateReplicatorCode(
 		const TSharedPtr<FReplicatedActorDecorator>& ActorDecorator,
 		FReplicatorCode& GeneratedResult,
 		FString& ResultMessage
 	);
 
 	bool GenerateChannelDataCode(
-		const TArray<TSharedPtr<FReplicatedActorDecorator>>& ReplicationActorDecorators,
-		const FString& ChannelDataProtoMsgName,
-		const FString& ChannelDataProcessorNamespace,
-		const FString& ChannelDataProcessorClassName,
-		const FString& ChannelDataProtoHeadFileName,
-		const FString& ProtoPackageName,
+		const FChannelDataInfo& ChannelDataInfo,
 		const FString& GoPackageImportPath,
-		FGeneratedCodeBundle& GeneratedCodeBundle,
+		const FString& ProtoPackageName,
+		FChannelDataCode& GeneratedResult,
 		FString& ResultMessage
 	);
 
@@ -176,21 +201,17 @@ public:
 		FString& GoCode
 	);
 
-protected:
-	TMap<FString, FModuleInfo> ModuleInfoByClassName;
-	TMap<FString, FCPPClassInfo> CPPClassInfoMap;
-
-	TMap<FString, int32> TargetActorSameNameCounter;
-	TMap<const UClass*, int32> TargetClassSameNameNumber;
-
 	inline void ProcessHeaderFiles(const TArray<FString>& Files, const FManifestModule& ManifestModule);
 
 	inline bool CreateDecorateActor(
 		TSharedPtr<FReplicatedActorDecorator>& OutActorDecorator,
 		FString& OutResultMessage,
-		const FRepGenActorInfo& ReplicationActorInfo,
+		const UClass* TargetActorClass,
+		const FChannelDataStateSetting& ChannelDataStateSetting,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
 		bool bInitPropertiesAndRPCs = true
 	);
+
+	inline TArray<TSharedPtr<FStructPropertyDecorator>> GetAllStructPropertyDecorators(const TArray<TSharedPtr<FReplicatedActorDecorator>>& ActorDecorator) const;
 };

@@ -1,6 +1,5 @@
 ﻿#include "ChanneldEditorSubsystem.h"
 
-#include "ActiveSocket.h"
 #include "ReplicatorGeneratorUtils.h"
 #include "Commandlets/CommandletHelpers.h"
 #include "ThreadUtils/FChanneldProcWorkerThread.h"
@@ -8,6 +7,7 @@
 #include "Developer/DesktopPlatform/Public/IDesktopPlatform.h"
 #include "Developer/DesktopPlatform/Public/DesktopPlatformModule.h"
 #include "Async/Async.h"
+#include "Windows/MinWindows.h"
 
 #define LOCTEXT_NAMESPACE "UChanneldEditorSubsystem"
 

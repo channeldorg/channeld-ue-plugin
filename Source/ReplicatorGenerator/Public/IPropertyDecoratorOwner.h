@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+class FStructPropertyDecorator;
+
 class IPropertyDecoratorOwner
 {
 public:
@@ -16,4 +18,9 @@ public:
 	virtual FString GetCode_GetWorldRef() = 0;
 
 	virtual UFunction* FindFunctionByName(const FName& FuncName) = 0;
+
+	virtual bool IsStruct() = 0;
+
+	virtual TArray<TSharedPtr<FStructPropertyDecorator>> GetStructPropertyDecorators() = 0;
+
 };

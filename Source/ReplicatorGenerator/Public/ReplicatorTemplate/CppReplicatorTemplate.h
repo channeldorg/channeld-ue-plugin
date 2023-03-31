@@ -164,13 +164,13 @@ static const TCHAR* CodeGen_ChanneldGeneratedTypesHeadTemp =
 DECLARE_LOG_CATEGORY_EXTERN(LogChanneldGen, Log, All);
 )EOF";
 
-static const FString CodeGen_ReplicatorRegistrationTemp =
+static const FString CodeGen_RegistrationTemp =
 	FString(LR"EOF(
 #pragma once
 #include "CoreMinimal.h"
 #include "Subsystems/EngineSubsystem.h"
 #include "Replication/ChanneldReplication.h"
-{Code_IncludeActorHeaders}
+{Code_IncludeHeaders}
 #include "ChanneldReplicatorRegistration.generated.h"
 
 )EOF")
@@ -186,7 +186,7 @@ class UChanneldReplicatorRegistration : public UEngineSubsystem
   }
   virtual void Deinitialize() override
   {
-{Code_ChannelDataProcessorUnregister}
+{Code_DeleteChannelDataProcessor}
   }
 
 private:
@@ -210,7 +210,7 @@ static const FString CodeGen_ChannelDataProcessorCPPTemp =
 #pragma once
 #include "ChannelDataInterfaces.h"
 
-#include "{File_CDP_ProtoHeader}"
+#include "{File_ChannelDataProtoHeader}"
 #include "unreal_common.pb.h"
 #include "Components/ActorComponent.h"
 #include "Replication/ChanneldReplication.h"

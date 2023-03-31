@@ -82,17 +82,6 @@ FString FRPCDecorator::GetCode_DeserializeFunctionParams()
 	return FString::Format(RPC_DeserializeFuncParamsTemp, FormatArgs);
 }
 
-FString FRPCDecorator::GetDeclaration_ProtoFields()
-{
-	FString FieldDefinitions;
-	for (int32 i = 0; i < Properties.Num(); i++)
-	{
-		const TSharedPtr<FPropertyDecorator> Property = Properties[i];
-		FieldDefinitions += Property->GetDefinition_ProtoField(i + 1) + TEXT(";\n");
-	}
-	return FieldDefinitions;
-}
-
 FString FRPCDecorator::GetCode_GetWorldRef()
 {
 	return TEXT("World");

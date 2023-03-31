@@ -312,3 +312,13 @@ FString FPropertyDecorator::GetCode_GetWorldRef()
 {
 	return TEXT("");
 }
+
+bool FPropertyDecorator::IsStruct()
+{
+	return false;
+}
+
+TArray<TSharedPtr<FStructPropertyDecorator>> FPropertyDecorator::GetStructPropertyDecorators()
+{
+	return TArray<TSharedPtr<FStructPropertyDecorator>>();
+}

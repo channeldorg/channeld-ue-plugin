@@ -4,6 +4,7 @@
 #include "PropertyDecoratorFactory.h"
 #include "ReplicatorGeneratorDefinition.h"
 #include "ReplicatorGeneratorUtils.h"
+#include "GameFramework/PlayerState.h"
 #include "Internationalization/Regex.h"
 #include "Misc/FileHelper.h"
 #include "ReplicatorTemplate/BlueprintReplicatorTemplate.h"
@@ -43,114 +44,109 @@ FString FReplicatorCodeGenerator::GetClassHeadFilePath(const FString& ClassName)
 }
 
 bool FReplicatorCodeGenerator::Generate(
-	const TArray<FRepGenActorInfo>& ReplicationActorInfos,
+	const TArray<FChannelDataInfo>& ChannelDataInfos,
 	const FString& DefaultModuleDir,
 	const FString& ProtoPackageName,
 	const FString& GoPackageImportPath,
 	FGeneratedCodeBundle& ReplicatorCodeBundle
 )
 {
+	TSet<const UClass*> ReplicationActorClassSet;
+	TArray<const UClass*> ReplicationActorClasses;
+	for (const FChannelDataInfo& ChannelDataInfo : ChannelDataInfos)
+	{
+		for (const FChannelDataInfo::FStateInfo& StateInfo : ChannelDataInfo.StateInfos)
+		{
+			if (!ReplicationActorClassSet.Contains(StateInfo.RepActorClass))
+			{
+				ReplicationActorClassSet.Add(StateInfo.RepActorClass);
+				ReplicationActorClasses.Add(StateInfo.RepActorClass);
+			}
+		}
+	}
+
 	// Clean global variables, make sure it's empty for this generation
-	TargetActorSameNameCounter.Empty(ReplicationActorInfos.Num());
-	TargetClassSameNameNumber.Empty(ReplicationActorInfos.Num());
+	TargetActorSameNameCounter.Empty();
+	TargetClassSameNameNumber.Empty();
 
-	// Clear global struct decorators, make sure it's empty for this generation
-	FPropertyDecoratorFactory::Get().ClearGlobalStruct();
+	FString Message;
+	FString RegistrationIncludeCode;
 
-	FString Message, IncludeCode, RegisterCode;
+	// Generate replicators code
 	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecoratorsToGenReplicator;
-	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecoratorsToGenChannelData;
-	for (const FRepGenActorInfo& Info : ReplicationActorInfos)
+	FString RegisterReplicatorCode;
+	for (const UClass* ReplicationActorClass : ReplicationActorClasses)
 	{
 		TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
-		if (!Info.bChanneldUEBuiltinType)
+		if (!CreateDecorateActor(ActorDecorator, Message, ReplicationActorClass, FChannelDataStateSetting(), ProtoPackageName, GoPackageImportPath))
 		{
-			if (!CreateDecorateActor(ActorDecorator, Message, Info, ProtoPackageName, GoPackageImportPath))
-			{
-				UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
-				continue;
-			}
-			if (ActorDecorator->IsSkipGenReplicator())
-			{
-				UE_LOG(LogChanneldRepGenerator, Display, TEXT("Skip generate replicator for %s"), *ActorDecorator->GetActorPathName());
-				continue;
-			}
-			FReplicatorCode GeneratedResult;
-			if (!GenerateActorCode(ActorDecorator, GeneratedResult, Message))
-			{
-				UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
-				continue;
-			}
-			ReplicatorCodeBundle.ReplicatorCodes.Add(GeneratedResult);
-			ActorDecoratorsToGenReplicator.Add(ActorDecorator);
-			IncludeCode.Append(GeneratedResult.IncludeActorCode + TEXT("\n"));
-			IncludeCode.Append(FString::Printf(TEXT("#include \"%s\"\n"), *GeneratedResult.HeadFileName));
-			RegisterCode.Append(GeneratedResult.RegisterReplicatorCode + TEXT("\n"));
+			UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
+			continue;
 		}
-		else
+		if (ActorDecorator->IsChanneldUEBuiltinType())
 		{
-			if (!CreateDecorateActor(ActorDecorator, Message, Info, ProtoPackageName, GoPackageImportPath, false))
-			{
-				UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
-				continue;
-			}
+			// Skip generate replicator for channeld ue builtin replication actors, they are written in ChanneldUE module.
+			continue;
 		}
-		if (ActorDecorator->IsSkipGenChannelDataState())
+		FReplicatorCode GeneratedResult;
+		if (!GenerateReplicatorCode(ActorDecorator, GeneratedResult, Message))
 		{
-			UE_LOG(LogChanneldRepGenerator, Display, TEXT("Skip generate channel data field for %s"), *ActorDecorator->GetActorPathName());
+			UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
+			continue;
 		}
-		else
-		{
-			ActorDecoratorsToGenChannelData.Add(ActorDecorator);
-		}
+		ReplicatorCodeBundle.ReplicatorCodes.Add(GeneratedResult);
+		ActorDecoratorsToGenReplicator.Add(ActorDecorator);
+		RegistrationIncludeCode.Append(GeneratedResult.IncludeActorCode + TEXT("\n"));
+		RegistrationIncludeCode.Append(FString::Printf(TEXT("#include \"%s\"\n"), *GeneratedResult.HeadFileName));
+		RegisterReplicatorCode.Append(GeneratedResult.RegisterReplicatorCode + TEXT("\n"));
 	}
 
 	// Channel data processor
-	const FString DefaultModuleName = FPaths::GetBaseFilename(DefaultModuleDir);
-	IncludeCode.Append(FString::Printf(TEXT("#include \"ChannelData_%s.h\"\n"), *DefaultModuleName));
-	const FString CDPNamespace = DefaultModuleName + TEXT("Processor");
-	const FString CDPClassName = TEXT("F") + CDPNamespace;
-	const FString ChanneldDataProtoMsgName = GenManager_DefaultChannelDataMsgName;
-	if (!GenerateChannelDataCode(
-			ActorDecoratorsToGenChannelData,
-			ChanneldDataProtoMsgName, CDPNamespace, CDPClassName,
-			TEXT("ChannelData_") + DefaultModuleName + CodeGen_ProtoPbHeadExtension,
-			ProtoPackageName, GoPackageImportPath,
-			ReplicatorCodeBundle, Message
-		)
-	)
+	FString RegisterChannelDataProcessorCode, DeleteChannelDataProcessorCode, ChannelDataProcessorPtrDecls;
+	for (const FChannelDataInfo& ChannelDataInfo : ChannelDataInfos)
 	{
-		UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
+		ReplicatorCodeBundle.ChannelDataCodes.Add(FChannelDataCode());
+		FChannelDataCode& ChannelDataCode = ReplicatorCodeBundle.ChannelDataCodes.Last();
+		if (!GenerateChannelDataCode(
+				ChannelDataInfo
+				, GoPackageImportPath
+				, ProtoPackageName
+				, ChannelDataCode
+				, Message
+			)
+		)
+		{
+			UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
+		}
+		RegistrationIncludeCode.Append(ChannelDataCode.IncludeProcessorCode + TEXT("\n"));
+		RegisterChannelDataProcessorCode.Append(ChannelDataCode.RegisterProcessorCode + TEXT("\n"));
+		DeleteChannelDataProcessorCode.Append(ChannelDataCode.DeleteProcessorPtrCode + TEXT("\n"));
+		ChannelDataProcessorPtrDecls.Append(ChannelDataCode.ProcessorPtrDecl + TEXT("\n"));
 	}
 
-	// Register codes
-	FStringFormatNamedArguments RegisterFormatArgs;
-	// register replicators
-	RegisterFormatArgs.Add(TEXT("Code_IncludeActorHeaders"), IncludeCode);
-	RegisterFormatArgs.Add(TEXT("Code_ReplicatorRegister"), RegisterCode);
+	// Registration codes
+	{
+		FStringFormatNamedArguments RegistrationFormatArgs;
 
-	// register channel data processor
-	const FString CDPVarNameInRegister = FString::Printf(TEXT("Var_%s"), *CDPClassName);
-	RegisterFormatArgs.Add(
-		TEXT("Code_ChannelDataProcessorRegister"),
-		FString::Printf(
-			TEXT("%s = new %s::%s();\nChanneldReplication::RegisterChannelDataProcessor(TEXT(\"%s.%s\"), %s);\n"),
-			*CDPVarNameInRegister,
-			*CDPNamespace, *CDPClassName,
-			*ProtoPackageName, *ChanneldDataProtoMsgName,
-			*CDPVarNameInRegister
-		)
-	);
-	RegisterFormatArgs.Add(TEXT("Code_ChannelDataProcessorUnregister"), FString::Printf(TEXT("delete %s;"), *CDPVarNameInRegister));
-	RegisterFormatArgs.Add(TEXT("Declaration_Variables"), FString::Printf(TEXT("%s::%s* %s;\n"), *CDPNamespace, *CDPClassName, *CDPVarNameInRegister));
-	ReplicatorCodeBundle.ReplicatorRegistrationHeadCode = FString::Format(*CodeGen_ReplicatorRegistrationTemp, RegisterFormatArgs);
+		// Registration include
+		RegistrationFormatArgs.Add(TEXT("Code_IncludeHeaders"), RegistrationIncludeCode);
+
+		// Register replicators
+		RegistrationFormatArgs.Add(TEXT("Code_ReplicatorRegister"), RegisterReplicatorCode);
+
+		// Register channel data processor
+		RegistrationFormatArgs.Add(TEXT("Code_ChannelDataProcessorRegister"), RegisterChannelDataProcessorCode);
+		RegistrationFormatArgs.Add(TEXT("Code_DeleteChannelDataProcessor"), DeleteChannelDataProcessorCode);
+		RegistrationFormatArgs.Add(TEXT("Declaration_Variables"), ChannelDataProcessorPtrDecls);
+		ReplicatorCodeBundle.ReplicatorRegistrationHeadCode = FString::Format(*CodeGen_RegistrationTemp, RegistrationFormatArgs);
+	}
 
 	// Type definitions
 	ReplicatorCodeBundle.TypeDefinitionsHeadCode = CodeGen_ChanneldGeneratedTypesHeadTemp;
 	ReplicatorCodeBundle.TypeDefinitionsCppCode = FString::Printf(TEXT("#include \"%s\"\nDEFINE_LOG_CATEGORY(LogChanneldGen);"), *GenManager_TypeDefinitionHeadFile);
 
 	// Global struct codes
-	auto GlobalStructDecorators = FPropertyDecoratorFactory::Get().GetGlobalStructDecorators();
+	auto GlobalStructDecorators = GetAllStructPropertyDecorators(ActorDecoratorsToGenReplicator);
 	ReplicatorCodeBundle.GlobalStructCodes.Append(TEXT("#pragma once\n"));
 	ReplicatorCodeBundle.GlobalStructCodes.Append(TEXT("#include \"ChanneldUtils.h\"\n"));
 	ReplicatorCodeBundle.GlobalStructCodes.Append(FString::Printf(TEXT("#include \"%s\"\n"), *GenManager_GlobalStructProtoHeaderFile));
@@ -159,11 +155,7 @@ bool FReplicatorCodeGenerator::Generate(
 		ReplicatorCodeBundle.GlobalStructCodes.Append(StructDecorator->GetDeclaration_PropPtrGroupStruct());
 		ReplicatorCodeBundle.GlobalStructProtoDefinitions.Append(StructDecorator->GetDefinition_ProtoStateMessage());
 	}
-	for (auto ActorDecorator : ActorDecoratorsToGenReplicator)
-	{
-		ReplicatorCodeBundle.GlobalStructCodes.Append(ActorDecorator->GetDeclaration_RPCParamStructs());
-		ReplicatorCodeBundle.GlobalStructProtoDefinitions.Append(ActorDecorator->GetDefinition_RPCParamProtoDefinitions());
-	}
+
 	FStringFormatNamedArguments ProtoFormatArgs;
 	ProtoFormatArgs.Add(TEXT("Declare_ProtoPackageName"), ProtoPackageName);
 	ProtoFormatArgs.Add(TEXT("Code_Import"), TEXT("import \"unreal_common.proto\";"));
@@ -177,7 +169,7 @@ bool FReplicatorCodeGenerator::Generate(
 	return true;
 }
 
-bool FReplicatorCodeGenerator::GenerateActorCode(
+bool FReplicatorCodeGenerator::GenerateReplicatorCode(
 	const TSharedPtr<FReplicatedActorDecorator>& ActorDecorator,
 	FReplicatorCode& GeneratedResult,
 	FString& ResultMessage
@@ -331,7 +323,7 @@ bool FReplicatorCodeGenerator::GenerateActorCode(
 	// ---------- Protobuf ----------
 
 	// ---------- Register ----------
-	FString IsMapInChannelData = ActorDecorator->IsSingleton() ? TEXT("false") : TEXT("true");
+	FString IsMapInChannelData = ActorDecorator->IsSingletonInChannelData() ? TEXT("false") : TEXT("true");
 	if (!bIsBlueprint)
 	{
 		GeneratedResult.RegisterReplicatorCode = FString::Printf(
@@ -356,19 +348,75 @@ bool FReplicatorCodeGenerator::GenerateActorCode(
 }
 
 bool FReplicatorCodeGenerator::GenerateChannelDataCode(
-	const TArray<TSharedPtr<FReplicatedActorDecorator>>& ReplicationActorDecorators,
-	const FString& ChannelDataProtoMsgName,
-	const FString& ChannelDataProcessorNamespace,
-	const FString& ChannelDataProcessorClassName,
-	const FString& ChannelDataProtoHeadFileName,
-	const FString& ProtoPackageName,
-	const FString& GoPackageImportPath,
-	FGeneratedCodeBundle& GeneratedCodeBundle,
-	FString& ResultMessage
+	const FChannelDataInfo& ChannelDataInfo
+	, const FString& GoPackageImportPath
+	, const FString& ProtoPackageName
+	, FChannelDataCode& GeneratedResult
+	, FString& ResultMessage
 )
 {
-	// Get all actor class decorator  with their parent classes
-	TArray<TSharedPtr<FReplicatedActorDecorator>> SortedReplicationActorClasses = ReplicationActorDecorators;
+	FString ChannelTypeName = UEnum::GetValueAsString(ChannelDataInfo.Setting.ChannelType);
+	if (ChannelTypeName.IsEmpty())
+	{
+		ResultMessage = FString::Printf(TEXT("Invalid channel type: %d"), static_cast<uint8>(ChannelDataInfo.Setting.ChannelType));
+		return false;
+	}
+	// Split channel type name by "::"
+	TArray<FString> ChannelTypeNameParts;
+	ChannelTypeName.ParseIntoArray(ChannelTypeNameParts, TEXT("::"));
+	if (ChannelTypeNameParts.Num() != 2)
+	{
+		ResultMessage = FString::Printf(TEXT("Invalid channel type name: %s"), *ChannelTypeName);
+		return false;
+	}
+	ChannelTypeName = ChannelTypeNameParts[1];
+
+	const FString ChannelDataProcessorNamespace = FString::Printf(TEXT("ChannelDataProcessor_%s"), *ChannelTypeName);
+	const FString ChannelDataProcessorClassName = FString::Printf(TEXT("F%s"), *ChannelDataProcessorNamespace);
+	const FString ChannelDataProtoMsgName = FString::Printf(TEXT("channelData_%s"), *ChannelTypeName);
+	GeneratedResult.ProcessorHeadFileName = FString::Printf(TEXT("%s%s"), *ChannelDataProcessorNamespace, *CodeGen_HeadFileExtension);
+	GeneratedResult.ProtoFileName = FString::Printf(TEXT("%s%s"), *ChannelDataProtoMsgName, *CodeGen_ProtoFileExtension);
+	GeneratedResult.IncludeProcessorCode = FString::Printf(TEXT("#include \"%s\""), *GeneratedResult.ProcessorHeadFileName);
+
+	// Register channel data processor
+	const FString CDPPointerName = FString::Printf(TEXT("%sPtr"), *ChannelDataProcessorNamespace);
+	GeneratedResult.RegisterProcessorCode = FString::Printf(
+		TEXT("%s = new %s::%s();\nChanneldReplication::RegisterChannelDataProcessor(TEXT(\"%s.%s\"), %s);\n"),
+		*CDPPointerName,
+		*ChannelDataProcessorNamespace, *ChannelDataProcessorClassName,
+		*ProtoPackageName, *ChannelDataProtoMsgName,
+		*CDPPointerName
+	);
+	GeneratedResult.DeleteProcessorPtrCode = FString::Printf(TEXT("delete %s;"), *CDPPointerName);
+	GeneratedResult.ProcessorPtrDecl = FString::Printf(TEXT("%s::%s* %s;\n"), *ChannelDataProcessorNamespace, *ChannelDataProcessorClassName, *CDPPointerName);
+
+	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecoratorsToGenChannelData;
+
+	FString Message;
+	for (const FChannelDataInfo::FStateInfo& StateInfo : ChannelDataInfo.StateInfos)
+	{
+		TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
+		if (!CreateDecorateActor(ActorDecorator, Message, StateInfo.RepActorClass, FChannelDataStateSetting(), ProtoPackageName, GoPackageImportPath, false))
+		{
+			UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
+		}
+		ActorDecoratorsToGenChannelData.Add(ActorDecorator);
+	}
+
+	// Generate ChannelDataProcessor Proto definition file
+	if (!GenerateChannelDataProtoDefFile(
+		ActorDecoratorsToGenChannelData
+		, ChannelDataProtoMsgName
+		, ProtoPackageName
+		, GoPackageImportPath
+		, GeneratedResult.ProtoDefsFile
+	))
+	{
+		ResultMessage = TEXT("Failed to generate channel data proto definition file");
+		return false;
+	}
+
+	TArray<TSharedPtr<FReplicatedActorDecorator>> SortedReplicationActorClasses = ActorDecoratorsToGenChannelData;
 	TArray<TSharedPtr<FReplicatedActorDecorator>> ChildrenOfAActor;
 
 	int32 AActorIndex = INDEX_NONE;
@@ -396,6 +444,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 		Swap(SortedReplicationActorClasses[AActorIndex], SortedReplicationActorClasses[SortedReplicationActorClasses.Num() - 1]);
 	}
 
+
 	// Generate ChannelDataProcessor CPP code
 	if (!GenerateChannelDataProcessorCode(
 		SortedReplicationActorClasses,
@@ -403,24 +452,12 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 		ChannelDataProtoMsgName,
 		ChannelDataProcessorNamespace,
 		ChannelDataProcessorClassName,
-		ChannelDataProtoHeadFileName,
+		ChannelDataProtoMsgName + CodeGen_ProtoPbHeadExtension,
 		ProtoPackageName,
-		GeneratedCodeBundle.ChannelDataProcessorHeadCode
+		GeneratedResult.ProcessorHeadCode
 	))
 	{
 		ResultMessage = TEXT("Failed to generate ChannelDataProcessor code");
-		return false;
-	}
-
-	// Generate ChannelDataProcessor Proto definition file
-	if (!GenerateChannelDataProtoDefFile(
-		SortedReplicationActorClasses,
-		ChannelDataProtoMsgName,
-		ProtoPackageName, GoPackageImportPath,
-		GeneratedCodeBundle.ChannelDataProtoDefsFile
-	))
-	{
-		ResultMessage = TEXT("Failed to generate channel data proto definition file");
 		return false;
 	}
 
@@ -429,7 +466,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 		ChildrenOfAActor,
 		ChannelDataProtoMsgName,
 		ProtoPackageName,
-		GeneratedCodeBundle.ChannelDataMerge_GoCode
+		GeneratedResult.Merge_GoCode
 	))
 	{
 		ResultMessage = TEXT("Failed to generate channel data merge go code");
@@ -440,7 +477,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 		GoPackageImportPath,
 		ChannelDataProtoMsgName,
 		ProtoPackageName,
-		GeneratedCodeBundle.ChannelDataRegistration_GoCode
+		GeneratedResult.Registration_GoCode
 	))
 	{
 		ResultMessage = TEXT("Failed to generate channel data registration go code");
@@ -504,7 +541,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 				!TargetClass->IsChildOf(AGameStateBase::StaticClass()) &&
 				!TargetClass->IsChildOf(APlayerState::StaticClass()) &&
 				!TargetClass->IsChildOf(AController::StaticClass()) &&
-				!ActorDecorator->IsSingleton()) ||
+				!ActorDecorator->IsSingletonInChannelData()) ||
 			TargetClass->IsChildOf(USceneComponent::StaticClass())
 		)
 		{
@@ -516,7 +553,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	}
 	FStringFormatNamedArguments CDPFormatArgs;
 	CDPFormatArgs.Add(TEXT("Code_IncludeAdditionHeaders"), ChannelDataProcessor_IncludeCode);
-	CDPFormatArgs.Add(TEXT("File_CDP_ProtoHeader"), ChannelDataProtoHeadFileName);
+	CDPFormatArgs.Add(TEXT("File_ChannelDataProtoHeader"), ChannelDataProtoHeadFileName);
 	CDPFormatArgs.Add(TEXT("Declaration_CDP_Namespace"), ChannelDataProcessorNamespace);
 	CDPFormatArgs.Add(TEXT("Declaration_CDP_ClassName"), ChannelDataProcessorClassName);
 	CDPFormatArgs.Add(TEXT("Definition_CDP_ProtoNamespace"), TEXT("generatedchanneldata"));
@@ -588,7 +625,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 		for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
 		{
 			// No need to collect singleton state for handover
-			if (ActorDecorator->IsSingleton())
+			if (ActorDecorator->IsSingletonInChannelData())
 			{
 				continue;
 			}
@@ -623,7 +660,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 			FString StateClassName = ActorDecorator->GetProtoStateMessageType();
 			FormatArgs.Add("Definition_StateClassName", StateClassName);
 
-			if (ActorDecorator->IsSingleton())
+			if (ActorDecorator->IsSingletonInChannelData())
 			{
 				FormatArgs.Add("Definition_StateVarName", StateClassName);
 
@@ -641,7 +678,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 					FStringFormatNamedArguments DeletionFormatArgs;
 					for (const auto& Deletion : TargetActors)
 					{
-						if (Deletion->IsSingleton())
+						if (Deletion->IsSingletonInChannelData())
 						{
 							continue;
 						}
@@ -730,22 +767,23 @@ void FReplicatorCodeGenerator::ProcessHeaderFiles(const TArray<FString>& Files, 
 bool FReplicatorCodeGenerator::CreateDecorateActor(
 	TSharedPtr<FReplicatedActorDecorator>& OutActorDecorator,
 	FString& OutResultMessage,
-	const FRepGenActorInfo& ReplicationActorInfo,
+	const UClass* TargetActorClass,
+	const FChannelDataStateSetting& ChannelDataStateSetting,
 	const FString& ProtoPackageName,
 	const FString& GoPackageImportPath,
 	bool bInitPropertiesAndRPCs
 )
 {
 	FReplicatedActorDecorator* ActorDecorator = new FReplicatedActorDecorator(
-		ReplicationActorInfo.TargetActorClass
-		, [this, ReplicationActorInfo](FString& TargetActorName, bool IsActorNameCompilable)
+		TargetActorClass
+		, [this, TargetActorClass](FString& TargetActorName, bool IsActorNameCompilable)
 		{
 			if (!IsActorNameCompilable)
 			{
 				TargetActorName = TEXT("l_") + ChanneldReplicatorGeneratorUtils::ReplaceUncompilableChar(TargetActorName, TEXT("_"));
 			}
 			int32* SameNameNumberPtr;
-			if ((SameNameNumberPtr = TargetClassSameNameNumber.Find(ReplicationActorInfo.TargetActorClass)) != nullptr)
+			if ((SameNameNumberPtr = TargetClassSameNameNumber.Find(TargetActorClass)) != nullptr)
 			{
 				if (*SameNameNumberPtr > 0)
 				{
@@ -759,22 +797,20 @@ bool FReplicatorCodeGenerator::CreateDecorateActor(
 				if (TargetActorSameNameCounter.Contains(TargetActorNameLower))
 				{
 					TargetActorName = FString::Printf(TEXT("%s_%d"), *TargetActorName, TargetActorSameNameCounter[TargetActorNameLower]);
-					TargetClassSameNameNumber.Add(ReplicationActorInfo.TargetActorClass, TargetActorSameNameCounter[TargetActorNameLower]);
+					TargetClassSameNameNumber.Add(TargetActorClass, TargetActorSameNameCounter[TargetActorNameLower]);
 					++TargetActorSameNameCounter[TargetActorNameLower];
 				}
 				else
 				{
-					TargetClassSameNameNumber.Add(ReplicationActorInfo.TargetActorClass, 0);
+					TargetClassSameNameNumber.Add(TargetActorClass, 0);
 					TargetActorSameNameCounter.Add(TargetActorNameLower, 1);
 				}
 			}
 		}
 		, ProtoPackageName
 		, GoPackageImportPath
-		, ReplicationActorInfo.bSingleton
-		, ReplicationActorInfo.bChanneldUEBuiltinType
-		, ReplicationActorInfo.bSkipGenReplicator
-		, ReplicationActorInfo.bSkipGenChannelDataState
+		, ChannelDataStateSetting.bSingleton
+		, ChannelDataStateSetting.bSkip
 	);
 	// If the target class is c++ class, we need to find the module it belongs to.
 	// The module info is used to generate the include code in head file.
@@ -796,4 +832,25 @@ bool FReplicatorCodeGenerator::CreateDecorateActor(
 	}
 	OutActorDecorator = MakeShareable(ActorDecorator);
 	return true;
+}
+
+TArray<TSharedPtr<FStructPropertyDecorator>> FReplicatorCodeGenerator::GetAllStructPropertyDecorators(const TArray<TSharedPtr<FReplicatedActorDecorator>>& ActorDecorator) const
+{
+	TArray<TSharedPtr<FStructPropertyDecorator>> AllStructPropertyDecorators;
+	for (const TSharedPtr<FReplicatedActorDecorator>& ActorDecoratorPtr : ActorDecorator)
+	{
+		AllStructPropertyDecorators.Append(ActorDecoratorPtr->GetStructPropertyDecorators());
+	}
+	TArray<TSharedPtr<FStructPropertyDecorator>> NonRepetitionStructPropertyDecorators;
+	TSet<FString> StructPropertyDecoratorNames;
+	for (const TSharedPtr<FStructPropertyDecorator>& StructPropertyDecorator : AllStructPropertyDecorators)
+	{
+		if (StructPropertyDecoratorNames.Contains(StructPropertyDecorator->GetPropertyName()))
+		{
+			continue;
+		}
+		StructPropertyDecoratorNames.Add(StructPropertyDecorator->GetPropertyName());
+		NonRepetitionStructPropertyDecorators.Add(StructPropertyDecorator);
+	}
+	return NonRepetitionStructPropertyDecorators;
 }
