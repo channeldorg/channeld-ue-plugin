@@ -17,6 +17,7 @@
 #include "Replication/ChanneldPlayerStateReplicator.h"
 #include "Replication/ChanneldGameStateBaseReplicator.h"
 #include "Replication/ChanneldActorReplicator.h"
+#include "Replication/ChanneldObjectReplicator.h"
 #include "Replication/ChanneldPawnReplicator.h"
 
 #define LOCTEXT_NAMESPACE "FChanneldUEModule"
@@ -32,6 +33,7 @@ void FChanneldUEModule::StartupModule()
 	}
 
 	REGISTER_REPLICATOR_SINGLETON(FChanneldGameStateBaseReplicator, AGameStateBase);
+	REGISTER_REPLICATOR(FChanneldObjectReplicator, UObject);
 	REGISTER_REPLICATOR(FChanneldActorReplicator, AActor);
 	REGISTER_REPLICATOR(FChanneldPawnReplicator, APawn);
 	REGISTER_REPLICATOR(FChanneldCharacterReplicator, ACharacter);

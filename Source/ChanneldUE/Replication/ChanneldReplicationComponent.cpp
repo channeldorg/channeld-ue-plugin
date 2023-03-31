@@ -186,6 +186,11 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 	{
 		return false;
 	}
+
+	if (!Processor->UpdateChannelData(GetOwner(), ChannelData))
+	{
+		return false;
+	}
 	
 	bool bUpdated = IsRemoved();
 	for (auto& Replicator : Replicators)
@@ -230,6 +235,11 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 	auto Processor = ChanneldReplication::FindChannelDataProcessor(UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()));
 	ensureMsgf(Processor, TEXT("Unable to find channel data processor for message: %s"), UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()));
 	if (!Processor)
+	{
+		return;
+	}
+
+	if (Processor->OnChannelDataUpdated(GetOwner(), ChannelData))
 	{
 		return;
 	}

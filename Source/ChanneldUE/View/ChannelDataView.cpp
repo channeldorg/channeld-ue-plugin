@@ -709,7 +709,7 @@ int32 UChannelDataView::SendChannelUpdate(Channeld::ChannelId ChId)
 		return 0;
 	}
 
-	auto NewState = MsgTemplate->New(&ArenaForSend);
+	auto DeltaChannelData = MsgTemplate->New(&ArenaForSend);
 
 	int UpdateCount = 0;
 	int RemovedCount = 0;
@@ -721,7 +721,7 @@ int32 UChannelDataView::SendChannelUpdate(Channeld::ChannelId ChId)
 			/* Pre-replication logic should be implemented in the replicator.
 			Provider->GetTargetObject()->CallPreReplication();
 			*/
-			if (Provider->UpdateChannelData(NewState))
+			if (Provider->UpdateChannelData(DeltaChannelData))
 			{
 				UpdateCount++;
 			}
@@ -749,15 +749,15 @@ int32 UChannelDataView::SendChannelUpdate(Channeld::ChannelId ChId)
 		google::protobuf::Message* RemovedData;
 		if (RemovedProvidersData.RemoveAndCopyValue(ChId, RemovedData))
 		{
-			NewState->MergeFrom(*RemovedData);
+			DeltaChannelData->MergeFrom(*RemovedData);
 			delete RemovedData;
 		}
 				
 		channeldpb::ChannelDataUpdateMessage UpdateMsg;
-		UpdateMsg.mutable_data()->PackFrom(*NewState);
+		UpdateMsg.mutable_data()->PackFrom(*DeltaChannelData);
 		Connection->Send(ChId, channeldpb::CHANNEL_DATA_UPDATE, UpdateMsg);
 
-		UE_LOG(LogChanneld, Verbose, TEXT("Sent %s update: %s"), UTF8_TO_TCHAR(NewState->GetTypeName().c_str()), UTF8_TO_TCHAR(NewState->DebugString().c_str()));
+		UE_LOG(LogChanneld, Verbose, TEXT("Sent %s update: %s"), UTF8_TO_TCHAR(DeltaChannelData->GetTypeName().c_str()), UTF8_TO_TCHAR(DeltaChannelData->DebugString().c_str()));
 	}
 
 	return UpdateCount;
@@ -965,6 +965,10 @@ bool UChannelDataView::ConsumeChannelUpdateData(Channeld::ChannelId ChId, google
 	return bConsumed;
 }
 
+// Warning: DO NOT use this function before sending the Spawn message!
+// Calling Provider->UpdateChannelData can cause FChanneldActorReplicator::Tick to be called, which will call
+// ChanneldUtils::GetRefOfObject and export the NetGUIDs, causing the UnrealObjectRef in the Spawn message
+// missing the contexts, so the client will not be able tow Spawn the object.
 const google::protobuf::Message* UChannelDataView::GetEntityData(UObject* Obj)
 {
 	IChannelDataProvider* Provider= nullptr;
