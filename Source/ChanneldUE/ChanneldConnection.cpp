@@ -59,6 +59,7 @@ void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 	RegisterMessageHandler(channeldpb::QUERY_SPATIAL_CHANNEL, new channeldpb::QuerySpatialChannelResultMessage());
 	RegisterMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, new channeldpb::ChannelDataHandoverMessage());
 	RegisterMessageHandler(channeldpb::SPATIAL_REGIONS_UPDATE, new channeldpb::SpatialRegionsUpdateMessage());
+	RegisterMessageHandler(channeldpb::CREATE_ENTITY_CHANNEL, new channeldpb::CreateChannelMessage());
 }
 
 void UChanneldConnection::Deinitialize()
@@ -573,6 +574,38 @@ void UChanneldConnection::CreateSpatialChannel(const FString& Metadata, const ch
 		Msg.mutable_mergeoptions()->MergeFrom(*MergeOptions);
 
 	Send(Channeld::GlobalChannelId, channeldpb::CREATE_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
+}
+
+void UChanneldConnection::CreateEntityChannel(Channeld::ChannelId ChId, UObject* Entity, uint32 EntityId,
+	const FString& Metadata, const channeldpb::ChannelSubscriptionOptions* SubOptions, 
+	const google::protobuf::Message* Data, const channeldpb::ChannelDataMergeOptions* MergeOptions,
+	const TFunction<void(const channeldpb::CreateChannelResultMessage*)>& Callback)
+{
+	channeldpb::CreateEntityChannelMessage CreateEntityMsg;
+	CreateEntityMsg.set_entityid(EntityId);
+	if (!Metadata.IsEmpty())
+	{
+		CreateEntityMsg.set_metadata(TCHAR_TO_UTF8(*Metadata));
+	}
+	if (SubOptions != nullptr)
+	{
+		CreateEntityMsg.mutable_suboptions()->MergeFrom(*SubOptions);
+	}
+	if (Data != nullptr)
+	{
+		CreateEntityMsg.mutable_data()->PackFrom(*Data);
+	}
+	if (MergeOptions != nullptr)
+	{
+		CreateEntityMsg.mutable_mergeoptions()->MergeFrom(*MergeOptions);
+	}
+	
+	if (const AActor* Actor = Cast<AActor>(Entity))
+	{
+		CreateEntityMsg.set_iswellknown(Actor->bAlwaysRelevant);
+	}
+	
+	Send(ChId, channeldpb::CREATE_ENTITY_CHANNEL, CreateEntityMsg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
 void UChanneldConnection::RemoveChannel(uint32 ChannelToRemove, const TFunction<void(const channeldpb::RemoveChannelMessage*)>& Callback)
