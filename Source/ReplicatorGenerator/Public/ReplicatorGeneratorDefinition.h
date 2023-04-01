@@ -37,3 +37,4 @@ static const FString GenManager_TemporaryGoRegistrationCodePath = GenManager_Int
 static const FString GenManager_RepClassInfoPath = GenManager_IntermediateDir / TEXT("RepAssetInfoPath.json");
 
 static const FString GenManager_ChannelDataSettingsPath = FPaths::ProjectConfigDir() / TEXT("ChanneldChannelDataSettings.json");
+static const FString GenManager_ChannelDataSchemataPath = FPaths::ProjectConfigDir() / TEXT("ChanneldChannelDataSchema.json");

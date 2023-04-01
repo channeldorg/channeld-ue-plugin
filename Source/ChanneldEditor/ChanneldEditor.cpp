@@ -158,14 +158,14 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().StopServersCommand);
 
 	MenuBuilder.AddSeparator();
-
+	
+	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().OpenChannelDataEditorCommand);
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().GenerateReplicatorCommand);
 
 	MenuBuilder.AddSubMenu(LOCTEXT("ChanneldAdvancedHeading", "Advanced..."),
 	                       LOCTEXT("ChanneldAdvancedTooltip", ""), FNewMenuDelegate::CreateLambda([](FMenuBuilder& InMenuBuilder)
 	                       {
 		                       InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand);
-		                       InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().OpenChannelDataEditorCommand);
 	                       }));
 
 	return MenuBuilder.MakeWidget();
@@ -683,7 +683,7 @@ void FChanneldEditorModule::AddRepCompsToBPsAction()
 
 void FChanneldEditorModule::OpenChannelDataEditorAction()
 {
-	GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>()->SpawnAndRegisterTab(LoadObject<UEditorUtilityWidgetBlueprint>(nullptr, L"/ChanneldUE/EditorUtilityWidgets/EUW_ChannelDataEditor"));
+	GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>()->SpawnAndRegisterTab(LoadObject<UEditorUtilityWidgetBlueprint>(nullptr, L"/ChanneldUE/EditorUtilityWidgets/EUW_ChannelDataSchemaEditor"));
 }
 
 

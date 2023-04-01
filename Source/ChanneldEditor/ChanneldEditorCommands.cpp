@@ -13,7 +13,7 @@ void FChanneldEditorCommands::RegisterCommands()
 	UI_COMMAND(StopServersCommand, "Stop Servers", "Stop launched PIE servers", EUserInterfaceActionType::Button, FInputChord());
 	UI_COMMAND(GenerateReplicatorCommand, "Generate Replication Code", "Generate replication code for all replicated actors", EUserInterfaceActionType::Button, FInputChord());
 	UI_COMMAND(AddRepComponentsToBPsCommand, "Add Replication Components To Blueprint Actors", "Add replication components to blueprint actors", EUserInterfaceActionType::Button, FInputChord());
-	UI_COMMAND(OpenChannelDataEditorCommand, "Open Channel Data Editor", "Open channel data settings editor", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(OpenChannelDataEditorCommand, "Edit Channel Data Schema", "Open channel data schema editor", EUserInterfaceActionType::Button, FInputChord());
 }
 
 #undef LOCTEXT_NAMESPACE

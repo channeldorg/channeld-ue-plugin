@@ -78,7 +78,7 @@ bool FReplicatorCodeGenerator::Generate(
 	for (const UClass* ReplicationActorClass : ReplicationActorClasses)
 	{
 		TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
-		if (!CreateDecorateActor(ActorDecorator, Message, ReplicationActorClass, FChannelDataStateSetting(), ProtoPackageName, GoPackageImportPath))
+		if (!CreateDecorateActor(ActorDecorator, Message, ReplicationActorClass, FChannelDataStateSchema(), ProtoPackageName, GoPackageImportPath))
 		{
 			UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
 			continue;
@@ -355,10 +355,10 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	, FString& ResultMessage
 )
 {
-	FString ChannelTypeName = UEnum::GetValueAsString(ChannelDataInfo.Setting.ChannelType);
+	FString ChannelTypeName = UEnum::GetValueAsString(ChannelDataInfo.Schema.ChannelType);
 	if (ChannelTypeName.IsEmpty())
 	{
-		ResultMessage = FString::Printf(TEXT("Invalid channel type: %d"), static_cast<uint8>(ChannelDataInfo.Setting.ChannelType));
+		ResultMessage = FString::Printf(TEXT("Invalid channel type: %d"), static_cast<uint8>(ChannelDataInfo.Schema.ChannelType));
 		return false;
 	}
 	// Split channel type name by "::"
@@ -396,7 +396,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	for (const FChannelDataInfo::FStateInfo& StateInfo : ChannelDataInfo.StateInfos)
 	{
 		TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
-		if (!CreateDecorateActor(ActorDecorator, Message, StateInfo.RepActorClass, FChannelDataStateSetting(), ProtoPackageName, GoPackageImportPath, false))
+		if (!CreateDecorateActor(ActorDecorator, Message, StateInfo.RepActorClass, FChannelDataStateSchema(), ProtoPackageName, GoPackageImportPath, false))
 		{
 			UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
 		}
@@ -768,7 +768,7 @@ bool FReplicatorCodeGenerator::CreateDecorateActor(
 	TSharedPtr<FReplicatedActorDecorator>& OutActorDecorator,
 	FString& OutResultMessage,
 	const UClass* TargetActorClass,
-	const FChannelDataStateSetting& ChannelDataStateSetting,
+	const FChannelDataStateSchema& ChannelDataStateSetting,
 	const FString& ProtoPackageName,
 	const FString& GoPackageImportPath,
 	bool bInitPropertiesAndRPCs

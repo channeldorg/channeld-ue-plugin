@@ -4,10 +4,10 @@
 #include "ChanneldTypes.h"
 #include "JsonModel.h"
 #include "ReplicatorGeneratorDefinition.h"
-#include "ChannelDataSettingController.generated.h"
+#include "ChannelDataSchemaController.generated.h"
 
 USTRUCT(BlueprintType)
-struct REPLICATORGENERATOR_API FChannelDataStateSettingRow : public FTableRowBase
+struct REPLICATORGENERATOR_API FChannelDataStateSchemaRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
@@ -29,9 +29,9 @@ struct REPLICATORGENERATOR_API FChannelDataStateSettingRow : public FTableRowBas
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	bool bSingleton = false;
 
-	FChannelDataStateSettingRow() = default;
+	FChannelDataStateSchemaRow() = default;
 
-	FChannelDataStateSettingRow(int32 InChannelType, int32 InChannelTypeOrder, const FString& InReplicationClassPath, int32 InStateOrder, bool InbSkip, bool InbSingleton)
+	FChannelDataStateSchemaRow(int32 InChannelType, int32 InChannelTypeOrder, const FString& InReplicationClassPath, int32 InStateOrder, bool InbSkip, bool InbSingleton)
 		: ChannelType(InChannelType)
 		  , ChannelTypeOrder(InChannelTypeOrder)
 		  , ReplicationClassPath(InReplicationClassPath)
@@ -48,7 +48,7 @@ struct REPLICATORGENERATOR_API FChannelDataStateSettingRow : public FTableRowBas
 };
 
 USTRUCT(BlueprintType)
-struct REPLICATORGENERATOR_API FChannelDataStateSetting
+struct REPLICATORGENERATOR_API FChannelDataStateSchema
 {
 	GENERATED_BODY()
 
@@ -67,16 +67,16 @@ struct REPLICATORGENERATOR_API FChannelDataStateSetting
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bSingleton = false;
 
-	FChannelDataStateSetting() = default;
+	FChannelDataStateSchema() = default;
 
-	FChannelDataStateSetting(EChanneldChannelType InChannelType, const FString& InReplicationClassPath, int32 InStateOrder)
+	FChannelDataStateSchema(EChanneldChannelType InChannelType, const FString& InReplicationClassPath, int32 InStateOrder)
 		: ChannelType(InChannelType)
 		  , ReplicationClassPath(InReplicationClassPath)
 		  , StateOrder(InStateOrder)
 	{
 	}
 
-	FChannelDataStateSetting(EChanneldChannelType InChannelType, const FString& InReplicationClassPath, int32 InStateOrder, bool InbSkip, bool InbSingleton)
+	FChannelDataStateSchema(EChanneldChannelType InChannelType, const FString& InReplicationClassPath, int32 InStateOrder, bool InbSkip, bool InbSingleton)
 		: ChannelType(InChannelType)
 		  , ReplicationClassPath(InReplicationClassPath)
 		  , StateOrder(InStateOrder)
@@ -87,7 +87,7 @@ struct REPLICATORGENERATOR_API FChannelDataStateSetting
 };
 
 USTRUCT(BlueprintType)
-struct REPLICATORGENERATOR_API FChannelDataSetting
+struct REPLICATORGENERATOR_API FChannelDataSchema
 {
 	GENERATED_BODY()
 
@@ -98,17 +98,17 @@ struct REPLICATORGENERATOR_API FChannelDataSetting
 	int32 ChannelTypeOrder = 0;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TArray<FChannelDataStateSetting> StateSettings;
+	TArray<FChannelDataStateSchema> StateSchemata;
 
-	FChannelDataSetting() = default;
+	FChannelDataSchema() = default;
 
-	FChannelDataSetting(EChanneldChannelType InChannelType, int32 InChannelTypeOrder)
+	FChannelDataSchema(EChanneldChannelType InChannelType, int32 InChannelTypeOrder)
 		: ChannelType(InChannelType)
 		  , ChannelTypeOrder(InChannelTypeOrder)
 	{
 	}
 
-	FChannelDataSetting(int32 InChannelType, int32 InChannelTypeOrder)
+	FChannelDataSchema(int32 InChannelType, int32 InChannelTypeOrder)
 		: ChannelType(static_cast<EChanneldChannelType>(InChannelType))
 		  , ChannelTypeOrder(InChannelTypeOrder)
 	{
@@ -116,7 +116,7 @@ struct REPLICATORGENERATOR_API FChannelDataSetting
 
 	void Sort()
 	{
-		StateSettings.Sort([](const FChannelDataStateSetting& A, const FChannelDataStateSetting& B)
+		StateSchemata.Sort([](const FChannelDataStateSchema& A, const FChannelDataStateSchema& B)
 		{
 			return A.StateOrder < B.StateOrder;
 		});
@@ -138,14 +138,13 @@ struct REPLICATORGENERATOR_API FChannelDataStateOption
 	}
 };
 
-
 UCLASS(BlueprintType)
-class REPLICATORGENERATOR_API UChannelDataSettingController : public UEditorSubsystem
+class REPLICATORGENERATOR_API UChannelDataSchemaController : public UEditorSubsystem
 {
 	GENERATED_BODY()
 
 protected:
-	TJsonModel<FChannelDataStateSettingRow> ChannelDataStateSettingModal = GenManager_ChannelDataSettingsPath;
+	TJsonModel<FChannelDataStateSchemaRow> ChannelDataStateSchemaModal = GenManager_ChannelDataSchemataPath;
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
@@ -154,23 +153,23 @@ public:
 	void GetChannelDataStateOptions(TArray<FChannelDataStateOption>& Options) const;
 
 	UFUNCTION(BlueprintCallable)
-	void GetChannelDataSettings(TArray<FChannelDataSetting>& ChannelDataSettings);
+	void GetChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata);
 
 	UFUNCTION(BlueprintCallable)
-	void SaveChannelDataSettings(const TArray<FChannelDataSetting>& ChannelDataSettings);
+	void SaveChannelDataSchemata(const TArray<FChannelDataSchema>& ChannelDataSchemata);
 
 	UFUNCTION(BlueprintCallable)
-	void ImportChannelDataSettingsFrom(const FString& FilePath, TArray<FChannelDataSetting>& ChannelDataSettings, bool& Success);
+	void ImportChannelDataSchemataFrom(const FString& FilePath, TArray<FChannelDataSchema>& ChannelDataSchemata, bool& Success);
 
 	UFUNCTION(BlueprintCallable)
-	void ExportChannelDataSettingsTo(const FString& FilePath, const TArray<FChannelDataSetting>& ChannelDataSettings, bool& Success);
+	void ExportChannelDataSchemataTo(const FString& FilePath, const TArray<FChannelDataSchema>& ChannelDataSchemata, bool& Success);
 
-	inline TArray<FChannelDataStateSettingRow> ConvertChannelDataSettingsToRows(const TArray<FChannelDataSetting>& ChannelDataSettings);
+	inline TArray<FChannelDataStateSchemaRow> ConvertChannelDataSchemataToRows(const TArray<FChannelDataSchema>& ChannelDataSchemata);
 
-	inline TArray<FChannelDataSetting> ConvertRowsToChannelDataSettings(const TArray<FChannelDataStateSettingRow>& ChannelDataSettingRows);
+	inline TArray<FChannelDataSchema> ConvertRowsToChannelDataSchemata(const TArray<FChannelDataStateSchemaRow>& ChannelDataSchemaRows);
 
-	inline void SortChannelDataSettings(TArray<FChannelDataSetting>& ChannelDataSettings);
+	inline void SortChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata);
 
 protected:
-	void GetDefaultChannelDataSettings(TArray<FChannelDataSetting>& ChannelDataSettings);
+	void GetDefaultChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata);
 };

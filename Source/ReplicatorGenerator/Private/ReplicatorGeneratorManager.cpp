@@ -7,8 +7,7 @@
 #include "HAL/FileManagerGeneric.h"
 #include "Internationalization/Regex.h"
 #include "Misc/FileHelper.h"
-#include "Persistence/RepActorCacheController.h"
-#include "Replication/ChanneldReplicationComponent.h"
+#include "Persistence/ChannelDataSchemaController.h"
 
 DEFINE_LOG_CATEGORY(LogChanneldRepGenerator);
 
@@ -72,12 +71,12 @@ bool FReplicatorGeneratorManager::GenerateReplication(const FString GoPackageImp
 {
 	TArray<FChannelDataInfo> ChannelDataInfos;
 
-	UChannelDataSettingController* ChannelDataSettingController = GEditor->GetEditorSubsystem<UChannelDataSettingController>();
-	TArray<FChannelDataSetting> ChannelDataSettings;
-	ChannelDataSettingController->GetChannelDataSettings(ChannelDataSettings);
-	for (const FChannelDataSetting& ChannelDataSetting : ChannelDataSettings)
+	UChannelDataSchemaController* ChannelDataSchemaController = GEditor->GetEditorSubsystem<UChannelDataSchemaController>();
+	TArray<FChannelDataSchema> ChannelDataSchemata;
+	ChannelDataSchemaController->GetChannelDataSchemata(ChannelDataSchemata);
+	for (const FChannelDataSchema& ChannelDataSchema : ChannelDataSchemata)
 	{
-		ChannelDataInfos.Add(FChannelDataInfo(ChannelDataSetting));
+		ChannelDataInfos.Add(FChannelDataInfo(ChannelDataSchema));
 	}
 
 	// We need to include the header file of the target class in 'ChanneldReplicatorRegister.h'. so we need to know the include path of the target class from 'uhtmanifest' file.

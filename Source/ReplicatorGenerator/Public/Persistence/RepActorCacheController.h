@@ -68,7 +68,7 @@ struct FRepActorDependency
 };
 
 UCLASS(BlueprintType)
-class REPLICATORGENERATOR_API URepActorCacheController : public UEngineSubsystem
+class REPLICATORGENERATOR_API URepActorCacheController : public UEditorSubsystem
 {
 	GENERATED_BODY()
 

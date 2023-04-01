@@ -95,7 +95,7 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 			}
 		}
 	}
-	URepActorCacheController* RepActorCacheController = GEditor->GetEngineSubsystem<URepActorCacheController>();
+	URepActorCacheController* RepActorCacheController = GEditor->GetEditorSubsystem<URepActorCacheController>();
 	if (RepActorCacheController == nullptr || !RepActorCacheController->SaveRepActorCache(TargetClasses))
 	{
 		return 1;

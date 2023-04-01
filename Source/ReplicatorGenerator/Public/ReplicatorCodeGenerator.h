@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "ReplicatedActorDecorator.h"
-#include "Persistence/ChannelDataSettingController.h"
+#include "Persistence/ChannelDataSchemaController.h"
 
 struct FCPPClassInfo
 {
@@ -56,12 +56,6 @@ struct FGeneratedCodeBundle
 	FString GlobalStructProtoDefinitions;
 
 	TArray<FChannelDataCode> ChannelDataCodes;
-
-	// FString ChannelDataProcessorHeadCode;
-	// FString ChannelDataProtoDefsFile;
-	//
-	// FString ChannelDataMerge_GoCode;
-	// FString ChannelDataRegistration_GoCode;
 };
 
 
@@ -70,24 +64,24 @@ struct FChannelDataInfo
 	struct FStateInfo
 	{
 		const UClass* RepActorClass;
-		FChannelDataStateSetting Setting;
+		FChannelDataStateSchema Setting;
 
 		FStateInfo() = default;
 
-		FStateInfo(const UClass* InRepActorClass, const FChannelDataStateSetting& InSetting) : RepActorClass(InRepActorClass), Setting(InSetting)
+		FStateInfo(const UClass* InRepActorClass, const FChannelDataStateSchema& InSetting) : RepActorClass(InRepActorClass), Setting(InSetting)
 		{
 		}
 	};
 
-	FChannelDataSetting Setting;
+	FChannelDataSchema Schema;
 
 	TArray<FStateInfo> StateInfos;
 
 	FChannelDataInfo() = default;
 
-	FChannelDataInfo(const FChannelDataSetting& InSetting) : Setting(InSetting)
+	FChannelDataInfo(const FChannelDataSchema& InSetting) : Schema(InSetting)
 	{
-		for (const FChannelDataStateSetting& StateSetting : InSetting.StateSettings)
+		for (const FChannelDataStateSchema& StateSetting : InSetting.StateSchemata)
 		{
 			if (const UClass* TargetClass = LoadClass<UObject>(nullptr, *StateSetting.ReplicationClassPath, nullptr, LOAD_None, nullptr))
 			{
@@ -207,7 +201,7 @@ protected:
 		TSharedPtr<FReplicatedActorDecorator>& OutActorDecorator,
 		FString& OutResultMessage,
 		const UClass* TargetActorClass,
-		const FChannelDataStateSetting& ChannelDataStateSetting,
+		const FChannelDataStateSchema& ChannelDataStateSchema,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
 		bool bInitPropertiesAndRPCs = true
