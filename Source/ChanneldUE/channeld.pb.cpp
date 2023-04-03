@@ -518,6 +518,37 @@ struct CreateEntityChannelMessageDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 CreateEntityChannelMessageDefaultTypeInternal _CreateEntityChannelMessage_default_instance_;
+PROTOBUF_CONSTEXPR AddEntityGroupMessage::AddEntityGroupMessage(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.entitiestoadd_)*/{}
+  , /*decltype(_impl_._entitiestoadd_cached_byte_size_)*/{0}
+  , /*decltype(_impl_.type_)*/0
+  , /*decltype(_impl_.junctionentityid_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct AddEntityGroupMessageDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR AddEntityGroupMessageDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~AddEntityGroupMessageDefaultTypeInternal() {}
+  union {
+    AddEntityGroupMessage _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AddEntityGroupMessageDefaultTypeInternal _AddEntityGroupMessage_default_instance_;
+PROTOBUF_CONSTEXPR RemoveEntityGroupMessage::RemoveEntityGroupMessage(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.entitiestoremove_)*/{}
+  , /*decltype(_impl_._entitiestoremove_cached_byte_size_)*/{0}
+  , /*decltype(_impl_.type_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct RemoveEntityGroupMessageDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR RemoveEntityGroupMessageDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~RemoveEntityGroupMessageDefaultTypeInternal() {}
+  union {
+    RemoveEntityGroupMessage _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RemoveEntityGroupMessageDefaultTypeInternal _RemoveEntityGroupMessage_default_instance_;
 PROTOBUF_CONSTEXPR DebugGetSpatialRegionsMessage::DebugGetSpatialRegionsMessage(
     ::_pbi::ConstantInitialized) {}
 struct DebugGetSpatialRegionsMessageDefaultTypeInternal {
@@ -530,8 +561,8 @@ struct DebugGetSpatialRegionsMessageDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DebugGetSpatialRegionsMessageDefaultTypeInternal _DebugGetSpatialRegionsMessage_default_instance_;
 }  // namespace channeldpb
-static ::_pb::Metadata file_level_metadata_channeld_2eproto[34];
-static const ::_pb::EnumDescriptor* file_level_enum_descriptors_channeld_2eproto[7];
+static ::_pb::Metadata file_level_metadata_channeld_2eproto[36];
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_channeld_2eproto[8];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_channeld_2eproto = nullptr;
 
 const uint32_t TableStruct_channeld_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
@@ -833,6 +864,23 @@ const uint32_t TableStruct_channeld_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
   PROTOBUF_FIELD_OFFSET(::channeldpb::CreateEntityChannelMessage, _impl_.mergeoptions_),
   PROTOBUF_FIELD_OFFSET(::channeldpb::CreateEntityChannelMessage, _impl_.iswellknown_),
   ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::AddEntityGroupMessage, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::AddEntityGroupMessage, _impl_.type_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::AddEntityGroupMessage, _impl_.junctionentityid_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::AddEntityGroupMessage, _impl_.entitiestoadd_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::RemoveEntityGroupMessage, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::RemoveEntityGroupMessage, _impl_.type_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::RemoveEntityGroupMessage, _impl_.entitiestoremove_),
+  ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::channeldpb::DebugGetSpatialRegionsMessage, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -873,7 +921,9 @@ static const ::_pbi::MigrationSchema schemas_channeld_2eproto[] PROTOBUF_SECTION
   { 263, 273, -1, sizeof(::channeldpb::SpatialInterestQuery)},
   { 277, -1, -1, sizeof(::channeldpb::UpdateSpatialInterestMessage)},
   { 285, -1, -1, sizeof(::channeldpb::CreateEntityChannelMessage)},
-  { 297, -1, -1, sizeof(::channeldpb::DebugGetSpatialRegionsMessage)},
+  { 297, -1, -1, sizeof(::channeldpb::AddEntityGroupMessage)},
+  { 306, -1, -1, sizeof(::channeldpb::RemoveEntityGroupMessage)},
+  { 314, -1, -1, sizeof(::channeldpb::DebugGetSpatialRegionsMessage)},
 };
 
 static const ::_pb::Message* const file_default_instances_channeld_2eproto[] = {
@@ -910,6 +960,8 @@ static const ::_pb::Message* const file_default_instances_channeld_2eproto[] = {
   &::channeldpb::_SpatialInterestQuery_default_instance_._instance,
   &::channeldpb::_UpdateSpatialInterestMessage_default_instance_._instance,
   &::channeldpb::_CreateEntityChannelMessage_default_instance_._instance,
+  &::channeldpb::_AddEntityGroupMessage_default_instance_._instance,
+  &::channeldpb::_RemoveEntityGroupMessage_default_instance_._instance,
   &::channeldpb::_DebugGetSpatialRegionsMessage_default_instance_._instance,
 };
 
@@ -1013,41 +1065,48 @@ const char descriptor_table_protodef_channeld_2eproto[] PROTOBUF_SECTION_VARIABL
   "bscriptionOptions\022\"\n\004data\030\004 \001(\0132\024.google"
   ".protobuf.Any\0229\n\014mergeOptions\030\005 \001(\0132#.ch"
   "anneldpb.ChannelDataMergeOptions\022\023\n\013isWe"
-  "llKnown\030\006 \001(\010\"\037\n\035DebugGetSpatialRegionsM"
-  "essage*\247\001\n\rBroadcastType\022\020\n\014NO_BROADCAST"
-  "\020\000\022\025\n\021SINGLE_CONNECTION\020\001\022\007\n\003ALL\020\002\022\022\n\016AL"
-  "L_BUT_SENDER\020\004\022\021\n\rALL_BUT_OWNER\020\010\022\022\n\016ALL"
-  "_BUT_CLIENT\020\020\022\022\n\016ALL_BUT_SERVER\020 \022\025\n\021ADJ"
-  "ACENT_CHANNELS\020@*;\n\016ConnectionType\022\021\n\rNO"
-  "_CONNECTION\020\000\022\n\n\006SERVER\020\001\022\n\n\006CLIENT\020\002*\220\001"
-  "\n\013ChannelType\022\013\n\007UNKNOWN\020\000\022\n\n\006GLOBAL\020\001\022\013"
-  "\n\007PRIVATE\020\002\022\014\n\010SUBWORLD\020\003\022\013\n\007SPATIAL\020\004\022\n"
-  "\n\006ENTITY\020\005\022\010\n\004TEST\020d\022\t\n\005TEST1\020e\022\t\n\005TEST2"
-  "\020f\022\t\n\005TEST3\020g\022\t\n\005TEST4\020h*\216\003\n\013MessageType"
-  "\022\013\n\007INVALID\020\000\022\010\n\004AUTH\020\001\022\022\n\016CREATE_CHANNE"
-  "L\020\003\022\022\n\016REMOVE_CHANNEL\020\004\022\020\n\014LIST_CHANNEL\020"
-  "\005\022\022\n\016SUB_TO_CHANNEL\020\006\022\026\n\022UNSUB_FROM_CHAN"
-  "NEL\020\007\022\027\n\023CHANNEL_DATA_UPDATE\020\010\022\016\n\nDISCON"
-  "NECT\020\t\022\032\n\026CREATE_SPATIAL_CHANNEL\020\n\022\031\n\025QU"
-  "ERY_SPATIAL_CHANNEL\020\013\022\031\n\025CHANNEL_DATA_HA"
-  "NDOVER\020\014\022\032\n\026SPATIAL_REGIONS_UPDATE\020\r\022\033\n\027"
-  "UPDATE_SPATIAL_INTEREST\020\016\022\031\n\025CREATE_ENTI"
-  "TY_CHANNEL\020\017\022\035\n\031DEBUG_GET_SPATIAL_REGION"
-  "S\020c\022\024\n\020USER_SPACE_START\020d*1\n\017Compression"
-  "Type\022\022\n\016NO_COMPRESSION\020\000\022\n\n\006SNAPPY\020\001*E\n\021"
-  "ChannelDataAccess\022\r\n\tNO_ACCESS\020\000\022\017\n\013READ"
-  "_ACCESS\020\001\022\020\n\014WRITE_ACCESS\020\002B0Z.github.co"
-  "m/metaworking/channeld/pkg/channeldpbb\006p"
-  "roto3"
+  "llKnown\030\006 \001(\010\"s\n\025AddEntityGroupMessage\022)"
+  "\n\004type\030\001 \001(\0162\033.channeldpb.EntityGroupTyp"
+  "e\022\030\n\020JunctionEntityId\030\002 \001(\r\022\025\n\rEntitiesT"
+  "oAdd\030\003 \003(\r\"_\n\030RemoveEntityGroupMessage\022)"
+  "\n\004type\030\001 \001(\0162\033.channeldpb.EntityGroupTyp"
+  "e\022\030\n\020EntitiesToRemove\030\002 \003(\r\"\037\n\035DebugGetS"
+  "patialRegionsMessage*\247\001\n\rBroadcastType\022\020"
+  "\n\014NO_BROADCAST\020\000\022\025\n\021SINGLE_CONNECTION\020\001\022"
+  "\007\n\003ALL\020\002\022\022\n\016ALL_BUT_SENDER\020\004\022\021\n\rALL_BUT_"
+  "OWNER\020\010\022\022\n\016ALL_BUT_CLIENT\020\020\022\022\n\016ALL_BUT_S"
+  "ERVER\020 \022\025\n\021ADJACENT_CHANNELS\020@*;\n\016Connec"
+  "tionType\022\021\n\rNO_CONNECTION\020\000\022\n\n\006SERVER\020\001\022"
+  "\n\n\006CLIENT\020\002*\220\001\n\013ChannelType\022\013\n\007UNKNOWN\020\000"
+  "\022\n\n\006GLOBAL\020\001\022\013\n\007PRIVATE\020\002\022\014\n\010SUBWORLD\020\003\022"
+  "\013\n\007SPATIAL\020\004\022\n\n\006ENTITY\020\005\022\010\n\004TEST\020d\022\t\n\005TE"
+  "ST1\020e\022\t\n\005TEST2\020f\022\t\n\005TEST3\020g\022\t\n\005TEST4\020h*\275"
+  "\003\n\013MessageType\022\013\n\007INVALID\020\000\022\010\n\004AUTH\020\001\022\022\n"
+  "\016CREATE_CHANNEL\020\003\022\022\n\016REMOVE_CHANNEL\020\004\022\020\n"
+  "\014LIST_CHANNEL\020\005\022\022\n\016SUB_TO_CHANNEL\020\006\022\026\n\022U"
+  "NSUB_FROM_CHANNEL\020\007\022\027\n\023CHANNEL_DATA_UPDA"
+  "TE\020\010\022\016\n\nDISCONNECT\020\t\022\032\n\026CREATE_SPATIAL_C"
+  "HANNEL\020\n\022\031\n\025QUERY_SPATIAL_CHANNEL\020\013\022\031\n\025C"
+  "HANNEL_DATA_HANDOVER\020\014\022\032\n\026SPATIAL_REGION"
+  "S_UPDATE\020\r\022\033\n\027UPDATE_SPATIAL_INTEREST\020\016\022"
+  "\031\n\025CREATE_ENTITY_CHANNEL\020\017\022\024\n\020ENTITY_GRO"
+  "UP_ADD\020\020\022\027\n\023ENTITY_GROUP_REMOVE\020\021\022\035\n\031DEB"
+  "UG_GET_SPATIAL_REGIONS\020c\022\024\n\020USER_SPACE_S"
+  "TART\020d*1\n\017CompressionType\022\022\n\016NO_COMPRESS"
+  "ION\020\000\022\n\n\006SNAPPY\020\001*E\n\021ChannelDataAccess\022\r"
+  "\n\tNO_ACCESS\020\000\022\017\n\013READ_ACCESS\020\001\022\020\n\014WRITE_"
+  "ACCESS\020\002*)\n\017EntityGroupType\022\014\n\010HANDOVER\020"
+  "\000\022\010\n\004LOCK\020\001B0Z.github.com/metaworking/ch"
+  "anneld/pkg/channeldpbb\006proto3"
   ;
 static const ::_pbi::DescriptorTable* const descriptor_table_channeld_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fany_2eproto,
 };
 static ::_pbi::once_flag descriptor_table_channeld_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_channeld_2eproto = {
-    false, false, 4965, descriptor_table_protodef_channeld_2eproto,
+    false, false, 5269, descriptor_table_protodef_channeld_2eproto,
     "channeld.proto",
-    &descriptor_table_channeld_2eproto_once, descriptor_table_channeld_2eproto_deps, 1, 34,
+    &descriptor_table_channeld_2eproto_once, descriptor_table_channeld_2eproto_deps, 1, 36,
     schemas_channeld_2eproto, file_default_instances_channeld_2eproto, TableStruct_channeld_2eproto::offsets,
     file_level_metadata_channeld_2eproto, file_level_enum_descriptors_channeld_2eproto,
     file_level_service_descriptors_channeld_2eproto,
@@ -1161,6 +1220,8 @@ bool MessageType_IsValid(int value) {
     case 13:
     case 14:
     case 15:
+    case 16:
+    case 17:
     case 99:
     case 100:
       return true;
@@ -1192,6 +1253,20 @@ bool ChannelDataAccess_IsValid(int value) {
     case 0:
     case 1:
     case 2:
+      return true;
+    default:
+      return false;
+  }
+}
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* EntityGroupType_descriptor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_channeld_2eproto);
+  return file_level_enum_descriptors_channeld_2eproto[7];
+}
+bool EntityGroupType_IsValid(int value) {
+  switch (value) {
+    case 0:
+    case 1:
       return true;
     default:
       return false;
@@ -9507,6 +9582,485 @@ void CreateEntityChannelMessage::InternalSwap(CreateEntityChannelMessage* other)
 
 // ===================================================================
 
+class AddEntityGroupMessage::_Internal {
+ public:
+};
+
+AddEntityGroupMessage::AddEntityGroupMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:channeldpb.AddEntityGroupMessage)
+}
+AddEntityGroupMessage::AddEntityGroupMessage(const AddEntityGroupMessage& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  AddEntityGroupMessage* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.entitiestoadd_){from._impl_.entitiestoadd_}
+    , /*decltype(_impl_._entitiestoadd_cached_byte_size_)*/{0}
+    , decltype(_impl_.type_){}
+    , decltype(_impl_.junctionentityid_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::memcpy(&_impl_.type_, &from._impl_.type_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.junctionentityid_) -
+    reinterpret_cast<char*>(&_impl_.type_)) + sizeof(_impl_.junctionentityid_));
+  // @@protoc_insertion_point(copy_constructor:channeldpb.AddEntityGroupMessage)
+}
+
+inline void AddEntityGroupMessage::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.entitiestoadd_){arena}
+    , /*decltype(_impl_._entitiestoadd_cached_byte_size_)*/{0}
+    , decltype(_impl_.type_){0}
+    , decltype(_impl_.junctionentityid_){0u}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+}
+
+AddEntityGroupMessage::~AddEntityGroupMessage() {
+  // @@protoc_insertion_point(destructor:channeldpb.AddEntityGroupMessage)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void AddEntityGroupMessage::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.entitiestoadd_.~RepeatedField();
+}
+
+void AddEntityGroupMessage::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void AddEntityGroupMessage::Clear() {
+// @@protoc_insertion_point(message_clear_start:channeldpb.AddEntityGroupMessage)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.entitiestoadd_.Clear();
+  ::memset(&_impl_.type_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.junctionentityid_) -
+      reinterpret_cast<char*>(&_impl_.type_)) + sizeof(_impl_.junctionentityid_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* AddEntityGroupMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // .channeldpb.EntityGroupType type = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+          _internal_set_type(static_cast<::channeldpb::EntityGroupType>(val));
+        } else
+          goto handle_unusual;
+        continue;
+      // uint32 JunctionEntityId = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _impl_.junctionentityid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // repeated uint32 EntitiesToAdd = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedUInt32Parser(_internal_mutable_entitiestoadd(), ptr, ctx);
+          CHK_(ptr);
+        } else if (static_cast<uint8_t>(tag) == 24) {
+          _internal_add_entitiestoadd(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* AddEntityGroupMessage::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:channeldpb.AddEntityGroupMessage)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .channeldpb.EntityGroupType type = 1;
+  if (this->_internal_type() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+      1, this->_internal_type(), target);
+  }
+
+  // uint32 JunctionEntityId = 2;
+  if (this->_internal_junctionentityid() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_junctionentityid(), target);
+  }
+
+  // repeated uint32 EntitiesToAdd = 3;
+  {
+    int byte_size = _impl_._entitiestoadd_cached_byte_size_.load(std::memory_order_relaxed);
+    if (byte_size > 0) {
+      target = stream->WriteUInt32Packed(
+          3, _internal_entitiestoadd(), byte_size, target);
+    }
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:channeldpb.AddEntityGroupMessage)
+  return target;
+}
+
+size_t AddEntityGroupMessage::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:channeldpb.AddEntityGroupMessage)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated uint32 EntitiesToAdd = 3;
+  {
+    size_t data_size = ::_pbi::WireFormatLite::
+      UInt32Size(this->_impl_.entitiestoadd_);
+    if (data_size > 0) {
+      total_size += 1 +
+        ::_pbi::WireFormatLite::Int32Size(static_cast<int32_t>(data_size));
+    }
+    int cached_size = ::_pbi::ToCachedSize(data_size);
+    _impl_._entitiestoadd_cached_byte_size_.store(cached_size,
+                                    std::memory_order_relaxed);
+    total_size += data_size;
+  }
+
+  // .channeldpb.EntityGroupType type = 1;
+  if (this->_internal_type() != 0) {
+    total_size += 1 +
+      ::_pbi::WireFormatLite::EnumSize(this->_internal_type());
+  }
+
+  // uint32 JunctionEntityId = 2;
+  if (this->_internal_junctionentityid() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_junctionentityid());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData AddEntityGroupMessage::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    AddEntityGroupMessage::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*AddEntityGroupMessage::GetClassData() const { return &_class_data_; }
+
+
+void AddEntityGroupMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<AddEntityGroupMessage*>(&to_msg);
+  auto& from = static_cast<const AddEntityGroupMessage&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:channeldpb.AddEntityGroupMessage)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_impl_.entitiestoadd_.MergeFrom(from._impl_.entitiestoadd_);
+  if (from._internal_type() != 0) {
+    _this->_internal_set_type(from._internal_type());
+  }
+  if (from._internal_junctionentityid() != 0) {
+    _this->_internal_set_junctionentityid(from._internal_junctionentityid());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void AddEntityGroupMessage::CopyFrom(const AddEntityGroupMessage& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:channeldpb.AddEntityGroupMessage)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool AddEntityGroupMessage::IsInitialized() const {
+  return true;
+}
+
+void AddEntityGroupMessage::InternalSwap(AddEntityGroupMessage* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.entitiestoadd_.InternalSwap(&other->_impl_.entitiestoadd_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(AddEntityGroupMessage, _impl_.junctionentityid_)
+      + sizeof(AddEntityGroupMessage::_impl_.junctionentityid_)
+      - PROTOBUF_FIELD_OFFSET(AddEntityGroupMessage, _impl_.type_)>(
+          reinterpret_cast<char*>(&_impl_.type_),
+          reinterpret_cast<char*>(&other->_impl_.type_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata AddEntityGroupMessage::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
+      file_level_metadata_channeld_2eproto[33]);
+}
+
+// ===================================================================
+
+class RemoveEntityGroupMessage::_Internal {
+ public:
+};
+
+RemoveEntityGroupMessage::RemoveEntityGroupMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:channeldpb.RemoveEntityGroupMessage)
+}
+RemoveEntityGroupMessage::RemoveEntityGroupMessage(const RemoveEntityGroupMessage& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  RemoveEntityGroupMessage* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.entitiestoremove_){from._impl_.entitiestoremove_}
+    , /*decltype(_impl_._entitiestoremove_cached_byte_size_)*/{0}
+    , decltype(_impl_.type_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_impl_.type_ = from._impl_.type_;
+  // @@protoc_insertion_point(copy_constructor:channeldpb.RemoveEntityGroupMessage)
+}
+
+inline void RemoveEntityGroupMessage::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.entitiestoremove_){arena}
+    , /*decltype(_impl_._entitiestoremove_cached_byte_size_)*/{0}
+    , decltype(_impl_.type_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+}
+
+RemoveEntityGroupMessage::~RemoveEntityGroupMessage() {
+  // @@protoc_insertion_point(destructor:channeldpb.RemoveEntityGroupMessage)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void RemoveEntityGroupMessage::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.entitiestoremove_.~RepeatedField();
+}
+
+void RemoveEntityGroupMessage::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void RemoveEntityGroupMessage::Clear() {
+// @@protoc_insertion_point(message_clear_start:channeldpb.RemoveEntityGroupMessage)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.entitiestoremove_.Clear();
+  _impl_.type_ = 0;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* RemoveEntityGroupMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // .channeldpb.EntityGroupType type = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+          _internal_set_type(static_cast<::channeldpb::EntityGroupType>(val));
+        } else
+          goto handle_unusual;
+        continue;
+      // repeated uint32 EntitiesToRemove = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedUInt32Parser(_internal_mutable_entitiestoremove(), ptr, ctx);
+          CHK_(ptr);
+        } else if (static_cast<uint8_t>(tag) == 16) {
+          _internal_add_entitiestoremove(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr));
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* RemoveEntityGroupMessage::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:channeldpb.RemoveEntityGroupMessage)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .channeldpb.EntityGroupType type = 1;
+  if (this->_internal_type() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+      1, this->_internal_type(), target);
+  }
+
+  // repeated uint32 EntitiesToRemove = 2;
+  {
+    int byte_size = _impl_._entitiestoremove_cached_byte_size_.load(std::memory_order_relaxed);
+    if (byte_size > 0) {
+      target = stream->WriteUInt32Packed(
+          2, _internal_entitiestoremove(), byte_size, target);
+    }
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:channeldpb.RemoveEntityGroupMessage)
+  return target;
+}
+
+size_t RemoveEntityGroupMessage::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:channeldpb.RemoveEntityGroupMessage)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated uint32 EntitiesToRemove = 2;
+  {
+    size_t data_size = ::_pbi::WireFormatLite::
+      UInt32Size(this->_impl_.entitiestoremove_);
+    if (data_size > 0) {
+      total_size += 1 +
+        ::_pbi::WireFormatLite::Int32Size(static_cast<int32_t>(data_size));
+    }
+    int cached_size = ::_pbi::ToCachedSize(data_size);
+    _impl_._entitiestoremove_cached_byte_size_.store(cached_size,
+                                    std::memory_order_relaxed);
+    total_size += data_size;
+  }
+
+  // .channeldpb.EntityGroupType type = 1;
+  if (this->_internal_type() != 0) {
+    total_size += 1 +
+      ::_pbi::WireFormatLite::EnumSize(this->_internal_type());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData RemoveEntityGroupMessage::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    RemoveEntityGroupMessage::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RemoveEntityGroupMessage::GetClassData() const { return &_class_data_; }
+
+
+void RemoveEntityGroupMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<RemoveEntityGroupMessage*>(&to_msg);
+  auto& from = static_cast<const RemoveEntityGroupMessage&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:channeldpb.RemoveEntityGroupMessage)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_impl_.entitiestoremove_.MergeFrom(from._impl_.entitiestoremove_);
+  if (from._internal_type() != 0) {
+    _this->_internal_set_type(from._internal_type());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void RemoveEntityGroupMessage::CopyFrom(const RemoveEntityGroupMessage& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:channeldpb.RemoveEntityGroupMessage)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool RemoveEntityGroupMessage::IsInitialized() const {
+  return true;
+}
+
+void RemoveEntityGroupMessage::InternalSwap(RemoveEntityGroupMessage* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.entitiestoremove_.InternalSwap(&other->_impl_.entitiestoremove_);
+  swap(_impl_.type_, other->_impl_.type_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata RemoveEntityGroupMessage::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
+      file_level_metadata_channeld_2eproto[34]);
+}
+
+// ===================================================================
+
 class DebugGetSpatialRegionsMessage::_Internal {
  public:
 };
@@ -9542,7 +10096,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*DebugGetSpatialRegionsMessage:
 ::PROTOBUF_NAMESPACE_ID::Metadata DebugGetSpatialRegionsMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[33]);
+      file_level_metadata_channeld_2eproto[35]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -9679,6 +10233,14 @@ Arena::CreateMaybeMessage< ::channeldpb::UpdateSpatialInterestMessage >(Arena* a
 template<> PROTOBUF_NOINLINE ::channeldpb::CreateEntityChannelMessage*
 Arena::CreateMaybeMessage< ::channeldpb::CreateEntityChannelMessage >(Arena* arena) {
   return Arena::CreateMessageInternal< ::channeldpb::CreateEntityChannelMessage >(arena);
+}
+template<> PROTOBUF_NOINLINE ::channeldpb::AddEntityGroupMessage*
+Arena::CreateMaybeMessage< ::channeldpb::AddEntityGroupMessage >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::channeldpb::AddEntityGroupMessage >(arena);
+}
+template<> PROTOBUF_NOINLINE ::channeldpb::RemoveEntityGroupMessage*
+Arena::CreateMaybeMessage< ::channeldpb::RemoveEntityGroupMessage >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::channeldpb::RemoveEntityGroupMessage >(arena);
 }
 template<> PROTOBUF_NOINLINE ::channeldpb::DebugGetSpatialRegionsMessage*
 Arena::CreateMaybeMessage< ::channeldpb::DebugGetSpatialRegionsMessage >(Arena* arena) {

@@ -803,6 +803,7 @@ class CHANNELDUE_API UnrealObjectRef final :
     kClassPathFieldNumber = 6,
     kNetGUIDFieldNumber = 1,
     kBunchBitsNumFieldNumber = 4,
+    kOwningConnIdFieldNumber = 7,
   };
   // repeated .unrealpb.UnrealObjectRef.GuidCachedObject context = 2;
   int context_size() const;
@@ -884,6 +885,19 @@ class CHANNELDUE_API UnrealObjectRef final :
   void _internal_set_bunchbitsnum(uint32_t value);
   public:
 
+  // optional uint32 owningConnId = 7;
+  bool has_owningconnid() const;
+  private:
+  bool _internal_has_owningconnid() const;
+  public:
+  void clear_owningconnid();
+  uint32_t owningconnid() const;
+  void set_owningconnid(uint32_t value);
+  private:
+  uint32_t _internal_owningconnid() const;
+  void _internal_set_owningconnid(uint32_t value);
+  public:
+
   // @@protoc_insertion_point(class_scope:unrealpb.UnrealObjectRef)
  private:
   class _Internal;
@@ -899,6 +913,7 @@ class CHANNELDUE_API UnrealObjectRef final :
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr classpath_;
     uint32_t netguid_;
     uint32_t bunchbitsnum_;
+    uint32_t owningconnid_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -1397,7 +1412,6 @@ class CHANNELDUE_API SpawnObjectMessage final :
     kLocationFieldNumber = 5,
     kChannelIdFieldNumber = 2,
     kLocalRoleFieldNumber = 3,
-    kOwningConnIdFieldNumber = 4,
   };
   // .unrealpb.UnrealObjectRef obj = 1;
   bool has_obj() const;
@@ -1461,19 +1475,6 @@ class CHANNELDUE_API SpawnObjectMessage final :
   void _internal_set_localrole(uint32_t value);
   public:
 
-  // optional uint32 owningConnId = 4;
-  bool has_owningconnid() const;
-  private:
-  bool _internal_has_owningconnid() const;
-  public:
-  void clear_owningconnid();
-  uint32_t owningconnid() const;
-  void set_owningconnid(uint32_t value);
-  private:
-  uint32_t _internal_owningconnid() const;
-  void _internal_set_owningconnid(uint32_t value);
-  public:
-
   // @@protoc_insertion_point(class_scope:unrealpb.SpawnObjectMessage)
  private:
   class _Internal;
@@ -1488,7 +1489,6 @@ class CHANNELDUE_API SpawnObjectMessage final :
     ::unrealpb::FVector* location_;
     uint32_t channelid_;
     uint32_t localrole_;
-    uint32_t owningconnid_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -2806,6 +2806,7 @@ class CHANNELDUE_API SpatialEntityState final :
 
   enum : int {
     kObjRefFieldNumber = 1,
+    kEntityDataFieldNumber = 3,
   };
   // .unrealpb.UnrealObjectRef objRef = 1;
   bool has_objref() const;
@@ -2825,6 +2826,24 @@ class CHANNELDUE_API SpatialEntityState final :
       ::unrealpb::UnrealObjectRef* objref);
   ::unrealpb::UnrealObjectRef* unsafe_arena_release_objref();
 
+  // optional .google.protobuf.Any entityData = 3;
+  bool has_entitydata() const;
+  private:
+  bool _internal_has_entitydata() const;
+  public:
+  void clear_entitydata();
+  const ::PROTOBUF_NAMESPACE_ID::Any& entitydata() const;
+  PROTOBUF_NODISCARD ::PROTOBUF_NAMESPACE_ID::Any* release_entitydata();
+  ::PROTOBUF_NAMESPACE_ID::Any* mutable_entitydata();
+  void set_allocated_entitydata(::PROTOBUF_NAMESPACE_ID::Any* entitydata);
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Any& _internal_entitydata() const;
+  ::PROTOBUF_NAMESPACE_ID::Any* _internal_mutable_entitydata();
+  public:
+  void unsafe_arena_set_allocated_entitydata(
+      ::PROTOBUF_NAMESPACE_ID::Any* entitydata);
+  ::PROTOBUF_NAMESPACE_ID::Any* unsafe_arena_release_entitydata();
+
   // @@protoc_insertion_point(class_scope:unrealpb.SpatialEntityState)
  private:
   class _Internal;
@@ -2833,8 +2852,10 @@ class CHANNELDUE_API SpatialEntityState final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
-    ::unrealpb::UnrealObjectRef* objref_;
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+    ::unrealpb::UnrealObjectRef* objref_;
+    ::PROTOBUF_NAMESPACE_ID::Any* entitydata_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -10560,6 +10581,34 @@ inline void UnrealObjectRef::set_allocated_classpath(std::string* classpath) {
   // @@protoc_insertion_point(field_set_allocated:unrealpb.UnrealObjectRef.classPath)
 }
 
+// optional uint32 owningConnId = 7;
+inline bool UnrealObjectRef::_internal_has_owningconnid() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool UnrealObjectRef::has_owningconnid() const {
+  return _internal_has_owningconnid();
+}
+inline void UnrealObjectRef::clear_owningconnid() {
+  _impl_.owningconnid_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000010u;
+}
+inline uint32_t UnrealObjectRef::_internal_owningconnid() const {
+  return _impl_.owningconnid_;
+}
+inline uint32_t UnrealObjectRef::owningconnid() const {
+  // @@protoc_insertion_point(field_get:unrealpb.UnrealObjectRef.owningConnId)
+  return _internal_owningconnid();
+}
+inline void UnrealObjectRef::_internal_set_owningconnid(uint32_t value) {
+  _impl_._has_bits_[0] |= 0x00000010u;
+  _impl_.owningconnid_ = value;
+}
+inline void UnrealObjectRef::set_owningconnid(uint32_t value) {
+  _internal_set_owningconnid(value);
+  // @@protoc_insertion_point(field_set:unrealpb.UnrealObjectRef.owningConnId)
+}
+
 // -------------------------------------------------------------------
 
 // ActorComponentRef
@@ -11064,34 +11113,6 @@ inline void SpawnObjectMessage::_internal_set_localrole(uint32_t value) {
 inline void SpawnObjectMessage::set_localrole(uint32_t value) {
   _internal_set_localrole(value);
   // @@protoc_insertion_point(field_set:unrealpb.SpawnObjectMessage.localRole)
-}
-
-// optional uint32 owningConnId = 4;
-inline bool SpawnObjectMessage::_internal_has_owningconnid() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
-  return value;
-}
-inline bool SpawnObjectMessage::has_owningconnid() const {
-  return _internal_has_owningconnid();
-}
-inline void SpawnObjectMessage::clear_owningconnid() {
-  _impl_.owningconnid_ = 0u;
-  _impl_._has_bits_[0] &= ~0x00000008u;
-}
-inline uint32_t SpawnObjectMessage::_internal_owningconnid() const {
-  return _impl_.owningconnid_;
-}
-inline uint32_t SpawnObjectMessage::owningconnid() const {
-  // @@protoc_insertion_point(field_get:unrealpb.SpawnObjectMessage.owningConnId)
-  return _internal_owningconnid();
-}
-inline void SpawnObjectMessage::_internal_set_owningconnid(uint32_t value) {
-  _impl_._has_bits_[0] |= 0x00000008u;
-  _impl_.owningconnid_ = value;
-}
-inline void SpawnObjectMessage::set_owningconnid(uint32_t value) {
-  _internal_set_owningconnid(value);
-  // @@protoc_insertion_point(field_set:unrealpb.SpawnObjectMessage.owningConnId)
 }
 
 // optional .unrealpb.FVector location = 5;
@@ -11836,6 +11857,93 @@ inline void SpatialEntityState::set_allocated_objref(::unrealpb::UnrealObjectRef
   }
   _impl_.objref_ = objref;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.SpatialEntityState.objRef)
+}
+
+// optional .google.protobuf.Any entityData = 3;
+inline bool SpatialEntityState::_internal_has_entitydata() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.entitydata_ != nullptr);
+  return value;
+}
+inline bool SpatialEntityState::has_entitydata() const {
+  return _internal_has_entitydata();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Any& SpatialEntityState::_internal_entitydata() const {
+  const ::PROTOBUF_NAMESPACE_ID::Any* p = _impl_.entitydata_;
+  return p != nullptr ? *p : reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Any&>(
+      ::PROTOBUF_NAMESPACE_ID::_Any_default_instance_);
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Any& SpatialEntityState::entitydata() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SpatialEntityState.entityData)
+  return _internal_entitydata();
+}
+inline void SpatialEntityState::unsafe_arena_set_allocated_entitydata(
+    ::PROTOBUF_NAMESPACE_ID::Any* entitydata) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.entitydata_);
+  }
+  _impl_.entitydata_ = entitydata;
+  if (entitydata) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.SpatialEntityState.entityData)
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* SpatialEntityState::release_entitydata() {
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::PROTOBUF_NAMESPACE_ID::Any* temp = _impl_.entitydata_;
+  _impl_.entitydata_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* SpatialEntityState::unsafe_arena_release_entitydata() {
+  // @@protoc_insertion_point(field_release:unrealpb.SpatialEntityState.entityData)
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::PROTOBUF_NAMESPACE_ID::Any* temp = _impl_.entitydata_;
+  _impl_.entitydata_ = nullptr;
+  return temp;
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* SpatialEntityState::_internal_mutable_entitydata() {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  if (_impl_.entitydata_ == nullptr) {
+    auto* p = CreateMaybeMessage<::PROTOBUF_NAMESPACE_ID::Any>(GetArenaForAllocation());
+    _impl_.entitydata_ = p;
+  }
+  return _impl_.entitydata_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* SpatialEntityState::mutable_entitydata() {
+  ::PROTOBUF_NAMESPACE_ID::Any* _msg = _internal_mutable_entitydata();
+  // @@protoc_insertion_point(field_mutable:unrealpb.SpatialEntityState.entityData)
+  return _msg;
+}
+inline void SpatialEntityState::set_allocated_entitydata(::PROTOBUF_NAMESPACE_ID::Any* entitydata) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.entitydata_);
+  }
+  if (entitydata) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(
+                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(entitydata));
+    if (message_arena != submessage_arena) {
+      entitydata = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, entitydata, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  _impl_.entitydata_ = entitydata;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.SpatialEntityState.entityData)
 }
 
 // -------------------------------------------------------------------

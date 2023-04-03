@@ -141,19 +141,24 @@ unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnec
 
 	auto GuidCache = World->GetNetDriver()->GuidCache;
 	auto NetGUID = GuidCache->GetNetGUID(Obj);
+	ObjRef.set_netguid(NetGUID.Value);
+	ObjRef.set_classpath(std::string(TCHAR_TO_UTF8(*Obj->GetClass()->GetPathName())));
+	
 	if (Obj->IsA<AActor>() && GuidCache->IsNetGUIDAuthority())
 	{
 		auto Actor = Cast<AActor>(Obj);
 		if (Connection == nullptr)
 		{
-			Connection = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
+			Connection = Actor->GetNetConnection();
 		}
 		if (!IsValid(Connection))
 		{
 			UE_LOG(LogChanneld, Log, TEXT("ChanneldUtils::GetRefOfObject: Unable to full-export '%s' as it doesn't have valid NetConnection"), *Obj->GetName());
-			ObjRef.set_netguid(NetGUID.Value);
 			return ObjRef;
 		}
+		
+		ObjRef.set_owningconnid(CastChecked<UChanneldNetConnection>(Connection)->GetConnId());
+		
 		auto PackageMap = Cast<UPackageMapClient>(Connection->PackageMap);
 
 		if (IsValid(PackageMap))
@@ -214,8 +219,6 @@ unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnec
 		}
 	}
 
-	ObjRef.set_netguid(NetGUID.Value);
-	ObjRef.set_classpath(std::string(TCHAR_TO_UTF8(*Obj->GetClass()->GetPathName())));
 	// ObjRef.set_connid(GEngine->GetEngineSubsystem<UChanneldConnection>()->GetConnId());
 	return ObjRef;
 }
