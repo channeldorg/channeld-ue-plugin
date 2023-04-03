@@ -29,7 +29,7 @@ static const FString GenManager_GlobalStructProtoHeaderFile = TEXT("ChanneldGlob
 
 static const FString GenManager_UnrealCommonProtoFile = TEXT("unreal_common") + CodeGen_ProtoFileExtension;
 
-static const FString GenManager_IntermediateDir = FPaths::ProjectIntermediateDir() / TEXT("ChanneldReplicationGenerator");
+static const FString GenManager_IntermediateDir = FPaths::ProjectIntermediateDir() / TEXT("ChanneldReplicationGenerated");
 static const FString GenManager_RepActorCachePath = GenManager_IntermediateDir / TEXT("ReplicationActorCache.json");
 static const FString GenManager_GeneratedManifestFilePath = GenManager_IntermediateDir / TEXT("ReplicationGeneratedManifest.json");
 static const FString GenManager_TemporaryGoMergeCodePath = GenManager_IntermediateDir / TEXT("Tmp_ChannelDataGoMergeCode.go");

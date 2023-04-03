@@ -45,27 +45,33 @@ func (dst *{Definition_ChannelDataMsgName}) Merge(src common.ChannelDataMessage,
 	}
 
 	if spatialNotifier != nil {
-		// src = the incoming update, dst = existing channel data
-		for netId, newActorState := range srcData.ActorStates {
-			oldActorState, exists := dst.ActorStates[netId]
-			if exists {
-				if newActorState.ReplicatedMovement != nil && newActorState.ReplicatedMovement.Location != nil &&
-					oldActorState.ReplicatedMovement != nil && oldActorState.ReplicatedMovement.Location != nil {
-					unreal.CheckSpatialInfoChange(netId, newActorState.ReplicatedMovement.Location, oldActorState.ReplicatedMovement.Location, spatialNotifier)
-				}
-			}
-		}
-
-		for netId, newSceneCompState := range srcData.SceneComponentStates {
-			oldSceneCompState, exists := dst.SceneComponentStates[netId]
-			if exists {
-				if newSceneCompState.RelativeLocation != nil && oldSceneCompState.RelativeLocation != nil {
-					unreal.CheckSpatialInfoChange(netId, newSceneCompState.RelativeLocation, oldSceneCompState.RelativeLocation, spatialNotifier)
-				}
-			}
-		}
+		{Code_SpatialNotifier}
 	}
 
+)EOF";
+
+static const TCHAR* CodeGen_Go_ActorSpatialNotifierTemp = LR"EOF(
+// src = the incoming update, dst = existing channel data
+for netId, newActorState := range srcData.ActorStates {
+	oldActorState, exists := dst.ActorStates[netId]
+	if exists {
+		if newActorState.ReplicatedMovement != nil && newActorState.ReplicatedMovement.Location != nil &&
+			oldActorState.ReplicatedMovement != nil && oldActorState.ReplicatedMovement.Location != nil {
+			unreal.CheckSpatialInfoChange(netId, newActorState.ReplicatedMovement.Location, oldActorState.ReplicatedMovement.Location, spatialNotifier)
+		}
+	}
+}
+)EOF";
+
+static const TCHAR* CodeGen_Go_SceneCompSpatialNotifierTemp = LR"EOF(
+for netId, newSceneCompState := range srcData.SceneComponentStates {
+	oldSceneCompState, exists := dst.SceneComponentStates[netId]
+	if exists {
+		if newSceneCompState.RelativeLocation != nil && oldSceneCompState.RelativeLocation != nil {
+			unreal.CheckSpatialInfoChange(netId, newSceneCompState.RelativeLocation, oldSceneCompState.RelativeLocation, spatialNotifier)
+		}
+	}
+}
 )EOF";
 
 static const TCHAR* CodeGen_Go_MergeStateTemplate = LR"EOF(
@@ -147,6 +153,6 @@ import (
 )
 
 func InitChannelDataTypes() {
-	channeld.RegisterChannelDataType(channeldpb.ChannelType_GLOBAL, &{Definition_GenPackageName}.{Definition_ChannelDataMsgName}{})
+	{Code_Registration}
 }
 )EOF";

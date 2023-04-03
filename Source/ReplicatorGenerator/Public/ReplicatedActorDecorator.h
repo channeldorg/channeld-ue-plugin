@@ -273,6 +273,8 @@ public:
 	 */
 	virtual FString GetProtoStateMessageType() override;
 
+	virtual FString GetProtoStateMessageTypeGo();
+
 	/**
 	 * Get code that sets whole delta state
 	 */

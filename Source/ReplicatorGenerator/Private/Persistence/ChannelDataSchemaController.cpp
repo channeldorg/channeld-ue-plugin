@@ -28,94 +28,35 @@ void UChannelDataSchemaController::GetChannelDataSchemata(TArray<FChannelDataSch
 	}
 	else
 	{
-		TArray<FChannelDataStateSchemaRow> DataStateSchemaRows;
-		ChannelDataStateSchemaModal.GetDataArray(DataStateSchemaRows);
-
-		if (DataStateSchemaRows.Num() == 0)
-		{
-			ChannelDataSchemata.Empty();
-			return;
-		}
-		ChannelDataSchemata = ConvertRowsToChannelDataSchemata(DataStateSchemaRows);
+		ChannelDataStateSchemaModal.GetDataArray(ChannelDataSchemata);
 	}
 }
 
 void UChannelDataSchemaController::SaveChannelDataSchemata(const TArray<FChannelDataSchema>& ChannelDataSchemata)
 {
-	ChannelDataStateSchemaModal.SaveDataArray(ConvertChannelDataSchemataToRows(ChannelDataSchemata));
+	ChannelDataStateSchemaModal.SaveDataArray(ChannelDataSchemata);
 }
 
 void UChannelDataSchemaController::ImportChannelDataSchemataFrom(const FString& FilePath, TArray<FChannelDataSchema>& ChannelDataSchemata, bool& Success)
 {
-	TJsonModel<FChannelDataStateSchemaRow> TmpModel(FilePath);
-	TArray<FChannelDataStateSchemaRow> DataStateSchemaRows;
-	if (!TmpModel.GetDataArray(DataStateSchemaRows))
+	TJsonModel<FChannelDataSchema> TmpModel(FilePath);
+	if (!TmpModel.GetDataArray(ChannelDataSchemata))
 	{
 		Success = false;
 		return;
 	}
-	ChannelDataSchemata = ConvertRowsToChannelDataSchemata(DataStateSchemaRows);
 	Success = true;
 }
 
 void UChannelDataSchemaController::ExportChannelDataSchemataTo(const FString& FilePath, const TArray<FChannelDataSchema>& ChannelDataSchemata, bool& Success)
 {
-	TJsonModel<FChannelDataStateSchemaRow> TmpModel(FilePath);
-	if (!TmpModel.SaveDataArray(ConvertChannelDataSchemataToRows(ChannelDataSchemata)))
+	TJsonModel<FChannelDataSchema> TmpModel(FilePath);
+	if (!TmpModel.SaveDataArray(ChannelDataSchemata))
 	{
 		Success = false;
 		return;
 	}
 	Success = true;
-}
-
-TArray<FChannelDataStateSchemaRow> UChannelDataSchemaController::ConvertChannelDataSchemataToRows(const TArray<FChannelDataSchema>& ChannelDataSchemata)
-{
-	TArray<FChannelDataStateSchemaRow> DataStateSchemaRows;
-	for (const FChannelDataSchema& ChannelDataSchema : ChannelDataSchemata)
-	{
-		for (const FChannelDataStateSchema& StateSchema : ChannelDataSchema.StateSchemata)
-		{
-			DataStateSchemaRows.Add(FChannelDataStateSchemaRow(
-				static_cast<int32>(ChannelDataSchema.ChannelType),
-				ChannelDataSchema.ChannelTypeOrder,
-				StateSchema.ReplicationClassPath,
-				StateSchema.StateOrder,
-				StateSchema.bSkip,
-				StateSchema.bSingleton
-			));
-		}
-	}
-	return DataStateSchemaRows;
-}
-
-inline TArray<FChannelDataSchema> UChannelDataSchemaController::ConvertRowsToChannelDataSchemata(const TArray<FChannelDataStateSchemaRow>& ChannelDataSchemaRows)
-{
-	TArray<FChannelDataSchema> ChannelDataSchemata;
-	TMap<int32, FChannelDataSchema> ChannelDataSchemaMap;
-	for (const FChannelDataStateSchemaRow& DataStateSchemaRow : ChannelDataSchemaRows)
-	{
-		FChannelDataSchema* ChannelDataSchema;
-
-		if ((ChannelDataSchema = ChannelDataSchemaMap.Find(DataStateSchemaRow.ChannelType)) == nullptr)
-		{
-			ChannelDataSchemaMap.Add(
-				DataStateSchemaRow.ChannelType,
-				FChannelDataSchema(DataStateSchemaRow.ChannelType, DataStateSchemaRow.ChannelTypeOrder)
-			);
-			ChannelDataSchema = ChannelDataSchemaMap.Find(DataStateSchemaRow.ChannelType);
-		}
-		ChannelDataSchema->StateSchemata.Add(FChannelDataStateSchema(
-			ChannelDataSchema->ChannelType
-			, DataStateSchemaRow.ReplicationClassPath
-			, DataStateSchemaRow.StateOrder
-			, DataStateSchemaRow.bSkip
-			, DataStateSchemaRow.bSingleton
-		));
-	}
-	ChannelDataSchemaMap.GenerateValueArray(ChannelDataSchemata);
-	SortChannelDataSchemata(ChannelDataSchemata);
-	return ChannelDataSchemata;
 }
 
 void UChannelDataSchemaController::SortChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata)
@@ -137,15 +78,17 @@ void UChannelDataSchemaController::GetDefaultChannelDataSchemata(TArray<FChannel
 	TArray<FChannelDataStateSchema>& StateSchemata = DefaultChannelDataSchema.StateSchemata;
 	TArray<FChannelDataStateOption> StateOptions;
 	GetChannelDataStateOptions(StateOptions);
+	URepActorCacheController* RepActorCacheController = GEditor->GetEditorSubsystem<URepActorCacheController>();
+
 	int Index = 0;
 	for (FChannelDataStateOption& StateOption : StateOptions)
 	{
 		StateSchemata.Add(FChannelDataStateSchema(
-			EChanneldChannelType::ECT_SubWorld,
-			StateOption.ReplicationClassPath,
-			++Index,
-			false,
-			false
+			EChanneldChannelType::ECT_SubWorld
+			, StateOption.ReplicationClassPath
+			, ++Index
+			, false
+			, RepActorCacheController->IsDefaultSingleton(StateOption.ReplicationClassPath)
 		));
 	}
 	ChannelDataSchemata.Add(DefaultChannelDataSchema);

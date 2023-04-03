@@ -264,6 +264,13 @@ FString FReplicatedActorDecorator::GetProtoStateMessageType()
 	return GetActorName() + TEXT("State");
 }
 
+FString FReplicatedActorDecorator::GetProtoStateMessageTypeGo()
+{
+	FString MessageTypeName = GetProtoStateMessageType();
+	MessageTypeName[0] = toupper(MessageTypeName[0]);
+	return MessageTypeName;
+}
+
 FString FReplicatedActorDecorator::GetCode_AllPropertiesSetDeltaState(const FString& FullStateName, const FString& DeltaStateName)
 {
 	if (Properties.Num() == 0)
@@ -564,7 +571,7 @@ bool FReplicatedActorDecorator::IsStruct()
 TArray<TSharedPtr<FStructPropertyDecorator>> FReplicatedActorDecorator::GetStructPropertyDecorators()
 {
 	TArray<TSharedPtr<FStructPropertyDecorator>> StructPropertyDecorators;
-	for(TSharedPtr<FPropertyDecorator>& Property : Properties)
+	for (TSharedPtr<FPropertyDecorator>& Property : Properties)
 	{
 		if (Property->IsStruct())
 		{
@@ -572,7 +579,7 @@ TArray<TSharedPtr<FStructPropertyDecorator>> FReplicatedActorDecorator::GetStruc
 		}
 		StructPropertyDecorators.Append(Property->GetStructPropertyDecorators());
 	}
-	for(TSharedPtr<FRPCDecorator> RPC : RPCs)
+	for (TSharedPtr<FRPCDecorator> RPC : RPCs)
 	{
 		// The RPC parameters be seen as numbers of struct, so the RPC decorator be seen as a struct decorator. 
 		StructPropertyDecorators.Add(RPC);

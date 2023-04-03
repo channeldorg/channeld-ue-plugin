@@ -129,15 +129,11 @@ bool FReplicatorGeneratorManager::GenerateReplication(const FString GoPackageImp
 		const FString DefaultModuleName = GetDefaultModuleName();
 		WriteCodeFile(GetReplicatorStorageDir() / ChannelDataCode.ProcessorHeadFileName, ChannelDataCode.ProcessorHeadCode, Message);
 		WriteProtoFile(GetReplicatorStorageDir() / ChannelDataCode.ProtoFileName, ChannelDataCode.ProtoDefsFile, Message);
-
-		// Generate channel data golang merge code temporary file.
-		// WriteTemporaryGoProtoData(ReplicatorCodeBundle.ChannelDataMerge_GoCode, Message);
-		ChanneldReplicatorGeneratorUtils::EnsureRepGenIntermediateDir();
-		// TODO
-		WriteCodeFile(GenManager_TemporaryGoMergeCodePath, ChannelDataCode.Merge_GoCode, Message);
-		WriteCodeFile(GenManager_TemporaryGoRegistrationCodePath, ChannelDataCode.Registration_GoCode, Message);
 	}
-
+	// Generate channel data golang merge code temporary file.
+	ChanneldReplicatorGeneratorUtils::EnsureRepGenIntermediateDir();
+	WriteCodeFile(GenManager_TemporaryGoMergeCodePath, ReplicatorCodeBundle.ChannelDataMerge_GoCode, Message);
+	WriteCodeFile(GenManager_TemporaryGoRegistrationCodePath, ReplicatorCodeBundle.ChannelDataRegistration_GoCode, Message);
 
 	// Save the generated manifest file
 	FGeneratedManifest Manifest(

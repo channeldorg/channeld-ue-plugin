@@ -8,38 +8,49 @@ void URepActorCacheController::Initialize(FSubsystemCollectionBase& Collection)
 
 bool URepActorCacheController::SaveRepActorCache(const TArray<const UClass*>& InRepActorClasses)
 {
-	TSet<const UClass*> RepActorClassesSet;
+	TMap<const UClass*, FRepActorRelationCache> RepActorClassesMap;
+	RepActorClassesMap.Empty(InRepActorClasses.Num());
 	for (const UClass* RepActorClass : InRepActorClasses)
 	{
-		RepActorClassesSet.Add(RepActorClass);
+		RepActorClassesMap.Add(RepActorClass, FRepActorRelationCache(RepActorClass));
 	}
-	TArray<const UClass*> SortedRepActorClassArr = RepActorClassesSet.Array();
-	SortedRepActorClassArr.Sort([](const UClass& Lhs, const UClass& Rhs)
+	for (const UClass* RepActorClass : InRepActorClasses)
 	{
-		return Lhs.GetPathName() < Rhs.GetPathName();
-	});
-	TArray<FRepActorCacheRow> NewRepActorCacheRows;
-	for (const UClass* RepActorClass : SortedRepActorClassArr)
+		for (const UClass* CompClass : ChanneldReplicatorGeneratorUtils::GetComponentClasses(RepActorClass))
+		{
+			if (RepActorClassesMap.Contains(CompClass))
+			{
+				RepActorClassesMap[RepActorClass].ComponentClassPaths.Add(RepActorClassesMap[CompClass].TargetClassPath);
+			}
+		}
+		RepActorClassesMap[RepActorClass].ComponentClassPaths.Sort();
+	}
+	for (const UClass* RepActorClass : InRepActorClasses)
 	{
 		if (RepActorClass == AActor::StaticClass() || RepActorClass == UActorComponent::StaticClass())
 		{
-			NewRepActorCacheRows.Add(FRepActorCacheRow(RepActorClass->GetPathName()));
 			continue;
 		}
 		const UClass* ParentClass = RepActorClass->GetSuperClass();
 		while (ParentClass)
 		{
 			// Maybe the parent class is not a replication actor class, so we need to skip it, and find the parent class of the parent class.
-			if (RepActorClassesSet.Contains(ParentClass) || ParentClass == AActor::StaticClass() || ParentClass == UActorComponent::StaticClass())
+			if (RepActorClassesMap.Contains(ParentClass) || ParentClass == AActor::StaticClass() || ParentClass == UActorComponent::StaticClass())
 			{
-				NewRepActorCacheRows.Add(FRepActorCacheRow(RepActorClass->GetPathName(), ParentClass->GetPathName()));
+				RepActorClassesMap[RepActorClass].ParentClassPath = RepActorClassesMap[ParentClass].TargetClassPath;
 				break;
 			}
 			ParentClass = ParentClass->GetSuperClass();
 		}
 	}
+	TArray<FRepActorRelationCache> NewRepActorRelationCaches;
+	RepActorClassesMap.GenerateValueArray(NewRepActorRelationCaches);
+	NewRepActorRelationCaches.Sort([](const FRepActorRelationCache& Lhs, const FRepActorRelationCache& Rhs)
+	{
+		return Lhs.TargetClassPath < Rhs.TargetClassPath;
+	});
 	ChanneldReplicatorGeneratorUtils::EnsureRepGenIntermediateDir();
-	return RepActorCacheModel.SaveData(FRepActorCache(NewRepActorCacheRows));
+	return RepActorCacheModel.SaveData(FRepActorCache(NewRepActorRelationCaches));
 }
 
 bool URepActorCacheController::NeedToRefreshCache()
@@ -49,9 +60,6 @@ bool URepActorCacheController::NeedToRefreshCache()
 	while (Dirs.Num() > 0)
 	{
 		FString Dir = Dirs.Pop(false);
-		UE_LOG(LogTemp, Warning, TEXT("Dir: %s"), *Dir);
-		UE_LOG(LogTemp, Warning, TEXT("Dir size: %d"), Dir.Len());
-		UE_LOG(LogTemp, Warning, TEXT("Dir content: %s"), *FPaths::GetCleanFilename(Dir));
 		TArray<FString> Files;
 		IFileManager::Get().FindFiles(Files, *(Dir / TEXT("*.uasset")), true, false);
 		for (FString File : Files)
@@ -74,13 +82,26 @@ bool URepActorCacheController::NeedToRefreshCache()
 	return false;
 }
 
+bool URepActorCacheController::IsDefaultSingleton(const FString& InTargetClassPath)
+{
+	EnsureLatestRepActorCache();
+	if (!RepActorDependencyMap.Contains(InTargetClassPath))
+	{
+		return false;
+	}
+	return (
+		RepActorDependencyMap[InTargetClassPath]->RelationCache.bIsChildOfGameState
+		|| RepActorDependencyMap[InTargetClassPath]->RelationCache.bIsChildOfWorldSetting
+	);
+}
+
 void URepActorCacheController::GetRepActorClassPaths(TArray<FString>& OutRepActorClassPaths)
 {
 	EnsureLatestRepActorCache();
-	OutRepActorClassPaths.Empty(RepActorCacheRows.Num());
-	for (const FRepActorCacheRow& RepActorCacheRow : RepActorCacheRows)
+	OutRepActorClassPaths.Empty(RepActorRelationCaches.Num());
+	for (const FRepActorRelationCache& RepActorRelationCache : RepActorRelationCaches)
 	{
-		OutRepActorClassPaths.Add(RepActorCacheRow.TargetClassPath);
+		OutRepActorClassPaths.Add(RepActorRelationCache.TargetClassPath);
 	}
 }
 
@@ -91,17 +112,7 @@ void URepActorCacheController::GetParentClassPaths(const FString& InTargetClassP
 	{
 		return;
 	}
-	OutParentClassPaths.Empty();
-	TWeakPtr<FRepActorDependency> RepActorDependency = RepActorDependencyMap.FindRef(InTargetClassPath);
-	if (RepActorDependency.IsValid())
-	{
-		RepActorDependency = RepActorDependency.Pin()->ParentClassPath;
-	}
-	while (RepActorDependency.IsValid())
-	{
-		OutParentClassPaths.Add(RepActorDependency.Pin()->TargetClassPath);
-		RepActorDependency = RepActorDependency.Pin()->ParentClassPath;
-	}
+	OutParentClassPaths = RepActorDependencyMap[InTargetClassPath]->SuperClassPaths;
 }
 
 void URepActorCacheController::GetChildClassPaths(const FString& InTargetClassPath, TArray<FString>& OutChildClassPaths)
@@ -113,33 +124,109 @@ void URepActorCacheController::GetChildClassPaths(const FString& InTargetClassPa
 	}
 	const TWeakPtr<FRepActorDependency> RepActorDependency = RepActorDependencyMap.FindRef(InTargetClassPath);
 	if (!RepActorDependency.IsValid()) return;
-	OutChildClassPaths.Empty();
-	for (const TWeakPtr<FRepActorDependency>& ChildRepActorDependency : RepActorDependency.Pin()->ChildClassPaths)
+	OutChildClassPaths.Empty(RepActorDependency.Pin()->Children.Num());
+	for (const TWeakPtr<FRepActorDependency>& ChildRepActorDependency : RepActorDependency.Pin()->Children)
 	{
 		OutChildClassPaths.Add(ChildRepActorDependency.Pin()->TargetClassPath);
 	}
 }
 
-void URepActorCacheController::SetRepActorCacheRows(const TArray<FRepActorCacheRow>& InRepActorCacheRows)
+void URepActorCacheController::GetComponentClassPaths(const FString& InTargetClassPath, TArray<FString>& OutComponentClassPaths)
 {
-	RepActorCacheRows = InRepActorCacheRows;
-	RepActorDependencyMap.Empty(RepActorCacheRows.Num());
-	for (FRepActorCacheRow& RepActorCacheRow : RepActorCacheRows)
+	EnsureLatestRepActorCache();
+	if (!RepActorDependencyMap.Contains(InTargetClassPath))
 	{
-		RepActorDependencyMap.Add(RepActorCacheRow.TargetClassPath, MakeShared<FRepActorDependency>(RepActorCacheRow.TargetClassPath));
+		return;
 	}
-	for (FRepActorCacheRow& RepActorCacheRow : RepActorCacheRows)
+	TWeakPtr<FRepActorDependency> RepActorDependency = RepActorDependencyMap.FindRef(InTargetClassPath);
+	OutComponentClassPaths.Empty();
+	TSet<FString> ComponentClassPathSet;
+	while (RepActorDependency.IsValid() && !RepActorDependency.Pin()->RelationCache.bIsComponent)
 	{
-		if (!RepActorDependencyMap.Contains(RepActorCacheRow.ParentClassPath))
+		for (const TWeakPtr<FRepActorDependency> CompDependency : RepActorDependency.Pin()->Components)
+		{
+			if (!CompDependency.IsValid())
+			{
+				continue;
+			}
+			const FString& CompClassPath = CompDependency.Pin()->TargetClassPath;
+			if (!ComponentClassPathSet.Contains(CompClassPath))
+			{
+				ComponentClassPathSet.Add(CompClassPath);
+				OutComponentClassPaths.Add(CompClassPath);
+			}
+			for (const FString& CompParentClassPath : CompDependency.Pin()->SuperClassPaths)
+			{
+				if (!ComponentClassPathSet.Contains(CompParentClassPath))
+				{
+					ComponentClassPathSet.Add(CompParentClassPath);
+					OutComponentClassPaths.Add(CompParentClassPath);
+				}
+			}
+		}
+		RepActorDependency = RepActorDependency.Pin()->Parent;
+	}
+}
+
+void URepActorCacheController::GetComponentUserClassPaths(const FString& InTargetClassPath, TArray<FString>& OutUserClassPaths)
+{
+	EnsureLatestRepActorCache();
+	if (!RepActorDependencyMap.Contains(InTargetClassPath) || !RepActorDependencyMap[InTargetClassPath]->RelationCache.bIsComponent)
+	{
+		return;
+	}
+	OutUserClassPaths = RepActorDependencyMap[InTargetClassPath]->ComponentUserClassPaths;
+}
+
+void URepActorCacheController::SetRepActorRelationCaches(const TArray<FRepActorRelationCache>& InRepActorRelationCaches)
+{
+	RepActorRelationCaches = InRepActorRelationCaches;
+	RepActorDependencyMap.Empty(RepActorRelationCaches.Num());
+	for (FRepActorRelationCache& RepActorRelationCache : RepActorRelationCaches)
+	{
+		RepActorDependencyMap.Add(RepActorRelationCache.TargetClassPath, MakeShared<FRepActorDependency>(RepActorRelationCache));
+	}
+	for (FRepActorRelationCache& RepActorRelationCache : RepActorRelationCaches)
+	{
+		const TSharedRef<FRepActorDependency> RepActorDependency = RepActorDependencyMap[RepActorRelationCache.TargetClassPath];
+		RepActorDependency->Components.Empty(RepActorRelationCache.ComponentClassPaths.Num());
+		for (const FString& CompClassPath : RepActorRelationCache.ComponentClassPaths)
+		{
+			RepActorDependency->Components.Add(RepActorDependencyMap[CompClassPath]);
+		}
+
+		if (!RepActorDependencyMap.Contains(RepActorRelationCache.ParentClassPath))
 		{
 			continue;
 		}
-		const TSharedRef<FRepActorDependency>& RepActorDependency = RepActorDependencyMap.FindRef(RepActorCacheRow.TargetClassPath);
-		const TSharedRef<FRepActorDependency>& ParentRepActorDependency = RepActorDependencyMap.FindRef(RepActorCacheRow.ParentClassPath);
-		RepActorDependency->ParentClassPath = ParentRepActorDependency;
-		ParentRepActorDependency->ChildClassPaths.Add(RepActorDependency);
+		const TSharedRef<FRepActorDependency> ParentRepActorDependency = RepActorDependencyMap[RepActorRelationCache.ParentClassPath];
+		RepActorDependency->Parent = ParentRepActorDependency;
+		ParentRepActorDependency->Children.Add(RepActorDependency);
+	}
+	for (FRepActorRelationCache& RepActorRelationCache : RepActorRelationCaches)
+	{
+		const TSharedRef<FRepActorDependency> RepActorDependency = RepActorDependencyMap[RepActorRelationCache.TargetClassPath];
+		TWeakPtr<FRepActorDependency> ParentRepActorDependency = RepActorDependency->Parent;
+		while (ParentRepActorDependency.IsValid())
+		{
+			RepActorDependency->SuperClassPaths.Add(ParentRepActorDependency.Pin()->TargetClassPath);
+			ParentRepActorDependency = ParentRepActorDependency.Pin()->Parent;
+		}
+	}
+	for (FRepActorRelationCache& RepActorRelationCache : RepActorRelationCaches)
+	{
+		if (RepActorRelationCache.bIsComponent)
+		{
+			continue;
+		}
+		const TSharedRef<FRepActorDependency> RepActorDependency = RepActorDependencyMap[RepActorRelationCache.TargetClassPath];
+		for (const TWeakPtr<FRepActorDependency>& CompDependency : RepActorDependency->Components)
+		{
+			CompDependency.Pin()->ComponentUserClassPaths.Add(RepActorDependency->TargetClassPath);
+		}
 	}
 }
+
 
 void URepActorCacheController::EnsureLatestRepActorCache()
 {
@@ -148,6 +235,6 @@ void URepActorCacheController::EnsureLatestRepActorCache()
 		FRepActorCache NewRepActorCache;
 		RepActorCacheModel.GetData(NewRepActorCache);
 		LatestRepActorCacheTime = NewRepActorCache.CacheTime;
-		SetRepActorCacheRows(NewRepActorCache.RepActorCacheRows);
+		SetRepActorRelationCaches(NewRepActorCache.RepActorRelationCaches);
 	}
 }

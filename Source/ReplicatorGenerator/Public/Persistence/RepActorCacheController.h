@@ -5,10 +5,12 @@
 #include "CoreMinimal.h"
 #include "JsonModel.h"
 #include "ReplicatorGeneratorDefinition.h"
+#include "GameFramework/GameStateBase.h"
+#include "GameFramework/WorldSettings.h"
 #include "RepActorCacheController.generated.h"
 
 USTRUCT(BlueprintType)
-struct REPLICATORGENERATOR_API FRepActorCacheRow
+struct REPLICATORGENERATOR_API FRepActorRelationCache
 {
 	GENERATED_BODY()
 
@@ -16,18 +18,37 @@ struct REPLICATORGENERATOR_API FRepActorCacheRow
 	FString TargetClassPath;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	bool bIsComponent = false;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	bool bIsChildOfGameState = false;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	bool bIsChildOfWorldSetting = false;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FString ParentClassPath;
 
-	FRepActorCacheRow() = default;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	TArray<FString> ComponentClassPaths;
 
-	FRepActorCacheRow(const FString& InTargetClassPath)
-		: TargetClassPath(InTargetClassPath)
-	{
-	}
+	FRepActorRelationCache() = default;
 
-	FRepActorCacheRow(const FString& InTargetClassPath, const FString& InParentClassPath)
-		: TargetClassPath(InTargetClassPath), ParentClassPath(InParentClassPath)
+	FRepActorRelationCache(const UClass* InTargetClass)
+		: TargetClassPath(InTargetClass->GetPathName())
 	{
+		if (InTargetClass->IsChildOf(UActorComponent::StaticClass()))
+		{
+			bIsComponent = true;
+		}
+		if (InTargetClass->IsChildOf(AGameStateBase::StaticClass()))
+		{
+			bIsChildOfGameState = true;
+		}
+		if(InTargetClass->IsChildOf(AWorldSettings::StaticClass()))
+		{
+			bIsChildOfWorldSetting = true;
+		}
 	}
 };
 
@@ -40,12 +61,12 @@ struct REPLICATORGENERATOR_API FRepActorCache
 	FDateTime CacheTime;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	TArray<FRepActorCacheRow> RepActorCacheRows;
+	TArray<FRepActorRelationCache> RepActorRelationCaches;
 
 	FRepActorCache() = default;
 
-	FRepActorCache(const TArray<FRepActorCacheRow>& InRepActorCacheRows)
-		: RepActorCacheRows(InRepActorCacheRows)
+	FRepActorCache(const TArray<FRepActorRelationCache>& InRepActorRelationCaches)
+		: RepActorRelationCaches(InRepActorRelationCaches)
 	{
 		CacheTime = FDateTime::UtcNow();
 	}
@@ -53,16 +74,24 @@ struct REPLICATORGENERATOR_API FRepActorCache
 
 struct FRepActorDependency
 {
+	FRepActorRelationCache RelationCache;
+
 	FString TargetClassPath;
 
-	TWeakPtr<FRepActorDependency> ParentClassPath;
+	TWeakPtr<FRepActorDependency> Parent;
 
-	TArray<TWeakPtr<FRepActorDependency>> ChildClassPaths;
+	TArray<FString> SuperClassPaths;
+
+	TArray<TWeakPtr<FRepActorDependency>> Children;
+
+	TArray<TWeakPtr<FRepActorDependency>> Components;
+
+	TArray<FString> ComponentUserClassPaths;
 
 	FRepActorDependency() = default;
 
-	FRepActorDependency(const FString& InTargetClassPath)
-		: TargetClassPath(InTargetClassPath)
+	FRepActorDependency(const FRepActorRelationCache& InRelationCache)
+		: RelationCache(InRelationCache), TargetClassPath(InRelationCache.TargetClassPath)
 	{
 	}
 };
@@ -74,7 +103,7 @@ class REPLICATORGENERATOR_API URepActorCacheController : public UEditorSubsystem
 
 protected:
 	FDateTime LatestRepActorCacheTime;
-	TArray<FRepActorCacheRow> RepActorCacheRows;
+	TArray<FRepActorRelationCache> RepActorRelationCaches;
 	TMap<FString, TSharedRef<FRepActorDependency>> RepActorDependencyMap;
 
 	TJsonModel<FRepActorCache> RepActorCacheModel = GenManager_RepActorCachePath;
@@ -87,17 +116,26 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool NeedToRefreshCache();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsDefaultSingleton(const FString& InTargetClassPath);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	void GetRepActorClassPaths(TArray<FString>& OutRepActorClassPaths);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	void GetParentClassPaths(const FString& InTargetClassPath, TArray<FString>& OutParentClassPaths);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	void GetChildClassPaths(const FString& InTargetClassPath, TArray<FString>& OutChildClassPaths);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	void GetComponentClassPaths(const FString& InTargetClassPath, TArray<FString>& OutComponentClassPaths);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	void GetComponentUserClassPaths(const FString& InTargetClassPath, TArray<FString>& OutUserClassPaths);
+
 protected:
-	void SetRepActorCacheRows(const TArray<FRepActorCacheRow>& InRepActorCacheRows);
+	void SetRepActorRelationCaches(const TArray<FRepActorRelationCache>& InRepActorRelationCaches);
 
 	void EnsureLatestRepActorCache();
 };

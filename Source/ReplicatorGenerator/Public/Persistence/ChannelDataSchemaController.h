@@ -7,47 +7,6 @@
 #include "ChannelDataSchemaController.generated.h"
 
 USTRUCT(BlueprintType)
-struct REPLICATORGENERATOR_API FChannelDataStateSchemaRow : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	int32 ChannelType = 0;
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	int32 ChannelTypeOrder = 0;
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	FString ReplicationClassPath;
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	int32 StateOrder = 0;
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	bool bSkip = false;
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	bool bSingleton = false;
-
-	FChannelDataStateSchemaRow() = default;
-
-	FChannelDataStateSchemaRow(int32 InChannelType, int32 InChannelTypeOrder, const FString& InReplicationClassPath, int32 InStateOrder, bool InbSkip, bool InbSingleton)
-		: ChannelType(InChannelType)
-		  , ChannelTypeOrder(InChannelTypeOrder)
-		  , ReplicationClassPath(InReplicationClassPath)
-		  , StateOrder(InStateOrder)
-		  , bSkip(InbSkip)
-		  , bSingleton(InbSingleton)
-	{
-	}
-
-	virtual FName GetRowName() const
-	{
-		return FName(FString::Printf(TEXT("%d$$%s"), ChannelType, *ReplicationClassPath));
-	}
-};
-
-USTRUCT(BlueprintType)
 struct REPLICATORGENERATOR_API FChannelDataStateSchema
 {
 	GENERATED_BODY()
@@ -144,7 +103,7 @@ class REPLICATORGENERATOR_API UChannelDataSchemaController : public UEditorSubsy
 	GENERATED_BODY()
 
 protected:
-	TJsonModel<FChannelDataStateSchemaRow> ChannelDataStateSchemaModal = GenManager_ChannelDataSchemataPath;
+	TJsonModel<FChannelDataSchema> ChannelDataStateSchemaModal = GenManager_ChannelDataSchemataPath;
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
@@ -163,10 +122,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ExportChannelDataSchemataTo(const FString& FilePath, const TArray<FChannelDataSchema>& ChannelDataSchemata, bool& Success);
-
-	inline TArray<FChannelDataStateSchemaRow> ConvertChannelDataSchemataToRows(const TArray<FChannelDataSchema>& ChannelDataSchemata);
-
-	inline TArray<FChannelDataSchema> ConvertRowsToChannelDataSchemata(const TArray<FChannelDataStateSchemaRow>& ChannelDataSchemaRows);
 
 	inline void SortChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata);
 

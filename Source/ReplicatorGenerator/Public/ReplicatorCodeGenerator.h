@@ -56,6 +56,9 @@ struct FGeneratedCodeBundle
 	FString GlobalStructProtoDefinitions;
 
 	TArray<FChannelDataCode> ChannelDataCodes;
+
+	FString ChannelDataRegistration_GoCode;
+	FString ChannelDataMerge_GoCode;
 };
 
 
@@ -121,7 +124,7 @@ public:
 	 * @param DefaultModuleDir The default module directory. The channel data processor will use default module name.
 	 * @param ProtoPackageName All generated proto files will use this package name.
 	 * @param GoPackageImportPath Be used to set 'option go_package='
-	 * @param ReplicatorCodeBundle The generated replicator codes (.h, .cpp, .proto) .
+	 * @param ReplicationCodeBundle The generated replicator codes (.h, .cpp, .proto) .
 	 * @return true on success, false otherwise.
 	 */
 	bool Generate(
@@ -129,7 +132,7 @@ public:
 		const FString& DefaultModuleDir,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
-		FGeneratedCodeBundle& ReplicatorCodeBundle
+		FGeneratedCodeBundle& ReplicationCodeBundle
 	);
 
 protected:
@@ -189,7 +192,7 @@ protected:
 	);
 
 	bool GenerateChannelDataRegistration_GoCode(
-		const FString& GoImportPath,
+		const FString& ChannelTypeName,
 		const FString& ChannelDataMessageName,
 		const FString& ProtoPackageName,
 		FString& GoCode
