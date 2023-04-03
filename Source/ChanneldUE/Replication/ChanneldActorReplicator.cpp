@@ -265,7 +265,7 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 		{
 			*RemoteRolePtr = (uint8)NewState->localrole();
 		}
-		if (NewState->has_owningconnid())
+		if (NewState->owningconnid() > 0)
 		{
 			ChanneldUtils::SetActorRoleByOwningConnId(Actor.Get(), NewState->owningconnid());
 		}

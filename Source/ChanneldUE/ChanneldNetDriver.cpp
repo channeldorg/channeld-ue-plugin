@@ -136,9 +136,9 @@ void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessa
 				NewActor->SetRole(LocalRole);
 			}
 
-			if (SpawnMsg->has_owningconnid())
+			if (SpawnMsg->mutable_obj()->owningconnid() > 0)
 			{
-				ChanneldUtils::SetActorRoleByOwningConnId(NewActor, SpawnMsg->owningconnid());
+				ChanneldUtils::SetActorRoleByOwningConnId(NewActor, SpawnMsg->mutable_obj()->owningconnid());
 				LocalRole = NewActor->GetLocalRole();
 			}
 		}

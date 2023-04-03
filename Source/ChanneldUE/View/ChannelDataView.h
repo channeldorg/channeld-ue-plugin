@@ -48,8 +48,10 @@ public:
 	void AddActorProvider(Channeld::ChannelId ChId, AActor* Actor);
 	void AddObjectProvider(Channeld::ChannelId ChId, UObject* Obj);
 	void AddObjectProviderToDefaultChannel(UObject* Obj);
-	void RemoveActorProvider(AActor* Actor, bool bSendRemoved);
-	void RemoveObjectProvider(UObject* Obj, bool bSendRemoved);
+	void RemoveActorProvider(Channeld::ChannelId ChId, AActor* Actor, bool bSendRemoved);
+	void RemoveActorProviderAll(AActor* Actor, bool bSendRemoved);
+	void RemoveObjectProvider(Channeld::ChannelId ChId, UObject* Obj, bool bSendRemoved);
+	void RemoveObjectProviderAll(UObject* Obj, bool bSendRemoved);
 	virtual void RemoveProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void RemoveProviderFromAllChannels(IChannelDataProvider* Provider, bool bSendRemoved);
 	virtual void MoveProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, IChannelDataProvider* Provider, bool bSendRemoved);
@@ -162,6 +164,8 @@ protected:
 	UPROPERTY()
 	UChanneldConnection* Connection;
 
+	TMap<int, const google::protobuf::Message*> ChannelDataTemplates;
+
 	// Reuse the message objects to 1) decrease the memory footprint; 2) save the data for the next update if no state is consumed.
 	TMap<Channeld::ChannelId, google::protobuf::Message*> ReceivedUpdateDataInChannels;
 
@@ -176,7 +180,6 @@ private:
 	// Use the Arena for faster allocation. See https://developers.google.com/protocol-buffers/docs/reference/arenas
 	google::protobuf::Arena ArenaForSend;
 
-	TMap<int, const google::protobuf::Message*> ChannelDataTemplates;
 	google::protobuf::Any* AnyForTypeUrl;
 	TMap<FString, google::protobuf::Message*> ChannelDataTemplatesByTypeUrl;
 

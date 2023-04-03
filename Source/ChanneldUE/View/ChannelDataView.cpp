@@ -280,7 +280,19 @@ void UChannelDataView::AddObjectProviderToDefaultChannel(UObject* Obj)
 	}
 }
 
-void UChannelDataView::RemoveActorProvider(AActor* Actor, bool bSendRemoved)
+void UChannelDataView::RemoveActorProvider(Channeld::ChannelId ChId, AActor* Actor, bool bSendRemoved)
+{
+	if (Actor->Implements<UChannelDataProvider>())
+	{
+		RemoveProvider(ChId, Cast<IChannelDataProvider>(Actor), bSendRemoved);
+	}
+	for (const auto Comp : Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+	{
+		RemoveProvider(ChId, Cast<IChannelDataProvider>(Comp), bSendRemoved);
+	}
+}
+
+void UChannelDataView::RemoveActorProviderAll(AActor* Actor, bool bSendRemoved)
 {
 	if (Actor->Implements<UChannelDataProvider>())
 	{
@@ -292,7 +304,22 @@ void UChannelDataView::RemoveActorProvider(AActor* Actor, bool bSendRemoved)
 	}
 }
 
-void UChannelDataView::RemoveObjectProvider(UObject* Obj, bool bSendRemoved)
+void UChannelDataView::RemoveObjectProvider(Channeld::ChannelId ChId, UObject* Obj, bool bSendRemoved)
+{
+	if (Obj->Implements<UChannelDataProvider>())
+	{
+		RemoveProvider(ChId, Cast<IChannelDataProvider>(Obj), bSendRemoved);
+	}
+	if (AActor* Actor = Cast<AActor>(Obj))
+	{
+		for (const auto Comp : Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
+		{
+			RemoveProvider(ChId, Cast<IChannelDataProvider>(Comp), bSendRemoved);
+		}
+	}
+}
+
+void UChannelDataView::RemoveObjectProviderAll(UObject* Obj, bool bSendRemoved)
 {
 	if (Obj->Implements<UChannelDataProvider>())
 	{
@@ -563,7 +590,7 @@ void UChannelDataView::OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId)
  	Channeld::ChannelId RemovedChId = NetIdOwningChannels.Remove(NetId);
 	UE_LOG(LogChanneld, Log, TEXT("Removed mapping of netId: %d (%d) -> channelId: %d"), NetId.Value, ChanneldUtils::GetNativeNetId(NetId.Value), RemovedChId);
 
-	RemoveActorProvider(Actor, false);
+	RemoveActorProviderAll(Actor, false);
 }
 
 void UChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, Channeld::ChannelId ChId)
