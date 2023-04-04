@@ -115,7 +115,7 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 	AActor* Owner = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_owner(), Actor->GetWorld(), bOwnerUnmapped, false));
 	if (!bOwnerUnmapped && Actor->GetOwner() != Owner)
 	{
-		DeltaState->mutable_owner()->CopyFrom(ChanneldUtils::GetRefOfObject(Actor->GetOwner()));
+		DeltaState->mutable_owner()->CopyFrom(*ChanneldUtils::GetRefOfObject(Actor->GetOwner()));
 		bStateChanged = true;
 	}
 
@@ -134,7 +134,7 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 	AActor* Instigator = Cast<AActor>(ChanneldUtils::GetObjectByRef(FullState->mutable_instigator(), Actor->GetWorld(), bInstigatorUnmapped, false));
 	if (!bInstigatorUnmapped && Actor->GetInstigator() != Instigator)
 	{
-		DeltaState->mutable_instigator()->CopyFrom(ChanneldUtils::GetRefOfObject(Actor->GetInstigator()));
+		DeltaState->mutable_instigator()->CopyFrom(*ChanneldUtils::GetRefOfObject(Actor->GetInstigator()));
 		bStateChanged = true;
 	}
 
@@ -187,7 +187,7 @@ void FChanneldActorReplicator::Tick(float DeltaTime)
 		*/
 		if (RepAttachment.AttachParent != ChanneldUtils::GetObjectByRef(RepAttachmentFullState->mutable_attachparent(), Actor->GetWorld(), false))
 		{
-			DeltaState->mutable_attachmentreplication()->mutable_attachparent()->CopyFrom(ChanneldUtils::GetRefOfObject(RepAttachment.AttachParent, Actor->GetNetConnection()));
+			DeltaState->mutable_attachmentreplication()->mutable_attachparent()->CopyFrom(*ChanneldUtils::GetRefOfObject(RepAttachment.AttachParent, Actor->GetNetConnection()));
 			bStateChanged = true;
 		}
 		bool bUnmapped = false;

@@ -228,7 +228,7 @@ public:
 	 */
 	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
 	
-	static unrealpb::UnrealObjectRef GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr);
+	static TSharedRef<unrealpb::UnrealObjectRef> GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr, bool bFullExport = false);
 		
 	static UActorComponent* GetActorComponentByRef(const unrealpb::ActorComponentRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
 	
@@ -295,4 +295,6 @@ public:
 		return nullptr;
 	}
 	*/
+private:
+	static TMap<uint32, TSharedRef<unrealpb::UnrealObjectRef>> ObjRefCache;
 };

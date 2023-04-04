@@ -64,7 +64,7 @@ void FChanneldPawnReplicator::Tick(float DeltaTime)
 		// Only set the PlayerState if it is replicated
 		if (*PlayerStatePtr == nullptr || (*PlayerStatePtr)->GetIsReplicated())
 		{
-			DeltaState->mutable_playerstate()->CopyFrom(ChanneldUtils::GetRefOfObject(*PlayerStatePtr));
+			DeltaState->mutable_playerstate()->CopyFrom(*ChanneldUtils::GetRefOfObject(*PlayerStatePtr));
 			bStateChanged = true;
 		}
 	}
@@ -76,7 +76,7 @@ void FChanneldPawnReplicator::Tick(float DeltaTime)
 		// Only set the Controller if it is replicated
 		if (Pawn->Controller == nullptr || Pawn->Controller->GetIsReplicated())
 		{
-			DeltaState->mutable_controller()->CopyFrom(ChanneldUtils::GetRefOfObject(Pawn->Controller));
+			DeltaState->mutable_controller()->CopyFrom(*ChanneldUtils::GetRefOfObject(Pawn->Controller));
 			bStateChanged = true;
 		}
 	}
