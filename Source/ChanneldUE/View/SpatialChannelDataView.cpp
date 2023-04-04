@@ -177,7 +177,7 @@ void USpatialChannelDataView::ServerHandleGetHandoverContext(UChanneldConnection
 		{
 			NetConn = Cast<UChanneldNetConnection>(HandoverActor->GetNetConnection());
 		}
-		HandoverContext->mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(HandoverObj, NetConn));
+		HandoverContext->mutable_obj()->CopyFrom(*ChanneldUtils::GetRefOfObject(HandoverObj, NetConn));
 		if (NetConn)
 		{
 			HandoverContext->set_clientconnid(NetConn->GetConnId());
@@ -1296,7 +1296,7 @@ void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnecti
 	// Create the entity channel before sending
 	channeldpb::ChannelSubscriptionOptions SubOptions;
 	SubOptions.set_skipselfupdatefanout(true);
-	Connection->CreateEntityChannel(Channeld::GlobalChannelId, Obj, NetId, TEXT(""), &SubOptions, /*GetEntityData(Obj)*/nullptr, nullptr,
+	Connection->CreateEntityChannel(Channeld::GlobalChannelId, Obj, NetId, TEXT(""), &SubOptions, GetEntityData(Obj)/*nullptr*/, nullptr,
 		[this, NetId, Obj, NetConn, OwningConnId](const channeldpb::CreateChannelResultMessage* ResultMsg)
 		{
 			AddObjectProvider(NetId, Obj);
@@ -1336,7 +1336,7 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 	channeldpb::ChannelSubscriptionOptions SubOptions;
 	SubOptions.set_skipselfupdatefanout(true);
 
-	Connection->CreateEntityChannel(SpatialChId, Obj, NetId.Value, TEXT(""), &SubOptions, /*GetEntityData(Obj)*/nullptr, nullptr,
+	Connection->CreateEntityChannel(SpatialChId, Obj, NetId.Value, TEXT(""), &SubOptions, GetEntityData(Obj)/*nullptr*/, nullptr,
 		[this, NetId, Obj, OwningConnId, SpatialChId, NetDriver](const channeldpb::CreateChannelResultMessage* _)
 		{
 			AddObjectProvider(NetId.Value, Obj);
@@ -1345,7 +1345,7 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 			unrealpb::SpawnObjectMessage SpawnMsg;
 	
 			// As we don't have any specific NetConnection to export the NetId, use a virtual one.
-			SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Obj, NetConnForSpawn));
+			SpawnMsg.mutable_obj()->CopyFrom(*ChanneldUtils::GetRefOfObject(Obj, NetConnForSpawn, true));
 			// Clear the export map and ack state so everytime we can get a full export.
 			ResetNetConnForSpawn();
 	

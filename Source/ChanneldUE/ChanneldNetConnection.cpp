@@ -220,7 +220,7 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 	}
 
 	unrealpb::SpawnObjectMessage SpawnMsg;
-	SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Object, this));
+	SpawnMsg.mutable_obj()->CopyFrom(*ChanneldUtils::GetRefOfObject(Object, this, true));
 	SpawnMsg.set_channelid(OwningChannelId);
 	if (Role > ENetRole::ROLE_None)
 	{
@@ -308,7 +308,7 @@ void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncNa
 	
 	unrealpb::RemoteFunctionMessage RpcMsg;
 	// Don't send the whole UnrealObjectRef to the other side - the object spawning process goes its own way!
-	// RpcMsg.mutable_targetobj()->MergeFrom(ChanneldUtils::GetRefOfObject(Actor));
+	// RpcMsg.mutable_targetobj()->MergeFrom(*ChanneldUtils::GetRefOfObject(Actor));
 	RpcMsg.mutable_targetobj()->set_netguid(Driver->GuidCache->GetNetGUID(Actor).Value);
 	RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
 	if (ParamsMsg)
