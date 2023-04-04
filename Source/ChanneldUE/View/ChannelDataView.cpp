@@ -79,7 +79,7 @@ void UChannelDataView::InitServer()
 {
 	// Add the GameStateBase (if it's an IChannelDataProvider).
 	// Missing this step will cause client failing to begin play.
-	AddActorProvider(Channeld::GlobalChannelId, GetWorld()->GetAuthGameMode()->GameState);
+	AddObjectProvider(Channeld::GlobalChannelId, GetWorld()->GetAuthGameMode()->GameState);
 	
 	ReceiveInitServer();
 }
@@ -232,21 +232,6 @@ void UChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* Provide
 	}
 }
 
-void UChannelDataView::AddActorProvider(Channeld::ChannelId ChId, AActor* Actor)
-{
-	if (Actor == nullptr)
-		return;
-	
-	if (Actor->Implements<UChannelDataProvider>())
-	{
-		AddProvider(ChId, Cast<IChannelDataProvider>(Actor));
-	}
-	for (auto Comp : Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
-	{
-		AddProvider(ChId, Cast<IChannelDataProvider>(Comp));
-	}
-}
-
 void UChannelDataView::AddObjectProvider(Channeld::ChannelId ChId, UObject* Obj)
 {
 	if (Obj == nullptr)
@@ -277,30 +262,6 @@ void UChannelDataView::AddObjectProviderToDefaultChannel(UObject* Obj)
 		{
 			AddProviderToDefaultChannel(Cast<IChannelDataProvider>(Comp));
 		}
-	}
-}
-
-void UChannelDataView::RemoveActorProvider(Channeld::ChannelId ChId, AActor* Actor, bool bSendRemoved)
-{
-	if (Actor->Implements<UChannelDataProvider>())
-	{
-		RemoveProvider(ChId, Cast<IChannelDataProvider>(Actor), bSendRemoved);
-	}
-	for (const auto Comp : Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
-	{
-		RemoveProvider(ChId, Cast<IChannelDataProvider>(Comp), bSendRemoved);
-	}
-}
-
-void UChannelDataView::RemoveActorProviderAll(AActor* Actor, bool bSendRemoved)
-{
-	if (Actor->Implements<UChannelDataProvider>())
-	{
-		RemoveProviderFromAllChannels(Cast<IChannelDataProvider>(Actor), bSendRemoved);
-	}
-	for (const auto Comp : Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()))
-	{
-		RemoveProviderFromAllChannels(Cast<IChannelDataProvider>(Comp), bSendRemoved);
 	}
 }
 
@@ -522,10 +483,7 @@ bool UChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID Ne
 	// NetIdOwningChannels.Add(NetId, ChId);
 	// UE_LOG(LogChanneld, Log, TEXT("Set up mapping of netId: %d -> channelId: %d, spawned: %s"), NetId.Value, ChId, *GetNameSafe(Obj));
 
-	if (Obj->IsA<AActor>())
-	{
-		AddActorProvider(ChId, Cast<AActor>(Obj));
-	}
+	AddObjectProvider(ChId, Obj);
 
 	return true;
 }
@@ -590,7 +548,7 @@ void UChannelDataView::OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId)
  	Channeld::ChannelId RemovedChId = NetIdOwningChannels.Remove(NetId);
 	UE_LOG(LogChanneld, Log, TEXT("Removed mapping of netId: %d (%d) -> channelId: %d"), NetId.Value, ChanneldUtils::GetNativeNetId(NetId.Value), RemovedChId);
 
-	RemoveActorProviderAll(Actor, false);
+	RemoveObjectProviderAll(Actor, false);
 }
 
 void UChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, Channeld::ChannelId ChId)
