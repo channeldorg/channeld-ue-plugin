@@ -953,7 +953,7 @@ bool UChannelDataView::ConsumeChannelUpdateData(Channeld::ChannelId ChId, google
 // Warning: DO NOT use this function before sending the Spawn message!
 // Calling Provider->UpdateChannelData can cause FChanneldActorReplicator::Tick to be called, which will call
 // ChanneldUtils::GetRefOfObject and export the NetGUIDs, causing the UnrealObjectRef in the Spawn message
-// missing the contexts, so the client will not be able tow Spawn the object.
+// missing the contexts, so the client will fail to Spawn the object.
 const google::protobuf::Message* UChannelDataView::GetEntityData(UObject* Obj)
 {
 	IChannelDataProvider* Provider= nullptr;

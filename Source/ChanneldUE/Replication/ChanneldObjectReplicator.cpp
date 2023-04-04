@@ -18,7 +18,7 @@ void FChanneldObjectReplicator::Tick(float DeltaTime)
 	{
 		if (TargetObject.IsValid())
 		{
-			ObjRef = ChanneldUtils::GetRefOfObject(TargetObject.Get());
+			ObjRef = *ChanneldUtils::GetRefOfObject(TargetObject.Get(), nullptr, true);
 			bStateChanged = true;
 		}
 	}
