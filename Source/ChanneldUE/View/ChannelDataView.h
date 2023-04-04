@@ -45,11 +45,8 @@ public:
 
 	virtual void AddProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider);
 	virtual void AddProviderToDefaultChannel(IChannelDataProvider* Provider);
-	void AddActorProvider(Channeld::ChannelId ChId, AActor* Actor);
 	void AddObjectProvider(Channeld::ChannelId ChId, UObject* Obj);
 	void AddObjectProviderToDefaultChannel(UObject* Obj);
-	void RemoveActorProvider(Channeld::ChannelId ChId, AActor* Actor, bool bSendRemoved);
-	void RemoveActorProviderAll(AActor* Actor, bool bSendRemoved);
 	void RemoveObjectProvider(Channeld::ChannelId ChId, UObject* Obj, bool bSendRemoved);
 	void RemoveObjectProviderAll(UObject* Obj, bool bSendRemoved);
 	virtual void RemoveProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider, bool bSendRemoved);

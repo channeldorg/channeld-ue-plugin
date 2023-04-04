@@ -1064,10 +1064,20 @@ void USpatialChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* 
 	{
 		return;
 	}
+
+	FNetworkGUID NetId = GetNetId(Provider);
+	
+	// Also add the provider to the entity channel
+	if (auto ChannelInfo = Connection->SubscribedChannels.Find(NetId.Value))
+	{
+		if (ChannelInfo->ChannelType == EChanneldChannelType::ECT_Entity)
+		{
+			AddProvider(NetId.Value, Provider);
+		}
+	}
 	
 	if (Connection->IsServer())
 	{
-		FNetworkGUID NetId = GetNetId(Provider);
 		if (NetIdOwningChannels.Contains(NetId))
 		{
 			Super::AddProviderToDefaultChannel(Provider);
@@ -1102,10 +1112,10 @@ void USpatialChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* 
 						if (OwningChId != Channeld::InvalidChannelId)
 						{
 							// Should make sure the PlayerController is not added to other spatial channels.
-							RemoveActorProvider(OwningChId, Controller, false);
+							RemoveObjectProvider(OwningChId, Controller, false);
 						}
 						SetOwningChannelId(ControllerNetId, SpatialChId);
-						AddActorProvider(SpatialChId, Controller);
+						AddObjectProvider(SpatialChId, Controller);
 
 						groupMsg.add_entitiestoadd(ControllerNetId.Value);
 					}
@@ -1117,10 +1127,10 @@ void USpatialChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* 
 						if (OwningChId != Channeld::InvalidChannelId)
 						{
 							// Should make sure the PlayerState is not added to other spatial channels.
-							RemoveActorProvider(OwningChId, PlayerState, false);
+							RemoveObjectProvider(OwningChId, PlayerState, false);
 						}
 						SetOwningChannelId(PlayerStateNetId, SpatialChId);
-						AddActorProvider(SpatialChId, PlayerState);
+						AddObjectProvider(SpatialChId, PlayerState);
 
 						groupMsg.add_entitiestoadd(PlayerStateNetId.Value);
 					}
@@ -1223,7 +1233,7 @@ void USpatialChannelDataView::OnDestroyedActor(AActor* Actor, const FNetworkGUID
 	// Server keeps the NetId-ChannelId mapping for cross-server RPC.
 	if (Connection->IsServer())
 	{
-		RemoveActorProviderAll(Actor, false);
+		RemoveObjectProviderAll(Actor, false);
 		return;
 	}
 	
