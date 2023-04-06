@@ -113,14 +113,21 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 				else if (Ref->has_classpath())
 				{
 					FString PathName = UTF8_TO_TCHAR(Ref->classpath().c_str());
-					Obj = LoadObject<UObject>(NULL, *PathName);
-					if (ClientConn)
+					if (auto ObjClass = LoadObject<UClass>(nullptr, *PathName))
 					{
-						GuidCache->RegisterNetGUIDFromPath_Server(NetGUID, PathName, 0, 0, false, false);
+						Obj = NewObject<UChannelDataView>(nullptr, ObjClass);
+						if (ClientConn)
+						{
+							GuidCache->RegisterNetGUIDFromPath_Server(NetGUID, PathName, 0, 0, false, false);
+						}
+						else
+						{
+							GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, 0, 0, false, false);
+						}
 					}
 					else
 					{
-						GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, 0, 0, false, false);
+						UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Failed to load class from path: %s"), *PathName);
 					}
 				}
 			}

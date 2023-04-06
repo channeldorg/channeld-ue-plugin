@@ -310,8 +310,9 @@ void UChannelDataView::RemoveProvider(Channeld::ChannelId ChId, IChannelDataProv
 		UE_LOG(LogChanneld, Verbose, TEXT("Removing channel data provider %s from channel %d"), *IChannelDataProvider::GetName(Provider), ChId);
 		
 		EChanneldChannelType ChannelType = GetChanneldSubsystem()->GetChannelTypeByChId(ChId);
-		
-		if (bSendRemoved && ChannelType != EChanneldChannelType::ECT_Spatial)
+
+		// Don't send removal update to the spatial or entity channel
+		if (bSendRemoved && ChannelType != EChanneldChannelType::ECT_Spatial && ChannelType != EChanneldChannelType::ECT_Entity)
 		{
 			// Collect the removed states immediately (before the provider gets destroyed completely)
 			google::protobuf::Message* RemovedData = RemovedProvidersData.FindRef(ChId);
