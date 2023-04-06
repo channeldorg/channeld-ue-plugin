@@ -1449,6 +1449,7 @@ class CHANNELDUE_API ChannelSubscriptionOptions final :
     kFanOutIntervalMsFieldNumber = 3,
     kFanOutDelayMsFieldNumber = 4,
     kSkipSelfUpdateFanOutFieldNumber = 5,
+    kSkipFirstFanOutFieldNumber = 6,
   };
   // repeated string dataFieldMasks = 2;
   int datafieldmasks_size() const;
@@ -1526,6 +1527,19 @@ class CHANNELDUE_API ChannelSubscriptionOptions final :
   void _internal_set_skipselfupdatefanout(bool value);
   public:
 
+  // optional bool skipFirstFanOut = 6;
+  bool has_skipfirstfanout() const;
+  private:
+  bool _internal_has_skipfirstfanout() const;
+  public:
+  void clear_skipfirstfanout();
+  bool skipfirstfanout() const;
+  void set_skipfirstfanout(bool value);
+  private:
+  bool _internal_skipfirstfanout() const;
+  void _internal_set_skipfirstfanout(bool value);
+  public:
+
   // @@protoc_insertion_point(class_scope:channeldpb.ChannelSubscriptionOptions)
  private:
   class _Internal;
@@ -1541,6 +1555,7 @@ class CHANNELDUE_API ChannelSubscriptionOptions final :
     uint32_t fanoutintervalms_;
     int32_t fanoutdelayms_;
     bool skipselfupdatefanout_;
+    bool skipfirstfanout_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_channeld_2eproto;
@@ -7451,6 +7466,34 @@ inline void ChannelSubscriptionOptions::_internal_set_skipselfupdatefanout(bool 
 inline void ChannelSubscriptionOptions::set_skipselfupdatefanout(bool value) {
   _internal_set_skipselfupdatefanout(value);
   // @@protoc_insertion_point(field_set:channeldpb.ChannelSubscriptionOptions.skipSelfUpdateFanOut)
+}
+
+// optional bool skipFirstFanOut = 6;
+inline bool ChannelSubscriptionOptions::_internal_has_skipfirstfanout() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool ChannelSubscriptionOptions::has_skipfirstfanout() const {
+  return _internal_has_skipfirstfanout();
+}
+inline void ChannelSubscriptionOptions::clear_skipfirstfanout() {
+  _impl_.skipfirstfanout_ = false;
+  _impl_._has_bits_[0] &= ~0x00000010u;
+}
+inline bool ChannelSubscriptionOptions::_internal_skipfirstfanout() const {
+  return _impl_.skipfirstfanout_;
+}
+inline bool ChannelSubscriptionOptions::skipfirstfanout() const {
+  // @@protoc_insertion_point(field_get:channeldpb.ChannelSubscriptionOptions.skipFirstFanOut)
+  return _internal_skipfirstfanout();
+}
+inline void ChannelSubscriptionOptions::_internal_set_skipfirstfanout(bool value) {
+  _impl_._has_bits_[0] |= 0x00000010u;
+  _impl_.skipfirstfanout_ = value;
+}
+inline void ChannelSubscriptionOptions::set_skipfirstfanout(bool value) {
+  _internal_set_skipfirstfanout(value);
+  // @@protoc_insertion_point(field_set:channeldpb.ChannelSubscriptionOptions.skipFirstFanOut)
 }
 
 // -------------------------------------------------------------------
