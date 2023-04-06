@@ -108,7 +108,8 @@ PROTOBUF_CONSTEXPR ChannelSubscriptionOptions::ChannelSubscriptionOptions(
   , /*decltype(_impl_.dataaccess_)*/0
   , /*decltype(_impl_.fanoutintervalms_)*/0u
   , /*decltype(_impl_.fanoutdelayms_)*/0
-  , /*decltype(_impl_.skipselfupdatefanout_)*/false} {}
+  , /*decltype(_impl_.skipselfupdatefanout_)*/false
+  , /*decltype(_impl_.skipfirstfanout_)*/false} {}
 struct ChannelSubscriptionOptionsDefaultTypeInternal {
   PROTOBUF_CONSTEXPR ChannelSubscriptionOptionsDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -620,11 +621,13 @@ const uint32_t TableStruct_channeld_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
   PROTOBUF_FIELD_OFFSET(::channeldpb::ChannelSubscriptionOptions, _impl_.fanoutintervalms_),
   PROTOBUF_FIELD_OFFSET(::channeldpb::ChannelSubscriptionOptions, _impl_.fanoutdelayms_),
   PROTOBUF_FIELD_OFFSET(::channeldpb::ChannelSubscriptionOptions, _impl_.skipselfupdatefanout_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::ChannelSubscriptionOptions, _impl_.skipfirstfanout_),
   0,
   ~0u,
   1,
   2,
   3,
+  4,
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::channeldpb::ChannelDataMergeOptions, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -893,37 +896,37 @@ static const ::_pbi::MigrationSchema schemas_channeld_2eproto[] PROTOBUF_SECTION
   { 18, -1, -1, sizeof(::channeldpb::ServerForwardMessage)},
   { 26, -1, -1, sizeof(::channeldpb::AuthMessage)},
   { 34, -1, -1, sizeof(::channeldpb::AuthResultMessage)},
-  { 43, 54, -1, sizeof(::channeldpb::ChannelSubscriptionOptions)},
-  { 59, -1, -1, sizeof(::channeldpb::ChannelDataMergeOptions)},
-  { 69, -1, -1, sizeof(::channeldpb::CreateChannelMessage)},
-  { 80, -1, -1, sizeof(::channeldpb::CreateChannelResultMessage)},
-  { 90, -1, -1, sizeof(::channeldpb::RemoveChannelMessage)},
-  { 97, -1, -1, sizeof(::channeldpb::ListChannelMessage)},
-  { 105, -1, -1, sizeof(::channeldpb::ListChannelResultMessage_ChannelInfo)},
-  { 114, -1, -1, sizeof(::channeldpb::ListChannelResultMessage)},
-  { 121, -1, -1, sizeof(::channeldpb::SubscribedToChannelMessage)},
-  { 129, -1, -1, sizeof(::channeldpb::SubscribedToChannelResultMessage)},
-  { 139, -1, -1, sizeof(::channeldpb::UnsubscribedFromChannelMessage)},
-  { 146, -1, -1, sizeof(::channeldpb::UnsubscribedFromChannelResultMessage)},
-  { 155, -1, -1, sizeof(::channeldpb::ChannelDataUpdateMessage)},
-  { 163, -1, -1, sizeof(::channeldpb::DisconnectMessage)},
-  { 170, -1, -1, sizeof(::channeldpb::SpatialInfo)},
-  { 179, -1, -1, sizeof(::channeldpb::CreateSpatialChannelsResultMessage)},
-  { 188, -1, -1, sizeof(::channeldpb::QuerySpatialChannelMessage)},
-  { 195, -1, -1, sizeof(::channeldpb::QuerySpatialChannelResultMessage)},
-  { 202, -1, -1, sizeof(::channeldpb::ChannelDataHandoverMessage)},
-  { 212, -1, -1, sizeof(::channeldpb::SpatialRegion)},
-  { 222, -1, -1, sizeof(::channeldpb::SpatialRegionsUpdateMessage)},
-  { 229, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_SpotsAOI)},
-  { 237, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_BoxAOI)},
-  { 245, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_SphereAOI)},
-  { 253, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_ConeAOI)},
-  { 263, 273, -1, sizeof(::channeldpb::SpatialInterestQuery)},
-  { 277, -1, -1, sizeof(::channeldpb::UpdateSpatialInterestMessage)},
-  { 285, -1, -1, sizeof(::channeldpb::CreateEntityChannelMessage)},
-  { 297, -1, -1, sizeof(::channeldpb::AddEntityGroupMessage)},
-  { 306, -1, -1, sizeof(::channeldpb::RemoveEntityGroupMessage)},
-  { 314, -1, -1, sizeof(::channeldpb::DebugGetSpatialRegionsMessage)},
+  { 43, 55, -1, sizeof(::channeldpb::ChannelSubscriptionOptions)},
+  { 61, -1, -1, sizeof(::channeldpb::ChannelDataMergeOptions)},
+  { 71, -1, -1, sizeof(::channeldpb::CreateChannelMessage)},
+  { 82, -1, -1, sizeof(::channeldpb::CreateChannelResultMessage)},
+  { 92, -1, -1, sizeof(::channeldpb::RemoveChannelMessage)},
+  { 99, -1, -1, sizeof(::channeldpb::ListChannelMessage)},
+  { 107, -1, -1, sizeof(::channeldpb::ListChannelResultMessage_ChannelInfo)},
+  { 116, -1, -1, sizeof(::channeldpb::ListChannelResultMessage)},
+  { 123, -1, -1, sizeof(::channeldpb::SubscribedToChannelMessage)},
+  { 131, -1, -1, sizeof(::channeldpb::SubscribedToChannelResultMessage)},
+  { 141, -1, -1, sizeof(::channeldpb::UnsubscribedFromChannelMessage)},
+  { 148, -1, -1, sizeof(::channeldpb::UnsubscribedFromChannelResultMessage)},
+  { 157, -1, -1, sizeof(::channeldpb::ChannelDataUpdateMessage)},
+  { 165, -1, -1, sizeof(::channeldpb::DisconnectMessage)},
+  { 172, -1, -1, sizeof(::channeldpb::SpatialInfo)},
+  { 181, -1, -1, sizeof(::channeldpb::CreateSpatialChannelsResultMessage)},
+  { 190, -1, -1, sizeof(::channeldpb::QuerySpatialChannelMessage)},
+  { 197, -1, -1, sizeof(::channeldpb::QuerySpatialChannelResultMessage)},
+  { 204, -1, -1, sizeof(::channeldpb::ChannelDataHandoverMessage)},
+  { 214, -1, -1, sizeof(::channeldpb::SpatialRegion)},
+  { 224, -1, -1, sizeof(::channeldpb::SpatialRegionsUpdateMessage)},
+  { 231, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_SpotsAOI)},
+  { 239, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_BoxAOI)},
+  { 247, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_SphereAOI)},
+  { 255, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_ConeAOI)},
+  { 265, 275, -1, sizeof(::channeldpb::SpatialInterestQuery)},
+  { 279, -1, -1, sizeof(::channeldpb::UpdateSpatialInterestMessage)},
+  { 287, -1, -1, sizeof(::channeldpb::CreateEntityChannelMessage)},
+  { 299, -1, -1, sizeof(::channeldpb::AddEntityGroupMessage)},
+  { 308, -1, -1, sizeof(::channeldpb::RemoveEntityGroupMessage)},
+  { 316, -1, -1, sizeof(::channeldpb::DebugGetSpatialRegionsMessage)},
 };
 
 static const ::_pb::Message* const file_default_instances_channeld_2eproto[] = {
@@ -979,132 +982,133 @@ const char descriptor_table_protodef_channeld_2eproto[] PROTOBUF_SECTION_VARIABL
   "ltMessage.AuthResult\022\016\n\006connId\030\002 \001(\r\0224\n\017"
   "compressionType\030\003 \001(\0162\033.channeldpb.Compr"
   "essionType\"=\n\nAuthResult\022\016\n\nSUCCESSFUL\020\000"
-  "\022\017\n\013INVALID_PIT\020\001\022\016\n\nINVALID_LT\020\002\"\231\002\n\032Ch"
+  "\022\017\n\013INVALID_PIT\020\001\022\016\n\nINVALID_LT\020\002\"\313\002\n\032Ch"
   "annelSubscriptionOptions\0226\n\ndataAccess\030\001"
   " \001(\0162\035.channeldpb.ChannelDataAccessH\000\210\001\001"
   "\022\026\n\016dataFieldMasks\030\002 \003(\t\022\035\n\020fanOutInterv"
   "alMs\030\003 \001(\rH\001\210\001\001\022\032\n\rfanOutDelayMs\030\004 \001(\005H\002"
-  "\210\001\001\022!\n\024skipSelfUpdateFanOut\030\005 \001(\010H\003\210\001\001B\r"
-  "\n\013_dataAccessB\023\n\021_fanOutIntervalMsB\020\n\016_f"
-  "anOutDelayMsB\027\n\025_skipSelfUpdateFanOut\"\206\001"
-  "\n\027ChannelDataMergeOptions\022\031\n\021shouldRepla"
-  "ceList\030\001 \001(\010\022\025\n\rlistSizeLimit\030\002 \001(\r\022\023\n\013t"
-  "runcateTop\030\003 \001(\010\022$\n\034shouldCheckRemovable"
-  "MapField\030\004 \001(\010\"\361\001\n\024CreateChannelMessage\022"
-  ",\n\013channelType\030\001 \001(\0162\027.channeldpb.Channe"
-  "lType\022\020\n\010metadata\030\002 \001(\t\022:\n\nsubOptions\030\003 "
-  "\001(\0132&.channeldpb.ChannelSubscriptionOpti"
-  "ons\022\"\n\004data\030\004 \001(\0132\024.google.protobuf.Any\022"
-  "9\n\014mergeOptions\030\005 \001(\0132#.channeldpb.Chann"
-  "elDataMergeOptions\"\204\001\n\032CreateChannelResu"
-  "ltMessage\022,\n\013channelType\030\001 \001(\0162\027.channel"
-  "dpb.ChannelType\022\020\n\010metadata\030\002 \001(\t\022\023\n\013own"
-  "erConnId\030\003 \001(\r\022\021\n\tchannelId\030\004 \001(\r\")\n\024Rem"
-  "oveChannelMessage\022\021\n\tchannelId\030\001 \001(\r\"Z\n\022"
-  "ListChannelMessage\022+\n\ntypeFilter\030\001 \001(\0162\027"
-  ".channeldpb.ChannelType\022\027\n\017metadataFilte"
-  "rs\030\002 \003(\t\"\300\001\n\030ListChannelResultMessage\022B\n"
-  "\010channels\030\001 \003(\01320.channeldpb.ListChannel"
-  "ResultMessage.ChannelInfo\032`\n\013ChannelInfo"
-  "\022\021\n\tchannelId\030\001 \001(\r\022,\n\013channelType\030\002 \001(\016"
-  "2\027.channeldpb.ChannelType\022\020\n\010metadata\030\003 "
-  "\001(\t\"h\n\032SubscribedToChannelMessage\022\016\n\006con"
-  "nId\030\001 \001(\r\022:\n\nsubOptions\030\002 \001(\0132&.channeld"
-  "pb.ChannelSubscriptionOptions\"\312\001\n Subscr"
-  "ibedToChannelResultMessage\022\016\n\006connId\030\001 \001"
-  "(\r\022:\n\nsubOptions\030\002 \001(\0132&.channeldpb.Chan"
-  "nelSubscriptionOptions\022,\n\010connType\030\003 \001(\016"
-  "2\032.channeldpb.ConnectionType\022,\n\013channelT"
-  "ype\030\004 \001(\0162\027.channeldpb.ChannelType\"0\n\036Un"
-  "subscribedFromChannelMessage\022\016\n\006connId\030\001"
-  " \001(\r\"\222\001\n$UnsubscribedFromChannelResultMe"
-  "ssage\022\016\n\006connId\030\001 \001(\r\022,\n\010connType\030\002 \001(\0162"
-  "\032.channeldpb.ConnectionType\022,\n\013channelTy"
-  "pe\030\003 \001(\0162\027.channeldpb.ChannelType\"U\n\030Cha"
-  "nnelDataUpdateMessage\022\"\n\004data\030\001 \001(\0132\024.go"
-  "ogle.protobuf.Any\022\025\n\rcontextConnId\030\002 \001(\r"
-  "\"#\n\021DisconnectMessage\022\016\n\006connId\030\001 \001(\r\".\n"
-  "\013SpatialInfo\022\t\n\001x\030\001 \001(\001\022\t\n\001y\030\002 \001(\001\022\t\n\001z\030"
-  "\003 \001(\001\"e\n\"CreateSpatialChannelsResultMess"
-  "age\022\030\n\020spatialChannelId\030\001 \003(\r\022\020\n\010metadat"
-  "a\030\002 \001(\t\022\023\n\013ownerConnId\030\003 \001(\r\"J\n\032QuerySpa"
-  "tialChannelMessage\022,\n\013spatialInfo\030\001 \003(\0132"
-  "\027.channeldpb.SpatialInfo\"5\n QuerySpatial"
-  "ChannelResultMessage\022\021\n\tchannelId\030\001 \003(\r\""
-  "\203\001\n\032ChannelDataHandoverMessage\022\024\n\014srcCha"
-  "nnelId\030\001 \001(\r\022\024\n\014dstChannelId\030\002 \001(\r\022\025\n\rco"
-  "ntextConnId\030\003 \001(\r\022\"\n\004data\030\004 \001(\0132\024.google"
-  ".protobuf.Any\"\203\001\n\rSpatialRegion\022$\n\003min\030\001"
-  " \001(\0132\027.channeldpb.SpatialInfo\022$\n\003max\030\002 \001"
-  "(\0132\027.channeldpb.SpatialInfo\022\021\n\tchannelId"
-  "\030\003 \001(\r\022\023\n\013serverIndex\030\004 \001(\r\"I\n\033SpatialRe"
-  "gionsUpdateMessage\022*\n\007regions\030\001 \003(\0132\031.ch"
-  "anneldpb.SpatialRegion\"\260\005\n\024SpatialIntere"
-  "stQuery\022@\n\010spotsAOI\030\001 \001(\0132).channeldpb.S"
-  "patialInterestQuery.SpotsAOIH\000\210\001\001\022<\n\006box"
-  "AOI\030\002 \001(\0132\'.channeldpb.SpatialInterestQu"
-  "ery.BoxAOIH\001\210\001\001\022B\n\tsphereAOI\030\003 \001(\0132*.cha"
-  "nneldpb.SpatialInterestQuery.SphereAOIH\002"
-  "\210\001\001\022>\n\007coneAOI\030\004 \001(\0132(.channeldpb.Spatia"
-  "lInterestQuery.ConeAOIH\003\210\001\001\032A\n\010SpotsAOI\022"
-  "&\n\005spots\030\001 \003(\0132\027.channeldpb.SpatialInfo\022"
-  "\r\n\005dists\030\002 \003(\r\032Z\n\006BoxAOI\022\'\n\006center\030\001 \001(\013"
-  "2\027.channeldpb.SpatialInfo\022\'\n\006extent\030\002 \001("
-  "\0132\027.channeldpb.SpatialInfo\032D\n\tSphereAOI\022"
-  "\'\n\006center\030\001 \001(\0132\027.channeldpb.SpatialInfo"
-  "\022\016\n\006radius\030\002 \001(\001\032}\n\007ConeAOI\022\'\n\006center\030\001 "
-  "\001(\0132\027.channeldpb.SpatialInfo\022*\n\tdirectio"
-  "n\030\002 \001(\0132\027.channeldpb.SpatialInfo\022\r\n\005angl"
-  "e\030\003 \001(\001\022\016\n\006radius\030\004 \001(\001B\013\n\t_spotsAOIB\t\n\007"
-  "_boxAOIB\014\n\n_sphereAOIB\n\n\010_coneAOI\"_\n\034Upd"
-  "ateSpatialInterestMessage\022\016\n\006connId\030\001 \001("
-  "\r\022/\n\005query\030\002 \001(\0132 .channeldpb.SpatialInt"
-  "erestQuery\"\360\001\n\032CreateEntityChannelMessag"
-  "e\022\020\n\010entityId\030\001 \001(\r\022\020\n\010metadata\030\002 \001(\t\022:\n"
-  "\nsubOptions\030\003 \001(\0132&.channeldpb.ChannelSu"
-  "bscriptionOptions\022\"\n\004data\030\004 \001(\0132\024.google"
-  ".protobuf.Any\0229\n\014mergeOptions\030\005 \001(\0132#.ch"
-  "anneldpb.ChannelDataMergeOptions\022\023\n\013isWe"
-  "llKnown\030\006 \001(\010\"s\n\025AddEntityGroupMessage\022)"
-  "\n\004type\030\001 \001(\0162\033.channeldpb.EntityGroupTyp"
-  "e\022\030\n\020JunctionEntityId\030\002 \001(\r\022\025\n\rEntitiesT"
-  "oAdd\030\003 \003(\r\"_\n\030RemoveEntityGroupMessage\022)"
-  "\n\004type\030\001 \001(\0162\033.channeldpb.EntityGroupTyp"
-  "e\022\030\n\020EntitiesToRemove\030\002 \003(\r\"\037\n\035DebugGetS"
-  "patialRegionsMessage*\247\001\n\rBroadcastType\022\020"
-  "\n\014NO_BROADCAST\020\000\022\025\n\021SINGLE_CONNECTION\020\001\022"
-  "\007\n\003ALL\020\002\022\022\n\016ALL_BUT_SENDER\020\004\022\021\n\rALL_BUT_"
-  "OWNER\020\010\022\022\n\016ALL_BUT_CLIENT\020\020\022\022\n\016ALL_BUT_S"
-  "ERVER\020 \022\025\n\021ADJACENT_CHANNELS\020@*;\n\016Connec"
-  "tionType\022\021\n\rNO_CONNECTION\020\000\022\n\n\006SERVER\020\001\022"
-  "\n\n\006CLIENT\020\002*\220\001\n\013ChannelType\022\013\n\007UNKNOWN\020\000"
-  "\022\n\n\006GLOBAL\020\001\022\013\n\007PRIVATE\020\002\022\014\n\010SUBWORLD\020\003\022"
-  "\013\n\007SPATIAL\020\004\022\n\n\006ENTITY\020\005\022\010\n\004TEST\020d\022\t\n\005TE"
-  "ST1\020e\022\t\n\005TEST2\020f\022\t\n\005TEST3\020g\022\t\n\005TEST4\020h*\275"
-  "\003\n\013MessageType\022\013\n\007INVALID\020\000\022\010\n\004AUTH\020\001\022\022\n"
-  "\016CREATE_CHANNEL\020\003\022\022\n\016REMOVE_CHANNEL\020\004\022\020\n"
-  "\014LIST_CHANNEL\020\005\022\022\n\016SUB_TO_CHANNEL\020\006\022\026\n\022U"
-  "NSUB_FROM_CHANNEL\020\007\022\027\n\023CHANNEL_DATA_UPDA"
-  "TE\020\010\022\016\n\nDISCONNECT\020\t\022\032\n\026CREATE_SPATIAL_C"
-  "HANNEL\020\n\022\031\n\025QUERY_SPATIAL_CHANNEL\020\013\022\031\n\025C"
-  "HANNEL_DATA_HANDOVER\020\014\022\032\n\026SPATIAL_REGION"
-  "S_UPDATE\020\r\022\033\n\027UPDATE_SPATIAL_INTEREST\020\016\022"
-  "\031\n\025CREATE_ENTITY_CHANNEL\020\017\022\024\n\020ENTITY_GRO"
-  "UP_ADD\020\020\022\027\n\023ENTITY_GROUP_REMOVE\020\021\022\035\n\031DEB"
-  "UG_GET_SPATIAL_REGIONS\020c\022\024\n\020USER_SPACE_S"
-  "TART\020d*1\n\017CompressionType\022\022\n\016NO_COMPRESS"
-  "ION\020\000\022\n\n\006SNAPPY\020\001*E\n\021ChannelDataAccess\022\r"
-  "\n\tNO_ACCESS\020\000\022\017\n\013READ_ACCESS\020\001\022\020\n\014WRITE_"
-  "ACCESS\020\002*)\n\017EntityGroupType\022\014\n\010HANDOVER\020"
-  "\000\022\010\n\004LOCK\020\001B0Z.github.com/metaworking/ch"
-  "anneld/pkg/channeldpbb\006proto3"
+  "\210\001\001\022!\n\024skipSelfUpdateFanOut\030\005 \001(\010H\003\210\001\001\022\034"
+  "\n\017skipFirstFanOut\030\006 \001(\010H\004\210\001\001B\r\n\013_dataAcc"
+  "essB\023\n\021_fanOutIntervalMsB\020\n\016_fanOutDelay"
+  "MsB\027\n\025_skipSelfUpdateFanOutB\022\n\020_skipFirs"
+  "tFanOut\"\206\001\n\027ChannelDataMergeOptions\022\031\n\021s"
+  "houldReplaceList\030\001 \001(\010\022\025\n\rlistSizeLimit\030"
+  "\002 \001(\r\022\023\n\013truncateTop\030\003 \001(\010\022$\n\034shouldChec"
+  "kRemovableMapField\030\004 \001(\010\"\361\001\n\024CreateChann"
+  "elMessage\022,\n\013channelType\030\001 \001(\0162\027.channel"
+  "dpb.ChannelType\022\020\n\010metadata\030\002 \001(\t\022:\n\nsub"
+  "Options\030\003 \001(\0132&.channeldpb.ChannelSubscr"
+  "iptionOptions\022\"\n\004data\030\004 \001(\0132\024.google.pro"
+  "tobuf.Any\0229\n\014mergeOptions\030\005 \001(\0132#.channe"
+  "ldpb.ChannelDataMergeOptions\"\204\001\n\032CreateC"
+  "hannelResultMessage\022,\n\013channelType\030\001 \001(\016"
+  "2\027.channeldpb.ChannelType\022\020\n\010metadata\030\002 "
+  "\001(\t\022\023\n\013ownerConnId\030\003 \001(\r\022\021\n\tchannelId\030\004 "
+  "\001(\r\")\n\024RemoveChannelMessage\022\021\n\tchannelId"
+  "\030\001 \001(\r\"Z\n\022ListChannelMessage\022+\n\ntypeFilt"
+  "er\030\001 \001(\0162\027.channeldpb.ChannelType\022\027\n\017met"
+  "adataFilters\030\002 \003(\t\"\300\001\n\030ListChannelResult"
+  "Message\022B\n\010channels\030\001 \003(\01320.channeldpb.L"
+  "istChannelResultMessage.ChannelInfo\032`\n\013C"
+  "hannelInfo\022\021\n\tchannelId\030\001 \001(\r\022,\n\013channel"
+  "Type\030\002 \001(\0162\027.channeldpb.ChannelType\022\020\n\010m"
+  "etadata\030\003 \001(\t\"h\n\032SubscribedToChannelMess"
+  "age\022\016\n\006connId\030\001 \001(\r\022:\n\nsubOptions\030\002 \001(\0132"
+  "&.channeldpb.ChannelSubscriptionOptions\""
+  "\312\001\n SubscribedToChannelResultMessage\022\016\n\006"
+  "connId\030\001 \001(\r\022:\n\nsubOptions\030\002 \001(\0132&.chann"
+  "eldpb.ChannelSubscriptionOptions\022,\n\010conn"
+  "Type\030\003 \001(\0162\032.channeldpb.ConnectionType\022,"
+  "\n\013channelType\030\004 \001(\0162\027.channeldpb.Channel"
+  "Type\"0\n\036UnsubscribedFromChannelMessage\022\016"
+  "\n\006connId\030\001 \001(\r\"\222\001\n$UnsubscribedFromChann"
+  "elResultMessage\022\016\n\006connId\030\001 \001(\r\022,\n\010connT"
+  "ype\030\002 \001(\0162\032.channeldpb.ConnectionType\022,\n"
+  "\013channelType\030\003 \001(\0162\027.channeldpb.ChannelT"
+  "ype\"U\n\030ChannelDataUpdateMessage\022\"\n\004data\030"
+  "\001 \001(\0132\024.google.protobuf.Any\022\025\n\rcontextCo"
+  "nnId\030\002 \001(\r\"#\n\021DisconnectMessage\022\016\n\006connI"
+  "d\030\001 \001(\r\".\n\013SpatialInfo\022\t\n\001x\030\001 \001(\001\022\t\n\001y\030\002"
+  " \001(\001\022\t\n\001z\030\003 \001(\001\"e\n\"CreateSpatialChannels"
+  "ResultMessage\022\030\n\020spatialChannelId\030\001 \003(\r\022"
+  "\020\n\010metadata\030\002 \001(\t\022\023\n\013ownerConnId\030\003 \001(\r\"J"
+  "\n\032QuerySpatialChannelMessage\022,\n\013spatialI"
+  "nfo\030\001 \003(\0132\027.channeldpb.SpatialInfo\"5\n Qu"
+  "erySpatialChannelResultMessage\022\021\n\tchanne"
+  "lId\030\001 \003(\r\"\203\001\n\032ChannelDataHandoverMessage"
+  "\022\024\n\014srcChannelId\030\001 \001(\r\022\024\n\014dstChannelId\030\002"
+  " \001(\r\022\025\n\rcontextConnId\030\003 \001(\r\022\"\n\004data\030\004 \001("
+  "\0132\024.google.protobuf.Any\"\203\001\n\rSpatialRegio"
+  "n\022$\n\003min\030\001 \001(\0132\027.channeldpb.SpatialInfo\022"
+  "$\n\003max\030\002 \001(\0132\027.channeldpb.SpatialInfo\022\021\n"
+  "\tchannelId\030\003 \001(\r\022\023\n\013serverIndex\030\004 \001(\r\"I\n"
+  "\033SpatialRegionsUpdateMessage\022*\n\007regions\030"
+  "\001 \003(\0132\031.channeldpb.SpatialRegion\"\260\005\n\024Spa"
+  "tialInterestQuery\022@\n\010spotsAOI\030\001 \001(\0132).ch"
+  "anneldpb.SpatialInterestQuery.SpotsAOIH\000"
+  "\210\001\001\022<\n\006boxAOI\030\002 \001(\0132\'.channeldpb.Spatial"
+  "InterestQuery.BoxAOIH\001\210\001\001\022B\n\tsphereAOI\030\003"
+  " \001(\0132*.channeldpb.SpatialInterestQuery.S"
+  "phereAOIH\002\210\001\001\022>\n\007coneAOI\030\004 \001(\0132(.channel"
+  "dpb.SpatialInterestQuery.ConeAOIH\003\210\001\001\032A\n"
+  "\010SpotsAOI\022&\n\005spots\030\001 \003(\0132\027.channeldpb.Sp"
+  "atialInfo\022\r\n\005dists\030\002 \003(\r\032Z\n\006BoxAOI\022\'\n\006ce"
+  "nter\030\001 \001(\0132\027.channeldpb.SpatialInfo\022\'\n\006e"
+  "xtent\030\002 \001(\0132\027.channeldpb.SpatialInfo\032D\n\t"
+  "SphereAOI\022\'\n\006center\030\001 \001(\0132\027.channeldpb.S"
+  "patialInfo\022\016\n\006radius\030\002 \001(\001\032}\n\007ConeAOI\022\'\n"
+  "\006center\030\001 \001(\0132\027.channeldpb.SpatialInfo\022*"
+  "\n\tdirection\030\002 \001(\0132\027.channeldpb.SpatialIn"
+  "fo\022\r\n\005angle\030\003 \001(\001\022\016\n\006radius\030\004 \001(\001B\013\n\t_sp"
+  "otsAOIB\t\n\007_boxAOIB\014\n\n_sphereAOIB\n\n\010_cone"
+  "AOI\"_\n\034UpdateSpatialInterestMessage\022\016\n\006c"
+  "onnId\030\001 \001(\r\022/\n\005query\030\002 \001(\0132 .channeldpb."
+  "SpatialInterestQuery\"\360\001\n\032CreateEntityCha"
+  "nnelMessage\022\020\n\010entityId\030\001 \001(\r\022\020\n\010metadat"
+  "a\030\002 \001(\t\022:\n\nsubOptions\030\003 \001(\0132&.channeldpb"
+  ".ChannelSubscriptionOptions\022\"\n\004data\030\004 \001("
+  "\0132\024.google.protobuf.Any\0229\n\014mergeOptions\030"
+  "\005 \001(\0132#.channeldpb.ChannelDataMergeOptio"
+  "ns\022\023\n\013isWellKnown\030\006 \001(\010\"s\n\025AddEntityGrou"
+  "pMessage\022)\n\004type\030\001 \001(\0162\033.channeldpb.Enti"
+  "tyGroupType\022\030\n\020JunctionEntityId\030\002 \001(\r\022\025\n"
+  "\rEntitiesToAdd\030\003 \003(\r\"_\n\030RemoveEntityGrou"
+  "pMessage\022)\n\004type\030\001 \001(\0162\033.channeldpb.Enti"
+  "tyGroupType\022\030\n\020EntitiesToRemove\030\002 \003(\r\"\037\n"
+  "\035DebugGetSpatialRegionsMessage*\247\001\n\rBroad"
+  "castType\022\020\n\014NO_BROADCAST\020\000\022\025\n\021SINGLE_CON"
+  "NECTION\020\001\022\007\n\003ALL\020\002\022\022\n\016ALL_BUT_SENDER\020\004\022\021"
+  "\n\rALL_BUT_OWNER\020\010\022\022\n\016ALL_BUT_CLIENT\020\020\022\022\n"
+  "\016ALL_BUT_SERVER\020 \022\025\n\021ADJACENT_CHANNELS\020@"
+  "*;\n\016ConnectionType\022\021\n\rNO_CONNECTION\020\000\022\n\n"
+  "\006SERVER\020\001\022\n\n\006CLIENT\020\002*\220\001\n\013ChannelType\022\013\n"
+  "\007UNKNOWN\020\000\022\n\n\006GLOBAL\020\001\022\013\n\007PRIVATE\020\002\022\014\n\010S"
+  "UBWORLD\020\003\022\013\n\007SPATIAL\020\004\022\n\n\006ENTITY\020\005\022\010\n\004TE"
+  "ST\020d\022\t\n\005TEST1\020e\022\t\n\005TEST2\020f\022\t\n\005TEST3\020g\022\t\n"
+  "\005TEST4\020h*\275\003\n\013MessageType\022\013\n\007INVALID\020\000\022\010\n"
+  "\004AUTH\020\001\022\022\n\016CREATE_CHANNEL\020\003\022\022\n\016REMOVE_CH"
+  "ANNEL\020\004\022\020\n\014LIST_CHANNEL\020\005\022\022\n\016SUB_TO_CHAN"
+  "NEL\020\006\022\026\n\022UNSUB_FROM_CHANNEL\020\007\022\027\n\023CHANNEL"
+  "_DATA_UPDATE\020\010\022\016\n\nDISCONNECT\020\t\022\032\n\026CREATE"
+  "_SPATIAL_CHANNEL\020\n\022\031\n\025QUERY_SPATIAL_CHAN"
+  "NEL\020\013\022\031\n\025CHANNEL_DATA_HANDOVER\020\014\022\032\n\026SPAT"
+  "IAL_REGIONS_UPDATE\020\r\022\033\n\027UPDATE_SPATIAL_I"
+  "NTEREST\020\016\022\031\n\025CREATE_ENTITY_CHANNEL\020\017\022\024\n\020"
+  "ENTITY_GROUP_ADD\020\020\022\027\n\023ENTITY_GROUP_REMOV"
+  "E\020\021\022\035\n\031DEBUG_GET_SPATIAL_REGIONS\020c\022\024\n\020US"
+  "ER_SPACE_START\020d*1\n\017CompressionType\022\022\n\016N"
+  "O_COMPRESSION\020\000\022\n\n\006SNAPPY\020\001*E\n\021ChannelDa"
+  "taAccess\022\r\n\tNO_ACCESS\020\000\022\017\n\013READ_ACCESS\020\001"
+  "\022\020\n\014WRITE_ACCESS\020\002*)\n\017EntityGroupType\022\014\n"
+  "\010HANDOVER\020\000\022\010\n\004LOCK\020\001B0Z.github.com/meta"
+  "working/channeld/pkg/channeldpbb\006proto3"
   ;
 static const ::_pbi::DescriptorTable* const descriptor_table_channeld_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fany_2eproto,
 };
 static ::_pbi::once_flag descriptor_table_channeld_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_channeld_2eproto = {
-    false, false, 5269, descriptor_table_protodef_channeld_2eproto,
+    false, false, 5319, descriptor_table_protodef_channeld_2eproto,
     "channeld.proto",
     &descriptor_table_channeld_2eproto_once, descriptor_table_channeld_2eproto_deps, 1, 36,
     schemas_channeld_2eproto, file_default_instances_channeld_2eproto, TableStruct_channeld_2eproto::offsets,
@@ -2501,6 +2505,9 @@ class ChannelSubscriptionOptions::_Internal {
   static void set_has_skipselfupdatefanout(HasBits* has_bits) {
     (*has_bits)[0] |= 8u;
   }
+  static void set_has_skipfirstfanout(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
 };
 
 ChannelSubscriptionOptions::ChannelSubscriptionOptions(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -2519,12 +2526,13 @@ ChannelSubscriptionOptions::ChannelSubscriptionOptions(const ChannelSubscription
     , decltype(_impl_.dataaccess_){}
     , decltype(_impl_.fanoutintervalms_){}
     , decltype(_impl_.fanoutdelayms_){}
-    , decltype(_impl_.skipselfupdatefanout_){}};
+    , decltype(_impl_.skipselfupdatefanout_){}
+    , decltype(_impl_.skipfirstfanout_){}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::memcpy(&_impl_.dataaccess_, &from._impl_.dataaccess_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.skipselfupdatefanout_) -
-    reinterpret_cast<char*>(&_impl_.dataaccess_)) + sizeof(_impl_.skipselfupdatefanout_));
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.skipfirstfanout_) -
+    reinterpret_cast<char*>(&_impl_.dataaccess_)) + sizeof(_impl_.skipfirstfanout_));
   // @@protoc_insertion_point(copy_constructor:channeldpb.ChannelSubscriptionOptions)
 }
 
@@ -2540,6 +2548,7 @@ inline void ChannelSubscriptionOptions::SharedCtor(
     , decltype(_impl_.fanoutintervalms_){0u}
     , decltype(_impl_.fanoutdelayms_){0}
     , decltype(_impl_.skipselfupdatefanout_){false}
+    , decltype(_impl_.skipfirstfanout_){false}
   };
 }
 
@@ -2569,10 +2578,10 @@ void ChannelSubscriptionOptions::Clear() {
 
   _impl_.datafieldmasks_.Clear();
   cached_has_bits = _impl_._has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
+  if (cached_has_bits & 0x0000001fu) {
     ::memset(&_impl_.dataaccess_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&_impl_.skipselfupdatefanout_) -
-        reinterpret_cast<char*>(&_impl_.dataaccess_)) + sizeof(_impl_.skipselfupdatefanout_));
+        reinterpret_cast<char*>(&_impl_.skipfirstfanout_) -
+        reinterpret_cast<char*>(&_impl_.dataaccess_)) + sizeof(_impl_.skipfirstfanout_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -2632,6 +2641,15 @@ const char* ChannelSubscriptionOptions::_InternalParse(const char* ptr, ::_pbi::
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
           _Internal::set_has_skipselfupdatefanout(&has_bits);
           _impl_.skipselfupdatefanout_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional bool skipFirstFanOut = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 48)) {
+          _Internal::set_has_skipfirstfanout(&has_bits);
+          _impl_.skipfirstfanout_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -2701,6 +2719,12 @@ uint8_t* ChannelSubscriptionOptions::_InternalSerialize(
     target = ::_pbi::WireFormatLite::WriteBoolToArray(5, this->_internal_skipselfupdatefanout(), target);
   }
 
+  // optional bool skipFirstFanOut = 6;
+  if (_internal_has_skipfirstfanout()) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(6, this->_internal_skipfirstfanout(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -2726,7 +2750,7 @@ size_t ChannelSubscriptionOptions::ByteSizeLong() const {
   }
 
   cached_has_bits = _impl_._has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
+  if (cached_has_bits & 0x0000001fu) {
     // optional .channeldpb.ChannelDataAccess dataAccess = 1;
     if (cached_has_bits & 0x00000001u) {
       total_size += 1 +
@@ -2745,6 +2769,11 @@ size_t ChannelSubscriptionOptions::ByteSizeLong() const {
 
     // optional bool skipSelfUpdateFanOut = 5;
     if (cached_has_bits & 0x00000008u) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool skipFirstFanOut = 6;
+    if (cached_has_bits & 0x00000010u) {
       total_size += 1 + 1;
     }
 
@@ -2769,7 +2798,7 @@ void ChannelSubscriptionOptions::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_
 
   _this->_impl_.datafieldmasks_.MergeFrom(from._impl_.datafieldmasks_);
   cached_has_bits = from._impl_._has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
+  if (cached_has_bits & 0x0000001fu) {
     if (cached_has_bits & 0x00000001u) {
       _this->_impl_.dataaccess_ = from._impl_.dataaccess_;
     }
@@ -2781,6 +2810,9 @@ void ChannelSubscriptionOptions::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_
     }
     if (cached_has_bits & 0x00000008u) {
       _this->_impl_.skipselfupdatefanout_ = from._impl_.skipselfupdatefanout_;
+    }
+    if (cached_has_bits & 0x00000010u) {
+      _this->_impl_.skipfirstfanout_ = from._impl_.skipfirstfanout_;
     }
     _this->_impl_._has_bits_[0] |= cached_has_bits;
   }
@@ -2804,8 +2836,8 @@ void ChannelSubscriptionOptions::InternalSwap(ChannelSubscriptionOptions* other)
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   _impl_.datafieldmasks_.InternalSwap(&other->_impl_.datafieldmasks_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(ChannelSubscriptionOptions, _impl_.skipselfupdatefanout_)
-      + sizeof(ChannelSubscriptionOptions::_impl_.skipselfupdatefanout_)
+      PROTOBUF_FIELD_OFFSET(ChannelSubscriptionOptions, _impl_.skipfirstfanout_)
+      + sizeof(ChannelSubscriptionOptions::_impl_.skipfirstfanout_)
       - PROTOBUF_FIELD_OFFSET(ChannelSubscriptionOptions, _impl_.dataaccess_)>(
           reinterpret_cast<char*>(&_impl_.dataaccess_),
           reinterpret_cast<char*>(&other->_impl_.dataaccess_));

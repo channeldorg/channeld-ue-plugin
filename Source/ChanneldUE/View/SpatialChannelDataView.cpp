@@ -250,7 +250,13 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 							// Keep the client connection until the client leaves the game, so we can reuse it for handover.
 							HandoverPC->NetConnection = nullptr;
 							
-							// Make sure the PlayerState is not destroyed together - we will handle it in the following handover context loop
+							// Make sure the Pawn and PlayerState are not destroyed together - we will handle it in the following handover context loop
+							if (HandoverPC->GetPawn())
+							{
+								// HandoverPC->Pawn = nullptr;
+								static const auto PawnProperty = CastFieldChecked<const FObjectProperty>(AController::StaticClass()->FindPropertyByName("Pawn"));
+								*PawnProperty->ContainerPtrToValuePtr<APawn*>(HandoverPC) = nullptr;
+							}
 							HandoverPC->PlayerState = nullptr;
 						}
 						else if (auto HandoverPawn = Cast<APawn>(HandoverActor))
@@ -415,11 +421,11 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 			}
 			else if (HandoverObj == nullptr)
 			{
-				UE_LOG(LogChanneld, Warning, TEXT("[Server] Failed to spawn object of netId %d from handover obj ref: %s"), NetId.Value, UTF8_TO_TCHAR(HandoverObjRef.DebugString().c_str()));
+				UE_LOG(LogChanneld, Error, TEXT("[Server] Failed to spawn object of netId %d from handover obj ref: %s"), NetId.Value, UTF8_TO_TCHAR(HandoverObjRef.DebugString().c_str()));
 			}
 			else
 			{
-				UE_LOG(LogChanneld, Warning, TEXT("[Server] Handover object '%s' is not valid, pending kill: %d"), *GetNameSafe(HandoverObj), HandoverObj->IsPendingKill());
+				UE_LOG(LogChanneld, Error, TEXT("[Server] Handover object '%s' is not valid, pending kill: %d"), *GetNameSafe(HandoverObj), HandoverObj->IsPendingKill());
 			}
 		}
 	}
@@ -975,6 +981,12 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 			{
 				RemoveObjectProviderAll(Obj, false);
 				SuppressedNetIdsToResolve.Add(NetId.Value);
+		
+				// Unsub from the entity channel which channelId equals to the NetId
+				if (Connection->SubscribedChannels.Contains(NetId.Value))
+				{
+					Connection->UnsubFromChannel(NetId.Value);
+				}
 			}
 			else
 			{
@@ -1234,6 +1246,12 @@ void USpatialChannelDataView::OnDestroyedActor(AActor* Actor, const FNetworkGUID
 	if (Connection->IsServer())
 	{
 		RemoveObjectProviderAll(Actor, false);
+		
+		// Unsub from the entity channel which channelId equals to the NetId
+		if (Connection->SubscribedChannels.Contains(NetId.Value))
+		{
+			Connection->UnsubFromChannel(NetId.Value);
+		}
 		return;
 	}
 	
@@ -1293,7 +1311,7 @@ void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnecti
 		return;
 	}
 
-	// Create the entity channel before sending
+	// Create the entity channel before sending spawn message
 	channeldpb::ChannelSubscriptionOptions SubOptions;
 	SubOptions.set_skipselfupdatefanout(true);
 	Connection->CreateEntityChannel(Channeld::GlobalChannelId, Obj, NetId, TEXT(""), &SubOptions, GetEntityData(Obj)/*nullptr*/, nullptr,
