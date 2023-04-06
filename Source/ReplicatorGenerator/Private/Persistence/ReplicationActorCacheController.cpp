@@ -6,7 +6,7 @@ void URepActorCacheController::Initialize(FSubsystemCollectionBase& Collection)
 	Super::Initialize(Collection);
 }
 
-bool URepActorCacheController::SaveRepActorCache(const TArray<const UClass*>& InRepActorClasses)
+FRepActorCache URepActorCacheController::ConvertClassesToRepActorCache(const TArray<const UClass*>& InRepActorClasses)
 {
 	TMap<const UClass*, FRepActorRelationCache> RepActorClassesMap;
 	RepActorClassesMap.Empty(InRepActorClasses.Num());
@@ -49,8 +49,13 @@ bool URepActorCacheController::SaveRepActorCache(const TArray<const UClass*>& In
 	{
 		return Lhs.TargetClassPath < Rhs.TargetClassPath;
 	});
+	return FRepActorCache(NewRepActorRelationCaches);
+}
+
+bool URepActorCacheController::SaveRepActorCache(const TArray<const UClass*>& InRepActorClasses)
+{
 	ChanneldReplicatorGeneratorUtils::EnsureRepGenIntermediateDir();
-	return RepActorCacheModel.SaveData(FRepActorCache(NewRepActorRelationCaches));
+	return RepActorCacheModel.SaveData(ConvertClassesToRepActorCache(InRepActorClasses));
 }
 
 bool URepActorCacheController::NeedToRefreshCache()
@@ -226,7 +231,6 @@ void URepActorCacheController::SetRepActorRelationCaches(const TArray<FRepActorR
 		}
 	}
 }
-
 
 void URepActorCacheController::EnsureLatestRepActorCache()
 {

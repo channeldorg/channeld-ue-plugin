@@ -45,7 +45,7 @@ struct REPLICATORGENERATOR_API FRepActorRelationCache
 		{
 			bIsChildOfGameState = true;
 		}
-		if(InTargetClass->IsChildOf(AWorldSettings::StaticClass()))
+		if (InTargetClass->IsChildOf(AWorldSettings::StaticClass()))
 		{
 			bIsChildOfWorldSetting = true;
 		}
@@ -107,8 +107,11 @@ protected:
 	TMap<FString, TSharedRef<FRepActorDependency>> RepActorDependencyMap;
 
 	TJsonModel<FRepActorCache> RepActorCacheModel = GenManager_RepActorCachePath;
+	TJsonModel<FRepActorCache> DefaultRepActorCacheModel = GenManager_DefaultRepActorCachePath;
 
 public:
+	static FRepActorCache ConvertClassesToRepActorCache(const TArray<const UClass*>& InRepActorClasses);
+
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	bool SaveRepActorCache(const TArray<const UClass*>& InRepActorClasses);

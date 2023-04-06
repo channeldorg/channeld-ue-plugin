@@ -1,5 +1,8 @@
 ﻿#pragma once
+
 #include "ReplicatorGeneratorManager.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/PlayerState.h"
 
 namespace ChanneldReplicatorGeneratorUtils
 {
@@ -33,7 +36,21 @@ namespace ChanneldReplicatorGeneratorUtils
 		EFilterRule FilterRule;
 	};
 
-	REPLICATORGENERATOR_API TArray<UClass*> GetChanneldUEBuiltinClasses();
+	TArray<const UClass*> ChanneldUEBuiltinClasses{
+		AActor::StaticClass(),
+		ACharacter::StaticClass(),
+		AController::StaticClass(),
+		AGameStateBase::StaticClass(),
+		APawn::StaticClass(),
+		APlayerController::StaticClass(),
+		APlayerState::StaticClass(),
+		UActorComponent::StaticClass(),
+		USceneComponent::StaticClass(),
+	};
+
+	TSet<const UClass*> ChanneldUEBuiltinClassSet{ChanneldUEBuiltinClasses};
+
+	REPLICATORGENERATOR_API TArray<const UClass*> GetChanneldUEBuiltinClasses();
 
 	REPLICATORGENERATOR_API bool IsChanneldUEBuiltinClass(const UClass* TargetClass);
 

@@ -18,7 +18,7 @@ import (
 static const TCHAR* CodeGen_Go_CollectStatesTemplate = LR"EOF(
 // Implement [channeld.ChannelDataCollector]
 func (to *{Definition_ChannelDataMsgName}) CollectStates(netId uint32, src common.Message) error {
-from, ok := src.(*{Definition_ChannelDataMsgName})
+{Decl_ChannelDataMsgVar}, ok := src.(*{Definition_ChannelDataMsgName})
 if !ok {
 	return errors.New("src is not a {Definition_ChannelDataMsgName}")
 }

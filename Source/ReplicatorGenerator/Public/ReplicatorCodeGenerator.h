@@ -27,6 +27,9 @@ struct FReplicatorCode
 
 struct FChannelDataCode
 {
+	EChanneldChannelType ChannelType;
+	FString ChannelDataMsgName;
+	
 	FString ProcessorHeadFileName;
 	FString ProcessorHeadCode;
 
@@ -121,7 +124,6 @@ public:
 	/**
 	 * Generate replicator codes for the specified actors.
 	 *
-	 * @param DefaultModuleDir The default module directory. The channel data processor will use default module name.
 	 * @param ProtoPackageName All generated proto files will use this package name.
 	 * @param GoPackageImportPath Be used to set 'option go_package='
 	 * @param ReplicationCodeBundle The generated replicator codes (.h, .cpp, .proto) .
@@ -129,7 +131,6 @@ public:
 	 */
 	bool Generate(
 		const TArray<FChannelDataInfo>& ChannelDataInfos,
-		const FString& DefaultModuleDir,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
 		FGeneratedCodeBundle& ReplicationCodeBundle

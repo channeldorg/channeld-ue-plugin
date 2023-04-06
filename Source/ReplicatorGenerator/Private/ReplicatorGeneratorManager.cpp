@@ -76,7 +76,11 @@ bool FReplicatorGeneratorManager::GenerateReplication(const FString GoPackageImp
 	ChannelDataSchemaController->GetChannelDataSchemata(ChannelDataSchemata);
 	for (const FChannelDataSchema& ChannelDataSchema : ChannelDataSchemata)
 	{
-		ChannelDataInfos.Add(FChannelDataInfo(ChannelDataSchema));
+		if (ChannelDataSchema.StateSchemata.Num() == 0)
+		{
+			continue;
+		}
+		ChannelDataInfos.Add(ChannelDataSchema);
 	}
 
 	// We need to include the header file of the target class in 'ChanneldReplicatorRegister.h'. so we need to know the include path of the target class from 'uhtmanifest' file.
@@ -88,7 +92,6 @@ bool FReplicatorGeneratorManager::GenerateReplication(const FString GoPackageImp
 	const FString GoPackageImportPath = GoPackageImportPathPrefix / ProtoPackageName;
 	CodeGenerator->Generate(
 		ChannelDataInfos
-		, GetDefaultModuleDir()
 		, ProtoPackageName
 		, GoPackageImportPath
 		, ReplicatorCodeBundle
@@ -116,6 +119,7 @@ bool FReplicatorGeneratorManager::GenerateReplication(const FString GoPackageImp
 			*ReplicatorCode.ProtoFileName
 		);
 	}
+
 	// Generate replicator registration code file
 	WriteCodeFile(GetReplicatorStorageDir() / GenManager_RepRegistrationHeadFile, ReplicatorCodeBundle.ReplicatorRegistrationHeadCode, Message);
 
@@ -123,10 +127,10 @@ bool FReplicatorGeneratorManager::GenerateReplication(const FString GoPackageImp
 	WriteCodeFile(GetReplicatorStorageDir() / GenManager_GlobalStructHeaderFile, ReplicatorCodeBundle.GlobalStructCodes, Message);
 	WriteProtoFile(GetReplicatorStorageDir() / GenManager_GlobalStructProtoFile, ReplicatorCodeBundle.GlobalStructProtoDefinitions, Message);
 
+	TMap<EChanneldChannelType, FString> ChannelTypeToChannelDataMsgMap;
 	for (const FChannelDataCode& ChannelDataCode : ReplicatorCodeBundle.ChannelDataCodes)
 	{
-		// Generate channel data processor code file
-		const FString DefaultModuleName = GetDefaultModuleName();
+		ChannelTypeToChannelDataMsgMap.Add(ChannelDataCode.ChannelType, ChannelDataCode.ChannelDataMsgName);
 		WriteCodeFile(GetReplicatorStorageDir() / ChannelDataCode.ProcessorHeadFileName, ChannelDataCode.ProcessorHeadCode, Message);
 		WriteProtoFile(GetReplicatorStorageDir() / ChannelDataCode.ProtoFileName, ChannelDataCode.ProtoDefsFile, Message);
 	}
@@ -141,7 +145,7 @@ bool FReplicatorGeneratorManager::GenerateReplication(const FString GoPackageImp
 		, ProtoPackageName
 		, GenManager_TemporaryGoMergeCodePath
 		, GenManager_TemporaryGoRegistrationCodePath
-		, GetDefaultProtoPackageName() + "." + GenManager_DefaultChannelDataMsgName
+		, ChannelTypeToChannelDataMsgMap
 	);
 
 	if (!SaveGeneratedManifest(Manifest))

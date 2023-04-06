@@ -1,9 +1,32 @@
 ﻿#include "Persistence/ChannelDataSchemaController.h"
+
+#include "ReplicatorGeneratorUtils.h"
 #include "Persistence/RepActorCacheController.h"
 
 void UChannelDataSchemaController::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+	// The "PLUGIN_DIR" is defined in the ReplicatorGenerator.Build.cs, but it is not available in the header file, so we have to use it here.
+	DefaultChannelDataSchemaModal = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Config") / GenManager_DefaultChannelDataSchemataFile;
+}
+
+void UChannelDataSchemaController::GetUnhiddenChannelTypes(TArray<EChanneldChannelType>& ChannelTypes) const
+{
+	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EChanneldChannelType"), true);
+	if (!EnumPtr)
+	{
+		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to find enum EChanneldChannelType"));
+		return;
+	}
+	ChannelTypes.Empty();
+	for (int32 i = 0; i < EnumPtr->NumEnums(); ++i)
+	{
+		if (EnumPtr->HasMetaData(TEXT("Hidden"), i))
+		{
+			continue;
+		}
+		ChannelTypes.Add(static_cast<EChanneldChannelType>(EnumPtr->GetValueByIndex(i)));
+	}
 }
 
 void UChannelDataSchemaController::GetChannelDataStateOptions(TArray<FChannelDataStateOption>& Options) const
@@ -21,20 +44,20 @@ void UChannelDataSchemaController::GetChannelDataStateOptions(TArray<FChannelDat
 
 void UChannelDataSchemaController::GetChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata)
 {
-	if (!ChannelDataStateSchemaModal.IsExist())
+	if (!ChannelDataSchemaModal.IsExist())
 	{
 		GetDefaultChannelDataSchemata(ChannelDataSchemata);
-		// SaveChannelDataSchemata(ChannelDataSchemata);
 	}
 	else
 	{
-		ChannelDataStateSchemaModal.GetDataArray(ChannelDataSchemata);
+		ChannelDataSchemaModal.GetDataArray(ChannelDataSchemata);
 	}
+	SortChannelDataSchemata(ChannelDataSchemata);
 }
 
 void UChannelDataSchemaController::SaveChannelDataSchemata(const TArray<FChannelDataSchema>& ChannelDataSchemata)
 {
-	ChannelDataStateSchemaModal.SaveDataArray(ChannelDataSchemata);
+	ChannelDataSchemaModal.SaveDataArray(ChannelDataSchemata);
 }
 
 void UChannelDataSchemaController::ImportChannelDataSchemataFrom(const FString& FilePath, TArray<FChannelDataSchema>& ChannelDataSchemata, bool& Success)
@@ -45,6 +68,7 @@ void UChannelDataSchemaController::ImportChannelDataSchemataFrom(const FString& 
 		Success = false;
 		return;
 	}
+	SortChannelDataSchemata(ChannelDataSchemata);
 	Success = true;
 }
 
@@ -59,6 +83,11 @@ void UChannelDataSchemaController::ExportChannelDataSchemataTo(const FString& Fi
 	Success = true;
 }
 
+void UChannelDataSchemaController::GetDefaultChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata)
+{
+	DefaultChannelDataSchemaModal.GetDataArray(ChannelDataSchemata);
+}
+
 void UChannelDataSchemaController::SortChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata)
 {
 	ChannelDataSchemata.Sort([](const FChannelDataSchema& A, const FChannelDataSchema& B)
@@ -69,28 +98,4 @@ void UChannelDataSchemaController::SortChannelDataSchemata(TArray<FChannelDataSc
 	{
 		DataSchema.Sort();
 	}
-}
-
-void UChannelDataSchemaController::GetDefaultChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata)
-{
-	ChannelDataSchemata.Empty();
-	FChannelDataSchema DefaultChannelDataSchema(EChanneldChannelType::ECT_SubWorld, 1);
-	TArray<FChannelDataStateSchema>& StateSchemata = DefaultChannelDataSchema.StateSchemata;
-	TArray<FChannelDataStateOption> StateOptions;
-	GetChannelDataStateOptions(StateOptions);
-	URepActorCacheController* RepActorCacheController = GEditor->GetEditorSubsystem<URepActorCacheController>();
-
-	int Index = 0;
-	for (FChannelDataStateOption& StateOption : StateOptions)
-	{
-		StateSchemata.Add(FChannelDataStateSchema(
-			EChanneldChannelType::ECT_SubWorld
-			, StateOption.ReplicationClassPath
-			, ++Index
-			, false
-			, RepActorCacheController->IsDefaultSingleton(StateOption.ReplicationClassPath)
-		));
-	}
-	ChannelDataSchemata.Add(DefaultChannelDataSchema);
-	SortChannelDataSchemata(ChannelDataSchemata);
 }

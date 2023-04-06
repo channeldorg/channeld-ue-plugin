@@ -12,9 +12,6 @@ struct REPLICATORGENERATOR_API FChannelDataStateSchema
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-	EChanneldChannelType ChannelType = EChanneldChannelType::ECT_Unknown;
-
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	FString ReplicationClassPath;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -28,16 +25,14 @@ struct REPLICATORGENERATOR_API FChannelDataStateSchema
 
 	FChannelDataStateSchema() = default;
 
-	FChannelDataStateSchema(EChanneldChannelType InChannelType, const FString& InReplicationClassPath, int32 InStateOrder)
-		: ChannelType(InChannelType)
-		  , ReplicationClassPath(InReplicationClassPath)
+	FChannelDataStateSchema(const FString& InReplicationClassPath, int32 InStateOrder)
+		: ReplicationClassPath(InReplicationClassPath)
 		  , StateOrder(InStateOrder)
 	{
 	}
 
-	FChannelDataStateSchema(EChanneldChannelType InChannelType, const FString& InReplicationClassPath, int32 InStateOrder, bool InbSkip, bool InbSingleton)
-		: ChannelType(InChannelType)
-		  , ReplicationClassPath(InReplicationClassPath)
+	FChannelDataStateSchema(const FString& InReplicationClassPath, int32 InStateOrder, bool InbSkip, bool InbSingleton)
+		: ReplicationClassPath(InReplicationClassPath)
 		  , StateOrder(InStateOrder)
 		  , bSkip(InbSkip)
 		  , bSingleton(InbSingleton)
@@ -103,10 +98,14 @@ class REPLICATORGENERATOR_API UChannelDataSchemaController : public UEditorSubsy
 	GENERATED_BODY()
 
 protected:
-	TJsonModel<FChannelDataSchema> ChannelDataStateSchemaModal = GenManager_ChannelDataSchemataPath;
+	TJsonModel<FChannelDataSchema> ChannelDataSchemaModal = GenManager_ChannelDataSchemataPath;
+	TJsonModel<FChannelDataSchema> DefaultChannelDataSchemaModal;
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
+	UFUNCTION(BlueprintCallable)
+	void GetUnhiddenChannelTypes(TArray<EChanneldChannelType>& ChannelTypes) const;
 
 	UFUNCTION(BlueprintCallable)
 	void GetChannelDataStateOptions(TArray<FChannelDataStateOption>& Options) const;
@@ -123,8 +122,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ExportChannelDataSchemataTo(const FString& FilePath, const TArray<FChannelDataSchema>& ChannelDataSchemata, bool& Success);
 
-	inline void SortChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata);
+	UFUNCTION(BlueprintCallable)
+	void GetDefaultChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata);
 
 protected:
-	void GetDefaultChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata);
+	inline void SortChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata);
 };

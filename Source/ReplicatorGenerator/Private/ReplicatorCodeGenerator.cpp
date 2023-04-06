@@ -45,7 +45,6 @@ FString FReplicatorCodeGenerator::GetClassHeadFilePath(const FString& ClassName)
 
 bool FReplicatorCodeGenerator::Generate(
 	const TArray<FChannelDataInfo>& ChannelDataInfos,
-	const FString& DefaultModuleDir,
 	const FString& ProtoPackageName,
 	const FString& GoPackageImportPath,
 	FGeneratedCodeBundle& ReplicationCodeBundle
@@ -101,7 +100,7 @@ bool FReplicatorCodeGenerator::Generate(
 		RegisterReplicatorCode.Append(GeneratedResult.RegisterReplicatorCode + TEXT("\n"));
 	}
 
-	// Channel data processor
+	// Channel data
 	FString RegisterChannelDataProcessorCode, DeleteChannelDataProcessorCode, ChannelDataProcessorPtrDecls,
 	        ChannelDataRegistrationGoCode;
 	ReplicationCodeBundle.ChannelDataMerge_GoCode.Append(FString::Printf(TEXT("package %s\n"), *ProtoPackageName));
@@ -384,9 +383,13 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 		ChannelTypeName = ChanneldReplicatorGeneratorUtils::ReplaceUncompilableChar(ChannelTypeName, TEXT(""));
 	}
 
-	const FString ChannelDataProcessorNamespace = FString::Printf(TEXT("ChannelDataProcessor_%s"), *ChannelTypeName);
+	GeneratedResult.ChannelType = ChannelDataInfo.Schema.ChannelType;
+
+	const FString ChannelDataProcessorNamespace = FString::Printf(TEXT("%sChannelDataProcessor"), *ChannelTypeName);
 	const FString ChannelDataProcessorClassName = FString::Printf(TEXT("F%s"), *ChannelDataProcessorNamespace);
-	const FString ChannelDataProtoMsgName = FString::Printf(TEXT("channelData_%s"), *ChannelTypeName);
+	const FString ChannelDataProtoMsgName = FString::Printf(TEXT("%sChannelData"), *ChannelTypeName);
+
+	GeneratedResult.ChannelDataMsgName = FString::Printf(TEXT("%s.%s"), *ProtoPackageName, *ChannelDataProtoMsgName);
 	GeneratedResult.ProcessorHeadFileName = FString::Printf(TEXT("%s%s"), *ChannelDataProcessorNamespace, *CodeGen_HeadFileExtension);
 	GeneratedResult.ProtoFileName = FString::Printf(TEXT("%s%s"), *ChannelDataProtoMsgName, *CodeGen_ProtoFileExtension);
 	GeneratedResult.IncludeProcessorCode = FString::Printf(TEXT("#include \"%s\""), *GeneratedResult.ProcessorHeadFileName);
@@ -409,9 +412,13 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	for (const FChannelDataInfo::FStateInfo& StateInfo : ChannelDataInfo.StateInfos)
 	{
 		TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
-		if (!CreateDecorateActor(ActorDecorator, Message, StateInfo.RepActorClass, FChannelDataStateSchema(), ProtoPackageName, GoPackageImportPath, false))
+		if (!CreateDecorateActor(ActorDecorator, Message, StateInfo.RepActorClass, StateInfo.Setting, ProtoPackageName, GoPackageImportPath, false))
 		{
-			UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
+			UE_LOG(LogChanneldRepGenerator, Warning, TEXT("%s"), *Message);
+		}
+		if (ActorDecorator->IsSkipGenChannelDataState())
+		{
+			continue;
 		}
 		ActorDecoratorsToGenChannelData.Add(ActorDecorator);
 	}
@@ -522,9 +529,16 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	FString ChannelDataProcessor_SetStateCode;
 	FString ChannelDataProcessor_GetRelevantNetGUIDsCode;
 
+	bool bHasAActor = false;
 	int32 ConstPathFNameVarDeclIndex = 0;
 	for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
 	{
+		const UClass* TargetClass = ActorDecorator->GetTargetClass();
+
+		if (TargetClass == AActor::StaticClass())
+		{
+			bHasAActor = true;
+		}
 		if (!ActorDecorator->IsBlueprintType())
 		{
 			ChannelDataProcessor_IncludeCode.Append(FString::Printf(TEXT("#include \"%s\"\n"), *ActorDecorator->GetIncludeActorHeaderPath()));
@@ -550,7 +564,6 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 			)
 		);
 
-		const UClass* TargetClass = ActorDecorator->GetTargetClass();
 		if ((TargetClass != AActor::StaticClass() &&
 				TargetClass != UActorComponent::StaticClass() &&
 				!TargetClass->IsChildOf(AGameStateBase::StaticClass()) &&
@@ -581,9 +594,21 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 
 	CDPFormatArgs.Add(TEXT("Code_Merge"), ChannelDataProcessor_MergeCode);
 	CDPFormatArgs.Add(TEXT("Declaration_CDP_ProtoVar"), ChannelDataMessageName);
-	CDPFormatArgs.Add(TEXT("Code_GetStateFromChannelData"), ChannelDataProcessor_GetStateCode);
-	CDPFormatArgs.Add(TEXT("Code_SetStateToChannelData"), ChannelDataProcessor_SetStateCode);
-	CDPFormatArgs.Add(TEXT("Code_GetRelevantNetGUIDs"), ChannelDataProcessor_GetRelevantNetGUIDsCode);
+	CDPFormatArgs.Add(TEXT("Code_GetStateFromChannelData"), ChannelDataProcessor_GetStateCode.IsEmpty() ? TEXT("") : ChannelDataProcessor_GetStateCode + TEXT("else"));
+	CDPFormatArgs.Add(TEXT("Code_SetStateToChannelData"), ChannelDataProcessor_SetStateCode.IsEmpty() ? TEXT("") : ChannelDataProcessor_SetStateCode + TEXT("else"));
+	if (bHasAActor)
+	{
+		CDPFormatArgs.Add(TEXT("Code_GetRelevantNetGUIDs"), ChannelDataProcessor_GetRelevantNetGUIDsCode);
+		CDPFormatArgs.Add(
+			TEXT("Code_GetRelevantNetGUIDsFromChannelDataInner"),
+			FString::Format(CodeGen_GetRelevantNetGUIDsFromChannelDataTemp, CDPFormatArgs)
+		);
+	}
+	else
+	{
+		CDPFormatArgs.Add(TEXT("Code_GetRelevantNetGUIDsFromChannelDataInner"), TEXT(""));
+	}
+
 	ChannelDataProcessorCode = FString::Format(*CodeGen_ChannelDataProcessorCPPTemp, CDPFormatArgs);
 	return true;
 }
@@ -629,12 +654,8 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 	ChannelDataProtoMsgGoName[0] = toupper(ChannelDataProtoMsgGoName[0]);
 
 	// Generate code: Implement [channeld.ChannelDataCollector]
-	{
-		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataProtoMsgGoName);
-
-		GoCode.Append(FString::Format(CodeGen_Go_CollectStatesTemplate, FormatArgs));
-	}
+	bool HasCollectStateInMap = false;
+	FString CollectStateGoCode;
 	{
 		FStringFormatNamedArguments FormatArgs;
 		for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
@@ -644,14 +665,22 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 			{
 				continue;
 			}
+			HasCollectStateInMap = true;
 			FormatArgs.Add("Definition_StatePackagePath", ActorDecorator->GetProtoPackagePathGo(ProtoPackageName));
 			FString StateClassName = ActorDecorator->GetProtoStateMessageTypeGo();
 			FormatArgs.Add("Definition_StateClassName", StateClassName);
 			FormatArgs.Add("Definition_StateVarName", "new" + StateClassName);
 			FormatArgs.Add("Definition_StateMapName", ActorDecorator->GetDefinition_ChannelDataFieldNameGo());
 
-			GoCode.Append(FString::Format(CodeGen_Go_CollectStateInMapTemplate, FormatArgs));
+			CollectStateGoCode.Append(FString::Format(CodeGen_Go_CollectStateInMapTemplate, FormatArgs));
 		}
+	}
+	{
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataProtoMsgGoName);
+		FormatArgs.Add("Decl_ChannelDataMsgVar", HasCollectStateInMap ? TEXT("from") : TEXT("_"));
+		GoCode.Append(FString::Format(CodeGen_Go_CollectStatesTemplate, FormatArgs));
+		GoCode.Append(CollectStateGoCode);
 	}
 
 	GoCode.Append(TEXT("\treturn nil\n}\n"));
@@ -663,12 +692,12 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 		bool HasSceneComponent = false;
 		for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
 		{
-			if(!HasActor) HasActor = ActorDecorator->GetTargetClass() == AActor::StaticClass();
-			if(!HasSceneComponent) HasSceneComponent = ActorDecorator->GetTargetClass() == USceneComponent::StaticClass();
+			if (!HasActor) HasActor = ActorDecorator->GetTargetClass() == AActor::StaticClass();
+			if (!HasSceneComponent) HasSceneComponent = ActorDecorator->GetTargetClass() == USceneComponent::StaticClass();
 		}
 		FString SpatialNotifierCode = TEXT("");
-		if(HasActor) SpatialNotifierCode.Append(CodeGen_Go_ActorSpatialNotifierTemp);
-		if(HasSceneComponent) SpatialNotifierCode.Append(CodeGen_Go_SceneCompSpatialNotifierTemp);
+		if (HasActor) SpatialNotifierCode.Append(CodeGen_Go_ActorSpatialNotifierTemp);
+		if (HasSceneComponent) SpatialNotifierCode.Append(CodeGen_Go_SceneCompSpatialNotifierTemp);
 		FStringFormatNamedArguments FormatArgs;
 		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataProtoMsgGoName);
 		FormatArgs.Add("Code_SpatialNotifier", SpatialNotifierCode);
@@ -744,7 +773,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataRegistration_GoCode(
 	// The first letter of Go proto type name should be upper case.
 	FString ChannelDataProtoMsgGoName = ChannelDataMessageName;
 	ChannelDataProtoMsgGoName[0] = toupper(ChannelDataProtoMsgGoName[0]);
-	
+
 	// The definition of channel type name in channeld go code is upper case, e.g. "ChannelType_GLOBAL"
 	GoCode = FString::Printf(TEXT("channeld.RegisterChannelDataType(channeldpb.ChannelType_%s, &%s.%s{})"), *ChannelTypeName.ToUpper(), *ProtoPackageName, *ChannelDataProtoMsgGoName);
 	return true;

@@ -45,26 +45,14 @@ namespace ChanneldReplicatorGeneratorUtils
 		GUObjectArray.RemoveUObjectCreateListener(this);
 	}
 
-	TSet<UClass*> ChanneldUEBuiltinClasses{
-		AActor::StaticClass(),
-		ACharacter::StaticClass(),
-		AController::StaticClass(),
-		AGameStateBase::StaticClass(),
-		APawn::StaticClass(),
-		APlayerController::StaticClass(),
-		APlayerState::StaticClass(),
-		UActorComponent::StaticClass(),
-		USceneComponent::StaticClass(),
-	};
-
-	TArray<UClass*> GetChanneldUEBuiltinClasses()
+	TArray<const UClass*> GetChanneldUEBuiltinClasses()
 	{
-		return ChanneldUEBuiltinClasses.Array();
+		return ChanneldUEBuiltinClasses;
 	}
 
 	bool IsChanneldUEBuiltinClass(const UClass* TargetClass)
 	{
-		return ChanneldUEBuiltinClasses.Contains(TargetClass);
+		return ChanneldUEBuiltinClassSet.Contains(TargetClass);
 	}
 
 	bool IsChanneldUEBuiltinSingletonClass(const UClass* TargetClass)

@@ -29,7 +29,7 @@ struct REPLICATORGENERATOR_API FGeneratedManifest
 	// TODO: FString -> TMap<EChanneldChannelType, FString>
 
 	UPROPERTY()
-	FString ChannelDataMsgName;
+	TMap<EChanneldChannelType, FString> ChannelDataMsgNames;
 
 	FGeneratedManifest() = default;
 
@@ -38,13 +38,13 @@ struct REPLICATORGENERATOR_API FGeneratedManifest
 		, const FString& InProtoPackageName
 		, const FString& InTemporaryGoMergeCodePath
 		, const FString& InTemporaryGoRegistrationCodePath
-		, const FString& InChannelDataMsgName
+		, const TMap<EChanneldChannelType, FString>& InChannelDataMsgNames
 	)
 		: GeneratedTime(InGeneratedTime)
 		  , ProtoPackageName(InProtoPackageName)
 		  , TemporaryGoMergeCodePath(InTemporaryGoMergeCodePath)
 		  , TemporaryGoRegistrationCodePath(InTemporaryGoRegistrationCodePath)
-		  , ChannelDataMsgName(InChannelDataMsgName)
+		  , ChannelDataMsgNames(InChannelDataMsgNames)
 	{
 	}
 };

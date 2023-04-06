@@ -17,22 +17,23 @@ public:
 	TJsonModel() = default;
 
 	TJsonModel(const FString& InDataFilePath);
+	virtual ~TJsonModel() = default;
 
-	void SetDataFilePath(const FString& InDataFilePath);
+	virtual void SetDataFilePath(const FString& InDataFilePath);
 
-	bool IsExist() const;
+	virtual bool IsExist() const;
 
-	bool GetData(OutStructType& OutData, bool ForceLoad = false);
+	virtual bool GetData(OutStructType& OutData, bool ForceLoad = false);
 
-	bool GetDataArray(TArray<OutStructType>& OutData, bool ForceLoad = false);
+	virtual bool GetDataArray(TArray<OutStructType>& OutData, bool ForceLoad = false);
 
-	bool LoadData();
+	virtual bool LoadData();
 
-	bool LoadDataArray();
+	virtual bool LoadDataArray();
 
-	bool SaveData(const OutStructType& InData);
+	virtual bool SaveData(const OutStructType& InData);
 
-	bool SaveDataArray(const TArray<OutStructType>& InDataArray);
+	virtual bool SaveDataArray(const TArray<OutStructType>& InDataArray);
 
-	bool IsNewer() const;
+	virtual bool IsNewer() const;
 };

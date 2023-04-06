@@ -29,45 +29,47 @@ public class ReplicatorGenerator : ModuleRules
 			}
 		);
 
+		string CompilerConfigurationName;
 		switch (Target.Configuration)
 		{
-			case UnrealTargetConfiguration.Unknown:
-			{
-				PublicDefinitions.Add("COMPILER_CONFIGURATION_NAME=\"Unknown\"");
-				break;
-			}
 			case UnrealTargetConfiguration.Debug:
 			{
-				PublicDefinitions.Add("COMPILER_CONFIGURATION_NAME=\"Debug\"");
+				CompilerConfigurationName = "COMPILER_CONFIGURATION_NAME=\"Debug\"";
 				break;
 			}
 			case UnrealTargetConfiguration.DebugGame:
 			{
-				PublicDefinitions.Add("COMPILER_CONFIGURATION_NAME=\"DebugGame\"");
+				CompilerConfigurationName = "COMPILER_CONFIGURATION_NAME=\"DebugGame\"";
 				break;
 			}
 			case UnrealTargetConfiguration.Development:
 			{
-				PublicDefinitions.Add("COMPILER_CONFIGURATION_NAME=\"Development\"");
+				CompilerConfigurationName = "COMPILER_CONFIGURATION_NAME=\"Development\"";
 				break;
 			}
 			case UnrealTargetConfiguration.Shipping:
 			{
-				PublicDefinitions.Add("COMPILER_CONFIGURATION_NAME=\"Shipping\"");
+				CompilerConfigurationName = "COMPILER_CONFIGURATION_NAME=\"Shipping\"";
 				break;
 			}
 			case UnrealTargetConfiguration.Test:
 			{
-				PublicDefinitions.Add("COMPILER_CONFIGURATION_NAME=\"Test\"");
+				CompilerConfigurationName = "COMPILER_CONFIGURATION_NAME=\"Test\"";
 				break;
 			}
 			default:
 			{
-				PublicDefinitions.Add("COMPILER_CONFIGURATION_NAME=\"\"");
+				CompilerConfigurationName = "COMPILER_CONFIGURATION_NAME=\"Unknown\"";
 				break;
 			}
 		}
 
-		;
+		PrivateDefinitions.AddRange(
+			new string[]
+			{
+				CompilerConfigurationName,
+				"PLUGIN_DIR=R\"(" + PluginDirectory + ")\"",
+			}
+		);
 	}
 }

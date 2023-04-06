@@ -248,7 +248,6 @@ namespace {Declaration_CDP_Namespace}
       }
       auto {Declaration_CDP_ProtoVar} = static_cast<{Definition_CDP_ProtoNamespace}::{Definition_CDP_ProtoMsgName}*>(ChannelData);
       {Code_GetStateFromChannelData}
-      else
       {
         UE_LOG(LogChanneldGen, Warning, TEXT("State of '%s' is not supported in the ChannelData, NetGUID: %d"), *TargetClass->GetName(), NetGUID);
       }
@@ -265,7 +264,6 @@ namespace {Declaration_CDP_Namespace}
       }
       auto {Declaration_CDP_ProtoVar} = static_cast<{Definition_CDP_ProtoNamespace}::{Definition_CDP_ProtoMsgName}*>(ChannelData);
       {Code_SetStateToChannelData}
-      else
       {
         UE_LOG(LogChanneldGen, Warning, TEXT("State of '%s' is not supported in the ChannelData, NetGUID: %d"), *TargetClass->GetName(), NetGUID);
       }
@@ -273,20 +271,23 @@ namespace {Declaration_CDP_Namespace}
 
     virtual TArray<uint32> GetRelevantNetGUIDsFromChannelData(const google::protobuf::Message* ChannelData) override
     {
-      const auto {Declaration_CDP_ProtoVar} = static_cast<const {Definition_CDP_ProtoNamespace}::{Definition_CDP_ProtoMsgName}*>(ChannelData);
       TArray<uint32> NetGUIDs;
-      for (auto& Pair : {Declaration_CDP_ProtoVar}->actorstates())
-      {
-		    if (Pair.second.has_replicatedmovement())
-		    {
-			    NetGUIDs.Add(Pair.first);
-		    }
-        {Code_GetRelevantNetGUIDs}
-      }
+      {Code_GetRelevantNetGUIDsFromChannelDataInner}
 	    return NetGUIDs;
     }
   };
 }
+)EOF";
+static const TCHAR* CodeGen_GetRelevantNetGUIDsFromChannelDataTemp = LR"EOF(
+      const auto {Declaration_CDP_ProtoVar} = static_cast<const {Definition_CDP_ProtoNamespace}::{Definition_CDP_ProtoMsgName}*>(ChannelData);
+      for (auto& Pair : {Declaration_CDP_ProtoVar}->actorstates())
+      {
+        if (Pair.second.has_replicatedmovement())
+        {
+          NetGUIDs.Add(Pair.first);
+        }
+        {Code_GetRelevantNetGUIDs}
+      }
 )EOF";
 
 static const TCHAR* CodeGen_GetRelevantNetIdByStateTemplate = LR"EOF(

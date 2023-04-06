@@ -158,7 +158,7 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().StopServersCommand);
 
 	MenuBuilder.AddSeparator();
-	
+
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().OpenChannelDataEditorCommand);
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().GenerateReplicatorCommand);
 
@@ -439,6 +439,20 @@ void FChanneldEditorModule::GenerateReplicationAction()
 		{
 			GenRepProtoGoCode(GeneratedProtoFiles, [this]()
 			{
+				auto Settings = GetMutableDefault<UChanneldSettings>();
+				FReplicatorGeneratorManager& GeneratorManager = FReplicatorGeneratorManager::Get();
+				FGeneratedManifest LatestGeneratedManifest;
+				if (!GeneratorManager.LoadLatestGeneratedManifest(LatestGeneratedManifest))
+				{
+					UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load latest generated manifest"));
+					FailedToGenRepCode();
+					return;
+				}
+				Settings->DefaultChannelDataMsgNames = LatestGeneratedManifest.ChannelDataMsgNames;
+				Settings->SaveConfig();
+				UE_LOG(LogChanneldEditor, Log, TEXT("Updated the channel data message names in the channeld settings."));
+				GetMutableDefault<UChanneldSettings>()->ReloadConfig();
+
 				if (GetMutableDefault<UChanneldEditorSettings>()->bAutoRecompileAfterGenerate)
 				{
 					UE_LOG(LogChanneldEditor, Verbose, TEXT("Auto recompile game code after generate replicator protos"));
@@ -448,7 +462,6 @@ void FChanneldEditorModule::GenerateReplicationAction()
 						RecompileGameCode();
 					});
 				}
-				GetMutableDefault<UChanneldSettings>()->ReloadConfig();
 
 				GenRepNotify->SpawnMissionSucceedNotification(nullptr);
 				bGeneratingReplication = false;
