@@ -308,35 +308,25 @@ void UChannelDataView::RemoveProvider(Channeld::ChannelId ChId, IChannelDataProv
 	if (Providers != nullptr)
 	{
 		UE_LOG(LogChanneld, Verbose, TEXT("Removing channel data provider %s from channel %d"), *IChannelDataProvider::GetName(Provider), ChId);
-		
-		EChanneldChannelType ChannelType = GetChanneldSubsystem()->GetChannelTypeByChId(ChId);
+
+		const auto ChannelInfo = Connection->SubscribedChannels.Find(ChId);
 
 		// Don't send removal update to the spatial or entity channel
-		if (bSendRemoved && ChannelType != EChanneldChannelType::ECT_Spatial && ChannelType != EChanneldChannelType::ECT_Entity)
+		if (bSendRemoved && ChannelInfo->ShouldSendRemovalUpdate())
 		{
 			// Collect the removed states immediately (before the provider gets destroyed completely)
 			google::protobuf::Message* RemovedData = RemovedProvidersData.FindRef(ChId);
 			if (!RemovedData)
 			{
-				if (ChannelType == EChanneldChannelType::ECT_Unknown)
+				const auto MsgTemplate = ChannelDataTemplates.FindRef(static_cast<int>(ChannelInfo->ChannelType));
+				if (!ensureMsgf(MsgTemplate, TEXT("Can't find channel data message template of channel type: %s"), *UEnum::GetValueAsString(ChannelInfo->ChannelType)))
 				{
-					UE_LOG(LogChanneld, Error, TEXT("Can't map channel type from channel id: %d. Removed states won't be created for provider: %s"), ChId, *IChannelDataProvider::GetName(Provider));
 					Providers->Remove(Provider);
 					Provider->OnRemovedFromChannel(ChId);
 					return;
 				}
-				else
-				{
-					const auto MsgTemplate = ChannelDataTemplates.FindRef(static_cast<int>(ChannelType));
-					if (!ensureMsgf(MsgTemplate, TEXT("Can't find channel data message template of channel type: %s"), *UEnum::GetValueAsString(ChannelType)))
-					{
-						Providers->Remove(Provider);
-						Provider->OnRemovedFromChannel(ChId);
-						return;
-					}
-					RemovedData = MsgTemplate->New();
-					RemovedProvidersData.Add(ChId, RemovedData);
-				}
+				RemovedData = MsgTemplate->New();
+				RemovedProvidersData.Add(ChId, RemovedData);
 			}
 			Provider->UpdateChannelData(RemovedData);
 		}
@@ -678,7 +668,7 @@ int32 UChannelDataView::SendChannelUpdate(Channeld::ChannelId ChId)
 		UE_LOG(LogChanneld, Warning, TEXT("Failed to SendChannelUpdate due to no subscription found for channel %d"), ChId);
 		return 0;
 	}
-	if (ChannelInfo->SubOptions.DataAccess != EChannelDataAccess::EDA_WRITE_ACCESS)
+	if (ChannelInfo->SubOptions.DataAccess != EChannelDataAccess::EDA_WRITE_ACCESS && !Connection->OwnedChannels.Contains(ChId))
 	{
 		return 0;
 	}
@@ -729,7 +719,7 @@ int32 UChannelDataView::SendChannelUpdate(Channeld::ChannelId ChId)
 		UE_LOG(LogChanneld, Log, TEXT("Removed %d channel data provider(s) from channel %d"), RemovedCount, ChId);
 	}
 
-	if (UpdateCount > 0 || RemovedCount > 0)
+	if (UpdateCount > 0 || (RemovedCount > 0 && ChannelInfo->ShouldSendRemovalUpdate()))
 	{
 		// Merge removed states
 		google::protobuf::Message* RemovedData;
@@ -757,15 +747,13 @@ int32 UChannelDataView::SendAllChannelUpdates()
 	int32 TotalUpdateCount = 0;
 	for (auto& Pair : Connection->SubscribedChannels)
 	{
+		// Skip sending updates for spatial channels. The channel data is maintained by channeld (by handling the Spawn and Destroy messages)
 		if (Pair.Value.ChannelType == EChanneldChannelType::ECT_Spatial)
 		{
 			continue;
 		}
-		if (static_cast<channeldpb::ChannelDataAccess>(Pair.Value.SubOptions.DataAccess) == channeldpb::WRITE_ACCESS)
-		{
-			Channeld::ChannelId ChId = Pair.Key;
-			TotalUpdateCount += SendChannelUpdate(ChId);
-		}
+		
+		TotalUpdateCount += SendChannelUpdate(Pair.Key);
 	}
 
 	ArenaForSend.Reset();

@@ -219,6 +219,13 @@ struct CHANNELDUE_API FSubscribedChannelInfo
 		if (MsgReflection->HasField(Target, MsgDescriptor->FindFieldByNumber(Target.kChannelTypeFieldNumber)))
 			ChannelType = static_cast<EChanneldChannelType>(Target.channeltype());
 	}
+
+	bool ShouldSendRemovalUpdate() const
+	{
+		return	ChannelType != EChanneldChannelType::ECT_Unknown &&
+				ChannelType != EChanneldChannelType::ECT_Spatial &&
+				ChannelType != EChanneldChannelType::ECT_Entity;
+	}
 };
 
 USTRUCT(BlueprintType)

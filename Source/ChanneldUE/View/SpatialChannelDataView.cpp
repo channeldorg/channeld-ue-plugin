@@ -79,10 +79,11 @@ void USpatialChannelDataView::InitPlayerController(UChanneldNetConnection* Clien
 		bool* Ptr = Prop->ContainerPtrToValuePtr<bool>(NewPlayerController);
 		*Ptr = false;
 		UE_LOG(LogChanneld, VeryVerbose, TEXT("Set bIsLocalPlayerController to %s"), NewPlayerController->IsLocalController() ? TEXT("true") : TEXT("false"));
-		
+
+		// Triggers ClientSetViewTarget RPC...
 		NewPlayerController->SetPlayer(ClientConn);
 
-		// IMPORTANT: Set ROLE_Authority must be done after SetPlayer()!
+		// IMPORTANT: Set to ROLE_Authority must be done AFTER SetPlayer(), otherwise UnPossess() will be called!
 		NewPlayerController->SetRole(ROLE_Authority);
 		NewPlayerController->SetReplicates(true);
 
@@ -217,7 +218,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	UE_LOG(LogChanneld, Log, TEXT("ChannelDataHandover from channel %d to %d(%s), object netIds: %s"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(),
 		bHasAuthority ? TEXT("A") : (bHasInterest ? TEXT("I") : TEXT("N")), *NetIds);
 	
-	// ===== Pass 1: handle the logic of the source channel =====
+	// ===== Pass 1: Handle the logic of the source channel =====
 	bool bHasAuthorityOverSourceChannel = Connection->OwnedChannels.Contains(HandoverMsg->srcchannelid());
 	bool bUpdateSourceChannel = false;
 	// for (auto& HandoverContext : HandoverData.context())
@@ -302,12 +303,15 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 		}
 	}
 
+	/* With entity channel, there's no need to update the source spatial channel.
 	if (bHasAuthorityOverSourceChannel && bUpdateSourceChannel)
 	{
+		// Send removal update to the source channel
 		SendChannelUpdate(HandoverMsg->srcchannelid());
 	}
+	*/
 
-	// ===== Pass 2: handle the logic of the destination channel =====
+	// ===== Pass 2: Handle the logic of the destination channel =====
 	
 	// All the objects that moved across the channels.
 	TArray<UObject*> HandoverObjs;
@@ -403,10 +407,6 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 							{
 								HandoverPC->NetConnection = ClientConn;
 							}
-						
-							// Set the role to SimulatedProxy so the actor can be updated by the handover channel data later.
-							HandoverActor->SetRole(ROLE_SimulatedProxy);
-							UE_LOG(LogChanneld, Verbose, TEXT("Set %s to ROLE_SimulatedProxy for ChannelDataUpdate"), *HandoverActor->GetName());
 						}
 					}
 				}
@@ -430,30 +430,33 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 		}
 	}
 
-	/*
-	bool bCrossServerHandover = HandoverData.has_channeldata();
-	// Applies the channel data update to the newly spawned objects.
+	// ===== Pass 3: Applies the channel data update to the newly spawned objects =====
 	// The references between the Pawn, PlayerController, and PlayerState should be set properly in this step.
-	if (CrossServerActors.Num() > 0 && bCrossServerHandover)
+	for (auto HandoverActor : CrossServerActors)
 	{
-		channeldpb::ChannelDataUpdateMessage UpdateMsg;
-		UpdateMsg.mutable_data()->CopyFrom(HandoverData.channeldata());
-		UE_LOG(LogChanneld, Verbose, TEXT("Applying handover channel data to %d cross-server actors"), CrossServerActors.Num());
-		HandleChannelDataUpdate(_, ChId, &UpdateMsg);
-	}
-	*/
-	for (auto& Pair : HandoverData.entities())
-	{
-		if (Pair.second.has_entitydata())
+		auto NetId = GetNetId(HandoverActor);
+		auto Pair = HandoverData.entities().find(NetId.Value);
+		// for (auto& Pair : HandoverData.entities())
+		if (Pair != HandoverData.entities().end())
 		{
-			channeldpb::ChannelDataUpdateMessage UpdateMsg;
-			UpdateMsg.mutable_data()->CopyFrom(Pair.second.entitydata());
-			UE_LOG(LogChanneld, Verbose, TEXT("Applying handover channel data to entity %d"), Pair.first);
-			HandleChannelDataUpdate(_, Pair.first, &UpdateMsg);
+			if (Pair->second.has_entitydata())
+			{
+				// Set the role to SimulatedProxy so the actor can be updated by the handover channel data later.
+				HandoverActor->SetRole(ROLE_SimulatedProxy);
+				UE_LOG(LogChanneld, Verbose, TEXT("Set %s to ROLE_SimulatedProxy for ChannelDataUpdate"), *HandoverActor->GetName());
+						
+				channeldpb::ChannelDataUpdateMessage UpdateMsg;
+				UpdateMsg.mutable_data()->CopyFrom(Pair->second.entitydata());
+				UE_LOG(LogChanneld, Verbose, TEXT("Applying handover channel data to entity %d"), Pair->first);
+				HandleChannelDataUpdate(_, Pair->first, &UpdateMsg);
+				
+				HandoverActor->SetRole(ENetRole::ROLE_Authority);
+				UE_LOG(LogChanneld, Verbose, TEXT("Set %s to back to ROLE_Authority after ChannelDataUpdate"), *HandoverActor->GetName());
+			}
 		}
 	}
 
-	// Post handover - set the actors' properties as same as they were in the source server.
+	// Post Handover - set the actors' properties as same as they were in the source server.
 	
 	// Pass 1: set up the cross-server PlayerControllers
 	for (auto HandoverActor : CrossServerActors)
@@ -825,8 +828,11 @@ void USpatialChannelDataView::InitServer()
 			UE_LOG(LogChanneld, Error, TEXT("Failed to parse the payload of the SERVER_PLAYER_LEAVE message to UnsubscribedFromChannelResultMessage. ChannelId: %d"), ChId);
 		}
 	});
-	
-	Connection->SubToChannel(Channeld::GlobalChannelId, nullptr, [&](const channeldpb::SubscribedToChannelResultMessage* _)
+
+	// Only the master server has the write access to the GLOBAL channel.
+	channeldpb::ChannelSubscriptionOptions SubOptions;
+	SubOptions.set_dataaccess(channeldpb::READ_ACCESS);
+	Connection->SubToChannel(Channeld::GlobalChannelId, &SubOptions, [&](const channeldpb::SubscribedToChannelResultMessage* _)
 	{
 		channeldpb::ChannelSubscriptionOptions SpatialSubOptions;
 		SpatialSubOptions.set_skipselfupdatefanout(true);
