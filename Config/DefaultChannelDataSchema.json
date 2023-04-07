@@ -34,10 +34,58 @@
 			"bSingleton": false
 		},
 		{
-			"replicationClassPath": "/Script/Engine.GameStateBase",
-			"stateOrder": 4,
+			"replicationClassPath": "/Script/Engine.Pawn",
+			"stateOrder": 5,
 			"bSkip": false,
-			"bSingleton": true
+			"bSingleton": false
+		},
+		{
+			"replicationClassPath": "/Script/Engine.PlayerController",
+			"stateOrder": 6,
+			"bSkip": false,
+			"bSingleton": false
+		},
+		{
+			"replicationClassPath": "/Script/Engine.PlayerState",
+			"stateOrder": 7,
+			"bSkip": false,
+			"bSingleton": false
+		},
+		{
+			"replicationClassPath": "/Script/Engine.ActorComponent",
+			"stateOrder": 8,
+			"bSkip": false,
+			"bSingleton": false
+		},
+		{
+			"replicationClassPath": "/Script/Engine.SceneComponent",
+			"stateOrder": 9,
+			"bSkip": false,
+			"bSingleton": false
+		}
+	]
+},
+{
+	"channelType": "ECT_Spatial",
+	"channelTypeOrder": 3,
+	"stateSchemata": [
+		{
+			"replicationClassPath": "/Script/Engine.Actor",
+			"stateOrder": 1,
+			"bSkip": false,
+			"bSingleton": false
+		},
+		{
+			"replicationClassPath": "/Script/Engine.Controller",
+			"stateOrder": 2,
+			"bSkip": false,
+			"bSingleton": false
+		},
+		{
+			"replicationClassPath": "/Script/Engine.Character",
+			"stateOrder": 3,
+			"bSkip": false,
+			"bSingleton": false
 		},
 		{
 			"replicationClassPath": "/Script/Engine.Pawn",
