@@ -23,43 +23,46 @@ void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 	//	});
 
 	// The connection's internal handlers should always be called first, so we should not use the delegate as the order of its broadcast is not guaranteed.
-	RegisterMessageHandler((uint32)channeldpb::AUTH, new channeldpb::AuthResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::AUTH, new channeldpb::AuthResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleAuth(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::CREATE_CHANNEL, new channeldpb::CreateChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::CREATE_CHANNEL, new channeldpb::CreateChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleCreateChannel(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::REMOVE_CHANNEL, new channeldpb::RemoveChannelMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::REMOVE_CHANNEL, new channeldpb::RemoveChannelMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleRemoveChannel(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::LIST_CHANNEL, new channeldpb::ListChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::LIST_CHANNEL, new channeldpb::ListChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleListChannel(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::SUB_TO_CHANNEL, new channeldpb::SubscribedToChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::SUB_TO_CHANNEL, new channeldpb::SubscribedToChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleSubToChannel(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::UNSUB_FROM_CHANNEL, new channeldpb::UnsubscribedFromChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, new channeldpb::UnsubscribedFromChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleUnsubFromChannel(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, new channeldpb::ChannelDataUpdateMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::CHANNEL_DATA_UPDATE, new channeldpb::ChannelDataUpdateMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleChannelDataUpdate(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::CREATE_SPATIAL_CHANNEL, new channeldpb::CreateChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::CREATE_SPATIAL_CHANNEL, new channeldpb::CreateSpatialChannelsResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleCreateSpatialChannel(Conn, ChId, Msg);
-		});	
-	RegisterMessageHandler(channeldpb::CREATE_SPATIAL_CHANNEL, new channeldpb::CreateSpatialChannelsResultMessage());
+		});
+	RegisterMessageHandler(channeldpb::CREATE_ENTITY_CHANNEL, new channeldpb::CreateChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+		{
+			HandleCreateChannel(Conn, ChId, Msg);
+		});
+	
 	RegisterMessageHandler(channeldpb::QUERY_SPATIAL_CHANNEL, new channeldpb::QuerySpatialChannelResultMessage());
 	RegisterMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, new channeldpb::ChannelDataHandoverMessage());
 	RegisterMessageHandler(channeldpb::SPATIAL_REGIONS_UPDATE, new channeldpb::SpatialRegionsUpdateMessage());
-	RegisterMessageHandler(channeldpb::CREATE_ENTITY_CHANNEL, new channeldpb::CreateChannelMessage());
 }
 
 void UChanneldConnection::Deinitialize()

@@ -970,7 +970,7 @@ void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 	// Trigger the callings of ServerReplicateActors() and LowLevelSend()
 	UNetDriver::TickFlush(DeltaSeconds);
 
-	// Send ChannelDataUpdate to channeld even if there's no client connection yet.
+	// Send ChannelDataUpdate to channeld even if there's no client connection yet, and ServerReplicateActors() is skipped.
 	if (IsServer() && ClientConnections.Num() == 0 && !bSkipServerReplicateActors)
 	{
 		if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication && ChannelDataView.IsValid())
