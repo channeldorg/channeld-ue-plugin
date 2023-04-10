@@ -238,10 +238,15 @@ FString FReplicatedActorDecorator::GetProtoNamespace()
 	return GetProtoPackageName();
 }
 
-FString FReplicatedActorDecorator::GetProtoDefinitionsFileName()
+FString FReplicatedActorDecorator::GetProtoDefinitionsFileClearName()
 {
 	// Using lower case actor name as the proto file name.
-	return GetActorName().ToLower() + CodeGen_ProtoFileExtension;
+	return GetActorName().ToLower();
+}
+
+FString FReplicatedActorDecorator::GetProtoDefinitionsFileName()
+{
+	return GetProtoDefinitionsFileClearName() + CodeGen_ProtoFileExtension;
 }
 
 FString FReplicatedActorDecorator::GetGoPackageImportPath()

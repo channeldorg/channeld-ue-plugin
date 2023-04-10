@@ -259,6 +259,11 @@ public:
 	virtual FString GetProtoNamespace() override;
 
 	/**
+ 	 * Get protobuf definitions file name without extension
+ 	 */
+	virtual FString GetProtoDefinitionsFileClearName();
+	
+	/**
 	 * Get protobuf definitions file name
 	 */
 	virtual FString GetProtoDefinitionsFileName();
