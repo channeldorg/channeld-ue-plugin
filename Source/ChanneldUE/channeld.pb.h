@@ -6498,11 +6498,10 @@ class CHANNELDUE_API AddEntityGroupMessage final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kEntitiesToAddFieldNumber = 3,
+    kEntitiesToAddFieldNumber = 2,
     kTypeFieldNumber = 1,
-    kJunctionEntityIdFieldNumber = 2,
   };
-  // repeated uint32 EntitiesToAdd = 3;
+  // repeated uint32 EntitiesToAdd = 2;
   int entitiestoadd_size() const;
   private:
   int _internal_entitiestoadd_size() const;
@@ -6533,15 +6532,6 @@ class CHANNELDUE_API AddEntityGroupMessage final :
   void _internal_set_type(::channeldpb::EntityGroupType value);
   public:
 
-  // uint32 JunctionEntityId = 2;
-  void clear_junctionentityid();
-  uint32_t junctionentityid() const;
-  void set_junctionentityid(uint32_t value);
-  private:
-  uint32_t _internal_junctionentityid() const;
-  void _internal_set_junctionentityid(uint32_t value);
-  public:
-
   // @@protoc_insertion_point(class_scope:channeldpb.AddEntityGroupMessage)
  private:
   class _Internal;
@@ -6553,7 +6543,6 @@ class CHANNELDUE_API AddEntityGroupMessage final :
     ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t > entitiestoadd_;
     mutable std::atomic<int> _entitiestoadd_cached_byte_size_;
     int type_;
-    uint32_t junctionentityid_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -10954,27 +10943,7 @@ inline void AddEntityGroupMessage::set_type(::channeldpb::EntityGroupType value)
   // @@protoc_insertion_point(field_set:channeldpb.AddEntityGroupMessage.type)
 }
 
-// uint32 JunctionEntityId = 2;
-inline void AddEntityGroupMessage::clear_junctionentityid() {
-  _impl_.junctionentityid_ = 0u;
-}
-inline uint32_t AddEntityGroupMessage::_internal_junctionentityid() const {
-  return _impl_.junctionentityid_;
-}
-inline uint32_t AddEntityGroupMessage::junctionentityid() const {
-  // @@protoc_insertion_point(field_get:channeldpb.AddEntityGroupMessage.JunctionEntityId)
-  return _internal_junctionentityid();
-}
-inline void AddEntityGroupMessage::_internal_set_junctionentityid(uint32_t value) {
-  
-  _impl_.junctionentityid_ = value;
-}
-inline void AddEntityGroupMessage::set_junctionentityid(uint32_t value) {
-  _internal_set_junctionentityid(value);
-  // @@protoc_insertion_point(field_set:channeldpb.AddEntityGroupMessage.JunctionEntityId)
-}
-
-// repeated uint32 EntitiesToAdd = 3;
+// repeated uint32 EntitiesToAdd = 2;
 inline int AddEntityGroupMessage::_internal_entitiestoadd_size() const {
   return _impl_.entitiestoadd_.size();
 }

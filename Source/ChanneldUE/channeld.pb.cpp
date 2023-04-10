@@ -524,7 +524,6 @@ PROTOBUF_CONSTEXPR AddEntityGroupMessage::AddEntityGroupMessage(
     /*decltype(_impl_.entitiestoadd_)*/{}
   , /*decltype(_impl_._entitiestoadd_cached_byte_size_)*/{0}
   , /*decltype(_impl_.type_)*/0
-  , /*decltype(_impl_.junctionentityid_)*/0u
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct AddEntityGroupMessageDefaultTypeInternal {
   PROTOBUF_CONSTEXPR AddEntityGroupMessageDefaultTypeInternal()
@@ -873,7 +872,6 @@ const uint32_t TableStruct_channeld_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::channeldpb::AddEntityGroupMessage, _impl_.type_),
-  PROTOBUF_FIELD_OFFSET(::channeldpb::AddEntityGroupMessage, _impl_.junctionentityid_),
   PROTOBUF_FIELD_OFFSET(::channeldpb::AddEntityGroupMessage, _impl_.entitiestoadd_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::channeldpb::RemoveEntityGroupMessage, _internal_metadata_),
@@ -925,8 +923,8 @@ static const ::_pbi::MigrationSchema schemas_channeld_2eproto[] PROTOBUF_SECTION
   { 279, -1, -1, sizeof(::channeldpb::UpdateSpatialInterestMessage)},
   { 287, -1, -1, sizeof(::channeldpb::CreateEntityChannelMessage)},
   { 299, -1, -1, sizeof(::channeldpb::AddEntityGroupMessage)},
-  { 308, -1, -1, sizeof(::channeldpb::RemoveEntityGroupMessage)},
-  { 316, -1, -1, sizeof(::channeldpb::DebugGetSpatialRegionsMessage)},
+  { 307, -1, -1, sizeof(::channeldpb::RemoveEntityGroupMessage)},
+  { 315, -1, -1, sizeof(::channeldpb::DebugGetSpatialRegionsMessage)},
 };
 
 static const ::_pb::Message* const file_default_instances_channeld_2eproto[] = {
@@ -1069,46 +1067,46 @@ const char descriptor_table_protodef_channeld_2eproto[] PROTOBUF_SECTION_VARIABL
   ".ChannelSubscriptionOptions\022\"\n\004data\030\004 \001("
   "\0132\024.google.protobuf.Any\0229\n\014mergeOptions\030"
   "\005 \001(\0132#.channeldpb.ChannelDataMergeOptio"
-  "ns\022\023\n\013isWellKnown\030\006 \001(\010\"s\n\025AddEntityGrou"
+  "ns\022\023\n\013isWellKnown\030\006 \001(\010\"Y\n\025AddEntityGrou"
   "pMessage\022)\n\004type\030\001 \001(\0162\033.channeldpb.Enti"
-  "tyGroupType\022\030\n\020JunctionEntityId\030\002 \001(\r\022\025\n"
-  "\rEntitiesToAdd\030\003 \003(\r\"_\n\030RemoveEntityGrou"
-  "pMessage\022)\n\004type\030\001 \001(\0162\033.channeldpb.Enti"
-  "tyGroupType\022\030\n\020EntitiesToRemove\030\002 \003(\r\"\037\n"
-  "\035DebugGetSpatialRegionsMessage*\247\001\n\rBroad"
-  "castType\022\020\n\014NO_BROADCAST\020\000\022\025\n\021SINGLE_CON"
-  "NECTION\020\001\022\007\n\003ALL\020\002\022\022\n\016ALL_BUT_SENDER\020\004\022\021"
-  "\n\rALL_BUT_OWNER\020\010\022\022\n\016ALL_BUT_CLIENT\020\020\022\022\n"
-  "\016ALL_BUT_SERVER\020 \022\025\n\021ADJACENT_CHANNELS\020@"
-  "*;\n\016ConnectionType\022\021\n\rNO_CONNECTION\020\000\022\n\n"
-  "\006SERVER\020\001\022\n\n\006CLIENT\020\002*\220\001\n\013ChannelType\022\013\n"
-  "\007UNKNOWN\020\000\022\n\n\006GLOBAL\020\001\022\013\n\007PRIVATE\020\002\022\014\n\010S"
-  "UBWORLD\020\003\022\013\n\007SPATIAL\020\004\022\n\n\006ENTITY\020\005\022\010\n\004TE"
-  "ST\020d\022\t\n\005TEST1\020e\022\t\n\005TEST2\020f\022\t\n\005TEST3\020g\022\t\n"
-  "\005TEST4\020h*\275\003\n\013MessageType\022\013\n\007INVALID\020\000\022\010\n"
-  "\004AUTH\020\001\022\022\n\016CREATE_CHANNEL\020\003\022\022\n\016REMOVE_CH"
-  "ANNEL\020\004\022\020\n\014LIST_CHANNEL\020\005\022\022\n\016SUB_TO_CHAN"
-  "NEL\020\006\022\026\n\022UNSUB_FROM_CHANNEL\020\007\022\027\n\023CHANNEL"
-  "_DATA_UPDATE\020\010\022\016\n\nDISCONNECT\020\t\022\032\n\026CREATE"
-  "_SPATIAL_CHANNEL\020\n\022\031\n\025QUERY_SPATIAL_CHAN"
-  "NEL\020\013\022\031\n\025CHANNEL_DATA_HANDOVER\020\014\022\032\n\026SPAT"
-  "IAL_REGIONS_UPDATE\020\r\022\033\n\027UPDATE_SPATIAL_I"
-  "NTEREST\020\016\022\031\n\025CREATE_ENTITY_CHANNEL\020\017\022\024\n\020"
-  "ENTITY_GROUP_ADD\020\020\022\027\n\023ENTITY_GROUP_REMOV"
-  "E\020\021\022\035\n\031DEBUG_GET_SPATIAL_REGIONS\020c\022\024\n\020US"
-  "ER_SPACE_START\020d*1\n\017CompressionType\022\022\n\016N"
-  "O_COMPRESSION\020\000\022\n\n\006SNAPPY\020\001*E\n\021ChannelDa"
-  "taAccess\022\r\n\tNO_ACCESS\020\000\022\017\n\013READ_ACCESS\020\001"
-  "\022\020\n\014WRITE_ACCESS\020\002*)\n\017EntityGroupType\022\014\n"
-  "\010HANDOVER\020\000\022\010\n\004LOCK\020\001B0Z.github.com/meta"
-  "working/channeld/pkg/channeldpbb\006proto3"
+  "tyGroupType\022\025\n\rEntitiesToAdd\030\002 \003(\r\"_\n\030Re"
+  "moveEntityGroupMessage\022)\n\004type\030\001 \001(\0162\033.c"
+  "hanneldpb.EntityGroupType\022\030\n\020EntitiesToR"
+  "emove\030\002 \003(\r\"\037\n\035DebugGetSpatialRegionsMes"
+  "sage*\247\001\n\rBroadcastType\022\020\n\014NO_BROADCAST\020\000"
+  "\022\025\n\021SINGLE_CONNECTION\020\001\022\007\n\003ALL\020\002\022\022\n\016ALL_"
+  "BUT_SENDER\020\004\022\021\n\rALL_BUT_OWNER\020\010\022\022\n\016ALL_B"
+  "UT_CLIENT\020\020\022\022\n\016ALL_BUT_SERVER\020 \022\025\n\021ADJAC"
+  "ENT_CHANNELS\020@*;\n\016ConnectionType\022\021\n\rNO_C"
+  "ONNECTION\020\000\022\n\n\006SERVER\020\001\022\n\n\006CLIENT\020\002*\220\001\n\013"
+  "ChannelType\022\013\n\007UNKNOWN\020\000\022\n\n\006GLOBAL\020\001\022\013\n\007"
+  "PRIVATE\020\002\022\014\n\010SUBWORLD\020\003\022\013\n\007SPATIAL\020\004\022\n\n\006"
+  "ENTITY\020\005\022\010\n\004TEST\020d\022\t\n\005TEST1\020e\022\t\n\005TEST2\020f"
+  "\022\t\n\005TEST3\020g\022\t\n\005TEST4\020h*\275\003\n\013MessageType\022\013"
+  "\n\007INVALID\020\000\022\010\n\004AUTH\020\001\022\022\n\016CREATE_CHANNEL\020"
+  "\003\022\022\n\016REMOVE_CHANNEL\020\004\022\020\n\014LIST_CHANNEL\020\005\022"
+  "\022\n\016SUB_TO_CHANNEL\020\006\022\026\n\022UNSUB_FROM_CHANNE"
+  "L\020\007\022\027\n\023CHANNEL_DATA_UPDATE\020\010\022\016\n\nDISCONNE"
+  "CT\020\t\022\032\n\026CREATE_SPATIAL_CHANNEL\020\n\022\031\n\025QUER"
+  "Y_SPATIAL_CHANNEL\020\013\022\031\n\025CHANNEL_DATA_HAND"
+  "OVER\020\014\022\032\n\026SPATIAL_REGIONS_UPDATE\020\r\022\033\n\027UP"
+  "DATE_SPATIAL_INTEREST\020\016\022\031\n\025CREATE_ENTITY"
+  "_CHANNEL\020\017\022\024\n\020ENTITY_GROUP_ADD\020\020\022\027\n\023ENTI"
+  "TY_GROUP_REMOVE\020\021\022\035\n\031DEBUG_GET_SPATIAL_R"
+  "EGIONS\020c\022\024\n\020USER_SPACE_START\020d*1\n\017Compre"
+  "ssionType\022\022\n\016NO_COMPRESSION\020\000\022\n\n\006SNAPPY\020"
+  "\001*E\n\021ChannelDataAccess\022\r\n\tNO_ACCESS\020\000\022\017\n"
+  "\013READ_ACCESS\020\001\022\020\n\014WRITE_ACCESS\020\002*)\n\017Enti"
+  "tyGroupType\022\014\n\010HANDOVER\020\000\022\010\n\004LOCK\020\001B0Z.g"
+  "ithub.com/metaworking/channeld/pkg/chann"
+  "eldpbb\006proto3"
   ;
 static const ::_pbi::DescriptorTable* const descriptor_table_channeld_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fany_2eproto,
 };
 static ::_pbi::once_flag descriptor_table_channeld_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_channeld_2eproto = {
-    false, false, 5319, descriptor_table_protodef_channeld_2eproto,
+    false, false, 5293, descriptor_table_protodef_channeld_2eproto,
     "channeld.proto",
     &descriptor_table_channeld_2eproto_once, descriptor_table_channeld_2eproto_deps, 1, 36,
     schemas_channeld_2eproto, file_default_instances_channeld_2eproto, TableStruct_channeld_2eproto::offsets,
@@ -9631,13 +9629,10 @@ AddEntityGroupMessage::AddEntityGroupMessage(const AddEntityGroupMessage& from)
       decltype(_impl_.entitiestoadd_){from._impl_.entitiestoadd_}
     , /*decltype(_impl_._entitiestoadd_cached_byte_size_)*/{0}
     , decltype(_impl_.type_){}
-    , decltype(_impl_.junctionentityid_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&_impl_.type_, &from._impl_.type_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.junctionentityid_) -
-    reinterpret_cast<char*>(&_impl_.type_)) + sizeof(_impl_.junctionentityid_));
+  _this->_impl_.type_ = from._impl_.type_;
   // @@protoc_insertion_point(copy_constructor:channeldpb.AddEntityGroupMessage)
 }
 
@@ -9649,7 +9644,6 @@ inline void AddEntityGroupMessage::SharedCtor(
       decltype(_impl_.entitiestoadd_){arena}
     , /*decltype(_impl_._entitiestoadd_cached_byte_size_)*/{0}
     , decltype(_impl_.type_){0}
-    , decltype(_impl_.junctionentityid_){0u}
     , /*decltype(_impl_._cached_size_)*/{}
   };
 }
@@ -9679,9 +9673,7 @@ void AddEntityGroupMessage::Clear() {
   (void) cached_has_bits;
 
   _impl_.entitiestoadd_.Clear();
-  ::memset(&_impl_.type_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&_impl_.junctionentityid_) -
-      reinterpret_cast<char*>(&_impl_.type_)) + sizeof(_impl_.junctionentityid_));
+  _impl_.type_ = 0;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -9700,20 +9692,12 @@ const char* AddEntityGroupMessage::_InternalParse(const char* ptr, ::_pbi::Parse
         } else
           goto handle_unusual;
         continue;
-      // uint32 JunctionEntityId = 2;
+      // repeated uint32 EntitiesToAdd = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
-          _impl_.junctionentityid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // repeated uint32 EntitiesToAdd = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedUInt32Parser(_internal_mutable_entitiestoadd(), ptr, ctx);
           CHK_(ptr);
-        } else if (static_cast<uint8_t>(tag) == 24) {
+        } else if (static_cast<uint8_t>(tag) == 16) {
           _internal_add_entitiestoadd(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr));
           CHK_(ptr);
         } else
@@ -9755,18 +9739,12 @@ uint8_t* AddEntityGroupMessage::_InternalSerialize(
       1, this->_internal_type(), target);
   }
 
-  // uint32 JunctionEntityId = 2;
-  if (this->_internal_junctionentityid() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_junctionentityid(), target);
-  }
-
-  // repeated uint32 EntitiesToAdd = 3;
+  // repeated uint32 EntitiesToAdd = 2;
   {
     int byte_size = _impl_._entitiestoadd_cached_byte_size_.load(std::memory_order_relaxed);
     if (byte_size > 0) {
       target = stream->WriteUInt32Packed(
-          3, _internal_entitiestoadd(), byte_size, target);
+          2, _internal_entitiestoadd(), byte_size, target);
     }
   }
 
@@ -9786,7 +9764,7 @@ size_t AddEntityGroupMessage::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated uint32 EntitiesToAdd = 3;
+  // repeated uint32 EntitiesToAdd = 2;
   {
     size_t data_size = ::_pbi::WireFormatLite::
       UInt32Size(this->_impl_.entitiestoadd_);
@@ -9804,11 +9782,6 @@ size_t AddEntityGroupMessage::ByteSizeLong() const {
   if (this->_internal_type() != 0) {
     total_size += 1 +
       ::_pbi::WireFormatLite::EnumSize(this->_internal_type());
-  }
-
-  // uint32 JunctionEntityId = 2;
-  if (this->_internal_junctionentityid() != 0) {
-    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_junctionentityid());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -9833,9 +9806,6 @@ void AddEntityGroupMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, 
   if (from._internal_type() != 0) {
     _this->_internal_set_type(from._internal_type());
   }
-  if (from._internal_junctionentityid() != 0) {
-    _this->_internal_set_junctionentityid(from._internal_junctionentityid());
-  }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -9854,12 +9824,7 @@ void AddEntityGroupMessage::InternalSwap(AddEntityGroupMessage* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   _impl_.entitiestoadd_.InternalSwap(&other->_impl_.entitiestoadd_);
-  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(AddEntityGroupMessage, _impl_.junctionentityid_)
-      + sizeof(AddEntityGroupMessage::_impl_.junctionentityid_)
-      - PROTOBUF_FIELD_OFFSET(AddEntityGroupMessage, _impl_.type_)>(
-          reinterpret_cast<char*>(&_impl_.type_),
-          reinterpret_cast<char*>(&other->_impl_.type_));
+  swap(_impl_.type_, other->_impl_.type_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata AddEntityGroupMessage::GetMetadata() const {

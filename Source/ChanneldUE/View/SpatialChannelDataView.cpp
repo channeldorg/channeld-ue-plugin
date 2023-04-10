@@ -1119,9 +1119,8 @@ void USpatialChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* 
 				if (const APawn* Pawn = Cast<APawn>(Actor))
 				{
 					// Set up the handover group for the pawn
-					channeldpb::AddEntityGroupMessage groupMsg;
-					groupMsg.set_type(channeldpb::HANDOVER);
-					groupMsg.set_junctionentityid(NetId.Value);
+					TArray<Channeld::EntityId> HandoverGroup;
+					HandoverGroup.Add(NetId.Value);
 					
 					if (auto Controller = Pawn->GetController())
 					{
@@ -1135,7 +1134,7 @@ void USpatialChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* 
 						SetOwningChannelId(ControllerNetId, SpatialChId);
 						AddObjectProvider(SpatialChId, Controller);
 
-						groupMsg.add_entitiestoadd(ControllerNetId.Value);
+						HandoverGroup.Add(ControllerNetId.Value);
 					}
 
 					if (auto PlayerState = Pawn->GetPlayerState())
@@ -1150,10 +1149,10 @@ void USpatialChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* 
 						SetOwningChannelId(PlayerStateNetId, SpatialChId);
 						AddObjectProvider(SpatialChId, PlayerState);
 
-						groupMsg.add_entitiestoadd(PlayerStateNetId.Value);
+						HandoverGroup.Add(PlayerStateNetId.Value);
 					}
 
-					Connection->Send(NetId.Value, channeldpb::ENTITY_GROUP_ADD, groupMsg);
+					Connection->AddToEntityGroup(NetId.Value, channeldpb::HANDOVER, HandoverGroup);
 				}
 				
 				//SendSpawnToAdjacentChannels(Provider->GetTargetObject(), SpatialChId);
@@ -1364,7 +1363,6 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 		[this, NetId, Obj, OwningConnId, SpatialChId, NetDriver](const channeldpb::CreateChannelResultMessage* _)
 		{
 			AddObjectProvider(NetId.Value, Obj);
-			
 	
 			unrealpb::SpawnObjectMessage SpawnMsg;
 	
@@ -1376,6 +1374,12 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 			bool bWellKnown = false;
 			if (const AActor* Actor = Cast<AActor>(Obj))
 			{
+				// Broadcast the EntityChannelCreated event to the actor so it can do some initialization.
+				if (auto RepComp = Cast<UChanneldReplicationComponent>(Actor->GetComponentByClass(UChanneldReplicationComponent::StaticClass())))
+				{
+					RepComp->OnEntityChannelCreated.Broadcast(NetId.Value);
+				}
+				
 				bWellKnown = Actor->bAlwaysRelevant;
 				
 				SpawnMsg.set_localrole(Actor->GetRemoteRole());

@@ -12,6 +12,8 @@ namespace Channeld
 
 	typedef uint32 ChannelId;
 
+	typedef uint32 EntityId;
+
 	/* Moved the definitions to unreal_common.proto
 	// User-space message types used in ChanneldUE
 	enum MessageType : uint32 {
