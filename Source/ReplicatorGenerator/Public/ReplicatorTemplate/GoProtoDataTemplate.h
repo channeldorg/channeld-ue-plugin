@@ -39,7 +39,7 @@ if exists {
 static const TCHAR* CodeGen_Go_MergeTemplate = LR"EOF(
 // Implement [channeld.MergeableChannelData]
 func (dst *{Definition_ChannelDataMsgName}) Merge(src common.ChannelDataMessage, options *channeldpb.ChannelDataMergeOptions, spatialNotifier common.SpatialInfoChangedNotifier) error {
-	srcData, ok := src.(*{Definition_ChannelDataMsgName})
+	{Decl_ChannelDataMsgVar}, ok := src.(*{Definition_ChannelDataMsgName})
 	if !ok {
 		return errors.New("src is not a {Definition_ChannelDataMsgName}")
 	}

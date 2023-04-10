@@ -654,7 +654,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 	ChannelDataProtoMsgGoName[0] = toupper(ChannelDataProtoMsgGoName[0]);
 
 	// Generate code: Implement [channeld.ChannelDataCollector]
-	bool HasCollectStateInMap = false;
+	bool bHasCollectStateInMap = false;
 	FString CollectStateGoCode;
 	{
 		FStringFormatNamedArguments FormatArgs;
@@ -665,7 +665,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 			{
 				continue;
 			}
-			HasCollectStateInMap = true;
+			bHasCollectStateInMap = true;
 			FormatArgs.Add("Definition_StatePackagePath", ActorDecorator->GetProtoPackagePathGo(ProtoPackageName));
 			FString StateClassName = ActorDecorator->GetProtoStateMessageTypeGo();
 			FormatArgs.Add("Definition_StateClassName", StateClassName);
@@ -678,34 +678,19 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 	{
 		FStringFormatNamedArguments FormatArgs;
 		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataProtoMsgGoName);
-		FormatArgs.Add("Decl_ChannelDataMsgVar", HasCollectStateInMap ? TEXT("from") : TEXT("_"));
+		FormatArgs.Add("Decl_ChannelDataMsgVar", bHasCollectStateInMap ? TEXT("from") : TEXT("_"));
 		GoCode.Append(FString::Format(CodeGen_Go_CollectStatesTemplate, FormatArgs));
 		GoCode.Append(CollectStateGoCode);
 	}
 
 	GoCode.Append(TEXT("\treturn nil\n}\n"));
 
-
 	// Generate code: Implement [channeld.MergeableChannelData]
-	{
-		bool HasActor = false;
-		bool HasSceneComponent = false;
-		for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
-		{
-			if (!HasActor) HasActor = ActorDecorator->GetTargetClass() == AActor::StaticClass();
-			if (!HasSceneComponent) HasSceneComponent = ActorDecorator->GetTargetClass() == USceneComponent::StaticClass();
-		}
-		FString SpatialNotifierCode = TEXT("");
-		if (HasActor) SpatialNotifierCode.Append(CodeGen_Go_ActorSpatialNotifierTemp);
-		if (HasSceneComponent) SpatialNotifierCode.Append(CodeGen_Go_SceneCompSpatialNotifierTemp);
-		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataProtoMsgGoName);
-		FormatArgs.Add("Code_SpatialNotifier", SpatialNotifierCode);
-		GoCode.Append(FString::Format(CodeGen_Go_MergeTemplate, FormatArgs));
-	}
+	FString MergeStateCode = TEXT("");
+	bool bHasMergeStateInMap = false;
 	{
 		FStringFormatNamedArguments FormatArgs;
-
+	
 		FString MergeActorStateCode = TEXT("");
 
 		for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
@@ -717,8 +702,8 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 			if (ActorDecorator->IsSingletonInChannelData())
 			{
 				FormatArgs.Add("Definition_StateVarName", StateClassName);
-
-				GoCode.Append(FString::Format(CodeGen_Go_MergeStateTemplate, FormatArgs));
+				bHasMergeStateInMap = true;
+				MergeStateCode.Append(FString::Format(CodeGen_Go_MergeStateTemplate, FormatArgs));
 			}
 			else
 			{
@@ -749,13 +734,31 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 				}
 				else
 				{
-					GoCode.Append(FString::Format(ActorDecorator->GetTargetClass()->IsChildOf<UActorComponent>() ? CodeGen_Go_MergeCompStateInMapTemplate : CodeGen_Go_MergeStateInMapTemplate, FormatArgs));
+					bHasMergeStateInMap = true;
+					MergeStateCode.Append(FString::Format(ActorDecorator->GetTargetClass()->IsChildOf<UActorComponent>() ? CodeGen_Go_MergeCompStateInMapTemplate : CodeGen_Go_MergeStateInMapTemplate, FormatArgs));
 				}
 			}
 		}
-
 		// Add ActorState's merge code at last
-		GoCode.Append(MergeActorStateCode);
+		MergeStateCode.Append(MergeActorStateCode);
+	}
+	{
+		bool HasActor = false;
+		bool HasSceneComponent = false;
+		for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
+		{
+			if (!HasActor) HasActor = ActorDecorator->GetTargetClass() == AActor::StaticClass();
+			if (!HasSceneComponent) HasSceneComponent = ActorDecorator->GetTargetClass() == USceneComponent::StaticClass();
+		}
+		FString SpatialNotifierCode = TEXT("");
+		if (HasActor) SpatialNotifierCode.Append(CodeGen_Go_ActorSpatialNotifierTemp);
+		if (HasSceneComponent) SpatialNotifierCode.Append(CodeGen_Go_SceneCompSpatialNotifierTemp);
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataProtoMsgGoName);
+		FormatArgs.Add("Code_SpatialNotifier", SpatialNotifierCode);
+		FormatArgs.Add("Decl_ChannelDataMsgVar", bHasMergeStateInMap ? TEXT("srcData") : TEXT("_"));
+		GoCode.Append(FString::Format(CodeGen_Go_MergeTemplate, FormatArgs));
+		GoCode.Append(MergeStateCode);
 	}
 
 	GoCode.Append(TEXT("\treturn nil\n}\n"));
