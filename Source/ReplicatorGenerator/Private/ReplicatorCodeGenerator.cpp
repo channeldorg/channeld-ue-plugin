@@ -101,7 +101,7 @@ bool FReplicatorCodeGenerator::Generate(
 	}
 
 	// Channel data
-	FString RegisterChannelDataProcessorCode, DeleteChannelDataProcessorCode, ChannelDataProcessorPtrDecls,
+	FString RegisterChannelDataCode, UnregisterChannelDataMsgCode, RegisterChannelDataProcessorCode, DeleteChannelDataProcessorCode, ChannelDataProcessorPtrDecls,
 	        ChannelDataRegistrationGoCode;
 	ReplicationCodeBundle.ChannelDataMerge_GoCode.Append(FString::Printf(TEXT("package %s\n"), *ProtoPackageName));
 	ReplicationCodeBundle.ChannelDataMerge_GoCode.Append(CodeGen_Go_Data_ImportTemplate);
@@ -121,6 +121,8 @@ bool FReplicatorCodeGenerator::Generate(
 			UE_LOG(LogChanneldRepGenerator, Error, TEXT("%s"), *Message);
 		}
 		RegistrationIncludeCode.Append(ChannelDataCode.IncludeProcessorCode + TEXT("\n"));
+		RegisterChannelDataCode.Append(ChannelDataCode.RegisterChannelDataCode + TEXT("\n"));
+		UnregisterChannelDataMsgCode.Append(ChannelDataCode.UnregisterChannelDataMsgCode + TEXT("\n"));
 		RegisterChannelDataProcessorCode.Append(ChannelDataCode.RegisterProcessorCode + TEXT("\n"));
 		DeleteChannelDataProcessorCode.Append(ChannelDataCode.DeleteProcessorPtrCode + TEXT("\n"));
 		ChannelDataProcessorPtrDecls.Append(ChannelDataCode.ProcessorPtrDecl + TEXT("\n"));
@@ -144,6 +146,8 @@ bool FReplicatorCodeGenerator::Generate(
 		RegistrationFormatArgs.Add(TEXT("Code_ReplicatorRegister"), RegisterReplicatorCode);
 
 		// Register channel data processor
+		RegistrationFormatArgs.Add(TEXT("Code_ChannelDataRegister"), RegisterChannelDataCode);
+		RegistrationFormatArgs.Add(TEXT("Code_ChannelDataMsgUnregister"), UnregisterChannelDataMsgCode);
 		RegistrationFormatArgs.Add(TEXT("Code_ChannelDataProcessorRegister"), RegisterChannelDataProcessorCode);
 		RegistrationFormatArgs.Add(TEXT("Code_DeleteChannelDataProcessor"), DeleteChannelDataProcessorCode);
 		RegistrationFormatArgs.Add(TEXT("Declaration_Variables"), ChannelDataProcessorPtrDecls);
@@ -376,23 +380,43 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 		ResultMessage = FString::Printf(TEXT("Cannot find display name for EChanneldChannelType enum value %d"), ChannelDataInfo.Schema.ChannelType);
 		return false;
 	}
-	FString ChannelTypeName = DisplayName.ToString();
-	// The display name of EChanneldChannelType enum may contain invalid characters.
-	if (ChanneldReplicatorGeneratorUtils::IsCompilableClassName(ChannelTypeName))
+	FString DisplayChannelTypeName = DisplayName.ToString();
+	FString CppTypeName;
+	if (!EnumPtr->FindNameStringByValue(CppTypeName, static_cast<int64>(ChannelDataInfo.Schema.ChannelType)))
 	{
-		ChannelTypeName = ChanneldReplicatorGeneratorUtils::ReplaceUncompilableChar(ChannelTypeName, TEXT(""));
+		ResultMessage = FString::Printf(TEXT("Cannot find cpp type name for EChanneldChannelType enum value %d"), ChannelDataInfo.Schema.ChannelType);
+		return false;
+	}
+	// The display name of EChanneldChannelType enum may contain invalid characters.
+	if (ChanneldReplicatorGeneratorUtils::IsCompilableClassName(DisplayChannelTypeName))
+	{
+		DisplayChannelTypeName = ChanneldReplicatorGeneratorUtils::ReplaceUncompilableChar(DisplayChannelTypeName, TEXT(""));
 	}
 
 	GeneratedResult.ChannelType = ChannelDataInfo.Schema.ChannelType;
 
-	const FString ChannelDataProcessorNamespace = FString::Printf(TEXT("%sChannelDataProcessor"), *ChannelTypeName);
+	const FString ChannelDataProcessorNamespace = FString::Printf(TEXT("%sChannelDataProcessor"), *DisplayChannelTypeName);
 	const FString ChannelDataProcessorClassName = FString::Printf(TEXT("F%s"), *ChannelDataProcessorNamespace);
-	const FString ChannelDataProtoMsgName = FString::Printf(TEXT("%sChannelData"), *ChannelTypeName);
+	const FString ChannelDataProtoMsgName = FString::Printf(TEXT("%sChannelData"), *DisplayChannelTypeName);
 
 	GeneratedResult.ChannelDataMsgName = FString::Printf(TEXT("%s.%s"), *ProtoPackageName, *ChannelDataProtoMsgName);
 	GeneratedResult.ProcessorHeadFileName = FString::Printf(TEXT("%s%s"), *ChannelDataProcessorNamespace, *CodeGen_HeadFileExtension);
 	GeneratedResult.ProtoFileName = FString::Printf(TEXT("%s%s"), *ChannelDataProtoMsgName, *CodeGen_ProtoFileExtension);
 	GeneratedResult.IncludeProcessorCode = FString::Printf(TEXT("#include \"%s\""), *GeneratedResult.ProcessorHeadFileName);
+
+	GeneratedResult.RegisterChannelDataCode.Append(
+		FString::Printf(
+			TEXT("ChanneldUtils::RegisterProtobufMessage<%s::%s>(TEXT(\"%s\"));\n"),
+			*ProtoPackageName, *ChannelDataProtoMsgName, *GeneratedResult.ChannelDataMsgName
+		)
+	);
+	GeneratedResult.RegisterChannelDataCode.Append(
+		FString::Printf(
+			TEXT("ChanneldReplication::RegisterChannelDataName(EChanneldChannelType::%s, TEXT(\"%s\"));\n"),
+			*CppTypeName, *GeneratedResult.ChannelDataMsgName
+		)
+	);
+	GeneratedResult.UnregisterChannelDataMsgCode.Append(FString::Printf(TEXT("ChanneldUtils::UnregisterProtobufMessage(TEXT(\"%s\"));\n"), *ChannelDataProtoMsgName));
 
 	// Register channel data processor
 	const FString CDPPointerName = FString::Printf(TEXT("%sPtr"), *ChannelDataProcessorNamespace);
@@ -496,7 +520,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	}
 
 	if (!GenerateChannelDataRegistration_GoCode(
-		ChannelTypeName,
+		DisplayChannelTypeName,
 		ChannelDataProtoMsgName,
 		ProtoPackageName,
 		GeneratedResult.Registration_GoCode
@@ -690,7 +714,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 	bool bHasMergeStateInMap = false;
 	{
 		FStringFormatNamedArguments FormatArgs;
-	
+
 		FString MergeActorStateCode = TEXT("");
 
 		for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)

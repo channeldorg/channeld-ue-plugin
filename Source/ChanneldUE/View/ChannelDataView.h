@@ -28,7 +28,7 @@ public:
 		
 		ChannelDataTemplates.Add(ChannelType, MsgTemplate);
 		ChannelDataTemplatesByTypeUrl.Add(TEXT("type.googleapis.com/") + MessageFullName, MsgTemplate);
-		UE_LOG(LogChanneld, Log, TEXT("Registered %s for channel type %d"), UTF8_TO_TCHAR(MsgTemplate->GetTypeName().c_str()), ChannelType);
+		UE_LOG(LogChanneld, Log, TEXT("Registered %s for channel type %d"), *MessageFullName, ChannelType);
 	}
 
 	UFUNCTION(BlueprintCallable)

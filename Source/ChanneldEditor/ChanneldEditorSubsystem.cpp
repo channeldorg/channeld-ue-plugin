@@ -171,10 +171,6 @@ void UChanneldEditorSubsystem::GenerateReplicationAction()
 					FailedToGenRepCode();
 					return;
 				}
-				Settings->DefaultChannelDataMsgNames = LatestGeneratedManifest.ChannelDataMsgNames;
-				Settings->SaveConfig();
-				UE_LOG(LogChanneldEditor, Log, TEXT("Updated the channel data message names in the channeld settings."));
-				GetMutableDefault<UChanneldSettings>()->ReloadConfig();
 
 				if (GetMutableDefault<UChanneldEditorSettings>()->bAutoRecompileAfterGenerate)
 				{
