@@ -110,7 +110,7 @@ bool UChanneldGameInstanceSubsystem::IsAuthenticated()
 	return ConnectionInstance && ConnectionInstance->IsAuthenticated();
 }
 
-EChanneldChannelType UChanneldGameInstanceSubsystem::GetChannelTypeByChId(int32 ChId)
+EChanneldChannelType UChanneldGameInstanceSubsystem::GetChannelTypeByChId(int64 ChId)
 {
 	if (!ensureMsgf(ConnectionInstance, TEXT("Need to call ConnectToChanneld first!")))
 	{
@@ -121,10 +121,10 @@ EChanneldChannelType UChanneldGameInstanceSubsystem::GetChannelTypeByChId(int32 
 	return SubscribedChannelInfo != nullptr ? SubscribedChannelInfo->ChannelType : EChanneldChannelType::ECT_Unknown;
 }
 
-FString UChanneldGameInstanceSubsystem::GetChannelTypeNameByChId(int32 ChId)
+FString UChanneldGameInstanceSubsystem::GetChannelTypeNameByChId(int64 ChId)
 {
 	EChanneldChannelType Type = GetChannelTypeByChId(ChId);
-	return StaticEnum<EChanneldChannelType>()->GetNameStringByValue((int64)Type);
+	return StaticEnum<EChanneldChannelType>()->GetNameStringByValue(static_cast<int64>(Type));
 }
 
 TArray<FSubscribedChannelInfo> UChanneldGameInstanceSubsystem::GetSubscribedChannels()
@@ -139,7 +139,7 @@ TArray<FSubscribedChannelInfo> UChanneldGameInstanceSubsystem::GetSubscribedChan
 	return EmptyResult;
 }
 
-bool UChanneldGameInstanceSubsystem::HasSubscribedToChannel(int32 ChId)
+bool UChanneldGameInstanceSubsystem::HasSubscribedToChannel(int64 ChId)
 {
 	if (ConnectionInstance)
 	{
@@ -148,7 +148,7 @@ bool UChanneldGameInstanceSubsystem::HasSubscribedToChannel(int32 ChId)
 	return false;
 }
 
-bool UChanneldGameInstanceSubsystem::HasOwnedChannel(int32 ChId)
+bool UChanneldGameInstanceSubsystem::HasOwnedChannel(int64 ChId)
 {
 	if (ConnectionInstance)
 	{
@@ -362,6 +362,33 @@ void UChanneldGameInstanceSubsystem::QuerySpatialChannel(const AActor* Actor,
 		Channeld::ChannelId ChId = ResultMsg->channelid_size() == 0 ? Channeld::InvalidChannelId : ResultMsg->channelid(0);
 		Callback.ExecuteIfBound((int64)ChId);
 	});
+}
+
+int64 UChanneldGameInstanceSubsystem::GetEntityId(AActor* Actor)
+{
+	if (auto NetDriver = GetNetDriver())
+	{
+		if (NetDriver->IsServer())
+		{
+			return NetDriver->GuidCache->GetOrAssignNetGUID(Actor).Value;
+		}
+		else
+		{
+			return NetDriver->GuidCache->GetNetGUID(Actor).Value;
+		}
+	}
+	return 0;
+}
+
+void UChanneldGameInstanceSubsystem::AddToHandoverGroup(AActor* JunctionEntity, const TArray<AActor*> EntitiesToAdd)
+{
+	Channeld::EntityId EntityChId = GetEntityId(JunctionEntity);
+	TArray<Channeld::EntityId> EntityIds;
+	for (auto Entity : EntitiesToAdd)
+	{
+		EntityIds.Add(GetEntityId(Entity));
+	}
+	ConnectionInstance->AddToEntityGroup(EntityChId, channeldpb::HANDOVER, EntityIds);
 }
 
 void UChanneldGameInstanceSubsystem::ServerBroadcast(int32 ChId, int32 ClientConnId, UProtoMessageObject* MessageObject,

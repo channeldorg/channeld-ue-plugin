@@ -674,6 +674,30 @@ void UChanneldConnection::QuerySpatialChannel(const TArray<FVector>& Positions, 
 	Send(Channeld::GlobalChannelId, channeldpb::QUERY_SPATIAL_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
+void UChanneldConnection::AddToEntityGroup(Channeld::EntityId EntityChId, channeldpb::EntityGroupType GroupType, const TArray<Channeld::EntityId> EntitiesToAdd)
+{
+	channeldpb::AddEntityGroupMessage addMsg;
+	addMsg.set_type(GroupType);
+	for (auto& EntityId : EntitiesToAdd)
+	{
+		addMsg.add_entitiestoadd(EntityId);
+	}
+	
+	Send(EntityChId, channeldpb::ENTITY_GROUP_ADD, addMsg);
+}
+
+void UChanneldConnection::RemoveFromEntityGroup(Channeld::EntityId EntityChId, channeldpb::EntityGroupType GroupType, const TArray<Channeld::EntityId> EntitiesToRemove)
+{
+	channeldpb::RemoveEntityGroupMessage removeMsg;
+	removeMsg.set_type(GroupType);
+	for (auto& EntityId : EntitiesToRemove)
+	{
+		removeMsg.add_entitiestoremove(EntityId);
+	}
+
+	Send(EntityChId, channeldpb::ENTITY_GROUP_REMOVE, removeMsg);
+}
+
 void UChanneldConnection::HandleAuth(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto ResultMsg = static_cast<const channeldpb::AuthResultMessage*>(Msg);
