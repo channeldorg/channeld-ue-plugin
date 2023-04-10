@@ -114,8 +114,24 @@ public:
 	 * @param InConnId The Id of the Connection to be disconnected
 	 */
 	void SendDisconnectMessage(Channeld::ConnectionId InConnId);
-	
+
+	/**
+	 * @brief Authenticate the connection with the given PIT and LT.
+	 * @param PIT Player Identity Token. Could be the username, email, or any other unique identifier.
+	 * @param LT Login Token. Could be the password, or any other token that can be used to authenticate the user.
+	 * @param Callback The callback function that will be called when the authentication is done.
+	 */
 	void Auth(const FString& PIT, const FString& LT, const TFunction<void(const channeldpb::AuthResultMessage*)>& Callback = nullptr);
+
+	/**
+	 * @brief Create a non-spatial, non-entity channel.
+	 * @param ChannelType The type of the channel to be created.
+	 * @param Metadata The metadata of the channel. Could be used to store any information about the channel.
+	 * @param SubOptions The subscription options of the channel. If not specified, the default options will be used.
+	 * @param Data The initial data of the channel. If not specified, the first received data will be used.
+	 * @param MergeOptions The merge options of the channel. If not specified, the default options will be used.
+	 * @param Callback The callback function that will be called when the channel is created.
+	 */
 	void CreateChannel(channeldpb::ChannelType ChannelType, const FString& Metadata, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const google::protobuf::Message* Data = nullptr, const channeldpb::ChannelDataMergeOptions* MergeOptions = nullptr, const TFunction<void(const channeldpb::CreateChannelResultMessage*)>& Callback = nullptr);
 	void CreateSpatialChannel(const FString& Metadata, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const google::protobuf::Message* Data = nullptr, const channeldpb::ChannelDataMergeOptions* MergeOptions = nullptr, const TFunction<void(const channeldpb::CreateSpatialChannelsResultMessage*)>& Callback = nullptr);
 	void CreateEntityChannel(Channeld::ChannelId ChId, UObject* Entity, uint32 EntityId, const FString& Metadata, const channeldpb::ChannelSubscriptionOptions* SubOptions = nullptr, const google::protobuf::Message* Data = nullptr, const channeldpb::ChannelDataMergeOptions* MergeOptions = nullptr, const TFunction<void(const channeldpb::CreateChannelResultMessage*)>& Callback = nullptr);
@@ -131,6 +147,9 @@ public:
 	void UnsubFromChannel(Channeld::ChannelId ChId, const TFunction<void(const channeldpb::UnsubscribedFromChannelResultMessage*)>& Callback = nullptr);
 	void UnsubConnectionFromChannel(Channeld::ConnectionId ConnId, Channeld::ChannelId ChId, const TFunction<void(const channeldpb::UnsubscribedFromChannelResultMessage*)>& Callback = nullptr);
 	void QuerySpatialChannel(const TArray<FVector>& Positions, const TFunction<void(const channeldpb::QuerySpatialChannelResultMessage*)>& Callback = nullptr);
+
+	void AddToEntityGroup(Channeld::EntityId EntityChId, channeldpb::EntityGroupType GroupType, const TArray<Channeld::EntityId> EntitiesToAdd);
+	void RemoveFromEntityGroup(Channeld::EntityId EntityChId, channeldpb::EntityGroupType GroupType, const TArray<Channeld::EntityId> EntitiesToRemove);
 	
 	void TickIncoming();
 	void TickOutgoing();
