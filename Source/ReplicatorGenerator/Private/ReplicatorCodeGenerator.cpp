@@ -57,7 +57,7 @@ bool FReplicatorCodeGenerator::Generate(
 	// Clear global struct decorators, make sure it's empty for this generation
 	FPropertyDecoratorFactory::Get().ClearGlobalStruct();
 
-	FString Message, IncludeCode, RegisterCode;
+	FString Message, IncludeCode, RegisterReplicatorCode;
 	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecoratorsToGenReplicator;
 	TArray<TSharedPtr<FReplicatedActorDecorator>> ActorDecoratorsToGenChannelData;
 	for (const FRepGenActorInfo& Info : ReplicationActorInfos)
@@ -85,7 +85,7 @@ bool FReplicatorCodeGenerator::Generate(
 			ActorDecoratorsToGenReplicator.Add(ActorDecorator);
 			IncludeCode.Append(GeneratedResult.IncludeActorCode + TEXT("\n"));
 			IncludeCode.Append(FString::Printf(TEXT("#include \"%s\"\n"), *GeneratedResult.HeadFileName));
-			RegisterCode.Append(GeneratedResult.RegisterReplicatorCode + TEXT("\n"));
+			RegisterReplicatorCode.Append(GeneratedResult.RegisterReplicatorCode + TEXT("\n"));
 		}
 		else
 		{
@@ -127,22 +127,42 @@ bool FReplicatorCodeGenerator::Generate(
 	FStringFormatNamedArguments RegisterFormatArgs;
 	// register replicators
 	RegisterFormatArgs.Add(TEXT("Code_IncludeActorHeaders"), IncludeCode);
-	RegisterFormatArgs.Add(TEXT("Code_ReplicatorRegister"), RegisterCode);
+	RegisterFormatArgs.Add(TEXT("Code_ReplicatorRegister"), RegisterReplicatorCode);
 
-	// register channel data processor
+	// register channel data
+	FString RegisterProtoMsgCode;
+	RegisterProtoMsgCode.Append(
+		FString::Printf(
+			TEXT("ChanneldUtils::RegisterProtobufMessage<%s::%s>(TEXT(\"%s.%s\"));\n"),
+			*ProtoPackageName, *ChanneldDataProtoMsgName, *ProtoPackageName, *ChanneldDataProtoMsgName
+		)
+	);
+	FString RegisterChannelDataNameCode;
+	for (const TCHAR* ChannelTypeName : {TEXT("ECT_Global"), TEXT("ECT_Spatial"), TEXT("ECT_SubWorld"),TEXT("ECT_Private")})
+	{
+		RegisterChannelDataNameCode.Append(
+			FString::Printf(
+				TEXT("ChanneldReplication::RegisterChannelDataName(EChanneldChannelType::%s, TEXT(\"%s.%s\"));\n"),
+				ChannelTypeName, *ProtoPackageName, *ChanneldDataProtoMsgName
+			)
+		);
+	}
 	const FString CDPVarNameInRegister = FString::Printf(TEXT("Var_%s"), *CDPClassName);
 	RegisterFormatArgs.Add(
 		TEXT("Code_ChannelDataProcessorRegister"),
 		FString::Printf(
-			TEXT("%s = new %s::%s();\nChanneldReplication::RegisterChannelDataProcessor(TEXT(\"%s.%s\"), %s);\n"),
+			TEXT("%s = new %s::%s();\nChanneldReplication::RegisterChannelDataProcessor(TEXT(\"%s.%s\"), %s);\n%s\n"),
 			*CDPVarNameInRegister,
 			*CDPNamespace, *CDPClassName,
 			*ProtoPackageName, *ChanneldDataProtoMsgName,
-			*CDPVarNameInRegister
+			*CDPVarNameInRegister,
+			*RegisterChannelDataNameCode
 		)
 	);
+	RegisterFormatArgs.Add(TEXT("Code_ChannelDataMsgUnregister"), FString::Printf(TEXT("ChanneldUtils::UnregisterProtobufMessage(TEXT(\"%s.%s\"));"), *ProtoPackageName, *ChanneldDataProtoMsgName));
 	RegisterFormatArgs.Add(TEXT("Code_ChannelDataProcessorUnregister"), FString::Printf(TEXT("delete %s;"), *CDPVarNameInRegister));
 	RegisterFormatArgs.Add(TEXT("Declaration_Variables"), FString::Printf(TEXT("%s::%s* %s;\n"), *CDPNamespace, *CDPClassName, *CDPVarNameInRegister));
+	RegisterFormatArgs.Add(TEXT("Code_ProtoMessageRegistry"), RegisterProtoMsgCode);
 	ReplicatorCodeBundle.ReplicatorRegistrationHeadCode = FString::Format(*CodeGen_ReplicatorRegistrationTemp, RegisterFormatArgs);
 
 	// Type definitions

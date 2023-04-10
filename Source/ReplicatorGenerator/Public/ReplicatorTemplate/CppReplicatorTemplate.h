@@ -181,11 +181,13 @@ class UChanneldReplicatorRegistration : public UEngineSubsystem
   GENERATED_BODY()
   virtual void Initialize(FSubsystemCollectionBase& Collection) override
   {
+{Code_ProtoMessageRegistry}
 {Code_ReplicatorRegister}
 {Code_ChannelDataProcessorRegister}
   }
   virtual void Deinitialize() override
   {
+{Code_ChannelDataMsgUnregister}
 {Code_ChannelDataProcessorUnregister}
   }
 

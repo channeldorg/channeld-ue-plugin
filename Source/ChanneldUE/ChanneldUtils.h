@@ -10,17 +10,21 @@
 
 class CHANNELDUE_API ChanneldUtils
 {
+private:
+	static TMap<FString, TSharedPtr<const google::protobuf::Message>> ProtoMessageRegistry;
+
 public:
-	static google::protobuf::Message* CreateProtobufMessage(const std::string& FullName)
+	template <typename MsgClass>
+	static void RegisterProtobufMessage(const FString& MessageFullName)
 	{
-		const google::protobuf::Descriptor* Desc = google::protobuf::DescriptorPool::generated_pool()
-			->FindMessageTypeByName(FullName);
-		if (Desc)
-		{
-			return google::protobuf::MessageFactory::generated_factory()->GetPrototype(Desc)->New();
-		}
-		return nullptr;
+		RegisterProtobufMessage(MessageFullName, new MsgClass());
 	}
+
+	static void RegisterProtobufMessage(const FString& MessageFullName, const google::protobuf::Message* Message);
+
+	static void UnregisterProtobufMessage(const FString& MessageFullName);
+
+	static google::protobuf::Message* CreateProtobufMessage(const FString& MessageFullName);
 
 	static void SetVectorFromPB(FVector& VectorToSet, const unrealpb::FVector& VectorToCheck)
 	{
@@ -120,7 +124,7 @@ public:
 	{
 		if (VectorPBToCheck == nullptr)
 			VectorPBToCheck = VectorToSet;
-		
+
 		bool bNotSame = false;
 		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X))
 		{
@@ -137,7 +141,7 @@ public:
 			VectorToSet->set_z(VectorToCheck.Z);
 			bNotSame = true;
 		}
-		
+
 		return bNotSame;
 	}
 
@@ -145,7 +149,7 @@ public:
 	{
 		if (RotatorPBToCheck == nullptr)
 			RotatorPBToCheck = RotatorToSet;
-		
+
 		bool bNotSame = false;
 		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch))
 		{
@@ -199,11 +203,11 @@ public:
 	 * @return The object if it's in the GuidCache or deserialized successfully.
 	 */
 	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
-	
+
 	static unrealpb::UnrealObjectRef GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr);
-		
+
 	static UActorComponent* GetActorComponentByRef(const unrealpb::ActorComponentRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
-	
+
 	static UActorComponent* GetActorComponentByRefChecked(const unrealpb::ActorComponentRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
 
 	static unrealpb::ActorComponentRef GetRefOfActorComponent(UActorComponent* Comp, UNetConnection* Connection = nullptr);
@@ -217,13 +221,13 @@ public:
 	 *
 	 *		returns true if a new actor was spawned. false means an existing actor was found for the netguid.
 	 */
-	bool static SerializeNewActor_Server(UNetConnection* Connection, UPackageMapClient* PackageMap, TSharedPtr<FNetGUIDCache> GuidCache, FArchive& Ar, class UActorChannel *Channel, class AActor*& Actor);
-	
+	bool static SerializeNewActor_Server(UNetConnection* Connection, UPackageMapClient* PackageMap, TSharedPtr<FNetGUIDCache> GuidCache, FArchive& Ar, class UActorChannel* Channel, class AActor*& Actor);
+
 	// Set the actor's NetRole on the client based on the NetConnection that owns the actor.
 	static void SetActorRoleByOwningConnId(AActor* Actor, Channeld::ConnectionId OwningConnId);
 
 	static ENetRole ServerGetActorNetRole(AActor* Actor);
-	
+
 	static uint32 GetNativeNetId(uint32 UniqueNetId)
 	{
 		return UniqueNetId & ((1 << Channeld::ConnectionIdBitOffset) - 1);

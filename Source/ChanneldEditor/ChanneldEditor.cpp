@@ -451,20 +451,6 @@ void FChanneldEditorModule::GenerateReplicationAction()
 		const TArray<FString> GeneratedProtoFiles = FReplicatorGeneratorManager::Get().GetGeneratedProtoFiles();
 		GenRepProtoCppCode(GeneratedProtoFiles);
 		GenRepProtoGoCode(GeneratedProtoFiles, LatestGeneratedManifest, GeneratorManager.GetReplicatorStorageDir());
-
-
-		// Update UChanneldSettings::DefaultChannelDataMsgNames
-		auto Settings = GetMutableDefault<UChanneldSettings>();
-		TMap<EChanneldChannelType, FString> NewChannelDataMsgNames;
-		for (auto& Pair : Settings->DefaultChannelDataMsgNames)
-		{
-			NewChannelDataMsgNames.Add(Pair.Key, LatestGeneratedManifest.ChannelDataMsgName);
-		}
-		Settings->DefaultChannelDataMsgNames = NewChannelDataMsgNames;
-		Settings->SaveConfig();
-		UE_LOG(LogChanneldEditor, Log, TEXT("Updated the default channel data message names in the channeld settings."));
-
-		GetMutableDefault<UChanneldSettings>()->ReloadConfig();
 	});
 	GenRepWorkThread->ProcFailedDelegate.AddLambda([this](FChanneldProcWorkerThread*)
 		{

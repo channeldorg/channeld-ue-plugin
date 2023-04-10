@@ -4,6 +4,41 @@
 #include "ChanneldNetDriver.h"
 #include "ChanneldTypes.h"
 
+TMap<FString, TSharedPtr<const google::protobuf::Message>> ChanneldUtils::ProtoMessageRegistry;
+
+void ChanneldUtils::RegisterProtobufMessage(const FString& MessageFullName, const google::protobuf::Message* Message)
+{
+	if (!Message)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Protobuf message is null."));
+		return;
+	}
+	if (ProtoMessageRegistry.Contains(MessageFullName))
+	{
+		UE_LOG(LogChanneld, Display, TEXT("Protobuf message %s already registered, will be overwritten."), *MessageFullName);
+	}
+	ProtoMessageRegistry.Add(MessageFullName, MakeShareable(Message));
+}
+
+void ChanneldUtils::UnregisterProtobufMessage(const FString& MessageFullName)
+{
+	if (!ProtoMessageRegistry.Contains(MessageFullName))
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Protobuf message %s is not registered."), *MessageFullName);
+		return;
+	}
+	ProtoMessageRegistry.Remove(MessageFullName);
+}
+
+google::protobuf::Message* ChanneldUtils::CreateProtobufMessage(const FString& MessageFullName)
+{
+	if (ProtoMessageRegistry.Contains(MessageFullName))
+	{
+		return ProtoMessageRegistry[MessageFullName]->New();
+	}
+	return nullptr;
+}
+
 UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache, UChanneldNetConnection* ClientConn)
 {
 	if (!Ref || !World)
@@ -23,7 +58,7 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 		GetUniqueNetId(NetGUID, Ref->connid());
 	}
 	*/
-		
+
 	bNetGUIDUnmapped = (World->GetNetDriver() == nullptr);
 	if (bNetGUIDUnmapped)
 	{
@@ -44,9 +79,9 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 			}
 			// Sort by the NetGUID to register in descending order.
 			CachedObjs.Sort([](const unrealpb::UnrealObjectRef_GuidCachedObject& Obj1, const unrealpb::UnrealObjectRef_GuidCachedObject& Obj2)
-				{
-					return Obj1.netguid() > Obj2.netguid();
-				});
+			{
+				return Obj1.netguid() > Obj2.netguid();
+			});
 			for (auto CachedObj : CachedObjs)
 			{
 				FNetworkGUID NewGUID = FNetworkGUID(CachedObj->netguid());
@@ -58,7 +93,7 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 					GetUniqueNetId(NewGUID, Ref->connid());
 				}
 				*/
-				
+
 				FString PathName = UTF8_TO_TCHAR(CachedObj->pathname().c_str());
 				// Remap name for PIE
 				GEngine->NetworkRemapPath(Connection, PathName, true);
@@ -118,7 +153,7 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 			UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Failed to create object from NetGUID: %d (%d)"), NetGUID.Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
 		}
 	}
-	
+
 	return Obj;
 }
 
@@ -273,15 +308,15 @@ bool ChanneldUtils::SerializeNewActor_Server(UNetConnection* Connection, UPackag
 {
 	LLM_SCOPE(ELLMTag::EngineMisc);
 
-	UE_LOG( LogNetPackageMap, VeryVerbose, TEXT( "SerializeNewActor START" ) );
+	UE_LOG(LogNetPackageMap, VeryVerbose, TEXT( "SerializeNewActor START" ));
 
 	uint8 bIsClosingChannel = 0;
 
-	if (Ar.IsLoading() )
+	if (Ar.IsLoading())
 	{
 		FInBunch* InBunch = (FInBunch*)&Ar;
-		bIsClosingChannel = InBunch->bClose;		// This is so we can determine that this channel was opened/closed for destruction
-		UE_LOG(LogNetPackageMap, Log, TEXT("UPackageMapClient::SerializeNewActor BitPos: %d"), InBunch->GetPosBits() );
+		bIsClosingChannel = InBunch->bClose; // This is so we can determine that this channel was opened/closed for destruction
+		UE_LOG(LogNetPackageMap, Log, TEXT("UPackageMapClient::SerializeNewActor BitPos: %d"), InBunch->GetPosBits());
 
 		PackageMap->ResetTrackedSyncLoadedGuids();
 	}
@@ -289,23 +324,23 @@ bool ChanneldUtils::SerializeNewActor_Server(UNetConnection* Connection, UPackag
 	NET_CHECKSUM(Ar);
 
 	FNetworkGUID NetGUID;
-	UObject *NewObj = Actor;
+	UObject* NewObj = Actor;
 	PackageMap->SerializeObject(Ar, AActor::StaticClass(), NewObj, &NetGUID);
 
-	if ( Ar.IsError() )
+	if (Ar.IsError())
 	{
-		UE_LOG( LogNetPackageMap, Error, TEXT( "UPackageMapClient::SerializeNewActor: Ar.IsError after SerializeObject 1" ) );
+		UE_LOG(LogNetPackageMap, Error, TEXT( "UPackageMapClient::SerializeNewActor: Ar.IsError after SerializeObject 1" ));
 		return false;
 	}
 
-	bool bFilterGuidRemapping = true;//(CVarFilterGuidRemapping.GetValueOnAnyThread() > 0);
+	bool bFilterGuidRemapping = true; //(CVarFilterGuidRemapping.GetValueOnAnyThread() > 0);
 	if (!bFilterGuidRemapping)
 	{
-		if ( GuidCache.IsValid() )
+		if (GuidCache.IsValid())
 		{
 			if (ensureMsgf(NetGUID.IsValid(), TEXT("Channel tried to add an invalid GUID to the import list: %s"), *Channel->Describe()))
 			{
-				GuidCache->ImportedNetGuids.Add( NetGUID );
+				GuidCache->ImportedNetGuids.Add(NetGUID);
 			}
 		}
 	}
@@ -318,27 +353,27 @@ bool ChanneldUtils::SerializeNewActor_Server(UNetConnection* Connection, UPackag
 	// The calling code may want to know, so this is why we distinguish
 	bool bActorWasSpawned = false;
 
-	if ( Ar.AtEnd() && NetGUID.IsDynamic() )
+	if (Ar.AtEnd() && NetGUID.IsDynamic())
 	{
 		// This must be a destruction info coming through or something is wrong
 		// If so, we should be closing the channel
 		// This can happen when dormant actors that don't have channels get destroyed
 		// Not finding the actor can happen if the client streamed in this level after a dynamic actor has been spawned and deleted on the server side
-		if ( bIsClosingChannel == 0 )
+		if (bIsClosingChannel == 0)
 		{
-			UE_LOG( LogNetPackageMap, Error, TEXT( "UPackageMapClient::SerializeNewActor: bIsClosingChannel == 0 : %s [%s]" ), *GetNameSafe(Actor), *NetGUID.ToString() );
+			UE_LOG(LogNetPackageMap, Error, TEXT( "UPackageMapClient::SerializeNewActor: bIsClosingChannel == 0 : %s [%s]" ), *GetNameSafe(Actor), *NetGUID.ToString());
 			Ar.SetError();
 			return false;
 		}
 
-		UE_LOG( LogNetPackageMap, Log, TEXT( "UPackageMapClient::SerializeNewActor:  Skipping full read because we are deleting dynamic actor: %s" ), *GetNameSafe(Actor) );
-		return false;		// This doesn't mean an error. This just simply means we didn't spawn an actor.
+		UE_LOG(LogNetPackageMap, Log, TEXT( "UPackageMapClient::SerializeNewActor:  Skipping full read because we are deleting dynamic actor: %s" ), *GetNameSafe(Actor));
+		return false; // This doesn't mean an error. This just simply means we didn't spawn an actor.
 	}
 
 	if (bFilterGuidRemapping)
 	{
 		// Do not mark guid as imported until we know we aren't deleting it
-		if ( GuidCache.IsValid() )
+		if (GuidCache.IsValid())
 		{
 			if (ensureMsgf(NetGUID.IsValid(), TEXT("Channel tried to add an invalid GUID to the import list: %s"), *Channel->Describe()))
 			{
@@ -347,7 +382,7 @@ bool ChanneldUtils::SerializeNewActor_Server(UNetConnection* Connection, UPackag
 		}
 	}
 
-	if ( NetGUID.IsDynamic() )
+	if (NetGUID.IsDynamic())
 	{
 		UObject* Archetype = nullptr;
 		UObject* ActorLevel = nullptr;
@@ -371,16 +406,16 @@ bool ChanneldUtils::SerializeNewActor_Server(UNetConnection* Connection, UPackag
 			}
 			ActorLevel = Actor->GetLevel();
 
-			check( Archetype != nullptr );
-			check( Actor->NeedsLoadForClient() );			// We have no business sending this unless the client can load
-			check( Archetype->NeedsLoadForClient() );		// We have no business sending this unless the client can load
+			check(Archetype != nullptr);
+			check(Actor->NeedsLoadForClient()); // We have no business sending this unless the client can load
+			check(Archetype->NeedsLoadForClient()); // We have no business sending this unless the client can load
 
 			const USceneComponent* RootComponent = Actor->GetRootComponent();
 
 			if (RootComponent)
 			{
 				Location = FRepMovement::RebaseOntoZeroOrigin(Actor->GetActorLocation(), Actor);
-			} 
+			}
 			else
 			{
 				Location = FVector::ZeroVector;
@@ -407,17 +442,17 @@ bool ChanneldUtils::SerializeNewActor_Server(UNetConnection* Connection, UPackag
 		}
 #endif // WITH_EDITOR
 
-		if ( ArchetypeNetGUID.IsValid() && Archetype == NULL )
+		if (ArchetypeNetGUID.IsValid() && Archetype == NULL)
 		{
-			const FNetGuidCacheObject* ExistingCacheObjectPtr = GuidCache->ObjectLookup.Find( ArchetypeNetGUID );
+			const FNetGuidCacheObject* ExistingCacheObjectPtr = GuidCache->ObjectLookup.Find(ArchetypeNetGUID);
 
-			if ( ExistingCacheObjectPtr != NULL )
+			if (ExistingCacheObjectPtr != NULL)
 			{
-				UE_LOG( LogNetPackageMap, Error, TEXT( "UPackageMapClient::SerializeNewActor. Unresolved Archetype GUID. Path: %s, NetGUID: %s." ), *ExistingCacheObjectPtr->PathName.ToString(), *ArchetypeNetGUID.ToString() );
+				UE_LOG(LogNetPackageMap, Error, TEXT( "UPackageMapClient::SerializeNewActor. Unresolved Archetype GUID. Path: %s, NetGUID: %s." ), *ExistingCacheObjectPtr->PathName.ToString(), *ArchetypeNetGUID.ToString());
 			}
 			else
 			{
-				UE_LOG( LogNetPackageMap, Error, TEXT( "UPackageMapClient::SerializeNewActor. Unresolved Archetype GUID. Guid not registered! NetGUID: %s." ), *ArchetypeNetGUID.ToString() );
+				UE_LOG(LogNetPackageMap, Error, TEXT( "UPackageMapClient::SerializeNewActor. Unresolved Archetype GUID. Guid not registered! NetGUID: %s." ), *ArchetypeNetGUID.ToString());
 			}
 		}
 
@@ -428,14 +463,14 @@ bool ChanneldUtils::SerializeNewActor_Server(UNetConnection* Connection, UPackag
 		bool bSerializeScale = false;
 		bool bSerializeVelocity = false;
 
-		{			
+		{
 			// Server is serializing an object to be sent to a client
 			if (Ar.IsSaving())
 			{
 				// We use 0.01f for comparing when using quantization, because we will only send a single point of precision anyway.
 				// We could probably get away with 0.1f, but that may introduce edge cases for rounding.
 				static constexpr float Epsilon_Quantized = 0.01f;
-					
+
 				// We use KINDA_SMALL_NUMBER for comparing when not using quantization, because that's the default for FVector::Equals.
 				static constexpr float Epsilon = KINDA_SMALL_NUMBER;
 
@@ -445,7 +480,6 @@ bool ChanneldUtils::SerializeNewActor_Server(UNetConnection* Connection, UPackag
 
 				// We use 0.001f for Rotation comparison to keep consistency with old behavior.
 				bSerializeRotation = !Rotation.IsNearlyZero(0.001f);
-					
 			}
 
 			auto ConditionallySerializeQuantizedVector = [&Ar, &SerSuccess, PackageMap](
@@ -499,12 +533,12 @@ bool ChanneldUtils::SerializeNewActor_Server(UNetConnection* Connection, UPackag
 			ConditionallySerializeQuantizedVector(Velocity, FVector::ZeroVector, true, bSerializeVelocity);
 		}
 
-		if ( Ar.IsLoading() )
+		if (Ar.IsLoading())
 		{
 			// Spawn actor if necessary (we may have already found it if it was dormant)
-			if ( Actor == NULL )
+			if (Actor == NULL)
 			{
-				if ( Archetype )
+				if (Archetype)
 				{
 					// For streaming levels, it's possible that the owning level has been made not-visible but is still loaded.
 					// In that case, the level will still be found but the owning world will be invalid.
@@ -544,7 +578,7 @@ bool ChanneldUtils::SerializeNewActor_Server(UNetConnection* Connection, UPackag
 							// Server may already has the actor spawned and cached. Remove it before registering.
 							GuidCache->NetGUIDLookup.Remove(Actor);
 							GuidCache->ObjectLookup.Remove(NetGUID);
-								
+
 							GuidCache->RegisterNetGUID_Server(NetGUID, Actor);
 
 							bActorWasSpawned = true;
@@ -561,26 +595,26 @@ bool ChanneldUtils::SerializeNewActor_Server(UNetConnection* Connection, UPackag
 				}
 				else
 				{
-					UE_LOG(LogNetPackageMap, Error, TEXT("UPackageMapClient::SerializeNewActor Unable to read Archetype for NetGUID %s / %s"), *NetGUID.ToString(), *ArchetypeNetGUID.ToString() );
+					UE_LOG(LogNetPackageMap, Error, TEXT("UPackageMapClient::SerializeNewActor Unable to read Archetype for NetGUID %s / %s"), *NetGUID.ToString(), *ArchetypeNetGUID.ToString());
 				}
 			}
 		}
 	}
-	else if ( Ar.IsLoading() && Actor == NULL )
+	else if (Ar.IsLoading() && Actor == NULL)
 	{
 		// Do not log a warning during replay, since this is a valid case
 		UDemoNetDriver* DemoNetDriver = Cast<UDemoNetDriver>(Connection->Driver);
 		if (DemoNetDriver == nullptr)
 		{
-			UE_LOG( LogNetPackageMap, Log, TEXT( "SerializeNewActor: Failed to find static actor: FullNetGuidPath: %s, Channel: %d" ), *GuidCache->FullNetGUIDPath( NetGUID ), Channel->ChIndex );
+			UE_LOG(LogNetPackageMap, Log, TEXT( "SerializeNewActor: Failed to find static actor: FullNetGuidPath: %s, Channel: %d" ), *GuidCache->FullNetGUIDPath( NetGUID ), Channel->ChIndex);
 		}
 
 		if (bFilterGuidRemapping)
 		{
 			// Do not attempt to resolve this missing actor
-			if ( GuidCache.IsValid() )
+			if (GuidCache.IsValid())
 			{
-				GuidCache->ImportedNetGuids.Remove( NetGUID );
+				GuidCache->ImportedNetGuids.Remove(NetGUID);
 			}
 		}
 	}
@@ -590,7 +624,7 @@ bool ChanneldUtils::SerializeNewActor_Server(UNetConnection* Connection, UPackag
 		// PackageMap->ReportSyncLoadsForActorSpawn(Actor);
 	}
 
-	UE_LOG( LogNetPackageMap, Log, TEXT( "SerializeNewActor END: Finished Serializing. Actor: %s, FullNetGUIDPath: %s, Channel: %d, IsLoading: %i, IsDynamic: %i" ), Actor ? *Actor->GetName() : TEXT("NULL"), *GuidCache->FullNetGUIDPath( NetGUID ), Channel->ChIndex, (int)Ar.IsLoading(), (int)NetGUID.IsDynamic() );
+	UE_LOG(LogNetPackageMap, Log, TEXT( "SerializeNewActor END: Finished Serializing. Actor: %s, FullNetGUIDPath: %s, Channel: %d, IsLoading: %i, IsDynamic: %i" ), Actor ? *Actor->GetName() : TEXT("NULL"), *GuidCache->FullNetGUIDPath( NetGUID ), Channel->ChIndex, (int)Ar.IsLoading(), (int)NetGUID.IsDynamic());
 
 	return bActorWasSpawned;
 }
@@ -603,17 +637,17 @@ void ChanneldUtils::SetActorRoleByOwningConnId(AActor* Actor, Channeld::Connecti
 	{
 		Actor->SetRole(ROLE_AutonomousProxy);
 	}
-	else// if (Actor->GetLocalRole() == ROLE_AutonomousProxy)
+	else // if (Actor->GetLocalRole() == ROLE_AutonomousProxy)
 	{
 		Actor->SetRole(ROLE_SimulatedProxy);
 	}
 	const static UEnum* Enum = StaticEnum<ENetRole>();
 	UE_LOG(LogChanneld, Verbose, TEXT("[Client] Updated actor %s's role from %s to %s, local/remote owning connId: %d/%d"),
-		*Actor->GetName(),
-		*Enum->GetNameStringByValue(OldRole),
-		*Enum->GetNameStringByValue(Actor->GetLocalRole()),
-		ConnToChanneld->GetConnId(),
-		OwningConnId
+	       *Actor->GetName(),
+	       *Enum->GetNameStringByValue(OldRole),
+	       *Enum->GetNameStringByValue(Actor->GetLocalRole()),
+	       ConnToChanneld->GetConnId(),
+	       OwningConnId
 	);
 }
 
