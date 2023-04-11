@@ -170,7 +170,6 @@ static const FString CodeGen_RegistrationTemp =
 #include "CoreMinimal.h"
 #include "Subsystems/EngineSubsystem.h"
 #include "Replication/ChanneldReplication.h"
-#include "ChanneldUtils.h"
 {Code_IncludeHeaders}
 #include "ChanneldReplicatorRegistration.generated.h"
 
@@ -183,12 +182,10 @@ class UChanneldReplicatorRegistration : public UEngineSubsystem
   virtual void Initialize(FSubsystemCollectionBase& Collection) override
   {
 {Code_ReplicatorRegister}
-{Code_ChannelDataRegister}
 {Code_ChannelDataProcessorRegister}
   }
   virtual void Deinitialize() override
   {
-{Code_ChannelDataMsgUnregister}
 {Code_DeleteChannelDataProcessor}
   }
 

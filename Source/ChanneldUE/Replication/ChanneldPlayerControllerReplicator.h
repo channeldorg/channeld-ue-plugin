@@ -1,12 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ChanneldReplicatorBase.h"
 #include "GameFramework\Character.h"
+#include "ChanneldReplicatorBase.h"
 #include "GameFramework/HUD.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/LocalMessage.h"
-#include "unreal_common.pb.h"
 
 class CHANNELDUE_API FChanneldPlayerControllerReplicator : public FChanneldReplicatorBase
 {
@@ -35,7 +34,6 @@ protected:
 	{
 		{FName("ClientVoiceHandshakeComplete"), nullptr},
 		{FName("ServerVerifyViewTarget"), nullptr},
-		{FName("ServerCheckClientPossession"), nullptr},
 		{FName("ServerCheckClientPossessionReliable"), nullptr},
 		{FName("ServerShortTimeout"), nullptr},
 	};

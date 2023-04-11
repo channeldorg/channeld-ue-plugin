@@ -3,15 +3,15 @@
 #include "google/protobuf/map_field.h"
 #include "google/protobuf/reflection.h"
 
-// using namespace google::protobuf;
+using namespace google::protobuf;
 
-bool FFlatStatesChannelDataProcessor::Merge(const google::protobuf::Message* SrcMsg, google::protobuf::Message* DstMsg)
+bool FFlatStatesChannelDataProcessor::Merge(const Message* SrcMsg, Message* DstMsg)
 {
 	// TODO
 	return false;
 }
 
-const google::protobuf::Message* FFlatStatesChannelDataProcessor::GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved)
+const Message* FFlatStatesChannelDataProcessor::GetStateFromChannelData(Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved)
 {
 	bIsRemoved = false;
 	auto StateInProto = ChanneldReplication::FindReplicatorStateInProto(TargetClass);
@@ -28,13 +28,13 @@ const google::protobuf::Message* FFlatStatesChannelDataProcessor::GetStateFromCh
 		return nullptr;
 	}
 
-	const google::protobuf::Message* State = nullptr;
+	const Message* State = nullptr;
 	if (StatesField->is_map())
 	{
 		auto KeysField = StatesField->message_type()->map_key();
 		auto ValuesField = StatesField->message_type()->map_value();
 
-		auto RepeatedStates = ChannelData->GetReflection()->GetRepeatedFieldRef<google::protobuf::Message>(*ChannelData, StatesField);
+		auto RepeatedStates = ChannelData->GetReflection()->GetRepeatedFieldRef<Message>(*ChannelData, StatesField);
 		int StatesNum = RepeatedStates.size();
 		for (int i = 0; i < StatesNum; i++)
 		{
@@ -55,7 +55,7 @@ const google::protobuf::Message* FFlatStatesChannelDataProcessor::GetStateFromCh
 	{
 		auto RemovedField = State->GetDescriptor()->field(0);
 		// The "removed" field should always be the first field in the proto message if it exists
-		if (RemovedField && RemovedField->type() == google::protobuf::FieldDescriptor::TYPE_BOOL)
+		if (RemovedField && RemovedField->type() == FieldDescriptor::TYPE_BOOL)
 		{
 			bIsRemoved = State->GetReflection()->GetBool(*State, RemovedField);
 		}
@@ -64,7 +64,7 @@ const google::protobuf::Message* FFlatStatesChannelDataProcessor::GetStateFromCh
 	return State;
 }
 
-void FFlatStatesChannelDataProcessor::SetStateToChannelData(const google::protobuf::Message* State,google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID)
+void FFlatStatesChannelDataProcessor::SetStateToChannelData(const Message* State,Message* ChannelData, UClass* TargetClass, uint32 NetGUID)
 {
 	auto StateInProto = ChanneldReplication::FindReplicatorStateInProto(TargetClass);
 	if (!StateInProto)
@@ -94,7 +94,7 @@ void FFlatStatesChannelDataProcessor::SetStateToChannelData(const google::protob
 		{
 			// The "removed" field should always be the first field in the proto message if it exists
 			auto RemovedField = MutableState->GetDescriptor()->field(0);
-			if (RemovedField && RemovedField->type() == google::protobuf::FieldDescriptor::TYPE_BOOL)
+			if (RemovedField && RemovedField->type() == FieldDescriptor::TYPE_BOOL)
 			{
 				MutableState->GetReflection()->SetBool(MutableState, RemovedField, true);
 			}
@@ -110,7 +110,7 @@ void FFlatStatesChannelDataProcessor::SetStateToChannelData(const google::protob
 		{
 			auto RemovedState = ChannelData->GetReflection()->MutableMessage(ChannelData, StatesField);
 			auto RemovedField = RemovedState->GetDescriptor()->field(0);
-			if (RemovedField && RemovedField->type() == google::protobuf::FieldDescriptor::TYPE_BOOL)
+			if (RemovedField && RemovedField->type() == FieldDescriptor::TYPE_BOOL)
 			{
 				RemovedState->GetReflection()->SetBool(RemovedState, RemovedField, true);
 			}

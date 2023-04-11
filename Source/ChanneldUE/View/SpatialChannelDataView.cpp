@@ -55,14 +55,7 @@ void USpatialChannelDataView::InitPlayerController(UChanneldNetConnection* Clien
 	{
 		// ~ Begin copy of AGameModeBase::InitNewPlayer
 		// Register the player with the session
-		if (NewPlayerController->PlayerState)
-		{
-			GameMode->GameSession->RegisterPlayer(NewPlayerController, ClientConn->PlayerId.GetUniqueNetId(), false);
-		}
-		else
-		{
-			UE_LOG(LogChanneld, Error, TEXT("Unable to register player for the game session: PlayerState is NULL. ConnId: %d"), ClientConn->GetConnId());
-		}
+		GameMode->GameSession->RegisterPlayer(NewPlayerController, ClientConn->PlayerId.GetUniqueNetId(), false);
 		//GameMode->ChangeName(NewPlayerController, FString::Printf(TEXT("Player_%d"), ClientConn->GetConnId()), false);
 		// ~ End copy of AGameModeBase::InitNewPlayer
 		

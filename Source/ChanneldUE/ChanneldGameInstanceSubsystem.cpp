@@ -21,7 +21,7 @@ void UChanneldGameInstanceSubsystem::Deinitialize()
 
 	if (ChannelDataView)
 	{
-		ChannelDataView->Uninitialize();
+		ChannelDataView->Unintialize();
 	}
 
 	ConnectionInstance->RemoveMessageHandler((uint32)channeldpb::AUTH, this);
@@ -396,9 +396,9 @@ void UChanneldGameInstanceSubsystem::CreateMessageObjectByChannelType(UProtoMess
 	CreateMessageObjectByFullName(MessageObject, bSuccess, ProtoFullName);
 }
 
-void UChanneldGameInstanceSubsystem::CreateMessageObjectByFullName(UProtoMessageObject*& MessageObject, bool& bSuccess, const FString& ProtobufFullName)
+void UChanneldGameInstanceSubsystem::CreateMessageObjectByFullName(UProtoMessageObject*& MessageObject, bool& bSuccess, FString ProtobufFullName)
 {
-	google::protobuf::Message* Message = ChanneldUtils::CreateProtobufMessage(ProtobufFullName);
+	google::protobuf::Message* Message = ChanneldUtils::CreateProtobufMessage(TCHAR_TO_UTF8(*ProtobufFullName));
 	MessageObject = NewObject<UProtoMessageObject>();
 
 	if (Message != nullptr)
@@ -570,7 +570,7 @@ void UChanneldGameInstanceSubsystem::HandleUserSpaceAnyMessage(UChanneldConnecti
 
 	// Erase "type.googleapis.com/"
 	ProtoFullName.erase(0, 20);
-	auto PayloadMsg = ChanneldUtils::CreateProtobufMessage(UTF8_TO_TCHAR(ProtoFullName.c_str()));
+	auto PayloadMsg = ChanneldUtils::CreateProtobufMessage(ProtoFullName);
 	if (PayloadMsg != nullptr)
 	{
 		AnyMsg->UnpackTo(PayloadMsg);

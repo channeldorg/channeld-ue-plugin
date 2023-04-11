@@ -32,21 +32,8 @@ void UChanneldSettings::PostInitProperties()
 
 	// Command line arguments can override the INI settings
 	const TCHAR* CmdLine = FCommandLine::Get();
-	
 	UE_LOG(LogChanneld, Log, TEXT("Parsing ChanneldSettings from command line args: %s"), CmdLine);
-
-	FString IniOverride;
-	if (FParse::Value(CmdLine, TEXT("CHANNELDUEINI="), IniOverride))
-	{
-		if (FPaths::IsRelative(IniOverride))
-		{
-			FString BaseDir = FPlatformProcess::BaseDir();
-			IniOverride = BaseDir / TEXT("../..") / IniOverride;
-		}
-		LoadConfig(GetClass(), *IniOverride);
-		UE_LOG(LogChanneld, Log, TEXT("Overrided default INI with '%s'"), *IniOverride);
-	}
-	
+		
 	if (FParse::Bool(CmdLine, TEXT("channeld="), bEnableNetworking))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bEnableNetworking from CLI: %d"), bEnableNetworking);

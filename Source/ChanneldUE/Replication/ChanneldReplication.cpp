@@ -5,7 +5,6 @@ TMap<const FString, const FReplicatorCreateFunc> ChanneldReplication::BPReplicat
 TArray<FReplicatorStateInProto> ChanneldReplication::ReplicatorStatesInProto;
 TMap<const UClass*, FReplicatorStateInProto> ChanneldReplication::ReplicatorTargetClassToStateInProto;
 TMap<const FName, IChannelDataProcessor*> ChanneldReplication::ChannelDataProcessorRegistry;
-TMap<const EChanneldChannelType, const FString> ChanneldReplication::ChannelDataNameRegistry;
 
 FReplicatorStateInProto* ChanneldReplication::FindReplicatorStateInProto(const UClass* TargetClass)
 {
@@ -43,17 +42,8 @@ FReplicatorStateInProto* ChanneldReplication::FindReplicatorStateInProto(const U
 		// Update the cached map
 		ReplicatorTargetClassToStateInProto.Add(TargetClass, *Result);
 	}
-
+	
 	return Result;
-}
-
-void ChanneldReplication::RegisterChannelDataName(EChanneldChannelType ChannelType, const FString& MessageFullName)
-{
-	if (ChannelDataNameRegistry.Contains(ChannelType))
-	{
-		UE_LOG(LogChanneld, Log, TEXT("Channel type %d has been registed, the old channel data name is %s, the new one is %s."), ChannelType, *ChannelDataNameRegistry[ChannelType], *MessageFullName);
-	}
-	ChannelDataNameRegistry.Add(ChannelType, MessageFullName);
 }
 
 void ChanneldReplication::RegisterReplicator(const UClass* TargetClass, const FReplicatorCreateFunc& Func, bool bOverride, bool bIsInMap)
@@ -142,13 +132,13 @@ uint32 ChanneldReplication::GetUnrealObjectType(const UObject* Obj)
 	{
 		return 0;
 	}
-
+	
 	const UClass* ObjClass = Obj->GetClass();
 	// Find in the descending order, so the most derived class will be found first
 	for (int i = ReplicatorStatesInProto.Num() - 1; i >= 0; i--)
 	{
 		FReplicatorStateInProto& State = ReplicatorStatesInProto[i];
-
+		
 		if (State.TargetClass)
 		{
 			for (const UClass* Class = ObjClass; Class != UObject::StaticClass(); Class = Class->GetSuperClass())

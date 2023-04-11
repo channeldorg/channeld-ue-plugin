@@ -15,15 +15,12 @@ struct FReplicatorStateInProto
 	FString TargetClassPathName;
 	FName TargetClassPathFName;
 	bool bIsInMap;
-
 	FReplicatorStateInProto(uint32 InIndex, const UClass* InClass, const FString* InPathName, bool InIsInMap)
 		: FieldIndex(InIndex)
-		  , TargetClass(InClass)
-		  , TargetClassPathName(InPathName ? *InPathName : TEXT(""))
-		  , TargetClassPathFName(InPathName ? FName(*InPathName) : FName(NAME_None))
-		  , bIsInMap(InIsInMap)
-	{
-	}
+		, TargetClass(InClass)
+		, TargetClassPathName(InPathName ? *InPathName : TEXT(""))
+		, TargetClassPathFName(InPathName ? FName(*InPathName) : FName(NAME_None))
+		, bIsInMap(InIsInMap){}
 };
 
 namespace ChanneldReplication
@@ -33,17 +30,10 @@ namespace ChanneldReplication
 	CHANNELDUE_API void RegisterReplicator(const UClass* TargetClass, const FReplicatorCreateFunc& Func, bool bOverride = true, bool bIsInMap = true);
 	CHANNELDUE_API void RegisterReplicator(const FString& PathName, const FReplicatorCreateFunc& Func, bool bOverride = true, bool bIsInMap = true);
 	CHANNELDUE_API TArray<FChanneldReplicatorBase*> FindAndCreateReplicators(UObject* ReplicatedObj);
-
+	
 	extern TArray<FReplicatorStateInProto> ReplicatorStatesInProto;
 	extern TMap<const UClass*, FReplicatorStateInProto> ReplicatorTargetClassToStateInProto;
 	CHANNELDUE_API FReplicatorStateInProto* FindReplicatorStateInProto(const UClass* TargetClass);
-
-	extern TMap<const EChanneldChannelType, const FString> ChannelDataNameRegistry;
-	CHANNELDUE_API void RegisterChannelDataName(EChanneldChannelType ChannelType, const FString& MessageFullName);
-	FORCEINLINE CHANNELDUE_API TMap<const EChanneldChannelType, const FString> GetChannelDataNameRegistry()
-	{
-		return ChannelDataNameRegistry;
-	}
 
 	extern TMap<const FName, IChannelDataProcessor*> ChannelDataProcessorRegistry;
 	CHANNELDUE_API void RegisterChannelDataProcessor(const FName& MessageFullName, IChannelDataProcessor* Processor);

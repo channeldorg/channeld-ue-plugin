@@ -173,7 +173,7 @@ public:
 		void CreateMessageObjectByChannelType(UProtoMessageObject*& MessageObject, bool& bSuccess, EChanneldChannelType ChannelType);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Protobuf")
-		void CreateMessageObjectByFullName(UProtoMessageObject*& MessageObject, bool& bSuccess, const FString& ProtobufFullName);
+		void CreateMessageObjectByFullName(UProtoMessageObject*& MessageObject, bool& bSuccess, FString ProtobufFullName);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld|View")
 		UChannelDataView* GetChannelDataView();

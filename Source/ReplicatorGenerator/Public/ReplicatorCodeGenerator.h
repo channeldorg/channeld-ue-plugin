@@ -36,9 +36,6 @@ struct FChannelDataCode
 	FString ProtoFileName;
 	FString ProtoDefsFile;
 
-	FString RegisterChannelDataCode;
-	FString UnregisterChannelDataMsgCode;
-
 	FString IncludeProcessorCode;
 	FString RegisterProcessorCode;
 	FString DeleteProcessorPtrCode;

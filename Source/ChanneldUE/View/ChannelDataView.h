@@ -19,7 +19,7 @@ class CHANNELDUE_API UChannelDataView : public UObject
 public:
 	UChannelDataView(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	FORCEINLINE void RegisterChannelDataTemplate(int ChannelType, const FString& MessageFullName, google::protobuf::Message* MsgTemplate)
+	FORCEINLINE void RegisterChannelDataTemplate(int ChannelType, google::protobuf::Message* MsgTemplate)
 	{
 		if (ChannelDataTemplates.Contains(ChannelType))
 		{
@@ -27,15 +27,18 @@ public:
 		}
 		
 		ChannelDataTemplates.Add(ChannelType, MsgTemplate);
-		ChannelDataTemplatesByTypeUrl.Add(TEXT("type.googleapis.com/") + MessageFullName, MsgTemplate);
-		UE_LOG(LogChanneld, Log, TEXT("Registered %s for channel type %d"), *MessageFullName, ChannelType);
+		if (AnyForTypeUrl == nullptr)
+			AnyForTypeUrl = new google::protobuf::Any;
+		AnyForTypeUrl->PackFrom(*MsgTemplate);
+		ChannelDataTemplatesByTypeUrl.Add(FString(UTF8_TO_TCHAR(AnyForTypeUrl->type_url().c_str())), MsgTemplate);
+		UE_LOG(LogChanneld, Log, TEXT("Registered %s for channel type %d"), UTF8_TO_TCHAR(MsgTemplate->GetTypeName().c_str()), ChannelType);
 	}
 
 	UFUNCTION(BlueprintCallable)
 	void RegisterChannelDataType(EChanneldChannelType ChannelType, const FString& MessageFullName);
 
 	virtual void Initialize(UChanneldConnection* InConn);
-	virtual void Uninitialize();
+	virtual void Unintialize();
 	virtual void BeginDestroy() override;
 	
 	virtual bool GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const {return false;}

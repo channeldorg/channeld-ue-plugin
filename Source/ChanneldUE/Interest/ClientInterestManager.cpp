@@ -1,6 +1,5 @@
 #include "ClientInterestManager.h"
 
-#include "BoxAOI.h"
 #include "ChanneldConnection.h"
 #include "ChanneldGameInstanceSubsystem.h"
 #include "ChanneldNetDriver.h"
@@ -30,12 +29,6 @@ void UClientInterestManager::ServerSetup(UChanneldNetConnection* InClientNetConn
 			auto Sphere = NewObject<USphereAOI>(this);
 			AOI = Sphere;
 			Sphere->Radius = Preset.Radius;
-		}
-		else if (Preset.AreaType == EClientInterestAreaType::Box)
-		{
-			auto Box = NewObject<UBoxAOI>(this);
-			AOI = Box;
-			Box->Extent = Preset.Extent;
 		}
 		else if (Preset.AreaType == EClientInterestAreaType::Cone)
 		{
@@ -191,14 +184,6 @@ void UClientInterestManager::Tick(float DeltaTime)
 		InterestMsg.mutable_query()->MergeFrom(QueryForTick);
 		GEngine->GetEngineSubsystem<UChanneldConnection>()->Send(ClientNetConn->GetSendToChannelId(), channeldpb::UPDATE_SPATIAL_INTEREST, InterestMsg);
 		QueryForTick.Clear();
-	}
-}
-
-void UClientInterestManager::ForceUpdate()
-{
-	if (ClientNetConn.IsValid())
-	{
-		OnPlayerEnterSpatialChannel(ClientNetConn.Get(), ClientNetConn->GetSendToChannelId());
 	}
 }
 

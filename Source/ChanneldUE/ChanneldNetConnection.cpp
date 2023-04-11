@@ -243,15 +243,9 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 
 void UChanneldNetConnection::SetSentSpawned(const FNetworkGUID NetId)
 {
-	if (UPackageMapClient* PackageMapClient = Cast<UPackageMapClient>(PackageMap))
-	{
-		int32* ExportCount = &PackageMapClient->NetGUIDExportCountMap.FindOrAdd(NetId, 0);
-		(*ExportCount)++;
-	}
-	else
-	{
-		UE_LOG(LogChanneld, Error, TEXT("Failed to set sent spawned as the NetConn %d has no PackageMapClient"), GetConnId());
-	}
+	UPackageMapClient* PackageMapClient = CastChecked<UPackageMapClient>(PackageMap);
+	int32* ExportCount = &PackageMapClient->NetGUIDExportCountMap.FindOrAdd(NetId, 0);
+	(*ExportCount)++;
 }
 
 void UChanneldNetConnection::SendDestroyMessage(UObject* Object, EChannelCloseReason Reason)
