@@ -99,9 +99,10 @@ public:
 	 * Generate replicators for the replication actors from registry table.
 	 *
 	 * @param GoPackageImportPathPrefix If the go package is "github.com/metaworking/channeld/examples/channeld-ue-tps/tpspb", the prefix is "github.com/metaworking/channeld/examples/channeld-ue-tps".
+	 * @param CompatibleRecompilation If true, the generated code will be compatible with the previous generated code.
 	 * @return true if the replicators are generated successfully.
 	 */
-	bool GenerateReplication(const FString GoPackageImportPathPrefix);
+	bool GenerateReplication(const FString GoPackageImportPathPrefix, bool CompatibleRecompilation);
 
 	/**
 	 * Write the given code to the disk.

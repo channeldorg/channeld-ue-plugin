@@ -61,6 +61,11 @@ void FChanneldEditorModule::StartupModule()
 		FChanneldEditorCommands::Get().StopServersCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::StopServersAction));
 	PluginCommands->MapAction(
+		FChanneldEditorCommands::Get().ToggleCompatibleRecompilationCommand,
+		FExecuteAction::CreateStatic(&FChanneldEditorModule::ToggleCompatibleRecompilationAction),
+		FCanExecuteAction(),
+		FIsActionChecked::CreateStatic(&FChanneldEditorModule::IsCompatibleRecompilationEnabled));
+	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().GenerateReplicatorCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::GenerateReplicationAction));
 	PluginCommands->MapAction(
@@ -155,6 +160,7 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 	MenuBuilder.AddSeparator();
 
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().OpenChannelDataEditorCommand);
+	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().ToggleCompatibleRecompilationCommand);
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().GenerateReplicatorCommand);
 
 	MenuBuilder.AddSubMenu(LOCTEXT("ChanneldAdvancedHeading", "Advanced..."),
@@ -374,6 +380,18 @@ void FChanneldEditorModule::LaunchServerGroup(const FServerGroup& ServerGroup)
 			ServerProcHandles.Add(ProcHandle);
 		}
 	}
+}
+
+bool FChanneldEditorModule::IsCompatibleRecompilationEnabled()
+{
+	return GetMutableDefault<UChanneldEditorSettings>()->bEnableCompatibleRecompilation;
+}
+
+void FChanneldEditorModule::ToggleCompatibleRecompilationAction()
+{
+	UChanneldEditorSettings* Settings = GetMutableDefault<UChanneldEditorSettings>();
+	Settings->bEnableCompatibleRecompilation = !Settings->bEnableCompatibleRecompilation;
+	Settings->SaveConfig();
 }
 
 void FChanneldEditorModule::StopServersAction()

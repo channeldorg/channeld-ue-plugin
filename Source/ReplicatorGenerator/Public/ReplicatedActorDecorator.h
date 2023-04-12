@@ -140,8 +140,9 @@ public:
 	FReplicatedActorDecorator(
 		const UClass* TargetActorClass
 		, const TFunction<void(FString& TargetActorName, bool IsActorNameCompilable)>& SetCompilableName
-		, FString ProtoPackageName
-		, FString GoPackageName
+		, const FString& ProtoPackageName
+		, const FString& ProtoStateMessageTypeSuffix
+		, const FString& GoPackageName
 		, bool IsSingletonInChannelData = false
 		, bool IsSkipGenChannelDataState = false
 	);
@@ -259,6 +260,11 @@ public:
 	virtual FString GetProtoNamespace() override;
 
 	/**
+	 * Get protobuf definitions base file name (without extension)
+	 */
+	virtual FString GetProtoDefinitionsBaseFileName();
+
+	/**
 	 * Get protobuf definitions file name
 	 */
 	virtual FString GetProtoDefinitionsFileName();
@@ -267,6 +273,11 @@ public:
 	 * Get go package name. Used for go proto code generation
 	 */
 	virtual FString GetGoPackageImportPath();
+
+	/**
+	 * Get the suffix of the state message type
+	 */
+	virtual FString GetProtoStateMessageTypeSuffix();
 
 	/**
 	 * Get message type for replicated actor properties mapping
@@ -339,6 +350,7 @@ protected:
 	FString TargetActorCompilableName;
 	FString InstanceRefName;
 	FString ProtoPackageName;
+	FString ProtoStateMessageTypeSuffix;
 	FString GoPackageImportPath;
 	FModuleInfo ModuleBelongTo;
 	TArray<TSharedPtr<FPropertyDecorator>> Properties;

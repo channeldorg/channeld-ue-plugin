@@ -22,7 +22,7 @@ void UChanneldEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	Super::Initialize(Collection);
 	UpdateRepActorCacheNotify = NewObject<UChanneldMissionNotiProxy>();
 	UpdateRepActorCacheNotify->AddToRoot();
-	
+
 	GenRepNotify = NewObject<UChanneldMissionNotiProxy>();
 	GenRepNotify->AddToRoot();
 }
@@ -152,10 +152,14 @@ void UChanneldEditorSubsystem::GenerateReplicationAction()
 			FText::FromString(TEXT("Failed To Generate Replication Code!"))
 		);
 		GenRepNotify->SpawnRunningMissionNotification(nullptr);
+		const UChanneldEditorSettings* EditorSettings = GetMutableDefault<UChanneldEditorSettings>();
 
 		FReplicatorGeneratorManager& GeneratorManager = FReplicatorGeneratorManager::Get();
 		GeneratorManager.RemoveGeneratedCodeFiles();
-		GeneratorManager.GenerateReplication(GetMutableDefault<UChanneldEditorSettings>()->ChanneldGoPackageImportPathPrefix);
+		GeneratorManager.GenerateReplication(
+			EditorSettings->ChanneldGoPackageImportPathPrefix,
+			EditorSettings->bEnableCompatibleRecompilation
+		);
 
 		const TArray<FString> GeneratedProtoFiles = GeneratorManager.GetGeneratedProtoFiles();
 		GenRepProtoCppCode(GeneratedProtoFiles, [this, GeneratedProtoFiles]()
@@ -176,13 +180,21 @@ void UChanneldEditorSubsystem::GenerateReplicationAction()
 				UE_LOG(LogChanneldEditor, Log, TEXT("Updated the channel data message names in the channeld settings."));
 				GetMutableDefault<UChanneldSettings>()->ReloadConfig();
 
-				if (GetMutableDefault<UChanneldEditorSettings>()->bAutoRecompileAfterGenerate)
+				if (GetMutableDefault<UChanneldEditorSettings>()->bEnableCompatibleRecompilation)
 				{
 					UE_LOG(LogChanneldEditor, Verbose, TEXT("Auto recompile game code after generate replicator protos"));
 					// Run RecompileGameCode in game thread, the RecompileGameCode will use FNotificationInfo which can only be used in game thread
 					AsyncTask(ENamedThreads::GameThread, [this]()
 					{
 						RecompileGameCode();
+					});
+				}
+				else
+				{
+					// Only when the dialog window is opened in the game line, the dialog window will be a ue4 editor style window
+					AsyncTask(ENamedThreads::GameThread, [this]()
+					{
+						FMessageDialog::Open(EAppMsgType::OkCancel, FText::FromString(TEXT("Please close the editor and recompile the game code to make the changes take effect.")));
 					});
 				}
 

@@ -41,6 +41,10 @@ private:
 	void StopServersAction();
 	void LaunchChanneldAndServersAction();
 	void LaunchServerGroup(const FServerGroup& ServerGroup);
+
+	static bool IsCompatibleRecompilationEnabled();
+	static void ToggleCompatibleRecompilationAction();
+
 	void GenerateReplicationAction();
 	void OpenEditorSettingsAction();
 

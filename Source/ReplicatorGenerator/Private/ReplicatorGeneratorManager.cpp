@@ -67,7 +67,7 @@ bool FReplicatorGeneratorManager::HeaderFilesCanBeFound(const UClass* TargetClas
 	return !TargetHeadFilePath.IsEmpty();
 }
 
-bool FReplicatorGeneratorManager::GenerateReplication(const FString GoPackageImportPathPrefix)
+bool FReplicatorGeneratorManager::GenerateReplication(const FString GoPackageImportPathPrefix, bool CompatibleRecompilation)
 {
 	TArray<FChannelDataInfo> ChannelDataInfos;
 
@@ -93,6 +93,7 @@ bool FReplicatorGeneratorManager::GenerateReplication(const FString GoPackageImp
 	CodeGenerator->Generate(
 		ChannelDataInfos
 		, ProtoPackageName
+		, CompatibleRecompilation ? ChanneldReplicatorGeneratorUtils::GetHashString(FDateTime::Now().ToString()) : TEXT("")
 		, GoPackageImportPath
 		, ReplicatorCodeBundle
 	);

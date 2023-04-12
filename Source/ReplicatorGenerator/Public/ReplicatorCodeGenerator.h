@@ -29,11 +29,12 @@ struct FChannelDataCode
 {
 	EChanneldChannelType ChannelType;
 	FString ChannelDataMsgName;
-	
+
 	FString ProcessorHeadFileName;
 	FString ProcessorHeadCode;
 
 	FString ProtoFileName;
+	FString ProtoBaseFileName;
 	FString ProtoDefsFile;
 
 	FString IncludeProcessorCode;
@@ -63,7 +64,6 @@ struct FGeneratedCodeBundle
 	FString ChannelDataRegistration_GoCode;
 	FString ChannelDataMerge_GoCode;
 };
-
 
 struct FChannelDataInfo
 {
@@ -101,7 +101,6 @@ struct FChannelDataInfo
 	}
 };
 
-
 class REPLICATORGENERATOR_API FReplicatorCodeGenerator
 {
 public:
@@ -124,14 +123,17 @@ public:
 	/**
 	 * Generate replicator codes for the specified actors.
 	 *
+	 * @param ChannelDataInfos Actor infos to generate replicator for.
 	 * @param ProtoPackageName All generated proto files will use this package name.
-	 * @param GoPackageImportPath Be used to set 'option go_package='
+	 * @param ProtoMessageSuffix The suffix of the generated proto message name.
+	 * @param GoPackageImportPath Be used to set 'option go_package='.
 	 * @param ReplicationCodeBundle The generated replicator codes (.h, .cpp, .proto) .
 	 * @return true on success, false otherwise.
 	 */
 	bool Generate(
 		const TArray<FChannelDataInfo>& ChannelDataInfos,
 		const FString& ProtoPackageName,
+		const FString& ProtoMessageSuffix,
 		const FString& GoPackageImportPath,
 		FGeneratedCodeBundle& ReplicationCodeBundle
 	);
@@ -161,6 +163,7 @@ protected:
 		const FChannelDataInfo& ChannelDataInfo,
 		const FString& GoPackageImportPath,
 		const FString& ProtoPackageName,
+		const FString& ProtoMessageSuffix,
 		FChannelDataCode& GeneratedResult,
 		FString& ResultMessage
 	);
@@ -207,6 +210,7 @@ protected:
 		const UClass* TargetActorClass,
 		const FChannelDataStateSchema& ChannelDataStateSchema,
 		const FString& ProtoPackageName,
+		const FString& ProtoMessageSuffix,
 		const FString& GoPackageImportPath,
 		bool bInitPropertiesAndRPCs = true
 	);

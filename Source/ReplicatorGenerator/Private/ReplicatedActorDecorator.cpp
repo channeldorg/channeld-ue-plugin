@@ -10,12 +10,14 @@
 FReplicatedActorDecorator::FReplicatedActorDecorator(
 	const UClass* TargetActorClass
 	, const TFunction<void(FString&, bool)>& SetCompilableName
-	, FString InProtoPackageName
-	, FString InGoPackageImportPath
+	, const FString& InProtoPackageName
+	, const FString& InProtoStateMessageTypeSuffix
+	, const FString& InGoPackageImportPath
 	, bool IsSingletonInChannelData
 	, bool IsSkipGenChannelDataState
 ) : TargetClass(TargetActorClass)
     , ProtoPackageName(InProtoPackageName)
+    , ProtoStateMessageTypeSuffix(InProtoStateMessageTypeSuffix)
     , GoPackageImportPath(InGoPackageImportPath)
     , bSingletonInChannelData(IsSingletonInChannelData)
     , bSkipGenChannelDataState(IsSkipGenChannelDataState)
@@ -238,15 +240,26 @@ FString FReplicatedActorDecorator::GetProtoNamespace()
 	return GetProtoPackageName();
 }
 
+FString FReplicatedActorDecorator::GetProtoDefinitionsBaseFileName()
+{
+	// Using lower case state name as the proto file name.
+	return GetProtoStateMessageType().ToLower();
+}
+
 FString FReplicatedActorDecorator::GetProtoDefinitionsFileName()
 {
-	// Using lower case actor name as the proto file name.
-	return GetActorName().ToLower() + CodeGen_ProtoFileExtension;
+	// Using lower case state name as the proto file name.
+	return GetProtoDefinitionsBaseFileName() + CodeGen_ProtoFileExtension;
 }
 
 FString FReplicatedActorDecorator::GetGoPackageImportPath()
 {
 	return GoPackageImportPath;
+}
+
+FString FReplicatedActorDecorator::GetProtoStateMessageTypeSuffix()
+{
+	return ProtoStateMessageTypeSuffix;
 }
 
 FString FReplicatedActorDecorator::GetProtoStateMessageType()
@@ -261,7 +274,11 @@ FString FReplicatedActorDecorator::GetProtoStateMessageType()
 	{
 		return TEXT("PlayerState");
 	}
-	return GetActorName() + TEXT("State");
+	if (IsChanneldUEBuiltinType())
+	{
+		return GetActorName() + TEXT("State");
+	}
+	return GetActorName() + TEXT("State_") + ProtoStateMessageTypeSuffix;
 }
 
 FString FReplicatedActorDecorator::GetProtoStateMessageTypeGo()
