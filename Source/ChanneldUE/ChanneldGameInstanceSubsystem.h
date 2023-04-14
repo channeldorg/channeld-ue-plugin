@@ -168,6 +168,15 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Entity")
 	void AddToHandoverGroup(AActor* JunctionEntity, const TArray<AActor*> EntitiesToAdd);
+	
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Entity")
+	void RemoveFromHandoverGroup(AActor* JunctionEntity, const TArray<AActor*> EntitiesToRemove);
+	
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Entity")
+	void AddToLockGroup(AActor* JunctionEntity, const TArray<AActor*> EntitiesToAdd);
+	
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Entity")
+	void RemoveFromLockGroup(AActor* JunctionEntity, const TArray<AActor*> EntitiesToRemove);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Net", Meta = (ToolTip = "Only run on server"))
 		void ServerBroadcast(int32 ChId, int32 ClientConnId, UProtoMessageObject* MessageObject, EChanneldBroadcastType BroadcastType);
