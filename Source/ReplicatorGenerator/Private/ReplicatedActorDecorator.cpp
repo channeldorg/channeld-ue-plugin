@@ -284,7 +284,23 @@ FString FReplicatedActorDecorator::GetProtoStateMessageType()
 FString FReplicatedActorDecorator::GetProtoStateMessageTypeGo()
 {
 	FString MessageTypeName = GetProtoStateMessageType();
-	MessageTypeName[0] = toupper(MessageTypeName[0]);
+	// The protoc generated Go code uses special rule. For example, the proto message name 'BP_test_Actor2xxx' will be
+	// converted to 'BPTest_Actor2XXX' in Go code
+	for (int32 i = 0; i < MessageTypeName.Len(); ++i)
+	{
+		if (MessageTypeName[i] == '_')
+		{
+			if (MessageTypeName.IsValidIndex(i + 1) && FChar::IsLower(MessageTypeName[i + 1]))
+			{
+				MessageTypeName.RemoveAt(i, 1, false);
+				MessageTypeName[i] = FChar::ToUpper(MessageTypeName[i]);
+			}
+		}
+		else if (FChar::IsLower(MessageTypeName[i]) && (i == 0 || FChar::IsDigit(MessageTypeName[i - 1])))
+		{
+			MessageTypeName[i] = FChar::ToUpper(MessageTypeName[i]);
+		}
+	}
 	return MessageTypeName;
 }
 
@@ -418,14 +434,28 @@ void FReplicatedActorDecorator::SetConstClassPathFNameVarName(const FString& Var
 FString FReplicatedActorDecorator::GetDefinition_ChannelDataFieldNameProto()
 {
 	FString ProtoStateMessageType = GetProtoStateMessageType();
-	ProtoStateMessageType[0] = tolower(ProtoStateMessageType[0]);
+	ProtoStateMessageType[0] = FChar::ToLower(ProtoStateMessageType[0]);
 	return ProtoStateMessageType + (IsSingletonInChannelData() ? TEXT("") : TEXT("s"));
 }
 
 FString FReplicatedActorDecorator::GetDefinition_ChannelDataFieldNameGo()
 {
 	FString ChannelDataFieldName = GetDefinition_ChannelDataFieldNameProto();
-	ChannelDataFieldName[0] = toupper(ChannelDataFieldName[0]);
+	for (int32 i = 0; i < ChannelDataFieldName.Len(); ++i)
+	{
+		if (ChannelDataFieldName[i] == '_')
+		{
+			if (ChannelDataFieldName.IsValidIndex(i + 1) && FChar::IsLower(ChannelDataFieldName[i + 1]))
+			{
+				ChannelDataFieldName.RemoveAt(i, 1, false);
+				ChannelDataFieldName[i] = FChar::ToUpper(ChannelDataFieldName[i]);
+			}
+		}
+		else if (FChar::IsLower(ChannelDataFieldName[i]) && (i == 0 || FChar::IsDigit(ChannelDataFieldName[i - 1])))
+		{
+			ChannelDataFieldName[i] = FChar::ToUpper(ChannelDataFieldName[i]);
+		}
+	}
 	return ChannelDataFieldName;
 }
 
