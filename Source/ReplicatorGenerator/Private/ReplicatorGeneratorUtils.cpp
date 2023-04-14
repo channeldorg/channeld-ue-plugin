@@ -100,9 +100,18 @@ namespace ChanneldReplicatorGeneratorUtils
 
 	bool HasRepComponent(const UClass* TargetClass)
 	{
-		if (!TargetClass->IsChildOf(AActor::StaticClass()))
+		const UObject* TargetObj = TargetClass->GetDefaultObject();
+		const AActor* TargetActor = Cast<AActor>(TargetObj);
+		if (TargetActor == nullptr)
 		{
 			return false;
+		}
+		for (const UActorComponent* Comp : TargetActor->GetComponents())
+		{
+			if (Comp->GetClass()->IsChildOf(UChanneldReplicationComponent::StaticClass()))
+			{
+				return true;
+			}
 		}
 		for (TFieldIterator<FProperty> It(TargetClass, EFieldIteratorFlags::ExcludeSuper); It; ++It)
 		{
@@ -152,18 +161,15 @@ namespace ChanneldReplicatorGeneratorUtils
 	TArray<const UClass*> GetComponentClasses(const UClass* TargetClass)
 	{
 		TSet<const UClass*> ComponentClasses;
-		for (TFieldIterator<FProperty> It(TargetClass, EFieldIteratorFlags::ExcludeSuper); It; ++It)
+		const UObject* TargetObj = TargetClass->GetDefaultObject();
+		const AActor* TargetActor = Cast<AActor>(TargetObj);
+		if (TargetActor == nullptr)
 		{
-			FProperty* Property = *It;
-
-			if (Property->IsA<FObjectProperty>())
-			{
-				const FObjectProperty* ObjProperty = CastFieldChecked<FObjectProperty>(Property);
-				if (ObjProperty->PropertyClass->IsChildOf(UActorComponent::StaticClass()))
-				{
-					ComponentClasses.Add(ObjProperty->PropertyClass);
-				}
-			}
+			return ComponentClasses.Array();
+		}
+		for (const UActorComponent* Comp : TargetActor->GetComponents())
+		{
+			ComponentClasses.Add(Comp->GetClass());
 		}
 		if (const UBlueprintGeneratedClass* TargetBPClass = Cast<UBlueprintGeneratedClass>(TargetClass))
 		{
