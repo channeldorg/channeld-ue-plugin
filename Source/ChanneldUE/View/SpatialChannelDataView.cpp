@@ -432,26 +432,23 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 
 	// ===== Pass 3: Applies the channel data update to the newly spawned objects =====
 	// The references between the Pawn, PlayerController, and PlayerState should be set properly in this step.
-	for (auto HandoverActor : CrossServerActors)
+	for (auto HandoverObj : HandoverObjs)
 	{
-		auto NetId = GetNetId(HandoverActor);
+		auto NetId = GetNetId(HandoverObj);
 		auto Pair = HandoverData.entities().find(NetId.Value);
 		// for (auto& Pair : HandoverData.entities())
-		if (Pair != HandoverData.entities().end())
+		if (Pair != HandoverData.entities().end() && Pair->second.has_entitydata())
 		{
-			if (Pair->second.has_entitydata())
+			if (AActor* HandoverActor = Cast<AActor>(HandoverObj))
 			{
 				// Set the role to SimulatedProxy so the actor can be updated by the handover channel data later.
 				HandoverActor->SetRole(ROLE_SimulatedProxy);
 				UE_LOG(LogChanneld, Verbose, TEXT("Set %s to ROLE_SimulatedProxy for ChannelDataUpdate"), *HandoverActor->GetName());
-						
+				
 				channeldpb::ChannelDataUpdateMessage UpdateMsg;
 				UpdateMsg.mutable_data()->CopyFrom(Pair->second.entitydata());
 				UE_LOG(LogChanneld, Verbose, TEXT("Applying handover channel data to entity %d"), Pair->first);
 				HandleChannelDataUpdate(_, Pair->first, &UpdateMsg);
-				
-				HandoverActor->SetRole(ENetRole::ROLE_Authority);
-				UE_LOG(LogChanneld, Verbose, TEXT("Set %s to back to ROLE_Authority after ChannelDataUpdate"), *HandoverActor->GetName());
 			}
 		}
 	}
@@ -461,6 +458,9 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	// Pass 1: set up the cross-server PlayerControllers
 	for (auto HandoverActor : CrossServerActors)
 	{
+		HandoverActor->SetRole(ENetRole::ROLE_Authority);
+		UE_LOG(LogChanneld, Verbose, TEXT("Set %s to back to ROLE_Authority after ChannelDataUpdate"), *HandoverActor->GetName());
+		
 		if (auto HandoverPC = Cast<APlayerController>(HandoverActor))
 		{
 			// ensureAlwaysMsgf(HandoverPC->GetPawn() != nullptr, TEXT("PlayerController doesn't have Pawn set properly"));
@@ -1355,12 +1355,18 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 	{
 		SpatialChId = GetChanneldSubsystem()->LowLevelSendToChannelId.Get();
 	}
-
+	
+	bool bWellKnown = false;
+	if (const AActor* Actor = Cast<AActor>(Obj))
+	{
+		bWellKnown = Actor->bAlwaysRelevant;
+	}
+	
 	channeldpb::ChannelSubscriptionOptions SubOptions;
 	SubOptions.set_skipselfupdatefanout(true);
 
-	Connection->CreateEntityChannel(SpatialChId, Obj, NetId.Value, TEXT(""), &SubOptions, GetEntityData(Obj)/*nullptr*/, nullptr,
-		[this, NetId, Obj, OwningConnId, SpatialChId, NetDriver](const channeldpb::CreateChannelResultMessage* _)
+	Connection->CreateEntityChannel(SpatialChId, Obj, NetId.Value, bWellKnown ? TEXT("well-known") : TEXT(""), &SubOptions, GetEntityData(Obj)/*nullptr*/, nullptr,
+		[this, NetId, Obj, bWellKnown, OwningConnId, SpatialChId, NetDriver](const channeldpb::CreateChannelResultMessage* _)
 		{
 			AddObjectProvider(NetId.Value, Obj);
 	
@@ -1371,7 +1377,6 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 			// Clear the export map and ack state so everytime we can get a full export.
 			ResetNetConnForSpawn();
 	
-			bool bWellKnown = false;
 			if (const AActor* Actor = Cast<AActor>(Obj))
 			{
 				// Broadcast the EntityChannelCreated event to the actor so it can do some initialization.
@@ -1379,8 +1384,6 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 				{
 					RepComp->OnEntityChannelCreated.Broadcast(NetId.Value);
 				}
-				
-				bWellKnown = Actor->bAlwaysRelevant;
 				
 				SpawnMsg.set_localrole(Actor->GetRemoteRole());
 				if (OwningConnId > 0)
