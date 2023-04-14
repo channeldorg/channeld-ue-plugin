@@ -391,6 +391,39 @@ void UChanneldGameInstanceSubsystem::AddToHandoverGroup(AActor* JunctionEntity, 
 	ConnectionInstance->AddToEntityGroup(EntityChId, channeldpb::HANDOVER, EntityIds);
 }
 
+void UChanneldGameInstanceSubsystem::RemoveFromHandoverGroup(AActor* JunctionEntity, const TArray<AActor*> EntitiesToRemove)
+{
+	Channeld::EntityId EntityChId = GetEntityId(JunctionEntity);
+	TArray<Channeld::EntityId> EntityIds;
+	for (auto Entity : EntitiesToRemove)
+	{
+		EntityIds.Add(GetEntityId(Entity));
+	}
+	ConnectionInstance->RemoveFromEntityGroup(EntityChId, channeldpb::HANDOVER, EntityIds);
+}
+
+void UChanneldGameInstanceSubsystem::AddToLockGroup(AActor* JunctionEntity, const TArray<AActor*> EntitiesToAdd)
+{
+	Channeld::EntityId EntityChId = GetEntityId(JunctionEntity);
+	TArray<Channeld::EntityId> EntityIds;
+	for (auto Entity : EntitiesToAdd)
+	{
+		EntityIds.Add(GetEntityId(Entity));
+	}
+	ConnectionInstance->AddToEntityGroup(EntityChId, channeldpb::LOCK, EntityIds);
+}
+
+void UChanneldGameInstanceSubsystem::RemoveFromLockGroup(AActor* JunctionEntity, const TArray<AActor*> EntitiesToRemove)
+{
+	Channeld::EntityId EntityChId = GetEntityId(JunctionEntity);
+	TArray<Channeld::EntityId> EntityIds;
+	for (auto Entity : EntitiesToRemove)
+	{
+		EntityIds.Add(GetEntityId(Entity));
+	}
+	ConnectionInstance->RemoveFromEntityGroup(EntityChId, channeldpb::LOCK, EntityIds);
+}
+
 void UChanneldGameInstanceSubsystem::ServerBroadcast(int32 ChId, int32 ClientConnId, UProtoMessageObject* MessageObject,
                                                      EChanneldBroadcastType BroadcastType)
 {
