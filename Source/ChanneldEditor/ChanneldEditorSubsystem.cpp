@@ -143,7 +143,7 @@ void UChanneldEditorSubsystem::GenerateReplicationAction()
 		return;
 	}
 	bGeneratingReplication = true;
-	AsyncTask(ENamedThreads::AnyThread, [this]()
+	AsyncTask(ENamedThreads::GameThread, [this]()
 	{
 		GenRepNotify->SetMissionNotifyText(
 			FText::FromString(TEXT("Cooking And Generating Replication Code...")),
@@ -245,7 +245,7 @@ void UChanneldEditorSubsystem::GenRepProtoCppCode(const TArray<FString>& ProtoFi
 		return;
 	}
 
-	UE_LOG(LogChanneldEditor, Display, TEXT("\"%s\" %s"), *ProtocPath, *Args);
+	UE_LOG(LogChanneldEditor, Display, TEXT("Generate Cpp Protobuf Code:\n\"%s\" %s"), *ProtocPath, *Args);
 
 	GenProtoCppCodeWorkThread = MakeShareable(new FChanneldProcWorkerThread(TEXT("GenerateReplicatorProtoThread"), ProtocPath, Args));
 	GenProtoCppCodeWorkThread->ProcOutputMsgDelegate.BindUObject(GenRepNotify, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
@@ -345,6 +345,8 @@ void UChanneldEditorSubsystem::GenRepProtoGoCode(const TArray<FString>& ProtoFil
 		FailedToGenRepCode();
 		return;
 	}
+
+	UE_LOG(LogChanneldEditor, Display, TEXT("Generate GO Protobuf Code:\n\"%s\" %s"), *ProtocPath, *Args);
 
 	GenProtoGoCodeWorkThread = MakeShareable(new FChanneldProcWorkerThread(TEXT("GenerateReplicatorGoProtoThread"), ProtocPath, Args));
 	GenProtoGoCodeWorkThread->ProcOutputMsgDelegate.BindUObject(GenRepNotify, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
