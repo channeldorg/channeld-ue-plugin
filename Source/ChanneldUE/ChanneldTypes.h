@@ -297,11 +297,11 @@ struct CHANNELDUE_API FClientInterestSettingsPreset
 	UPROPERTY(EditAnywhere, Category="Box AOI")
 	FVector Extent = FVector(15000.0f, 15000.0f, 15000.0f);
 
-	// Used by SphereAOI
-	UPROPERTY(EditAnywhere, Category="Sphere and Cone AOI")
+	// Used by SphereAOI and ConeAOI
+	UPROPERTY(EditAnywhere, Category="Sphere AOI")
 	float Radius = 15000.0f;
 
-	// Used by SphereAOI and ConeAOI
+	// Used by ConeAOI
 	UPROPERTY(EditAnywhere, Category="Cone AOI")
 	float Angle = 120.0f;
 };
