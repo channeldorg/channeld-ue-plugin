@@ -160,13 +160,17 @@ namespace ChanneldReplicatorGeneratorUtils
 
 	TArray<const UClass*> GetComponentClasses(const UClass* TargetClass)
 	{
-		TSet<const UClass*> ComponentClasses;
+		if (TargetClass == AActor::StaticClass())
+		{
+			return {USceneComponent::StaticClass()};
+		}
 		const UObject* TargetObj = TargetClass->GetDefaultObject();
 		const AActor* TargetActor = Cast<AActor>(TargetObj);
 		if (TargetActor == nullptr)
 		{
-			return ComponentClasses.Array();
+			return {};
 		}
+		TSet<const UClass*> ComponentClasses;
 		for (const UActorComponent* Comp : TargetActor->GetComponents())
 		{
 			ComponentClasses.Add(Comp->GetClass());
@@ -331,7 +335,11 @@ namespace ChanneldReplicatorGeneratorUtils
 
 		return FPaths::Combine(
 			FPaths::ConvertRelativePathToFull(FPaths::EngineDir()),
-			TEXT("Binaries"), PlatformName, FString::Printf(TEXT("%s%s-Cmd.exe"), *Binary, bIsDevelopment ? TEXT("") : *FString::Printf(TEXT("-%s-%s"), *PlatformName, *ConfigurationName)));
+			TEXT("Binaries"), PlatformName,
+			FString::Printf(TEXT("%s%s-Cmd.exe"), *Binary, bIsDevelopment
+				                                               ? TEXT("")
+				                                               : *FString::Printf(
+					                                               TEXT("-%s-%s"), *PlatformName, *ConfigurationName)));
 #endif
 
 #if PLATFORM_MAC
