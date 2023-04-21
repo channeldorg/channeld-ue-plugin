@@ -6,6 +6,7 @@
 #include "ChanneldEditorStyle.h"
 #include "ChanneldMissionNotiProxy.h"
 #include "AddCompToBPSubsystem.h"
+#include "ChanneldEditorUtils.h"
 #include "ChanneldSettings.h"
 #include "ChanneldSettingsDetails.h"
 #include "LevelEditor.h"
@@ -432,17 +433,36 @@ void FChanneldEditorModule::ToggleChanneldAndServersAction()
 
 void FChanneldEditorModule::LaunchChanneldAndServersAction()
 {
-	LaunchChanneldAction([this](EChanneldLaunchResult Result)
+	auto Settings = GetMutableDefault<UChanneldSettings>();
+	bool bChanneldPortForServerInUse = ChanneldEditorUtils::IsPortInUse(Settings->ChanneldPortForServer);
+	if(bChanneldPortForServerInUse)
 	{
-		if (Result < EChanneldLaunchResult::Failed)
+		const FText Title = LOCTEXT("ChanneldPortInUseTitle", "Channeld Port In Use");
+		const FText Message = FText::FromString(
+			FString::Printf(
+				TEXT("Channeld Port For Server (%d) are both in use, do you want to skip launching channeld and launch servers directly?"),
+				Settings->ChanneldPortForServer
+			)
+		);
+		if(FMessageDialog::Open(EAppMsgType::YesNo, Message, &Title) == EAppReturnType::Yes)
 		{
-			AsyncTask(ENamedThreads::GameThread, [this]()
-			{
-				LaunchServersAction();
-			});
+			LaunchServersAction();
 		}
-	});
-}
+	}
+	else
+	{
+		LaunchChanneldAction([this](EChanneldLaunchResult Result)
+		{
+			if (Result < EChanneldLaunchResult::Failed)
+			{
+				AsyncTask(ENamedThreads::GameThread, [this]()
+				{
+					LaunchServersAction();
+				});
+			}
+		});
+}	}
+
 
 void FChanneldEditorModule::GenerateReplicationAction()
 {
