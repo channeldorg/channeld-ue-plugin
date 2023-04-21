@@ -40,7 +40,9 @@ void FChanneldEditorModule::StartupModule()
 	PluginCommands = MakeShareable(new FUICommandList);
 	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().PluginCommand,
-		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::LaunchChanneldAndServersAction));
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::ToggleChanneldAndServersAction),
+		FCanExecuteAction::CreateLambda([this]() { return !GetTimerManager()->IsTimerActive(ToggleChanneldAndServersThrottle); })
+	);
 	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().ToggleNetworkingCommand,
 		FExecuteAction::CreateStatic(&FChanneldEditorModule::ToggleNetworkingAction),
@@ -305,6 +307,11 @@ void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchR
 
 void FChanneldEditorModule::StopChanneldAction()
 {
+	if(BuildChanneldWorkThread.IsValid() && BuildChanneldWorkThread->IsProcRunning())
+	{
+		BuildChanneldWorkThread->Cancel();
+		UE_LOG(LogChanneldEditor, Log, TEXT("Stopped building channeld"));
+	}
 	if (FPlatformProcess::IsProcRunning(ChanneldProcHandle))
 	{
 		FPlatformProcess::TerminateProc(ChanneldProcHandle, true);
@@ -391,6 +398,36 @@ void FChanneldEditorModule::StopServersAction()
 		FPlatformProcess::TerminateProc(ServerProc, true);
 	}
 	ServerProcHandles.Reset();
+}
+
+void FChanneldEditorModule::ToggleChanneldAndServersAction()
+{
+	FTimerManager* TimerManager = GetTimerManager();
+	if(TimerManager->IsTimerActive(ToggleChanneldAndServersThrottle))
+	{
+		return;
+	}
+	bool bServerRunning = false;
+	for (FProcHandle& ServerProc : ServerProcHandles)
+	{
+		if(FPlatformProcess::IsProcRunning(ServerProc))
+		{
+			bServerRunning = true;
+			break;
+		}
+	}
+	bool bChanneldRunning = FPlatformProcess::IsProcRunning(ChanneldProcHandle) || (BuildChanneldWorkThread.IsValid() && BuildChanneldWorkThread->IsProcRunning());
+	if(bServerRunning || bChanneldRunning)
+	{
+		StopChanneldAction();
+		StopServersAction();
+	}
+	else
+	{
+		LaunchChanneldAndServersAction();
+	}
+	TimerManager->ClearTimer(ToggleChanneldAndServersThrottle);
+	TimerManager->SetTimer(ToggleChanneldAndServersThrottle, 1.0f, false);
 }
 
 void FChanneldEditorModule::LaunchChanneldAndServersAction()

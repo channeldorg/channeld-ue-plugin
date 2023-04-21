@@ -40,6 +40,7 @@ private:
 	FTimerManager* GetTimerManager();
 	void LaunchServersAction();
 	void StopServersAction();
+	void ToggleChanneldAndServersAction();
 	void LaunchChanneldAndServersAction();
 
 	void GenerateReplicationAction();
@@ -64,6 +65,14 @@ private:
 	void OpenEditorSettingsAction();
 	
 	void LaunchServerGroup(const FServerGroup& ServerGroup);
+
+	// When building channeld "Toggle Channeld And Servers", the build channeld process will end.
+	// Quickly click "Toggle Channeld And Servers" again (interval <0.2s) to execute LaunchChanneldAction.
+	// At this time, the build channeld process has ended, and build channeld is required,
+	// so BuildChanneldWorkThread will be reassigned. At this time, the "Run()" is still executing in last BuildChanneldWorkThread,
+	// and an exception will be thrown after the "Sleep(0.2)" is over because the last BuildChanneldWorkThread has been destructed.
+	// So we need to throttle the "ToggleChanneldAndServersAction" to avoid this problem.
+	FTimerHandle ToggleChanneldAndServersThrottle;
 
 	FProcHandle ChanneldProcHandle;
 	
