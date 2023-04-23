@@ -6,6 +6,7 @@ FArrayPropertyDecorator::FArrayPropertyDecorator(FProperty* InProperty, IPropert
 	: FPropertyDecorator(InProperty, InOwner)
 {
 	check(InProperty != nullptr)
+	SetForceNotDirectlyAccessible(true);
 	FPropertyDecoratorFactory& Factory = FPropertyDecoratorFactory::Get();
 	InnerProperty = Factory.GetPropertyDecorator(CastFieldChecked<FArrayProperty>(InProperty)->Inner, this);
 	ProtoFieldRule = TEXT("repeated");

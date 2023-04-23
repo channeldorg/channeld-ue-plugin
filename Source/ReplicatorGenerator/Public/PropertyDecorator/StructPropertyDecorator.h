@@ -91,10 +91,6 @@ public:
 	
 	virtual void PostInit() override;
 	
-	virtual bool IsExternallyAccessible() override;
-
-	virtual bool IsDeclaredInCPP() override;
-
 	virtual FString GetCompilableCPPType() override;
 
 	virtual FString GetProtoFieldType() override;
