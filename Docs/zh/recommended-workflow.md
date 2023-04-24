@@ -114,12 +114,10 @@ ChannelUE提供了热编译兼容模式，该模式下每次生成同步代码�
 
 3. 点击`Launch Servers`开启专用服务器
 
-#### 在编辑器中进行测试
-等待专用服务器和网关启动完成后，可以在编辑器中进行测试，步骤如下：
-1. 根据[官方文档](https://docs.unrealengine.com/4.27/zh-CN/InteractiveExperiences/Networking/Actors/)的流程打开PIE设置
-2. 将`Multiplayer Options`中的`Run Under One Process`设置为false
-    ![](../images/disable_run_under_one_process.png)
-3. 点击`Play`按钮开启PIE
+#### 测试多个客户端
+如果要同时开启多个客户端，需要对默认的编辑器设置做一些修改。打开主菜单`编辑 -> 编辑器偏好设置 -> 关卡编辑器 -> 播放`，在`Multiplayer options`中，**取消**`单进程下的运行`的勾选：
+
+![](../images/settings_run_under_one_process.png)
 
 #### 关闭专用服务器和网关
 测试完成后，可以通过插件的二级菜单关闭专用服务器和网关，依次点击`Stop Servers`和`Stop Channeld`即可关闭专用服务器和网关。

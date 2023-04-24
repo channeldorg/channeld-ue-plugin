@@ -146,7 +146,7 @@ void UChanneldEditorSubsystem::GenerateReplicationAction()
 	AsyncTask(ENamedThreads::GameThread, [this]()
 	{
 		GenRepNotify->SetMissionNotifyText(
-			FText::FromString(TEXT("Cooking And Generating Replication Code...")),
+			FText::FromString(TEXT("Generating Replication Code...")),
 			LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),
 			FText::FromString(TEXT("Successfully Generated Replication Code.")),
 			FText::FromString(TEXT("Failed To Generate Replication Code!"))
