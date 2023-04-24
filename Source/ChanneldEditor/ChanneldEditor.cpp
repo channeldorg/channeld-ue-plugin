@@ -187,11 +187,11 @@ void FChanneldEditorModule::LaunchChanneldAction()
 	LaunchChanneldAction(nullptr);
 }
 
-void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchResult Result)> PostChanneldLaunched /* nullptr*/)
+void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(bool IsLaunched)> PostChanneldLaunched /* nullptr*/)
 {
 	BuildChanneldNotify->SetMissionNotifyText(
 		FText::FromString(TEXT("Building Channeld Gateway...")),
-		LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),
+		LOCTEXT("RunningNotificationCancelButton", "Cancel"),
 		FText::FromString(TEXT("Launch Channeld Gateway")),
 		FText::FromString(TEXT("Failed To Build Channeld Gateway!"))
 	);
@@ -200,14 +200,14 @@ void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchR
 	if (FPlatformProcess::IsProcRunning(ChanneldProcHandle))
 	{
 		UE_LOG(LogChanneldEditor, Warning, TEXT("Channeld is already running"));
-		PostChanneldLaunched(EChanneldLaunchResult::CLR_AlreadyLaunched);
+		PostChanneldLaunched(true);
 		BuildChanneldNotify->SpawnMissionSucceedNotification(nullptr);
 		return;
 	}
 	if (BuildChanneldWorkThread.IsValid() && BuildChanneldWorkThread->IsProcRunning())
 	{
 		UE_LOG(LogChanneldEditor, Warning, TEXT("Channeld is already building"));
-		PostChanneldLaunched(EChanneldLaunchResult::CLR_Building);
+		PostChanneldLaunched(false);
 		return;
 	}
 	FString ChanneldPath = FPlatformMisc::GetEnvironmentVariable(TEXT("CHANNELD_PATH"));
@@ -288,13 +288,13 @@ void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(EChanneldLaunchR
 					&Title
 				);
 				if (PostChanneldLaunched != nullptr)
-					PostChanneldLaunched(EChanneldLaunchResult::CLR_Failed);
+					PostChanneldLaunched(false);
 			});
 		}
 		else
 		{
 			if (PostChanneldLaunched != nullptr)
-				PostChanneldLaunched(EChanneldLaunchResult::CLR_Launched);
+				PostChanneldLaunched(true);
 		}
 	});
 
@@ -413,9 +413,9 @@ void FChanneldEditorModule::StopServersAction()
 
 void FChanneldEditorModule::LaunchChanneldAndServersAction()
 {
-	LaunchChanneldAction([this](EChanneldLaunchResult Result)
+	LaunchChanneldAction([this](bool IsLaunched)
 	{
-		if (Result < EChanneldLaunchResult::CLR_Failed)
+		if (IsLaunched)
 		{
 			AsyncTask(ENamedThreads::GameThread, [this]()
 			{

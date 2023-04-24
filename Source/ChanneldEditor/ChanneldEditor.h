@@ -13,14 +13,6 @@ class FMenuBuilder;
 class SWidget;
 class FUICommandList;
 
-enum EChanneldLaunchResult : uint8
-{
-	CLR_Launched,
-	CLR_AlreadyLaunched,
-	CLR_Building,
-	CLR_Failed,
-};
-
 class FChanneldEditorModule : public IModuleInterface
 {
 public:
@@ -34,7 +26,7 @@ private:
 	static bool IsNetworkingEnabled();
 	static void ToggleNetworkingAction();
 	void LaunchChanneldAction();
-	void LaunchChanneldAction(TFunction<void(EChanneldLaunchResult Result)> PostChanneldLaunched = nullptr);
+	void LaunchChanneldAction(TFunction<void(bool IsLaunched)> PostChanneldLaunched = nullptr);
 	void StopChanneldAction();
 	FTimerManager* GetTimerManager();
 	void LaunchServersAction();
