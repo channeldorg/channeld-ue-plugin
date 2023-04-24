@@ -8,6 +8,24 @@
 			"stateOrder": 1,
 			"bSkip": false,
 			"bSingleton": true
+		},
+		{
+			"replicationClassPath": "/Script/Engine.Actor",
+			"stateOrder": 2,
+			"bSkip": false,
+			"bSingleton": false
+		},
+		{
+			"replicationClassPath": "/Script/Engine.SceneComponent",
+			"stateOrder": 3,
+			"bSkip": false,
+			"bSingleton": false
+		},
+		{
+			"replicationClassPath": "/Script/Engine.ActorComponent",
+			"stateOrder": 4,
+			"bSkip": false,
+			"bSingleton": false
 		}
 	]
 },
