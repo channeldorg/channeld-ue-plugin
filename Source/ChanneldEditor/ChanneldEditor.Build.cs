@@ -51,7 +51,10 @@ public class ChanneldEditor : ModuleRules
                 // ... add private dependencies that you statically link with here ...	
 			}
         );
-
+        if (Target.Version.MajorVersion == 5)
+        {
+            PrivateDependencyModuleNames.Add("ToolMenus"); 
+        }
 
         DynamicallyLoadedModuleNames.AddRange(
             new string[]

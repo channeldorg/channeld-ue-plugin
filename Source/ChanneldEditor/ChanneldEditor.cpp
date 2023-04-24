@@ -68,13 +68,26 @@ void FChanneldEditorModule::StartupModule()
 		FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::AddRepCompsToBPsAction));
 
+#if ENGINE_MAJOR_VERSION == 5
+	UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.User");
+	FToolMenuSection& Section = ToolbarMenu->AddSection("ChanneldComboButton");
+	Section.AddEntry(FToolMenuEntry::InitComboButton(
+		"ChanneldComboButton",
+		FUIAction(),
+		FOnGetContent::CreateRaw(this,&FChanneldEditorModule::CreateMenuContent, PluginCommands),
+		LOCTEXT("LevelEditorToolbarChanneldButtonLabel", "Channeld"),
+		LOCTEXT("LevelEditorToolbarChanneldButtonTooltip", "Tools and utilities provided by ChanneldUE"),
+		FSlateIcon(FChanneldEditorStyle::GetStyleSetName(), "ChanneldEditor.PluginCommand")
+	));
+#else
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
 	TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender());
 	ToolbarExtender->AddToolBarExtension("Compile", EExtensionHook::After, PluginCommands,
-	                                     FToolBarExtensionDelegate::CreateRaw(this, &FChanneldEditorModule::AddToolbarButton));
-	LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
+										 FToolBarExtensionDelegate::CreateRaw(this, &FChanneldEditorModule::AddToolbarButton));
 
+	LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
+#endif
 	// Stop all services launched during the session 
 	FEditorDelegates::EditorModeIDExit.AddLambda([&](const FEditorModeID&)
 	{
@@ -126,6 +139,14 @@ void FChanneldEditorModule::ShutdownModule()
 
 void FChanneldEditorModule::AddToolbarButton(FToolBarBuilder& Builder)
 {
+#if ENGINE_MAJOR_VERSION >= 5 
+	UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.User");
+	FToolMenuSection& Section = ToolbarMenu->AddSection("ChanneldComboButton");
+	Section.AddEntry(FToolMenuEntry::InitComboButton(
+		"ChanneldComboButton",
+		FUIAction(),
+		FOnGetContent::CreateRaw(this,&FChanneldEditorModule::CreateMenuContent, PluginCommands)));
+#else
 	Builder.AddToolBarButton(FChanneldEditorCommands::Get().PluginCommand);
 
 	FUIAction TempAction;
@@ -136,6 +157,7 @@ void FChanneldEditorModule::AddToolbarButton(FToolBarBuilder& Builder)
 	                       TAttribute<FSlateIcon>(),
 	                       true
 	);
+#endif
 }
 
 TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUICommandList> Commands)
@@ -431,12 +453,19 @@ void FChanneldEditorModule::GenerateReplicationAction()
 			CommandletHelpers::BuildCommandletProcessArguments(
 				TEXT("CookAndGenRep"),
 				*FString::Printf(TEXT("\"%s\""), *FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())),
+#if ENGINE_MAJOR_VERSION >= 5 
+				*FString::Printf(TEXT(" -targetplatform=WindowsServer -AssetGatherAll=true -skipcompile -nop4 -cook -skipstage -utf8output -stdout -GoPackageImportPathPrefix=%s"), *GetMutableDefault<UChanneldEditorSettings>()->ChanneldGoPackageImportPathPrefix)
+#else
 				*FString::Printf(TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout -GoPackageImportPathPrefix=%s"), *GetMutableDefault<UChanneldEditorSettings>()->ChanneldGoPackageImportPathPrefix)
+#endif
 			)
 		)
 	);
 	GenRepWorkThread->ProcOutputMsgDelegate.BindUObject(GenRepNotify, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
 	GenRepWorkThread->ProcBeginDelegate.AddUObject(GenRepNotify, &UChanneldMissionNotiProxy::SpawnRunningMissionNotification);
+	GenRepWorkThread->ProcFailedDelegate.AddLambda([this](FChanneldProcWorkerThread* ProcWorkerThread){
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed Generate Code!!"));
+	});
 	GenRepWorkThread->ProcSucceedDelegate.AddLambda([this](FChanneldProcWorkerThread* ProcWorkerThread)
 	{
 		FReplicatorGeneratorManager& GeneratorManager = FReplicatorGeneratorManager::Get();

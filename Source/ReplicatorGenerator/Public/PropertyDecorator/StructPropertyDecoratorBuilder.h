@@ -18,6 +18,11 @@ public:
 
 	void ClearGlobalStructs();
 
+	virtual FString GetReferencerName() const override
+	{
+		return TEXT("FStructPropertyDecoratorBuilder");
+	}
+
 protected:
 	TMap<UScriptStruct*, TSharedPtr<FStructPropertyDecorator>> GlobalStructs;
 
