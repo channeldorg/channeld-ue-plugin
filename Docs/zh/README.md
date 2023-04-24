@@ -9,7 +9,7 @@
 ### [基本概念](basic-concepts.md)
 ### [配置ChanneldUE](settings.md)
 ### C++和蓝图API
-### 本地开发测试工作流
+### [本地开发测试工作流](recommended-workflow.md)
 ### 生成同步代码
 ## 进阶主题
 ### ChannelUE的网络同步实现
