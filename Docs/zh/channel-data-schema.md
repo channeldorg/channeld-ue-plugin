@@ -33,7 +33,7 @@
 
 >当从未更新过同步缓存，或项目中有任何资产发生了变化时，<img src="../images/refresh_rep_actor_cache_button_alarm.png" height = "20" alt="" />按钮左侧会有一个警告图标，用于提示需要更新同步缓存。但是可以按照自己的需求来决定是否需要更新同步缓存。
 
-等待一段时间，当Unreal Engine编辑器右下角提示`Successfully Updated Replication Cache`时，表示更新成功。
+等待一段时间，当Unreal Engine编辑器右下角提示`Successfully Updated Replication Actor Cache`时，表示更新成功。
 
 ![](../images/successfully_updated_rep_actor_cache.png)
 
@@ -52,7 +52,7 @@
 ### 新增频道数据状态
 当在项目中新增了一个同步Actor、ActorComponent时，并希望它能够在某个频道中进行同步时，需要在频道数据模型中新增一个频道数据状态。
 
-如同下图所示，在需要添加频道数据状态的频道数据模型项点击`Add`按钮，选中子菜单中的需要新增的频道数据状态，即可新增频道数据状态。
+如同下图所示，在需要添加频道数据状态的频道数据模型项点击`Add State`按钮，选中子菜单中的需要新增的频道数据状态，即可新增频道数据状态。
 
 ![](../images/add_channel_data_state.png)
 
