@@ -47,16 +47,16 @@
 
 <img height="200" src="../images/stop_servers_and_channeld.png"/>
 
-然后，点击插件工具栏中的`Editor Channel Data Schema`按钮，打开频道数据模型编辑器：
+然后，点击插件工具栏中的`Editor Channel Data Schema...`按钮，打开频道数据模型编辑器：
 
 <img height="220" src="../images/open_channel_data_schema_editor.png"/>
 
 在频道数据模型编辑器进行如下操作：
 
-<img height="400" src="../images/add_demo_channel_data_state.png"/>
+<img height="400" src="../images/add_global_demo_channel_data_state.png"/>
 
 1. 点击`Refresh...`按钮，等待刷新频道数据状态完成。首次刷新时要遍历项目中所有的代码和蓝图，所以可能较长，请耐心等待。
-2. 找到`Spatial`频道，点击`Add`按钮，在展开的菜单中依次点击`ThirdPersonPlayerController`和`BP_TestActor`的资源引用。
+2. 找到`Global`频道，点击`Add State`按钮，在展开的菜单中依次点击`ThirdPersonPlayerController`和`BP_TestActor`的资源引用。
 3. 点击`Generate...`按钮，等待生成频道数据模型完成。
 
 最后，代码生成后，会自动编译。编译成功，则整个生成步骤完毕。下面可以进入游戏看看效果了。

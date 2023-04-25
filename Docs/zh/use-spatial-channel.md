@@ -44,7 +44,19 @@
 
 <img height="300" src="../images/player_controller_connect.png"/>
 
-## 7.5.运行游戏并测试
+## 7.5.配置频道数据模型
+点击插件工具栏中的`Editor Channel Data Schema...`按钮，打开频道数据模型编辑器：
+
+<img height="220" src="../images/open_channel_data_schema_editor.png"/>
+
+在频道数据模型编辑器进行如下操作：
+
+<img height="400" src="../images/add_spatial_demo_channel_data_state.png"/>
+
+1. 找到`Spatial`频道，点击`Add State`按钮，在展开的菜单中依次点击`ThirdPersonPlayerController`和`BP_TestActor`的资源引用。
+2. 点击`Generate...`按钮，等待生成频道数据模型完成。
+
+## 7.6.运行游戏并测试
 重复步骤4，重启channeld服务和游戏服务器。可以观察到，3个UE服务器进程依次启动。其中2个空间服务器进程在启动成功后，会打印出创建空间频道成功的日志：
 
 ```log

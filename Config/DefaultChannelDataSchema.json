@@ -4,26 +4,56 @@
 	"channelTypeOrder": 1,
 	"stateSchemata": [
 		{
-			"replicationClassPath": "/Script/Engine.GameStateBase",
-			"stateOrder": 1,
-			"bSkip": false,
-			"bSingleton": true
-		},
-		{
 			"replicationClassPath": "/Script/Engine.Actor",
-			"stateOrder": 2,
+			"stateOrder": 1,
 			"bSkip": false,
 			"bSingleton": false
 		},
 		{
-			"replicationClassPath": "/Script/Engine.SceneComponent",
+			"replicationClassPath": "/Script/Engine.GameStateBase",
+			"stateOrder": 2,
+			"bSkip": false,
+			"bSingleton": true
+		},
+		{
+			"replicationClassPath": "/Script/Engine.Controller",
 			"stateOrder": 3,
 			"bSkip": false,
 			"bSingleton": false
 		},
 		{
-			"replicationClassPath": "/Script/Engine.ActorComponent",
+			"replicationClassPath": "/Script/Engine.Character",
 			"stateOrder": 4,
+			"bSkip": false,
+			"bSingleton": false
+		},
+		{
+			"replicationClassPath": "/Script/Engine.Pawn",
+			"stateOrder": 5,
+			"bSkip": false,
+			"bSingleton": false
+		},
+		{
+			"replicationClassPath": "/Script/Engine.PlayerController",
+			"stateOrder": 6,
+			"bSkip": false,
+			"bSingleton": false
+		},
+		{
+			"replicationClassPath": "/Script/Engine.PlayerState",
+			"stateOrder": 7,
+			"bSkip": false,
+			"bSingleton": false
+		},
+		{
+			"replicationClassPath": "/Script/Engine.ActorComponent",
+			"stateOrder": 8,
+			"bSkip": false,
+			"bSingleton": false
+		},
+		{
+			"replicationClassPath": "/Script/Engine.SceneComponent",
+			"stateOrder": 9,
 			"bSkip": false,
 			"bSingleton": false
 		}
@@ -53,31 +83,31 @@
 		},
 		{
 			"replicationClassPath": "/Script/Engine.Pawn",
-			"stateOrder": 5,
+			"stateOrder": 4,
 			"bSkip": false,
 			"bSingleton": false
 		},
 		{
 			"replicationClassPath": "/Script/Engine.PlayerController",
-			"stateOrder": 6,
+			"stateOrder": 5,
 			"bSkip": false,
 			"bSingleton": false
 		},
 		{
 			"replicationClassPath": "/Script/Engine.PlayerState",
-			"stateOrder": 7,
+			"stateOrder": 6,
 			"bSkip": false,
 			"bSingleton": false
 		},
 		{
 			"replicationClassPath": "/Script/Engine.ActorComponent",
-			"stateOrder": 8,
+			"stateOrder": 7,
 			"bSkip": false,
 			"bSingleton": false
 		},
 		{
 			"replicationClassPath": "/Script/Engine.SceneComponent",
-			"stateOrder": 9,
+			"stateOrder": 8,
 			"bSkip": false,
 			"bSingleton": false
 		}
@@ -107,31 +137,31 @@
 		},
 		{
 			"replicationClassPath": "/Script/Engine.Pawn",
-			"stateOrder": 5,
+			"stateOrder": 4,
 			"bSkip": false,
 			"bSingleton": false
 		},
 		{
 			"replicationClassPath": "/Script/Engine.PlayerController",
-			"stateOrder": 6,
+			"stateOrder": 5,
 			"bSkip": false,
 			"bSingleton": false
 		},
 		{
 			"replicationClassPath": "/Script/Engine.PlayerState",
-			"stateOrder": 7,
+			"stateOrder": 6,
 			"bSkip": false,
 			"bSingleton": false
 		},
 		{
 			"replicationClassPath": "/Script/Engine.ActorComponent",
-			"stateOrder": 8,
+			"stateOrder": 7,
 			"bSkip": false,
 			"bSingleton": false
 		},
 		{
 			"replicationClassPath": "/Script/Engine.SceneComponent",
-			"stateOrder": 9,
+			"stateOrder": 8,
 			"bSkip": false,
 			"bSingleton": false
 		}

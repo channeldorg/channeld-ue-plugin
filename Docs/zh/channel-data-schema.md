@@ -11,7 +11,7 @@
 
 ### 打开编辑器
 
-如下图所示，点击ChannelUE插件的`Editor Channel Data Schema` 按钮，打开频道数据模型编辑器。
+如下图所示，点击ChannelUE插件的`Editor Channel Data Schema...` 按钮，打开频道数据模型编辑器。
 
 ![](../images/open_channel_data_schema_editor.png)
 
