@@ -71,7 +71,7 @@
 
 ![](../images/delete_channel_data_state.png)
 
->如果被删除的频道数据状态的子类或者组件的使用者是该数据频道模型的状态，那么需要先删除其子类或组件的使用者吃能将其自己删除。
+>在删除某个状态前，需要先删除依赖它的状态，如子类或组件的状态。
 >* 下图所呈现的是想要删除GameStateBase的频道数据状态，但是由于GameStateBase的子类BP_RepGameState是该频道数据模型的状态，所以需要先删除BP_RepGameState才能将GameStateBase删除。
 >
 >![](../images/delete_channel_data_state_demo1.png)
