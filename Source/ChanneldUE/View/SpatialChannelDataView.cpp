@@ -611,6 +611,12 @@ bool USpatialChannelDataView::ClientDeleteObject(UObject* Obj)
 	UE_LOG(LogChanneld, Log, TEXT("Deleting object that is no longer in the client's interest area: %s"), *Obj->GetName());
 	if (auto Actor = Cast<AActor>(Obj))
 	{
+		// Skip well-known actors
+		if (Actor->bAlwaysRelevant)
+		{
+			return false;
+		}
+		
 		// AutonomousProxy actors (PlayerControllers, Pawn, PlayerStates, etc.) are always relevant to the client.
 		if (Actor->GetLocalRole() == ROLE_AutonomousProxy)
 		{
@@ -807,6 +813,7 @@ void USpatialChannelDataView::InitServer()
 			StartSpot->SetActorLocation(StartPos);
 		}
 		NewPlayer->StartSpot = StartSpot;
+		NewPlayer->SetInitialLocationAndRotation(StartPos, NewPlayer->GetControlRotation());
 		UE_LOG(LogChanneld, Log, TEXT("%s selected %s for client %d"), *PlayerStartLocator->GetName(), *StartPos.ToCompactString(), NetConn->GetConnId());
 	});
 	
