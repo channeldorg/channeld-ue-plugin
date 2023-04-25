@@ -117,7 +117,7 @@ EChanneldChannelType UChanneldGameInstanceSubsystem::GetChannelTypeByChId(int64 
 		return EChanneldChannelType::ECT_Unknown;
 	}
 
-	FSubscribedChannelInfo* SubscribedChannelInfo = ConnectionInstance->SubscribedChannels.Find(ChId);
+	FSubscribedChannelInfo* SubscribedChannelInfo = ConnectionInstance->SubscribedChannels.Find((Channeld::ChannelId)ChId);
 	return SubscribedChannelInfo != nullptr ? SubscribedChannelInfo->ChannelType : EChanneldChannelType::ECT_Unknown;
 }
 
@@ -143,7 +143,7 @@ bool UChanneldGameInstanceSubsystem::HasSubscribedToChannel(int64 ChId)
 {
 	if (ConnectionInstance)
 	{
-		return ConnectionInstance->SubscribedChannels.Contains(ChId);
+		return ConnectionInstance->SubscribedChannels.Contains((Channeld::ChannelId)ChId);
 	}
 	return false;
 }
@@ -152,7 +152,7 @@ bool UChanneldGameInstanceSubsystem::HasOwnedChannel(int64 ChId)
 {
 	if (ConnectionInstance)
 	{
-		return ConnectionInstance->OwnedChannels.Contains(ChId);
+		return ConnectionInstance->OwnedChannels.Contains((Channeld::ChannelId)ChId);
 	}
 	return false;
 }
