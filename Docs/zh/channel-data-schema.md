@@ -1,13 +1,13 @@
 # 频道数据模型
 ## 什么是频道数据模型
-频道数据模型定义了频道类型对应的频道数据的状态信息。channeld每次进行频道数据同步时，都会根据频道类型对应的频道数据模型进行同步。
-
-## 频道数据模型的结构
-每种频道类型对应频道数据模型由若干频道数据状态组成。频道数据状态是指同步Actor、ActorComponent的状态。一个频道数据状态在一个频道数据中可以是单例的，也可以多例的。
->通常GameState、worldSetting等在GamePlay开发过程中保持一个服务器仅一份实例单例的同步Actor时，该同步Actor的状态在频道数据模型为单例。
+频道数据模型定义了[频道](./basic-concepts.md#频道)对应的[频道数据状态](./basic-concepts.md#频道数据中的状态)。channeld每次进行频道数据同步时，都会根据频道对应的频道数据模型进行同步。
+>GameState、WorldSetting等同步Actor在一个虚拟世界中仅存在一个实例，其在频道数据模型中应该为单例。
 
 ## 频道数据模型编辑器
-频道数据模型的定义是用json文件描述的，但是不推荐您直接对json文件进行修改，而是使用更加便捷的编辑器进行编辑。
+频道数据模型的定义是用JSON格式描述的，但是不推荐直接对json文件进行修改，而是使用ChanneldUE内置的编辑器进行编辑。
+>频道数据模型的定义文件储存在：项目根目录下的`Config/ChanneldChannelDataSchema.json`
+>
+>频道数据模型的默认定义文件储存在：ChanneldUE插件根目录下的`Config/DefaultChannelDataSchema.json`
 
 ### 打开编辑器
 
@@ -19,21 +19,21 @@
 
 <img src="../images/default_channel_data_schema_editor.png" height = "600" alt="" />
 
->当您在新项目中第一次打开频道数据模型编辑器时，会自动创建默认的频道数据模型。
+>当在新项目中第一次打开频道数据模型编辑器时，会自动创建默认的频道数据模型。
 
 ### 频道数据模型的保存
-频道数据模型的编辑器会自动保存，当您修改频道数据模型时，会自动保存频道数据模型到项目根目录下的`Config/ChanneldChannelDataSchema.json`文件中。
+频道数据模型的编辑器会自动保存，当修改频道数据模型时，会自动保存频道数据模型到项目根目录下的`Config/ChanneldChannelDataSchema.json`文件中。
 
-### 更新同步Actor缓存
-当项目中新增或删除了同步Actor、ActorComponent时，需要更新同步Actor缓存，以便编辑器能够正确的显示频道数据状态的选项。
+### 更新同步缓存
+当项目中新增或删除了同步Actor、ActorComponent时，需要更新同步缓存，以便编辑器能够正确的显示频道数据状态的选项。
 
-如同下图所示，在频道数据编辑器上方点击`Refresh...`按钮，更新同步Actor缓存。
+如同下图所示，在频道数据编辑器上方点击`Refresh...`按钮，更新同步缓存。
 
 <img src="../images/refresh_rep_actor_cache.png" width = "600" alt="" />
 
->当您从未更新过同步Actor缓存，或项目中有任何资产发生了变化时，<img src="../images/refresh_rep_actor_cache_button_alarm.png" height = "20" alt="" />按钮左侧会有一个警告图标，用于提示您需要更新同步Actor缓存。但是您可以按照自己的需求来决定是否需要更新同步Actor缓存。
+>当从未更新过同步缓存，或项目中有任何资产发生了变化时，<img src="../images/refresh_rep_actor_cache_button_alarm.png" height = "20" alt="" />按钮左侧会有一个警告图标，用于提示需要更新同步缓存。但是可以按照自己的需求来决定是否需要更新同步缓存。
 
-等待一段时间，当Unreal Engine编辑器右下角提示`Successfully updated rep actor cache`时，表示更新成功。
+等待一段时间，当Unreal Engine编辑器右下角提示`Successfully Updated Replication Cache`时，表示更新成功。
 
 ![](../images/successfully_updated_rep_actor_cache.png)
 
@@ -50,7 +50,7 @@
 ![](../images/delete_channel_data_type.png)
 
 ### 新增频道数据状态
-当您在项目中新增了一个同步Actor、ActorComponent时，并希望它能够在某个频道中进行同步时，需要在频道数据模型中新增一个频道数据状态。
+当在项目中新增了一个同步Actor、ActorComponent时，并希望它能够在某个频道中进行同步时，需要在频道数据模型中新增一个频道数据状态。
 
 如同下图所示，在需要添加频道数据状态的频道数据模型项点击`Add`按钮，选中子菜单中的需要新增的频道数据状态，即可新增频道数据状态。
 

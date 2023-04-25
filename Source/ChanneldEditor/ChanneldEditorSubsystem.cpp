@@ -27,18 +27,18 @@ void UChanneldEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	GenRepNotify->AddToRoot();
 }
 
-void UChanneldEditorSubsystem::UpdateRepActorCacheAction(FPostRepActorCache PostUpdatedRepActorCache)
+void UChanneldEditorSubsystem::UpdateReplicationCacheAction(FPostRepActorCache PostUpdatedRepActorCache)
 {
 	UpdateRepActorCacheNotify->SetMissionNotifyText(
-		FText::FromString(TEXT("Cooking And Updating Replication Actor Cache...")),
+		FText::FromString(TEXT("Cooking And Updating Replication Cache...")),
 		LOCTEXT("RunningCookNotificationCancelButton", "Cancel"),
-		FText::FromString(TEXT("Successfully Updated Replication Actor Cache.")),
-		FText::FromString(TEXT("Failed To Update Replication Actor Cache!"))
+		FText::FromString(TEXT("Successfully Updated Replication Cache.")),
+		FText::FromString(TEXT("Failed To Update Replication Cache!"))
 	);
 	if (!bUpdatingRepActorCache)
 	{
 		UpdateRepActorCacheNotify->SpawnRunningMissionNotification(nullptr);
-		UpdateRepActorCache(
+		UpdateReplicationCache(
 			[this, PostUpdatedRepActorCache](EUpdateRepActorCacheResult Result)
 			{
 				AsyncTask(ENamedThreads::GameThread, [this, Result, PostUpdatedRepActorCache]()
@@ -63,11 +63,11 @@ void UChanneldEditorSubsystem::UpdateRepActorCacheAction(FPostRepActorCache Post
 	}
 }
 
-void UChanneldEditorSubsystem::UpdateRepActorCache(TFunction<void(EUpdateRepActorCacheResult Result)> PostUpdateRegActorCache, FMissionCanceled* CanceledDelegate)
+void UChanneldEditorSubsystem::UpdateReplicationCache(TFunction<void(EUpdateRepActorCacheResult Result)> PostUpdateRegActorCache, FMissionCanceled* CanceledDelegate)
 {
 	if (bUpdatingRepActorCache)
 	{
-		UE_LOG(LogChanneldEditor, Error, TEXT("Already updating replication actor cache"));
+		UE_LOG(LogChanneldEditor, Error, TEXT("Already updating replication cache"));
 		PostUpdateRegActorCache(EUpdateRepActorCacheResult::URRT_Updating);
 		return;
 	}

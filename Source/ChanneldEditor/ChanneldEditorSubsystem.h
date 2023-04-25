@@ -24,9 +24,9 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	UFUNCTION(BlueprintCallable)
-	void UpdateRepActorCacheAction(FPostRepActorCache PostUpdatedRepActorCache);
+	void UpdateReplicationCacheAction(FPostRepActorCache PostUpdatedRepActorCache);
 
-	void UpdateRepActorCache(TFunction<void(EUpdateRepActorCacheResult Result)> PostUpdateRegActorCache, FMissionCanceled* CanceledDelegate);
+	void UpdateReplicationCache(TFunction<void(EUpdateRepActorCacheResult Result)> PostUpdateRegActorCache, FMissionCanceled* CanceledDelegate);
 
 	UFUNCTION(BlueprintCallable)
 	void ChooseFile(FString& FilePath, bool& Success, const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes = TEXT("All files (*.*)|*.*"));
