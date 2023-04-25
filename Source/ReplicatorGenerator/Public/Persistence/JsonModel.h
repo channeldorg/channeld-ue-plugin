@@ -35,5 +35,7 @@ public:
 
 	virtual bool SaveDataArray(const TArray<OutStructType>& InDataArray);
 
+	virtual FDateTime LastUpdatedTime() const;
+
 	virtual bool IsNewer() const;
 };

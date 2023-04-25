@@ -149,11 +149,17 @@ bool TJsonModel<OutStructType>::SaveDataArray(const TArray<OutStructType>& InDat
 }
 
 template <typename OutStructType>
+FDateTime TJsonModel<OutStructType>::LastUpdatedTime() const
+{
+	return IFileManager::Get().GetTimeStamp(*DataFilePath);
+}
+
+template <typename OutStructType>
 bool TJsonModel<OutStructType>::IsNewer() const
 {
 	if (bLastLoadExisting && !IsExist())
 	{
 		return true;
 	}
-	return IFileManager::Get().GetTimeStamp(*DataFilePath) > LastLoadTime;
+	return LastUpdatedTime() > LastLoadTime;
 }

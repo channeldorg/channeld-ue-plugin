@@ -14,6 +14,7 @@ enum class EUpdateRepActorCacheResult : uint8
 };
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FPostRepActorCache, EUpdateRepActorCacheResult, Result);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPostGenRepCode, bool, Result);
 
 UCLASS(Meta = (DisplayName = "Channeld Editor"))
 class CHANNELDEDITOR_API UChanneldEditorSubsystem : public UEditorSubsystem
@@ -21,6 +22,9 @@ class CHANNELDEDITOR_API UChanneldEditorSubsystem : public UEditorSubsystem
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(BlueprintAssignable)
+	FPostGenRepCode PostGenerateReplicationCode;
+	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -34,6 +38,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ChooseFilePathToSave(FString& FilePath, bool& Success, const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes = TEXT("All files (*.*)|*.*"));
 
+	UFUNCTION(BlueprintCallable)
+	bool NeedToGenerateReplicationCode(bool ShowDialog = false);
+	
 	UFUNCTION(BlueprintCallable)
 	void GenerateReplicationAction();
 	

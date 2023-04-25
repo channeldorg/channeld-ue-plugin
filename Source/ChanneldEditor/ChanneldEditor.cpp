@@ -184,11 +184,16 @@ void FChanneldEditorModule::ToggleNetworkingAction()
 
 void FChanneldEditorModule::LaunchChanneldAction()
 {
-	LaunchChanneldAction(nullptr);
+	LaunchChanneldAction([](bool IsLaunched){});
 }
 
 void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(bool IsLaunched)> PostChanneldLaunched /* nullptr*/)
 {
+	if(GEditor->GetEditorSubsystem<UChanneldEditorSubsystem>()->NeedToGenerateReplicationCode(true))
+	{
+		PostChanneldLaunched(false);
+		return;
+	}
 	BuildChanneldNotify->SetMissionNotifyText(
 		FText::FromString(TEXT("Building Channeld Gateway...")),
 		LOCTEXT("RunningNotificationCancelButton", "Cancel"),
@@ -326,6 +331,10 @@ FTimerManager* FChanneldEditorModule::GetTimerManager()
 
 void FChanneldEditorModule::LaunchServersAction()
 {
+	if(GEditor->GetEditorSubsystem<UChanneldEditorSubsystem>()->NeedToGenerateReplicationCode(true))
+	{
+		return;
+	}
 	UChanneldEditorSettings* Settings = GetMutableDefault<UChanneldEditorSettings>();
 	FTimerManager* TimerManager = GetTimerManager();
 	for (FServerGroup& ServerGroup : Settings->ServerGroups)
@@ -446,7 +455,7 @@ void FChanneldEditorModule::AddRepCompsToBPsAction()
 
 void FChanneldEditorModule::OpenChannelDataEditorAction()
 {
-	GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>()->SpawnAndRegisterTab(LoadObject<UEditorUtilityWidgetBlueprint>(nullptr, L"/ChanneldUE/EditorUtilityWidgets/EUW_ChannelDataSchemaEditor"));
+	GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>()->SpawnAndRegisterTab(LoadObject<UEditorUtilityWidgetBlueprint>(nullptr, L"/ChanneldUE/EditorUtilityWidgets/ChannelDataSchemaEditor"));
 }
 
 

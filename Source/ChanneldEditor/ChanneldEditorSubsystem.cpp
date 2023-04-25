@@ -134,6 +134,29 @@ void UChanneldEditorSubsystem::ChooseFilePathToSave(FString& FilePath, bool& Suc
 	}
 }
 
+bool UChanneldEditorSubsystem::NeedToGenerateReplicationCode(bool ShowDialog /*= false*/)
+{
+	const FDateTime SchemaLastUpdateTime = GEditor->GetEditorSubsystem<UChannelDataSchemaController>()->GetLastUpdatedTime();
+	FGeneratedManifest LatestGeneratedManifest;
+	if(!FReplicatorGeneratorManager::Get().LoadLatestGeneratedManifest(LatestGeneratedManifest))
+	{
+		if(ShowDialog)
+		{
+			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("GenerateReplicationCode", "Replication code has not been generated yet, please generate replication code to continue"));
+		}
+		return true;
+	}
+	if (LatestGeneratedManifest.GeneratedTime < SchemaLastUpdateTime)
+	{
+		if(ShowDialog)
+		{
+			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("GenerateReplicationCode", "Replication code is out of date, please generate replication code to continue"));
+		}
+		return true;
+	}
+	return false;
+}
+
 
 void UChanneldEditorSubsystem::GenerateReplicationAction()
 {
@@ -197,9 +220,9 @@ void UChanneldEditorSubsystem::GenerateReplicationAction()
 						FMessageDialog::Open(EAppMsgType::OkCancel, FText::FromString(TEXT("Please close the editor and recompile the game code to make the changes take effect.")));
 					});
 				}
-
 				GenRepNotify->SpawnMissionSucceedNotification(nullptr);
 				bGeneratingReplication = false;
+				PostGenerateReplicationCode.Broadcast(true);
 			});
 		});
 	});
@@ -387,6 +410,7 @@ void UChanneldEditorSubsystem::FailedToGenRepCode()
 {
 	GenRepNotify->SpawnMissionFailedNotification(nullptr);
 	bGeneratingReplication = false;
+	PostGenerateReplicationCode.Broadcast(false);
 }
 
 void UChanneldEditorSubsystem::RecompileGameCode() const

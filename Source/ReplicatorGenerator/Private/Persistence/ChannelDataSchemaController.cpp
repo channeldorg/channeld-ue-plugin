@@ -88,6 +88,11 @@ void UChannelDataSchemaController::GetDefaultChannelDataSchemata(TArray<FChannel
 	DefaultChannelDataSchemaModal.GetDataArray(ChannelDataSchemata);
 }
 
+FDateTime UChannelDataSchemaController::GetLastUpdatedTime() const
+{
+	return ChannelDataSchemaModal.LastUpdatedTime();
+}
+
 void UChannelDataSchemaController::SortChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata)
 {
 	ChannelDataSchemata.Sort([](const FChannelDataSchema& A, const FChannelDataSchema& B)

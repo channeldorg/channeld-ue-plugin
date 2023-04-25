@@ -125,6 +125,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GetDefaultChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata);
 
+	UFUNCTION(BlueprintCallable)
+	FDateTime GetLastUpdatedTime() const;
+
 protected:
 	inline void SortChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata);
 };
