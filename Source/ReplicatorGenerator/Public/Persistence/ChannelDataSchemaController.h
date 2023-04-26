@@ -92,16 +92,39 @@ struct REPLICATORGENERATOR_API FChannelDataStateOption
 	}
 };
 
+DECLARE_DELEGATE(FPostDataSchemaUndoRedoDelegate)
+
+UCLASS()
+class UChannelDataSchemaTransaction : public UObject
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY()
+	TArray<FChannelDataSchema> ChannelDataSchemata;
+
+	virtual void PostEditUndo() override;
+
+	FPostDataSchemaUndoRedoDelegate PostDataSchemaUndoRedo;
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPostDataSchemaUpdateDelegate, const TArray<FChannelDataSchema>&, DataSchemata);
+
 UCLASS(BlueprintType)
 class REPLICATORGENERATOR_API UChannelDataSchemaController : public UEditorSubsystem
 {
 	GENERATED_BODY()
 
 protected:
+	UPROPERTY()
+	UChannelDataSchemaTransaction* ChannelDataSchemaTransaction;
+	
 	TJsonModel<FChannelDataSchema> ChannelDataSchemaModal = GenManager_ChannelDataSchemataPath;
 	TJsonModel<FChannelDataSchema> DefaultChannelDataSchemaModal;
 
 public:
+	UPROPERTY(BlueprintAssignable)
+	FPostDataSchemaUpdateDelegate PostDataSchemaUpdated;
+	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -130,4 +153,6 @@ public:
 
 protected:
 	inline void SortChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata);
+
+	void HandlePostDataSchemaUndoRedo();
 };

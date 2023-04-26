@@ -1,13 +1,28 @@
 ﻿#include "Persistence/ChannelDataSchemaController.h"
 
-#include "ReplicatorGeneratorUtils.h"
+#include "ScopedTransaction.h"
 #include "Persistence/RepActorCacheController.h"
+
+#define LOCTEXT_NAMESPACE "VictoryVertexSnapEditor"
+
+void UChannelDataSchemaTransaction::PostEditUndo()
+{
+	UObject::PostEditUndo();
+	PostDataSchemaUndoRedo.ExecuteIfBound();
+}
 
 void UChannelDataSchemaController::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 	// The "PLUGIN_DIR" is defined in the ReplicatorGenerator.Build.cs, but it is not available in the header file, so we have to use it here.
 	DefaultChannelDataSchemaModal = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Config") / GenManager_DefaultChannelDataSchemataFile;
+
+	ChannelDataSchemaTransaction = NewObject<UChannelDataSchemaTransaction>();
+	ChannelDataSchemaTransaction->SetFlags(RF_Transactional);
+	ChannelDataSchemaTransaction->PostDataSchemaUndoRedo.BindUObject(this, &UChannelDataSchemaController::HandlePostDataSchemaUndoRedo);
+	TArray<FChannelDataSchema> ChannelDataSchemata;
+	GetChannelDataSchemata(ChannelDataSchemata);
+	ChannelDataSchemaTransaction->ChannelDataSchemata = ChannelDataSchemata;
 }
 
 void UChannelDataSchemaController::GetUnhiddenChannelTypes(TArray<EChanneldChannelType>& ChannelTypes) const
@@ -57,7 +72,15 @@ void UChannelDataSchemaController::GetChannelDataSchemata(TArray<FChannelDataSch
 
 void UChannelDataSchemaController::SaveChannelDataSchemata(const TArray<FChannelDataSchema>& ChannelDataSchemata)
 {
+	// Save the channel data schemata to the json file.
 	ChannelDataSchemaModal.SaveDataArray(ChannelDataSchemata);
+
+	// Save the channel data schemata to the transaction.
+	FScopedTransaction Transaction(TEXT("Replciation Generator"),LOCTEXT("SaveChannelDataSchemata", "Save Channel Data Schemata"), ChannelDataSchemaTransaction);
+	ChannelDataSchemaTransaction->Modify();
+	ChannelDataSchemaTransaction->ChannelDataSchemata = ChannelDataSchemata;
+
+	PostDataSchemaUpdated.Broadcast(ChannelDataSchemata);
 }
 
 void UChannelDataSchemaController::ImportChannelDataSchemataFrom(const FString& FilePath, TArray<FChannelDataSchema>& ChannelDataSchemata, bool& Success)
@@ -104,3 +127,11 @@ void UChannelDataSchemaController::SortChannelDataSchemata(TArray<FChannelDataSc
 		DataSchema.Sort();
 	}
 }
+
+void UChannelDataSchemaController::HandlePostDataSchemaUndoRedo()
+{
+	ChannelDataSchemaModal.SaveDataArray(ChannelDataSchemaTransaction->ChannelDataSchemata);
+	PostDataSchemaUpdated.Broadcast(ChannelDataSchemaTransaction->ChannelDataSchemata);
+}
+
+#undef LOCTEXT_NAMESPACE
