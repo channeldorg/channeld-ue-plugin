@@ -37,7 +37,7 @@ public:
 	FEntityChannelCreatedSignature OnEntityChannelCreated;
 	
 	TSet<Channeld::ChannelId> AddedToChannelIds;
-	
+
 protected:
 	bool bInitialized = false;
 	bool bUninitialized = false;
@@ -45,6 +45,7 @@ protected:
 	// EChanneldChannelType ChannelType;
 	// Channeld::ChannelId OwningChannelId;
 	bool bRemoved = false;
+	float LastUpdateTime = 0;
 
 	TArray< TUniquePtr<FChanneldReplicatorBase> > Replicators;
 
