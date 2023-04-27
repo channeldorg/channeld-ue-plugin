@@ -65,9 +65,6 @@ public:
 	 * @param NetGUID The NetworkGUID used for looking up the state in the channel data. Generally the key of the state map.
 	 */
 	virtual void SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID) = 0;
-
-	// The NetIds of the objects that are relevant to the client in the ChannelDataUpdate. If any NetId is unresolved, the client will spawn the object.
-	virtual TArray<uint32> GetRelevantNetGUIDsFromChannelData(const google::protobuf::Message* ChannelData) = 0;
 	
 	virtual ~IChannelDataProcessor() {}
 };

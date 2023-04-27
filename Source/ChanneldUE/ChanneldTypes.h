@@ -119,11 +119,15 @@ struct CHANNELDUE_API FChannelSubscriptionOptions
 	UPROPERTY(BlueprintReadWrite)
 	bool bSkipSelfUpdateFanOut;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool bSkipFirstFanOut;
+
 	FChannelSubscriptionOptions() :
 		DataAccess(EChannelDataAccess::EDA_WRITE_ACCESS),
 		FanOutIntervalMs(20),
 		FanOutDelayMs(0),
-		bSkipSelfUpdateFanOut(false)
+		bSkipSelfUpdateFanOut(true),
+		bSkipFirstFanOut(false)
 	{
 	}
 
@@ -167,6 +171,11 @@ struct CHANNELDUE_API FChannelSubscriptionOptions
 		if (Target.has_skipselfupdatefanout())
 		{
 			bSkipSelfUpdateFanOut = Target.skipselfupdatefanout();
+		}
+
+		if (Target.has_skipfirstfanout())
+		{
+			bSkipFirstFanOut = Target.skipfirstfanout();
 		}
 	}
 

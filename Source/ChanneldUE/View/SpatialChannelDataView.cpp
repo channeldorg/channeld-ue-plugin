@@ -735,6 +735,9 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 		return false;
 	}
 
+	/* With the Entity channel, the Spatial channel data schema is fixed and contains the UnrealObjectRef to resolve
+	 * the objects that aren't spawned yet.
+	 * 
 	const FName MessageName = UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str());
 	auto Processor = ChanneldReplication::FindChannelDataProcessor(MessageName);
 	ensureMsgf(Processor, TEXT("Unable to find channel data processor for message: %s"), UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()));
@@ -750,6 +753,62 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 	}
 
 	return TryToResolveObjects(ChId, NetGUIDs);
+	*/
+
+	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
+	if (!NetDriver)
+	{
+		return false;
+	}
+
+	if (GetChanneldSubsystem()->GetChannelTypeByChId(ChId) != EChanneldChannelType::ECT_Spatial)
+	{
+		return false;
+	}
+	
+	auto SpatialChannelData = static_cast<const unrealpb::SpatialChannelData*>(ChannelData);
+	for (auto& Pair : SpatialChannelData->entities())
+	{
+		FNetworkGUID NetGUID(Pair.first);
+		// Don't use IsGUIDRegistered - the object may still exist in GuidCache but has been deleted.
+		if (auto CacheObj = NetDriver->GuidCache->ObjectLookup.Find(NetGUID))
+		{
+			if (CacheObj->Object.IsValid())
+			{
+				continue;
+			}
+		}
+		
+		TCHAR* ClassPath = UTF8_TO_TCHAR(Pair.second.objref().classpath().c_str());
+		if (UClass* EntityClass = LoadObject<UClass>(nullptr, ClassPath))
+		{
+			// Do not resolve other PlayerController or PlayerState on the client.
+			if (EntityClass->IsChildOf(APlayerController::StaticClass()) ||
+				EntityClass->IsChildOf(APlayerState::StaticClass()))
+			{
+				continue;
+			}
+		}
+
+		// Set up the mapping before actually spawn it, so AddProvider() can find the mapping.
+		SetOwningChannelId(Pair.first, ChId);
+			
+		// Also add the mapping of all context NetGUIDs
+		for (auto& ContextObj : Pair.second.objref().context())
+		{
+			SetOwningChannelId(ContextObj.netguid(), ChId);
+		}
+
+		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from unresolved SpatialEntityState, NetId: %d"), Pair.first);
+		UObject* NewObj = ChanneldUtils::GetObjectByRef(&Pair.second.objref(), GetWorld());
+		if (NewObj)
+		{
+			AddObjectProviderToDefaultChannel(NewObj);
+			OnNetSpawnedObject(NewObj, ChId);
+		}
+	}
+	
+	return false;
 }
 
 void USpatialChannelDataView::ClientHandleGetUnrealObjectRef(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
