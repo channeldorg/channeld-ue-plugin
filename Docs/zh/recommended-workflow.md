@@ -1,25 +1,23 @@
-## 
-## 本地测试
-
 # 推荐工作流
 
 ## 本地开发迭代
 
 ### 使用UE原生网络同步开发
-开发过程推荐优先使用[UE原生网络同步](https://docs.unrealengine.com/4.27/zh-CN/InteractiveExperiences/Networking/Actors/)进行GamePlay的开发和调试，在实现GamePlay功能后再使用ChanneldUE进行同步。
->使用UE原生网络同步时请确保已关闭ChanneldUE的同步功能，如下图所示：
+开发过程推荐优先使用[UE原生网络同步](https://docs.unrealengine.com/4.27/zh-CN/InteractiveExperiences/Networking/Actors/)进行GamePlay的开发和调试。在实现GamePlay功能后再开启ChanneldUE网络同步进行开发和调试。这样可以避免频繁地生成同步代码、启动专用服务器和网关。
+>使用UE原生网络同步时请确保已关闭ChanneldUE的网络同步：
 >
 >![](../images/disable_channeld_networking.png)
 
-### 开启Channeld同步功能
-但您已经实现了GamePlay功能并测试完成后，可以使用ChanneldUE的同步功能来进行基于channeld的分布式专用服务器开发。
->首先需要开启ChanneldUE的同步功能，如下图所示：
->
->![](../images/enable_channeld_networking.png)
+### 使用ChanneldUE网络同步进行测试
+当实现了GamePlay功能并测试完成后，就可以使用ChanneldUE的网络同步来进行测试。
+#### 开启ChanneldUE网络同步
+开启ChanneldUE网络同步，使UE原生的网络同步切换到ChanneldUE网络同步：
+
+![](../images/enable_channeld_networking.png)
 
 #### 为Actor开启同步功能
-如果希望使用ChannelUE同步Actor的属性则需要在UE原生网络同步的配置上为Actor添加同步组件。ChannelUE支持为C++和蓝图Actor添加同步组件。具体操作如下：
-* C++ Actor的Class中添加同步组件
+在UE原生网络同步配置的基础上还需要为Actor添加同步组件。ChannelUE支持为C++和蓝图Actor添加同步组件。具体操作如下：
+* 为C++ Actor添加同步组件
     1. Actor 类中声明`ChanneldReplicationComponent`组件
     ```
     #include "Replication/ChanneldReplicationComponent.h"
@@ -42,56 +40,56 @@
     }
     ```
 
-* 蓝图Actor中添加同步组件，如下图所示：
-
+* 为蓝图Actor中添加同步组件
     ![](../images/character_rep_component.png)
 
-#### 为已有项目的同步Actor添加同步组件
-除手动为同步Actor添加同步组件外，ChanneldUE提供了工具为已有项目中的Actor添加同步组件。具体操作如下：
+##### 为已有项目的同步Actor添加同步组件
+除手动为同步Actor添加同步组件外，ChanneldUE提供了工具为已有项目中的Actor添加同步组件：
 
 ![](../images/add_rep_comp_to_bpactor.png)
 
 >注意：该工具会加载项目中所有的Actor，如果项目中有大量的Actor，可能会导致加载时间过长，建议在仅在项目中途才使用ChanneldUE插件时使用一次该功能或者较小项目中使用该功能。
 
-### 配置频道数据模型
+#### 配置频道数据模型
 为同步Actor添加同步组件后还不足以使他们通过ChanneldUE同步，还需指定同步Actor的状态在哪个频道中同步。ChanneldUE通过频道数据模型来指定同步Actor的状态在哪个频道中同步。
+>频道数据模型详细说明和使用可参考[频道数据模型](./channel-data-schema.md)
 
-频道数据模型需要在频道数据模型编辑器中进行配置。点击ChannelUE插件的`Editor Channel Data Schema` 按钮。
+##### 打开频道数据模型编辑器
+
+频道数据模型需要在频道数据模型编辑器中进行配置。点击ChannelUE插件的`Editor Channel Data Schema` 按钮：
 
 ![](../images/open_channel_data_schema_editor.png)
 
 将会打开如下编辑器窗口：
 
-<img src="../images/default_channel_data_schema_editor.png" height = "600" alt="" />
+<img src="../images/default_channel_data_schema_editor.png" height = "400" alt="" />
 
->频道数据模型详细说明和是使用可参考[频道数据模型](./channel-data-schema.md)
+##### 将Actor状态添加到频道数据模型
+首先，需要更新同步Actor缓存。在频道数据编辑器上方点击`Refresh...`按钮：
 
-#### 新增Actor
-当新增了一个同步Actor时，需要先更新同步Actor缓存。在频道数据编辑器上方点击`Refresh...`按钮：
-
-![](../images/refresh_channel_data_state.png)
+![](../images/refresh_rep_actor_cache.png)
 
 等待同步Actor缓存更新完成后，就可以将新增的同步Actor状态添加到某一个频道数据下：
 
 ![](../images/add_channel_data_state.png)
 
-#### GameState
+##### GameState
 通常GameState在服务器中只有唯一的实例，因此可以将GameState的状态设置为单例：
 
 ![](../images/singleton_channel_data_state.png)
 
 >在多服情况下建议将GameState的状态放到Global频道中并设置为单例，以保证GameState的状态在所有的服务器中保持一致。
->除了GameState外，如WorldSettings等Actor都是单例，同样建议将其状态设置为单例。
+>除了GameState外，如WorldSettings等都是单例，同样建议将其状态设置为单例。
 
-### 生成同步代码
+#### 生成同步代码
 配置完成频道数据模型后，需要生成C++的同步代码。同步代码主要是用来处理频道数据模型的状态同步的。
 
-#### 生成
+##### 生成
 在频道数据编辑器上方点击`Generate...`按钮即可生成同步代码：
 
 ![](../images/generate_rep_code.png)
 
-#### 热编译兼容模式
+##### 热编译兼容模式
 ChannelUE提供了热编译兼容模式，该模式下每次生成同步代码后自动热编译项目源码，如果关闭热编译兼容模式则在生成同步代码后需要先关闭UE编辑器再通过源码编译。
 
 ![](../images/enable_compatible_recompilation.png)
@@ -131,7 +129,7 @@ ChannelUE提供了热编译兼容模式，该模式下每次生成同步代码�
 频道数据模型定义文件建议通过版本控制工具进行版本控制，以保证多人协作时频道数据模型的一致性。频道数据模型定义文件路径为`Config/ChanneldChannelDataSchema.json`。
 
 #### 配置频道数据模型
-如果您在配置频道数据模型之前，通过版本控制变更了项目代码，那么在配置频道数据模型前建议先[更新一次同步Actor缓存](#新增Actor)以确保频道数据状态能正确的显示在频道数据编辑器中。
+如果在配置频道数据模型之前通过版本控制变更了项目代码，那么请先[更新一次同步Actor缓存](#新增Actor)以确保频道数据状态能正确的显示在频道数据编辑器中。
 
 ### 同步代码
 
