@@ -764,8 +764,12 @@ void UChanneldConnection::HandleSubToChannel(UChanneldConnection* Conn, Channeld
 		FSubscribedChannelInfo* ExistingSub = SubscribedChannels.Find(ChId);
 		if (ExistingSub != nullptr)
 		{
-			// Merge the SubOptions if the subscription already exists
-			ExistingSub->Merge(*SubMsg);
+			if (SubMsg->has_suboptions())
+			{
+				UE_LOG(LogChanneld, Verbose, TEXT("Merged the SubOptions of the channel %d: %s"), ChId, UTF8_TO_TCHAR(SubMsg->suboptions().ShortDebugString().c_str()));
+				// Merge the SubOptions if the subscription already exists
+				ExistingSub->Merge(*SubMsg);
+			}
 		}
 		else
 		{

@@ -312,7 +312,7 @@ void UChannelDataView::RemoveProvider(Channeld::ChannelId ChId, IChannelDataProv
 		const auto ChannelInfo = Connection->SubscribedChannels.Find(ChId);
 
 		// Don't send removal update to the spatial or entity channel
-		if (bSendRemoved && ChannelInfo->ShouldSendRemovalUpdate())
+		if (bSendRemoved && ChannelInfo && ChannelInfo->ShouldSendRemovalUpdate())
 		{
 			// Collect the removed states immediately (before the provider gets destroyed completely)
 			google::protobuf::Message* RemovedData = RemovedProvidersData.FindRef(ChId);
