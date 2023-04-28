@@ -112,7 +112,6 @@ private:
 	// So we use a virtual NetConnection that doesn't belong to any client, and clear the export map everytime to make sure the NetId is fully exported.
 	UPROPERTY()
 	UChanneldNetConnection* NetConnForSpawn;
-	void ResetNetConnForSpawn();
 
 	void ServerHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleGetHandoverContext(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);

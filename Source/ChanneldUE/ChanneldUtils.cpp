@@ -5,6 +5,7 @@
 #include "ChanneldTypes.h"
 
 TMap<uint32, TSharedRef<unrealpb::UnrealObjectRef>> ChanneldUtils::ObjRefCache;
+UChanneldNetConnection* ChanneldUtils::NetConnForSpawn;
 
 UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache, UChanneldNetConnection* ClientConn)
 {
@@ -107,6 +108,13 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 
 						//// Remove the channel after using it
 						//Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
+
+						if (ClientConn && ClientConn == NetConnForSpawn)
+						{
+							// Always remember to reset the NetConnForSpawn after using it.
+							ResetNetConnForSpawn();
+						}
+						
 						return Actor;
 					}
 				}
@@ -115,14 +123,16 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 					FString PathName = UTF8_TO_TCHAR(Ref->classpath().c_str());
 					if (auto ObjClass = LoadObject<UClass>(nullptr, *PathName))
 					{
-						Obj = NewObject<UChannelDataView>(nullptr, ObjClass);
+						Obj = NewObject<UObject>(GetTransientPackage(), ObjClass);
 						if (ClientConn)
 						{
-							GuidCache->RegisterNetGUIDFromPath_Server(NetGUID, PathName, 0, 0, false, false);
+							// GuidCache->RegisterNetGUIDFromPath_Server(NetGUID, PathName, 0, 0, false, false);
+							GuidCache->RegisterNetGUID_Server(NetGUID, Obj);
 						}
 						else
 						{
-							GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, 0, 0, false, false);
+							// GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, 0, 0, false, false);
+							GuidCache->RegisterNetGUID_Client(NetGUID, Obj);
 						}
 					}
 					else
@@ -146,14 +156,14 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 	else
 	{
 		/*
+		*/
 		if (!ObjRefCache.Contains(NetGUID.Value))
 		{
 			auto Cached = MakeShared<unrealpb::UnrealObjectRef>();
 			Cached->CopyFrom(*Ref);
 			ObjRefCache.Add(NetGUID.Value, Cached);
-			UE_LOG(LogChanneld, Verbose, TEXT("Cached ObjRef: %d"), NetGUID.Value);
+			UE_LOG(LogChanneld, VeryVerbose, TEXT("Cached ObjRef: %d"), NetGUID.Value);
 		}
-		*/
 	}
 	
 	return Obj;
@@ -185,12 +195,12 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 	*/
 	if (const auto Cached = ObjRefCache.Find(NetGUID.Value))
 	{
-		UE_LOG(LogChanneld, Verbose, TEXT("Use cached ObjRef: %d"), NetGUID.Value);
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Use cached ObjRef: %d"), NetGUID.Value);
 		return *Cached;
 	}
 	else
 	{
-		UE_LOG(LogChanneld, Verbose, TEXT("Cached ObjRef: %d"), NetGUID.Value);
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Cached ObjRef: %d"), NetGUID.Value);
 		ObjRefCache.Add(NetGUID.Value, ObjRef);
 	}
 	
@@ -202,6 +212,10 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 		if (Connection == nullptr)
 		{
 			Connection = Actor->GetNetConnection();
+		}
+		if (Connection == nullptr)
+		{
+			Connection = NetConnForSpawn;
 		}
 		if (!IsValid(Connection))
 		{
@@ -259,6 +273,12 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 
 				// Remove the channel after using it
 				Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
+
+				if (Connection == NetConnForSpawn)
+				{
+					// Clear the export map and ack state so everytime we can get a full export.
+					ResetNetConnForSpawn();
+				}
 			}
 			//else
 			//{
@@ -273,6 +293,14 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 
 	// ObjRef.set_connid(GEngine->GetEngineSubsystem<UChanneldConnection>()->GetConnId());
 	return ObjRef;
+}
+
+void ChanneldUtils::ResetNetConnForSpawn()
+{
+	auto PacketMapClient = CastChecked<UPackageMapClient>(NetConnForSpawn->PackageMap);
+	PacketMapClient->NetGUIDExportCountMap.Empty();
+	const static FPackageMapAckState EmptyAckStatus;
+	PacketMapClient->RestorePackageMapExportAckStatus(EmptyAckStatus);
 }
 
 UActorComponent* ChanneldUtils::GetActorComponentByRef(const unrealpb::ActorComponentRef* Ref, UWorld* World, bool bCreateIfNotInCache, UChanneldNetConnection* ClientConn)

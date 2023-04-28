@@ -18,5 +18,5 @@ public:
 	//~End FChanneldReplicatorBase Interface
 
 protected:
-	unrealpb::UnrealObjectRef ObjRef;
+	TSharedPtr<unrealpb::UnrealObjectRef> ObjRef;
 };

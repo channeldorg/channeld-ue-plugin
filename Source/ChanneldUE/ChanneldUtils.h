@@ -183,7 +183,7 @@ public:
 		SpatialInfo->set_z(Vector.Y);
 	}
 
-	static FNetworkGUID GetNetId(UObject* Obj)
+	static FNetworkGUID GetNetId(UObject* Obj, bool bAssignOnServer = true)
 	{
 		FNetworkGUID NetId;
 		if (!Obj)
@@ -198,7 +198,7 @@ public:
 
 		if (const auto NetDriver = World->GetNetDriver())
 		{
-			if (NetDriver->IsServer())
+			if (NetDriver->IsServer() && bAssignOnServer)
 			{
 				NetId = NetDriver->GuidCache->GetOrAssignNetGUID(Obj);
 			}
@@ -295,6 +295,13 @@ public:
 		return nullptr;
 	}
 	*/
+
+	static void InitNetConnForSpawn(UChanneldNetConnection* InNetConn)
+	{
+		NetConnForSpawn = InNetConn;
+	}
 private:
 	static TMap<uint32, TSharedRef<unrealpb::UnrealObjectRef>> ObjRefCache;
+	static UChanneldNetConnection* NetConnForSpawn;
+	static void ResetNetConnForSpawn();
 };
