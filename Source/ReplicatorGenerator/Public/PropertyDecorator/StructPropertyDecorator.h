@@ -131,6 +131,10 @@ public:
 	FString GetDefinition_ProtoStateMessage();
 
 	virtual FString GetCode_GetWorldRef() override;
+
+	virtual bool IsStruct() override;
+
+	virtual TArray<TSharedPtr<FStructPropertyDecorator>> GetStructPropertyDecorators() override;
 	
 protected:
 	TArray<TSharedPtr<FPropertyDecorator>> Properties;

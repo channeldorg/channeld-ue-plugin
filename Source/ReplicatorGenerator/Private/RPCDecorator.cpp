@@ -31,7 +31,7 @@ bool FRPCDecorator::Init(const TFunction<FString()>& SetNameForIllegalPropName)
 	}
 
 	CompilablePropName = OriginalFunction->GetName();
-	if (!ChanneldReplicatorGeneratorUtils::IsCompilableClassName(CompilablePropName))
+	if (ChanneldReplicatorGeneratorUtils::ContainsUncompilableChar(CompilablePropName))
 	{
 		CompilablePropName = *SetNameForIllegalPropName();
 	}
@@ -80,17 +80,6 @@ FString FRPCDecorator::GetCode_DeserializeFunctionParams()
 	FormatArgs.Add(TEXT("Declare_ParamStructCopy"), GetCompilableCPPType());
 	FormatArgs.Add(TEXT("Code_GetWorldRef"), Owner->GetCode_GetWorldRef());
 	return FString::Format(RPC_DeserializeFuncParamsTemp, FormatArgs);
-}
-
-FString FRPCDecorator::GetDeclaration_ProtoFields()
-{
-	FString FieldDefinitions;
-	for (int32 i = 0; i < Properties.Num(); i++)
-	{
-		const TSharedPtr<FPropertyDecorator> Property = Properties[i];
-		FieldDefinitions += Property->GetDefinition_ProtoField(i + 1) + TEXT(";\n");
-	}
-	return FieldDefinitions;
 }
 
 FString FRPCDecorator::GetCode_GetWorldRef()

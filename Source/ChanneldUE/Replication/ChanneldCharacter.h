@@ -9,7 +9,7 @@
 // 2. Route server's ProcessEvent to the cross-server RPC if no authority over the character
 // 3. Fix certain cross-server movement issues
 UCLASS(BlueprintType)
-class AChanneldCharacter : public ACharacter
+class CHANNELDUE_API AChanneldCharacter : public ACharacter
 {
 	GENERATED_BODY()
 

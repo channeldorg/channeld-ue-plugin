@@ -289,6 +289,10 @@ public:
 
 	virtual FString GetCode_GetWorldRef() override;
 
+	virtual bool IsStruct() override;
+
+	virtual TArray<TSharedPtr<FStructPropertyDecorator>> GetStructPropertyDecorators() override;
+
 protected:
 	bool bInitialized = false;
 	

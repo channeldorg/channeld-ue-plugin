@@ -27,7 +27,7 @@ public:
 	TSubclassOf<class UChannelDataView> ChannelDataViewClass = USingleChannelDataView::StaticClass();
 	// The default channel data message name for each channel type. The entries will be registered in UChannelDataView::Initialize.
 	// Every time the replication code is generated, the entries will be updated with the message names in the generated code.
-	UPROPERTY(Config, EditAnywhere, Category="View")
+	UPROPERTY(Config, BlueprintReadOnly, Category="View")
 	TMap<EChanneldChannelType, FString> DefaultChannelDataMsgNames =
 	{
 		{EChanneldChannelType::ECT_Global, TEXT("tpspb.TestRepChannelData")},
