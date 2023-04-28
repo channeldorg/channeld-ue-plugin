@@ -7,15 +7,15 @@ ChanneldUE尚不支持[条件属性复制](https://docs.unrealengine.com/4.27/zh
 这意味着，所有发生变化的属性都会从UE服务器发送到channeld网关服务，并广播到所有订阅者。客户端会收到频道内所有玩家的属性变化，包括其它玩家的PlayerController和PlayerState的属性，但是不会进行处理，因为客户端不会创建其它玩家的PlayerController或PlayerState实例。这确实会造成一定的带宽浪费，以及潜在的安全性问题。基于channeld网关服务实现条件属性复制的功能正在计划中。
 
 ## 网络更新频率
-ChanneldUE尚不支持[网络更新频率](https://docs.unrealengine.com/4.27/zh-CN/InteractiveExperiences/Networking/Actors/Properties/#%E6%95%B0%E6%8D%AE%E9%A9%B1%E5%8A%A8%E5%9E%8B%E7%BD%91%E7%BB%9C%E6%9B%B4%E6%96%B0%E9%A2%91%E7%8E%87)。
+ChanneldUE支持[网络更新频率](https://docs.unrealengine.com/4.27/zh-CN/InteractiveExperiences/Networking/Actors/Properties/#%E6%95%B0%E6%8D%AE%E9%A9%B1%E5%8A%A8%E5%9E%8B%E7%BD%91%E7%BB%9C%E6%9B%B4%E6%96%B0%E9%A2%91%E7%8E%87)。
 
-在服务器端，属性变化在每帧都会被同步到channeld网关服务。在客户端，收到的属性同步频率取决于订阅频道时设置的`FanOutIntervalMs`参数，默认为20ms，相当于`NetUpdateFrequency=50`。全局频道的同步频率可以在频道数据视图中修改`GlobalChannelFanOutIntervalMs`来调整；空间频道的同步频率以频道距离衰减，默认为50Hz（距离为0，即同一空间频道），20Hz（距离为1个空间频道），10Hz（距离为2个及以上空间频道）。若要修改空间频道的同步频率，需要修改channeld网关服务的代码[message_spatial.go](https://github.com/metaworking/channeld/pkg/channeld/message_spatial.go)中的`spatialDampingSettings`。
+在客户端，收到的属性同步频率取决于订阅频道时设置的`FanOutIntervalMs`参数，默认为20ms，相当于50Hz。全局频道的同步频率可以在频道数据视图中修改`GlobalChannelFanOutIntervalMs`来调整；空间频道的同步频率以频道距离衰减，默认为50Hz（距离为0，即同一空间频道），20Hz（距离为1个空间频道），10Hz（距离为2个及以上空间频道）。若要修改空间频道的同步频率，需要修改channeld网关服务的代码[message_spatial.go](/../../../channeld/blob/master/pkg/channeld/message_spatial.go)中的`spatialDampingSettings`。
 
 ## 网络裁剪距离
 ChanneldUE不支持Actor的`Net Cull Distance Squared`属性，但是可以作为替代方案使用。
 
 在原生UE中，一个客户端能够被同步到的空间范围由每个网络Actor的`Net Cull Distance Squared`属性来控制，默认为150米的平方。在ChanneldUE中，客户端的兴趣范围（Area of Interest）即客户端订阅的空间频道的集合。客户端能够接收到的最小同步范围是一个空间频道，在[入门指南](getting-started.md)使用的第三人称示例里，为20x20米。
-可以修改channeld网关服务的配置[spatial_static_2x2.json](https://github.com/metaworking/channeld/config/spatial_static_2x2.json)来调整该数值。具体配置方法见[配置channeld](config-channeld.md)文档。
+可以修改channeld网关服务的配置[spatial_static_2x2.json](/../../../channeld/blob/master/config/spatial_static_2x2.json)来调整该数值。具体配置方法见[配置channeld](config-channeld.md)文档。
 
 若要实现以玩家为中心的，半径为150米的球型兴趣范围，打开主菜单`编辑 -> 项目设置 -> 插件 -> Channeld -> Spatial -> Client Interest`，添加一个`Client Interest Preset`，设置`Area Type`为**Sphere**，`Radius`为**15000**。
 

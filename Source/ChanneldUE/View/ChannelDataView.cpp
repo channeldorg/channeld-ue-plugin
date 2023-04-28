@@ -443,11 +443,11 @@ void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerControl
 	}
 }
 
-FNetworkGUID UChannelDataView::GetNetId(UObject* Obj) const
+FNetworkGUID UChannelDataView::GetNetId(UObject* Obj, bool bAssignOnServer/* = true*/) const
 {
 	if (const auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
 	{
-		if (NetDriver->IsServer())
+		if (NetDriver->IsServer() && bAssignOnServer)
 		{
 			return NetDriver->GuidCache->GetOrAssignNetGUID(Obj);
 		}
@@ -939,10 +939,12 @@ bool UChannelDataView::ConsumeChannelUpdateData(Channeld::ChannelId ChId, google
 	return bConsumed;
 }
 
+/* The following comment no longer applies since we added caching for ChanneldUtils::GetRefOfObject.
 // Warning: DO NOT use this function before sending the Spawn message!
 // Calling Provider->UpdateChannelData can cause FChanneldActorReplicator::Tick to be called, which will call
 // ChanneldUtils::GetRefOfObject and export the NetGUIDs, causing the UnrealObjectRef in the Spawn message
 // missing the contexts, so the client will fail to Spawn the object.
+*/
 const google::protobuf::Message* UChannelDataView::GetEntityData(UObject* Obj)
 {
 	IChannelDataProvider* Provider= nullptr;
