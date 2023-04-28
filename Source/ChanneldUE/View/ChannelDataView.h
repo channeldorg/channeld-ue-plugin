@@ -57,7 +57,7 @@ public:
 	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, Channeld::ChannelId ChId){}
 	virtual void OnRemoveClientConnection(UChanneldNetConnection* ClientConn){}
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn);
-	virtual FNetworkGUID GetNetId(UObject* Obj) const;
+	virtual FNetworkGUID GetNetId(UObject* Obj, bool bAssignOnServer = true) const;
 	virtual FNetworkGUID GetNetId(IChannelDataProvider* Provider) const;
 	
 	/**

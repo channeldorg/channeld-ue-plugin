@@ -376,8 +376,10 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 				bSuppressAddProviderAndSendOnServerSpawn = false;
 				UE_LOG(LogChanneld, Log, TEXT("[Server] Spawned handover obj: %s"), *GetNameSafe(HandoverObj));
 
+				/* Moved to ChanneldUtils::GetObjectByRef
 				// Always remember to reset the NetConnForSpawn after using it.
 				ResetNetConnForSpawn();
+				*/
 			}
 		
 			if (IsValid(HandoverObj))
@@ -761,7 +763,50 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 		return false;
 	}
 
-	if (GetChanneldSubsystem()->GetChannelTypeByChId(ChId) != EChanneldChannelType::ECT_Spatial)
+	EChanneldChannelType ChannelType = GetChanneldSubsystem()->GetChannelTypeByChId(ChId);
+	if (ChannelType == EChanneldChannelType::ECT_Entity)
+	{
+		FNetworkGUID NetGUID(ChId);
+		// Don't use IsGUIDRegistered - the object may still exist in GuidCache but has been deleted.
+		if (auto CacheObj = NetDriver->GuidCache->ObjectLookup.Find(NetGUID))
+		{
+			if (CacheObj->Object.IsValid())
+			{
+				return false;
+			}
+		}
+
+		auto ObjRefField = ChannelData->GetDescriptor()->field(0);
+		if (ObjRefField == nullptr)
+		{
+			return true;
+		}
+		if (ObjRefField->name() == "objRef" && ChannelData->GetReflection()->HasField(*ChannelData, ObjRefField))
+		{
+			auto& ObjRef = static_cast<const unrealpb::UnrealObjectRef&>(ChannelData->GetReflection()->GetMessage(*ChannelData, ObjRefField));
+			TCHAR* ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
+			if (UClass* EntityClass = LoadObject<UClass>(nullptr, ClassPath))
+			{
+				// Do not resolve other PlayerController on the client.
+				if (EntityClass->IsChildOf(APlayerController::StaticClass()))
+				{
+					return true;
+				}
+			}
+
+			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from unresolved EntityChannelData, NetId: %d"), ObjRef.netguid());
+			UObject* NewObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld());
+			if (NewObj)
+			{
+				AddObjectProvider(ChId, NewObj);
+				/* We don't know the spatial channel id of the entity yet.
+				OnNetSpawnedObject(NewObj, ChId);
+				*/
+			}
+		}
+	}
+
+	if (ChannelType != EChanneldChannelType::ECT_Spatial)
 	{
 		return false;
 	}
@@ -778,29 +823,29 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 				continue;
 			}
 		}
-		
-		TCHAR* ClassPath = UTF8_TO_TCHAR(Pair.second.objref().classpath().c_str());
+
+		auto& ObjRef = Pair.second.objref();
+		TCHAR* ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
 		if (UClass* EntityClass = LoadObject<UClass>(nullptr, ClassPath))
 		{
-			// Do not resolve other PlayerController or PlayerState on the client.
-			if (EntityClass->IsChildOf(APlayerController::StaticClass()) ||
-				EntityClass->IsChildOf(APlayerState::StaticClass()))
+			// Do not resolve other PlayerController on the client.
+			if (EntityClass->IsChildOf(APlayerController::StaticClass()))
 			{
 				continue;
 			}
 		}
 
 		// Set up the mapping before actually spawn it, so AddProvider() can find the mapping.
-		SetOwningChannelId(Pair.first, ChId);
+		SetOwningChannelId(ObjRef.netguid(), ChId);
 			
 		// Also add the mapping of all context NetGUIDs
-		for (auto& ContextObj : Pair.second.objref().context())
+		for (auto& ContextObj : ObjRef.context())
 		{
 			SetOwningChannelId(ContextObj.netguid(), ChId);
 		}
 
-		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from unresolved SpatialEntityState, NetId: %d"), Pair.first);
-		UObject* NewObj = ChanneldUtils::GetObjectByRef(&Pair.second.objref(), GetWorld());
+		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from unresolved SpatialEntityState, NetId: %d"), ObjRef.netguid());
+		UObject* NewObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld());
 		if (NewObj)
 		{
 			AddObjectProviderToDefaultChannel(NewObj);
@@ -852,6 +897,7 @@ void USpatialChannelDataView::InitServer()
 	NetConnForSpawn = NewObject<UChanneldNetConnection>(GetTransientPackage(), UChanneldNetConnection::StaticClass());
 	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
 	NetConnForSpawn->InitBase(NetDriver, NetDriver->GetSocket(), FURL(), USOCK_Open);
+	ChanneldUtils::InitNetConnForSpawn(NetConnForSpawn);
 	
 	if (UClass* PlayerStartLocatorClass = GetMutableDefault<UChanneldSettings>()->PlayerStartLocatorClass)
 	{
@@ -977,6 +1023,12 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 
 	// Does the client has interest over the handover objects?
 	const bool bHasInterest = Connection->SubscribedChannels.Contains(HandoverMsg->dstchannelid());
+
+	if (bHasInterest)
+	{
+		// Spawn the unresolved objects from the spatial entities
+		CheckUnspawnedObject(HandoverMsg->dstchannelid(), &HandoverData);
+	}
 	
 	// for (auto& HandoverContext : HandoverData.context())
 	for (auto& Pair : HandoverData.entities())
@@ -989,32 +1041,6 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 		UObject* Obj = GetObjectFromNetGUID(NetId);
 		if (!Obj)
 		{
-			/*
-			We can't wait the server to send the Spawn messages as it's suppressed in the handover process.
-			But we also don't want to spawn the PlayerState or PlayerController of other players.
-			It's very difficult to check if the UObject to be spawned is a PlayerState or PlayerController.
-			
-			if (bHasInterest)
-			{
-				// Don't spawn PlayerState or PlayerController for handover in the client
-				if (HandoverContext.obj().objtype() == unrealpb::UOT_PlayerController || HandoverContext.obj().objtype() == unrealpb::UOT_PlayerState)
-				{
-					continue;
-				}
-				
-				Obj = ChanneldUtils::GetObjectByRef(&HandoverContext.obj(), GetWorld());
-				if (Obj)
-				{
-					AddObjectProvider(Obj);
-					OnClientSpawnedObject(Obj, HandoverMsg->dstchannelid());
-				}
-				else
-				{
-					UE_LOG(LogChanneld, Log, TEXT("[Client] Unable to spawn handover object, NetId: %d"), NetId.Value);
-				}
-			}
-			*/
-			
 			continue;
 		}
 
@@ -1374,7 +1400,7 @@ void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnecti
 		return;
 	}
 
-	const uint32 NetId = GetNetId(Obj).Value;
+	const uint32 NetId = GetNetId(Obj, true).Value;
 	// The entity channel already exists, send directly
 	if (Connection->SubscribedChannels.Contains(NetId))
 	{
@@ -1386,22 +1412,14 @@ void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnecti
 	channeldpb::ChannelSubscriptionOptions SubOptions;
 	SubOptions.set_skipselfupdatefanout(true);
 	Connection->CreateEntityChannel(Channeld::GlobalChannelId, Obj, NetId, TEXT(""), &SubOptions, GetEntityData(Obj)/*nullptr*/, nullptr,
-		[this, NetId, Obj, NetConn, OwningConnId](const channeldpb::CreateChannelResultMessage* ResultMsg)
+		[this, Obj, NetConn, OwningConnId](const channeldpb::CreateChannelResultMessage* ResultMsg)
 		{
-			AddObjectProvider(NetId, Obj);
+			AddObjectProvider(ResultMsg->channelid(), Obj);
 
 			SendSpawnToConn_EntityChannelReady(Obj, NetConn, OwningConnId);
 		});
 
 	UE_LOG(LogChanneld, Verbose, TEXT("Creating entity channel for obj: %s, netId: %d"), *Obj->GetName(), NetId);
-}
-
-void USpatialChannelDataView::ResetNetConnForSpawn()
-{
-	auto PacketMapClient = CastChecked<UPackageMapClient>(NetConnForSpawn->PackageMap);
-	PacketMapClient->NetGUIDExportCountMap.Empty();
-	const static FPackageMapAckState EmptyAckStatus;
-	PacketMapClient->RestorePackageMapExportAckStatus(EmptyAckStatus);
 }
 
 // Broadcast the spawning to all clients subscribed in the nearby spatial channels
@@ -1440,8 +1458,10 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 	
 			// As we don't have any specific NetConnection to export the NetId, use a virtual one.
 			SpawnMsg.mutable_obj()->CopyFrom(*ChanneldUtils::GetRefOfObject(Obj, NetConnForSpawn, true));
+			/* Moved to ChanneldUtils::GetRefOfObject
 			// Clear the export map and ack state so everytime we can get a full export.
 			ResetNetConnForSpawn();
+			*/
 	
 			if (const AActor* Actor = Cast<AActor>(Obj))
 			{
@@ -1462,15 +1482,15 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 	
 			SpawnMsg.set_channelid(SpatialChId);
 
-			// Broadcast the spawn message to all other connections if it's a Well-Known Object.
+			// Broadcast the spawn message to all client connections if it's a Well-Known Object.
 			if (bWellKnown)
 			{
-				Connection->Broadcast(Channeld::GlobalChannelId, unrealpb::SPAWN, SpawnMsg, channeldpb::ALL_BUT_SENDER);
+				Connection->Broadcast(Channeld::GlobalChannelId, unrealpb::SPAWN, SpawnMsg, channeldpb::ALL_BUT_SERVER);
 				UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message of well-known obj: %s, netId: %d"), *Obj->GetName(), NetId.Value);
 			}
 			else
 			{
-				Connection->Broadcast(SpatialChId,unrealpb::SPAWN, SpawnMsg, /*channeldpb::ADJACENT_CHANNELS |*/ channeldpb::ALL_BUT_SENDER);
+				Connection->Broadcast(SpatialChId,unrealpb::SPAWN, SpawnMsg, /*channeldpb::ADJACENT_CHANNELS |*/ channeldpb::ALL_BUT_SERVER);
 				UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message to spatial channel %d, obj: %s, netId: %d"), SpatialChId, *Obj->GetName(), NetId.Value);
 			}
 			
