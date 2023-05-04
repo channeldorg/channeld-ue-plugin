@@ -2,21 +2,20 @@
 
 ## 本地开发迭代
 
-### 使用UE原生网络同步开发
-开发过程推荐优先使用[UE原生网络同步](https://docs.unrealengine.com/4.27/zh-CN/InteractiveExperiences/Networking/Actors/)进行GamePlay的开发和调试。在实现GamePlay功能后再开启ChanneldUE网络同步进行开发和调试。这样可以避免频繁地生成同步代码、启动专用服务器和网关。
->使用UE原生网络同步时请确保已关闭ChanneldUE的网络同步：
+### 使用原生UE进行开发迭代
+在日常的开发中，推荐先使用[原生UE网络同步](https://docs.unrealengine.com/4.27/zh-CN/InteractiveExperiences/Networking/Actors/)进行GamePlay的开发和调试。在实现GamePlay功能后再开启ChanneldUE网络同步进行开发和调试。这样可以避免频繁地生成同步代码、启动专用服务器和网关。
+>使用原生UE网络同步时请确保已关闭ChanneldUE的网络同步：
 >
 >![](../images/disable_channeld_networking.png)
 
 ### 使用ChanneldUE网络同步进行测试
-当实现了GamePlay功能并测试完成后，就可以使用ChanneldUE的网络同步来进行测试。
-#### 开启ChanneldUE网络同步
-开启ChanneldUE网络同步，使UE原生的网络同步切换到ChanneldUE网络同步：
+
+开启ChanneldUE网络同步，使原生UE的网络同步切换到ChanneldUE网络同步：
 
 ![](../images/enable_channeld_networking.png)
 
-#### 为Actor开启同步功能
-在UE原生网络同步配置的基础上还需要为Actor添加同步组件。ChannelUE支持为C++和蓝图Actor添加同步组件。具体操作如下：
+#### 为Actor开启基于ChanneldUE的同步
+使用了网络同步或RPC的Actor需要添加同步组件。具体操作如下：
 * 为C++ Actor添加同步组件
     1. Actor 类中声明`ChanneldReplicationComponent`组件
     ```
@@ -43,20 +42,18 @@
 * 为蓝图Actor中添加同步组件
     ![](../images/character_rep_component.png)
 
-##### 为已有项目的同步Actor添加同步组件
-除手动为同步Actor添加同步组件外，ChanneldUE提供了工具为已有项目中的Actor添加同步组件：
+##### 批量添加同步组件
+除手动为同步Actor添加同步组件外，ChanneldUE提供了工具为已有项目中的Actor批量添加同步组件：
 
 ![](../images/add_rep_comp_to_bpactor.png)
 
 >注意：该工具会加载项目中所有的Actor，如果项目中有大量的Actor，可能会导致加载时间过长，建议在仅在项目中途才使用ChanneldUE插件时使用一次该功能或者较小项目中使用该功能。
 
 #### 配置频道数据模型
-为同步Actor添加同步组件后还不足以使他们通过ChanneldUE同步，还需指定同步Actor的状态在哪个频道中同步。ChanneldUE通过频道数据模型来指定同步Actor的状态在哪个频道中同步。
+为同步Actor添加同步组件后，还需要配置频道数据模型来映射同步Actor和频道数据的关系。
 >频道数据模型详细说明和使用可参考[频道数据模型](./channel-data-schema.md)
 
-##### 打开频道数据模型编辑器
-
-频道数据模型需要在频道数据模型编辑器中进行配置。点击ChannelUE插件的`Editor Channel Data Schema` 按钮：
+点击ChannelUE插件的`Editor Channel Data Schema` 按钮：
 
 ![](../images/open_channel_data_schema_editor.png)
 
@@ -65,13 +62,12 @@
 <img src="../images/default_channel_data_schema_editor.png" height = "400" alt="" />
 
 ##### 将Actor状态添加到频道数据模型
-首先，需要更新同步Actor缓存。在频道数据编辑器上方点击`Refresh...`按钮：
+首先，如果同步缓存过期（出现黄色叹号），需要先对其进行更新。在频道数据编辑器上方点击`Refresh...`按钮：
 
 ![](../images/refresh_rep_actor_cache.png)
 
-等待同步Actor缓存更新完成后，就可以将新增的同步Actor状态添加到某一个频道数据下：
 
-![](../images/add_channel_data_state.png)
+同步缓存更新完成后，将新增的同步Actor映射到某一个频道数据下：（下图演示将`BP_TestRep`映射到全局频道。因为`BP_TestRep`依赖`StaticMeshComponent`组件，所以该组件也被同时添加到全局频道）
 
 ##### GameState
 通常GameState在服务器中只有唯一的实例，因此可以将GameState的状态设置为单例：
@@ -82,25 +78,21 @@
 >除了GameState外，如WorldSettings等都是单例，同样建议将其状态设置为单例。
 
 #### 生成同步代码
-配置完成频道数据模型后，需要生成C++的同步代码。同步代码主要是用来处理频道数据模型的状态同步的。
-
-##### 生成
 在频道数据编辑器上方点击`Generate...`按钮即可生成同步代码：
-
+配置完成频道数据模型后，需要生成C++的同步代码。同步代码主要是用来实现频道数据模型中的状态同步。
 ![](../images/generate_rep_code.png)
 
 ##### 热编译兼容模式
-ChannelUE提供了热编译兼容模式，该模式下每次生成同步代码后自动热编译项目源码，如果关闭热编译兼容模式则在生成同步代码后需要先关闭UE编辑器再通过源码编译。
+ChannelUE提供了热编译兼容模式，该模式下每次生成同步代码后自动热编译项目源码，如果关闭了热编译兼容模式，在下次运行游戏前，需要关闭UE编辑器并重新编译项目代码。
 
 ![](../images/enable_compatible_recompilation.png)
 
 >热编译兼容模式下每次生成的同步代码都会存在差异，所以在发布前建议关闭热编译兼容模式再生成一次同步代码。
 
 ### 本地测试
-由于ChanneldUE采用了分布式专用服务器的架构，所以在本地测试时需要启动多个专用服务器和网关。ChannelUE提供了专用服务器和网关的启动工具。
+由于ChanneldUE采用了分布式专用服务器的架构，所以在本地测试时需要启动channeld网关和多个专用服务器。ChanneldUE提供了相关的启动工具。
 
-#### 启动专用服务器和网关
-通过插件的二级菜单开启专用服务器和网关，步骤如下：
+通过插件的下拉菜单开启网关和专用服务器，步骤如下：
 
 ![](../images/toolbar_menu.png)
 <!-- ，但是请先确保`Launch Channeld`成功开启网关后再通过`Launch Servers`开启专用服务器。 -->
@@ -126,7 +118,7 @@ ChannelUE提供了热编译兼容模式，该模式下每次生成同步代码�
 
 ### 频道数据模型
 #### 频道数据模型定义文件
-频道数据模型定义文件建议通过版本控制工具进行版本控制，以保证多人协作时频道数据模型的一致性。频道数据模型定义文件路径为`Config/ChanneldChannelDataSchema.json`。
+频道数据模型定义文件建议通过版本控制工具进行版本控制，以保证多人协作时，生成的同步代码是一致的。频道数据模型定义文件路径为`Config/ChanneldChannelDataSchema.json`。
 
 #### 配置频道数据模型
 如果在配置频道数据模型之前通过版本控制变更了项目代码，那么请先[更新一次同步Actor缓存](#新增Actor)以确保频道数据状态能正确的显示在频道数据编辑器中。
@@ -135,14 +127,25 @@ ChannelUE提供了热编译兼容模式，该模式下每次生成同步代码�
 
 #### 重新生成一次同步代码
 如果通过版本控制变更了项目代码，建议执行如下操作：
-1. 先手动删除位于`Source/<游戏模块>/ChanneldGenerated`目录下的文件，确保能够顺利编译
+1. 如果更新了C++的同步Actor建议先手动删除位于`Source/<游戏模块>/ChanneldGenerated`目录下的文件，确保能够顺利编译
 2. [生成一次同步代码](#生成同步代码)
 >如使用git作为版本控制工具，可以在项目根目录下的`.git/hooks/post-merge`脚本中添加删除`Source/<游戏模块>/ChanneldGenerated`目录的逻辑。
 
 #### 无需上传至版本控制
+##### 同步代码
 推荐将ChanneldUE生成的同步代码忽略，以免版本控制工具将其纳入版本控制中。
 >如使用git作为版本控制工具，可以在项目根目录下的`.gitignore`文件中添加如下内容：
 >```
 ># ChanneldUE生成的同步代码
 >/Source/**/ChanneldGenerated
+>```
+
+##### channeld网关
+通常，channeld网关不会纳入版本控制。但是当开发者需要修改channeld网关源码并将其纳入版本控制时，推荐将ChanneldUE生成的同步代码忽略：
+
+>如使用git作为版本控制工具，可以在channeld网关根目录下的`.gitignore`文件中添加如下内容：
+>```
+># ChanneldUE生成的同步代码
+>cmd/gen_proto.*
+>channeldgenpb
 >```
