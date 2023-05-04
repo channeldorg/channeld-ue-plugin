@@ -40,6 +40,7 @@
     ```
 
 * 为蓝图Actor中添加同步组件
+
     ![](../images/character_rep_component.png)
 
 ##### 批量添加同步组件
