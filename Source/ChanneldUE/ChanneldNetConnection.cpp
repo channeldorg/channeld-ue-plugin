@@ -342,12 +342,16 @@ FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= fa
 	if (RemoteAddr)
 	{
 		if (bAppendPort)
-			RemoteAddr->SetPort(GetSendToChannelId()%(std::numeric_limits<uint16_t>::max()+1));
+		{
+			// Use the native UNetConnection::ConnectionId as the port (which is limited to 1024 by default).
+			// If we use the GetConnId(), FInternetAddrBSD::SetPort() will throw check error when ConnId > 65535.
+			RemoteAddr->SetPort(GetConnectionId());
+		}
 		return RemoteAddr->ToString(bAppendPort);
 	}
 	else
 	{
-		return bAppendPort ? FString::Printf(TEXT("0.0.0.0:%d"), GetSendToChannelId()) : TEXT("0.0.0.0");
+		return bAppendPort ? FString::Printf(TEXT("0.0.0.0:%d"), GetConnectionId()) : TEXT("0.0.0.0");
 	}
 }
 

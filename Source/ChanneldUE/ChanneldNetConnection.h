@@ -28,6 +28,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void ReceivedRawPacket(void* Data, int32 Count) override;
 
+	// Get the ConnectionID associated with channeld, which is different from the native UNetConnection::GetConnectionId().
 	FORCEINLINE Channeld::ConnectionId GetConnId() const
 	{
 		if (RemoteAddr.IsValid())
@@ -39,6 +40,7 @@ public:
 		return 0;
 	}
 
+	// Get the ChannelID used for SendData() when `ChId` is not specified.
 	Channeld::ChannelId GetSendToChannelId();
 	
 	// Send data between UE client and sever via channeld. MsgType should be in user space (>= 100).
