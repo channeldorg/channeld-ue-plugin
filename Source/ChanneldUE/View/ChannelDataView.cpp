@@ -500,7 +500,7 @@ void UChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConnId)
 void UChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkGUID NetId)
 {
 	// Don't broadcast the destroy of objects that are only spawned in the owning client.
-	if (Obj->IsA<APlayerState>() || Obj->IsA<APlayerController>())
+	if (Obj->IsA<APlayerController>())
 	{
 		return;
 	}
