@@ -183,13 +183,16 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 		return false;
 	}
 
-	// Apply AActor::NetUpdateFrequency
-	float t = GetWorld()->GetTimeSeconds();
-	if (t - LastUpdateTime < 1.0f / Owner->NetUpdateFrequency)
+	if (!IsRemoved())
 	{
-		return false;
+		// Apply AActor::NetUpdateFrequency
+		float t = GetWorld()->GetTimeSeconds();
+		if (t - LastUpdateTime < 1.0f / Owner->NetUpdateFrequency)
+		{
+			return false;
+		}
+		LastUpdateTime = t;
 	}
-	LastUpdateTime = t;
 
 	auto Processor = ChanneldReplication::FindChannelDataProcessor(UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()));
 	ensureMsgf(Processor, TEXT("Unable to find channel data processor for message: %s"), UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()));

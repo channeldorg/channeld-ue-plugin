@@ -536,11 +536,12 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 void USpatialChannelDataView::ServerHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	const auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
-	UE_LOG(LogChanneld, Log, TEXT("[Server] Sub %s conn %d to %s channel %d"),
+	UE_LOG(LogChanneld, Log, TEXT("[Server] Sub %s conn %d to %s channel %d, data access: %s"),
 		SubResultMsg->conntype() == channeldpb::CLIENT ? TEXT("client") : TEXT("server"),
 		SubResultMsg->connid(),
 		UTF8_TO_TCHAR(channeldpb::ChannelType_Name(SubResultMsg->channeltype()).c_str()),
-		ChId);
+		ChId,
+		UTF8_TO_TCHAR(channeldpb::ChannelDataAccess_Name(SubResultMsg->suboptions().dataaccess()).c_str()));
 	
 	if (SubResultMsg->channeltype() == channeldpb::SPATIAL)
 	{
@@ -947,7 +948,8 @@ void USpatialChannelDataView::InitServer()
 	Connection->SubToChannel(Channeld::GlobalChannelId, &SubOptions, [&](const channeldpb::SubscribedToChannelResultMessage* _)
 	{
 		channeldpb::ChannelSubscriptionOptions SpatialSubOptions;
-		SpatialSubOptions.set_skipselfupdatefanout(true);
+		SpatialSubOptions.set_dataaccess(channeldpb::WRITE_ACCESS);
+		
 		Connection->CreateSpatialChannel(TEXT(""), &SpatialSubOptions, ChannelInitData ? ChannelInitData->GetMessage() : nullptr, nullptr,
 			[](const channeldpb::CreateSpatialChannelsResultMessage* ResultMsg)
 		{
@@ -1410,7 +1412,7 @@ void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnecti
 
 	// Create the entity channel before sending spawn message
 	channeldpb::ChannelSubscriptionOptions SubOptions;
-	SubOptions.set_skipselfupdatefanout(true);
+	SubOptions.set_dataaccess(channeldpb::WRITE_ACCESS);
 	Connection->CreateEntityChannel(Channeld::GlobalChannelId, Obj, NetId, TEXT(""), &SubOptions, GetEntityData(Obj)/*nullptr*/, nullptr,
 		[this, Obj, NetConn, OwningConnId](const channeldpb::CreateChannelResultMessage* ResultMsg)
 		{
@@ -1447,7 +1449,7 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 	}
 	
 	channeldpb::ChannelSubscriptionOptions SubOptions;
-	SubOptions.set_skipselfupdatefanout(true);
+	SubOptions.set_dataaccess(channeldpb::WRITE_ACCESS);
 
 	Connection->CreateEntityChannel(SpatialChId, Obj, NetId.Value, bWellKnown ? TEXT("well-known") : TEXT(""), &SubOptions, GetEntityData(Obj)/*nullptr*/, nullptr,
 		[this, NetId, Obj, bWellKnown, OwningConnId, SpatialChId, NetDriver](const channeldpb::CreateChannelResultMessage* _)
@@ -1506,12 +1508,16 @@ void USpatialChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkG
 	{
 		return;
 	}
-	
+
+	int BroadcastType = channeldpb::ALL_BUT_SENDER;
 	// Don't broadcast the destroy of objects that are only spawned in the owning client.
 	// Spatial channels don't support Gameplayer Debugger yet.
-	if (Obj->IsA<APlayerState>() || Obj->IsA<APlayerController>() || Obj->GetClass()->GetFName() == GameplayerDebuggerClassName)
+	if (/*Obj->IsA<APlayerState>() ||*/ Obj->IsA<APlayerController>() || Obj->GetClass()->GetFName() == GameplayerDebuggerClassName)
 	{
-		return;
+		/* Still need to send the Destroy message to interested servers, and channeld to clean up the entity channel and SpatialEntityState.
+		// return;
+		*/
+		BroadcastType |= channeldpb::ALL_BUT_CLIENT;
 	}
 	
 	const auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
