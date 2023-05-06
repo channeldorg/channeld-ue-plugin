@@ -2807,6 +2807,7 @@ class CHANNELDUE_API SpatialEntityState final :
   enum : int {
     kObjRefFieldNumber = 1,
     kEntityDataFieldNumber = 3,
+    kRemovedFieldNumber = 2,
   };
   // .unrealpb.UnrealObjectRef objRef = 1;
   bool has_objref() const;
@@ -2844,6 +2845,15 @@ class CHANNELDUE_API SpatialEntityState final :
       ::PROTOBUF_NAMESPACE_ID::Any* entitydata);
   ::PROTOBUF_NAMESPACE_ID::Any* unsafe_arena_release_entitydata();
 
+  // bool removed = 2;
+  void clear_removed();
+  bool removed() const;
+  void set_removed(bool value);
+  private:
+  bool _internal_removed() const;
+  void _internal_set_removed(bool value);
+  public:
+
   // @@protoc_insertion_point(class_scope:unrealpb.SpatialEntityState)
  private:
   class _Internal;
@@ -2856,6 +2866,7 @@ class CHANNELDUE_API SpatialEntityState final :
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::unrealpb::UnrealObjectRef* objref_;
     ::PROTOBUF_NAMESPACE_ID::Any* entitydata_;
+    bool removed_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -11857,6 +11868,26 @@ inline void SpatialEntityState::set_allocated_objref(::unrealpb::UnrealObjectRef
   }
   _impl_.objref_ = objref;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.SpatialEntityState.objRef)
+}
+
+// bool removed = 2;
+inline void SpatialEntityState::clear_removed() {
+  _impl_.removed_ = false;
+}
+inline bool SpatialEntityState::_internal_removed() const {
+  return _impl_.removed_;
+}
+inline bool SpatialEntityState::removed() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SpatialEntityState.removed)
+  return _internal_removed();
+}
+inline void SpatialEntityState::_internal_set_removed(bool value) {
+  
+  _impl_.removed_ = value;
+}
+inline void SpatialEntityState::set_removed(bool value) {
+  _internal_set_removed(value);
+  // @@protoc_insertion_point(field_set:unrealpb.SpatialEntityState.removed)
 }
 
 // optional .google.protobuf.Any entityData = 3;
