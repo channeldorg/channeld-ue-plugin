@@ -52,6 +52,7 @@ public:
 protected:
 	virtual void ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId) override;
 
+	virtual void SendSpawnToClients_EntityChannelReady(const FNetworkGUID NetId, UObject* Obj, uint32 OwningConnId, Channeld::ChannelId SpatialChId);
 	virtual void SendSpawnToConn_EntityChannelReady(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId);
 	// The client need to destroy the objects that are no longer relevant to the client.
 	virtual void OnRemovedProvidersFromChannel(Channeld::ChannelId ChId, channeldpb::ChannelType ChannelType, const TSet<FProviderInternal>& RemovedProviders) override;
@@ -113,6 +114,10 @@ private:
 	UPROPERTY()
 	UChanneldNetConnection* NetConnForSpawn;
 
+	// Synchronize the NetworkGUIDs of the static and well-known objects across the spatial servers.
+	void SyncNetIds();
+	
+	void ServerHandleSyncNetId(UChanneldConnection* ChanneldConnection, unsigned I, const google::protobuf::Message* Message);
 	void ServerHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleGetHandoverContext(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleHandover(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);

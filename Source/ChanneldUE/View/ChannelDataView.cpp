@@ -232,6 +232,23 @@ void UChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* Provide
 	}
 }
 
+bool UChannelDataView::IsObjectProvider(UObject* Obj)
+{
+	if (Obj == nullptr)
+		return false;
+	
+	if (Obj->Implements<UChannelDataProvider>())
+	{
+		return true;
+	}
+	if (AActor* Actor = Cast<AActor>(Obj))
+	{
+		return Actor->GetComponentsByInterface(UChannelDataProvider::StaticClass()).Num() > 0;
+	}
+	
+	return false;
+}
+
 void UChannelDataView::AddObjectProvider(Channeld::ChannelId ChId, UObject* Obj)
 {
 	if (Obj == nullptr)

@@ -191,6 +191,12 @@ CHANNELDUE_API extern SpatialEntityStateDefaultTypeInternal _SpatialEntityState_
 class SpawnObjectMessage;
 struct SpawnObjectMessageDefaultTypeInternal;
 CHANNELDUE_API extern SpawnObjectMessageDefaultTypeInternal _SpawnObjectMessage_default_instance_;
+class SyncNetIdMessage;
+struct SyncNetIdMessageDefaultTypeInternal;
+CHANNELDUE_API extern SyncNetIdMessageDefaultTypeInternal _SyncNetIdMessage_default_instance_;
+class SyncNetIdMessage_NetIdPath;
+struct SyncNetIdMessage_NetIdPathDefaultTypeInternal;
+CHANNELDUE_API extern SyncNetIdMessage_NetIdPathDefaultTypeInternal _SyncNetIdMessage_NetIdPath_default_instance_;
 class UnrealObjectRef;
 struct UnrealObjectRefDefaultTypeInternal;
 CHANNELDUE_API extern UnrealObjectRefDefaultTypeInternal _UnrealObjectRef_default_instance_;
@@ -246,6 +252,8 @@ template<> CHANNELDUE_API ::unrealpb::SpatialChannelData* Arena::CreateMaybeMess
 template<> CHANNELDUE_API ::unrealpb::SpatialChannelData_EntitiesEntry_DoNotUse* Arena::CreateMaybeMessage<::unrealpb::SpatialChannelData_EntitiesEntry_DoNotUse>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::SpatialEntityState* Arena::CreateMaybeMessage<::unrealpb::SpatialEntityState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::SpawnObjectMessage* Arena::CreateMaybeMessage<::unrealpb::SpawnObjectMessage>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::SyncNetIdMessage* Arena::CreateMaybeMessage<::unrealpb::SyncNetIdMessage>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::SyncNetIdMessage_NetIdPath* Arena::CreateMaybeMessage<::unrealpb::SyncNetIdMessage_NetIdPath>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::UnrealObjectRef* Arena::CreateMaybeMessage<::unrealpb::UnrealObjectRef>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::UnrealObjectRef_GuidCachedObject* Arena::CreateMaybeMessage<::unrealpb::UnrealObjectRef_GuidCachedObject>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
@@ -260,6 +268,7 @@ enum MessageType : int {
   DESTROY = 104,
   HANDOVER_CONTEXT = 105,
   GET_UNREAL_OBJECT_REF = 106,
+  SYNC_NET_ID = 107,
   SERVER_PLAYER_SPAWNED = 201,
   SERVER_PLAYER_LEAVE = 202,
   MessageType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
@@ -2684,6 +2693,329 @@ class CHANNELDUE_API GetUnrealObjectRefResultMessage final :
 };
 // -------------------------------------------------------------------
 
+class CHANNELDUE_API SyncNetIdMessage_NetIdPath final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.SyncNetIdMessage.NetIdPath) */ {
+ public:
+  inline SyncNetIdMessage_NetIdPath() : SyncNetIdMessage_NetIdPath(nullptr) {}
+  ~SyncNetIdMessage_NetIdPath() override;
+  explicit PROTOBUF_CONSTEXPR SyncNetIdMessage_NetIdPath(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  SyncNetIdMessage_NetIdPath(const SyncNetIdMessage_NetIdPath& from);
+  SyncNetIdMessage_NetIdPath(SyncNetIdMessage_NetIdPath&& from) noexcept
+    : SyncNetIdMessage_NetIdPath() {
+    *this = ::std::move(from);
+  }
+
+  inline SyncNetIdMessage_NetIdPath& operator=(const SyncNetIdMessage_NetIdPath& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SyncNetIdMessage_NetIdPath& operator=(SyncNetIdMessage_NetIdPath&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const SyncNetIdMessage_NetIdPath& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const SyncNetIdMessage_NetIdPath* internal_default_instance() {
+    return reinterpret_cast<const SyncNetIdMessage_NetIdPath*>(
+               &_SyncNetIdMessage_NetIdPath_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    13;
+
+  friend void swap(SyncNetIdMessage_NetIdPath& a, SyncNetIdMessage_NetIdPath& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SyncNetIdMessage_NetIdPath* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SyncNetIdMessage_NetIdPath* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  SyncNetIdMessage_NetIdPath* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<SyncNetIdMessage_NetIdPath>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const SyncNetIdMessage_NetIdPath& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const SyncNetIdMessage_NetIdPath& from) {
+    SyncNetIdMessage_NetIdPath::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SyncNetIdMessage_NetIdPath* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.SyncNetIdMessage.NetIdPath";
+  }
+  protected:
+  explicit SyncNetIdMessage_NetIdPath(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kPathFieldNumber = 2,
+    kNetIdFieldNumber = 1,
+  };
+  // string path = 2;
+  void clear_path();
+  const std::string& path() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_path(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_path();
+  PROTOBUF_NODISCARD std::string* release_path();
+  void set_allocated_path(std::string* path);
+  private:
+  const std::string& _internal_path() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_path(const std::string& value);
+  std::string* _internal_mutable_path();
+  public:
+
+  // uint32 netId = 1;
+  void clear_netid();
+  uint32_t netid() const;
+  void set_netid(uint32_t value);
+  private:
+  uint32_t _internal_netid() const;
+  void _internal_set_netid(uint32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:unrealpb.SyncNetIdMessage.NetIdPath)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr path_;
+    uint32_t netid_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API SyncNetIdMessage final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.SyncNetIdMessage) */ {
+ public:
+  inline SyncNetIdMessage() : SyncNetIdMessage(nullptr) {}
+  ~SyncNetIdMessage() override;
+  explicit PROTOBUF_CONSTEXPR SyncNetIdMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  SyncNetIdMessage(const SyncNetIdMessage& from);
+  SyncNetIdMessage(SyncNetIdMessage&& from) noexcept
+    : SyncNetIdMessage() {
+    *this = ::std::move(from);
+  }
+
+  inline SyncNetIdMessage& operator=(const SyncNetIdMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SyncNetIdMessage& operator=(SyncNetIdMessage&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const SyncNetIdMessage& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const SyncNetIdMessage* internal_default_instance() {
+    return reinterpret_cast<const SyncNetIdMessage*>(
+               &_SyncNetIdMessage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    14;
+
+  friend void swap(SyncNetIdMessage& a, SyncNetIdMessage& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SyncNetIdMessage* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SyncNetIdMessage* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  SyncNetIdMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<SyncNetIdMessage>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const SyncNetIdMessage& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const SyncNetIdMessage& from) {
+    SyncNetIdMessage::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SyncNetIdMessage* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.SyncNetIdMessage";
+  }
+  protected:
+  explicit SyncNetIdMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  typedef SyncNetIdMessage_NetIdPath NetIdPath;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kNetIdPathsFieldNumber = 1,
+  };
+  // repeated .unrealpb.SyncNetIdMessage.NetIdPath netIdPaths = 1;
+  int netidpaths_size() const;
+  private:
+  int _internal_netidpaths_size() const;
+  public:
+  void clear_netidpaths();
+  ::unrealpb::SyncNetIdMessage_NetIdPath* mutable_netidpaths(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::SyncNetIdMessage_NetIdPath >*
+      mutable_netidpaths();
+  private:
+  const ::unrealpb::SyncNetIdMessage_NetIdPath& _internal_netidpaths(int index) const;
+  ::unrealpb::SyncNetIdMessage_NetIdPath* _internal_add_netidpaths();
+  public:
+  const ::unrealpb::SyncNetIdMessage_NetIdPath& netidpaths(int index) const;
+  ::unrealpb::SyncNetIdMessage_NetIdPath* add_netidpaths();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::SyncNetIdMessage_NetIdPath >&
+      netidpaths() const;
+
+  // @@protoc_insertion_point(class_scope:unrealpb.SyncNetIdMessage)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::SyncNetIdMessage_NetIdPath > netidpaths_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
 class CHANNELDUE_API SpatialEntityState final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.SpatialEntityState) */ {
  public:
@@ -2732,7 +3064,7 @@ class CHANNELDUE_API SpatialEntityState final :
                &_SpatialEntityState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    15;
 
   friend void swap(SpatialEntityState& a, SpatialEntityState& b) {
     a.Swap(&b);
@@ -2945,7 +3277,7 @@ class CHANNELDUE_API SpatialChannelData final :
                &_SpatialChannelData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    17;
 
   friend void swap(SpatialChannelData& a, SpatialChannelData& b) {
     a.Swap(&b);
@@ -3108,7 +3440,7 @@ class CHANNELDUE_API FRepMovement final :
                &_FRepMovement_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    18;
 
   friend void swap(FRepMovement& a, FRepMovement& b) {
     a.Swap(&b);
@@ -3356,7 +3688,7 @@ class CHANNELDUE_API FRepAttachment final :
                &_FRepAttachment_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    19;
 
   friend void swap(FRepAttachment& a, FRepAttachment& b) {
     a.Swap(&b);
@@ -3614,7 +3946,7 @@ class CHANNELDUE_API ActorState final :
                &_ActorState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    20;
 
   friend void swap(ActorState& a, ActorState& b) {
     a.Swap(&b);
@@ -3948,7 +4280,7 @@ class CHANNELDUE_API ActorComponentState final :
                &_ActorComponentState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    19;
+    21;
 
   friend void swap(ActorComponentState& a, ActorComponentState& b) {
     a.Swap(&b);
@@ -4127,7 +4459,7 @@ class CHANNELDUE_API SceneComponentState final :
                &_SceneComponentState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    20;
+    22;
 
   friend void swap(SceneComponentState& a, SceneComponentState& b) {
     a.Swap(&b);
@@ -4501,7 +4833,7 @@ class CHANNELDUE_API FBasedMovementInfo final :
                &_FBasedMovementInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    23;
 
   friend void swap(FBasedMovementInfo& a, FBasedMovementInfo& b) {
     a.Swap(&b);
@@ -4764,7 +5096,7 @@ class CHANNELDUE_API FRootMotionSource_FRootMotionFinishVelocitySettings final :
                &_FRootMotionSource_FRootMotionFinishVelocitySettings_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    24;
 
   friend void swap(FRootMotionSource_FRootMotionFinishVelocitySettings& a, FRootMotionSource_FRootMotionFinishVelocitySettings& b) {
     a.Swap(&b);
@@ -4952,7 +5284,7 @@ class CHANNELDUE_API FRootMotionSource final :
                &_FRootMotionSource_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    25;
 
   friend void swap(FRootMotionSource& a, FRootMotionSource& b) {
     a.Swap(&b);
@@ -5342,7 +5674,7 @@ class CHANNELDUE_API FRootMotionSourceGroup final :
                &_FRootMotionSourceGroup_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    26;
 
   friend void swap(FRootMotionSourceGroup& a, FRootMotionSourceGroup& b) {
     a.Swap(&b);
@@ -5615,7 +5947,7 @@ class CHANNELDUE_API FRepRootMotionMontage final :
                &_FRepRootMotionMontage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    27;
 
   friend void swap(FRepRootMotionMontage& a, FRepRootMotionMontage& b) {
     a.Swap(&b);
@@ -5973,7 +6305,7 @@ class CHANNELDUE_API CharacterState final :
                &_CharacterState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    28;
 
   friend void swap(CharacterState& a, CharacterState& b) {
     a.Swap(&b);
@@ -6241,7 +6573,7 @@ class CHANNELDUE_API Character_ServerMovePacked_Params final :
                &_Character_ServerMovePacked_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    29;
 
   friend void swap(Character_ServerMovePacked_Params& a, Character_ServerMovePacked_Params& b) {
     a.Swap(&b);
@@ -6405,7 +6737,7 @@ class CHANNELDUE_API Character_ClientMoveResponsePacked_Params final :
                &_Character_ClientMoveResponsePacked_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    30;
 
   friend void swap(Character_ClientMoveResponsePacked_Params& a, Character_ClientMoveResponsePacked_Params& b) {
     a.Swap(&b);
@@ -6569,7 +6901,7 @@ class CHANNELDUE_API PlayerState final :
                &_PlayerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    31;
 
   friend void swap(PlayerState& a, PlayerState& b) {
     a.Swap(&b);
@@ -6772,7 +7104,7 @@ class CHANNELDUE_API ControllerState final :
                &_ControllerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    32;
 
   friend void swap(ControllerState& a, ControllerState& b) {
     a.Swap(&b);
@@ -6949,7 +7281,7 @@ class CHANNELDUE_API Controller_ClientSetLocation_Params final :
                &_Controller_ClientSetLocation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    33;
 
   friend void swap(Controller_ClientSetLocation_Params& a, Controller_ClientSetLocation_Params& b) {
     a.Swap(&b);
@@ -7126,7 +7458,7 @@ class CHANNELDUE_API Controller_ClientSetRotation_Params final :
                &_Controller_ClientSetRotation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    34;
 
   friend void swap(Controller_ClientSetRotation_Params& a, Controller_ClientSetRotation_Params& b) {
     a.Swap(&b);
@@ -7294,7 +7626,7 @@ class CHANNELDUE_API PlayerControllerState final :
                &_PlayerControllerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    35;
 
   friend void swap(PlayerControllerState& a, PlayerControllerState& b) {
     a.Swap(&b);
@@ -7472,7 +7804,7 @@ class CHANNELDUE_API PlayerController_ServerUpdateCamera_Params final :
                &_PlayerController_ServerUpdateCamera_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    36;
 
   friend void swap(PlayerController_ServerUpdateCamera_Params& a, PlayerController_ServerUpdateCamera_Params& b) {
     a.Swap(&b);
@@ -7640,7 +7972,7 @@ class CHANNELDUE_API PlayerController_ClientSetHUD_Params final :
                &_PlayerController_ClientSetHUD_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    37;
 
   friend void swap(PlayerController_ClientSetHUD_Params& a, PlayerController_ClientSetHUD_Params& b) {
     a.Swap(&b);
@@ -7798,7 +8130,7 @@ class CHANNELDUE_API PlayerController_ClientSetViewTarget_Params final :
                &_PlayerController_ClientSetViewTarget_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    38;
 
   friend void swap(PlayerController_ClientSetViewTarget_Params& a, PlayerController_ClientSetViewTarget_Params& b) {
     a.Swap(&b);
@@ -7999,7 +8331,7 @@ class CHANNELDUE_API PlayerController_ClientEnableNetworkVoice_Params final :
                &_PlayerController_ClientEnableNetworkVoice_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    39;
 
   friend void swap(PlayerController_ClientEnableNetworkVoice_Params& a, PlayerController_ClientEnableNetworkVoice_Params& b) {
     a.Swap(&b);
@@ -8152,7 +8484,7 @@ class CHANNELDUE_API PlayerController_ClientCapBandwidth_Params final :
                &_PlayerController_ClientCapBandwidth_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    38;
+    40;
 
   friend void swap(PlayerController_ClientCapBandwidth_Params& a, PlayerController_ClientCapBandwidth_Params& b) {
     a.Swap(&b);
@@ -8300,7 +8632,7 @@ class CHANNELDUE_API PlayerController_ClientRestart_Params final :
                &_PlayerController_ClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    41;
 
   friend void swap(PlayerController_ClientRestart_Params& a, PlayerController_ClientRestart_Params& b) {
     a.Swap(&b);
@@ -8457,7 +8789,7 @@ class CHANNELDUE_API PlayerController_ClientSetCameraMode_Params final :
                &_PlayerController_ClientSetCameraMode_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    40;
+    42;
 
   friend void swap(PlayerController_ClientSetCameraMode_Params& a, PlayerController_ClientSetCameraMode_Params& b) {
     a.Swap(&b);
@@ -8610,7 +8942,7 @@ class CHANNELDUE_API PlayerController_ClientRetryClientRestart_Params final :
                &_PlayerController_ClientRetryClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    41;
+    43;
 
   friend void swap(PlayerController_ClientRetryClientRestart_Params& a, PlayerController_ClientRetryClientRestart_Params& b) {
     a.Swap(&b);
@@ -8767,7 +9099,7 @@ class CHANNELDUE_API PlayerController_ServerSetSpectatorLocation_Params final :
                &_PlayerController_ServerSetSpectatorLocation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    42;
+    44;
 
   friend void swap(PlayerController_ServerSetSpectatorLocation_Params& a, PlayerController_ServerSetSpectatorLocation_Params& b) {
     a.Swap(&b);
@@ -8944,7 +9276,7 @@ class CHANNELDUE_API PlayerController_ServerAcknowledgePossession_Params final :
                &_PlayerController_ServerAcknowledgePossession_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    43;
+    45;
 
   friend void swap(PlayerController_ServerAcknowledgePossession_Params& a, PlayerController_ServerAcknowledgePossession_Params& b) {
     a.Swap(&b);
@@ -9101,7 +9433,7 @@ class CHANNELDUE_API PlayerController_ClientGotoState_Params final :
                &_PlayerController_ClientGotoState_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    44;
+    46;
 
   friend void swap(PlayerController_ClientGotoState_Params& a, PlayerController_ClientGotoState_Params& b) {
     a.Swap(&b);
@@ -9254,7 +9586,7 @@ class CHANNELDUE_API PlayerController_ClientReceiveLocalizedMessage_Params final
                &_PlayerController_ClientReceiveLocalizedMessage_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    45;
+    47;
 
   friend void swap(PlayerController_ClientReceiveLocalizedMessage_Params& a, PlayerController_ClientReceiveLocalizedMessage_Params& b) {
     a.Swap(&b);
@@ -9478,7 +9810,7 @@ class CHANNELDUE_API GameStateBase final :
                &_GameStateBase_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    46;
+    48;
 
   friend void swap(GameStateBase& a, GameStateBase& b) {
     a.Swap(&b);
@@ -9686,7 +10018,7 @@ class CHANNELDUE_API PawnState final :
                &_PawnState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    47;
+    49;
 
   friend void swap(PawnState& a, PawnState& b) {
     a.Swap(&b);
@@ -9879,7 +10211,7 @@ class CHANNELDUE_API FClientAdjustment final :
                &_FClientAdjustment_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    48;
+    50;
 
   friend void swap(FClientAdjustment& a, FClientAdjustment& b) {
     a.Swap(&b);
@@ -11774,6 +12106,124 @@ inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObject
 GetUnrealObjectRefResultMessage::objref() const {
   // @@protoc_insertion_point(field_list:unrealpb.GetUnrealObjectRefResultMessage.objRef)
   return _impl_.objref_;
+}
+
+// -------------------------------------------------------------------
+
+// SyncNetIdMessage_NetIdPath
+
+// uint32 netId = 1;
+inline void SyncNetIdMessage_NetIdPath::clear_netid() {
+  _impl_.netid_ = 0u;
+}
+inline uint32_t SyncNetIdMessage_NetIdPath::_internal_netid() const {
+  return _impl_.netid_;
+}
+inline uint32_t SyncNetIdMessage_NetIdPath::netid() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SyncNetIdMessage.NetIdPath.netId)
+  return _internal_netid();
+}
+inline void SyncNetIdMessage_NetIdPath::_internal_set_netid(uint32_t value) {
+  
+  _impl_.netid_ = value;
+}
+inline void SyncNetIdMessage_NetIdPath::set_netid(uint32_t value) {
+  _internal_set_netid(value);
+  // @@protoc_insertion_point(field_set:unrealpb.SyncNetIdMessage.NetIdPath.netId)
+}
+
+// string path = 2;
+inline void SyncNetIdMessage_NetIdPath::clear_path() {
+  _impl_.path_.ClearToEmpty();
+}
+inline const std::string& SyncNetIdMessage_NetIdPath::path() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SyncNetIdMessage.NetIdPath.path)
+  return _internal_path();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void SyncNetIdMessage_NetIdPath::set_path(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.path_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:unrealpb.SyncNetIdMessage.NetIdPath.path)
+}
+inline std::string* SyncNetIdMessage_NetIdPath::mutable_path() {
+  std::string* _s = _internal_mutable_path();
+  // @@protoc_insertion_point(field_mutable:unrealpb.SyncNetIdMessage.NetIdPath.path)
+  return _s;
+}
+inline const std::string& SyncNetIdMessage_NetIdPath::_internal_path() const {
+  return _impl_.path_.Get();
+}
+inline void SyncNetIdMessage_NetIdPath::_internal_set_path(const std::string& value) {
+  
+  _impl_.path_.Set(value, GetArenaForAllocation());
+}
+inline std::string* SyncNetIdMessage_NetIdPath::_internal_mutable_path() {
+  
+  return _impl_.path_.Mutable(GetArenaForAllocation());
+}
+inline std::string* SyncNetIdMessage_NetIdPath::release_path() {
+  // @@protoc_insertion_point(field_release:unrealpb.SyncNetIdMessage.NetIdPath.path)
+  return _impl_.path_.Release();
+}
+inline void SyncNetIdMessage_NetIdPath::set_allocated_path(std::string* path) {
+  if (path != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.path_.SetAllocated(path, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.path_.IsDefault()) {
+    _impl_.path_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.SyncNetIdMessage.NetIdPath.path)
+}
+
+// -------------------------------------------------------------------
+
+// SyncNetIdMessage
+
+// repeated .unrealpb.SyncNetIdMessage.NetIdPath netIdPaths = 1;
+inline int SyncNetIdMessage::_internal_netidpaths_size() const {
+  return _impl_.netidpaths_.size();
+}
+inline int SyncNetIdMessage::netidpaths_size() const {
+  return _internal_netidpaths_size();
+}
+inline void SyncNetIdMessage::clear_netidpaths() {
+  _impl_.netidpaths_.Clear();
+}
+inline ::unrealpb::SyncNetIdMessage_NetIdPath* SyncNetIdMessage::mutable_netidpaths(int index) {
+  // @@protoc_insertion_point(field_mutable:unrealpb.SyncNetIdMessage.netIdPaths)
+  return _impl_.netidpaths_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::SyncNetIdMessage_NetIdPath >*
+SyncNetIdMessage::mutable_netidpaths() {
+  // @@protoc_insertion_point(field_mutable_list:unrealpb.SyncNetIdMessage.netIdPaths)
+  return &_impl_.netidpaths_;
+}
+inline const ::unrealpb::SyncNetIdMessage_NetIdPath& SyncNetIdMessage::_internal_netidpaths(int index) const {
+  return _impl_.netidpaths_.Get(index);
+}
+inline const ::unrealpb::SyncNetIdMessage_NetIdPath& SyncNetIdMessage::netidpaths(int index) const {
+  // @@protoc_insertion_point(field_get:unrealpb.SyncNetIdMessage.netIdPaths)
+  return _internal_netidpaths(index);
+}
+inline ::unrealpb::SyncNetIdMessage_NetIdPath* SyncNetIdMessage::_internal_add_netidpaths() {
+  return _impl_.netidpaths_.Add();
+}
+inline ::unrealpb::SyncNetIdMessage_NetIdPath* SyncNetIdMessage::add_netidpaths() {
+  ::unrealpb::SyncNetIdMessage_NetIdPath* _add = _internal_add_netidpaths();
+  // @@protoc_insertion_point(field_add:unrealpb.SyncNetIdMessage.netIdPaths)
+  return _add;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::SyncNetIdMessage_NetIdPath >&
+SyncNetIdMessage::netidpaths() const {
+  // @@protoc_insertion_point(field_list:unrealpb.SyncNetIdMessage.netIdPaths)
+  return _impl_.netidpaths_;
 }
 
 // -------------------------------------------------------------------
@@ -20351,6 +20801,10 @@ inline void FClientAdjustment::set_movementmode(uint32_t value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
