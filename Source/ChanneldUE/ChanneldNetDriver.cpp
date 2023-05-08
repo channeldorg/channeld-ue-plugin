@@ -608,6 +608,13 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	{
 		return;
 	}
+	
+	/* Newly spawned actor always has LocalRole = Authority
+	*/
+	if (!Actor->HasAuthority())
+	{
+		return;
+	}
 
 	if (Actor->HasDeferredComponentRegistration())
 	{
@@ -618,13 +625,6 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 
 	// Make sure the NetGUID exists.
 	FNetworkGUID NetId = GuidCache->GetOrAssignNetGUID(Actor);
-	
-	/* Newly spawned actor always has LocalRole = Authority
-	if (!Actor->HasAuthority())
-	{
-		return;
-	}
-	*/
 
 	/* Moved to UChanneldGameInstanceSubsystem::OnActorSpawned
 	UChanneldGameInstanceSubsystem* ChanneldSubsystem = GetSubsystem();
