@@ -14,21 +14,6 @@ namespace Channeld
 
 	typedef uint32 EntityId;
 
-	/* Moved the definitions to unreal_common.proto
-	// User-space message types used in ChanneldUE
-	enum MessageType : uint32 {
-		// Used by LowLevelSend in NetConnection/NetDriver.
-		MessageType_LOW_LEVEL = 100,
-		// Used by ChanneldGameInstanceSubsystem to broadcast the ProtoMessageObject from server side. The message is packed as google::protobuf::any to support anonymous types.
-		MessageType_ANY = 101,
-		// Used by ReplicationDriver to send/receive UE's native RPC.
-		MessageType_RPC = 102,
-		MessageType_SPAWN = 103,
-		MessageType_DESTROY = 104,
-		MessageType_SERVER_PLAYER_SPAWNED = 201,
-	};
-	*/
-
 	/*
 	UENUM(BlueprintType)
 	enum class EChannelId : ChannelId

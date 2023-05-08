@@ -5,6 +5,7 @@
 #include "ChanneldNetDriver.h"
 #include "ChanneldUtils.h"
 #include "ChanneldMetrics.h"
+#include "EngineUtils.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/DataChannel.h"
@@ -805,6 +806,24 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 				*/
 			}
 		}
+		/*
+		else
+		{
+			// The object has just been deleted, don't re-spawn it here.
+			if (SuppressedNetIdsToResolve.Contains(NetGUID.Value))
+			{
+				UE_LOG(LogChanneld, Verbose, TEXT("The object has just been deleted during recent handover, ignore resolving it: %d"), NetGUID.Value);
+			}
+			else
+			{
+				unrealpb::GetUnrealObjectRefMessage Msg;
+				Msg.add_netguid(NetGUID.Value);
+				ResolvingNetGUIDs.Add(NetGUID.Value);
+				Connection->Send(ChId, unrealpb::GET_UNREAL_OBJECT_REF, Msg);
+				UE_LOG(LogChanneld, Verbose, TEXT("Sent GetUnrealObjectRefMessage to channel %d, NetId: %d"), ChId, NetGUID.Value);
+			}
+		}
+		*/
 	}
 
 	if (ChannelType != EChanneldChannelType::ECT_Spatial)
@@ -929,6 +948,8 @@ void USpatialChannelDataView::InitServer()
 	
 	Connection->AddMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, this, &USpatialChannelDataView::ServerHandleHandover);
 
+	Connection->RegisterMessageHandler(unrealpb::SYNC_NET_ID, new channeldpb::ServerForwardMessage, this, &USpatialChannelDataView::ServerHandleSyncNetId);
+
 	Connection->RegisterMessageHandler(unrealpb::SERVER_PLAYER_LEAVE, new channeldpb::ServerForwardMessage, [&](UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 	{
 		channeldpb::UnsubscribedFromChannelResultMessage UnsubMsg;
@@ -951,7 +972,7 @@ void USpatialChannelDataView::InitServer()
 		SpatialSubOptions.set_dataaccess(channeldpb::WRITE_ACCESS);
 		
 		Connection->CreateSpatialChannel(TEXT(""), &SpatialSubOptions, ChannelInitData ? ChannelInitData->GetMessage() : nullptr, nullptr,
-			[](const channeldpb::CreateSpatialChannelsResultMessage* ResultMsg)
+			[this](const channeldpb::CreateSpatialChannelsResultMessage* ResultMsg)
 		{
 			FString StrChIds;
 			for (int i = 0; i < ResultMsg->spatialchannelid_size(); i++)
@@ -961,21 +982,120 @@ void USpatialChannelDataView::InitServer()
 					StrChIds.AppendChar(',');
 			}
 			UE_LOG(LogChanneld, Log, TEXT("Created spatial channels: %s"), *StrChIds);
+
+			SyncNetIds();
 		});
 	});
+}
 
-	/*
-	FGameModeEvents::GameModePostLoginEvent.AddLambda([&](AGameModeBase* GameMode, APlayerController* NewPlayer)
+void USpatialChannelDataView::SyncNetIds()
+{
+	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
 	{
-		APawn* NewPawn = NewPlayer->GetPawn();
+		TArray<AActor*> Actors;
+		TArray<FVector> ActorPositions;
+		for(TActorIterator<AActor> It(GetWorld(), AActor::StaticClass()); It; ++It)
+		{
+			AActor* Actor = *It;
+			if (/*Actor->GetIsReplicated() &&*/ !Actor->IsA<AInfo>())
+			{
+				Actors.Add(Actor);
+				ActorPositions.Add(Actor->GetActorLocation());
+			}
+		}
 
-		unrealpb::ServerSpawnedPlayerMessage Msg;
-		Msg.set_clientconnid(CastChecked<UChanneldNetConnection>(NewPlayer->GetNetConnection())->GetConnId());
-		Msg.mutable_startpos()->CopyFrom(ChanneldUtils::GetVectorPB(NewPawn->GetActorLocation()));
-		// Send to Master server
-		Connection->Send(Channeld::GlobalChannelId, unrealpb::SERVER_PLAYER_SPAWNED, Msg);
-	});
-	*/
+		Connection->QuerySpatialChannel(ActorPositions, [this, NetDriver, Actors](const channeldpb::QuerySpatialChannelResultMessage* ResultMsg)
+		{
+			unrealpb::SyncNetIdMessage SyncMsg;
+			for (int i = 0; i < ResultMsg->channelid_size(); i++)
+			{
+				Channeld::ChannelId SpatialChId = ResultMsg->channelid(i);
+				AActor* Actor = Actors[i];
+				UE_LOG(LogChanneld, Log, TEXT("Queried spatial channelId %d for static actor: %s"), SpatialChId, *Actor->GetName());
+				
+				FNetworkGUID NetId = NetDriver->GuidCache->GetOrAssignNetGUID(Actor);
+				SetOwningChannelId(NetId, SpatialChId);
+				AddObjectProvider(SpatialChId, Actors[i]);
+
+				if (!Connection->OwnedChannels.Contains(SpatialChId))
+				{
+					continue;
+				}
+
+				auto NetIdPath = SyncMsg.add_netidpaths();
+				NetIdPath->set_netid(NetId.Value);
+				NetIdPath->set_path(TCHAR_TO_UTF8(*Actor->GetPathName()));//NetDriver->GuidCache->FullNetGUIDPath(NetId)));
+
+				// Create the entity channel for the channel data provider.
+				if (IsObjectProvider(Actor))
+				{
+					channeldpb::ChannelSubscriptionOptions SubOptions;
+					SubOptions.set_dataaccess(channeldpb::WRITE_ACCESS);
+					Connection->CreateEntityChannel(SpatialChId, Actor, NetId.Value, TEXT(""), &SubOptions, GetEntityData(Actor)/*nullptr*/, nullptr,
+					[this, Actor](const channeldpb::CreateChannelResultMessage* ResultMsg)
+					{
+						AddObjectProvider(ResultMsg->channelid(), Actor);
+					});
+				}
+			}
+
+			if (SyncMsg.netidpaths_size() > 0)
+			{
+				Connection->Broadcast(Channeld::GlobalChannelId, unrealpb::SYNC_NET_ID, SyncMsg, channeldpb::ALL_BUT_CLIENT | channeldpb::ALL_BUT_SENDER);
+			}
+		});
+	}
+}
+
+void USpatialChannelDataView::ServerHandleSyncNetId(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
+	if (!NetDriver)
+	{
+		return;
+	}
+	
+	unrealpb::SyncNetIdMessage SyncMsg;
+	if (!SyncMsg.ParseFromString(static_cast<const channeldpb::ServerForwardMessage*>(Msg)->payload()))
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to parse the payload of the SYNC_NET_ID message"));
+		return;
+	}
+	
+	for (int i = 0; i < SyncMsg.netidpaths_size(); i++)
+	{
+		const auto& NetIdPath = SyncMsg.netidpaths(i);
+		FNetworkGUID NetId(NetIdPath.netid());
+		FString Path(UTF8_TO_TCHAR(NetIdPath.path().c_str()));
+		UE_LOG(LogChanneld, Log, TEXT("[Server] Syncing %s with NetId: %d"), *Path, NetId.Value);
+
+		for (auto It = NetDriver->GuidCache->ObjectLookup.CreateIterator(); It; ++It)
+		{
+			FNetGuidCacheObject CachedObj = It.Value();
+			if (CachedObj.Object.IsValid() && CachedObj.Object->GetPathName() == Path)
+			{
+				UE_LOG(LogChanneld, Log, TEXT("[Server] Replacing cached %s with NetId: %d -> %d"), *It.Value().Object->GetName(), It.Key().Value, NetId.Value);
+				NetDriver->GuidCache->ObjectLookup.Emplace(NetId, CachedObj);
+				NetDriver->GuidCache->NetGUIDLookup.Emplace(CachedObj.Object, NetId);
+
+				// Update the NetId->ChannelId mapping.
+				Channeld::ChannelId SpatialChId;
+				if (NetIdOwningChannels.RemoveAndCopyValue(It.Key(), SpatialChId))
+				{
+					SetOwningChannelId(NetId, SpatialChId);
+				}
+				
+				// The server should have no authority over the actor with the sync NetId.
+				if (AActor* Actor = Cast<AActor>(CachedObj.Object.Get()))
+				{
+					Actor->SetRole(ROLE_SimulatedProxy);
+				}
+				
+				It.RemoveCurrent();
+				break;
+			}
+		}
+	}
 }
 
 void USpatialChannelDataView::ClientHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
@@ -1424,6 +1544,53 @@ void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnecti
 	UE_LOG(LogChanneld, Verbose, TEXT("Creating entity channel for obj: %s, netId: %d"), *Obj->GetName(), NetId);
 }
 
+void USpatialChannelDataView::SendSpawnToClients_EntityChannelReady(const FNetworkGUID NetId, UObject* Obj, uint32 OwningConnId, Channeld::ChannelId SpatialChId)
+{
+	unrealpb::SpawnObjectMessage SpawnMsg;
+	
+	// As we don't have any specific NetConnection to export the NetId, use a virtual one.
+	SpawnMsg.mutable_obj()->CopyFrom(*ChanneldUtils::GetRefOfObject(Obj, NetConnForSpawn, true));
+	/* Moved to ChanneldUtils::GetRefOfObject
+	// Clear the export map and ack state so everytime we can get a full export.
+	ResetNetConnForSpawn();
+	*/
+
+	bool bWellKnown = false;
+	if (const AActor* Actor = Cast<AActor>(Obj))
+	{
+		bWellKnown = Actor->bAlwaysRelevant;
+		// Broadcast the EntityChannelCreated event to the actor so it can do some initialization.
+		if (auto RepComp = Cast<UChanneldReplicationComponent>(Actor->GetComponentByClass(UChanneldReplicationComponent::StaticClass())))
+		{
+			RepComp->OnEntityChannelCreated.Broadcast(NetId.Value);
+		}
+				
+		SpawnMsg.set_localrole(Actor->GetRemoteRole());
+		if (OwningConnId > 0)
+		{
+			SpawnMsg.mutable_obj()->set_owningconnid(OwningConnId);
+		}
+		// The spatial info must be set for channeld to adjust the spatial channelId
+		SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(Actor->GetActorLocation()));
+	}
+	
+	SpawnMsg.set_channelid(SpatialChId);
+
+	// Broadcast the spawn message to all client connections if it's a Well-Known Object.
+	if (bWellKnown)
+	{
+		Connection->Broadcast(Channeld::GlobalChannelId, unrealpb::SPAWN, SpawnMsg, channeldpb::ALL_BUT_SERVER);
+		UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message of well-known obj: %s, netId: %d"), *Obj->GetName(), NetId.Value);
+	}
+	else
+	{
+		Connection->Broadcast(SpatialChId,unrealpb::SPAWN, SpawnMsg, /*channeldpb::ADJACENT_CHANNELS |*/ channeldpb::ALL_BUT_SERVER);
+		UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message to spatial channel %d, obj: %s, netId: %d"), SpatialChId, *Obj->GetName(), NetId.Value);
+	}
+			
+	GetChanneldSubsystem()->GetNetDriver()->SetAllSentSpawn(NetId);
+}
+
 // Broadcast the spawning to all clients subscribed in the nearby spatial channels
 void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConnId)
 {
@@ -1442,61 +1609,21 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 		SpatialChId = GetChanneldSubsystem()->LowLevelSendToChannelId.Get();
 	}
 	
-	bool bWellKnown = false;
-	if (const AActor* Actor = Cast<AActor>(Obj))
+	// The entity channel already exists, send directly
+	if (Connection->SubscribedChannels.Contains(NetId.Value))
 	{
-		bWellKnown = Actor->bAlwaysRelevant;
+		SendSpawnToClients_EntityChannelReady(NetId, Obj, OwningConnId, SpatialChId);
+		return;
 	}
-	
+
 	channeldpb::ChannelSubscriptionOptions SubOptions;
 	SubOptions.set_dataaccess(channeldpb::WRITE_ACCESS);
-
-	Connection->CreateEntityChannel(SpatialChId, Obj, NetId.Value, bWellKnown ? TEXT("well-known") : TEXT(""), &SubOptions, GetEntityData(Obj)/*nullptr*/, nullptr,
-		[this, NetId, Obj, bWellKnown, OwningConnId, SpatialChId, NetDriver](const channeldpb::CreateChannelResultMessage* _)
+	Connection->CreateEntityChannel(SpatialChId, Obj, NetId.Value, TEXT(""), &SubOptions, GetEntityData(Obj)/*nullptr*/, nullptr,
+		[this, NetId, Obj, OwningConnId, SpatialChId](const channeldpb::CreateChannelResultMessage* _)
 		{
 			AddObjectProvider(NetId.Value, Obj);
-	
-			unrealpb::SpawnObjectMessage SpawnMsg;
-	
-			// As we don't have any specific NetConnection to export the NetId, use a virtual one.
-			SpawnMsg.mutable_obj()->CopyFrom(*ChanneldUtils::GetRefOfObject(Obj, NetConnForSpawn, true));
-			/* Moved to ChanneldUtils::GetRefOfObject
-			// Clear the export map and ack state so everytime we can get a full export.
-			ResetNetConnForSpawn();
-			*/
-	
-			if (const AActor* Actor = Cast<AActor>(Obj))
-			{
-				// Broadcast the EntityChannelCreated event to the actor so it can do some initialization.
-				if (auto RepComp = Cast<UChanneldReplicationComponent>(Actor->GetComponentByClass(UChanneldReplicationComponent::StaticClass())))
-				{
-					RepComp->OnEntityChannelCreated.Broadcast(NetId.Value);
-				}
-				
-				SpawnMsg.set_localrole(Actor->GetRemoteRole());
-				if (OwningConnId > 0)
-				{
-					SpawnMsg.mutable_obj()->set_owningconnid(OwningConnId);
-				}
-				// The spatial info must be set for channeld to adjust the spatial channelId
-				SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(Actor->GetActorLocation()));
-			}
-	
-			SpawnMsg.set_channelid(SpatialChId);
-
-			// Broadcast the spawn message to all client connections if it's a Well-Known Object.
-			if (bWellKnown)
-			{
-				Connection->Broadcast(Channeld::GlobalChannelId, unrealpb::SPAWN, SpawnMsg, channeldpb::ALL_BUT_SERVER);
-				UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message of well-known obj: %s, netId: %d"), *Obj->GetName(), NetId.Value);
-			}
-			else
-			{
-				Connection->Broadcast(SpatialChId,unrealpb::SPAWN, SpawnMsg, /*channeldpb::ADJACENT_CHANNELS |*/ channeldpb::ALL_BUT_SERVER);
-				UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Spawn message to spatial channel %d, obj: %s, netId: %d"), SpatialChId, *Obj->GetName(), NetId.Value);
-			}
 			
-			NetDriver->SetAllSentSpawn(NetId);
+			SendSpawnToClients_EntityChannelReady(NetId, Obj, OwningConnId, SpatialChId);
 		});
 
 	UE_LOG(LogChanneld, Verbose, TEXT("Creating entity channel for obj: %s, netId: %d, spatial channelId: %d"), *Obj->GetName(), NetId.Value, SpatialChId);
