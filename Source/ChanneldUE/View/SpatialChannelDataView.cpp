@@ -652,13 +652,18 @@ bool USpatialChannelDataView::ClientDeleteObject(UObject* Obj)
 		Obj->ConditionalBeginDestroy();
 	}
 			
+	FNetworkGUID NetId = GetNetId(Obj, false);
+
+	// Unsub from the entity channel
+	if (Connection->SubscribedChannels.Contains(NetId.Value))
+	{
+		Connection->UnsubFromChannel(NetId.Value);
+	}
+	
 	// Remove the object from the GuidCache so it can be re-created in CheckUnspawnedObject() when the client regain the interest.
 	auto GuidCache = GetWorld()->NetDriver->GuidCache;
-	FNetworkGUID NetId;
-	if (GuidCache->NetGUIDLookup.RemoveAndCopyValue(Obj, NetId))
-	{
-		GuidCache->ObjectLookup.Remove(NetId);
-	}
+	GuidCache->NetGUIDLookup.Remove(Obj);
+	GuidCache->ObjectLookup.Remove(NetId);
 	
 	return true;
 }
