@@ -5,7 +5,7 @@
 #include "Replication/ChanneldReplicationComponent.h"
 #include "ChanneldEditorSettings.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType, Blueprintable)
 struct FServerGroup
 {
 	GENERATED_BODY()

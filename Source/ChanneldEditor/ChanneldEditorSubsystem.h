@@ -62,6 +62,11 @@ public:
 	 */
 	void RecompileGameCode() const;
 
+	UFUNCTION(BlueprintCallable)
+	void PackageProject( const FName InPlatformInfoName );
+
+	void AddMessageLog( const FText& Text, const FText& Detail, const FString& TutorialLink, const FString& DocumentationLink );
+
 private:
 	TSharedPtr<FChanneldProcWorkerThread> UpdateRepActorCacheWorkThread;
 	UChanneldMissionNotiProxy* UpdateRepActorCacheNotify;

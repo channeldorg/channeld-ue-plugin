@@ -44,13 +44,22 @@ public class ChanneldEditor : ModuleRules
                 "EditorSubsystem",
                 "Slate",
                 "SlateCore",
-                "EditorStyle", 
+                "EditorStyle",
                 "ReplicatorGenerator",
                 "UATHelper",
                 "Kismet",
                 "LiveCoding",
                 "Blutility",
+                "UMG",
                 "UMGEditor",
+                "ClassViewer",
+                "EditorWidgets",
+                "ApplicationCore",
+                "GameProjectGeneration",
+                "ProjectTargetPlatformEditor",
+                "DesktopPlatform",
+                "TargetPlatform",
+                "EngineSettings",
                 // ... add private dependencies that you statically link with here ...	
 			}
         );
