@@ -14,9 +14,14 @@ enum class EUpdateRepActorCacheResult : uint8
 };
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FPostRepActorCache, EUpdateRepActorCacheResult, Result);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPostGenRepCode, bool, Result);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FPostPackageProject, bool, Success);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FPostBuildServerDockerImage, bool, Success);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FPostBuildChanneldDockerImage, bool, Success);
 
 UCLASS(Meta = (DisplayName = "Channeld Editor"))
 class CHANNELDEDITOR_API UChanneldEditorSubsystem : public UEditorSubsystem
@@ -69,11 +74,17 @@ public:
 	void RecompileGameCode() const;
 
 	UFUNCTION(BlueprintCallable)
+	void OpenMessageDialog(FText Message, FText OptTitle);
+
+	UFUNCTION(BlueprintCallable)
 	bool CheckDockerCommand();
 
 	UFUNCTION(BlueprintCallable)
 	void BuildServerDockerImage(const FString& Tag, const FPostBuildServerDockerImage& PostBuildServerDockerImage);
-	
+
+	UFUNCTION(BlueprintCallable)
+	void BuildChanneldDockerImage(const FString& Tag, const FPostBuildChanneldDockerImage& PostBuildChanneldDockerImage);
+
 	UFUNCTION(BlueprintCallable)
 	void PackageProject(const FName InPlatformInfoName, const FPostPackageProject& PostPackageProject);
 
@@ -92,6 +103,6 @@ private:
 	TSharedPtr<FChanneldProcWorkerThread> GenProtoCppCodeWorkThread;
 	TSharedPtr<FChanneldProcWorkerThread> GenProtoGoCodeWorkThread;
 
-	TSharedPtr<FChanneldProcWorkerThread> BuildServerDockerImageWorkThread;
 	UChanneldMissionNotiProxy* BuildServerDockerImageNotify;
+	UChanneldMissionNotiProxy* BuildChanneldDockerImageNotify;
 };

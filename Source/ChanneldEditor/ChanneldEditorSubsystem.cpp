@@ -47,6 +47,11 @@ void UChanneldEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	BuildServerDockerImageNotify = NewObject<UChanneldMissionNotiProxy>();
 	BuildServerDockerImageNotify->AddToRoot();
+	BuildServerDockerImageNotify->SetShowCancel(false);
+
+	BuildChanneldDockerImageNotify = NewObject<UChanneldMissionNotiProxy>();
+	BuildChanneldDockerImageNotify->AddToRoot();
+	BuildServerDockerImageNotify->SetShowCancel(false);
 }
 
 void UChanneldEditorSubsystem::UpdateReplicationCacheAction(FPostRepActorCache PostUpdatedRepActorCache)
@@ -498,6 +503,11 @@ void UChanneldEditorSubsystem::RecompileGameCode() const
 	}
 }
 
+void UChanneldEditorSubsystem::OpenMessageDialog(FText Message, FText OptTitle)
+{
+	FMessageDialog::Open(EAppMsgType::Ok, Message, &OptTitle);
+}
+
 bool UChanneldEditorSubsystem::CheckDockerCommand()
 {
 	return system("docker -v") == 0;
@@ -514,32 +524,41 @@ void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
 	);
 	BuildServerDockerImageNotify->SpawnRunningMissionNotification(nullptr);
 
-	const UProjectPackagingSettings* const PackagingSettings = GetDefault<UProjectPackagingSettings>();
-	FString ServerPackagePath = PackagingSettings->StagingDirectory.Path / TEXT("LinuxServer");
-	// if (!FPaths::DirectoryExists(ServerPackagePath))
-	// {
-	// 	UE_LOG(LogChanneldEditor, Error, TEXT("Server package path is invalid: %s."), *ServerPackagePath);
-	// 	BuildServerDockerImageNotify->SpawnMissionFailedNotification(nullptr);
-	// 	PostBuildServerDockerImage.ExecuteIfBound(false);
-	// 	return;
-	// }
-
-	FString DockerfileTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("Dockerfile-LinuxServer");
-	// Load DockerfileTemplate
-	FString DockerfileContent;
-	if (!FFileHelper::LoadFileToString(DockerfileContent, *DockerfileTemplate))
+	if (Tag.IsEmpty())
 	{
-		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load Dockerfile template."));
+		UE_LOG(LogChanneldEditor, Error, TEXT("Tag is empty!"));
 		BuildServerDockerImageNotify->SpawnMissionFailedNotification(nullptr);
 		PostBuildServerDockerImage.ExecuteIfBound(false);
 		return;
 	}
-	// Replace template args
-	FStringFormatNamedArguments FormatArgs;
-	FormatArgs.Add(TEXT("PackagePath"), ServerPackagePath);
-	FormatArgs.Add(TEXT("ProjectName"), FApp::GetProjectName());
-	DockerfileContent = FString::Format(*DockerfileContent, FormatArgs);
 
+	const UProjectPackagingSettings* const PackagingSettings = GetDefault<UProjectPackagingSettings>();
+	FString ServerPackagePath = PackagingSettings->StagingDirectory.Path / TEXT("LinuxServer");
+	if (!FPaths::DirectoryExists(ServerPackagePath))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Server package path is invalid: %s."), *ServerPackagePath);
+		BuildServerDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+		PostBuildServerDockerImage.ExecuteIfBound(false);
+		return;
+	}
+
+	FString DockerfileTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("Dockerfile-LinuxServer");
+	// Load DockerfileTemplate
+	FString DockerfileContent;
+	{
+		if (!FFileHelper::LoadFileToString(DockerfileContent, *DockerfileTemplate))
+		{
+			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load Dockerfile template."));
+			BuildServerDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+			PostBuildServerDockerImage.ExecuteIfBound(false);
+			return;
+		}
+		// Replace template args
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("PackagePath"), TEXT("./LinuxServer"));
+		FormatArgs.Add(TEXT("ProjectName"), FApp::GetProjectName());
+		DockerfileContent = FString::Format(*DockerfileContent, FormatArgs);
+	}
 	// Write Dockerfile to intermediate dir
 	const FString ServerDockerfilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
 		"Dockerfile-LinuxServer");
@@ -551,36 +570,184 @@ void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
 		return;
 	}
 
-
 	FString BuildArgs = FString::Printf(
 		TEXT("build -f \"%s\" -t %s \"%s\""), *ServerDockerfilePath, *Tag, *PackagingSettings->StagingDirectory.Path);
 
+	FString BatTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("BuildDockerImage.bat");
+
+	FString BatFileContent;
+	{
+		if (!FFileHelper::LoadFileToString(BatFileContent, *BatTemplate))
+		{
+			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load BuildServerDockerImage.bat template."));
+			BuildServerDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+			PostBuildServerDockerImage.ExecuteIfBound(false);
+			return;
+		}
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("BuildCmd"), TEXT("docker ") + BuildArgs);
+		BatFileContent = FString::Format(*BatFileContent, FormatArgs);
+	}
 	// Save the cmd to a temp bat file
-	// const FString TempBatFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
-	// 	"BuildServerDockerImage.bat");
-	// FFileHelper::SaveStringToFile(TEXT("docker ") + BuildArgs, *TempBatFilePath);
+	const FString TempBatFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+		"BuildServerDockerImage.bat");
 
-	BuildServerDockerImageWorkThread = MakeShareable(
-		new FChanneldProcWorkerThread(
-			TEXT("BuildServerDockerImageWorkThread"),
-			TEXT("docker"),
-			BuildArgs,
-			FPaths::ProjectDir()
-			// true, false, false, false
-		)
-	);
+	FFileHelper::SaveStringToFile(BatFileContent, *TempBatFilePath);
 
-	BuildServerDockerImageWorkThread->ProcFailedDelegate.AddUObject(BuildServerDockerImageNotify,
-	                                                                &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
-	BuildServerDockerImageWorkThread->ProcOutputMsgDelegate.BindUObject(
-		BuildServerDockerImageNotify, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
-	BuildServerDockerImageWorkThread->ProcSucceedDelegate.AddLambda(
-		[this, PostBuildServerDockerImage](FChanneldProcWorkerThread*)
+
+	AsyncTask(ENamedThreads::AnyNormalThreadNormalTask, [this, TempBatFilePath, PostBuildServerDockerImage]()
+	{
+		int Result = system(TCHAR_TO_ANSI(*TempBatFilePath));
+		if (Result == 0)
 		{
 			BuildServerDockerImageNotify->SpawnMissionSucceedNotification(nullptr);
 			PostBuildServerDockerImage.ExecuteIfBound(true);
-		});
-	BuildServerDockerImageWorkThread->Execute();
+		}
+		else
+		{
+			BuildServerDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+			PostBuildServerDockerImage.ExecuteIfBound(false);
+		}
+	});
+}
+
+
+void UChanneldEditorSubsystem::BuildChanneldDockerImage(const FString& Tag,
+                                                        const FPostBuildChanneldDockerImage&
+                                                        PostBuildChanneldDockerImage)
+{
+	BuildChanneldDockerImageNotify->SetMissionNotifyText(
+		FText::FromString(TEXT("Building Channeld Gateway...")),
+		LOCTEXT("RunningNotificationCancelButton", "Cancel"),
+		FText::FromString(TEXT("Successfully Built Channeld Gateway!")),
+		FText::FromString(TEXT("Failed To Build Channeld Gateway!"))
+	);
+	BuildChanneldDockerImageNotify->SpawnRunningMissionNotification(nullptr);
+
+	if (Tag.IsEmpty())
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Tag is empty!"));
+		BuildChanneldDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+		PostBuildChanneldDockerImage.ExecuteIfBound(false);
+		return;
+	}
+
+	FString ChanneldPath = FPlatformMisc::GetEnvironmentVariable(TEXT("CHANNELD_PATH"));
+	if (ChanneldPath.IsEmpty())
+	{
+		UE_LOG(LogChanneldEditor, Error,
+		       TEXT(
+			       "CHANNELD_PATH environment variable is not set. Please set it to the path of the channeld source code directory."
+		       ));
+		BuildChanneldDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+		PostBuildChanneldDockerImage.ExecuteIfBound(false);
+		return;
+	}
+	FPaths::NormalizeDirectoryName(ChanneldPath);
+
+	if (!FPaths::DirectoryExists(ChanneldPath))
+	{
+		UE_LOG(LogChanneldEditor, Error,
+		       TEXT(
+			       "Channeld source code directory does not exist."
+		       ));
+		BuildChanneldDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+		PostBuildChanneldDockerImage.ExecuteIfBound(false);
+		return;
+	}
+
+	FString ChanneldEntryPath = GetMutableDefault<UChanneldEditorSettings>()->
+		GeneratedGoReplicationCodeStorageFolder;
+	if (ChanneldEntryPath.IsEmpty())
+	{
+		UE_LOG(LogChanneldEditor, Error,
+		       TEXT(
+			       "GeneratedGoReplicationCodeStorageFolder is not set. Please set it to the path of the channeld entry point."
+		       ));
+		BuildChanneldDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+		PostBuildChanneldDockerImage.ExecuteIfBound(false);
+		return;
+	}
+	FPaths::NormalizeDirectoryName(ChanneldEntryPath);
+
+	if (!FPaths::DirectoryExists(ChanneldPath / ChanneldEntryPath))
+	{
+		UE_LOG(LogChanneldEditor, Error,
+		       TEXT(
+			       "Channeld entry point does not exist."
+		       ));
+		BuildChanneldDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+		PostBuildChanneldDockerImage.ExecuteIfBound(false);
+		return;
+	}
+
+	FString DockerfileTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("Dockerfile-channeld");
+	// Load DockerfileTemplate
+	FString DockerfileContent;
+	{
+		if (!FFileHelper::LoadFileToString(DockerfileContent, *DockerfileTemplate))
+		{
+			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load Dockerfile template."));
+			BuildChanneldDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+			PostBuildChanneldDockerImage.ExecuteIfBound(false);
+			return;
+		}
+
+		// Replace template args
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("WorkDir"), ChanneldEntryPath);
+		FormatArgs.Add(TEXT("AppName"), FPaths::GetCleanFilename(ChanneldEntryPath));
+		DockerfileContent = FString::Format(*DockerfileContent, FormatArgs);
+	}
+	// Write Dockerfile to intermediate dir
+	const FString ChanneldDockerfilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+		"Dockerfile-channeld");
+	if (!FFileHelper::SaveStringToFile(DockerfileContent, *ChanneldDockerfilePath))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to save Dockerfile."));
+		BuildChanneldDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+		PostBuildChanneldDockerImage.ExecuteIfBound(false);
+		return;
+	}
+
+	FString BuildArgs = FString::Printf(
+		TEXT("build -f \"%s\" -t %s \"%s\""), *ChanneldDockerfilePath, *Tag, *ChanneldPath);
+
+	FString BatTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("BuildDockerImage.bat");
+
+	FString BatFileContent;
+	{
+		if (!FFileHelper::LoadFileToString(BatFileContent, *BatTemplate))
+		{
+			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load BuildServerDockerImage.bat template."));
+			BuildChanneldDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+			PostBuildChanneldDockerImage.ExecuteIfBound(false);
+			return;
+		}
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("BuildCmd"), TEXT("docker ") + BuildArgs);
+		BatFileContent = FString::Format(*BatFileContent, FormatArgs);
+	}
+	// Save the cmd to a temp bat file
+	const FString TempBatFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+		"BuildChanneldDockerImage.bat");
+
+	FFileHelper::SaveStringToFile(BatFileContent, *TempBatFilePath);
+
+	AsyncTask(ENamedThreads::AnyNormalThreadNormalTask, [this, TempBatFilePath, PostBuildChanneldDockerImage]()
+	{
+		int Result = system(TCHAR_TO_ANSI(*TempBatFilePath));
+		if (Result == 0)
+		{
+			BuildChanneldDockerImageNotify->SpawnMissionSucceedNotification(nullptr);
+			PostBuildChanneldDockerImage.ExecuteIfBound(true);
+		}
+		else
+		{
+			BuildChanneldDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+			PostBuildChanneldDockerImage.ExecuteIfBound(false);
+		}
+	});
 }
 
 FString GetCookingOptionalParams()
