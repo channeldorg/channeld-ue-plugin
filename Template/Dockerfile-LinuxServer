@@ -1,0 +1,13 @@
+FROM ubuntu
+
+RUN useradd -u 8877 ue4
+USER ue4
+
+COPY --chown=ue4:ue4 {PackagePath} /LinuxServer/
+# COPY ./Saved/Config/Windows/ChanneldUE.ini /LinuxServer/ChanneldUE.ini
+# COPY ./Packages/Engine.ini /LinuxServer/Engine.ini
+
+WORKDIR /LinuxServer
+
+# MUST use the shell form in order to pass the ENV!
+CMD ./{ProjectName}.sh

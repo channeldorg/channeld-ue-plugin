@@ -75,6 +75,7 @@ public class ChanneldEditor : ModuleRules
         PrivateDefinitions.AddRange(
             new string[]
             {
+                "PLUGIN_DIR=R\"(" + PluginDirectory + ")\"",
                 "PROTOC_PATH=R\"(" + Path.Combine(PluginDirectory, "Source", "ProtobufUE", "ThirdParty", "bin", "protoc.exe") + ")\"",
                 "PROTOBUF_INCLUDE_PATH=R\"(" + Path.Combine(PluginDirectory, "Source", "ProtobufUE", "ThirdParty", "include") + ")\"",
             }

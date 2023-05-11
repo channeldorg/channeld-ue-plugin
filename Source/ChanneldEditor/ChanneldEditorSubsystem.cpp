@@ -27,6 +27,7 @@
 #include "Interfaces/IProjectTargetPlatformEditorModule.h"
 #include "Logging/MessageLog.h"
 #include "Logging/TokenizedMessage.h"
+#include "Misc/FileHelper.h"
 #include "Misc/HotReloadInterface.h"
 #include "Settings/EditorExperimentalSettings.h"
 #include "Settings/ProjectPackagingSettings.h"
@@ -43,6 +44,9 @@ void UChanneldEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	GenRepNotify = NewObject<UChanneldMissionNotiProxy>();
 	GenRepNotify->AddToRoot();
+
+	BuildServerDockerImageNotify = NewObject<UChanneldMissionNotiProxy>();
+	BuildServerDockerImageNotify->AddToRoot();
 }
 
 void UChanneldEditorSubsystem::UpdateReplicationCacheAction(FPostRepActorCache PostUpdatedRepActorCache)
@@ -494,6 +498,91 @@ void UChanneldEditorSubsystem::RecompileGameCode() const
 	}
 }
 
+bool UChanneldEditorSubsystem::CheckDockerCommand()
+{
+	return system("docker -v") == 0;
+}
+
+void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
+                                                      const FPostBuildServerDockerImage& PostBuildServerDockerImage)
+{
+	BuildServerDockerImageNotify->SetMissionNotifyText(
+		FText::FromString(TEXT("Building Server Docker Image...")),
+		LOCTEXT("RunningNotificationCancelButton", "Cancel"),
+		FText::FromString(TEXT("Successfully Built Server Docker Image!")),
+		FText::FromString(TEXT("Failed to Build Server Docker Image!"))
+	);
+	BuildServerDockerImageNotify->SpawnRunningMissionNotification(nullptr);
+
+	const UProjectPackagingSettings* const PackagingSettings = GetDefault<UProjectPackagingSettings>();
+	FString ServerPackagePath = PackagingSettings->StagingDirectory.Path / TEXT("LinuxServer");
+	// if (!FPaths::DirectoryExists(ServerPackagePath))
+	// {
+	// 	UE_LOG(LogChanneldEditor, Error, TEXT("Server package path is invalid: %s."), *ServerPackagePath);
+	// 	BuildServerDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+	// 	PostBuildServerDockerImage.ExecuteIfBound(false);
+	// 	return;
+	// }
+
+	FString DockerfileTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("Dockerfile-LinuxServer");
+	// Load DockerfileTemplate
+	FString DockerfileContent;
+	if (!FFileHelper::LoadFileToString(DockerfileContent, *DockerfileTemplate))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load Dockerfile template."));
+		BuildServerDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+		PostBuildServerDockerImage.ExecuteIfBound(false);
+		return;
+	}
+	// Replace template args
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("PackagePath"), ServerPackagePath);
+	FormatArgs.Add(TEXT("ProjectName"), FApp::GetProjectName());
+	DockerfileContent = FString::Format(*DockerfileContent, FormatArgs);
+
+	// Write Dockerfile to intermediate dir
+	const FString ServerDockerfilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+		"Dockerfile-LinuxServer");
+	if (!FFileHelper::SaveStringToFile(DockerfileContent, *ServerDockerfilePath))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to save Dockerfile."));
+		BuildServerDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+		PostBuildServerDockerImage.ExecuteIfBound(false);
+		return;
+	}
+
+
+	FString BuildArgs = FString::Printf(
+		TEXT("build -f \"%s\" -t %s \"%s\""), *ServerDockerfilePath, *Tag, *PackagingSettings->StagingDirectory.Path);
+
+	// Save the cmd to a temp bat file
+	// const FString TempBatFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+	// 	"BuildServerDockerImage.bat");
+	// FFileHelper::SaveStringToFile(TEXT("docker ") + BuildArgs, *TempBatFilePath);
+
+	BuildServerDockerImageWorkThread = MakeShareable(
+		new FChanneldProcWorkerThread(
+			TEXT("BuildServerDockerImageWorkThread"),
+			TEXT("docker"),
+			BuildArgs,
+			FPaths::ProjectDir()
+			// true, false, false, false
+		)
+	);
+
+	BuildServerDockerImageWorkThread->ProcFailedDelegate.AddUObject(BuildServerDockerImageNotify,
+	                                                                &UChanneldMissionNotiProxy::SpawnMissionFailedNotification);
+	BuildServerDockerImageWorkThread->ProcOutputMsgDelegate.BindUObject(
+		BuildServerDockerImageNotify, &UChanneldMissionNotiProxy::ReceiveOutputMsg);
+	BuildServerDockerImageWorkThread->ProcSucceedDelegate.AddLambda(
+		[this, PostBuildServerDockerImage](FChanneldProcWorkerThread*)
+		{
+			BuildServerDockerImageNotify->SpawnMissionSucceedNotification(nullptr);
+			PostBuildServerDockerImage.ExecuteIfBound(true);
+		});
+	BuildServerDockerImageWorkThread->Execute();
+}
+
 FString GetCookingOptionalParams()
 {
 	FString OptionalParams;
@@ -522,7 +611,8 @@ const TCHAR* GetUATCompilationFlags()
 	return TEXT("-nocompileeditor");
 }
 
-void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName)
+void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
+                                              const FPostPackageProject& PostPackageProject)
 {
 	GUnrealEd->CancelPlayingViaLauncher();
 	const bool bPromptUserToSave = false;
@@ -550,6 +640,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName)
 			                     LOCTEXT("MissingPlatformFilesPackage",
 			                             "Missing required files to package this platform."));
 		}
+		PostPackageProject.ExecuteIfBound(false);
 		return;
 	}
 
@@ -558,6 +649,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName)
 		FMessageDialog::Open(EAppMsgType::Ok,
 		                     LOCTEXT("MissingGameDefaultMap",
 		                             "No Game Default Map specified in Project Settings > Maps & Modes."));
+		PostPackageProject.ExecuteIfBound(false);
 		return;
 	}
 
@@ -571,6 +663,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName)
 		ParamArray.Add(FAnalyticsEventAttribute(TEXT("Time"), 0.0));
 		FEditorAnalytics::ReportEvent(TEXT("Editor.Package.Failed"), PlatformInfo->TargetPlatformName.ToString(),
 		                              bProjectHasCode, EAnalyticsErrorCodes::SDKNotFound, ParamArray);
+		PostPackageProject.ExecuteIfBound(false);
 		return;
 	}
 
@@ -707,6 +800,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName)
 
 			if (UnrecoverableError)
 			{
+				PostPackageProject.ExecuteIfBound(false);
 				return;
 			}
 		}
@@ -715,6 +809,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName)
 	if (!FModuleManager::LoadModuleChecked<IProjectTargetPlatformEditorModule>("ProjectTargetPlatformEditor").
 		ShowUnsupportedTargetWarning(PlatformInfo->VanillaPlatformName))
 	{
+		PostPackageProject.ExecuteIfBound(false);
 		return;
 	}
 
@@ -739,6 +834,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName)
 	                                                        .ToString(), PackagingSettings->StagingDirectory.Path,
 	                                                        OutFolderName))
 	{
+		PostPackageProject.ExecuteIfBound(false);
 		return;
 	}
 
@@ -960,16 +1056,9 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName)
 	                                      LOCTEXT("PackagingProjectTaskName", "Packaging project"),
 	                                      LOCTEXT("PackagingTaskName", "Packaging"),
 	                                      FEditorStyle::GetBrush(TEXT("MainFrame.PackageProject")),
-	                                      [](FString Message, double TimeSec)
+	                                      [PostPackageProject](FString Message, double TimeSec)
 	                                      {
-	                                      	if(Message == TEXT("Completed"))
-	                                      	{
-	                                      		FMessageLog("PackagingResults").Open(EMessageSeverity::Info, true);
-	                                      	}
-	                                      	else
-	                                      	{
-	                                      		FMessageLog("PackagingResults").Info(FText::FromString(Message));
-	                                      	}
+		                                      PostPackageProject.ExecuteIfBound(Message == TEXT("Completed"));
 	                                      }
 	);
 }
@@ -992,5 +1081,6 @@ void UChanneldEditorSubsystem::AddMessageLog(const FText& Text, const FText& Det
 	MessageLog.AddMessage(Message);
 	MessageLog.Open();
 }
+
 
 #undef LOCTEXT_NAMESPACE
