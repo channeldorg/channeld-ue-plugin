@@ -411,20 +411,33 @@ void UChanneldConnection::TickOutgoing()
 		return;
 
 	channeldpb::Packet Packet;
-	uint32 Size = HeaderSize;
+	uint32 TotalSize = HeaderSize;
 	TSharedPtr<channeldpb::MessagePack> MessagePack;
-	while (OutgoingQueue.Dequeue(MessagePack))
+	while (OutgoingQueue.Peek(MessagePack))
 	{
-		Size += MessagePack->ByteSizeLong();
-		if (Size >= Channeld::MaxPacketSize)
+		uint32 MsgSize = MessagePack->ByteSizeLong();
+		if (HeaderSize + MsgSize > Channeld::MaxPacketSize)
+		{
+			OutgoingQueue.Pop();
+			UE_LOG(LogChanneld, Error, TEXT("Dropped oversized message pack: %d, type: %d"), MsgSize, MessagePack->msgtype());
+			return;
+		}
+		
+		TotalSize += MsgSize;
+		if (TotalSize >= Channeld::MaxPacketSize)
 			break;
+
+		OutgoingQueue.Pop();
 		Packet.add_messages()->CopyFrom(*MessagePack);
 	}
 
-	SendDirect(Packet);
+	if (TotalSize > 0)
+	{
+		SendDirect(Packet);
+	}
 }
 
-void UChanneldConnection::SendDirect(channeldpb::Packet Packet)
+void UChanneldConnection::SendDirect(const channeldpb::Packet& Packet)
 {
 	uint32 PacketSize = Packet.ByteSizeLong();
 	uint32 Size = HeaderSize + PacketSize;
@@ -432,7 +445,6 @@ void UChanneldConnection::SendDirect(channeldpb::Packet Packet)
 	uint8* PacketData = new uint8[Size];
 	if (!Packet.SerializeToArray(PacketData + HeaderSize, Size))
 	{
-		Packet.Clear();
 		delete[] PacketData;
 		UE_LOG(LogChanneld, Error, TEXT("Failed to serialize Packet, size: %d"), Size);
 		return;
@@ -449,11 +461,19 @@ void UChanneldConnection::SendDirect(channeldpb::Packet Packet)
 	int32 BytesSent;
 	bool IsSent = Socket->Send(PacketData, Size, BytesSent);
 	// Free send buffer
-	Packet.Clear();
 	delete[] PacketData;
 	if (!IsSent || BytesSent != Size)
 	{
-		UE_LOG(LogChanneld, Error, TEXT("Failed to send packet to channeld, sent/full size: %d/%d"), BytesSent, Size);
+		FString MsgTypes;
+		for (int i = 0; i < Packet.messages_size(); i++)
+		{
+			MsgTypes.Appendf(TEXT("%d, "), Packet.messages(i).msgtype());
+		}
+		UE_LOG(LogChanneld, Error, TEXT("Failed to send packet to channeld, msgTypes: %s, sent/full size: %d/%d, last sent: %d"), *MsgTypes, BytesSent, Size, LastBytesSent);
+	}
+	else
+	{
+		LastBytesSent = BytesSent;
 	}
 }
 
