@@ -182,6 +182,8 @@ private:
 	FRunnableThread* ReceiveThread = nullptr;
 	uint8* ReceiveBuffer;
 	uint32 ReceiveBufferOffset;
+	// For debug
+	int32 LastBytesSent = 0;
 
 	struct MessageHandlerEntry
 	{
@@ -206,7 +208,7 @@ private:
 	TQueue<TSharedPtr<channeldpb::MessagePack>> OutgoingQueue;
 	TMap<uint32, FChanneldMessageHandlerFunc> RpcCallbacks;
 
-	void SendDirect(channeldpb::Packet Packet);
+	void SendDirect(const channeldpb::Packet& Packet);
 	void Receive();
 	void OnDisconnected();
 
