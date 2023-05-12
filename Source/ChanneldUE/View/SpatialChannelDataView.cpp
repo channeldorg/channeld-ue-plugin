@@ -654,11 +654,13 @@ bool USpatialChannelDataView::ClientDeleteObject(UObject* Obj)
 			
 	FNetworkGUID NetId = GetNetId(Obj, false);
 
+	/* Moved to OnDestroyedActor
 	// Unsub from the entity channel
 	if (Connection->SubscribedChannels.Contains(NetId.Value))
 	{
 		Connection->UnsubFromChannel(NetId.Value);
 	}
+	*/
 	
 	// Remove the object from the GuidCache so it can be re-created in CheckUnspawnedObject() when the client regain the interest.
 	auto GuidCache = GetWorld()->NetDriver->GuidCache;
@@ -1206,12 +1208,14 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 			{
 				RemoveObjectProviderAll(Obj, false);
 				SuppressedNetIdsToResolve.Add(NetId.Value);
-		
+
+				/* Moved to OnDestroyedActor
 				// Unsub from the entity channel which channelId equals to the NetId
 				if (Connection->SubscribedChannels.Contains(NetId.Value))
 				{
 					Connection->UnsubFromChannel(NetId.Value);
 				}
+				*/
 			}
 			else
 			{
@@ -1466,16 +1470,16 @@ bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetwork
 
 void USpatialChannelDataView::OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId)
 {
+	// Unsub from the entity channel which channelId equals to the NetId
+	if (Connection->SubscribedChannels.Contains(NetId.Value))
+	{
+		Connection->UnsubFromChannel(NetId.Value);
+	}
+	
 	// Server keeps the NetId-ChannelId mapping for cross-server RPC.
 	if (Connection->IsServer())
 	{
 		RemoveObjectProviderAll(Actor, false);
-		
-		// Unsub from the entity channel which channelId equals to the NetId
-		if (Connection->SubscribedChannels.Contains(NetId.Value))
-		{
-			Connection->UnsubFromChannel(NetId.Value);
-		}
 		return;
 	}
 	
