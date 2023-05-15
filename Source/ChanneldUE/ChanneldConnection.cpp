@@ -211,7 +211,7 @@ void UChanneldConnection::Receive()
 			return;
 		}
 
-		if (ReceiveBuffer[0] != 67)
+		if (ReceiveBuffer[0] != 67 || ReceiveBuffer[1] != 72)
 		{
 			ReceiveBufferOffset = 0;
 			UE_LOG(LogChanneld, Error, TEXT("Invalid tag: %d, the packet will be dropped"), ReceiveBuffer[0]);
@@ -220,11 +220,7 @@ void UChanneldConnection::Receive()
 			return;
 		}
 
-		uint32 PacketSize = ReceiveBuffer[3];
-		if (ReceiveBuffer[1] != 72)
-			PacketSize = PacketSize | (ReceiveBuffer[1] << 16) | (ReceiveBuffer[2] << 8);
-		else if (ReceiveBuffer[2] != 78)
-			PacketSize = PacketSize | (ReceiveBuffer[2] << 8);
+		uint32 PacketSize = ReceiveBuffer[3] | (ReceiveBuffer[2]<<8);
 		
 		if (ReceiveBufferOffset < HeaderSize + PacketSize)
 		{
@@ -452,9 +448,9 @@ void UChanneldConnection::SendDirect(const channeldpb::Packet& Packet)
 
 	// Set the header
 	PacketData[0] = 67;
-	PacketData[1] = PacketSize > 0xffff ? (0xff & (PacketSize >> 16)) : 72;
-	PacketData[2] = PacketSize > 0xff ? (0xff & (PacketSize >> 8)) : 78;
-	PacketData[3] = (uint8)(PacketSize & 0xff);
+	PacketData[1] = 72;
+	PacketData[2] = (PacketSize >> 8) & 0xff;
+	PacketData[3] = (PacketSize & 0xff);
 	// TODO: support Snappy compression
 	PacketData[4] = 0;
 
