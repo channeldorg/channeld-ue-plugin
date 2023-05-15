@@ -13,6 +13,7 @@
 #include "GameProjectGenerationModule.h"
 #include "ILiveCodingModule.h"
 #include "InstalledPlatformInfo.h"
+#include "ISettingsModule.h"
 #include "IUATHelperModule.h"
 #include "PlatformInfo.h"
 #include "ProtocHelper.h"
@@ -52,6 +53,10 @@ void UChanneldEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	BuildChanneldDockerImageNotify = NewObject<UChanneldMissionNotiProxy>();
 	BuildChanneldDockerImageNotify->AddToRoot();
 	BuildServerDockerImageNotify->SetShowCancel(false);
+
+	UploadDockerImageNotify = NewObject<UChanneldMissionNotiProxy>();
+	UploadDockerImageNotify->AddToRoot();
+	UploadDockerImageNotify->SetShowCancel(false);
 }
 
 void UChanneldEditorSubsystem::UpdateReplicationCacheAction(FPostRepActorCache PostUpdatedRepActorCache)
@@ -387,7 +392,7 @@ void UChanneldEditorSubsystem::GenRepProtoGoCode(const TArray<FString>& ProtoFil
 	}
 
 	FString DirToGoMain = ChanneldPath / GetMutableDefault<UChanneldEditorSettings>()->
-		GeneratedGoReplicationCodeStorageFolder;
+		LaunchChanneldEntry;
 	FString DirToGenGoProto = DirToGoMain / LatestGeneratedManifest.ProtoPackageName;
 	FPaths::NormalizeDirectoryName(DirToGenGoProto);
 	if (!IFileManager::Get().DirectoryExists(*DirToGenGoProto))
@@ -594,7 +599,6 @@ void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
 
 	FFileHelper::SaveStringToFile(BatFileContent, *TempBatFilePath);
 
-
 	AsyncTask(ENamedThreads::AnyNormalThreadNormalTask, [this, TempBatFilePath, PostBuildServerDockerImage]()
 	{
 		int Result = system(TCHAR_TO_ANSI(*TempBatFilePath));
@@ -657,7 +661,7 @@ void UChanneldEditorSubsystem::BuildChanneldDockerImage(const FString& Tag,
 	}
 
 	FString ChanneldEntryPath = GetMutableDefault<UChanneldEditorSettings>()->
-		GeneratedGoReplicationCodeStorageFolder;
+		LaunchChanneldEntry;
 	if (ChanneldEntryPath.IsEmpty())
 	{
 		UE_LOG(LogChanneldEditor, Error,
@@ -681,30 +685,10 @@ void UChanneldEditorSubsystem::BuildChanneldDockerImage(const FString& Tag,
 		return;
 	}
 
-	FString DockerfileTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("Dockerfile-channeld");
-	// Load DockerfileTemplate
-	FString DockerfileContent;
+	const FString ChanneldDockerfilePath = ChanneldPath / ChanneldEntryPath / TEXT("Dockerfile");
+	if(!FPaths::FileExists(ChanneldDockerfilePath))
 	{
-		if (!FFileHelper::LoadFileToString(DockerfileContent, *DockerfileTemplate))
-		{
-			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load Dockerfile template."));
-			BuildChanneldDockerImageNotify->SpawnMissionFailedNotification(nullptr);
-			PostBuildChanneldDockerImage.ExecuteIfBound(false);
-			return;
-		}
-
-		// Replace template args
-		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add(TEXT("WorkDir"), ChanneldEntryPath);
-		FormatArgs.Add(TEXT("AppName"), FPaths::GetCleanFilename(ChanneldEntryPath));
-		DockerfileContent = FString::Format(*DockerfileContent, FormatArgs);
-	}
-	// Write Dockerfile to intermediate dir
-	const FString ChanneldDockerfilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
-		"Dockerfile-channeld");
-	if (!FFileHelper::SaveStringToFile(DockerfileContent, *ChanneldDockerfilePath))
-	{
-		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to save Dockerfile."));
+		UE_LOG(LogChanneldEditor, Error, TEXT("Cannot find Dockerfile at %s."), *ChanneldDockerfilePath);
 		BuildChanneldDockerImageNotify->SpawnMissionFailedNotification(nullptr);
 		PostBuildChanneldDockerImage.ExecuteIfBound(false);
 		return;
@@ -725,6 +709,7 @@ void UChanneldEditorSubsystem::BuildChanneldDockerImage(const FString& Tag,
 			return;
 		}
 		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("WorkDir"), ChanneldPath);
 		FormatArgs.Add(TEXT("BuildCmd"), TEXT("docker ") + BuildArgs);
 		BatFileContent = FString::Format(*BatFileContent, FormatArgs);
 	}
@@ -748,6 +733,14 @@ void UChanneldEditorSubsystem::BuildChanneldDockerImage(const FString& Tag,
 			PostBuildChanneldDockerImage.ExecuteIfBound(false);
 		}
 	});
+}
+
+void UChanneldEditorSubsystem::OpenPackagingSettings()
+{
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		SettingsModule->ShowViewer("Project", "Packaging", "Project");
+	}
 }
 
 FString GetCookingOptionalParams()
@@ -981,32 +974,32 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 	}
 
 	// let the user pick a target directory
-	if (PackagingSettings->StagingDirectory.Path.IsEmpty())
+	if (PackagingSettings->StagingDirectory.Path.IsEmpty() || PackagingSettings->StagingDirectory.Path ==
+		FPaths::ProjectDir())
 	{
-		PackagingSettings->StagingDirectory.Path = FPaths::ProjectDir();
+		FString OutFolderName;
+
+		void* ParentWindowWindowHandle = nullptr;
+		IMainFrameModule& MainFrameModule = FModuleManager::LoadModuleChecked<IMainFrameModule>(TEXT("MainFrame"));
+		const TSharedPtr<SWindow>& MainFrameParentWindow = MainFrameModule.GetParentWindow();
+		if (MainFrameParentWindow.IsValid() && MainFrameParentWindow->GetNativeWindow().IsValid())
+		{
+			ParentWindowWindowHandle = MainFrameParentWindow->GetNativeWindow()->GetOSWindowHandle();
+		}
+
+		if (!FDesktopPlatformModule::Get()->OpenDirectoryDialog(ParentWindowWindowHandle,
+		                                                        LOCTEXT("PackageDirectoryDialogTitle",
+		                                                                "Package project...")
+		                                                        .ToString(), PackagingSettings->StagingDirectory.Path,
+		                                                        OutFolderName))
+		{
+			PostPackageProject.ExecuteIfBound(false);
+			return;
+		}
+
+		PackagingSettings->StagingDirectory.Path = OutFolderName;
+		PackagingSettings->SaveConfig();
 	}
-
-	FString OutFolderName;
-
-	void* ParentWindowWindowHandle = nullptr;
-	IMainFrameModule& MainFrameModule = FModuleManager::LoadModuleChecked<IMainFrameModule>(TEXT("MainFrame"));
-	const TSharedPtr<SWindow>& MainFrameParentWindow = MainFrameModule.GetParentWindow();
-	if (MainFrameParentWindow.IsValid() && MainFrameParentWindow->GetNativeWindow().IsValid())
-	{
-		ParentWindowWindowHandle = MainFrameParentWindow->GetNativeWindow()->GetOSWindowHandle();
-	}
-
-	if (!FDesktopPlatformModule::Get()->OpenDirectoryDialog(ParentWindowWindowHandle,
-	                                                        LOCTEXT("PackageDirectoryDialogTitle", "Package project...")
-	                                                        .ToString(), PackagingSettings->StagingDirectory.Path,
-	                                                        OutFolderName))
-	{
-		PostPackageProject.ExecuteIfBound(false);
-		return;
-	}
-
-	PackagingSettings->StagingDirectory.Path = OutFolderName;
-	PackagingSettings->SaveConfig();
 
 	// create the packager process
 	FString OptionalParams;
@@ -1247,6 +1240,71 @@ void UChanneldEditorSubsystem::AddMessageLog(const FText& Text, const FText& Det
 	FMessageLog MessageLog("PackagingResults");
 	MessageLog.AddMessage(Message);
 	MessageLog.Open();
+}
+
+void UChanneldEditorSubsystem::UploadDockerImage(const FString& ChanneldImageTag, const FString& ServerImageTag,
+                                                 const FPostUploadDockerImage& PostUploadDockerImage)
+{
+	UploadDockerImageNotify->SetMissionNotifyText(
+		FText::FromString(TEXT("Uploading Docker Image...")),
+		LOCTEXT("RunningNotificationCancelButton", "Cancel"),
+		FText::FromString(TEXT("Successfully Uploaded Docker Image!")),
+		FText::FromString(TEXT("Failed to Upload Docker Image!"))
+	);
+	UploadDockerImageNotify->SpawnRunningMissionNotification(nullptr);
+
+	if (ChanneldImageTag.IsEmpty() || ServerImageTag.IsEmpty())
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("ChanneldImageTag or ServerImageTag is empty."));
+		UploadDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+		PostUploadDockerImage.ExecuteIfBound(false);
+		return;
+	}
+
+	FString BatTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("UploadDockerImage.bat");
+
+	FString BatFileContent;
+	{
+		if (!FFileHelper::LoadFileToString(BatFileContent, *BatTemplate))
+		{
+			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load BuildServerDockerImage.bat template."));
+			UploadDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+			PostUploadDockerImage.ExecuteIfBound(false);
+			return;
+		}
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("WorkDir"), FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment"));
+		FormatArgs.Add(TEXT("ChanneldTag"), ChanneldImageTag);
+		FormatArgs.Add(TEXT("ChanneldRepoUrl"), FPaths::GetPath(FPaths::GetPath(ChanneldImageTag)));
+		FormatArgs.Add(TEXT("ServerTag"), ServerImageTag);
+		FormatArgs.Add(TEXT("ServerRepoUrl"), FPaths::GetPath(FPaths::GetPath(ServerImageTag)));
+		BatFileContent = FString::Format(*BatFileContent, FormatArgs);
+	}
+	// Save the cmd to a temp bat file
+	const FString TempBatFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+		"UploadDockerImage.bat");
+
+	FFileHelper::SaveStringToFile(BatFileContent, *TempBatFilePath);
+
+	AsyncTask(ENamedThreads::AnyNormalThreadNormalTask, [this, TempBatFilePath, PostUploadDockerImage]()
+	{
+		int Result = system(TCHAR_TO_ANSI(*TempBatFilePath));
+		if (Result == 0)
+		{
+			UploadDockerImageNotify->SpawnMissionSucceedNotification(nullptr);
+			PostUploadDockerImage.ExecuteIfBound(true);
+		}
+		else
+		{
+			UploadDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+			PostUploadDockerImage.ExecuteIfBound(false);
+		}
+	});
+}
+
+void UChanneldEditorSubsystem::DeplymentToCluster(const FDeploymentStepParams DeploymentParams,
+                                                  const FPostDeplymentToCluster& PostDeplymentToCluster)
+{
 }
 
 

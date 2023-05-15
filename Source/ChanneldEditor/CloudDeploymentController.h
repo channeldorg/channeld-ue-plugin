@@ -44,12 +44,6 @@ struct CHANNELDEDITOR_API FUploadStepParams
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString ServerImageTag;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TArray<FString> ChanneldParams;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TArray<FServerGroupForDeployment> ServerGroups;
-
 	FUploadStepParams() {};
 };
 
@@ -64,6 +58,12 @@ struct CHANNELDEDITOR_API FDeploymentStepParams
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString ServerImageTag;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TArray<FString> ChanneldParams;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TArray<FServerGroupForDeployment> ServerGroups;
+	
 	FDeploymentStepParams() {};
 };
 

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldMissionNotiProxy.h"
+#include "CloudDeploymentController.h"
 #include "ChanneldEditorSubsystem.generated.h"
 
 UENUM(BlueprintType)
@@ -22,6 +23,10 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FPostPackageProject, bool, Success);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FPostBuildServerDockerImage, bool, Success);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FPostBuildChanneldDockerImage, bool, Success);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FPostUploadDockerImage, bool, Success);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FPostDeplymentToCluster, bool, Success);
 
 UCLASS(Meta = (DisplayName = "Channeld Editor"))
 class CHANNELDEDITOR_API UChanneldEditorSubsystem : public UEditorSubsystem
@@ -86,10 +91,19 @@ public:
 	void BuildChanneldDockerImage(const FString& Tag, const FPostBuildChanneldDockerImage& PostBuildChanneldDockerImage);
 
 	UFUNCTION(BlueprintCallable)
+	void OpenPackagingSettings();
+	
+	UFUNCTION(BlueprintCallable)
 	void PackageProject(const FName InPlatformInfoName, const FPostPackageProject& PostPackageProject);
 
 	void AddMessageLog(const FText& Text, const FText& Detail, const FString& TutorialLink,
 	                   const FString& DocumentationLink);
+
+	UFUNCTION(BlueprintCallable)
+	void UploadDockerImage(const FString& ChanneldImageTag, const FString& ServerImageTag, const FPostUploadDockerImage& PostUploadDockerImage);
+
+	UFUNCTION(BlueprintCallable)
+	void DeplymentToCluster(const FDeploymentStepParams DeploymentParams, const FPostDeplymentToCluster& PostDeplymentToCluster);
 
 private:
 	TSharedPtr<FChanneldProcWorkerThread> UpdateRepActorCacheWorkThread;
@@ -105,4 +119,6 @@ private:
 
 	UChanneldMissionNotiProxy* BuildServerDockerImageNotify;
 	UChanneldMissionNotiProxy* BuildChanneldDockerImageNotify;
+
+	UChanneldMissionNotiProxy* UploadDockerImageNotify;
 };

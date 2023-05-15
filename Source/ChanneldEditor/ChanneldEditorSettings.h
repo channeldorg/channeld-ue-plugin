@@ -66,10 +66,6 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Replication Generator", DisplayName = "Automatically Recompile After Generating Replication Code")
 	bool bEnableCompatibleRecompilation = true;
 
-	// Generate go replication code to the specified folder after generating replication code, the folder is relative to "CHANNELD_PATH"
-	UPROPERTY(Config, EditAnywhere, Category = "Replication Generator")
-	FString GeneratedGoReplicationCodeStorageFolder = TEXT("examples/channeld-ue-tps");
-
 	// Set go_package in generated .proto file to the specified value
 	UPROPERTY(Config, EditAnywhere, Category = "Replication Generator|Protobuf", DisplayName= "Go Package Import Path Prefix")
 	FString ChanneldGoPackageImportPathPrefix = TEXT("github.com/metaworking/channeld/examples/channeld-ue-tps");

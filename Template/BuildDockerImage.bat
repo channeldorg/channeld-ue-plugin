@@ -1,4 +1,5 @@
 @echo off
+
 {BuildCmd}
 :: Get the command line result
 set BuildCmdResult=%ERRORLEVEL%

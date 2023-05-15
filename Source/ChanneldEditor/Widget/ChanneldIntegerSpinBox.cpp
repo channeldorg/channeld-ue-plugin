@@ -21,7 +21,7 @@ TSharedRef<SWidget> UChanneldIntegerSpinBox::RebuildWidget()
          .OnBeginSliderMovement(BIND_UOBJECT_DELEGATE(FSimpleDelegate, HandleOnBeginSliderMovement))
          .OnEndSliderMovement(BIND_UOBJECT_DELEGATE(FOnFloatValueChanged, HandleOnEndSliderMovement))
          ;
-     return BuildDesignTimeWidget(MySpinBox.ToSharedRef());
+     return MySpinBox.ToSharedRef();
 }
 
 void UChanneldIntegerSpinBox::HandleOnFloatValueChanged(float InValue) {
