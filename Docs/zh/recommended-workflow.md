@@ -17,7 +17,7 @@
 #### 为Actor开启基于ChanneldUE的同步
 使用了网络同步或RPC的Actor需要添加同步组件。具体操作如下：
 * 为C++ Actor添加同步组件
-    1. Actor 类中声明`ChanneldReplicationComponent`组件
+    1. Actor 类中声明`ChanneldReplicationComponent`组件：
     ```
     #include "Replication/ChanneldReplicationComponent.h"
     ...
