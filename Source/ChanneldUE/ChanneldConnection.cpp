@@ -8,8 +8,33 @@
 
 void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 {
-	if (ReceiveBufferSize > Channeld::MaxPacketSize)
+	// Command line arguments can override the INI settings
+	const TCHAR* CmdLine = FCommandLine::Get();
+	if (FParse::Value(CmdLine, TEXT("ReceiveBufferSize="), ReceiveBufferSize))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed ReceiveBufferSize from CLI: %d"), ReceiveBufferSize);
+	}
+	if (FParse::Value(CmdLine, TEXT("SendBufferSize="), SendBufferSize))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed SendBufferSize from CLI: %d"), SendBufferSize);
+	}
+	if (FParse::Bool(CmdLine, TEXT("ShowUserSpaceMessageLog="), bShowUserSpaceMessageLog))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed bShowUserSpaceMessageLog from CLI: %d"), bShowUserSpaceMessageLog);
+	}
+	if (FParse::Bool(CmdLine, TEXT("DisableMultiMsgPayload="), bDisableMultiMsgPayload))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed bDisableMultiMsgPayload from CLI: %d"), bDisableMultiMsgPayload);
+	}
+	
+	if (ReceiveBufferSize < Channeld::MaxPacketSize)
+	{
 		ReceiveBufferSize = Channeld::MaxPacketSize;
+	}
+	if (SendBufferSize < Channeld::MaxPacketSize)
+	{
+		SendBufferSize = Channeld::MaxPacketSize;
+	}
 	ReceiveBuffer = new uint8[ReceiveBufferSize];
 
 	// StubId=0 is reserved.
@@ -110,6 +135,33 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int32
 
 	// Create TCP socket to channeld
 	Socket = SocketSubsystem->CreateSocket(NAME_Stream, TEXT("Connection to channeld"), RemoteAddr->GetProtocolType());
+
+	int32 NewSize = 0;
+	if (Socket->SetReceiveBufferSize(ReceiveBufferSize, NewSize))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Set Socket's receive buffer size to %d"), NewSize);
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to set Socket's receive buffer size"));
+	}
+	if (Socket->SetSendBufferSize(SendBufferSize, NewSize))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Set Socket's send buffer size to %d"), NewSize);
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to set Socket's send buffer size"));
+	}
+	if(!Socket->SetNoDelay(true))
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to set Socket to NoDelay"));
+	}
+	if(!Socket->SetNonBlocking(true))
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to set Socket to NonBlocking"));
+	}
+	
 	UE_LOG(LogChanneld, Log, TEXT("Connecting to channeld with addr: %s"), *RemoteAddr->ToString(true));
 	bool bSocketConnected = Socket->Connect(*RemoteAddr);
 	if (!ensure(bSocketConnected))
@@ -407,27 +459,38 @@ void UChanneldConnection::TickOutgoing()
 		return;
 
 	channeldpb::Packet Packet;
-	uint32 TotalSize = HeaderSize;
 	TSharedPtr<channeldpb::MessagePack> MessagePack;
 	while (OutgoingQueue.Peek(MessagePack))
 	{
 		uint32 MsgSize = MessagePack->ByteSizeLong();
-		if (HeaderSize + MsgSize > Channeld::MaxPacketSize)
+		if (MsgSize >= Channeld::MaxPacketSize)
 		{
 			OutgoingQueue.Pop();
 			UE_LOG(LogChanneld, Error, TEXT("Dropped oversized message pack: %d, type: %d"), MsgSize, MessagePack->msgtype());
 			return;
 		}
-		
-		TotalSize += MsgSize;
-		if (TotalSize >= Channeld::MaxPacketSize)
-			break;
 
-		OutgoingQueue.Pop();
 		Packet.add_messages()->CopyFrom(*MessagePack);
+		if (Packet.ByteSizeLong() > Channeld::MaxPacketSize)
+		{
+			// Revert adding the message that causes oversize
+			Packet.mutable_messages()->RemoveLast();
+			UE_LOG(LogChanneld, Log, TEXT("Packet is going to be oversized: %d, message type: %d, size: %d, num in packet: %d"),
+				(uint32)Packet.ByteSizeLong(), MessagePack->msgtype(), MsgSize, Packet.messages_size());
+			break;
+		}
+
+		// Actually remove the message from the queue
+		OutgoingQueue.Pop();
+		
+		if (bDisableMultiMsgPayload)
+		{
+			SendDirect(Packet);
+			Packet.clear_messages();
+		}
 	}
 
-	if (TotalSize > 0)
+	if (Packet.messages_size() > 0)
 	{
 		SendDirect(Packet);
 	}
@@ -465,11 +528,11 @@ void UChanneldConnection::SendDirect(const channeldpb::Packet& Packet)
 		{
 			MsgTypes.Appendf(TEXT("%d, "), Packet.messages(i).msgtype());
 		}
-		UE_LOG(LogChanneld, Error, TEXT("Failed to send packet to channeld, msgTypes: %s, sent/full size: %d/%d, last sent: %d"), *MsgTypes, BytesSent, Size, LastBytesSent);
+		UE_LOG(LogChanneld, Error, TEXT("Failed to send packet to channeld, msgTypes: %s, sent/full size: %d/%d, last packet size: %d"), *MsgTypes, BytesSent, Size, LastPacketSize);
 	}
 	else
 	{
-		LastBytesSent = BytesSent;
+		LastPacketSize = PacketSize;
 	}
 }
 
