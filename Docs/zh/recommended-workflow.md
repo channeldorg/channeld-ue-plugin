@@ -31,7 +31,7 @@
     };
     ```
 
-    2. Actor 的构造函数中实例化`ChanneldReplicationComponent`组件
+    2. Actor 的构造函数中实例化`ChanneldReplicationComponent`组件：
     ```
     ACppActor::ACppActor()
     {
