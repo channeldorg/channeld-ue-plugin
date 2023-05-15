@@ -155,10 +155,17 @@ public:
 	void TickOutgoing();
 
 	UPROPERTY(Config)
-		int32 ReceiveBufferSize = Channeld::MaxPacketSize;
+	int32 ReceiveBufferSize = Channeld::MaxPacketSize * 2;
+
+	UPROPERTY(Config)
+	int32 SendBufferSize = Channeld::MaxPacketSize * 2;
 	
 	UPROPERTY(Config)
-		bool bShowUserSpaceMessageLog = false;
+	bool bShowUserSpaceMessageLog = false;
+
+	// If true, only one message will be sent per packet. A packet can have multiple messages in the payload in one trip to improve the efficiency.
+	UPROPERTY(Config)
+	bool bDisableMultiMsgPayload = false;
 
 	FChanneldAuthenticatedDelegate OnAuthenticated;
 
@@ -183,7 +190,7 @@ private:
 	uint8* ReceiveBuffer;
 	uint32 ReceiveBufferOffset;
 	// For debug
-	int32 LastBytesSent = 0;
+	int32 LastPacketSize = 0;
 
 	struct MessageHandlerEntry
 	{
