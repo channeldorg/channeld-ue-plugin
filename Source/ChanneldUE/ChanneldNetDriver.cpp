@@ -200,6 +200,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, Channeld::Ch
 		}
 
 		HandleCustomRPC(RpcMsg);
+		OnReceivedRPC(*RpcMsg);
 	}
 	else if (MsgType == unrealpb::SPAWN)
 	{
@@ -242,6 +243,16 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, Channeld::Ch
 	}
 }
 
+void UChanneldNetDriver::OnReceivedRPC(const unrealpb::RemoteFunctionMessage& RpcMsg)
+{
+	if (ChannelDataView.IsValid())
+	{
+		UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+		Metrics->ReceivedRPCs_Counter->Increment();
+		Metrics->ReceivedRPCs->Add({{"funcName", RpcMsg.functionname()}}).Increment();
+	}
+}
+
 void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg)
 {
 	// We should NEVER creates the actor via RPC
@@ -274,7 +285,7 @@ void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMess
 	ReceivedRPC(Actor, FuncName, Msg->paramspayload(), bDelayRPC);
 	if (bDelayRPC)
 	{
-		UE_LOG(LogChanneld, Log, TEXT("Delayed RPC '%s::%s' due to unmapped NetGUID: %d"), *Actor->GetName(), *FuncName.ToString(), Msg->targetobj().netguid());
+		UE_LOG(LogChanneld, Log, TEXT("Deferred RPC '%s::%s' due to unmapped NetGUID: %d"), *Actor->GetName(), *FuncName.ToString(), Msg->targetobj().netguid());
 		UnprocessedRPCs.Add(Msg);
 	}
 }
@@ -746,6 +757,7 @@ void UChanneldNetDriver::SendCrossServerRPC(TSharedPtr<unrealpb::RemoteFunctionM
 		{
 			ConnToChanneld->Broadcast(TargetChId, unrealpb::RPC, *Msg, channeldpb::SINGLE_CONNECTION);
 			UE_LOG(LogChanneld, Verbose, TEXT("Sent cross-server RPC to channel %d, netId: %d, func: %s"), TargetChId, Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
+			OnSentRPC(*Msg);
 		}
 		else
 		{
@@ -866,7 +878,6 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 				{
 					if (ChannelDataView.IsValid() && ChannelDataView->SendMulticastRPC(Actor, FuncName, ParamsMsg))
 					{
-						OnSentRPC(Actor, FuncName);
 						return;
 					}
 				}
@@ -877,7 +888,6 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 					if (NetConn)
 					{
 						NetConn->SendRPCMessage(Actor, FuncName, ParamsMsg, ChannelDataView->GetOwningChannelId(Actor));
-						OnSentRPC(Actor, FuncName);
 						return;
 					}
 					UE_LOG(LogChanneld, Warning, TEXT("Failed to send RPC %s::%s as the actor doesn't have any NetConn"), *Actor->GetName(), *FuncName);
@@ -896,7 +906,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 					Channeld::ChannelId ForwardChId = ChannelDataView->GetOwningChannelId(Actor);
 					ConnToChanneld->Broadcast(ForwardChId, unrealpb::RPC, RpcMsg, channeldpb::SINGLE_CONNECTION);
 					UE_LOG(LogChanneld, Log, TEXT("Forwarded RPC %s::%s to the owner of channel %d"), *Actor->GetName(), *FuncName, ForwardChId);
-					OnSentRPC(Actor, FuncName);
+					OnSentRPC(RpcMsg);
 					return;
 				}
 			}
@@ -915,11 +925,14 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 	Super::ProcessRemoteFunction(Actor, Function, Parameters, OutParms, Stack, SubObject);
 }
 
-void UChanneldNetDriver::OnSentRPC(class AActor* Actor, FString FuncName)
+void UChanneldNetDriver::OnSentRPC(const unrealpb::RemoteFunctionMessage& RpcMsg)
 {
-	//UE_LOG(LogChanneld, Verbose, TEXT("Sent RPC %s::%s via channeld"), *Actor->GetName(), *FuncName);
-	UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-	Metrics->AddConnTypeLabel(Metrics->SentRPCs).Increment();
+	if (ChannelDataView.IsValid())
+	{
+		UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+		Metrics->SentRPCs_Counter->Increment();
+		Metrics->SentRPCs->Add({{"funcName", RpcMsg.functionname()}}).Increment();
+	}
 }
 
 void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDeferredRPC)

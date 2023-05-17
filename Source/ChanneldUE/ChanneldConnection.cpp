@@ -137,7 +137,7 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int32
 	Socket = SocketSubsystem->CreateSocket(NAME_Stream, TEXT("Connection to channeld"), RemoteAddr->GetProtocolType());
 
 	int32 NewSize = 0;
-	if (Socket->SetReceiveBufferSize(ReceiveBufferSize, NewSize))
+	if (Socket->SetReceiveBufferSize(0x0fffff, NewSize))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Set Socket's receive buffer size to %d"), NewSize);
 	}
@@ -145,7 +145,7 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int32
 	{
 		UE_LOG(LogChanneld, Error, TEXT("Failed to set Socket's receive buffer size"));
 	}
-	if (Socket->SetSendBufferSize(SendBufferSize, NewSize))
+	if (Socket->SetSendBufferSize(0x0fffff, NewSize))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Set Socket's send buffer size to %d"), NewSize);
 	}
@@ -190,6 +190,7 @@ void UChanneldConnection::OnDisconnected()
 	ReceiveBufferOffset = 0;
 	IncomingQueue.Empty();
 	OutgoingQueue.Empty();
+	OutgoingQueueSize = 0;
 	RpcCallbacks.Empty();
 	// StubId=0 is reserved.
 	RpcCallbacks.Add(0, nullptr);
@@ -259,7 +260,7 @@ void UChanneldConnection::Receive()
 			// Unfinished packet
 			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet header: %d"), BytesRead);
 			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->AddConnTypeLabel(Metrics->UnfinishedPacket).Increment();
+			Metrics->FragmentedPacket_Counter->Increment();
 			return;
 		}
 
@@ -268,7 +269,7 @@ void UChanneldConnection::Receive()
 			ReceiveBufferOffset = 0;
 			UE_LOG(LogChanneld, Error, TEXT("Invalid tag: %d, the packet will be dropped"), ReceiveBuffer[0]);
 			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->AddConnTypeLabel(Metrics->DroppedPacket).Increment();
+			Metrics->DroppedPacket_Counter->Increment();
 			return;
 		}
 
@@ -279,7 +280,7 @@ void UChanneldConnection::Receive()
 			// Unfinished packet
 			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet body, read: %d, pos: %d/%d"), BytesRead, ReceiveBufferOffset, HeaderSize + PacketSize);
 			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->AddConnTypeLabel(Metrics->UnfinishedPacket).Increment();
+			Metrics->FragmentedPacket_Counter->Increment();
 			return;
 		}
 
@@ -291,7 +292,7 @@ void UChanneldConnection::Receive()
 			ReceiveBufferOffset = 0;
 			UE_LOG(LogChanneld, Error, TEXT("UChanneldConnection::Receive: Failed to parse packet, size: %d"), PacketSize);
 			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->AddConnTypeLabel(Metrics->DroppedPacket).Increment();
+			Metrics->DroppedPacket_Counter->Increment();
 			return;
 		}
 
@@ -466,7 +467,8 @@ void UChanneldConnection::TickOutgoing()
 		if (MsgSize >= Channeld::MaxPacketSize)
 		{
 			OutgoingQueue.Pop();
-			UE_LOG(LogChanneld, Error, TEXT("Dropped oversized message pack: %d, type: %d"), MsgSize, MessagePack->msgtype());
+			OutgoingQueueSize--;
+			UE_LOG(LogChanneld, Error, TEXT("Dropped oversized message pack: %d, type: %d, remaining in queue: %d"), MsgSize, MessagePack->msgtype(), OutgoingQueueSize);
 			return;
 		}
 
@@ -475,13 +477,14 @@ void UChanneldConnection::TickOutgoing()
 		{
 			// Revert adding the message that causes oversize
 			Packet.mutable_messages()->RemoveLast();
-			UE_LOG(LogChanneld, Log, TEXT("Packet is going to be oversized: %d, message type: %d, size: %d, num in packet: %d"),
-				(uint32)Packet.ByteSizeLong(), MessagePack->msgtype(), MsgSize, Packet.messages_size());
+			UE_LOG(LogChanneld, Log, TEXT("Packet is going to be oversized: %d, message type: %d, size: %d, num in packet: %d, remaining in queue: %d"),
+				(uint32)Packet.ByteSizeLong(), MessagePack->msgtype(), MsgSize, Packet.messages_size(), OutgoingQueueSize);
 			break;
 		}
 
 		// Actually remove the message from the queue
 		OutgoingQueue.Pop();
+		OutgoingQueueSize--;
 		
 		if (bDisableMultiMsgPayload)
 		{
@@ -567,6 +570,7 @@ void UChanneldConnection::SendRaw(Channeld::ChannelId ChId, uint32 MsgType, cons
 	MsgPack->set_msgtype(MsgType);
 	MsgPack->set_msgbody(MsgBody);
 	OutgoingQueue.Enqueue(MsgPack);
+	OutgoingQueueSize++;
 
 	/*
 	channeldpb::MessagePack MsgPack;

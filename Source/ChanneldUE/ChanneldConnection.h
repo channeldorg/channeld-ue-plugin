@@ -213,6 +213,7 @@ private:
 	TMap<uint32, MessageHandlerEntry> MessageHandlers;
 	TQueue<MessageQueueEntry> IncomingQueue;
 	TQueue<TSharedPtr<channeldpb::MessagePack>> OutgoingQueue;
+	int OutgoingQueueSize = 0;
 	TMap<uint32, FChanneldMessageHandlerFunc> RpcCallbacks;
 
 	void SendDirect(const channeldpb::Packet& Packet);

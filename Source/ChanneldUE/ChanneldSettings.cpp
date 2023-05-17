@@ -56,7 +56,10 @@ void UChanneldSettings::PostInitProperties()
 	if (FParse::Value(CmdLine, TEXT("ViewClass="), ViewClassName))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed View class name from CLI: %s"), *ViewClassName);
-		ChannelDataViewClass = LoadClass<UChannelDataView>(NULL, *ViewClassName);
+		if (auto LoadedViewClass = LoadClass<UChannelDataView>(NULL, *ViewClassName))
+		{
+			ChannelDataViewClass = LoadedViewClass;
+		}
 	}
 	if (FParse::Value(CmdLine, TEXT("channeldClientIp="), ChanneldIpForClient))
 	{

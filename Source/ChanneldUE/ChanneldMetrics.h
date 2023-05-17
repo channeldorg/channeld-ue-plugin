@@ -1,5 +1,6 @@
 #pragma once
 #include "MetricsSubsystem.h"
+#include "View/ChannelDataView.h"
 #include "ChanneldMetrics.generated.h"
 
 UCLASS(transient)
@@ -17,20 +18,31 @@ public:
 	virtual bool IsTickable() const override { return !IsTemplate(); };
 	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UMetrics, STATGROUP_Tickables); }
 	//~ End FTickableGameObject Interface
-
-	Counter& AddConnTypeLabel(Family<Counter>* Family);
-	Gauge& AddConnTypeLabel(Family<Gauge>* Family);
 	
 	Family<Gauge>* FPS;
-	Family<Gauge>* CPU;
-	Family<Gauge>* Memory;
 	Gauge* FPS_Gauge;
+
+	Family<Gauge>* CPU;
 	Gauge* CPU_Gauge;
+
+	Family<Gauge>* Memory;
 	Gauge* MEM_Gauge;
-	Family<Counter>* UnfinishedPacket;
+	
+	Family<Counter>* FragmentedPacket;
+	Counter* FragmentedPacket_Counter;
+
 	Family<Counter>* DroppedPacket;
+	Counter* DroppedPacket_Counter;
+	
 	Family<Counter>* ReplicatedProviders;
+	Counter* ReplicatedProviders_Counter;
+	
 	Family<Counter>* SentRPCs;
+	Counter* SentRPCs_Counter;
+	
+	Family<Counter>* ReceivedRPCs;
+	Counter* ReceivedRPCs_Counter;
+	
 	Family<Counter>* GetHandoverContexts;
 	Family<Counter>* Handovers;
 };
