@@ -317,6 +317,11 @@ void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncNa
 		UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %d bytes"), RpcMsg.paramspayload().size());
 	}
 	SendMessage(unrealpb::RPC, RpcMsg, ChId);
+
+	if (auto NetDriver = Cast<UChanneldNetDriver>(Driver))
+	{
+		NetDriver->OnSentRPC(RpcMsg);
+	}
 }
 
 FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= false*/)
