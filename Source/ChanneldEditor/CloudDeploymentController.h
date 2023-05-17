@@ -15,7 +15,7 @@ struct CHANNELDEDITOR_API FServerGroupForDeployment : public FServerGroup
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString YAMLTemplatePath;
 
-	FServerGroupForDeployment() {};
+	FServerGroupForDeployment() {}
 };
 
 
@@ -30,7 +30,7 @@ struct CHANNELDEDITOR_API FPackageStepParams
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString ServerImageTag;
 
-	FPackageStepParams() {};
+	FPackageStepParams() {}
 };
 
 USTRUCT(BlueprintType)
@@ -44,7 +44,7 @@ struct CHANNELDEDITOR_API FUploadStepParams
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString ServerImageTag;
 
-	FUploadStepParams() {};
+	FUploadStepParams() {}
 };
 
 USTRUCT(BlueprintType)
@@ -59,12 +59,21 @@ struct CHANNELDEDITOR_API FDeploymentStepParams
 	FString ServerImageTag;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString Cluster;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString Namespace;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString YAMLTemplatePath;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TArray<FString> ChanneldParams;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TArray<FServerGroupForDeployment> ServerGroups;
 	
-	FDeploymentStepParams() {};
+	FDeploymentStepParams() {}
 };
 
 USTRUCT(BlueprintType)
@@ -81,7 +90,7 @@ struct CHANNELDEDITOR_API FCloudDeploymentParams
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FDeploymentStepParams DeploymentStepParams;
 
-	FCloudDeploymentParams() {};
+	FCloudDeploymentParams() {}
 };
 
 UCLASS(BlueprintType, Blueprintable)

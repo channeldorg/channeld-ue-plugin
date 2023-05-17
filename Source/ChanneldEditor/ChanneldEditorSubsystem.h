@@ -103,7 +103,7 @@ public:
 	void UploadDockerImage(const FString& ChanneldImageTag, const FString& ServerImageTag, const FPostUploadDockerImage& PostUploadDockerImage);
 
 	UFUNCTION(BlueprintCallable)
-	void DeplymentToCluster(const FDeploymentStepParams DeploymentParams, const FPostDeplymentToCluster& PostDeplymentToCluster);
+	void DeployToCluster(const FDeploymentStepParams DeploymentParams, const FPostDeplymentToCluster& PostDeplymentToCluster);
 
 private:
 	TSharedPtr<FChanneldProcWorkerThread> UpdateRepActorCacheWorkThread;
@@ -121,4 +121,9 @@ private:
 	UChanneldMissionNotiProxy* BuildChanneldDockerImageNotify;
 
 	UChanneldMissionNotiProxy* UploadDockerImageNotify;
+
+	TSharedPtr<FChanneldProcWorkerThread> DeployToClusterWorkThread;
+	UChanneldMissionNotiProxy* DeployToClusterNotify;
+
+	
 };

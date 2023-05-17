@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {Namespace}
+  name: {Name}
+spec:
+  replicas: {Replicas}
+  selector:
+    matchLabels:
+      app: server
+  strategy:
+    type: Recreate
+  template:
+    spec:
+      containers:
+        - command: [{ChanneldParams}]
+          image: {DockerImage}
+          name: {Name}
+          ports:
+            - containerPort: 8080
+              name: metrics-port
+          resources:
+            limits:
+              cpu: 3500m
+              memory: 512M
+            requests:
+              cpu: "1"
+          # envFrom:
+          # - configMapRef:
+          #     name: 
+      imagePullSecrets: # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+        - name: channeld-registry
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {Namespace}
+  name: {Name}
+spec:
+  ports:
+    - name: "metrics"
+      port: 8080
+      targetPort: metrics-port
+  selector:
+    app: server
+  type: LoadBalancer
+---

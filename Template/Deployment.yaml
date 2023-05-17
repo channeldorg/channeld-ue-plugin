@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {Namespace}
+  name: channeld-getaway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: channeld-getaway
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: channeld-getaway
+    spec:
+      containers:
+        - command: [{ChanneldParams}]
+          image: {DockerImage}
+          name: channeld-getaway
+          ports:
+            - containerPort: 11288
+              name: server-port
+            - containerPort: 12108
+              name: client-port
+            - containerPort: 8080
+              name: metrics-port
+          resources:
+            limits:
+              cpu: 3500m
+              memory: 512M
+            requests:
+              cpu: "2"
+          # envFrom:
+          # - configMapRef:
+          #     name: channeld-configmap
+      imagePullSecrets: # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+        - name: channeld-registry
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {Namespace}
+  name: channeld-getaway
+spec:
+  ports:
+    - name: "server"
+      port: 11288
+      targetPort: server-port
+    - name: "client"
+      port: 12108
+      targetPort: client-port
+    - name: "metrics"
+      port: 8080
+      targetPort: metrics-port
+  selector:
+    app: channeld-getaway
+  type: LoadBalancer
+---
+# {ServerDeploymentAndService}

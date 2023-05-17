@@ -57,6 +57,9 @@ void UChanneldEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	UploadDockerImageNotify = NewObject<UChanneldMissionNotiProxy>();
 	UploadDockerImageNotify->AddToRoot();
 	UploadDockerImageNotify->SetShowCancel(false);
+
+	DeployToClusterNotify = NewObject<UChanneldMissionNotiProxy>();
+	DeployToClusterNotify->AddToRoot();
 }
 
 void UChanneldEditorSubsystem::UpdateReplicationCacheAction(FPostRepActorCache PostUpdatedRepActorCache)
@@ -660,13 +663,12 @@ void UChanneldEditorSubsystem::BuildChanneldDockerImage(const FString& Tag,
 		return;
 	}
 
-	FString ChanneldEntryPath = GetMutableDefault<UChanneldEditorSettings>()->
-		LaunchChanneldEntry;
+	FString ChanneldEntryPath = GetMutableDefault<UChanneldEditorSettings>()->LaunchChanneldEntry;
 	if (ChanneldEntryPath.IsEmpty())
 	{
 		UE_LOG(LogChanneldEditor, Error,
 		       TEXT(
-			       "GeneratedGoReplicationCodeStorageFolder is not set. Please set it to the path of the channeld entry point."
+			       "LaunchChanneldEntry is not set. Please set it to the path of the channeld entry point."
 		       ));
 		BuildChanneldDockerImageNotify->SpawnMissionFailedNotification(nullptr);
 		PostBuildChanneldDockerImage.ExecuteIfBound(false);
@@ -686,7 +688,7 @@ void UChanneldEditorSubsystem::BuildChanneldDockerImage(const FString& Tag,
 	}
 
 	const FString ChanneldDockerfilePath = ChanneldPath / ChanneldEntryPath / TEXT("Dockerfile");
-	if(!FPaths::FileExists(ChanneldDockerfilePath))
+	if (!FPaths::FileExists(ChanneldDockerfilePath))
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("Cannot find Dockerfile at %s."), *ChanneldDockerfilePath);
 		BuildChanneldDockerImageNotify->SpawnMissionFailedNotification(nullptr);
@@ -1302,9 +1304,177 @@ void UChanneldEditorSubsystem::UploadDockerImage(const FString& ChanneldImageTag
 	});
 }
 
-void UChanneldEditorSubsystem::DeplymentToCluster(const FDeploymentStepParams DeploymentParams,
-                                                  const FPostDeplymentToCluster& PostDeplymentToCluster)
+void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams DeploymentParams,
+                                               const FPostDeplymentToCluster& PostDeplymentToCluster)
 {
+	DeployToClusterNotify->SetMissionNotifyText(
+		FText::FromString(TEXT("Deploying to Cluster...")),
+		LOCTEXT("RunningNotificationCancelButton", "Cancel"),
+		FText::FromString(TEXT("Successfully Deployed to Cluster!")),
+		FText::FromString(TEXT("Failed to Deploy to Cluster!"))
+	);
+	DeployToClusterNotify->SpawnRunningMissionNotification(nullptr);
+
+	FString Cluster = DeploymentParams.Cluster;
+	FString Namespace = DeploymentParams.Namespace;
+	FString ChanneldImageTag = DeploymentParams.ChanneldImageTag;
+	FString ServerImageTag = DeploymentParams.ChanneldImageTag;
+	FString YAMLTemplatePath = DeploymentParams.YAMLTemplatePath;
+
+
+	FString YAMLTemplateContent;
+
+	// for( int32 I = 0 ;I < DeploymentParams.ServerGroups.Num(); ++I)
+	// {
+	// 	FString ServerYAMLTemplateContent;
+	// 	const FServerGroupForDeployment& ServerGroup  = DeploymentParams.ServerGroups[I];
+	// 	if (!FFileHelper::LoadFileToString(ServerYAMLTemplateContent, *ServerGroup.YAMLTemplatePath))
+	// 	{
+	// 		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load YAML template at %s."), *ServerGroup.YAMLTemplatePath);
+	// 		DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
+	// 		PostDeplymentToCluster.ExecuteIfBound(false);
+	// 		return;
+	// 	}
+	// 	FStringFormatNamedArguments FormatArgs;
+	// 	
+	// 	FormatArgs.Add(TEXT("Namespace"), Namespace);
+	// 	FormatArgs.Add(TEXT("Name"), FString::Printf(TEXT("Server_%d"), I));
+	// 	FormatArgs.Add(TEXT("Replicas"), ServerGroup.ServerNum);
+	// 	FormatArgs.Add(TEXT("DockerImage"), ServerImageTag);
+	// 	YAMLTemplateContent.Append(FString::Format(*ServerYAMLTemplateContent, FormatArgs));
+	// }
+	{
+		FString ChanneldEntryPath = GetMutableDefault<UChanneldEditorSettings>()->LaunchChanneldEntry;
+		if (ChanneldEntryPath.IsEmpty())
+		{
+			UE_LOG(LogChanneldEditor, Error,
+			       TEXT(
+				       "LaunchChanneldEntry is not set. Please set it to the path of the channeld entry point."
+			       ));
+			DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
+			PostDeplymentToCluster.ExecuteIfBound(false);
+			return;
+		}
+		FPaths::NormalizeDirectoryName(ChanneldEntryPath);
+		FString ChanneldParams = FString::Printf(TEXT("./%s"), *FPaths::GetCleanFilename(ChanneldEntryPath));
+		for (int32 I = 0; I < DeploymentParams.ChanneldParams.Num(); I++)
+		{
+			ChanneldParams.Append(TEXT(", "));
+			ChanneldParams.Append(DeploymentParams.ChanneldParams[I]);
+		}
+
+		if (!FFileHelper::LoadFileToString(YAMLTemplateContent, *YAMLTemplatePath))
+		{
+			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load YAML template at %s."), *YAMLTemplatePath);
+			DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
+			PostDeplymentToCluster.ExecuteIfBound(false);
+			return;
+		}
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("ChanneldParams"), ChanneldParams);
+		FormatArgs.Add(TEXT("Namespace"), Namespace);
+		FormatArgs.Add(TEXT("DockerImage"), ChanneldImageTag);
+		// FormatArgs.Add(TEXT("ServerTag"), ServerImageTag);
+		YAMLTemplateContent = FString::Format(*YAMLTemplateContent, FormatArgs);
+	}
+	const FString TempYAMLFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+		"Deployment.yaml");
+	FFileHelper::SaveStringToFile(YAMLTemplateContent, *TempYAMLFilePath);
+
+	FString CheckPodStatusBatTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT(
+		"CheckPodStatus.bat");
+	FString JQPath = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Source") / TEXT(
+		"ThirdParty") / TEXT("jq-win64.exe");
+
+	FString CheckChanneldPodStatusBatPath = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT(
+		"CheckChanneldPodStatus.bat");
+	{
+		FString CheckPodStatusBatFileContent;
+		if (!FFileHelper::LoadFileToString(CheckPodStatusBatFileContent, *CheckPodStatusBatTemplate))
+		{
+			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load CheckPodStatus.bat template."));
+			DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
+			PostDeplymentToCluster.ExecuteIfBound(false);
+			return;
+		}
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("WorkDir"), FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment"));
+		FormatArgs.Add(TEXT("JQPath"), JQPath);
+		FormatArgs.Add(
+			TEXT("PodStatusJsonPath"), FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+				"ChanneldPodStatus.json"));
+		FormatArgs.Add(TEXT("PodSelector"), TEXT("app=channeld-getaway"));
+		FormatArgs.Add(TEXT("PodDescriptionName"), TEXT("channeld"));
+		CheckPodStatusBatFileContent = FString::Format(*CheckPodStatusBatFileContent, FormatArgs);
+		FFileHelper::SaveStringToFile(CheckPodStatusBatFileContent, *CheckChanneldPodStatusBatPath);
+	}
+
+	FString DeployBatTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("Deployment.bat");
+	FString DeployBatFileContent;
+	{
+		if (!FFileHelper::LoadFileToString(DeployBatFileContent, *DeployBatTemplate))
+		{
+			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load Deployment.bat template."));
+			DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
+			PostDeplymentToCluster.ExecuteIfBound(false);
+			return;
+		}
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("WorkDir"), FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment"));
+		FormatArgs.Add(TEXT("YAMLFilePath"), TempYAMLFilePath);
+		FormatArgs.Add(TEXT("CheckPodStatusBatPath"), CheckChanneldPodStatusBatPath);
+		DeployBatFileContent = FString::Format(*DeployBatFileContent, FormatArgs);
+	}
+
+	const FString TempBatFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+		"Deployment.bat");
+	FFileHelper::SaveStringToFile(DeployBatFileContent, *TempBatFilePath);
+
+	DeployToClusterWorkThread = MakeShareable(
+		new FChanneldProcWorkerThread(
+			TEXT("DeployToClusterThread"),
+			TempBatFilePath,
+			TEXT("")
+		)
+	);
+	DeployToClusterWorkThread->ProcOutputMsgDelegate.BindUObject(UpdateRepActorCacheNotify,
+	                                                             &UChanneldMissionNotiProxy::ReceiveOutputMsg);
+	DeployToClusterNotify->MissionCanceled.AddLambda([this]()
+	{
+		if (DeployToClusterWorkThread.IsValid() && DeployToClusterWorkThread->GetThreadStatus() ==
+			EChanneldThreadStatus::Busy)
+		{
+			DeployToClusterWorkThread->Cancel();
+		}
+	});
+	DeployToClusterWorkThread->ProcSucceedDelegate.AddLambda(
+		[this, PostDeplymentToCluster](FChanneldProcWorkerThread*)
+		{
+			DeployToClusterNotify->SpawnMissionSucceedNotification(nullptr);
+			PostDeplymentToCluster.ExecuteIfBound(true);
+		});
+	DeployToClusterWorkThread->ProcFailedDelegate.AddLambda(
+		[this, PostDeplymentToCluster](FChanneldProcWorkerThread*)
+		{
+			DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
+			PostDeplymentToCluster.ExecuteIfBound(false);
+		});
+	DeployToClusterWorkThread->Execute();
+	//
+	// AsyncTask(ENamedThreads::AnyNormalThreadNormalTask, [this, TempBatFilePath, PostDeplymentToCluster]()
+	// {
+	// 	int Result = system(TCHAR_TO_ANSI(*TempBatFilePath));
+	// 	if (Result == 0)
+	// 	{
+	// 		DeployToClusterNotify->SpawnMissionSucceedNotification(nullptr);
+	// 		PostDeplymentToCluster.ExecuteIfBound(true);
+	// 	}
+	// 	else
+	// 	{
+	// 		DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
+	// 		PostDeplymentToCluster.ExecuteIfBound(false);
+	// 	}
+	// });
 }
 
 
