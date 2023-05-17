@@ -656,6 +656,11 @@ bool UChannelDataView::SendMulticastRPC(AActor* Actor, const FString& FuncName, 
 		Connection->Broadcast(ChId, unrealpb::RPC, RpcMsg, channeldpb::SINGLE_CONNECTION);
 		UE_LOG(LogChanneld, Log, TEXT("Forwarded RPC %s::%s to the owner of channel %d"), *Actor->GetName(), *FuncName, ChId);
 	}
+
+	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
+	{
+		NetDriver->OnSentRPC(RpcMsg);
+	}
 	
 	return true;
 }
@@ -778,7 +783,7 @@ int32 UChannelDataView::SendAllChannelUpdates()
 	if (TotalUpdateCount > 0)
 	{
 		UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-		Metrics->AddConnTypeLabel(Metrics->ReplicatedProviders).Increment(TotalUpdateCount);
+		Metrics->ReplicatedProviders_Counter->Increment(TotalUpdateCount);
 	}
 
 	return TotalUpdateCount;
