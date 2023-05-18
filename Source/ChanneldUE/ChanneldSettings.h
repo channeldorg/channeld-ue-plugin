@@ -96,6 +96,9 @@ public:
 	// If set to true, the RPC with the actor that hasn't been exported to the client will be postponed until being exported.
 	UPROPERTY(Config, EditAnywhere, Category = "Server")
 	bool bQueueUnexportedActorRPC = false;
+	// If set to true, the redirecting of RPC will be disabled. Useful for debugging.
+	UPROPERTY(Config, EditAnywhere, Category = "Server")
+	bool bDisableRedirectingRPC = false;
 	// Delay the calling of InitServer() for attaching the debugger or other purpose.
 	UPROPERTY(Config, EditAnywhere, Category = "Server|Debug")
 	float DelayViewInitInSeconds = 0;
