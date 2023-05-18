@@ -592,18 +592,6 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	CDPFormatArgs.Add(TEXT("Declaration_CDP_ProtoVar"), ChannelDataMessageName);
 	CDPFormatArgs.Add(TEXT("Code_GetStateFromChannelData"), ChannelDataProcessor_GetStateCode.IsEmpty() ? TEXT("") : ChannelDataProcessor_GetStateCode + TEXT("else"));
 	CDPFormatArgs.Add(TEXT("Code_SetStateToChannelData"), ChannelDataProcessor_SetStateCode.IsEmpty() ? TEXT("") : ChannelDataProcessor_SetStateCode + TEXT("else"));
-	if (bHasAActor)
-	{
-		CDPFormatArgs.Add(TEXT("Code_GetRelevantNetGUIDs"), ChannelDataProcessor_GetRelevantNetGUIDsCode);
-		CDPFormatArgs.Add(
-			TEXT("Code_GetRelevantNetGUIDsFromChannelDataInner"),
-			FString::Format(CodeGen_GetRelevantNetGUIDsFromChannelDataTemp, CDPFormatArgs)
-		);
-	}
-	else
-	{
-		CDPFormatArgs.Add(TEXT("Code_GetRelevantNetGUIDsFromChannelDataInner"), TEXT(""));
-	}
 
 	ChannelDataProcessorCode = FString::Format(*CodeGen_ChannelDataProcessorCPPTemp, CDPFormatArgs);
 	return true;

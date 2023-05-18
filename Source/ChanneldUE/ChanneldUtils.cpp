@@ -71,6 +71,20 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 				}
 				else
 				{
+					// Fix 'Netguid mismatch' issue
+					if (FNetGuidCacheObject* ExistingCacheObjectPtr = GuidCache->ObjectLookup.Find(NewGUID))
+					{
+						if (ExistingCacheObjectPtr->Object != nullptr && GuidCache->NetGUIDLookup.FindRef(ExistingCacheObjectPtr->Object) != NewGUID)
+						{
+							FNetworkGUID CurrentNetGUID = GuidCache->NetGUIDLookup.FindRef(ExistingCacheObjectPtr->Object);
+							if (CurrentNetGUID != NewGUID)
+							{
+								GuidCache->NetGUIDLookup.Emplace(ExistingCacheObjectPtr->Object, NewGUID);
+								UE_LOG(LogChanneld, Verbose, TEXT("[Client] Updated NetGUIDLookup for %s: %d -> %d"), *ExistingCacheObjectPtr->Object->GetName(), CurrentNetGUID.Value, NewGUID.Value);
+							}
+						}
+					}
+					
 					GuidCache->RegisterNetGUIDFromPath_Client(NewGUID, PathName, CachedObj->outerguid(), 0, false, false);
 				}
 				UObject* NewObj = GuidCache->GetObjectFromNetGUID(NewGUID, false);
