@@ -42,10 +42,15 @@ void FChanneldUEModule::StartupModule()
 	REGISTER_REPLICATOR(FChanneldPlayerControllerReplicator, APlayerController);
 	REGISTER_REPLICATOR(FChanneldActorComponentReplicator, UActorComponent);
 	REGISTER_REPLICATOR(FChanneldSceneComponentReplicator, USceneComponent);
+
+	SpatialChannelDataProcessor = new FDefaultSpatialChannelDataProcessor();
+	ChanneldReplication::RegisterChannelDataProcessor(TEXT("unrealpb.SpatialChannelData"), SpatialChannelDataProcessor);
 }
 
 void FChanneldUEModule::ShutdownModule()
 {
+	delete SpatialChannelDataProcessor;
+	
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 	{
 		SettingsModule->UnregisterSettings("Project", "Plugins", "ChanneldSettings");
