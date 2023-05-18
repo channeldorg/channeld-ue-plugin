@@ -55,6 +55,9 @@ public:
 	// If true, UNetConnection::SetInternalAck() will be called to internally ack all packets. Should be turned on for reliable connection (TCP) to save bandwidth.
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	bool bSetInternalAck = true;
+	// How many times an RPC will be redirected from a server that couldn't handle it to another server. 0 = No redirection. Setting this to a too high value can cause the RPC bouncing between servers and saturate the network.
+	UPROPERTY(Config, EditAnywhere, Category = "Transport")
+	int32 RpcRedirectionMaxRetries = 1;
 
 	// Should the server and client skip the custom replication system and use UE's default one. All traffic still goes through channeld either way.
 	UPROPERTY(Config, EditAnywhere, Category = "Replication")
@@ -96,9 +99,6 @@ public:
 	// If set to true, the RPC with the actor that hasn't been exported to the client will be postponed until being exported.
 	UPROPERTY(Config, EditAnywhere, Category = "Server")
 	bool bQueueUnexportedActorRPC = false;
-	// If set to true, the redirecting of RPC will be disabled. Useful for debugging.
-	UPROPERTY(Config, EditAnywhere, Category = "Server")
-	bool bDisableRedirectingRPC = false;
 	// Delay the calling of InitServer() for attaching the debugger or other purpose.
 	UPROPERTY(Config, EditAnywhere, Category = "Server|Debug")
 	float DelayViewInitInSeconds = 0;

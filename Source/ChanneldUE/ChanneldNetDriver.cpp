@@ -245,12 +245,11 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, Channeld::Ch
 
 void UChanneldNetDriver::OnReceivedRPC(const unrealpb::RemoteFunctionMessage& RpcMsg)
 {
-	if (ChannelDataView.IsValid())
-	{
-		UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-		Metrics->ReceivedRPCs_Counter->Increment();
-		Metrics->ReceivedRPCs->Add({{"funcName", RpcMsg.functionname()}}).Increment();
-	}
+	UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+	Metrics->ReceivedRPCs_Counter->Increment();
+#if !UE_BUILD_SHIPPING
+	Metrics->ReceivedRPCs->Add({{"funcName", RpcMsg.functionname()}}).Increment();
+#endif
 }
 
 void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg)
@@ -750,31 +749,38 @@ void UChanneldNetDriver::SetAllSentSpawn(const FNetworkGUID NetId)
 
 void UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg)
 {
-	if (GetMutableDefault<UChanneldSettings>()->bDisableRedirectingRPC)
+	if (Msg->redirectioncounter() < GetMutableDefault<UChanneldSettings>()->RpcRedirectionMaxRetries)
 	{
-		return;
-	}
-	
-	if (ChannelDataView.IsValid())
-	{
-		Channeld::ChannelId TargetChId = ChannelDataView->GetOwningChannelId(FNetworkGUID(Msg->targetobj().netguid()));
-		ensureMsgf(!ConnToChanneld->OwnedChannels.Contains(TargetChId), TEXT("Attempt to redirect RPC to the same server, netId: %d, func: %s"), Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
-		
-		if (TargetChId != Channeld::InvalidChannelId)
+		if (ChannelDataView.IsValid())
 		{
-			ConnToChanneld->Broadcast(TargetChId, unrealpb::RPC, *Msg, channeldpb::SINGLE_CONNECTION);
-			UE_LOG(LogChanneld, Verbose, TEXT("Redirect RPC to channel %d, netId: %d, func: %s"), TargetChId, Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
-			OnSentRPC(*Msg);
+			Channeld::ChannelId TargetChId = ChannelDataView->GetOwningChannelId(FNetworkGUID(Msg->targetobj().netguid()));
+			ensureMsgf(!ConnToChanneld->OwnedChannels.Contains(TargetChId), TEXT("Attempt to redirect RPC to the same server, netId: %d, func: %s"), Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
+		
+			if (TargetChId != Channeld::InvalidChannelId)
+			{
+				Msg->set_redirectioncounter(Msg->redirectioncounter() + 1);
+				ConnToChanneld->Broadcast(TargetChId, unrealpb::RPC, *Msg, channeldpb::SINGLE_CONNECTION);
+				UE_LOG(LogChanneld, Verbose, TEXT("Redirect RPC to channel %d, netId: %d, func: %s"), TargetChId, Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
+				
+				UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+				Metrics->RedirectedRPCs_Counter->Increment();
+#if !UE_BUILD_SHIPPING
+				Metrics->RedirectedRPCs->Add({{"funcName", Msg->functionname()}}).Increment();
+#endif
+
+				OnSentRPC(*Msg);
+				return;
+			}
+			
+			UE_LOG(LogChanneld, Warning, TEXT("Unable to redirect RPC as the mapping to the target channel doesn't exists, netId: %d"), Msg->targetobj().netguid());
 		}
 		else
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Unable to redirect RPC as the mapping to the target channel doesn't exists, netId: %d"), Msg->targetobj().netguid());
+			UE_LOG(LogChanneld, Warning, TEXT("Unable to redirect RPC as the view doesn't exist."));
 		}
 	}
-	else
-	{
-		UE_LOG(LogChanneld, Warning, TEXT("Unable to redirect RPC as the view doesn't exist."));
-	}
+
+	GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(Msg->functionname());
 }
 
 // Called only on client or the destination server of a handover.
@@ -935,18 +941,19 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 		UE_LOG(LogChanneld, Warning, TEXT("Can't find the ReplicationComponent to serialize RPC: %s::%s"), *Actor->GetName(), *FuncName);
 	}
 
+	GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(std::string(TCHAR_TO_UTF8(*FuncName)));
+	
 	// Fallback to native RPC
 	Super::ProcessRemoteFunction(Actor, Function, Parameters, OutParms, Stack, SubObject);
 }
 
 void UChanneldNetDriver::OnSentRPC(const unrealpb::RemoteFunctionMessage& RpcMsg)
 {
-	if (ChannelDataView.IsValid())
-	{
-		UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-		Metrics->SentRPCs_Counter->Increment();
-		Metrics->SentRPCs->Add({{"funcName", RpcMsg.functionname()}}).Increment();
-	}
+	UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+	Metrics->SentRPCs_Counter->Increment();
+#if !UE_BUILD_SHIPPING
+	Metrics->SentRPCs->Add({{"funcName", RpcMsg.functionname()}}).Increment();
+#endif
 }
 
 void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDeferredRPC)
