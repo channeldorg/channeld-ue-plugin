@@ -119,6 +119,11 @@ void UChanneldSettings::PostInitProperties()
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bEnableSpatialVisualizer from CLI: %d"), bEnableSpatialVisualizer);
 	}
+	
+	if (FParse::Bool(CmdLine, TEXT("DisableRedirectingRPC="), bDisableRedirectingRPC))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed bDisableRedirectingRPC from CLI: %d"), bDisableRedirectingRPC);
+	}
 }
 
 bool UChanneldSettings::IsNetworkingEnabled() const
