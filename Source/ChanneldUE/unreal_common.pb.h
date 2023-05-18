@@ -1231,6 +1231,7 @@ class CHANNELDUE_API RemoteFunctionMessage final :
     kFunctionNameFieldNumber = 2,
     kParamsPayloadFieldNumber = 3,
     kTargetObjFieldNumber = 1,
+    kRedirectionCounterFieldNumber = 4,
   };
   // string functionName = 2;
   void clear_functionname();
@@ -1278,6 +1279,15 @@ class CHANNELDUE_API RemoteFunctionMessage final :
       ::unrealpb::UnrealObjectRef* targetobj);
   ::unrealpb::UnrealObjectRef* unsafe_arena_release_targetobj();
 
+  // int32 redirectionCounter = 4;
+  void clear_redirectioncounter();
+  int32_t redirectioncounter() const;
+  void set_redirectioncounter(int32_t value);
+  private:
+  int32_t _internal_redirectioncounter() const;
+  void _internal_set_redirectioncounter(int32_t value);
+  public:
+
   // @@protoc_insertion_point(class_scope:unrealpb.RemoteFunctionMessage)
  private:
   class _Internal;
@@ -1289,6 +1299,7 @@ class CHANNELDUE_API RemoteFunctionMessage final :
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr functionname_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr paramspayload_;
     ::unrealpb::UnrealObjectRef* targetobj_;
+    int32_t redirectioncounter_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -11306,6 +11317,26 @@ inline void RemoteFunctionMessage::set_allocated_paramspayload(std::string* para
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:unrealpb.RemoteFunctionMessage.paramsPayload)
+}
+
+// int32 redirectionCounter = 4;
+inline void RemoteFunctionMessage::clear_redirectioncounter() {
+  _impl_.redirectioncounter_ = 0;
+}
+inline int32_t RemoteFunctionMessage::_internal_redirectioncounter() const {
+  return _impl_.redirectioncounter_;
+}
+inline int32_t RemoteFunctionMessage::redirectioncounter() const {
+  // @@protoc_insertion_point(field_get:unrealpb.RemoteFunctionMessage.redirectionCounter)
+  return _internal_redirectioncounter();
+}
+inline void RemoteFunctionMessage::_internal_set_redirectioncounter(int32_t value) {
+  
+  _impl_.redirectioncounter_ = value;
+}
+inline void RemoteFunctionMessage::set_redirectioncounter(int32_t value) {
+  _internal_set_redirectioncounter(value);
+  // @@protoc_insertion_point(field_set:unrealpb.RemoteFunctionMessage.redirectionCounter)
 }
 
 // -------------------------------------------------------------------

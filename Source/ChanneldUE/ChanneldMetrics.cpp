@@ -44,6 +44,12 @@ void UChanneldMetrics::Initialize(FSubsystemCollectionBase& Collection)
 	
 	ReceivedRPCs = &Metrics->AddCounterFamily(FName("ue_rpc_recv"), TEXT("Number of the RPCs received from channeld"));
 	ReceivedRPCs_Counter = &ReceivedRPCs->Add(NameLabel);
+
+	DroppedRPCs = &Metrics->AddCounterFamily(FName("ue_rpc_drop"), TEXT("Number of the RPCs dropped"));
+	DroppedRPCs_Counter = &DroppedRPCs->Add(NameLabel);
+
+	RedirectedRPCs = &Metrics->AddCounterFamily(FName("ue_rpc_redir"), TEXT("Number of the RPCs redirected"));
+	RedirectedRPCs_Counter = &RedirectedRPCs->Add(NameLabel);
 	
 	GetHandoverContexts = &Metrics->AddCounterFamily(FName("ue_handover_ctx"), TEXT("Number of getting handover context"));
 	
@@ -76,6 +82,12 @@ void UChanneldMetrics::Deinitialize()
 
 	ReceivedRPCs->Remove(ReceivedRPCs_Counter);
 	Metrics->Remove(*ReceivedRPCs);
+
+	DroppedRPCs->Remove(DroppedRPCs_Counter);
+	Metrics->Remove(*DroppedRPCs);
+
+	RedirectedRPCs->Remove(RedirectedRPCs_Counter);
+	Metrics->Remove(*RedirectedRPCs);
 	
 	Metrics->Remove(*GetHandoverContexts);
 	Metrics->Remove(*Handovers);
@@ -86,4 +98,12 @@ void UChanneldMetrics::Tick(float DeltaTime)
 	FPS_Gauge->Set(1.0 / DeltaTime);
 	CPU_Gauge->Set(FPlatformTime::GetCPUTime().CPUTimePct);
 	MEM_Gauge->Set(FPlatformMemory::GetStats().UsedPhysical >> 20);
+}
+
+void UChanneldMetrics::OnDroppedRPC(const std::string& FuncName)
+{
+	DroppedRPCs_Counter->Increment();
+#if !UE_BUILD_SHIPPING
+	DroppedRPCs->Add({{"funcName", FuncName}}).Increment();
+#endif
 }

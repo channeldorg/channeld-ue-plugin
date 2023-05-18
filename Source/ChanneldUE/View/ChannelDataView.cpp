@@ -647,6 +647,7 @@ bool UChannelDataView::SendMulticastRPC(AActor* Actor, const FString& FuncName, 
 		else
 		{
 			UE_LOG(LogChanneld, Warning, TEXT("Multicast RPC is only supported in Global, SubWorld and Spatial channels. ChannelId: %d, ChannelType: %d"), ChId, (int32)ChannelInfo->ChannelType);
+			GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(RpcMsg.functionname());
 			return false;
 		}
 	}
