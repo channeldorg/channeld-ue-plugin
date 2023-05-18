@@ -114,56 +114,62 @@
 	]
 },
 {
-	"channelType": "ECT_Spatial",
+	"channelType": "ECT_Entity",
 	"channelTypeOrder": 3,
 	"stateSchemata": [
 		{
-			"replicationClassPath": "/Script/Engine.Actor",
+			"replicationClassPath": "/Script/Engine.UObject",
 			"stateOrder": 1,
 			"bSkip": false,
-			"bSingleton": false
+			"bSingleton": true
+		},
+		{
+			"replicationClassPath": "/Script/Engine.Actor",
+			"stateOrder": 2,
+			"bSkip": false,
+			"bSingleton": true
 		},
 		{
 			"replicationClassPath": "/Script/Engine.Controller",
-			"stateOrder": 2,
+			"stateOrder": 3,
 			"bSkip": false,
-			"bSingleton": false
+			"bSingleton": true
 		},
 		{
 			"replicationClassPath": "/Script/Engine.Character",
-			"stateOrder": 3,
+			"stateOrder": 4,
 			"bSkip": false,
-			"bSingleton": false
+			"bSingleton": true
 		},
 		{
 			"replicationClassPath": "/Script/Engine.Pawn",
-			"stateOrder": 4,
+			"stateOrder": 5,
 			"bSkip": false,
-			"bSingleton": false
+			"bSingleton": true
 		},
 		{
 			"replicationClassPath": "/Script/Engine.PlayerController",
-			"stateOrder": 5,
+			"stateOrder": 6,
 			"bSkip": false,
-			"bSingleton": false
+			"bSingleton": true
 		},
 		{
 			"replicationClassPath": "/Script/Engine.PlayerState",
-			"stateOrder": 6,
+			"stateOrder": 7,
 			"bSkip": false,
-			"bSingleton": false
+			"bSingleton": true
 		},
 		{
 			"replicationClassPath": "/Script/Engine.ActorComponent",
-			"stateOrder": 7,
+			"stateOrder": 8,
 			"bSkip": false,
-			"bSingleton": false
+			"bSingleton": true
 		},
 		{
 			"replicationClassPath": "/Script/Engine.SceneComponent",
-			"stateOrder": 8,
+			"stateOrder": 9,
 			"bSkip": false,
-			"bSingleton": false
+			"bSingleton": true
 		}
 	]
 }

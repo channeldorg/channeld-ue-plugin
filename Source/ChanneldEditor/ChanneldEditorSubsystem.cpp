@@ -142,7 +142,7 @@ bool UChanneldEditorSubsystem::NeedToGenerateReplicationCode(bool ShowDialog /*=
 	{
 		if(ShowDialog)
 		{
-			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("GenerateReplicationCode", "Replication code has not been generated yet, please generate replication code to continue"));
+			return FMessageDialog::Open(EAppMsgType::YesNo, LOCTEXT("GenerateReplicationCode", "Replication code has not been generated yet. Do you still want to proceed?")) == EAppReturnType::No;
 		}
 		return true;
 	}
@@ -150,7 +150,7 @@ bool UChanneldEditorSubsystem::NeedToGenerateReplicationCode(bool ShowDialog /*=
 	{
 		if(ShowDialog)
 		{
-			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("GenerateReplicationCode", "Replication code is out of date, please generate replication code to continue"));
+			return FMessageDialog::Open(EAppMsgType::YesNo, LOCTEXT("GenerateReplicationCode", "Replication code is out of date. Do you still want to proceed?")) == EAppReturnType::No;
 		}
 		return true;
 	}
