@@ -15,9 +15,11 @@ public:
 
 	//~ Begin FTickableGameObject Interface.
 	virtual void Tick(float DeltaTime) override;
-	virtual bool IsTickable() const override { return !IsTemplate(); };
+	virtual bool IsTickable() const override { return !IsTemplate(); }
 	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UMetrics, STATGROUP_Tickables); }
 	//~ End FTickableGameObject Interface
+	
+	void OnDroppedRPC(const std::string& String);
 	
 	Family<Gauge>* FPS;
 	Gauge* FPS_Gauge;
@@ -42,8 +44,13 @@ public:
 	
 	Family<Counter>* ReceivedRPCs;
 	Counter* ReceivedRPCs_Counter;
+
+	Family<Counter>* DroppedRPCs;
+	Counter* DroppedRPCs_Counter;
+
+	Family<Counter>* RedirectedRPCs;
+	Counter* RedirectedRPCs_Counter;
 	
 	Family<Counter>* GetHandoverContexts;
 	Family<Counter>* Handovers;
 };
-

@@ -103,6 +103,11 @@ void UChanneldSettings::PostInitProperties()
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bDisableHandshaking from CLI: %d"), bDisableHandshaking);
 	}
+	
+	if (FParse::Value(CmdLine, TEXT("RpcRedirectionMaxRetries="), RpcRedirectionMaxRetries))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed RpcRedirectionMaxRetries from CLI: %d"), RpcRedirectionMaxRetries);
+	}
 
 	if (FParse::Bool(CmdLine, TEXT("SkipCustomReplication="), bSkipCustomReplication))
 	{
@@ -118,11 +123,6 @@ void UChanneldSettings::PostInitProperties()
 	if (FParse::Bool(CmdLine, TEXT("EnableSpatialVisualizer="), bEnableSpatialVisualizer))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bEnableSpatialVisualizer from CLI: %d"), bEnableSpatialVisualizer);
-	}
-	
-	if (FParse::Bool(CmdLine, TEXT("DisableRedirectingRPC="), bDisableRedirectingRPC))
-	{
-		UE_LOG(LogChanneld, Log, TEXT("Parsed bDisableRedirectingRPC from CLI: %d"), bDisableRedirectingRPC);
 	}
 }
 
