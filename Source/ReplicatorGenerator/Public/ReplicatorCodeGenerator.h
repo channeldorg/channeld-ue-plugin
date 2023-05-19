@@ -171,6 +171,7 @@ protected:
 	bool GenerateChannelDataProcessorCode(
 		const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
 		const TArray<TSharedPtr<FReplicatedActorDecorator>>& ChildrenOfAActor,
+		const EChanneldChannelType ChannelType,
 		const FString& ChannelDataMessageName,
 		const FString& ChannelDataProcessorNamespace,
 		const FString& ChannelDataProcessorClassName,

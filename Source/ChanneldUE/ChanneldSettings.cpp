@@ -124,6 +124,9 @@ void UChanneldSettings::PostInitProperties()
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bEnableSpatialVisualizer from CLI: %d"), bEnableSpatialVisualizer);
 	}
+
+	// Upgrade to v0.6: use fixed SpatialChannelData message
+	DefaultChannelDataMsgNames.Emplace(EChanneldChannelType::ECT_Spatial, TEXT("unrealpb.SpatialChannelData"));
 }
 
 bool UChanneldSettings::IsNetworkingEnabled() const

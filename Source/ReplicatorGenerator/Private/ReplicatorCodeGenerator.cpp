@@ -470,6 +470,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	if (!GenerateChannelDataProcessorCode(
 		SortedReplicationActorClasses,
 		ChildrenOfAActor,
+		ChannelDataInfo.Schema.ChannelType,
 		ChannelDataProtoMsgName,
 		ChannelDataProcessorNamespace,
 		ChannelDataProcessorClassName,
@@ -514,6 +515,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
 	const TArray<TSharedPtr<FReplicatedActorDecorator>>& ChildrenOfAActor,
+	const EChanneldChannelType ChannelType,
 	const FString& ChannelDataMessageName,
 	const FString& ChannelDataProcessorNamespace,
 	const FString& ChannelDataProcessorClassName,
@@ -530,6 +532,14 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	FString ChannelDataProcessor_GetStateCode;
 	FString ChannelDataProcessor_SetStateCode;
 	FString ChannelDataProcessor_GetRelevantNetGUIDsCode;
+
+	// Entity channel data always has the UnrealObjectRef state
+	ChannelDataProcessor_GetStateCode.Append(FString::Format(ChannelType == EChanneldChannelType::ECT_Entity ?
+		CodeGen_GetObjectStateFromEntityChannelData : CodeGen_GetObjectStateFromChannelData,
+		{{"Declaration_ChannelDataMessage", ChannelDataMessageName}}));
+	ChannelDataProcessor_SetStateCode.Append(FString::Format(ChannelType == EChanneldChannelType::ECT_Entity ?
+		CodeGen_SetObjectStateToEntityChannelData : CodeGen_SetObjectStateToChannelData,
+		{{"Declaration_ChannelDataMessage", ChannelDataMessageName}}));
 
 	bool bHasAActor = false;
 	int32 ConstPathFNameVarDeclIndex = 0;

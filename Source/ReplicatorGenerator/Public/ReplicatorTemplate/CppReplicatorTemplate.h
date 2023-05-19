@@ -272,6 +272,36 @@ namespace {Declaration_CDP_Namespace}
 }
 )EOF";
 
+static const TCHAR* CodeGen_GetObjectStateFromChannelData = LR"EOF(
+  if (TargetClass == UObject::StaticClass())
+	{
+    bIsRemoved = false;
+		// Do nothing - just suppress the warning
+	}
+)EOF";
+
+static const TCHAR* CodeGen_SetObjectStateToChannelData = LR"EOF(
+	if (TargetClass == UObject::StaticClass())
+	{
+		// Do nothing - just suppress the warning
+	}
+)EOF";
+
+static const TCHAR* CodeGen_GetObjectStateFromEntityChannelData = LR"EOF(
+  if (TargetClass == UObject::StaticClass())
+	{
+    bIsRemoved = false;
+		return {Declaration_ChannelDataMessage}->has_objref() ? &{Declaration_ChannelDataMessage}->objref() : nullptr;
+	}
+)EOF";
+
+static const TCHAR* CodeGen_SetObjectStateToEntityChannelData = LR"EOF(
+	if (TargetClass == UObject::StaticClass())
+	{
+		{Declaration_ChannelDataMessage}->mutable_objref()->CopyFrom(*State);
+	}
+)EOF";
+
 static const TCHAR* CodeGen_GetRelevantNetIdByStateTemplate = LR"EOF(
         else if ({Declaration_CDP_ProtoVar}->{Definition_StateMapName}_size() > 0 && {Declaration_CDP_ProtoVar}->{Definition_StateMapName}().contains(Pair.first))
         {
