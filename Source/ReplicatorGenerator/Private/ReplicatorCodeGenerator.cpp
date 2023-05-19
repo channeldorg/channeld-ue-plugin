@@ -410,7 +410,8 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 		TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
 		if (!CreateDecorateActor(ActorDecorator, Message, StateInfo.RepActorClass, StateInfo.Setting, ProtoPackageName, ProtoMessageSuffix, GoPackageImportPath, false))
 		{
-			UE_LOG(LogChanneldRepGenerator, Warning, TEXT("%s"), *Message);
+			UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Failed to create ActorDecorator: %s"), *Message);
+			return false;
 		}
 		if (ActorDecorator->IsSkipGenChannelDataState())
 		{
@@ -422,6 +423,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	// Generate ChannelDataProcessor Proto definition file
 	if (!GenerateChannelDataProtoDefFile(
 		ActorDecoratorsToGenChannelData
+		, ChannelDataInfo.Schema.ChannelType
 		, ChannelDataProtoMsgName
 		, ProtoPackageName
 		, GoPackageImportPath
@@ -600,6 +602,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 
 bool FReplicatorCodeGenerator::GenerateChannelDataProtoDefFile(
 	const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
+	const EChanneldChannelType ChannelType,
 	const FString& ChannelDataMessageName,
 	const FString& ProtoPackageName,
 	const FString& GoPackageImportPath,
@@ -609,6 +612,12 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProtoDefFile(
 	FString ChannelDataFields;
 	FString ImportCode = FString::Printf(TEXT("import \"%s\";\n"), *GenManager_UnrealCommonProtoFile);
 	int32 I = 0;
+	// Entity channel data always has the UnrealObjectRef field
+	if (ChannelType == EChanneldChannelType::ECT_Entity)
+	{
+		I++;
+		ChannelDataFields.Append("optional unrealpb.UnrealObjectRef objRef = 1;\n");
+	}
 	for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
 	{
 		ChannelDataFields.Append(ActorDecorator->GetCode_ChannelDataProtoFieldDefinition(++I));
@@ -873,7 +882,7 @@ bool FReplicatorCodeGenerator::CreateDecorateActor(
 	// The module info is used to generate the include code in head file.
 	if (!ActorDecorator->IsBlueprintType() && !ModuleInfoByClassName.Contains(ActorDecorator->GetActorCPPClassName()))
 	{
-		OutResultMessage = FString::Printf(TEXT("Can not find the module %s belongs to"), *ActorDecorator->GetActorCPPClassName());
+		OutResultMessage = FString::Printf(TEXT("Can not find the module which the class '%s' belongs to"), *ActorDecorator->GetActorCPPClassName());
 		delete ActorDecorator;
 		ActorDecorator = nullptr;
 		OutActorDecorator = nullptr;

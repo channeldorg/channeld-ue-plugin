@@ -339,7 +339,7 @@ public:
 
 	virtual FString GetCode_ChannelDataProcessor_SetStateToChannelData(const FString& ChannelDataMessageName);
 
-	virtual FString GetCode_ChannelDataProtoFieldDefinition(const int32& Index);
+	virtual FString GetCode_ChannelDataProtoFieldDefinition(const int32& FieldNum);
 
 	virtual bool IsStruct() override;
 
