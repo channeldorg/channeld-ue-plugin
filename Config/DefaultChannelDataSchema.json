@@ -118,12 +118,6 @@
 	"channelTypeOrder": 3,
 	"stateSchemata": [
 		{
-			"replicationClassPath": "/Script/Engine.UObject",
-			"stateOrder": 1,
-			"bSkip": false,
-			"bSingleton": true
-		},
-		{
 			"replicationClassPath": "/Script/Engine.Actor",
 			"stateOrder": 2,
 			"bSkip": false,

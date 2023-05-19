@@ -598,15 +598,15 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_SetStateToChanne
 	return FString::Format(ActorDecor_SetStateToChannelData, FormatArgs);
 }
 
-FString FReplicatedActorDecorator::GetCode_ChannelDataProtoFieldDefinition(const int32& Index)
+FString FReplicatedActorDecorator::GetCode_ChannelDataProtoFieldDefinition(const int32& FieldNum)
 {
 	if (IsSingletonInChannelData())
 	{
-		return FString::Printf(TEXT("%s.%s %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameProto(), Index);
+		return FString::Printf(TEXT("optional %s.%s %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameProto(), FieldNum);
 	}
 	else
 	{
-		return FString::Printf(TEXT("map<uint32, %s.%s> %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameProto(), Index);
+		return FString::Printf(TEXT("map<uint32, %s.%s> %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameProto(), FieldNum);
 	}
 }
 

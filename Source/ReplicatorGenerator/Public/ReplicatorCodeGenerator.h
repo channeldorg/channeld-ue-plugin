@@ -181,6 +181,7 @@ protected:
 
 	bool GenerateChannelDataProtoDefFile(
 		const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
+		const EChanneldChannelType ChannelType,
 		const FString& ChannelDataMessageName,
 		const FString& ProtoPackageName,
 		const FString& GoPackageImportPath,
