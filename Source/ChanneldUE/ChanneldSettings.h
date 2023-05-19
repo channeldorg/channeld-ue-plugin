@@ -32,7 +32,7 @@ public:
 	{
 		{EChanneldChannelType::ECT_Global, TEXT("tpspb.TestRepChannelData")},
 		{EChanneldChannelType::ECT_SubWorld, TEXT("tpspb.TestRepChannelData")},
-		{EChanneldChannelType::ECT_Spatial, TEXT("tpspb.TestRepChannelData")},
+		{EChanneldChannelType::ECT_Spatial, TEXT("unrealpb.SpatialChannelData")},
 	};
 
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")

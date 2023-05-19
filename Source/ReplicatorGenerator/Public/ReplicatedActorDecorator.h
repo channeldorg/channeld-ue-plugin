@@ -47,7 +47,7 @@ static const TCHAR* ActorDecor_GetStateFromChannelData_Singleton =
 	LR"EOF(
 if({Code_Condition}) {
   bIsRemoved = false;
-  return {Declaration_ChannelDataMessage}->mutable_{Definition_ChannelDataFieldName}();
+  return {Declaration_ChannelDataMessage}->has_{Definition_ChannelDataFieldName}() ? &{Declaration_ChannelDataMessage}->{Definition_ChannelDataFieldName}() : nullptr;
 }
 )EOF";
 
