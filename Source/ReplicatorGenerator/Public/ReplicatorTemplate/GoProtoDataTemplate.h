@@ -12,6 +12,7 @@ import (
 	"github.com/metaworking/channeld/pkg/unrealpb"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
+	{Code_AnypbImport}
 )
 )EOF";
 
@@ -172,5 +173,39 @@ import (
 
 func InitChannelDataTypes() {
 	{Code_Registration}
+}
+)EOF";
+
+static const TCHAR* CodeGen_Go_EntityChannelDataTemplate = LR"EOF(
+// Implement [channeld.HandoverDataMerger]
+func (entityData *{Definition_ChannelDataMsgName}) MergeTo(msg common.Message, fullData bool) error {
+	handoverData, ok := msg.(*unrealpb.SpatialChannelData)
+	if !ok {
+		return errors.New("msg is not a SpatialChannelData")
+	}
+
+	entityState := &unrealpb.SpatialEntityState{
+		ObjRef: entityData.ObjRef,
+	}
+
+	if fullData {
+		anyData, err := anypb.New(entityData)
+		if err != nil {
+			return err
+		}
+		entityState.EntityData = anyData
+	}
+
+	if handoverData.Entities == nil {
+		handoverData.Entities = make(map[uint32]*unrealpb.SpatialEntityState)
+	}
+	handoverData.Entities[*entityData.ObjRef.NetGUID] = entityState
+
+	return nil
+}
+
+// Implement [unreal.UnrealObjectEntityData]
+func (entityData *{Definition_ChannelDataMsgName}) SetObjRef(objRef *unrealpb.UnrealObjectRef) {
+	entityData.ObjRef = objRef
 }
 )EOF";

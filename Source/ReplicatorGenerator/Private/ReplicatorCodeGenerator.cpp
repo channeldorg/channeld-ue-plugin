@@ -105,7 +105,10 @@ bool FReplicatorCodeGenerator::Generate(
 	FString RegisterChannelDataProcessorCode, DeleteChannelDataProcessorCode, ChannelDataProcessorPtrDecls,
 	        ChannelDataRegistrationGoCode;
 	ReplicationCodeBundle.ChannelDataMerge_GoCode.Append(FString::Printf(TEXT("package %s\n"), *ProtoPackageName));
-	ReplicationCodeBundle.ChannelDataMerge_GoCode.Append(CodeGen_Go_Data_ImportTemplate);
+	// Entity channel data.go imports anypb
+	bool bHasEntityChannelData = ChannelDataInfos.ContainsByPredicate([](const auto& Info) {return Info.Schema.ChannelType == EChanneldChannelType::ECT_Entity;});
+	ReplicationCodeBundle.ChannelDataMerge_GoCode.Append(FString::Format(CodeGen_Go_Data_ImportTemplate,
+		{{"Code_AnypbImport", bHasEntityChannelData	? TEXT("\"google.golang.org/protobuf/types/known/anypb\"") : TEXT("")}}));
 	for (const FChannelDataInfo& ChannelDataInfo : ChannelDataInfos)
 	{
 		ReplicationCodeBundle.ChannelDataCodes.Add(FChannelDataCode());
@@ -547,7 +550,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 		ChannelDataProcessor_RemovedStateDecl.Append(ActorDecorator->GetDeclaration_ChanneldDataProcessor_RemovedStata() + TEXT("\n"));
 		ChannelDataProcessor_InitRemovedStateCode.Append(ActorDecorator->GetCode_ChanneldDataProcessor_InitRemovedState());
 		ChannelDataProcessor_MergeCode.Append(ActorDecorator->GetCode_ChannelDataProcessor_Merge(ChildrenOfAActor));
-
+		
 		ChannelDataProcessor_GetStateCode.Append(
 			FString::Printf(
 				TEXT("%s%s"),
@@ -769,6 +772,14 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 	}
 
 	// GoCode.Append(TEXT("\treturn nil\n}\n"));
+
+	// Entity channel data needs to implemented a couple of more interfaces
+	if (ChannelType == EChanneldChannelType::ECT_Entity)
+	{
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataProtoMsgGoName);
+		GoCode.Append(FString::Format(CodeGen_Go_EntityChannelDataTemplate, FormatArgs));
+	}
 
 	return true;
 }
