@@ -482,6 +482,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	if (!GenerateChannelDataMerge_GoCode(
 		SortedReplicationActorClasses,
 		ChildrenOfAActor,
+		ChannelDataInfo.Schema.ChannelType,
 		ChannelDataProtoMsgName,
 		ProtoPackageName,
 		GeneratedResult.Merge_GoCode
@@ -628,6 +629,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProtoDefFile(
 bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 	const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
 	const TArray<TSharedPtr<FReplicatedActorDecorator>>& ChildrenOfAActor,
+	const EChanneldChannelType ChannelType,
 	const FString& ChannelDataMessageName,
 	const FString& ProtoPackageName,
 	FString& GoCode
@@ -726,6 +728,10 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 		// Add ActorState's merge code at last
 		MergeStateCode.Append(MergeActorStateCode);
 	}
+	FString CheckHandoverCode = TEXT("");
+	FString NotifyHandoverCode = TEXT("");
+	// Only generate handover code for entity channel data
+	if (ChannelType == EChanneldChannelType::ECT_Entity)
 	{
 		bool HasActor = false;
 		bool HasSceneComponent = false;
@@ -734,18 +740,26 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 			if (!HasActor) HasActor = ActorDecorator->GetTargetClass() == AActor::StaticClass();
 			if (!HasSceneComponent) HasSceneComponent = ActorDecorator->GetTargetClass() == USceneComponent::StaticClass();
 		}
-		FString SpatialNotifierCode = TEXT("");
-		if (HasActor) SpatialNotifierCode.Append(CodeGen_Go_ActorSpatialNotifierTemp);
-		if (HasSceneComponent) SpatialNotifierCode.Append(CodeGen_Go_SceneCompSpatialNotifierTemp);
+		if (HasActor || HasSceneComponent)
+		{
+			FString CheckHandoverInStatesCode = TEXT("");
+			if (HasActor) CheckHandoverInStatesCode.Append(CodeGen_Go_ActorCheckHandoverTemplate);
+			if (HasSceneComponent) CheckHandoverInStatesCode.Append(CodeGen_Go_SceneCompCheckHandoverTemplate);
+			CheckHandoverCode = FString::Format(CodeGen_Go_CheckHandoverTemplate, { { "Code_CheckHandoverInStates", CheckHandoverInStatesCode } });
+			NotifyHandoverCode = CodeGen_Go_NotifyHandover;
+		}
+	}
+	{
 		FStringFormatNamedArguments FormatArgs;
 		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataProtoMsgGoName);
-		FormatArgs.Add("Code_SpatialNotifier", SpatialNotifierCode);
+		FormatArgs.Add("Code_CheckHandover", CheckHandoverCode);
+		FormatArgs.Add("Code_MergeStates", MergeStateCode);
+		FormatArgs.Add("Code_NotifyHandover", NotifyHandoverCode);
 		FormatArgs.Add("Decl_ChannelDataMsgVar", bHasMergeStateInMap ? TEXT("srcData") : TEXT("_"));
 		GoCode.Append(FString::Format(CodeGen_Go_MergeTemplate, FormatArgs));
-		GoCode.Append(MergeStateCode);
 	}
 
-	GoCode.Append(TEXT("\treturn nil\n}\n"));
+	// GoCode.Append(TEXT("\treturn nil\n}\n"));
 
 	return true;
 }

@@ -44,34 +44,52 @@ func (dst *{Definition_ChannelDataMsgName}) Merge(src common.ChannelDataMessage,
 		return errors.New("src is not a {Definition_ChannelDataMsgName}")
 	}
 
-	if spatialNotifier != nil {
-		{Code_SpatialNotifier}
-	}
+	{Code_CheckHandover}
+	{Code_MergeStates}
+	{Code_NotifyHandover}
 
-)EOF";
-
-static const TCHAR* CodeGen_Go_ActorSpatialNotifierTemp = LR"EOF(
-// src = the incoming update, dst = existing channel data
-for netId, newActorState := range srcData.ActorStates {
-	oldActorState, exists := dst.ActorStates[netId]
-	if exists {
-		if newActorState.ReplicatedMovement != nil && newActorState.ReplicatedMovement.Location != nil &&
-			oldActorState.ReplicatedMovement != nil && oldActorState.ReplicatedMovement.Location != nil {
-			unreal.CheckSpatialInfoChange(netId, newActorState.ReplicatedMovement.Location, oldActorState.ReplicatedMovement.Location, spatialNotifier)
-		}
-	}
+	return nil
 }
 )EOF";
 
-static const TCHAR* CodeGen_Go_SceneCompSpatialNotifierTemp = LR"EOF(
-for netId, newSceneCompState := range srcData.SceneComponentStates {
-	oldSceneCompState, exists := dst.SceneComponentStates[netId]
-	if exists {
-		if newSceneCompState.RelativeLocation != nil && oldSceneCompState.RelativeLocation != nil {
-			unreal.CheckSpatialInfoChange(netId, newSceneCompState.RelativeLocation, oldSceneCompState.RelativeLocation, spatialNotifier)
-		}
+static const TCHAR* CodeGen_Go_CheckHandoverTemplate = LR"EOF(
+	hasHandover := false
+	var oldInfo, newInfo *common.SpatialInfo
+	if spatialNotifier != nil && dst.ObjRef != nil {
+		{Code_CheckHandoverInStates}
 	}
-}
+)EOF";
+
+static const TCHAR* CodeGen_Go_ActorCheckHandoverTemplate = LR"EOF(
+		if srcData.ActorState != nil && srcData.ActorState.ReplicatedMovement != nil && srcData.ActorState.ReplicatedMovement.Location != nil &&
+			dst.ActorState != nil && dst.ActorState.ReplicatedMovement != nil && dst.ActorState.ReplicatedMovement.Location != nil {
+			hasHandover, oldInfo, newInfo = unreal.CheckEntityHandover(*dst.ObjRef.NetGUID, srcData.ActorState.ReplicatedMovement.Location, dst.ActorState.ReplicatedMovement.Location)
+		}
+)EOF";
+
+static const TCHAR* CodeGen_Go_SceneCompCheckHandoverTemplate = LR"EOF(
+		if !hasHandover && srcData.SceneComponentState != nil && srcData.SceneComponentState.RelativeLocation != nil &&
+			dst.SceneComponentState != nil && dst.SceneComponentState.RelativeLocation != nil {
+			hasHandover, oldInfo, newInfo = unreal.CheckEntityHandover(*dst.ObjRef.NetGUID, srcData.SceneComponentState.RelativeLocation, dst.SceneComponentState.RelativeLocation)
+		}
+)EOF";
+
+static const TCHAR* CodeGen_Go_NotifyHandover = LR"EOF(
+	if hasHandover {
+		spatialNotifier.Notify(*oldInfo, *newInfo,
+			func(srcChannelId common.ChannelId, dstChannelId common.ChannelId, handoverData interface{}) {
+				entityId, ok := handoverData.(*channeld.EntityId)
+				if !ok {
+					channeld.RootLogger().Error("handover data is not an entityId",
+						zap.Uint32("srcChannelId", uint32(srcChannelId)),
+						zap.Uint32("dstChannelId", uint32(dstChannelId)),
+					)
+					return
+				}
+				*entityId = channeld.EntityId(*dst.ObjRef.NetGUID)
+			},
+		)
+	}
 )EOF";
 
 static const TCHAR* CodeGen_Go_MergeStateTemplate = LR"EOF(

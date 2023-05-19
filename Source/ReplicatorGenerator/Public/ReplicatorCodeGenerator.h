@@ -190,6 +190,7 @@ protected:
 	bool GenerateChannelDataMerge_GoCode(
 		const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
 		const TArray<TSharedPtr<FReplicatedActorDecorator>>& ChildrenOfAActor,
+		const EChanneldChannelType ChannelType,
 		const FString& ChannelDataMessageName,
 		const FString& ProtoPackageName,
 		FString& GoCode
