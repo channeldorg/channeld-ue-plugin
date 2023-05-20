@@ -533,7 +533,11 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	FString ChannelDataProcessor_SetStateCode;
 	FString ChannelDataProcessor_GetRelevantNetGUIDsCode;
 
-	// Entity channel data always has the UnrealObjectRef state
+	// Handle Merge/GetState/SetStsate of UnrealObjectRef for the Entity channel data
+	if (ChannelType == EChanneldChannelType::ECT_Entity)
+	{
+		ChannelDataProcessor_MergeCode.Append(CodeGen_MergeObjectState);
+	}
 	ChannelDataProcessor_GetStateCode.Append(FString::Format(ChannelType == EChanneldChannelType::ECT_Entity ?
 		CodeGen_GetObjectStateFromEntityChannelData : CodeGen_GetObjectStateFromChannelData,
 		{{"Declaration_ChannelDataMessage", ChannelDataMessageName}}));

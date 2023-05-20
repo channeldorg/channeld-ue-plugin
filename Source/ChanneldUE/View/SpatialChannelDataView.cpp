@@ -790,93 +790,78 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 		{
 			return true;
 		}
-		if (ObjRefField->name() == "objRef" && ChannelData->GetReflection()->HasField(*ChannelData, ObjRefField))
+		if (!ensureMsgf(ObjRefField->name() == "objRef", TEXT("EntityChannelData's first field should be 'objRef' but is '%s'"), UTF8_TO_TCHAR(ObjRefField->name().c_str())))
 		{
-			auto& ObjRef = static_cast<const unrealpb::UnrealObjectRef&>(ChannelData->GetReflection()->GetMessage(*ChannelData, ObjRefField));
-			TCHAR* ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
-			if (UClass* EntityClass = LoadObject<UClass>(nullptr, ClassPath))
-			{
-				// Do not resolve other PlayerController on the client.
-				if (EntityClass->IsChildOf(APlayerController::StaticClass()))
-				{
-					return true;
-				}
-			}
-
-			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from unresolved EntityChannelData, NetId: %d"), ObjRef.netguid());
-			UObject* NewObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld());
-			if (NewObj)
-			{
-				AddObjectProvider(ChId, NewObj);
-				/* We don't know the spatial channel id of the entity yet.
-				OnNetSpawnedObject(NewObj, ChId);
-				*/
-			}
+			return true;
 		}
-		/*
-		else
+		if (!ChannelData->GetReflection()->HasField(*ChannelData, ObjRefField))
 		{
-			// The object has just been deleted, don't re-spawn it here.
-			if (SuppressedNetIdsToResolve.Contains(NetGUID.Value))
-			{
-				UE_LOG(LogChanneld, Verbose, TEXT("The object has just been deleted during recent handover, ignore resolving it: %d"), NetGUID.Value);
-			}
-			else
-			{
-				unrealpb::GetUnrealObjectRefMessage Msg;
-				Msg.add_netguid(NetGUID.Value);
-				ResolvingNetGUIDs.Add(NetGUID.Value);
-				Connection->Send(ChId, unrealpb::GET_UNREAL_OBJECT_REF, Msg);
-				UE_LOG(LogChanneld, Verbose, TEXT("Sent GetUnrealObjectRefMessage to channel %d, NetId: %d"), ChId, NetGUID.Value);
-			}
+			return true;
 		}
-		*/
-	}
-
-	if (ChannelType != EChanneldChannelType::ECT_Spatial)
-	{
-		return false;
-	}
 	
-	auto SpatialChannelData = static_cast<const unrealpb::SpatialChannelData*>(ChannelData);
-	for (auto& Pair : SpatialChannelData->entities())
-	{
-		FNetworkGUID NetGUID(Pair.first);
-		// Don't use IsGUIDRegistered - the object may still exist in GuidCache but has been deleted.
-		if (auto CacheObj = NetDriver->GuidCache->ObjectLookup.Find(NetGUID))
-		{
-			if (CacheObj->Object.IsValid())
-			{
-				continue;
-			}
-		}
-
-		auto& ObjRef = Pair.second.objref();
+		auto& ObjRef = static_cast<const unrealpb::UnrealObjectRef&>(ChannelData->GetReflection()->GetMessage(*ChannelData, ObjRefField));
 		TCHAR* ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
 		if (UClass* EntityClass = LoadObject<UClass>(nullptr, ClassPath))
 		{
 			// Do not resolve other PlayerController on the client.
 			if (EntityClass->IsChildOf(APlayerController::StaticClass()))
 			{
-				continue;
+				return true;
 			}
 		}
 
-		// Set up the mapping before actually spawn it, so AddProvider() can find the mapping.
-		SetOwningChannelId(ObjRef.netguid(), ChId);
-			
-		// Also add the mapping of all context NetGUIDs
-		for (auto& ContextObj : ObjRef.context())
-		{
-			SetOwningChannelId(ContextObj.netguid(), ChId);
-		}
-
-		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from unresolved SpatialEntityState, NetId: %d"), ObjRef.netguid());
+		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from unresolved EntityChannelData, NetId: %d"), ObjRef.netguid());
 		UObject* NewObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld());
 		if (NewObj)
 		{
-			AddObjectProviderToDefaultChannel(NewObj);
+			AddObjectProvider(ChId, NewObj);
+			/* We don't know the spatial channel id of the entity yet.
 			OnNetSpawnedObject(NewObj, ChId);
+			*/
+		}
+	}
+	else if (ChannelType == EChanneldChannelType::ECT_Spatial)
+	{
+		auto SpatialChannelData = static_cast<const unrealpb::SpatialChannelData*>(ChannelData);
+		for (auto& Pair : SpatialChannelData->entities())
+		{
+			FNetworkGUID NetGUID(Pair.first);
+			// Don't use IsGUIDRegistered - the object may still exist in GuidCache but has been deleted.
+			if (auto CacheObj = NetDriver->GuidCache->ObjectLookup.Find(NetGUID))
+			{
+				if (CacheObj->Object.IsValid())
+				{
+					continue;
+				}
+			}
+
+			auto& ObjRef = Pair.second.objref();
+			TCHAR* ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
+			if (UClass* EntityClass = LoadObject<UClass>(nullptr, ClassPath))
+			{
+				// Do not resolve other PlayerController on the client.
+				if (EntityClass->IsChildOf(APlayerController::StaticClass()))
+				{
+					continue;
+				}
+			}
+
+			// Set up the mapping before actually spawn it, so AddProvider() can find the mapping.
+			SetOwningChannelId(ObjRef.netguid(), ChId);
+			
+			// Also add the mapping of all context NetGUIDs
+			for (auto& ContextObj : ObjRef.context())
+			{
+				SetOwningChannelId(ContextObj.netguid(), ChId);
+			}
+
+			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from unresolved SpatialEntityState, NetId: %d"), ObjRef.netguid());
+			UObject* NewObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld());
+			if (NewObj)
+			{
+				AddObjectProviderToDefaultChannel(NewObj);
+				OnNetSpawnedObject(NewObj, ChId);
+			}
 		}
 	}
 	
