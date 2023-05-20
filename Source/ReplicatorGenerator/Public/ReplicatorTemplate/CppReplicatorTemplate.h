@@ -272,6 +272,14 @@ namespace {Declaration_CDP_Namespace}
 }
 )EOF";
 
+static const TCHAR* CodeGen_MergeObjectState =
+  LR"EOF(
+if (Src->has_objref())
+{
+  Dst->mutable_objref()->MergeFrom(Src->objref());
+}
+)EOF";
+
 static const TCHAR* CodeGen_GetObjectStateFromChannelData = LR"EOF(
   if (TargetClass == UObject::StaticClass())
 	{
