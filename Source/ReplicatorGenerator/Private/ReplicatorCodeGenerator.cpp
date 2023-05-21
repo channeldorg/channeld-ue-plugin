@@ -665,38 +665,6 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 	FString ChannelDataProtoMsgGoName = ChannelDataMessageName;
 	ChannelDataProtoMsgGoName[0] = toupper(ChannelDataProtoMsgGoName[0]);
 
-	// Generate code: Implement [channeld.ChannelDataCollector]
-	bool bHasCollectStateInMap = false;
-	FString CollectStateGoCode;
-	{
-		FStringFormatNamedArguments FormatArgs;
-		for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
-		{
-			// No need to collect singleton state for handover
-			if (ActorDecorator->IsSingletonInChannelData())
-			{
-				continue;
-			}
-			bHasCollectStateInMap = true;
-			FormatArgs.Add("Definition_StatePackagePath", ActorDecorator->GetProtoPackagePathGo(ProtoPackageName));
-			FString StateClassName = ActorDecorator->GetProtoStateMessageTypeGo();
-			FormatArgs.Add("Definition_StateClassName", StateClassName);
-			FormatArgs.Add("Definition_StateVarName", "new" + StateClassName);
-			FormatArgs.Add("Definition_StateMapName", ActorDecorator->GetDefinition_ChannelDataFieldNameGo());
-
-			CollectStateGoCode.Append(FString::Format(CodeGen_Go_CollectStateInMapTemplate, FormatArgs));
-		}
-	}
-	{
-		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataProtoMsgGoName);
-		FormatArgs.Add("Decl_ChannelDataMsgVar", bHasCollectStateInMap ? TEXT("from") : TEXT("_"));
-		GoCode.Append(FString::Format(CodeGen_Go_CollectStatesTemplate, FormatArgs));
-		GoCode.Append(CollectStateGoCode);
-	}
-
-	GoCode.Append(TEXT("\treturn nil\n}\n"));
-
 	// Generate code: Implement [channeld.MergeableChannelData]
 	FString MergeStateCode = TEXT("");
 	bool bHasMergeStateInMap = false;
