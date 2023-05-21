@@ -51,8 +51,6 @@ void UChanneldMetrics::Initialize(FSubsystemCollectionBase& Collection)
 	RedirectedRPCs = &Metrics->AddCounterFamily(FName("ue_rpc_redir"), TEXT("Number of the RPCs redirected"));
 	RedirectedRPCs_Counter = &RedirectedRPCs->Add(NameLabel);
 	
-	GetHandoverContexts = &Metrics->AddCounterFamily(FName("ue_handover_ctx"), TEXT("Number of getting handover context"));
-	
 	Handovers = &Metrics->AddCounterFamily(FName("ue_handovers"), TEXT("Number of handovers"));
 }
 
@@ -89,7 +87,6 @@ void UChanneldMetrics::Deinitialize()
 	RedirectedRPCs->Remove(RedirectedRPCs_Counter);
 	Metrics->Remove(*RedirectedRPCs);
 	
-	Metrics->Remove(*GetHandoverContexts);
 	Metrics->Remove(*Handovers);
 }
 
