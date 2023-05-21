@@ -51,6 +51,5 @@ public:
 	Family<Counter>* RedirectedRPCs;
 	Counter* RedirectedRPCs_Counter;
 	
-	Family<Counter>* GetHandoverContexts;
 	Family<Counter>* Handovers;
 };

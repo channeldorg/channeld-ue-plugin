@@ -110,12 +110,6 @@ CHANNELDUE_API extern FVectorDefaultTypeInternal _FVector_default_instance_;
 class GameStateBase;
 struct GameStateBaseDefaultTypeInternal;
 CHANNELDUE_API extern GameStateBaseDefaultTypeInternal _GameStateBase_default_instance_;
-class GetHandoverContextMessage;
-struct GetHandoverContextMessageDefaultTypeInternal;
-CHANNELDUE_API extern GetHandoverContextMessageDefaultTypeInternal _GetHandoverContextMessage_default_instance_;
-class GetHandoverContextResultMessage;
-struct GetHandoverContextResultMessageDefaultTypeInternal;
-CHANNELDUE_API extern GetHandoverContextResultMessageDefaultTypeInternal _GetHandoverContextResultMessage_default_instance_;
 class GetUnrealObjectRefMessage;
 struct GetUnrealObjectRefMessageDefaultTypeInternal;
 CHANNELDUE_API extern GetUnrealObjectRefMessageDefaultTypeInternal _GetUnrealObjectRefMessage_default_instance_;
@@ -225,8 +219,6 @@ template<> CHANNELDUE_API ::unrealpb::FRootMotionSourceGroup* Arena::CreateMaybe
 template<> CHANNELDUE_API ::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings* Arena::CreateMaybeMessage<::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::FVector* Arena::CreateMaybeMessage<::unrealpb::FVector>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::GameStateBase* Arena::CreateMaybeMessage<::unrealpb::GameStateBase>(Arena*);
-template<> CHANNELDUE_API ::unrealpb::GetHandoverContextMessage* Arena::CreateMaybeMessage<::unrealpb::GetHandoverContextMessage>(Arena*);
-template<> CHANNELDUE_API ::unrealpb::GetHandoverContextResultMessage* Arena::CreateMaybeMessage<::unrealpb::GetHandoverContextResultMessage>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::GetUnrealObjectRefMessage* Arena::CreateMaybeMessage<::unrealpb::GetUnrealObjectRefMessage>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::GetUnrealObjectRefResultMessage* Arena::CreateMaybeMessage<::unrealpb::GetUnrealObjectRefResultMessage>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::HandoverContext* Arena::CreateMaybeMessage<::unrealpb::HandoverContext>(Arena*);
@@ -266,8 +258,6 @@ enum MessageType : int {
   RPC = 102,
   SPAWN = 103,
   DESTROY = 104,
-  HANDOVER_CONTEXT = 105,
-  GET_UNREAL_OBJECT_REF = 106,
   SYNC_NET_ID = 107,
   SERVER_PLAYER_SPAWNED = 201,
   SERVER_PLAYER_LEAVE = 202,
@@ -1847,366 +1837,6 @@ class CHANNELDUE_API HandoverContext final :
 };
 // -------------------------------------------------------------------
 
-class CHANNELDUE_API GetHandoverContextMessage final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.GetHandoverContextMessage) */ {
- public:
-  inline GetHandoverContextMessage() : GetHandoverContextMessage(nullptr) {}
-  ~GetHandoverContextMessage() override;
-  explicit PROTOBUF_CONSTEXPR GetHandoverContextMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  GetHandoverContextMessage(const GetHandoverContextMessage& from);
-  GetHandoverContextMessage(GetHandoverContextMessage&& from) noexcept
-    : GetHandoverContextMessage() {
-    *this = ::std::move(from);
-  }
-
-  inline GetHandoverContextMessage& operator=(const GetHandoverContextMessage& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline GetHandoverContextMessage& operator=(GetHandoverContextMessage&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetOwningArena() == from.GetOwningArena()
-  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetOwningArena() != nullptr
-  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const GetHandoverContextMessage& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const GetHandoverContextMessage* internal_default_instance() {
-    return reinterpret_cast<const GetHandoverContextMessage*>(
-               &_GetHandoverContextMessage_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    8;
-
-  friend void swap(GetHandoverContextMessage& a, GetHandoverContextMessage& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(GetHandoverContextMessage* other) {
-    if (other == this) return;
-  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() != nullptr &&
-        GetOwningArena() == other->GetOwningArena()) {
-   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() == other->GetOwningArena()) {
-  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(GetHandoverContextMessage* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  GetHandoverContextMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<GetHandoverContextMessage>(arena);
-  }
-  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const GetHandoverContextMessage& from);
-  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const GetHandoverContextMessage& from) {
-    GetHandoverContextMessage::MergeImpl(*this, from);
-  }
-  private:
-  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
-  public:
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  uint8_t* _InternalSerialize(
-      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
-  void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(GetHandoverContextMessage* other);
-
-  private:
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "unrealpb.GetHandoverContextMessage";
-  }
-  protected:
-  explicit GetHandoverContextMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                       bool is_message_owned = false);
-  public:
-
-  static const ClassData _class_data_;
-  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kNetIdFieldNumber = 1,
-    kSrcChannelIdFieldNumber = 2,
-    kDstChannelIdFieldNumber = 3,
-  };
-  // uint32 netId = 1;
-  void clear_netid();
-  uint32_t netid() const;
-  void set_netid(uint32_t value);
-  private:
-  uint32_t _internal_netid() const;
-  void _internal_set_netid(uint32_t value);
-  public:
-
-  // uint32 srcChannelId = 2;
-  void clear_srcchannelid();
-  uint32_t srcchannelid() const;
-  void set_srcchannelid(uint32_t value);
-  private:
-  uint32_t _internal_srcchannelid() const;
-  void _internal_set_srcchannelid(uint32_t value);
-  public:
-
-  // uint32 dstChannelId = 3;
-  void clear_dstchannelid();
-  uint32_t dstchannelid() const;
-  void set_dstchannelid(uint32_t value);
-  private:
-  uint32_t _internal_dstchannelid() const;
-  void _internal_set_dstchannelid(uint32_t value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:unrealpb.GetHandoverContextMessage)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  struct Impl_ {
-    uint32_t netid_;
-    uint32_t srcchannelid_;
-    uint32_t dstchannelid_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_unreal_5fcommon_2eproto;
-};
-// -------------------------------------------------------------------
-
-class CHANNELDUE_API GetHandoverContextResultMessage final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.GetHandoverContextResultMessage) */ {
- public:
-  inline GetHandoverContextResultMessage() : GetHandoverContextResultMessage(nullptr) {}
-  ~GetHandoverContextResultMessage() override;
-  explicit PROTOBUF_CONSTEXPR GetHandoverContextResultMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  GetHandoverContextResultMessage(const GetHandoverContextResultMessage& from);
-  GetHandoverContextResultMessage(GetHandoverContextResultMessage&& from) noexcept
-    : GetHandoverContextResultMessage() {
-    *this = ::std::move(from);
-  }
-
-  inline GetHandoverContextResultMessage& operator=(const GetHandoverContextResultMessage& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline GetHandoverContextResultMessage& operator=(GetHandoverContextResultMessage&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetOwningArena() == from.GetOwningArena()
-  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetOwningArena() != nullptr
-  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const GetHandoverContextResultMessage& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const GetHandoverContextResultMessage* internal_default_instance() {
-    return reinterpret_cast<const GetHandoverContextResultMessage*>(
-               &_GetHandoverContextResultMessage_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    9;
-
-  friend void swap(GetHandoverContextResultMessage& a, GetHandoverContextResultMessage& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(GetHandoverContextResultMessage* other) {
-    if (other == this) return;
-  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() != nullptr &&
-        GetOwningArena() == other->GetOwningArena()) {
-   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() == other->GetOwningArena()) {
-  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(GetHandoverContextResultMessage* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  GetHandoverContextResultMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<GetHandoverContextResultMessage>(arena);
-  }
-  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const GetHandoverContextResultMessage& from);
-  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const GetHandoverContextResultMessage& from) {
-    GetHandoverContextResultMessage::MergeImpl(*this, from);
-  }
-  private:
-  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
-  public:
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  uint8_t* _InternalSerialize(
-      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
-  void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(GetHandoverContextResultMessage* other);
-
-  private:
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "unrealpb.GetHandoverContextResultMessage";
-  }
-  protected:
-  explicit GetHandoverContextResultMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                       bool is_message_owned = false);
-  public:
-
-  static const ClassData _class_data_;
-  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kContextFieldNumber = 4,
-    kNetIdFieldNumber = 1,
-    kSrcChannelIdFieldNumber = 2,
-    kDstChannelIdFieldNumber = 3,
-  };
-  // repeated .unrealpb.HandoverContext context = 4;
-  int context_size() const;
-  private:
-  int _internal_context_size() const;
-  public:
-  void clear_context();
-  ::unrealpb::HandoverContext* mutable_context(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::HandoverContext >*
-      mutable_context();
-  private:
-  const ::unrealpb::HandoverContext& _internal_context(int index) const;
-  ::unrealpb::HandoverContext* _internal_add_context();
-  public:
-  const ::unrealpb::HandoverContext& context(int index) const;
-  ::unrealpb::HandoverContext* add_context();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::HandoverContext >&
-      context() const;
-
-  // uint32 netId = 1;
-  void clear_netid();
-  uint32_t netid() const;
-  void set_netid(uint32_t value);
-  private:
-  uint32_t _internal_netid() const;
-  void _internal_set_netid(uint32_t value);
-  public:
-
-  // uint32 srcChannelId = 2;
-  void clear_srcchannelid();
-  uint32_t srcchannelid() const;
-  void set_srcchannelid(uint32_t value);
-  private:
-  uint32_t _internal_srcchannelid() const;
-  void _internal_set_srcchannelid(uint32_t value);
-  public:
-
-  // uint32 dstChannelId = 3;
-  void clear_dstchannelid();
-  uint32_t dstchannelid() const;
-  void set_dstchannelid(uint32_t value);
-  private:
-  uint32_t _internal_dstchannelid() const;
-  void _internal_set_dstchannelid(uint32_t value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:unrealpb.GetHandoverContextResultMessage)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  struct Impl_ {
-    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::HandoverContext > context_;
-    uint32_t netid_;
-    uint32_t srcchannelid_;
-    uint32_t dstchannelid_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_unreal_5fcommon_2eproto;
-};
-// -------------------------------------------------------------------
-
 class CHANNELDUE_API HandoverData final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.HandoverData) */ {
  public:
@@ -2255,7 +1885,7 @@ class CHANNELDUE_API HandoverData final :
                &_HandoverData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    10;
+    8;
 
   friend void swap(HandoverData& a, HandoverData& b) {
     a.Swap(&b);
@@ -2433,7 +2063,7 @@ class CHANNELDUE_API GetUnrealObjectRefMessage final :
                &_GetUnrealObjectRefMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    11;
+    9;
 
   friend void swap(GetUnrealObjectRefMessage& a, GetUnrealObjectRefMessage& b) {
     a.Swap(&b);
@@ -2595,7 +2225,7 @@ class CHANNELDUE_API GetUnrealObjectRefResultMessage final :
                &_GetUnrealObjectRefResultMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    10;
 
   friend void swap(GetUnrealObjectRefResultMessage& a, GetUnrealObjectRefResultMessage& b) {
     a.Swap(&b);
@@ -2752,7 +2382,7 @@ class CHANNELDUE_API SyncNetIdMessage_NetIdPath final :
                &_SyncNetIdMessage_NetIdPath_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    11;
 
   friend void swap(SyncNetIdMessage_NetIdPath& a, SyncNetIdMessage_NetIdPath& b) {
     a.Swap(&b);
@@ -2916,7 +2546,7 @@ class CHANNELDUE_API SyncNetIdMessage final :
                &_SyncNetIdMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    14;
+    12;
 
   friend void swap(SyncNetIdMessage& a, SyncNetIdMessage& b) {
     a.Swap(&b);
@@ -3075,7 +2705,7 @@ class CHANNELDUE_API SpatialEntityState final :
                &_SpatialEntityState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    13;
 
   friend void swap(SpatialEntityState& a, SpatialEntityState& b) {
     a.Swap(&b);
@@ -3288,7 +2918,7 @@ class CHANNELDUE_API SpatialChannelData final :
                &_SpatialChannelData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    15;
 
   friend void swap(SpatialChannelData& a, SpatialChannelData& b) {
     a.Swap(&b);
@@ -3451,7 +3081,7 @@ class CHANNELDUE_API FRepMovement final :
                &_FRepMovement_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    16;
 
   friend void swap(FRepMovement& a, FRepMovement& b) {
     a.Swap(&b);
@@ -3699,7 +3329,7 @@ class CHANNELDUE_API FRepAttachment final :
                &_FRepAttachment_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    19;
+    17;
 
   friend void swap(FRepAttachment& a, FRepAttachment& b) {
     a.Swap(&b);
@@ -3957,7 +3587,7 @@ class CHANNELDUE_API ActorState final :
                &_ActorState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    20;
+    18;
 
   friend void swap(ActorState& a, ActorState& b) {
     a.Swap(&b);
@@ -4291,7 +3921,7 @@ class CHANNELDUE_API ActorComponentState final :
                &_ActorComponentState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    19;
 
   friend void swap(ActorComponentState& a, ActorComponentState& b) {
     a.Swap(&b);
@@ -4470,7 +4100,7 @@ class CHANNELDUE_API SceneComponentState final :
                &_SceneComponentState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    20;
 
   friend void swap(SceneComponentState& a, SceneComponentState& b) {
     a.Swap(&b);
@@ -4844,7 +4474,7 @@ class CHANNELDUE_API FBasedMovementInfo final :
                &_FBasedMovementInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    21;
 
   friend void swap(FBasedMovementInfo& a, FBasedMovementInfo& b) {
     a.Swap(&b);
@@ -5107,7 +4737,7 @@ class CHANNELDUE_API FRootMotionSource_FRootMotionFinishVelocitySettings final :
                &_FRootMotionSource_FRootMotionFinishVelocitySettings_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    22;
 
   friend void swap(FRootMotionSource_FRootMotionFinishVelocitySettings& a, FRootMotionSource_FRootMotionFinishVelocitySettings& b) {
     a.Swap(&b);
@@ -5295,7 +4925,7 @@ class CHANNELDUE_API FRootMotionSource final :
                &_FRootMotionSource_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    23;
 
   friend void swap(FRootMotionSource& a, FRootMotionSource& b) {
     a.Swap(&b);
@@ -5685,7 +5315,7 @@ class CHANNELDUE_API FRootMotionSourceGroup final :
                &_FRootMotionSourceGroup_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    24;
 
   friend void swap(FRootMotionSourceGroup& a, FRootMotionSourceGroup& b) {
     a.Swap(&b);
@@ -5958,7 +5588,7 @@ class CHANNELDUE_API FRepRootMotionMontage final :
                &_FRepRootMotionMontage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    25;
 
   friend void swap(FRepRootMotionMontage& a, FRepRootMotionMontage& b) {
     a.Swap(&b);
@@ -6316,7 +5946,7 @@ class CHANNELDUE_API CharacterState final :
                &_CharacterState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    26;
 
   friend void swap(CharacterState& a, CharacterState& b) {
     a.Swap(&b);
@@ -6584,7 +6214,7 @@ class CHANNELDUE_API Character_ServerMovePacked_Params final :
                &_Character_ServerMovePacked_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    27;
 
   friend void swap(Character_ServerMovePacked_Params& a, Character_ServerMovePacked_Params& b) {
     a.Swap(&b);
@@ -6748,7 +6378,7 @@ class CHANNELDUE_API Character_ClientMoveResponsePacked_Params final :
                &_Character_ClientMoveResponsePacked_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    28;
 
   friend void swap(Character_ClientMoveResponsePacked_Params& a, Character_ClientMoveResponsePacked_Params& b) {
     a.Swap(&b);
@@ -6912,7 +6542,7 @@ class CHANNELDUE_API PlayerState final :
                &_PlayerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    29;
 
   friend void swap(PlayerState& a, PlayerState& b) {
     a.Swap(&b);
@@ -7115,7 +6745,7 @@ class CHANNELDUE_API ControllerState final :
                &_ControllerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    30;
 
   friend void swap(ControllerState& a, ControllerState& b) {
     a.Swap(&b);
@@ -7292,7 +6922,7 @@ class CHANNELDUE_API Controller_ClientSetLocation_Params final :
                &_Controller_ClientSetLocation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    31;
 
   friend void swap(Controller_ClientSetLocation_Params& a, Controller_ClientSetLocation_Params& b) {
     a.Swap(&b);
@@ -7469,7 +7099,7 @@ class CHANNELDUE_API Controller_ClientSetRotation_Params final :
                &_Controller_ClientSetRotation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    32;
 
   friend void swap(Controller_ClientSetRotation_Params& a, Controller_ClientSetRotation_Params& b) {
     a.Swap(&b);
@@ -7637,7 +7267,7 @@ class CHANNELDUE_API PlayerControllerState final :
                &_PlayerControllerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    33;
 
   friend void swap(PlayerControllerState& a, PlayerControllerState& b) {
     a.Swap(&b);
@@ -7815,7 +7445,7 @@ class CHANNELDUE_API PlayerController_ServerUpdateCamera_Params final :
                &_PlayerController_ServerUpdateCamera_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    34;
 
   friend void swap(PlayerController_ServerUpdateCamera_Params& a, PlayerController_ServerUpdateCamera_Params& b) {
     a.Swap(&b);
@@ -7983,7 +7613,7 @@ class CHANNELDUE_API PlayerController_ClientSetHUD_Params final :
                &_PlayerController_ClientSetHUD_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    35;
 
   friend void swap(PlayerController_ClientSetHUD_Params& a, PlayerController_ClientSetHUD_Params& b) {
     a.Swap(&b);
@@ -8141,7 +7771,7 @@ class CHANNELDUE_API PlayerController_ClientSetViewTarget_Params final :
                &_PlayerController_ClientSetViewTarget_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    38;
+    36;
 
   friend void swap(PlayerController_ClientSetViewTarget_Params& a, PlayerController_ClientSetViewTarget_Params& b) {
     a.Swap(&b);
@@ -8342,7 +7972,7 @@ class CHANNELDUE_API PlayerController_ClientEnableNetworkVoice_Params final :
                &_PlayerController_ClientEnableNetworkVoice_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    37;
 
   friend void swap(PlayerController_ClientEnableNetworkVoice_Params& a, PlayerController_ClientEnableNetworkVoice_Params& b) {
     a.Swap(&b);
@@ -8495,7 +8125,7 @@ class CHANNELDUE_API PlayerController_ClientCapBandwidth_Params final :
                &_PlayerController_ClientCapBandwidth_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    40;
+    38;
 
   friend void swap(PlayerController_ClientCapBandwidth_Params& a, PlayerController_ClientCapBandwidth_Params& b) {
     a.Swap(&b);
@@ -8643,7 +8273,7 @@ class CHANNELDUE_API PlayerController_ClientRestart_Params final :
                &_PlayerController_ClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    41;
+    39;
 
   friend void swap(PlayerController_ClientRestart_Params& a, PlayerController_ClientRestart_Params& b) {
     a.Swap(&b);
@@ -8800,7 +8430,7 @@ class CHANNELDUE_API PlayerController_ClientSetCameraMode_Params final :
                &_PlayerController_ClientSetCameraMode_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    42;
+    40;
 
   friend void swap(PlayerController_ClientSetCameraMode_Params& a, PlayerController_ClientSetCameraMode_Params& b) {
     a.Swap(&b);
@@ -8953,7 +8583,7 @@ class CHANNELDUE_API PlayerController_ClientRetryClientRestart_Params final :
                &_PlayerController_ClientRetryClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    43;
+    41;
 
   friend void swap(PlayerController_ClientRetryClientRestart_Params& a, PlayerController_ClientRetryClientRestart_Params& b) {
     a.Swap(&b);
@@ -9110,7 +8740,7 @@ class CHANNELDUE_API PlayerController_ServerSetSpectatorLocation_Params final :
                &_PlayerController_ServerSetSpectatorLocation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    44;
+    42;
 
   friend void swap(PlayerController_ServerSetSpectatorLocation_Params& a, PlayerController_ServerSetSpectatorLocation_Params& b) {
     a.Swap(&b);
@@ -9287,7 +8917,7 @@ class CHANNELDUE_API PlayerController_ServerAcknowledgePossession_Params final :
                &_PlayerController_ServerAcknowledgePossession_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    45;
+    43;
 
   friend void swap(PlayerController_ServerAcknowledgePossession_Params& a, PlayerController_ServerAcknowledgePossession_Params& b) {
     a.Swap(&b);
@@ -9444,7 +9074,7 @@ class CHANNELDUE_API PlayerController_ClientGotoState_Params final :
                &_PlayerController_ClientGotoState_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    46;
+    44;
 
   friend void swap(PlayerController_ClientGotoState_Params& a, PlayerController_ClientGotoState_Params& b) {
     a.Swap(&b);
@@ -9597,7 +9227,7 @@ class CHANNELDUE_API PlayerController_ClientReceiveLocalizedMessage_Params final
                &_PlayerController_ClientReceiveLocalizedMessage_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    47;
+    45;
 
   friend void swap(PlayerController_ClientReceiveLocalizedMessage_Params& a, PlayerController_ClientReceiveLocalizedMessage_Params& b) {
     a.Swap(&b);
@@ -9821,7 +9451,7 @@ class CHANNELDUE_API GameStateBase final :
                &_GameStateBase_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    48;
+    46;
 
   friend void swap(GameStateBase& a, GameStateBase& b) {
     a.Swap(&b);
@@ -10029,7 +9659,7 @@ class CHANNELDUE_API PawnState final :
                &_PawnState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    49;
+    47;
 
   friend void swap(PawnState& a, PawnState& b) {
     a.Swap(&b);
@@ -10222,7 +9852,7 @@ class CHANNELDUE_API FClientAdjustment final :
                &_FClientAdjustment_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    50;
+    48;
 
   friend void swap(FClientAdjustment& a, FClientAdjustment& b) {
     a.Swap(&b);
@@ -11743,174 +11373,6 @@ inline void HandoverContext::_internal_set_clientconnid(uint32_t value) {
 inline void HandoverContext::set_clientconnid(uint32_t value) {
   _internal_set_clientconnid(value);
   // @@protoc_insertion_point(field_set:unrealpb.HandoverContext.clientConnId)
-}
-
-// -------------------------------------------------------------------
-
-// GetHandoverContextMessage
-
-// uint32 netId = 1;
-inline void GetHandoverContextMessage::clear_netid() {
-  _impl_.netid_ = 0u;
-}
-inline uint32_t GetHandoverContextMessage::_internal_netid() const {
-  return _impl_.netid_;
-}
-inline uint32_t GetHandoverContextMessage::netid() const {
-  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextMessage.netId)
-  return _internal_netid();
-}
-inline void GetHandoverContextMessage::_internal_set_netid(uint32_t value) {
-  
-  _impl_.netid_ = value;
-}
-inline void GetHandoverContextMessage::set_netid(uint32_t value) {
-  _internal_set_netid(value);
-  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextMessage.netId)
-}
-
-// uint32 srcChannelId = 2;
-inline void GetHandoverContextMessage::clear_srcchannelid() {
-  _impl_.srcchannelid_ = 0u;
-}
-inline uint32_t GetHandoverContextMessage::_internal_srcchannelid() const {
-  return _impl_.srcchannelid_;
-}
-inline uint32_t GetHandoverContextMessage::srcchannelid() const {
-  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextMessage.srcChannelId)
-  return _internal_srcchannelid();
-}
-inline void GetHandoverContextMessage::_internal_set_srcchannelid(uint32_t value) {
-  
-  _impl_.srcchannelid_ = value;
-}
-inline void GetHandoverContextMessage::set_srcchannelid(uint32_t value) {
-  _internal_set_srcchannelid(value);
-  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextMessage.srcChannelId)
-}
-
-// uint32 dstChannelId = 3;
-inline void GetHandoverContextMessage::clear_dstchannelid() {
-  _impl_.dstchannelid_ = 0u;
-}
-inline uint32_t GetHandoverContextMessage::_internal_dstchannelid() const {
-  return _impl_.dstchannelid_;
-}
-inline uint32_t GetHandoverContextMessage::dstchannelid() const {
-  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextMessage.dstChannelId)
-  return _internal_dstchannelid();
-}
-inline void GetHandoverContextMessage::_internal_set_dstchannelid(uint32_t value) {
-  
-  _impl_.dstchannelid_ = value;
-}
-inline void GetHandoverContextMessage::set_dstchannelid(uint32_t value) {
-  _internal_set_dstchannelid(value);
-  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextMessage.dstChannelId)
-}
-
-// -------------------------------------------------------------------
-
-// GetHandoverContextResultMessage
-
-// uint32 netId = 1;
-inline void GetHandoverContextResultMessage::clear_netid() {
-  _impl_.netid_ = 0u;
-}
-inline uint32_t GetHandoverContextResultMessage::_internal_netid() const {
-  return _impl_.netid_;
-}
-inline uint32_t GetHandoverContextResultMessage::netid() const {
-  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextResultMessage.netId)
-  return _internal_netid();
-}
-inline void GetHandoverContextResultMessage::_internal_set_netid(uint32_t value) {
-  
-  _impl_.netid_ = value;
-}
-inline void GetHandoverContextResultMessage::set_netid(uint32_t value) {
-  _internal_set_netid(value);
-  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextResultMessage.netId)
-}
-
-// uint32 srcChannelId = 2;
-inline void GetHandoverContextResultMessage::clear_srcchannelid() {
-  _impl_.srcchannelid_ = 0u;
-}
-inline uint32_t GetHandoverContextResultMessage::_internal_srcchannelid() const {
-  return _impl_.srcchannelid_;
-}
-inline uint32_t GetHandoverContextResultMessage::srcchannelid() const {
-  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextResultMessage.srcChannelId)
-  return _internal_srcchannelid();
-}
-inline void GetHandoverContextResultMessage::_internal_set_srcchannelid(uint32_t value) {
-  
-  _impl_.srcchannelid_ = value;
-}
-inline void GetHandoverContextResultMessage::set_srcchannelid(uint32_t value) {
-  _internal_set_srcchannelid(value);
-  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextResultMessage.srcChannelId)
-}
-
-// uint32 dstChannelId = 3;
-inline void GetHandoverContextResultMessage::clear_dstchannelid() {
-  _impl_.dstchannelid_ = 0u;
-}
-inline uint32_t GetHandoverContextResultMessage::_internal_dstchannelid() const {
-  return _impl_.dstchannelid_;
-}
-inline uint32_t GetHandoverContextResultMessage::dstchannelid() const {
-  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextResultMessage.dstChannelId)
-  return _internal_dstchannelid();
-}
-inline void GetHandoverContextResultMessage::_internal_set_dstchannelid(uint32_t value) {
-  
-  _impl_.dstchannelid_ = value;
-}
-inline void GetHandoverContextResultMessage::set_dstchannelid(uint32_t value) {
-  _internal_set_dstchannelid(value);
-  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextResultMessage.dstChannelId)
-}
-
-// repeated .unrealpb.HandoverContext context = 4;
-inline int GetHandoverContextResultMessage::_internal_context_size() const {
-  return _impl_.context_.size();
-}
-inline int GetHandoverContextResultMessage::context_size() const {
-  return _internal_context_size();
-}
-inline void GetHandoverContextResultMessage::clear_context() {
-  _impl_.context_.Clear();
-}
-inline ::unrealpb::HandoverContext* GetHandoverContextResultMessage::mutable_context(int index) {
-  // @@protoc_insertion_point(field_mutable:unrealpb.GetHandoverContextResultMessage.context)
-  return _impl_.context_.Mutable(index);
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::HandoverContext >*
-GetHandoverContextResultMessage::mutable_context() {
-  // @@protoc_insertion_point(field_mutable_list:unrealpb.GetHandoverContextResultMessage.context)
-  return &_impl_.context_;
-}
-inline const ::unrealpb::HandoverContext& GetHandoverContextResultMessage::_internal_context(int index) const {
-  return _impl_.context_.Get(index);
-}
-inline const ::unrealpb::HandoverContext& GetHandoverContextResultMessage::context(int index) const {
-  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextResultMessage.context)
-  return _internal_context(index);
-}
-inline ::unrealpb::HandoverContext* GetHandoverContextResultMessage::_internal_add_context() {
-  return _impl_.context_.Add();
-}
-inline ::unrealpb::HandoverContext* GetHandoverContextResultMessage::add_context() {
-  ::unrealpb::HandoverContext* _add = _internal_add_context();
-  // @@protoc_insertion_point(field_add:unrealpb.GetHandoverContextResultMessage.context)
-  return _add;
-}
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::HandoverContext >&
-GetHandoverContextResultMessage::context() const {
-  // @@protoc_insertion_point(field_list:unrealpb.GetHandoverContextResultMessage.context)
-  return _impl_.context_;
 }
 
 // -------------------------------------------------------------------
@@ -20832,10 +20294,6 @@ inline void FClientAdjustment::set_movementmode(uint32_t value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
-// -------------------------------------------------------------------
-
-// -------------------------------------------------------------------
-
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

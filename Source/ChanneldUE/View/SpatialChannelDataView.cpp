@@ -146,53 +146,6 @@ TArray<UObject*> USpatialChannelDataView::GetHandoverObjects_Implementation(UObj
 	return Result;
 }
 
-void USpatialChannelDataView::ServerHandleGetHandoverContext(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
-{
-	auto GetContextMsg = static_cast<const unrealpb::GetHandoverContextMessage*>(Msg);
-	const auto NetId = FNetworkGUID(GetContextMsg->netid());
-	UObject* Obj = GetObjectFromNetGUID(NetId);
-
-	unrealpb::GetHandoverContextResultMessage ResultMsg;
-	ResultMsg.set_netid(NetId.Value);
-	ResultMsg.set_srcchannelid(GetContextMsg->srcchannelid());
-	ResultMsg.set_dstchannelid(GetContextMsg->dstchannelid());
-
-	if (Obj == nullptr)
-	{
-		UE_LOG(LogChanneld, Error, TEXT("Unable to get handover context, netId: %d"), NetId.Value);
-		// Always send back the result message.
-		Connection->Send(ChId, unrealpb::HANDOVER_CONTEXT, ResultMsg);
-		return;
-	}
-
-	TArray<UObject*> HandoverObjs = GetHandoverObjects(Obj, GetContextMsg->srcchannelid(), GetContextMsg->dstchannelid());
-
-	for (UObject* HandoverObj : HandoverObjs)
-	{
-		if (HandoverObj == nullptr)
-		{
-			continue;
-		}
-		auto HandoverContext = ResultMsg.add_context();
-		UChanneldNetConnection* NetConn = nullptr;
-		if (AActor* HandoverActor = Cast<AActor>(HandoverObj))
-		{
-			NetConn = Cast<UChanneldNetConnection>(HandoverActor->GetNetConnection());
-		}
-		HandoverContext->mutable_obj()->CopyFrom(*ChanneldUtils::GetRefOfObject(HandoverObj, NetConn));
-		if (NetConn)
-		{
-			HandoverContext->set_clientconnid(NetConn->GetConnId());
-		}
-	}
-
-	UE_LOG(LogChanneld, Verbose, TEXT("[Server] GetHandoverContext for channeld: %s"), UTF8_TO_TCHAR(ResultMsg.DebugString().c_str()));
-	
-	Connection->Send(ChId, unrealpb::HANDOVER_CONTEXT, ResultMsg);
-
-	GEngine->GetEngineSubsystem<UChanneldMetrics>()->GetHandoverContexts->Add({{"objNum", std::to_string(ResultMsg.context_size())}}).Increment();
-}
-
 void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	auto HandoverMsg = static_cast<const channeldpb::ChannelDataHandoverMessage*>(Msg);
@@ -206,12 +159,6 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	const bool bHasAuthority = Connection->OwnedChannels.Contains(HandoverMsg->dstchannelid());
 	
 	FString NetIds;
-	/*
-	for (auto& HandoverContext : HandoverData.context())
-	{
-		NetIds.Appendf(TEXT("%d[%d], "), HandoverContext.obj().netguid(), HandoverContext.clientconnid());
-	}
-	*/
 	for (auto& Pair : HandoverData.entities())
 	{
 		NetIds.Appendf(TEXT("%d[%d], "), Pair.second.objref().netguid(), Pair.second.objref().owningconnid());
@@ -221,11 +168,9 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	
 	// ===== Pass 1: Handle the logic of the source channel =====
 	bool bHasAuthorityOverSourceChannel = Connection->OwnedChannels.Contains(HandoverMsg->srcchannelid());
-	bool bUpdateSourceChannel = false;
-	// for (auto& HandoverContext : HandoverData.context())
 	for (auto& Pair : HandoverData.entities())
 	{
-		const unrealpb::UnrealObjectRef& HandoverObjRef = Pair.second.objref();//HandoverContext.obj();
+		const unrealpb::UnrealObjectRef& HandoverObjRef = Pair.second.objref();
 		FNetworkGUID NetId(HandoverObjRef.netguid());
 		
 		// Source spatial server - the channel data is handed over from
@@ -236,7 +181,6 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 			if (IsValid(HandoverObj))
 			{
 				RemoveObjectProvider(HandoverMsg->srcchannelid(), HandoverObj, bHasAuthorityOverSourceChannel);
-				bUpdateSourceChannel = true;
 				
 				// If the handover actor is no longer in the interest area of current server, delete it.
 				if (!bHasInterest)
@@ -319,10 +263,9 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	// The actors that moved across the servers and are authorized by current (destination) server.
 	TArray<AActor*> CrossServerActors;
 
-	// for (auto& HandoverContext : HandoverData.context())
 	for (auto& Pair : HandoverData.entities())
 	{
-		const unrealpb::UnrealObjectRef& HandoverObjRef = Pair.second.objref();//HandoverContext.obj();
+		const unrealpb::UnrealObjectRef& HandoverObjRef = Pair.second.objref();
 		FNetworkGUID NetId(HandoverObjRef.netguid());
 		
 		// Set the NetId-ChannelId mapping before spawn the object, so AddProviderToDefaultChannel won't have to query the spatial channel.
@@ -684,60 +627,6 @@ bool USpatialChannelDataView::ConsumeChannelUpdateData(Channeld::ChannelId ChId,
 	return Super::ConsumeChannelUpdateData(ChId, UpdateData);
 }
 
-bool USpatialChannelDataView::TryToResolveObjects(Channeld::ChannelId ChId, TArray<uint32> NetGUIDs)
-{
-	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
-	if (!NetDriver)
-	{
-		return false;
-	}
-	
-	TArray<uint32> UnresolvedNetGUIDs;
-	for (uint32 NetGUID : NetGUIDs)
-	{
-		// The object has just been deleted, don't re-spawn it here.
-		if (SuppressedNetIdsToResolve.Contains(NetGUID))
-		{
-			UE_LOG(LogChanneld, Verbose, TEXT("The object has just been deleted during recent handover, ignore resolving it: %d"), NetGUID);
-			continue;
-		}
-		
-		if (!ResolvingNetGUIDs.Contains(NetGUID))
-		{
-			// Don't use IsGUIDRegistered - the object may still exist in GuidCache but has been deleted.
-			if (auto CacheObj = NetDriver->GuidCache->ObjectLookup.Find(FNetworkGUID(NetGUID)))
-			{
-				if (CacheObj->Object.IsValid())
-				{
-					continue;
-				}
-			}
-			
-			UnresolvedNetGUIDs.Add(NetGUID);
-		}
-	}
-
-	if (UnresolvedNetGUIDs.Num() == 0)
-	{
-		// Stop the channel data from being consumed in UChannelDataView::HandleChannelDataUpdate if still under resolving.
-		return ResolvingNetGUIDs.Num() > 0;
-	}
-
-	unrealpb::GetUnrealObjectRefMessage Msg;
-	FString LogStr;
-	for (uint32 NetGUID : UnresolvedNetGUIDs)
-	{
-		Msg.add_netguid(NetGUID);
-		ResolvingNetGUIDs.Add(NetGUID);
-		LogStr.Appendf(TEXT("%d, "), NetGUID);
-	}
-	
-	Connection->Send(ChId, unrealpb::GET_UNREAL_OBJECT_REF, Msg);
-	UE_LOG(LogChanneld, Verbose, TEXT("Sent GetUnrealObjectRefMessage to channel %d, NetIds: %s"), ChId, *LogStr);
-
-	return true;
-}
-
 bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData)
 {
 	// Only client needs to spawn the objects.
@@ -745,26 +634,6 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 	{
 		return false;
 	}
-
-	/* With the Entity channel, the Spatial channel data schema is fixed and contains the UnrealObjectRef to resolve
-	 * the objects that aren't spawned yet.
-	 * 
-	const FName MessageName = UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str());
-	auto Processor = ChanneldReplication::FindChannelDataProcessor(MessageName);
-	ensureMsgf(Processor, TEXT("Unable to find channel data processor for message: %s"), UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()));
-	if (!Processor)
-	{
-		return false;
-	}
-	
-	TArray<uint32> NetGUIDs = Processor->GetRelevantNetGUIDsFromChannelData(ChannelData);
-	if (NetGUIDs.Num() == 0)
-	{
-		return false;
-	}
-
-	return TryToResolveObjects(ChId, NetGUIDs);
-	*/
 
 	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
 	if (!NetDriver)
@@ -935,8 +804,6 @@ void USpatialChannelDataView::InitServer()
 	});
 	
 	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, this, &USpatialChannelDataView::ServerHandleSubToChannel);
-	
-	Connection->RegisterMessageHandler(unrealpb::HANDOVER_CONTEXT, new unrealpb::GetHandoverContextMessage, this, &USpatialChannelDataView::ServerHandleGetHandoverContext);
 	
 	Connection->AddMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, this, &USpatialChannelDataView::ServerHandleHandover);
 
@@ -1126,7 +993,6 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 	HandoverMsg->data().UnpackTo(&HandoverData);
 
 	TArray<FString> NetIds;
-	// for (auto& HandoverContext : HandoverData.context())
 	for (auto& Pair : HandoverData.entities())
 	{
 		NetIds.Add(FString::FromInt(Pair.second.objref().netguid()));
@@ -1144,7 +1010,6 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 		CheckUnspawnedObject(HandoverMsg->dstchannelid(), &HandoverData);
 	}
 	
-	// for (auto& HandoverContext : HandoverData.context())
 	for (auto& Pair : HandoverData.entities())
 	{
 		FNetworkGUID NetId(Pair.second.objref().netguid());
@@ -1237,7 +1102,6 @@ void USpatialChannelDataView::InitClient()
 
 	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, this, &USpatialChannelDataView::ClientHandleSubToChannel);
 	Connection->AddMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, this, &USpatialChannelDataView::ClientHandleHandover);
-	Connection->RegisterMessageHandler(unrealpb::GET_UNREAL_OBJECT_REF, new unrealpb::GetUnrealObjectRefResultMessage, this, &USpatialChannelDataView::ClientHandleGetUnrealObjectRef);
 	
 	channeldpb::ChannelSubscriptionOptions GlobalSubOptions;
 	GlobalSubOptions.set_dataaccess(channeldpb::READ_ACCESS);
