@@ -79,13 +79,13 @@ void SChanneldClassPicker::GetDesiredWidth(float& OutMinDesiredWidth, float& Out
 
 void SChanneldClassPicker::Construct(const FArguments& InArgs)
 {
-	check(InArgs._MetaClass);
-	check(InArgs._SelectedClass.IsSet());
+	// check(InArgs._MetaClass);
+	// check(InArgs._SelectedClass.IsSet());
 	check(InArgs._OnSetClass.IsBound());
 
 	Font = InArgs._Font;
 	
-	MetaClass = InArgs._MetaClass;
+	MetaClass = InArgs._MetaClass ? InArgs._MetaClass : UObject::StaticClass();
 	RequiredInterface = InArgs._RequiredInterface;
 	bAllowAbstract = InArgs._AllowAbstract;
 	bIsBlueprintBaseOnly = InArgs._IsBlueprintBaseOnly;

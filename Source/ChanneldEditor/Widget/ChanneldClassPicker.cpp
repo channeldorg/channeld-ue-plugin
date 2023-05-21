@@ -29,6 +29,11 @@ void UChanneldClassPicker::ReleaseSlateResources(bool bReleaseChildren)
 	MyClassPicker.Reset();
 }
 
+void UChanneldClassPicker::SetSelectedClass(UClass* InClass)
+{
+	MyClassPicker->OnClassPicked(InClass);
+}
+
 void UChanneldClassPicker::HandleSetClass(const UClass* InClass)
 {
 	SelectedClass = InClass;

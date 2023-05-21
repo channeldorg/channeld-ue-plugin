@@ -57,7 +57,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnChangeClassDelegate OnChangeClass;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Value")
+	UPROPERTY(BlueprintReadOnly, Category = "Value")
 	const UClass* SelectedClass = nullptr;
 
 	//~ Begin UWidget Interface
@@ -67,6 +67,9 @@ public:
 	//~ Begin UVisual Interface
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
 	//~ End UVisual Interface
+
+	UFUNCTION(BlueprintCallable)
+	void SetSelectedClass(UClass* InClass);
 
 protected:
 	TSharedPtr<SChanneldClassPicker> MyClassPicker;

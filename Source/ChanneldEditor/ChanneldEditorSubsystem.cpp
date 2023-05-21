@@ -541,14 +541,6 @@ void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
 	}
 
 	const UProjectPackagingSettings* const PackagingSettings = GetDefault<UProjectPackagingSettings>();
-	FString ServerPackagePath = PackagingSettings->StagingDirectory.Path / TEXT("LinuxServer");
-	if (!FPaths::DirectoryExists(ServerPackagePath))
-	{
-		UE_LOG(LogChanneldEditor, Error, TEXT("Server package path is invalid: %s."), *ServerPackagePath);
-		BuildServerDockerImageNotify->SpawnMissionFailedNotification(nullptr);
-		PostBuildServerDockerImage.ExecuteIfBound(false);
-		return;
-	}
 
 	FString DockerfileTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("Dockerfile-LinuxServer");
 	// Load DockerfileTemplate
@@ -561,9 +553,7 @@ void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
 			PostBuildServerDockerImage.ExecuteIfBound(false);
 			return;
 		}
-		// Replace template args
 		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add(TEXT("PackagePath"), TEXT("./LinuxServer"));
 		FormatArgs.Add(TEXT("ProjectName"), FApp::GetProjectName());
 		DockerfileContent = FString::Format(*DockerfileContent, FormatArgs);
 	}
@@ -573,6 +563,17 @@ void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
 	if (!FFileHelper::SaveStringToFile(DockerfileContent, *ServerDockerfilePath))
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to save Dockerfile."));
+		BuildServerDockerImageNotify->SpawnMissionFailedNotification(nullptr);
+		PostBuildServerDockerImage.ExecuteIfBound(false);
+		return;
+	}
+
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	if (!PlatformFile.CopyFile(*(PackagingSettings->StagingDirectory.Path / TEXT("LinuxServer/ChanneldUE.ini")),
+	                           *(FPaths::GetPath(FPaths::GetProjectFilePath()) / TEXT(
+		                           "/Saved/Config/Windows/ChanneldUE.ini"))))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to copy ChanneldUE.ini"));
 		BuildServerDockerImageNotify->SpawnMissionFailedNotification(nullptr);
 		PostBuildServerDockerImage.ExecuteIfBound(false);
 		return;
@@ -1318,31 +1319,10 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 	FString Cluster = DeploymentParams.Cluster;
 	FString Namespace = DeploymentParams.Namespace;
 	FString ChanneldImageTag = DeploymentParams.ChanneldImageTag;
-	FString ServerImageTag = DeploymentParams.ChanneldImageTag;
+	FString ServerImageTag = DeploymentParams.ServerImageTag;
 	FString YAMLTemplatePath = DeploymentParams.YAMLTemplatePath;
 
-
 	FString YAMLTemplateContent;
-
-	// for( int32 I = 0 ;I < DeploymentParams.ServerGroups.Num(); ++I)
-	// {
-	// 	FString ServerYAMLTemplateContent;
-	// 	const FServerGroupForDeployment& ServerGroup  = DeploymentParams.ServerGroups[I];
-	// 	if (!FFileHelper::LoadFileToString(ServerYAMLTemplateContent, *ServerGroup.YAMLTemplatePath))
-	// 	{
-	// 		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load YAML template at %s."), *ServerGroup.YAMLTemplatePath);
-	// 		DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
-	// 		PostDeplymentToCluster.ExecuteIfBound(false);
-	// 		return;
-	// 	}
-	// 	FStringFormatNamedArguments FormatArgs;
-	// 	
-	// 	FormatArgs.Add(TEXT("Namespace"), Namespace);
-	// 	FormatArgs.Add(TEXT("Name"), FString::Printf(TEXT("Server_%d"), I));
-	// 	FormatArgs.Add(TEXT("Replicas"), ServerGroup.ServerNum);
-	// 	FormatArgs.Add(TEXT("DockerImage"), ServerImageTag);
-	// 	YAMLTemplateContent.Append(FString::Format(*ServerYAMLTemplateContent, FormatArgs));
-	// }
 	{
 		FString ChanneldEntryPath = GetMutableDefault<UChanneldEditorSettings>()->LaunchChanneldEntry;
 		if (ChanneldEntryPath.IsEmpty())
@@ -1373,40 +1353,77 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 		FStringFormatNamedArguments FormatArgs;
 		FormatArgs.Add(TEXT("ChanneldParams"), ChanneldParams);
 		FormatArgs.Add(TEXT("Namespace"), Namespace);
-		FormatArgs.Add(TEXT("DockerImage"), ChanneldImageTag);
-		// FormatArgs.Add(TEXT("ServerTag"), ServerImageTag);
+		FormatArgs.Add(TEXT("ChanneldDockerImage"), ChanneldImageTag);
 		YAMLTemplateContent = FString::Format(*YAMLTemplateContent, FormatArgs);
 	}
+
+	FString CheckPodStatusCommand;
+	CheckPodStatusCommand.Append(
+		GetCheckPodCommand(
+			TEXT("%jqPath%"),
+			FString::Printf(
+				TEXT("\"%s/channeld-getaway_pod_status.json\""),
+				*(FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment"))),
+			TEXT("\"app=channeld-getaway\""),
+			1,
+			TEXT("channeld-getaway")
+		));
+
+	for (int32 I = 0; I < DeploymentParams.ServerGroups.Num(); ++I)
+	{
+		FString ServerYAMLTemplateContent;
+		const FServerGroupForDeployment& ServerGroup = DeploymentParams.ServerGroups[I];
+		if (!ServerGroup.bEnabled || ServerGroup.ServerNum <= 0)
+		{
+			UE_LOG(LogChanneldEditor, Display, TEXT("ServerGroup %d is disabled."), I);
+			continue;
+		}
+		if (!FFileHelper::LoadFileToString(ServerYAMLTemplateContent, *ServerGroup.YAMLTemplatePath))
+		{
+			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load server YAML template at %s."),
+			       *ServerGroup.YAMLTemplatePath);
+			DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
+			PostDeplymentToCluster.ExecuteIfBound(false);
+			return;
+		}
+		FStringFormatNamedArguments FormatArgs;
+
+		FormatArgs.Add(TEXT("Namespace"), Namespace);
+		FormatArgs.Add(TEXT("Name"), FString::Printf(TEXT("server-%d"), I));
+		FormatArgs.Add(TEXT("Replicas"), ServerGroup.ServerNum);
+		FormatArgs.Add(TEXT("ServerDockerImage"), ServerImageTag);
+		FormatArgs.Add(TEXT("Map"), ServerGroup.ServerMap.GetLongPackageName());
+		FormatArgs.Add(TEXT("ViewClass"), ServerGroup.ServerViewClass->GetPathName());
+		FormatArgs.Add(TEXT("AdditionalArgs"), ServerGroup.AdditionalArgs.ToString());
+		YAMLTemplateContent.Append(FString::Format(*ServerYAMLTemplateContent, FormatArgs));
+		CheckPodStatusCommand.Append(
+			GetCheckPodCommand(
+				TEXT("%jqPath%"),
+				FString::Printf(
+					TEXT("\"%s/server-%d_pod_status.json\""),
+					*(FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment")), I),
+				FString::Printf(TEXT("\"app=server-%d\""), I),
+				ServerGroup.ServerNum,
+				FString::Printf(TEXT("server-%d"), I)
+			));
+	}
+
 	const FString TempYAMLFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
 		"Deployment.yaml");
 	FFileHelper::SaveStringToFile(YAMLTemplateContent, *TempYAMLFilePath);
 
 	FString CheckPodStatusBatTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT(
 		"CheckPodStatus.bat");
-	FString JQPath = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Source") / TEXT(
-		"ThirdParty") / TEXT("jq-win64.exe");
 
-	FString CheckChanneldPodStatusBatPath = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT(
-		"CheckChanneldPodStatus.bat");
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	if (!PlatformFile.CopyFile(
+		*(FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT("CheckPodStatus.bat")),
+		*(FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("CheckPodStatus.bat"))))
 	{
-		FString CheckPodStatusBatFileContent;
-		if (!FFileHelper::LoadFileToString(CheckPodStatusBatFileContent, *CheckPodStatusBatTemplate))
-		{
-			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load CheckPodStatus.bat template."));
-			DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
-			PostDeplymentToCluster.ExecuteIfBound(false);
-			return;
-		}
-		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add(TEXT("WorkDir"), FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment"));
-		FormatArgs.Add(TEXT("JQPath"), JQPath);
-		FormatArgs.Add(
-			TEXT("PodStatusJsonPath"), FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
-				"ChanneldPodStatus.json"));
-		FormatArgs.Add(TEXT("PodSelector"), TEXT("app=channeld-getaway"));
-		FormatArgs.Add(TEXT("PodDescriptionName"), TEXT("channeld"));
-		CheckPodStatusBatFileContent = FString::Format(*CheckPodStatusBatFileContent, FormatArgs);
-		FFileHelper::SaveStringToFile(CheckPodStatusBatFileContent, *CheckChanneldPodStatusBatPath);
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to copy CheckPodStatus.bat"));
+		DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
+		PostDeplymentToCluster.ExecuteIfBound(false);
+		return;
 	}
 
 	FString DeployBatTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("Deployment.bat");
@@ -1421,8 +1438,11 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 		}
 		FStringFormatNamedArguments FormatArgs;
 		FormatArgs.Add(TEXT("WorkDir"), FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment"));
+		FormatArgs.Add(
+			TEXT("JQPath"),
+			FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Source") / TEXT("ThirdParty") / TEXT("jq-win64.exe"));
 		FormatArgs.Add(TEXT("YAMLFilePath"), TempYAMLFilePath);
-		FormatArgs.Add(TEXT("CheckPodStatusBatPath"), CheckChanneldPodStatusBatPath);
+		DeployBatFileContent.Append(CheckPodStatusCommand);
 		DeployBatFileContent = FString::Format(*DeployBatFileContent, FormatArgs);
 	}
 
@@ -1434,7 +1454,8 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 		new FChanneldProcWorkerThread(
 			TEXT("DeployToClusterThread"),
 			TempBatFilePath,
-			TEXT("")
+			TEXT(""),
+			FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment")
 		)
 	);
 	DeployToClusterWorkThread->ProcOutputMsgDelegate.BindUObject(UpdateRepActorCacheNotify,
@@ -1460,21 +1481,28 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 			PostDeplymentToCluster.ExecuteIfBound(false);
 		});
 	DeployToClusterWorkThread->Execute();
-	//
-	// AsyncTask(ENamedThreads::AnyNormalThreadNormalTask, [this, TempBatFilePath, PostDeplymentToCluster]()
-	// {
-	// 	int Result = system(TCHAR_TO_ANSI(*TempBatFilePath));
-	// 	if (Result == 0)
-	// 	{
-	// 		DeployToClusterNotify->SpawnMissionSucceedNotification(nullptr);
-	// 		PostDeplymentToCluster.ExecuteIfBound(true);
-	// 	}
-	// 	else
-	// 	{
-	// 		DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
-	// 		PostDeplymentToCluster.ExecuteIfBound(false);
-	// 	}
-	// });
+}
+
+FString UChanneldEditorSubsystem::GetCheckPodCommand(const FString& JQPath, const FString& PodStatusJSONPath,
+                                                     const FString& PodSelector, int32 PodReplicas,
+                                                     const FString& DescriptionName) const
+{
+	static const TCHAR* CallCheckPodCommand =
+		LR"EOF(
+call CheckPodStatus.bat {JQPath} {PodStatusJSONPath} {PodSelector} {PodReplicas} {DescriptionName}
+if ERRORLEVEL 1 (
+    Exit /b 1
+)
+)EOF";
+
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("JQPath"), JQPath);
+	FormatArgs.Add(TEXT("PodStatusJSONPath"), PodStatusJSONPath);
+	FormatArgs.Add(TEXT("PodSelector"), PodSelector);
+	FormatArgs.Add(TEXT("PodReplicas"), PodReplicas);
+	FormatArgs.Add(TEXT("DescriptionName"), DescriptionName);
+
+	return FString::Format(CallCheckPodCommand, FormatArgs);
 }
 
 

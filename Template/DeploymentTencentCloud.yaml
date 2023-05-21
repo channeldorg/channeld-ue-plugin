@@ -44,6 +44,8 @@ kind: Service
 metadata:
   namespace: {Namespace}
   name: channeld-getaway
+  annotations:
+    service.cloud.tencent.com/tke-service-config: channeld-getaway-service-config
 spec:
   ports:
     - name: "server"
@@ -58,4 +60,17 @@ spec:
   selector:
     app: channeld-getaway
   type: LoadBalancer
+---
+apiVersion: cloud.tencent.com/v1alpha1
+kind: TkeServiceConfig
+metadata:
+  name: channeld-getaway-service-config # 配置的名称
+  namespace: default # 配置的命名空间
+spec:
+  loadBalancer:
+    l4Listeners: # 四层规则配置，适用于Service的监听器配置。
+    - protocol: TCP # 协议端口锚定Service的四层规则。必填，枚举值：TCP|UDP。
+      port: 12108 # 必填，可选值：1~65535。
+      healthCheck: # 健康检查相关配置。选填
+        enable: false # 是否开启会话保持。必填，布尔值
 ---

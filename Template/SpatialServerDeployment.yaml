@@ -2,39 +2,36 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: {Namespace}
-  name: channeld-getaway
+  name: {Name}
 spec:
-  replicas: 1
+  replicas: {Replicas}
   selector:
     matchLabels:
-      app: channeld-getaway
+      app: {Name}
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: channeld-getaway
+        app: {Name}
     spec:
+      initContainers:
+      - name: init-wait-for-channeld
+        image: alpine
+        command: ["/bin/sh", "-c", "for i in $(seq 1 300); do nc -zvw1 channeld-getaway 12108 && exit 0 || sleep 3; done; exit 1"]
       containers:
-        - command: [{ChanneldParams}]
-          image: {ChanneldDockerImage}
-          name: channeld-getaway
+        - command: ['./ChanneldIntegrationServer.sh', '{Map}', '-metrics', '-server', '-log', 'channeldServerAddr=channeld-getaway', 'ViewClass={ViewClass}', '-FPS=30', 'CHANNELDUEINI=/LinuxServer/ChanneldUE.ini', '{AdditionalArgs}']
+          image: {ServerDockerImage}
+          name: {Name}
           ports:
-            - containerPort: 11288
-              name: server-port
-            - containerPort: 12108
-              name: client-port
-            - containerPort: 8080
+            - containerPort: 8081
               name: metrics-port
           resources:
             limits:
               cpu: 3500m
-              memory: 512M
+              memory: 1024M
             requests:
               cpu: "2"
-          # envFrom:
-          # - configMapRef:
-          #     name: channeld-configmap
       imagePullSecrets: # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
         - name: channeld-registry
       restartPolicy: Always
@@ -43,19 +40,13 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: {Namespace}
-  name: channeld-getaway
+  name: {Name}
 spec:
   ports:
-    - name: "server"
-      port: 11288
-      targetPort: server-port
-    - name: "client"
-      port: 12108
-      targetPort: client-port
     - name: "metrics"
-      port: 8080
+      port: 8081
       targetPort: metrics-port
   selector:
-    app: channeld-getaway
+    app: {Name}
   type: LoadBalancer
 ---

@@ -105,6 +105,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DeployToCluster(const FDeploymentStepParams DeploymentParams, const FPostDeplymentToCluster& PostDeplymentToCluster);
 
+	FString GetCheckPodCommand(const FString& JQPath, const FString& PodStatusJSONPath, const FString& PodSelector, int32 PodReplicas, const FString& DescriptionName) const;
+
 private:
 	TSharedPtr<FChanneldProcWorkerThread> UpdateRepActorCacheWorkThread;
 	UChanneldMissionNotiProxy* UpdateRepActorCacheNotify;

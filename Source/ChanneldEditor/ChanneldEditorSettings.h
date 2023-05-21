@@ -10,25 +10,25 @@ struct FServerGroup
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bEnabled = true;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "1", ClampMax = "16"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", ClampMax = "16"))
 	int32 ServerNum = 1;
 
 	// How long to wait before launching the servers (in seconds)
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DelayTime = 0.f;
 
 	// If not set, the open map in the Editor will be used.
-	UPROPERTY(EditAnywhere, meta=(AllowedClasses="World"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowedClasses="World"))
 	FSoftObjectPath ServerMap;
 
 	// If not set, the ChannelDataViewClass in the UChanneldSettings will be used.
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UChannelDataView> ServerViewClass;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText AdditionalArgs;
 
 	FTimerHandle DelayHandle;
