@@ -15,9 +15,10 @@ struct CHANNELDEDITOR_API FServerGroupForDeployment : public FServerGroup
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString YAMLTemplatePath;
 
-	FServerGroupForDeployment() {}
+	FServerGroupForDeployment()
+	{
+	}
 };
-
 
 USTRUCT(BlueprintType)
 struct CHANNELDEDITOR_API FPackageStepParams
@@ -30,7 +31,9 @@ struct CHANNELDEDITOR_API FPackageStepParams
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString ServerImageTag;
 
-	FPackageStepParams() {}
+	FPackageStepParams()
+	{
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -44,7 +47,9 @@ struct CHANNELDEDITOR_API FUploadStepParams
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString ServerImageTag;
 
-	FUploadStepParams() {}
+	FUploadStepParams()
+	{
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -72,8 +77,10 @@ struct CHANNELDEDITOR_API FDeploymentStepParams
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TArray<FServerGroupForDeployment> ServerGroups;
-	
-	FDeploymentStepParams() {}
+
+	FDeploymentStepParams()
+	{
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -90,7 +97,70 @@ struct CHANNELDEDITOR_API FCloudDeploymentParams
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FDeploymentStepParams DeploymentStepParams;
 
-	FCloudDeploymentParams() {}
+	FCloudDeploymentParams()
+	{
+	}
+};
+
+USTRUCT(BlueprintType)
+struct CHANNELDEDITOR_API FOneClickDeploymentResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString BuiltChanneldImageTag;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString BuiltChanneldImageId;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString BuiltServerImageTag;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString BuiltServerImageId;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString UploadedChanneldImageTag;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString UploadedChanneldImageId;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString UploadedServerImageTag;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString UploadedServerImageId;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString DeployedChanneldImageTag;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString DeployedChanneldImageId;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString DeployedServerImageTag;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString DeployedServerImageId;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString Cluster;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString Namespace;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString YAMLTemplatePath;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TArray<FString> ChanneldParams;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TArray<FServerGroupForDeployment> ServerGroups;
+	
+	FOneClickDeploymentResult()
+	{
+	}
 };
 
 UCLASS(BlueprintType, Blueprintable)
@@ -99,8 +169,12 @@ class CHANNELDEDITOR_API UCloudDeploymentController : public UEditorSubsystem
 	GENERATED_BODY()
 
 protected:
-	FString JsonPath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
-	"CloudDeploymentParam.json");
+	FString DeploymentParamJsonPath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+		"CloudDeploymentParam.json");
+
+	FString OneClickDeploymentResultJsonPath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") /
+		TEXT(
+			"OneClickDeploymentResult.json");
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
@@ -128,4 +202,20 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SaveDeploymentStepParams(const FDeploymentStepParams& InParams);
+
+	UFUNCTION(BlueprintCallable)
+	FOneClickDeploymentResult LoadOneClickDeploymentResult();
+
+	UFUNCTION(BlueprintCallable)
+	void SaveOneClickDeploymentPackageResult();
+
+	UFUNCTION(BlueprintCallable)
+	bool CheckOneClickDeploymentBuiltImageLatest();
+
+	UFUNCTION(BlueprintCallable)
+	void SaveOneClickDeploymentUploadResult();
+
+	UFUNCTION(BlueprintCallable)
+	void SaveOneClickDeploymentDeploymentResult();
+
 };

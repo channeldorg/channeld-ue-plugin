@@ -609,12 +609,18 @@ void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
 		if (Result == 0)
 		{
 			BuildServerDockerImageNotify->SpawnMissionSucceedNotification(nullptr);
-			PostBuildServerDockerImage.ExecuteIfBound(true);
+			AsyncTask(ENamedThreads::GameThread, [this, PostBuildServerDockerImage]()
+			{
+				PostBuildServerDockerImage.ExecuteIfBound(true);
+			});
 		}
 		else
 		{
 			BuildServerDockerImageNotify->SpawnMissionFailedNotification(nullptr);
-			PostBuildServerDockerImage.ExecuteIfBound(false);
+			AsyncTask(ENamedThreads::GameThread, [this, PostBuildServerDockerImage]()
+			{
+				PostBuildServerDockerImage.ExecuteIfBound(true);
+			});
 		}
 	});
 }
@@ -728,12 +734,18 @@ void UChanneldEditorSubsystem::BuildChanneldDockerImage(const FString& Tag,
 		if (Result == 0)
 		{
 			BuildChanneldDockerImageNotify->SpawnMissionSucceedNotification(nullptr);
-			PostBuildChanneldDockerImage.ExecuteIfBound(true);
+			AsyncTask(ENamedThreads::GameThread, [this, PostBuildChanneldDockerImage]()
+			{
+				PostBuildChanneldDockerImage.ExecuteIfBound(true);
+			});
 		}
 		else
 		{
 			BuildChanneldDockerImageNotify->SpawnMissionFailedNotification(nullptr);
-			PostBuildChanneldDockerImage.ExecuteIfBound(false);
+			AsyncTask(ENamedThreads::GameThread, [this, PostBuildChanneldDockerImage]()
+			{
+				PostBuildChanneldDockerImage.ExecuteIfBound(false);
+			});
 		}
 	});
 }
@@ -744,6 +756,40 @@ void UChanneldEditorSubsystem::OpenPackagingSettings()
 	{
 		SettingsModule->ShowViewer("Project", "Packaging", "Project");
 	}
+}
+
+TMap<FString, FString> UChanneldEditorSubsystem::GetDockerImageId(const TArray<FString>& Tags)
+{
+	FString NowStr = FString::FromInt(FDateTime::UtcNow().ToUnixTimestamp() * 1000 + FDateTime::Now().GetMillisecond());
+	FString TmpDir = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment");
+	FString BatContent = TEXT("@echo off\n");
+	for (auto Tag : Tags)
+	{
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("Tag"), Tag);
+		FormatArgs.Add(TEXT("Now"), NowStr);
+		FormatArgs.Add(TEXT("TagFile"), NowStr);
+		BatContent.Append(FString::Printf(
+				TEXT("docker inspect --format='{{.Id}}' %s > \"%s/%d\"\n"),
+				*Tag, *TmpDir, GetTypeHash(Tag + NowStr)
+			)
+		);
+	}
+	FString BatFilePath = TmpDir / TEXT("GetDocekerImage.bat");
+	FFileHelper::SaveStringToFile(BatContent, *BatFilePath);
+	system(TCHAR_TO_ANSI(*BatFilePath));
+	TMap<FString, FString> Result;
+	for (auto Tag : Tags)
+	{
+		FString TagFile = TmpDir / FString::Printf(TEXT("%d"), GetTypeHash(Tag + NowStr));
+		FString ImageId;
+		if (FFileHelper::LoadFileToString(ImageId, *TagFile))
+		{
+			ImageId = ImageId.Mid(1, ImageId.Len() - 2);
+			Result.Add(Tag, ImageId);
+		}
+	}
+	return Result;
 }
 
 FString GetCookingOptionalParams()
@@ -1295,12 +1341,18 @@ void UChanneldEditorSubsystem::UploadDockerImage(const FString& ChanneldImageTag
 		if (Result == 0)
 		{
 			UploadDockerImageNotify->SpawnMissionSucceedNotification(nullptr);
-			PostUploadDockerImage.ExecuteIfBound(true);
+			AsyncTask(ENamedThreads::GameThread, [this, PostUploadDockerImage]()
+			{
+				PostUploadDockerImage.ExecuteIfBound(true);
+			});
 		}
 		else
 		{
 			UploadDockerImageNotify->SpawnMissionFailedNotification(nullptr);
-			PostUploadDockerImage.ExecuteIfBound(false);
+			AsyncTask(ENamedThreads::GameThread, [this, PostUploadDockerImage]()
+			{
+				PostUploadDockerImage.ExecuteIfBound(false);
+			});
 		}
 	});
 }
@@ -1504,6 +1556,5 @@ if ERRORLEVEL 1 (
 
 	return FString::Format(CallCheckPodCommand, FormatArgs);
 }
-
 
 #undef LOCTEXT_NAMESPACE

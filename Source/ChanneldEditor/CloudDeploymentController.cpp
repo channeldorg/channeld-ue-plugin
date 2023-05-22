@@ -2,6 +2,8 @@
 
 
 #include "CloudDeploymentController.h"
+
+#include "ChanneldEditorSubsystem.h"
 #include "ChanneldEditorTypes.h"
 #include "JsonObjectConverter.h"
 #include "Misc/FileHelper.h"
@@ -15,13 +17,13 @@ FCloudDeploymentParams UCloudDeploymentController::LoadCloudDeploymentParams()
 {
 	FCloudDeploymentParams Result;
 	FString JsonString;
-	if (!FFileHelper::LoadFileToString(JsonString, *JsonPath))
+	if (!FFileHelper::LoadFileToString(JsonString, *DeploymentParamJsonPath))
 	{
 		return Result;
 	}
 	if (!FJsonObjectConverter::JsonObjectStringToUStruct<FCloudDeploymentParams>(JsonString, &Result, 0, 0))
 	{
-		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to parse json from file: %s"), *JsonPath);
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to parse json from file: %s"), *DeploymentParamJsonPath);
 		return Result;
 	}
 	return Result;
@@ -32,11 +34,11 @@ void UCloudDeploymentController::SaveCloudDeploymentParams(const FCloudDeploymen
 	FString JsonString;
 	if (!FJsonObjectConverter::UStructToJsonObjectString(InParams, JsonString, 0, 0))
 	{
-		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to convert data to json: %s"), *JsonPath);
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to convert data to json: %s"), *DeploymentParamJsonPath);
 	}
-	if (!FFileHelper::SaveStringToFile(JsonString, *JsonPath))
+	if (!FFileHelper::SaveStringToFile(JsonString, *DeploymentParamJsonPath))
 	{
-		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to save data to file: %s"), *JsonPath);
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to save data to file: %s"), *DeploymentParamJsonPath);
 	}
 }
 
@@ -74,4 +76,108 @@ void UCloudDeploymentController::SaveDeploymentStepParams(const FDeploymentStepP
 	FCloudDeploymentParams CloudDeploymentParams = LoadCloudDeploymentParams();
 	CloudDeploymentParams.DeploymentStepParams = InParams;
 	SaveCloudDeploymentParams(CloudDeploymentParams);
+}
+
+FOneClickDeploymentResult UCloudDeploymentController::LoadOneClickDeploymentResult()
+{
+	FOneClickDeploymentResult Result;
+	FString JsonString;
+	if (!FFileHelper::LoadFileToString(JsonString, *OneClickDeploymentResultJsonPath))
+	{
+		return Result;
+	}
+	if (!FJsonObjectConverter::JsonObjectStringToUStruct<FOneClickDeploymentResult>(JsonString, &Result, 0, 0))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to parse json from file: %s"), *OneClickDeploymentResultJsonPath);
+		return Result;
+	}
+	return Result;
+}
+
+void UCloudDeploymentController::SaveOneClickDeploymentPackageResult()
+{
+	const FPackageStepParams& PackageStepParams = LoadPackageStepParams();
+	auto ImageIds = GEditor->GetEditorSubsystem<UChanneldEditorSubsystem>()->GetDockerImageId({
+		PackageStepParams.ChanneldImageTag, PackageStepParams.ServerImageTag
+	});
+	FOneClickDeploymentResult Result;
+	Result.BuiltChanneldImageTag = PackageStepParams.ChanneldImageTag;
+	Result.BuiltChanneldImageId = ImageIds[PackageStepParams.ChanneldImageTag];
+	Result.BuiltServerImageTag = PackageStepParams.ServerImageTag;
+	Result.BuiltServerImageId = ImageIds[PackageStepParams.ServerImageTag];
+
+	FString JsonString;
+	if (!FJsonObjectConverter::UStructToJsonObjectString(Result, JsonString, 0, 0))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to convert data to json: %s"), *OneClickDeploymentResultJsonPath);
+	}
+	if (!FFileHelper::SaveStringToFile(JsonString, *OneClickDeploymentResultJsonPath))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to save data to file: %s"), *OneClickDeploymentResultJsonPath);
+	}
+}
+
+bool UCloudDeploymentController::CheckOneClickDeploymentBuiltImageLatest()
+{
+	auto PackageStepParams = LoadPackageStepParams();
+	auto OneClickDeploymentResult = LoadOneClickDeploymentResult();
+	if (
+		OneClickDeploymentResult.BuiltChanneldImageTag.IsEmpty() || OneClickDeploymentResult.BuiltServerImageTag.
+		IsEmpty()
+		|| PackageStepParams.ChanneldImageTag.IsEmpty() || PackageStepParams.ServerImageTag.IsEmpty()
+		|| PackageStepParams.ChanneldImageTag != OneClickDeploymentResult.BuiltChanneldImageTag
+		|| PackageStepParams.ServerImageTag != OneClickDeploymentResult.BuiltServerImageTag
+	)
+	{
+		return false;
+	}
+	auto ImageIds = GEditor->GetEditorSubsystem<UChanneldEditorSubsystem>()->GetDockerImageId({
+		PackageStepParams.ChanneldImageTag, PackageStepParams.ServerImageTag
+	});
+	return ImageIds[OneClickDeploymentResult.BuiltChanneldImageTag] == OneClickDeploymentResult.BuiltChanneldImageId &&
+		ImageIds[OneClickDeploymentResult.BuiltServerImageTag] == OneClickDeploymentResult.BuiltServerImageId;
+}
+
+void UCloudDeploymentController::SaveOneClickDeploymentUploadResult()
+{
+	FOneClickDeploymentResult Result = LoadOneClickDeploymentResult();
+	Result.UploadedChanneldImageTag = Result.BuiltChanneldImageTag;
+	Result.UploadedChanneldImageId = Result.BuiltChanneldImageId;
+	Result.UploadedServerImageTag = Result.BuiltServerImageTag;
+	Result.UploadedServerImageId = Result.BuiltServerImageId;
+
+	FString JsonString;
+	if (!FJsonObjectConverter::UStructToJsonObjectString(Result, JsonString, 0, 0))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to convert data to json: %s"), *OneClickDeploymentResultJsonPath);
+	}
+	if (!FFileHelper::SaveStringToFile(JsonString, *OneClickDeploymentResultJsonPath))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to save data to file: %s"), *OneClickDeploymentResultJsonPath);
+	}
+}
+
+void UCloudDeploymentController::SaveOneClickDeploymentDeploymentResult()
+{
+	const FDeploymentStepParams& DeploymentStepParams = LoadDeploymentStepParams();
+	FOneClickDeploymentResult Result = LoadOneClickDeploymentResult();
+	Result.DeployedChanneldImageTag = Result.UploadedChanneldImageTag;
+	Result.DeployedChanneldImageId = Result.UploadedChanneldImageId;
+	Result.DeployedServerImageTag = Result.UploadedServerImageTag;
+	Result.DeployedServerImageId = Result.UploadedServerImageId;
+	Result.Cluster = DeploymentStepParams.Cluster;
+	Result.Namespace = DeploymentStepParams.Namespace;
+	Result.YAMLTemplatePath = DeploymentStepParams.YAMLTemplatePath;
+	Result.ChanneldParams = DeploymentStepParams.ChanneldParams;
+	Result.ServerGroups = DeploymentStepParams.ServerGroups;
+
+	FString JsonString;
+	if (!FJsonObjectConverter::UStructToJsonObjectString(Result, JsonString, 0, 0))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to convert data to json: %s"), *OneClickDeploymentResultJsonPath);
+	}
+	if (!FFileHelper::SaveStringToFile(JsonString, *OneClickDeploymentResultJsonPath))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to save data to file: %s"), *OneClickDeploymentResultJsonPath);
+	}
 }

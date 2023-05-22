@@ -94,6 +94,9 @@ public:
 	void OpenPackagingSettings();
 	
 	UFUNCTION(BlueprintCallable)
+	TMap<FString, FString> GetDockerImageId(const TArray<FString>& Tags);
+
+	UFUNCTION(BlueprintCallable)
 	void PackageProject(const FName InPlatformInfoName, const FPostPackageProject& PostPackageProject);
 
 	void AddMessageLog(const FText& Text, const FText& Detail, const FString& TutorialLink,
