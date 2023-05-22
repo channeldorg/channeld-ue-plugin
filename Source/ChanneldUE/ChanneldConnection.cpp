@@ -22,10 +22,6 @@ void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bShowUserSpaceMessageLog from CLI: %d"), bShowUserSpaceMessageLog);
 	}
-	if (FParse::Bool(CmdLine, TEXT("DisableMultiMsgPayload="), bDisableMultiMsgPayload))
-	{
-		UE_LOG(LogChanneld, Log, TEXT("Parsed bDisableMultiMsgPayload from CLI: %d"), bDisableMultiMsgPayload);
-	}
 	
 	if (ReceiveBufferSize < Channeld::MaxPacketSize)
 	{
@@ -479,18 +475,19 @@ void UChanneldConnection::TickOutgoing()
 			Packet.mutable_messages()->RemoveLast();
 			UE_LOG(LogChanneld, Log, TEXT("Packet is going to be oversized: %d, message type: %d, size: %d, num in packet: %d, remaining in queue: %d"),
 				(uint32)Packet.ByteSizeLong(), MessagePack->msgtype(), MsgSize, Packet.messages_size(), OutgoingQueueSize);
-			break;
+
+			if (Packet.messages_size() > 0)
+			{
+				SendDirect(Packet);
+				Packet.Clear();
+			}
+			// Keep sending packets until the queue is empty.
+			continue;
 		}
 
 		// Actually remove the message from the queue
 		OutgoingQueue.Pop();
 		OutgoingQueueSize--;
-		
-		if (bDisableMultiMsgPayload)
-		{
-			SendDirect(Packet);
-			Packet.clear_messages();
-		}
 	}
 
 	if (Packet.messages_size() > 0)

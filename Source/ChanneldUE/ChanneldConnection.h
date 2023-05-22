@@ -163,10 +163,6 @@ public:
 	UPROPERTY(Config)
 	bool bShowUserSpaceMessageLog = false;
 
-	// If true, only one message will be sent per packet. A packet can have multiple messages in the payload in one trip to improve the efficiency.
-	UPROPERTY(Config)
-	bool bDisableMultiMsgPayload = false;
-
 	FChanneldAuthenticatedDelegate OnAuthenticated;
 
 	//FUserSpaceMessageHandlerFunc UserSpaceMessageHandlerFunc = nullptr;
