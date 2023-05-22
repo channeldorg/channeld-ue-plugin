@@ -33,6 +33,8 @@ Replication Graph中将Actor分组或是建立特殊的列表，跟channeld中�
 ## 网络相关性和优先级
 ChanneldUE部分支持[网络相关性](https://docs.unrealengine.com/4.27/zh-CN/InteractiveExperiences/Networking/Actors/Relevancy/)，但是不支持优先级设定。
 
+当同步Actor开启`bAlwaysRelevant`时，所有客户端都会订阅到该Actor对应的实体频道；
+
 当一个同步Actor离开玩家的兴趣范围时，客户端会调用该Actor的IsNetRelevantFor方法来判断是否跟玩家相关，如果相关，则不销毁该Actor。要开启网络相关性的调用判断，需要在主菜单`编辑 -> 项目设置 -> 插件 -> Channeld -> Spatial -> Client Interest`中勾选`Use Net Relavancy For Uninterested Actors`。
 
 ## 框架和系统的跨服支持

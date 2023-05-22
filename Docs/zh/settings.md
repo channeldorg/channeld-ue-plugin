@@ -17,6 +17,9 @@ ChannelUE插件在游戏运行时的相关设置。可以在`编辑 > 项目设�
 | `Channeld Ip for Server` | 127.0.0.1 | 服务器连接Channeld的IP地址 |
 | `Channeld Port for Server` | 11288 | 服务器连接Channeld的端口。不会影响启动channeld时监听的端口 |
 | `Use Receive Thread` | true | 是否使用独立线程接收来自channeld的数据 |
+| `Disable Handshaking` | true | 是否跳过UE默认的握手过程。客户端在进入UE服务器之前，必须先经过channeld的连接和验证 |
+| `Set Internal Ack` | true | 是否禁用UE内置的心跳机制。使用可靠连接（如TCP）时建议打开，以减小带宽消耗。 |
+| `Rpc Redirection Max Retries` | true | RPC重定向的次数上限。当一个服务器无法处理RPC时，会尝试将RPC转发到可以处理的服务器。该值设为0时，不会发生重定向，会导致跨服移动会出现轻微的抖动；该值设得太高时，RPC可能会在服务器之间反复发送，导致网络阻塞 |
 
 ### 空间频道 `Spatial`
 | 配置项 | 默认值 | 说明 |
@@ -97,4 +100,4 @@ ChannelUE插件在编辑器运行时的相关设置。可以在`编辑 > 编辑�
 | 配置项 | 默认值 | 说明 |
 | ------ | ------ | ------ |
 | Skip | false | 是否跳过生成该Actor类型的同步代码 |
-| Singleton | false | 该Actor类型的实例是否全局唯一（如：GameState） |
+| Singleton | false | 该Actor类型的实例是否在该频道全局唯一（如：Global频道的GameState） |
