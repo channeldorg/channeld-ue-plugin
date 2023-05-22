@@ -261,6 +261,12 @@ void UChanneldNetConnection::SendDestroyMessage(UObject* Object, EChannelCloseRe
 		UE_LOG(LogChanneld, Warning, TEXT("SendDestroyMessage failed as the NetConn %d has no NetDriver"), GetConnId());
 		return;
 	}
+
+	if (!PackageMap)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("SendDestroyMessage failed as the NetConn %d has no PackageMap"), GetConnId());
+		return;
+	}
 	
 	const FNetworkGUID NetId = Driver->GuidCache->GetNetGUID(Object);
 	if (!NetId.IsValid())
