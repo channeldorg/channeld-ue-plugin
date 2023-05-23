@@ -21,16 +21,20 @@ static const FString GenManager_TypeDefinitionCppFile = TEXT("ChanneldGeneratedT
 
 static const FString GenManager_RepRegistrationHeadFile = TEXT("ChanneldReplicatorRegistration") + CodeGen_HeadFileExtension;
 
-static const FString GenManager_DefaultChannelDataMsgName = TEXT("DefaultChannelData");
-
 static const FString GenManager_GlobalStructHeaderFile = TEXT("ChanneldGlobalStruct") + CodeGen_HeadFileExtension;
 static const FString GenManager_GlobalStructProtoFile = TEXT("ChanneldGlobalStruct") + CodeGen_ProtoFileExtension;
 static const FString GenManager_GlobalStructProtoHeaderFile = TEXT("ChanneldGlobalStruct") + CodeGen_ProtoPbHeadExtension;
 
 static const FString GenManager_UnrealCommonProtoFile = TEXT("unreal_common") + CodeGen_ProtoFileExtension;
 
-static const FString GenManager_IntermediateDir = FPaths::ProjectIntermediateDir() / TEXT("ChanneldReplicatorGenerator");
-static const FString GenManager_GeneratedManifestFilePath = GenManager_IntermediateDir / TEXT("ReplicatorGeneratedManifest.json");
+static const FString GenManager_IntermediateDir = FPaths::ProjectIntermediateDir() / TEXT("ChanneldReplicationGenerated");
+static const FString GenManager_RepActorCachePath = GenManager_IntermediateDir / TEXT("ReplicationActorCache.json");
+static const FString GenManager_DefaultRepActorCachePath = GenManager_IntermediateDir / TEXT("ReplicationActorCache.json");
+static const FString GenManager_GeneratedManifestFilePath = GenManager_IntermediateDir / TEXT("ReplicationGeneratedManifest.json");
 static const FString GenManager_TemporaryGoMergeCodePath = GenManager_IntermediateDir / TEXT("Tmp_ChannelDataGoMergeCode.go");
 static const FString GenManager_TemporaryGoRegistrationCodePath = GenManager_IntermediateDir / TEXT("Tmp_ChannelDataGoRegCode.go");
 static const FString GenManager_RepClassInfoPath = GenManager_IntermediateDir / TEXT("RepAssetInfoPath.json");
+
+static const FString GenManager_ChannelDataSettingsPath = FPaths::ProjectConfigDir() / TEXT("ChanneldChannelDataSettings.json");
+static const FString GenManager_ChannelDataSchemataPath = FPaths::ProjectConfigDir() / TEXT("ChanneldChannelDataSchema.json");
+static const FString GenManager_DefaultChannelDataSchemataFile = TEXT("DefaultChannelDataSchema.json");

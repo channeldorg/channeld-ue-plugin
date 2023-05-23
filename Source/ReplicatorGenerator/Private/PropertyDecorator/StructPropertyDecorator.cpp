@@ -86,7 +86,7 @@ FString FStructPropertyDecorator::GetCode_AssignPropPointer(const FString& Conta
 
 TArray<FString> FStructPropertyDecorator::GetAdditionalIncludes()
 {
-	TSet<FString> IncludeFileSet {GenManager_GlobalStructHeaderFile, GenManager_GlobalStructProtoHeaderFile};
+	TSet<FString> IncludeFileSet{GenManager_GlobalStructHeaderFile, GenManager_GlobalStructProtoHeaderFile};
 	for (auto PropDecorator : Properties)
 	{
 		IncludeFileSet.Append(PropDecorator->GetAdditionalIncludes());
@@ -287,4 +287,33 @@ FString FStructPropertyDecorator::GetDefinition_ProtoStateMessage()
 FString FStructPropertyDecorator::GetCode_GetWorldRef()
 {
 	return FString("World");
+}
+
+bool FStructPropertyDecorator::IsStruct()
+{
+	return true;
+}
+
+TArray<TSharedPtr<FStructPropertyDecorator>> FStructPropertyDecorator::GetStructPropertyDecorators()
+{
+	TArray<TSharedPtr<FStructPropertyDecorator>> StructPropertyDecorators;
+	for (TSharedPtr<FPropertyDecorator>& Property : Properties)
+	{
+		if (Property->IsStruct())
+		{
+			StructPropertyDecorators.Add(StaticCastSharedPtr<FStructPropertyDecorator>(Property));
+		}
+		StructPropertyDecorators.Append(Property->GetStructPropertyDecorators());
+	}
+	TArray<TSharedPtr<FStructPropertyDecorator>> NonRepetitionStructPropertyDecorators;
+	TSet<FString> StructPropertyDecoratorNames;
+	for (TSharedPtr<FStructPropertyDecorator>& StructPropertyDecorator : StructPropertyDecorators)
+	{
+		if (!StructPropertyDecoratorNames.Contains(StructPropertyDecorator->GetPropertyName()))
+		{
+			StructPropertyDecoratorNames.Add(StructPropertyDecorator->GetPropertyName());
+			NonRepetitionStructPropertyDecorators.Add(StructPropertyDecorator);
+		}
+	}
+	return NonRepetitionStructPropertyDecorators;
 }

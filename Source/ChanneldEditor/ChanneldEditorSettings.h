@@ -64,7 +64,7 @@ public:
 
 	// Replication Generator will automatically recompile the game code after generating the replicators. if you want to disable this feature, set the item to be false
 	UPROPERTY(Config, EditAnywhere, Category = "Replication Generator", DisplayName = "Automatically Recompile After Generating Replication Code")
-	bool bAutoRecompileAfterGenerate = true;
+	bool bEnableCompatibleRecompilation = true;
 
 	// Generate go replication code to the specified folder after generating replication code, the folder is relative to "CHANNELD_PATH"
 	UPROPERTY(Config, EditAnywhere, Category = "Replication Generator")

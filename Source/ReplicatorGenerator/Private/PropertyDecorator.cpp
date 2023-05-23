@@ -17,7 +17,7 @@ bool FPropertyDecorator::Init(const TFunction<FString()>& SetNameForIllegalPropN
 	if (OriginalProperty != nullptr)
 	{
 		CompilablePropName = OriginalProperty->GetName();
-		if (!ChanneldReplicatorGeneratorUtils::IsCompilableClassName(CompilablePropName))
+		if (ChanneldReplicatorGeneratorUtils::ContainsUncompilableChar(CompilablePropName))
 		{
 			CompilablePropName = *SetNameForIllegalPropName();
 		}
@@ -311,4 +311,14 @@ TArray<FString> FPropertyDecorator::GetAdditionalIncludes()
 FString FPropertyDecorator::GetCode_GetWorldRef()
 {
 	return TEXT("");
+}
+
+bool FPropertyDecorator::IsStruct()
+{
+	return false;
+}
+
+TArray<TSharedPtr<FStructPropertyDecorator>> FPropertyDecorator::GetStructPropertyDecorators()
+{
+	return TArray<TSharedPtr<FStructPropertyDecorator>>();
 }

@@ -1,6 +1,5 @@
 ﻿#include "ReplicatorGeneratorManager.h"
 
-#include "ReplicatorGeneratorDefinition.h"
 #include "ReplicatorGeneratorUtils.h"
 #include "Engine/AssetManager.h"
 #include "Engine/SCS_Node.h"
@@ -8,10 +7,7 @@
 #include "HAL/FileManagerGeneric.h"
 #include "Internationalization/Regex.h"
 #include "Misc/FileHelper.h"
-#include "Replication/ChanneldReplicationComponent.h"
-#include "Serialization/JsonReader.h"
-#include "Serialization/JsonSerializer.h"
-#include "ReplicationRegistry.h"
+#include "Persistence/ChannelDataSchemaController.h"
 
 DEFINE_LOG_CATEGORY(LogChanneldRepGenerator);
 
@@ -45,6 +41,11 @@ FString FReplicatorGeneratorManager::GetDefaultModuleDir()
 	return DefaultModuleDir;
 }
 
+FString FReplicatorGeneratorManager::GetDefaultModuleName()
+{
+	return FPaths::GetBaseFilename(GetDefaultModuleDir());
+}
+
 FString FReplicatorGeneratorManager::GetReplicatorStorageDir()
 {
 	if (ReplicatorStorageDir.IsEmpty())
@@ -60,132 +61,41 @@ FString FReplicatorGeneratorManager::GetDefaultProtoPackageName() const
 	return GenManager_DefaultProtoPackageName;
 }
 
-FString FReplicatorGeneratorManager::GetDefaultModuleName()
-{
-	return FPaths::GetBaseFilename(GetDefaultModuleDir());
-}
-
 bool FReplicatorGeneratorManager::HeaderFilesCanBeFound(const UClass* TargetClass)
 {
 	const FString TargetHeadFilePath = CodeGenerator->GetClassHeadFilePath(TargetClass->GetPrefixCPP() + TargetClass->GetName());
 	return !TargetHeadFilePath.IsEmpty();
 }
 
-void FReplicatorGeneratorManager::StartGenerateReplicator()
+bool FReplicatorGeneratorManager::GenerateReplication(const FString GoPackageImportPathPrefix, bool CompatibleRecompilation)
 {
+	TArray<FChannelDataInfo> ChannelDataInfos;
+
+	UChannelDataSchemaController* ChannelDataSchemaController = GEditor->GetEditorSubsystem<UChannelDataSchemaController>();
+	TArray<FChannelDataSchema> ChannelDataSchemata;
+	ChannelDataSchemaController->GetChannelDataSchemata(ChannelDataSchemata);
+	for (const FChannelDataSchema& ChannelDataSchema : ChannelDataSchemata)
+	{
+		if (ChannelDataSchema.StateSchemata.Num() == 0)
+		{
+			continue;
+		}
+		ChannelDataInfos.Add(ChannelDataSchema);
+	}
+
+	// We need to include the header file of the target class in 'ChanneldReplicatorRegister.h'. so we need to know the include path of the target class from 'uhtmanifest' file.
+	// But the 'uhtmanifest' file is a large json file, so we need to read and parser it only once.
 	CodeGenerator->RefreshModuleInfoByClassName();
-}
-
-void FReplicatorGeneratorManager::StopGenerateReplicator()
-{
-}
-
-bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*>& ReplicationActorClasses, const FString GoPackageImportPathPrefix)
-{
-	UE_LOG(LogChanneldRepGenerator, Display, TEXT("Start generating %d replicators"), ReplicationActorClasses.Num());
-
-	TArray<FString> IncludeActorCodes, RegisterReplicatorCodes;
 
 	FGeneratedCodeBundle ReplicatorCodeBundle;
-
-	// Read generate replication options from ReplicationRegistryTable. and sort the ActorInfosToGenRep by the order in the table
-	TArray<FRepGenActorInfo> ActorInfosToGenRep;
-	int32 Index = 0;
-
-	UDataTable* RegistryTable = ReplicationRegistryUtils::LoadRegistryTable();
-	TArray<FChanneldReplicationRegistryItem*> RegistryTableData = ReplicationRegistryUtils::GetRegistryTableData(RegistryTable);
-
-	// Use map and set to improve the performance of searching
-	TMap<FString, const UClass*> ReplicationActorClassesMap;
-	ReplicationActorClassesMap.Reserve(ReplicationActorClasses.Num());
-	TSet<FString> RegisteredClassPathsSet;
-	RegisteredClassPathsSet.Reserve(RegistryTableData.Num());
-
-	// Array of actor classes that is not registered in the registry table
-	TArray<FChanneldReplicationRegistryItem> TargetClassPathsToRegister;
-	// Array of actor classes that is registered in the registry table but not in the target classes
-	TArray<FString> TargetClassPathsToUnregister;
-	for (const UClass* TargetActorClass : ReplicationActorClasses)
-	{
-		ReplicationActorClassesMap.Add(TargetActorClass->GetPathName(), TargetActorClass);
-	}
-	for (FChanneldReplicationRegistryItem* RegistryItem : RegistryTableData)
-	{
-		RegisteredClassPathsSet.Add(RegistryItem->TargetClassPath);
-		if (!ReplicationActorClassesMap.Contains(RegistryItem->TargetClassPath))
-		{
-			TargetClassPathsToUnregister.Add(RegistryItem->TargetClassPath);
-		}
-		else
-		{
-			ActorInfosToGenRep.Add(
-				FRepGenActorInfo(
-					++Index
-					, ReplicationActorClassesMap.FindRef(RegistryItem->TargetClassPath)
-					, RegistryItem->Singleton
-					, false
-					, RegistryItem->Skip
-					, RegistryItem->Skip
-				)
-			);
-		}
-	}
-	for (const UClass* TargetActorClass : ReplicationActorClasses)
-	{
-		if (!ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinClass(TargetActorClass) && !RegisteredClassPathsSet.Contains(TargetActorClass->GetPathName()))
-		{
-			FChanneldReplicationRegistryItem RegistryItem;
-			RegistryItem.TargetClassPath = TargetActorClass->GetPathName();
-			RegistryItem.Skip = DefaultSkipGenRep.Contains(RegistryItem.TargetClassPath);
-			TargetClassPathsToRegister.Add(RegistryItem);
-			ActorInfosToGenRep.Add(
-				FRepGenActorInfo(
-					++Index
-					, TargetActorClass
-					, false
-					, false
-					, RegistryItem.Skip
-					, RegistryItem.Skip
-				)
-			);
-		}
-	}
-	// ChanneldUEBuiltinClasses are not included in the registry table.
-	// For making sure that the order of the channel data state is fixed every time, we get them from a fixed order array.
-	for (const UClass* BuiltinClass : ChanneldReplicatorGeneratorUtils::GetChanneldUEBuiltinClasses())
-	{
-		ActorInfosToGenRep.Add(
-			FRepGenActorInfo(
-				++Index
-				, BuiltinClass
-				, ChanneldReplicatorGeneratorUtils::IsChanneldUEBuiltinSingletonClass(BuiltinClass)
-				, true
-				, true
-				, false
-			)
-		);
-	}
-
-	// Register and unregister and save the RegistryTable
-	if (TargetClassPathsToRegister.Num() > 0 || TargetClassPathsToUnregister.Num() > 0)
-	{
-		ReplicationRegistryUtils::AddItemsToRegistryTable(RegistryTable, TargetClassPathsToRegister);
-		ReplicationRegistryUtils::RemoveItemsFromRegistryTable(RegistryTable, TargetClassPathsToUnregister);
-		if (!ReplicationRegistryUtils::SaveRegistryTable(RegistryTable))
-		{
-			UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save the RegistryTable"));
-			return false;
-		}
-	}
-
 	const FString ProtoPackageName = GetDefaultProtoPackageName();
 	const FString GoPackageImportPath = GoPackageImportPathPrefix / ProtoPackageName;
 	CodeGenerator->Generate(
-		ActorInfosToGenRep,
-		GetDefaultModuleDir(),
-		ProtoPackageName,
-		GoPackageImportPath,
-		ReplicatorCodeBundle
+		ChannelDataInfos
+		, ProtoPackageName
+		, CompatibleRecompilation ? ChanneldReplicatorGeneratorUtils::GetHashString(FDateTime::Now().ToString()) : TEXT("")
+		, GoPackageImportPath
+		, ReplicatorCodeBundle
 	);
 	FString Message;
 
@@ -210,6 +120,7 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 			*ReplicatorCode.ProtoFileName
 		);
 	}
+
 	// Generate replicator registration code file
 	WriteCodeFile(GetReplicatorStorageDir() / GenManager_RepRegistrationHeadFile, ReplicatorCodeBundle.ReplicatorRegistrationHeadCode, Message);
 
@@ -217,34 +128,30 @@ bool FReplicatorGeneratorManager::GenerateReplication(const TArray<const UClass*
 	WriteCodeFile(GetReplicatorStorageDir() / GenManager_GlobalStructHeaderFile, ReplicatorCodeBundle.GlobalStructCodes, Message);
 	WriteProtoFile(GetReplicatorStorageDir() / GenManager_GlobalStructProtoFile, ReplicatorCodeBundle.GlobalStructProtoDefinitions, Message);
 
-	// Generate channel data processor code file
-	const FString DefaultModuleName = GetDefaultModuleName();
-	WriteCodeFile(GetReplicatorStorageDir() / TEXT("ChannelData_") + DefaultModuleName + CodeGen_HeadFileExtension, ReplicatorCodeBundle.ChannelDataProcessorHeadCode, Message);
-	WriteProtoFile(GetReplicatorStorageDir() / TEXT("ChannelData_") + DefaultModuleName + CodeGen_ProtoFileExtension, ReplicatorCodeBundle.ChannelDataProtoDefsFile, Message);
-
+	TMap<EChanneldChannelType, FString> ChannelTypeToChannelDataMsgMap;
+	for (const FChannelDataCode& ChannelDataCode : ReplicatorCodeBundle.ChannelDataCodes)
+	{
+		ChannelTypeToChannelDataMsgMap.Add(ChannelDataCode.ChannelType, ChannelDataCode.ChannelDataMsgName);
+		WriteCodeFile(GetReplicatorStorageDir() / ChannelDataCode.ProcessorHeadFileName, ChannelDataCode.ProcessorHeadCode, Message);
+		WriteProtoFile(GetReplicatorStorageDir() / ChannelDataCode.ProtoFileName, ChannelDataCode.ProtoDefsFile, Message);
+	}
 	// Generate channel data golang merge code temporary file.
-	// WriteTemporaryGoProtoData(ReplicatorCodeBundle.ChannelDataMerge_GoCode, Message);
-	EnsureReplicatorGeneratedIntermediateDir();
+	ChanneldReplicatorGeneratorUtils::EnsureRepGenIntermediateDir();
 	WriteCodeFile(GenManager_TemporaryGoMergeCodePath, ReplicatorCodeBundle.ChannelDataMerge_GoCode, Message);
 	WriteCodeFile(GenManager_TemporaryGoRegistrationCodePath, ReplicatorCodeBundle.ChannelDataRegistration_GoCode, Message);
 
-	UE_LOG(
-		LogChanneldRepGenerator,
-		Display,
-		TEXT("The generation of replicators is completed, %d replicators need to be generated, a total of %d replicators are generated"),
-		ReplicationActorClasses.Num(), ReplicatorCodeBundle.ReplicatorCodes.Num()
+	// Save the generated manifest file
+	FGeneratedManifest Manifest(
+		FDateTime::UtcNow()
+		, ProtoPackageName
+		, GenManager_TemporaryGoMergeCodePath
+		, GenManager_TemporaryGoRegistrationCodePath
+		, ChannelTypeToChannelDataMsgMap
 	);
 
-	// Save the generated manifest file
-	FGeneratedManifest Manifest;
-	Manifest.GeneratedTime = FDateTime::Now();
-	Manifest.ProtoPackageName = ProtoPackageName;
-	Manifest.TemporaryGoMergeCodePath = GenManager_TemporaryGoMergeCodePath;
-	Manifest.TemporaryGoRegistrationCodePath = GenManager_TemporaryGoRegistrationCodePath;
-	Manifest.ChannelDataMsgName = GetDefaultProtoPackageName() + "." + GenManager_DefaultChannelDataMsgName;
-	if (SaveGeneratedManifest(Manifest, Message))
+	if (!SaveGeneratedManifest(Manifest))
 	{
-		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save the generated manifest file, error message: %s"), *Message);
+		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to save the generated manifest file"));
 		return false;
 	}
 
@@ -317,15 +224,6 @@ void FReplicatorGeneratorManager::RemoveGeneratedCodeFiles()
 	}
 }
 
-inline void FReplicatorGeneratorManager::EnsureReplicatorGeneratedIntermediateDir()
-{
-	IFileManager& FileManager = IFileManager::Get();
-	if (!FileManager.DirectoryExists(*GenManager_IntermediateDir))
-	{
-		FileManager.MakeDirectory(*GenManager_IntermediateDir, true);
-	}
-}
-
 inline FString FReplicatorGeneratorManager::GetTemporaryGoProtoDataFilePath() const
 {
 	return GenManager_TemporaryGoMergeCodePath;
@@ -333,92 +231,17 @@ inline FString FReplicatorGeneratorManager::GetTemporaryGoProtoDataFilePath() co
 
 inline bool FReplicatorGeneratorManager::WriteTemporaryGoProtoData(const FString& Code, FString& ResultMessage)
 {
-	EnsureReplicatorGeneratedIntermediateDir();
+	ChanneldReplicatorGeneratorUtils::EnsureRepGenIntermediateDir();
 	return WriteCodeFile(GetTemporaryGoProtoDataFilePath(), Code, ResultMessage);
 }
 
-bool FReplicatorGeneratorManager::LoadLatestGeneratedManifest(FGeneratedManifest& Result, FString& Message) const
+bool FReplicatorGeneratorManager::LoadLatestGeneratedManifest(FGeneratedManifest& Result)
 {
-	return LoadLatestGeneratedManifest(GenManager_GeneratedManifestFilePath, Result, Message);
+	return GeneratedManifestModel.GetData(Result, true);
 }
 
-bool FReplicatorGeneratorManager::LoadLatestGeneratedManifest(const FString& Filename, FGeneratedManifest& Result, FString& Message) const
+bool FReplicatorGeneratorManager::SaveGeneratedManifest(const FGeneratedManifest& Manifest)
 {
-	FString Json;
-	if (!FFileHelper::LoadFileToString(Json, *Filename))
-	{
-		Message = FString::Printf(TEXT("Unable to load GeneratedManifest: %s"), *Filename);
-		return false;
-	}
-
-	TSharedPtr<FJsonObject> RootObject = TSharedPtr<FJsonObject>();
-	TSharedRef<TJsonReader<TCHAR>> Reader = TJsonReaderFactory<TCHAR>::Create(Json);
-
-	if (!FJsonSerializer::Deserialize(Reader, RootObject))
-	{
-		Message = FString::Printf(TEXT("GeneratedManifest is malformed: %s"), *Filename);
-		return false;
-	}
-
-	double GeneratedTime;
-	if (!RootObject->TryGetNumberField(TEXT("GeneratedTime"), GeneratedTime))
-	{
-		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'GeneratedTime'"));
-	}
-	Result.GeneratedTime = FDateTime::FromUnixTimestamp(GeneratedTime);
-
-	if (!RootObject->TryGetStringField(TEXT("ProtoPackageName"), Result.ProtoPackageName))
-	{
-		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'ProtoPackageName'"));
-	}
-
-	if (!RootObject->TryGetStringField(TEXT("TemporaryGoMergeCodePath"), Result.TemporaryGoMergeCodePath))
-	{
-		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'TemporaryGoMergeCodePath'"));
-	}
-
-	if (!RootObject->TryGetStringField(TEXT("TemporaryGoRegistrationCodePath"), Result.TemporaryGoRegistrationCodePath))
-	{
-		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'TemporaryGoRegistrationCodePath'"));
-	}
-
-	if (!RootObject->TryGetStringField(TEXT("ChannelDataMsgName"), Result.ChannelDataMsgName))
-	{
-		UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Unable to find field 'ChannelDataMsgName'"));
-	}
-
-	return true;
-}
-
-bool FReplicatorGeneratorManager::SaveGeneratedManifest(const FGeneratedManifest& Manifest, FString& Message)
-{
-	EnsureReplicatorGeneratedIntermediateDir();
-	return SaveGeneratedManifest(Manifest, GenManager_GeneratedManifestFilePath, Message);
-}
-
-bool FReplicatorGeneratorManager::SaveGeneratedManifest(const FGeneratedManifest& Manifest, const FString& Filename, FString& Message)
-{
-	if (!FPaths::DirectoryExists(FPaths::GetPath(Filename)))
-	{
-		Message = FString::Printf(TEXT("Unable to find the directory of GeneratedManifest: %s"), *Filename);
-		return false;
-	}
-	FString Json;
-	TSharedPtr<FJsonObject> RootObject = TSharedPtr<FJsonObject>();
-
-	const TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&Json);
-	JsonWriter->WriteObjectStart();
-	JsonWriter->WriteValue(TEXT("GeneratedTime"), Manifest.GeneratedTime.ToUnixTimestamp());
-	JsonWriter->WriteValue(TEXT("ProtoPackageName"), Manifest.ProtoPackageName);
-	JsonWriter->WriteValue(TEXT("TemporaryGoMergeCodePath"), Manifest.TemporaryGoMergeCodePath);
-	JsonWriter->WriteValue(TEXT("TemporaryGoRegistrationCodePath"), Manifest.TemporaryGoRegistrationCodePath);
-	JsonWriter->WriteValue(TEXT("ChannelDataMsgName"), Manifest.ChannelDataMsgName);
-	JsonWriter->WriteObjectEnd();
-	JsonWriter->Close();
-	if (FFileHelper::SaveStringToFile(Json, *Filename))
-	{
-		Message = FString::Printf(TEXT("Unable to save GeneratedManifest: %s"), *Filename);
-		return false;
-	}
-	return true;
+	ChanneldReplicatorGeneratorUtils::EnsureRepGenIntermediateDir();
+	return GeneratedManifestModel.SaveData(Manifest);
 }

@@ -47,7 +47,6 @@ public:
 
 	FString GetCode_SerializeFunctionParams();
 	FString GetCode_DeserializeFunctionParams();
-	FString GetDeclaration_ProtoFields();
 	
 	virtual FString GetCode_GetWorldRef() override;
 

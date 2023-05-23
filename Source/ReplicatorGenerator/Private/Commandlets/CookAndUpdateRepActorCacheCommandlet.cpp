@@ -1,8 +1,11 @@
-#include "Commandlets/CookAndGenRepCommandlet.h"
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "ReplicatorGeneratorManager.h"
+
+#include "Commandlets/CookAndUpdateRepActorCacheCommandlet.h"
+
 #include "ReplicatorGeneratorUtils.h"
 #include "Components/TimelineComponent.h"
+#include "Persistence/RepActorCacheController.h"
 
 void FLoadedObjectListener::StartListen()
 {
@@ -25,7 +28,7 @@ void FLoadedObjectListener::NotifyUObjectCreated(const UObjectBase* Object, int3
 			break;
 		}
 		CheckedClasses.Add(ClassPath);
-		if(LoadedClass == AActor::StaticClass() || LoadedClass == UActorComponent::StaticClass())
+		if (LoadedClass == AActor::StaticClass() || LoadedClass == UActorComponent::StaticClass())
 		{
 			FilteredClasses.Add(LoadedClass);
 			break;
@@ -43,7 +46,7 @@ void FLoadedObjectListener::OnUObjectArrayShutdown()
 	GUObjectArray.RemoveUObjectCreateListener(this);
 }
 
-UCookAndGenRepCommandlet::UCookAndGenRepCommandlet()
+UCookAndUpdateRepActorCacheCommandlet::UCookAndUpdateRepActorCacheCommandlet()
 {
 	IsClient = false;
 	IsEditor = true;
@@ -51,10 +54,9 @@ UCookAndGenRepCommandlet::UCookAndGenRepCommandlet()
 	LogToConsole = true;
 }
 
-int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
+int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 {
 	FReplicatorGeneratorManager& GeneratorManager = FReplicatorGeneratorManager::Get();
-	GeneratorManager.StartGenerateReplicator();
 
 	TSet<FSoftClassPath> LoadedRepClasses;
 
@@ -93,19 +95,11 @@ int32 UCookAndGenRepCommandlet::Main(const FString& CmdLineParams)
 			}
 		}
 	}
-
-	//Get parameter '-GoPackageImportPathPrefix' from command line
-	FString GoPackageImportPathPrefix;
-	FParse::Value(*CmdLineParams, TEXT("-GoPackageImportPathPrefix="), GoPackageImportPathPrefix);
-
-	GeneratorManager.RemoveGeneratedCodeFiles();
-
-	if (!GeneratorManager.GenerateReplication(TargetClasses, GoPackageImportPathPrefix))
+	URepActorCacheController* RepActorCacheController = GEditor->GetEditorSubsystem<URepActorCacheController>();
+	if (RepActorCacheController == nullptr || !RepActorCacheController->SaveRepActorCache(TargetClasses))
 	{
-		Result = 1;
+		return 1;
 	}
 
-	GeneratorManager.StopGenerateReplicator();
-
-	return Result;
+	return 0;
 }
