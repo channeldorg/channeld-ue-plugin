@@ -36,6 +36,11 @@ void UChannelDataSchemaController::GetUnhiddenChannelTypes(TArray<EChanneldChann
 	ChannelTypes.Empty();
 	for (int32 i = 0; i < EnumPtr->NumEnums(); ++i)
 	{
+		// Hide the spatial channel type for the schema editor.
+		if (EnumPtr->GetValueByIndex(i) == static_cast<int64>(EChanneldChannelType::ECT_Spatial))
+		{
+			continue;
+		}
 		if (EnumPtr->HasMetaData(TEXT("Hidden"), i))
 		{
 			continue;
