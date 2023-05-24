@@ -173,6 +173,12 @@ protected:
 	// The spawned object's NetGUID mapping to the ID of the channel that owns the object.
 	TMap<const FNetworkGUID, Channeld::ChannelId> NetIdOwningChannels;
 
+	// Virtual NetConnection for sending Spawn message to channeld to broadcast.
+	// Exporting the NetId of the spawned object requires a NetConnection, but we don't have a specific client when broadcasting.
+	// So we use a virtual NetConnection that doesn't belong to any client, and clear the export map everytime to make sure the NetId is fully exported.
+	UPROPERTY()
+	UChanneldNetConnection* NetConnForSpawn;
+
 private:
 	
 	// Use the Arena for faster allocation. See https://developers.google.com/protocol-buffers/docs/reference/arenas

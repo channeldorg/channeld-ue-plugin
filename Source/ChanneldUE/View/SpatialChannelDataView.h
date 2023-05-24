@@ -107,12 +107,6 @@ private:
 	// until the client gains interest in them again.
 	TSet<uint32> SuppressedNetIdsToResolve;
 
-	// Virtual NetConnection for sending Spawn message to channeld to broadcast in spatial channels.
-	// Exporting the NetId of the spawned object requires a NetConnection, but we don't have a specific client when broadcasting.
-	// So we use a virtual NetConnection that doesn't belong to any client, and clear the export map everytime to make sure the NetId is fully exported.
-	UPROPERTY()
-	UChanneldNetConnection* NetConnForSpawn;
-
 	// Synchronize the NetworkGUIDs of the static and well-known objects across the spatial servers.
 	void SyncNetIds();
 	

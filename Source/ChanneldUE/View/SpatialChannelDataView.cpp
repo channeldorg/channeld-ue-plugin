@@ -774,11 +774,6 @@ void USpatialChannelDataView::InitServer()
 	// Spatial server has no authority over the GameState.
 	GetWorld()->GetAuthGameMode()->GameState->SetRole(ENetRole::ROLE_SimulatedProxy);
 	Super::InitServer();
-
-	NetConnForSpawn = NewObject<UChanneldNetConnection>(GetTransientPackage(), UChanneldNetConnection::StaticClass());
-	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
-	NetConnForSpawn->InitBase(NetDriver, NetDriver->GetSocket(), FURL(), USOCK_Open);
-	ChanneldUtils::InitNetConnForSpawn(NetConnForSpawn);
 	
 	if (UClass* PlayerStartLocatorClass = GetMutableDefault<UChanneldSettings>()->PlayerStartLocatorClass)
 	{

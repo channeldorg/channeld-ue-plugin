@@ -120,9 +120,11 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 						Actor->PostNetInit();
 						UE_LOG(LogChanneld, Verbose, TEXT("[Client] Created new actor '%s' with NetGUID %d (%d)"), *Actor->GetName(), GuidCache->GetNetGUID(Actor).Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
 
-						//// Remove the channel after using it
+						/* Called in UChanneldNetDriver::NotifyActorDestroyed 
+						// Remove the channel after using it
 						//Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
-
+						*/
+						
 						if (ClientConn && ClientConn == NetConnForSpawn)
 						{
 							// Always remember to reset the NetConnForSpawn after using it.
@@ -147,6 +149,14 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 						{
 							// GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, 0, 0, false, false);
 							GuidCache->RegisterNetGUID_Client(NetGUID, Obj);
+						}
+
+						if (AActor* Actor = Cast<AActor>(Obj))
+						{
+							// Triggers UChanneldNetDriver::NotifyActorChannelOpen
+							World->GetNetDriver()->NotifyActorChannelOpen(nullptr, Actor);
+							// After all properties have been initialized, call PostNetInit. This should call BeginPlay() so initialization can be done with proper starting values.
+							Actor->PostNetInit();
 						}
 					}
 					else
