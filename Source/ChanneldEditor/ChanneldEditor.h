@@ -43,6 +43,7 @@ private:
 	void AddRepCompsToBPsAction();
 
 	void OpenChannelDataEditorAction();
+	void OpenCloudDeploymentAction();
 
 	FProcHandle ChanneldProcHandle;
 

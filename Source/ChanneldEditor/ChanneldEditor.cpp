@@ -74,6 +74,9 @@ void FChanneldEditorModule::StartupModule()
 	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().OpenChannelDataEditorCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::OpenChannelDataEditorAction));
+	PluginCommands->MapAction(
+		FChanneldEditorCommands::Get().OpenCloudDeploymentCommand,
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::OpenCloudDeploymentAction));
 
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
@@ -167,6 +170,7 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 	                       LOCTEXT("ChanneldAdvancedTooltip", ""), FNewMenuDelegate::CreateLambda([](FMenuBuilder& InMenuBuilder)
 	                       {
 		                       InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand);
+		                       InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().OpenCloudDeploymentCommand);
 	                       }));
 
 	return MenuBuilder.MakeWidget();
@@ -458,5 +462,9 @@ void FChanneldEditorModule::OpenChannelDataEditorAction()
 	GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>()->SpawnAndRegisterTab(LoadObject<UEditorUtilityWidgetBlueprint>(nullptr, L"/ChanneldUE/EditorUtilityWidgets/ChannelDataSchemaEditor"));
 }
 
+void FChanneldEditorModule::OpenCloudDeploymentAction()
+{
+	GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>()->SpawnAndRegisterTab(LoadObject<UEditorUtilityWidgetBlueprint>(nullptr, L"/ChanneldUE/EditorUtilityWidgets/CloudDeployment"));
+}
 
 #undef LOCTEXT_NAMESPACE
