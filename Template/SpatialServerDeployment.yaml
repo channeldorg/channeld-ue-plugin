@@ -48,5 +48,4 @@ spec:
       targetPort: metrics-port
   selector:
     app: {Name}
-  type: LoadBalancer
 ---

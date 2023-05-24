@@ -60,6 +60,9 @@ void UChanneldEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	DeployToClusterNotify = NewObject<UChanneldMissionNotiProxy>();
 	DeployToClusterNotify->AddToRoot();
+
+	StopDeploymentNotify = NewObject<UChanneldMissionNotiProxy>();
+	StopDeploymentNotify->AddToRoot();
 }
 
 void UChanneldEditorSubsystem::UpdateReplicationCacheAction(FPostRepActorCache PostUpdatedRepActorCache)
@@ -1358,7 +1361,7 @@ void UChanneldEditorSubsystem::UploadDockerImage(const FString& ChanneldImageTag
 }
 
 void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams DeploymentParams,
-                                               const FPostDeplymentToCluster& PostDeplymentToCluster)
+                                               const FPostDeploymentToCluster& PostDeplymentToCluster)
 {
 	DeployToClusterNotify->SetMissionNotifyText(
 		FText::FromString(TEXT("Deploying to Cluster...")),
@@ -1374,39 +1377,16 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 	FString ServerImageTag = DeploymentParams.ServerImageTag;
 	FString YAMLTemplatePath = DeploymentParams.YAMLTemplatePath;
 
-	FString YAMLTemplateContent;
-	{
-		FString ChanneldEntryPath = GetMutableDefault<UChanneldEditorSettings>()->LaunchChanneldEntry;
-		if (ChanneldEntryPath.IsEmpty())
-		{
-			UE_LOG(LogChanneldEditor, Error,
-			       TEXT(
-				       "LaunchChanneldEntry is not set. Please set it to the path of the channeld entry point."
-			       ));
-			DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
-			PostDeplymentToCluster.ExecuteIfBound(false);
-			return;
-		}
-		FPaths::NormalizeDirectoryName(ChanneldEntryPath);
-		FString ChanneldParams = FString::Printf(TEXT("./%s"), *FPaths::GetCleanFilename(ChanneldEntryPath));
-		for (int32 I = 0; I < DeploymentParams.ChanneldParams.Num(); I++)
-		{
-			ChanneldParams.Append(TEXT(", "));
-			ChanneldParams.Append(DeploymentParams.ChanneldParams[I]);
-		}
+	TArray<FString> DeploymentNames = {TEXT("channeld-getaway")};
+	TArray<FString> MetricsAddrs = {TEXT("channeld-getaway:8080")};
 
-		if (!FFileHelper::LoadFileToString(YAMLTemplateContent, *YAMLTemplatePath))
-		{
-			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load YAML template at %s."), *YAMLTemplatePath);
-			DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
-			PostDeplymentToCluster.ExecuteIfBound(false);
-			return;
-		}
-		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add(TEXT("ChanneldParams"), ChanneldParams);
-		FormatArgs.Add(TEXT("Namespace"), Namespace);
-		FormatArgs.Add(TEXT("ChanneldDockerImage"), ChanneldImageTag);
-		YAMLTemplateContent = FString::Format(*YAMLTemplateContent, FormatArgs);
+	FString YAMLTemplateContent;
+	if (!FFileHelper::LoadFileToString(YAMLTemplateContent, *YAMLTemplatePath))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load YAML template at %s."), *YAMLTemplatePath);
+		DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
+		PostDeplymentToCluster.ExecuteIfBound(false);
+		return;
 	}
 
 	FString CheckPodStatusCommand;
@@ -1440,6 +1420,9 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 		}
 		FStringFormatNamedArguments FormatArgs;
 
+		DeploymentNames.Add(FString::Printf(TEXT("server-%d"), I));
+		MetricsAddrs.Add(FString::Printf(TEXT("server-%d:8081"), I));
+
 		FormatArgs.Add(TEXT("Namespace"), Namespace);
 		FormatArgs.Add(TEXT("Name"), FString::Printf(TEXT("server-%d"), I));
 		FormatArgs.Add(TEXT("Replicas"), ServerGroup.ServerNum);
@@ -1460,6 +1443,44 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 			));
 	}
 
+	{
+		FString ChanneldEntryPath = GetMutableDefault<UChanneldEditorSettings>()->LaunchChanneldEntry;
+		if (ChanneldEntryPath.IsEmpty())
+		{
+			UE_LOG(LogChanneldEditor, Error,
+			       TEXT(
+				       "LaunchChanneldEntry is not set. Please set it to the path of the channeld entry point."
+			       ));
+			DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
+			PostDeplymentToCluster.ExecuteIfBound(false);
+			return;
+		}
+		FPaths::NormalizeDirectoryName(ChanneldEntryPath);
+		FString ChanneldParams = FString::Printf(TEXT("./%s"), *FPaths::GetCleanFilename(ChanneldEntryPath));
+		for (int32 I = 0; I < DeploymentParams.ChanneldParams.Num(); I++)
+		{
+			ChanneldParams.Append(TEXT(", "));
+			ChanneldParams.Append(DeploymentParams.ChanneldParams[I]);
+		}
+
+		FString MetricsAddrStr;
+		for (int32 I = 0; I < MetricsAddrs.Num(); I++)
+		{
+			if (I != 0)
+			{
+				MetricsAddrStr.Append(TEXT(", "));
+			}
+			MetricsAddrStr.Append(MetricsAddrs[I]);
+		}
+
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("ChanneldParams"), ChanneldParams);
+		FormatArgs.Add(TEXT("Namespace"), Namespace);
+		FormatArgs.Add(TEXT("ChanneldDockerImage"), ChanneldImageTag);
+		FormatArgs.Add(TEXT("MetricsAddr"), MetricsAddrStr);
+		YAMLTemplateContent = FString::Format(*YAMLTemplateContent, FormatArgs);
+	}
+
 	const FString TempYAMLFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
 		"Deployment.yaml");
 	FFileHelper::SaveStringToFile(YAMLTemplateContent, *TempYAMLFilePath);
@@ -1478,6 +1499,11 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 		return;
 	}
 
+	FString ChanneldExternalIPFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+		"ChannelExternalIP");
+	FString GrafanaExternalIPFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+		"GrafanaExternalIP");
+
 	FString DeployBatTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("Deployment.bat");
 	FString DeployBatFileContent;
 	{
@@ -1489,23 +1515,51 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 			return;
 		}
 		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add(TEXT("WorkDir"), FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment"));
 		FormatArgs.Add(
 			TEXT("JQPath"),
 			FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Source") / TEXT("ThirdParty") / TEXT("jq-win64.exe"));
+		FormatArgs.Add(TEXT("ContextName"), Cluster);
 		FormatArgs.Add(TEXT("YAMLFilePath"), TempYAMLFilePath);
-		DeployBatFileContent.Append(CheckPodStatusCommand);
+		FormatArgs.Add(TEXT("CheckPodStatusCommand"), CheckPodStatusCommand);
+		FormatArgs.Add(TEXT("Namespace"), Namespace);
+		FormatArgs.Add(TEXT("ChanneldExternalIPFilePath"), ChanneldExternalIPFilePath);
+		FormatArgs.Add(TEXT("GrafanaExternalIPFilePath"), GrafanaExternalIPFilePath);
 		DeployBatFileContent = FString::Format(*DeployBatFileContent, FormatArgs);
 	}
-
-	const FString TempBatFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+	const FString TempDeployBatFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
 		"Deployment.bat");
-	FFileHelper::SaveStringToFile(DeployBatFileContent, *TempBatFilePath);
+	FFileHelper::SaveStringToFile(DeployBatFileContent, *TempDeployBatFilePath);
+
+	FString StopBatTemplateFilePath = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") /
+		TEXT("StopDeployment.bat");
+	FString StopBatFileContent;
+	{
+		if (!FFileHelper::LoadFileToString(StopBatFileContent, *StopBatTemplateFilePath))
+		{
+			UE_LOG(LogChanneldEditor, Error, TEXT("Failed to load StopDeployment.bat template."));
+			DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
+			PostDeplymentToCluster.ExecuteIfBound(false);
+			return;
+		}
+		FString DeploymentNamesString;
+		for (FString DeploymentName : DeploymentNames)
+		{
+			DeploymentNamesString.Append(FString::Printf(TEXT("%s "), *DeploymentName));
+		}
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("ContextName"), Cluster);
+		FormatArgs.Add(TEXT("Namespace"), Namespace);
+		FormatArgs.Add(TEXT("Deployments"), DeploymentNamesString);
+		StopBatFileContent = FString::Format(*StopBatFileContent, FormatArgs);
+		FFileHelper::SaveStringToFile(StopBatFileContent,
+		                              *(FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+			                              "StopDeployment.bat")));
+	}
 
 	DeployToClusterWorkThread = MakeShareable(
 		new FChanneldProcWorkerThread(
 			TEXT("DeployToClusterThread"),
-			TempBatFilePath,
+			TempDeployBatFilePath,
 			TEXT(""),
 			FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment")
 		)
@@ -1524,13 +1578,19 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 		[this, PostDeplymentToCluster](FChanneldProcWorkerThread*)
 		{
 			DeployToClusterNotify->SpawnMissionSucceedNotification(nullptr);
-			PostDeplymentToCluster.ExecuteIfBound(true);
+			AsyncTask(ENamedThreads::GameThread, [this, PostDeplymentToCluster]()
+			{
+				PostDeplymentToCluster.ExecuteIfBound(true);
+			});
 		});
 	DeployToClusterWorkThread->ProcFailedDelegate.AddLambda(
 		[this, PostDeplymentToCluster](FChanneldProcWorkerThread*)
 		{
 			DeployToClusterNotify->SpawnMissionFailedNotification(nullptr);
-			PostDeplymentToCluster.ExecuteIfBound(false);
+			AsyncTask(ENamedThreads::GameThread, [this, PostDeplymentToCluster]()
+			{
+				PostDeplymentToCluster.ExecuteIfBound(false);
+			});
 		});
 	DeployToClusterWorkThread->Execute();
 }
@@ -1542,7 +1602,7 @@ FString UChanneldEditorSubsystem::GetCheckPodCommand(const FString& JQPath, cons
 	static const TCHAR* CallCheckPodCommand =
 		LR"EOF(
 call CheckPodStatus.bat {JQPath} {PodStatusJSONPath} {PodSelector} {PodReplicas} {DescriptionName}
-if ERRORLEVEL 1 (
+if %ERRORLEVEL% NEQ 0 (
     Exit /b 1
 )
 )EOF";
@@ -1555,6 +1615,147 @@ if ERRORLEVEL 1 (
 	FormatArgs.Add(TEXT("DescriptionName"), DescriptionName);
 
 	return FString::Format(CallCheckPodCommand, FormatArgs);
+}
+
+void UChanneldEditorSubsystem::GetCurrentContext(FString& CurrentContext, bool& Success, FString& Message)
+{
+	FString CurrentContextFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+		"CurrentClusterContext");
+	int Result = system(
+		TCHAR_TO_ANSI(*(FString::Printf(TEXT("kubectl config current-context 1>%s 2>&1"), *CurrentContextFilePath))));
+	Success = true;
+	if (Result != 0)
+	{
+		Success = false;
+		if (!FFileHelper::LoadFileToString(Message, *CurrentContextFilePath))
+		{
+			Message = TEXT("Failed to load current context.");
+		}
+	}
+	else
+	{
+		if (!FFileHelper::LoadFileToString(CurrentContext, *CurrentContextFilePath))
+		{
+			Success = false;
+			Message = TEXT("Failed to load current context.");
+		}
+		else
+		{
+			CurrentContext = CurrentContext.TrimStartAndEnd();
+		}
+	}
+	FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*CurrentContextFilePath);
+}
+
+void UChanneldEditorSubsystem::GetCurrentContextNamespace(FString& Namespace, bool& Success, FString& Message)
+{
+	FString ClusterContextNamespaceFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") /
+		TEXT("ClusterContextNamespace");
+	int Result = system(TCHAR_TO_ANSI(
+		*(FString::Printf(TEXT("kubectl config view --minify --output \"jsonpath={..namespace}\" 1>%s 2>&1"), *
+			ClusterContextNamespaceFilePath))));
+	Success = true;
+	if (Result != 0)
+	{
+		Success = false;
+		if (!FFileHelper::LoadFileToString(Message, *ClusterContextNamespaceFilePath))
+		{
+			Message = TEXT("Failed to load context namespace.");
+		}
+	}
+	else
+	{
+		if (!FFileHelper::LoadFileToString(Namespace, *ClusterContextNamespaceFilePath))
+		{
+			Success = false;
+			Message = TEXT("Failed to load context namespace.");
+		}
+		else
+		{
+			Namespace = Namespace.TrimStartAndEnd();
+		}
+	}
+	if (Namespace.IsEmpty())
+	{
+		Namespace = TEXT("default");
+	}
+	FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*ClusterContextNamespaceFilePath);
+}
+
+void UChanneldEditorSubsystem::StopDeployment(FPostStopDeployment PostStopDeployment)
+{
+	StopDeploymentNotify->SetMissionNotifyText(
+		FText::FromString(TEXT("Stopping Deployment...")),
+		LOCTEXT("RunningNotificationCancelButton", "Cancel"),
+		FText::FromString(TEXT("Successfully stopped deployment.")),
+		FText::FromString(TEXT("Failed to stop deployment."))
+	);
+	StopDeploymentNotify->SpawnRunningMissionNotification(nullptr);
+
+	FString StopBatFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+		"StopDeployment.bat");
+	if (!FPaths::FileExists(StopBatFilePath))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to find StopDeployment.bat. Plesae run deployment first."));
+		StopDeploymentNotify->SpawnMissionFailedNotification(nullptr);
+		PostStopDeployment.ExecuteIfBound(false);
+	}
+	StopDeploymentWorkThread = MakeShareable(
+		new FChanneldProcWorkerThread(
+			TEXT("StopDeploymentThread"),
+			StopBatFilePath,
+			TEXT(""),
+			FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment")
+		)
+	);
+	StopDeploymentWorkThread->ProcOutputMsgDelegate.BindUObject(UpdateRepActorCacheNotify,
+	                                                            &UChanneldMissionNotiProxy::ReceiveOutputMsg);
+	StopDeploymentNotify->MissionCanceled.AddLambda([this]()
+	{
+		if (StopDeploymentWorkThread.IsValid() && StopDeploymentWorkThread->GetThreadStatus() ==
+			EChanneldThreadStatus::Busy)
+		{
+			StopDeploymentWorkThread->Cancel();
+		}
+	});
+	StopDeploymentWorkThread->ProcSucceedDelegate.AddLambda(
+		[this, PostStopDeployment](FChanneldProcWorkerThread*)
+		{
+			StopDeploymentNotify->SpawnMissionSucceedNotification(nullptr);
+			AsyncTask(ENamedThreads::GameThread, [this, PostStopDeployment]()
+			{
+				PostStopDeployment.ExecuteIfBound(true);
+			});
+		});
+	StopDeploymentWorkThread->ProcFailedDelegate.AddLambda(
+		[this, PostStopDeployment](FChanneldProcWorkerThread*)
+		{
+			StopDeploymentNotify->SpawnMissionFailedNotification(nullptr);
+			AsyncTask(ENamedThreads::GameThread, [this, PostStopDeployment]()
+			{
+				PostStopDeployment.ExecuteIfBound(false);
+			});
+		});
+	StopDeploymentWorkThread->Execute();
+}
+
+void UChanneldEditorSubsystem::GetDeployedGrafanaURL(FString& URL, bool& Success, FString& Message)
+{
+	FString GrafanaExternalIPFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+		"GrafanaExternalIP");
+
+	if (!FFileHelper::LoadFileToString(URL, *GrafanaExternalIPFilePath) || URL.IsEmpty())
+	{
+		Success = false;
+		Message = TEXT("Failed to load GrafanaExternalIP file.");
+		return;
+	}
+	Success = true;
+	// 删除url的开头和结尾的'符号
+	URL = URL.TrimStartAndEnd();
+	URL.RemoveFromStart(TEXT("'"));
+	URL.RemoveFromEnd(TEXT("'"));
+	URL = FString::Printf(TEXT("http://%s:3000"), *URL);
 }
 
 #undef LOCTEXT_NAMESPACE

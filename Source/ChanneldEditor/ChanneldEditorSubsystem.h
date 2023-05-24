@@ -26,7 +26,9 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FPostBuildChanneldDockerImage, bool, Success);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FPostUploadDockerImage, bool, Success);
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FPostDeplymentToCluster, bool, Success);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FPostDeploymentToCluster, bool, Success);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FPostStopDeployment, bool, Success);
 
 UCLASS(Meta = (DisplayName = "Channeld Editor"))
 class CHANNELDEDITOR_API UChanneldEditorSubsystem : public UEditorSubsystem
@@ -106,10 +108,21 @@ public:
 	void UploadDockerImage(const FString& ChanneldImageTag, const FString& ServerImageTag, const FPostUploadDockerImage& PostUploadDockerImage);
 
 	UFUNCTION(BlueprintCallable)
-	void DeployToCluster(const FDeploymentStepParams DeploymentParams, const FPostDeplymentToCluster& PostDeplymentToCluster);
+	void DeployToCluster(const FDeploymentStepParams DeploymentParams, const FPostDeploymentToCluster& PostDeplymentToCluster);
 
 	FString GetCheckPodCommand(const FString& JQPath, const FString& PodStatusJSONPath, const FString& PodSelector, int32 PodReplicas, const FString& DescriptionName) const;
 
+	UFUNCTION(BlueprintCallable)
+	void GetCurrentContext(FString& CurrentContext, bool& Success, FString& Message);
+
+	UFUNCTION(BlueprintCallable)
+	void GetCurrentContextNamespace(FString& Namespace, bool& Success, FString& Message);
+
+	UFUNCTION(BlueprintCallable)
+	void StopDeployment(FPostStopDeployment PostStopDeployment);
+
+	UFUNCTION(BlueprintCallable)
+	void GetDeployedGrafanaURL(FString& URL, bool& Success, FString& Message);
 private:
 	TSharedPtr<FChanneldProcWorkerThread> UpdateRepActorCacheWorkThread;
 	UChanneldMissionNotiProxy* UpdateRepActorCacheNotify;
@@ -130,5 +143,7 @@ private:
 	TSharedPtr<FChanneldProcWorkerThread> DeployToClusterWorkThread;
 	UChanneldMissionNotiProxy* DeployToClusterNotify;
 
+	TSharedPtr<FChanneldProcWorkerThread> StopDeploymentWorkThread;
+	UChanneldMissionNotiProxy* StopDeploymentNotify;
 	
 };
