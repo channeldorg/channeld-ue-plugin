@@ -166,11 +166,14 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().ToggleCompatibleRecompilationCommand);
 	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().GenerateReplicatorCommand);
 
+	MenuBuilder.AddSeparator();
+
+	MenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().OpenCloudDeploymentCommand);
+
 	MenuBuilder.AddSubMenu(LOCTEXT("ChanneldAdvancedHeading", "Advanced..."),
 	                       LOCTEXT("ChanneldAdvancedTooltip", ""), FNewMenuDelegate::CreateLambda([](FMenuBuilder& InMenuBuilder)
 	                       {
 		                       InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand);
-		                       InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().OpenCloudDeploymentCommand);
 	                       }));
 
 	return MenuBuilder.MakeWidget();
