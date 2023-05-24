@@ -68,7 +68,43 @@ void UCloudDeploymentController::SaveUploadStepParams(const FUploadStepParams& I
 
 FDeploymentStepParams UCloudDeploymentController::LoadDeploymentStepParams()
 {
+	if(!FPaths::FileExists(DeploymentParamJsonPath))
+	{
+		return GetDefaultDeploymentStepParams();
+	}
 	return LoadCloudDeploymentParams().DeploymentStepParams;
+}
+
+FDeploymentStepParams UCloudDeploymentController::GetDefaultDeploymentStepParams()
+{
+	FDeploymentStepParams DefaultParams;
+	DefaultParams.YAMLTemplatePath = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT(
+		"Deployment.yaml");
+	auto EditorSetting = GetMutableDefault<UChanneldEditorSettings>();
+	DefaultParams.ChanneldParams = EditorSetting->LaunchChanneldParameters;
+	TArray<FServerGroup> EditorServerGroup = EditorSetting->ServerGroups;
+	for (int32 I = 0; I < EditorServerGroup.Num(); ++I)
+	{
+		FServerGroup ServerGroup = EditorServerGroup[I];
+		FServerGroupForDeployment ServerGroupForDeployment;
+		ServerGroupForDeployment.bEnabled = ServerGroup.bEnabled;
+		ServerGroupForDeployment.ServerNum = ServerGroup.ServerNum;
+		ServerGroupForDeployment.ServerMap = ServerGroup.ServerMap;
+		ServerGroupForDeployment.ServerViewClass = ServerGroup.ServerViewClass;
+		ServerGroupForDeployment.AdditionalArgs = ServerGroup.AdditionalArgs;
+		if (I == 0)
+		{
+			ServerGroupForDeployment.YAMLTemplatePath = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT(
+				"ServerDeployment.yaml");
+		}
+		else if (I == 1)
+		{
+			ServerGroupForDeployment.YAMLTemplatePath = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT(
+				"SpatialServerDeployment.yaml");
+		}
+		DefaultParams.ServerGroups.Add(ServerGroupForDeployment);
+	}
+	return DefaultParams;
 }
 
 void UCloudDeploymentController::SaveDeploymentStepParams(const FDeploymentStepParams& InParams)

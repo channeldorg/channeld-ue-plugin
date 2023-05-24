@@ -837,7 +837,8 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 	                                    bNotifyNoPackagesSaved, bCanBeDeclined);
 
 	// does the project have any code?
-	FGameProjectGenerationModule& GameProjectModule = FModuleManager::LoadModuleChecked<FGameProjectGenerationModule>(
+	FGameProjectGenerationModule& GameProjectModule = FModuleManager::LoadModuleChecked<
+		FGameProjectGenerationModule>(
 		TEXT("GameProjectGeneration"));
 	bool bProjectHasCode = GameProjectModule.Get().ProjectHasCodeFiles();
 
@@ -865,7 +866,8 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 		return;
 	}
 
-	if (PlatformInfo->SDKStatus == PlatformInfo::EPlatformSDKStatus::NotInstalled || (bProjectHasCode && PlatformInfo->
+	if (PlatformInfo->SDKStatus == PlatformInfo::EPlatformSDKStatus::NotInstalled || (bProjectHasCode &&
+		PlatformInfo->
 		bUsesHostCompiler && !FSourceCodeNavigation::IsCompilerAvailable()))
 	{
 		IMainFrameModule& MainFrameModule = FModuleManager::GetModuleChecked<IMainFrameModule>(TEXT("MainFrame"));
@@ -901,7 +903,8 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 
 			// report to analytics
 			FEditorAnalytics::ReportBuildRequirementsFailure(
-				TEXT("Editor.Package.Failed"), PlatformInfo->TargetPlatformName.ToString(), bProjectHasCode, Result);
+				TEXT("Editor.Package.Failed"), PlatformInfo->TargetPlatformName.ToString(), bProjectHasCode,
+				Result);
 
 			// report to main frame
 			bool UnrecoverableError = false;
@@ -1042,7 +1045,8 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 		if (!FDesktopPlatformModule::Get()->OpenDirectoryDialog(ParentWindowWindowHandle,
 		                                                        LOCTEXT("PackageDirectoryDialogTitle",
 		                                                                "Package project...")
-		                                                        .ToString(), PackagingSettings->StagingDirectory.Path,
+		                                                        .ToString(),
+		                                                        PackagingSettings->StagingDirectory.Path,
 		                                                        OutFolderName))
 		{
 			PostPackageProject.ExecuteIfBound(false);
@@ -1251,7 +1255,8 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 
 	FString ProjectPath = FPaths::IsProjectFilePathSet()
 		                      ? FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())
-		                      : FPaths::RootDir() / FApp::GetProjectName() / FApp::GetProjectName() + TEXT(".uproject");
+		                      : FPaths::RootDir() / FApp::GetProjectName() / FApp::GetProjectName() + TEXT(
+			                      ".uproject");
 	FString CommandLine = FString::Printf(
 		TEXT(
 			"-ScriptsForProject=\"%s\" BuildCookRun %s%s -nop4 -project=\"%s\" -cook -stage -archive -archivedirectory=\"%s\" -package -ue4exe=\"%s\" %s -utf8output"),
@@ -1270,7 +1275,10 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 	                                      FEditorStyle::GetBrush(TEXT("MainFrame.PackageProject")),
 	                                      [PostPackageProject](FString Message, double TimeSec)
 	                                      {
-		                                      PostPackageProject.ExecuteIfBound(Message == TEXT("Completed"));
+		                                      AsyncTask(ENamedThreads::GameThread, [Message, PostPackageProject]()
+		                                      {
+			                                      PostPackageProject.ExecuteIfBound(Message == TEXT("Completed"));
+		                                      });
 	                                      }
 	);
 }
@@ -1373,6 +1381,10 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 
 	FString Cluster = DeploymentParams.Cluster;
 	FString Namespace = DeploymentParams.Namespace;
+	if (Namespace.IsEmpty())
+	{
+		Namespace = TEXT("default");
+	}
 	FString ChanneldImageTag = DeploymentParams.ChanneldImageTag;
 	FString ServerImageTag = DeploymentParams.ServerImageTag;
 	FString YAMLTemplatePath = DeploymentParams.YAMLTemplatePath;

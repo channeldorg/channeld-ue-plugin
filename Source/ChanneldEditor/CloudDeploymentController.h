@@ -201,6 +201,9 @@ public:
 	FDeploymentStepParams LoadDeploymentStepParams();
 
 	UFUNCTION(BlueprintCallable)
+	FDeploymentStepParams GetDefaultDeploymentStepParams();
+
+	UFUNCTION(BlueprintCallable)
 	void SaveDeploymentStepParams(const FDeploymentStepParams& InParams);
 
 	UFUNCTION(BlueprintCallable)
