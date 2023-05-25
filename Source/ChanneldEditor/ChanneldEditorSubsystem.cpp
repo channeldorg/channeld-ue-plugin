@@ -1720,6 +1720,8 @@ void UChanneldEditorSubsystem::StopDeployment(FPostStopDeployment PostStopDeploy
 			FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment")
 		)
 	);
+	FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*(FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT("GrafanaExternalIP")));
+
 	StopDeploymentWorkThread->ProcOutputMsgDelegate.BindUObject(UpdateRepActorCacheNotify,
 	                                                            &UChanneldMissionNotiProxy::ReceiveOutputMsg);
 	StopDeploymentNotify->MissionCanceled.AddLambda([this]()
