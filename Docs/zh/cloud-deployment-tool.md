@@ -38,13 +38,14 @@ channeld/tps-channeld:latest
 部署步骤中各个设置项的含义如下：
 - `Target Cluster Context`：要使用的Kubernetes集群的上下文。点击`Detect`会获取并填入当前的上下。可以使用`kubectl config get-contexts`命令查看所有可用的上下文。
 - `Namespace`：要部署到的Kubernetes命名空间。点击`Detect`会获取并填入当前的命名空间。可以使用`kubectl get namespaces`命令查看所有可用的命名空间。
-- `YAML Template`：部署时使用的YAML模板文件。
+- `Image Pull Secret`：用于从私有仓库拉取镜像的Secret。如果使用的是公有仓库，可以留空。
+- `YAML Template`：部署时使用的YAML模板文件，包含了`channeld`、`grafana`、`prometheus`的Deployment和Service。
 - `channeld Launch Args`：网关服务的启动参数。默认跟随编辑器配置中的启动参数。
 - `Main Server Group`：主服务器（组）的配置。默认跟随编辑器配置中的第一个服务器组配置。
   - `Enabled`：是否启用。关闭时不会部署主服务器。
   - `Server Map`：地图名称。默认使用当前地图。
   - `Server View Class`：频道数据视图类。默认使用项目配置中的视图类。
-  - `YAML Template`：
+  - `YAML Template`：UE服务器部署时使用的YAML模板文件
   - `Additional Args`：额外的启动参数。
 - `Spatial Server Group`：空间服务器（组）的配置。默认跟随编辑器配置中的第二个服务器组配置。
 
@@ -52,9 +53,22 @@ channeld/tps-channeld:latest
 
 部署成功后，会显示Grafana的URL，用于查看服务器的运行状态。默认的用户名和密码都是`admin`。
 
+>使用腾讯云容器镜像服务时可以使用ChanneldUE插件目录下的`Template/DeploymentTencentCloud.yaml`作为 `YAML Template`。
+
+>`Image Pull Secret`字段中填入的Secret名称。对应的Secret可以使用[kubectl创建](https://kubernetes.io/zh-cn/docs/concepts/configuration/secret/#creating-a-secret)，也可以通过云服务商的控制台创建。
+
 ## 一键部署
 在上述步骤都顺利完成后，可以点击`One-Click Deploy`按钮，自动执行打包、上传和部署三个步骤，来加速云部署工作流。
 
 点击`Shut Down`按钮，可以关闭当前正在运行的网关服务和游戏服务器，并消耗相应的云资源。
 
 ## 故障排查
+### 打包
+- 控制台输出`ERROR: error during connect: this error may indicate that the docker daemon is not running`的报错时，请确保`Docker Engine`已经开启
+
+### 上传
+- 控制台输出`Please login to the RepoUrl first.`表示镜像上传至仓库时需要登录，请在控制台中按照提示输入用户名和密码
+
+### 部署
+- `Output Log`窗口输出`Something wrong with xxx pod`时，请根据下方给出的pod状态文件进行进一步排查
+- pod状态中出现`ImagePullBackOff`或`ErrImagePull`时，请检查`Image Pull Secret`字段中填入的Secret名称是否正确
