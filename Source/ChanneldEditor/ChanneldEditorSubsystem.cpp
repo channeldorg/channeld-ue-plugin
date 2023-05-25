@@ -1396,8 +1396,8 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 		TEXT("imagePullSecrets: [{name: %s}]"), *DeploymentParams.ImagePullSecret);
 	FString YAMLTemplatePath = DeploymentParams.YAMLTemplatePath;
 
-	TArray<FString> DeploymentNames = {TEXT("channeld-getaway")};
-	TArray<FString> MetricsAddrs = {TEXT("channeld-getaway:8080")};
+	TArray<FString> DeploymentNames = {TEXT("channeld-gateway")};
+	TArray<FString> MetricsAddrs = {TEXT("channeld-gateway:8080")};
 
 	FString YAMLTemplateContent;
 	if (!FFileHelper::LoadFileToString(YAMLTemplateContent, *YAMLTemplatePath))
@@ -1413,11 +1413,11 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 		GetCheckPodCommand(
 			TEXT("%jqPath%"),
 			FString::Printf(
-				TEXT("\"%s/channeld-getaway_pod_status.json\""),
+				TEXT("\"%s/channeld-gateway_pod_status.json\""),
 				*(GetCloudDepymentProjectIntermediateDir())),
-			TEXT("\"app=channeld-getaway\""),
+			TEXT("\"app=channeld-gateway\""),
 			1,
-			TEXT("channeld-getaway")
+			TEXT("channeld-gateway")
 		));
 
 	for (int32 I = 0; I < DeploymentParams.ServerGroups.Num(); ++I)
