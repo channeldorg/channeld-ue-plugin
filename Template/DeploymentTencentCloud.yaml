@@ -35,8 +35,7 @@ spec:
           # envFrom:
           # - configMapRef:
           #     name: channeld-configmap
-      imagePullSecrets: # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-        - name: channeld-registry
+      {ImagePullSecrets}
       restartPolicy: Always
 ---
 apiVersion: v1
@@ -65,7 +64,7 @@ apiVersion: cloud.tencent.com/v1alpha1
 kind: TkeServiceConfig
 metadata:
   name: channeld-getaway-service-config # 配置的名称
-  namespace: default # 配置的命名空间
+  namespace: {Namespace} # 配置的命名空间
 spec:
   loadBalancer:
     l4Listeners: # 四层规则配置，适用于Service的监听器配置。

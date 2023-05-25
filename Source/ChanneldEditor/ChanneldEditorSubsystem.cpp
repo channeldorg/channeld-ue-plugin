@@ -1392,6 +1392,8 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 	}
 	FString ChanneldImageTag = DeploymentParams.ChanneldImageTag;
 	FString ServerImageTag = DeploymentParams.ServerImageTag;
+	FString ImagePullSecrets = DeploymentParams.ImagePullSecret.IsEmpty() ? TEXT("") : FString::Printf(
+		TEXT("imagePullSecrets: [{name: %s}]"), *DeploymentParams.ImagePullSecret);
 	FString YAMLTemplatePath = DeploymentParams.YAMLTemplatePath;
 
 	TArray<FString> DeploymentNames = {TEXT("channeld-getaway")};
@@ -1441,6 +1443,7 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 		MetricsAddrs.Add(FString::Printf(TEXT("server-%d:8081"), I));
 
 		FormatArgs.Add(TEXT("Namespace"), Namespace);
+		FormatArgs.Add(TEXT("ImagePullSecrets"), ImagePullSecrets);
 		FormatArgs.Add(TEXT("Name"), FString::Printf(TEXT("server-%d"), I));
 		FormatArgs.Add(TEXT("Replicas"), ServerGroup.ServerNum);
 		FormatArgs.Add(TEXT("ServerDockerImage"), ServerImageTag);
@@ -1495,6 +1498,7 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 		FormatArgs.Add(TEXT("Namespace"), Namespace);
 		FormatArgs.Add(TEXT("ChanneldDockerImage"), ChanneldImageTag);
 		FormatArgs.Add(TEXT("MetricsAddr"), MetricsAddrStr);
+		FormatArgs.Add(TEXT("ImagePullSecrets"), ImagePullSecrets);
 		YAMLTemplateContent = FString::Format(*YAMLTemplateContent, FormatArgs);
 	}
 

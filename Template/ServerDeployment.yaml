@@ -32,8 +32,7 @@ spec:
               memory: 1024M
             requests:
               cpu: "2"
-      imagePullSecrets: # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-        - name: channeld-registry
+      {ImagePullSecrets}
       restartPolicy: Always
 ---
 apiVersion: v1

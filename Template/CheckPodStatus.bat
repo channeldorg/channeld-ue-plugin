@@ -46,8 +46,10 @@ goto recheck
 for /f "delims=" %%a in ('type %podStatusJsonPath% ^| %jqPath% -r ".[] | .status.containerStatuses[0].state.waiting.reason"') do set reason=%%a
 if "%reason%" NEQ %prevReason% (
     if "%reason%" NEQ "" (
-        echo Waiting for %podDescriptionName% pod to be ready: %reason%
-        set prevReason="%reason%"
+        if "%reason%" NEQ "null" (
+            echo Waiting for %podDescriptionName% pod to be ready: %reason%
+            set prevReason="%reason%"
+        )
     )
 )
 timeout /t 1 /nobreak 1>nul 2>&1

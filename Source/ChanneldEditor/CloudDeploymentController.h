@@ -70,6 +70,9 @@ struct CHANNELDEDITOR_API FDeploymentStepParams
 	FString Namespace;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString ImagePullSecret;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString YAMLTemplatePath;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -121,7 +124,7 @@ struct CHANNELDEDITOR_API FOneClickDeploymentResult
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString UploadedChanneldImageTag;
-	
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString UploadedChanneldImageId;
 
@@ -150,6 +153,9 @@ struct CHANNELDEDITOR_API FOneClickDeploymentResult
 	FString Namespace;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString ImagePullSecret;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString YAMLTemplatePath;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -157,7 +163,7 @@ struct CHANNELDEDITOR_API FOneClickDeploymentResult
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TArray<FServerGroupForDeployment> ServerGroups;
-	
+
 	FOneClickDeploymentResult()
 	{
 	}
@@ -217,5 +223,4 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SaveOneClickDeploymentDeploymentResult();
-
 };

@@ -206,6 +206,7 @@ void UCloudDeploymentController::SaveOneClickDeploymentDeploymentResult()
 	Result.DeployedServerImageId = Result.UploadedServerImageId;
 	Result.Cluster = DeploymentStepParams.Cluster;
 	Result.Namespace = DeploymentStepParams.Namespace;
+	Result.ImagePullSecret = DeploymentStepParams.ImagePullSecret;
 	Result.YAMLTemplatePath = DeploymentStepParams.YAMLTemplatePath;
 	Result.ChanneldParams = DeploymentStepParams.ChanneldParams;
 	Result.ServerGroups = DeploymentStepParams.ServerGroups;
