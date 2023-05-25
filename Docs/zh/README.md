@@ -11,6 +11,7 @@
 ### C++和蓝图API
 ### 本地开发测试工作流
 ### [频道数据模型](channel-data-schema.md)
+### [云部署工具](cloud-deployment-tool.md)
 ## 进阶主题
 ### ChannelUE的网络同步实现
 ### [和原生UE的差异以及替代方案](native-ue-comparison.md)
