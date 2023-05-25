@@ -169,12 +169,9 @@ class CHANNELDEDITOR_API UCloudDeploymentController : public UEditorSubsystem
 	GENERATED_BODY()
 
 protected:
-	FString DeploymentParamJsonPath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
-		"CloudDeploymentParam.json");
+	FString DeploymentParamJsonPath;
 
-	FString OneClickDeploymentResultJsonPath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") /
-		TEXT(
-			"OneClickDeploymentResult.json");
+	FString OneClickDeploymentResultJsonPath;
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;

@@ -5,7 +5,7 @@
 set BuildCmdResult=%ERRORLEVEL%
 :: Pause the script if the build failed
 if %BuildCmdResult% NEQ 0 (
-    pause>nil
+    pause>nul
     EXIT /B %BuildCmdResult%
 )
 

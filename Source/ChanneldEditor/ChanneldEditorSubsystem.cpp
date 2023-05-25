@@ -524,6 +524,11 @@ bool UChanneldEditorSubsystem::CheckDockerCommand()
 	return system("docker -v") == 0;
 }
 
+FString UChanneldEditorSubsystem::GetCloudDepymentProjectIntermediateDir() const
+{
+	return FPaths::ConvertRelativePathToFull(FPaths::ProjectDir() / TEXT("Intermediate") / TEXT("ChanneldClouldDeployment"));
+}
+
 void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
                                                       const FPostBuildServerDockerImage& PostBuildServerDockerImage)
 {
@@ -561,7 +566,7 @@ void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
 		DockerfileContent = FString::Format(*DockerfileContent, FormatArgs);
 	}
 	// Write Dockerfile to intermediate dir
-	const FString ServerDockerfilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+	const FString ServerDockerfilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
 		"Dockerfile-LinuxServer");
 	if (!FFileHelper::SaveStringToFile(DockerfileContent, *ServerDockerfilePath))
 	{
@@ -601,7 +606,7 @@ void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
 		BatFileContent = FString::Format(*BatFileContent, FormatArgs);
 	}
 	// Save the cmd to a temp bat file
-	const FString TempBatFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+	const FString TempBatFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
 		"BuildServerDockerImage.bat");
 
 	FFileHelper::SaveStringToFile(BatFileContent, *TempBatFilePath);
@@ -726,7 +731,7 @@ void UChanneldEditorSubsystem::BuildChanneldDockerImage(const FString& Tag,
 		BatFileContent = FString::Format(*BatFileContent, FormatArgs);
 	}
 	// Save the cmd to a temp bat file
-	const FString TempBatFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+	const FString TempBatFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
 		"BuildChanneldDockerImage.bat");
 
 	FFileHelper::SaveStringToFile(BatFileContent, *TempBatFilePath);
@@ -764,7 +769,7 @@ void UChanneldEditorSubsystem::OpenPackagingSettings()
 TMap<FString, FString> UChanneldEditorSubsystem::GetDockerImageId(const TArray<FString>& Tags)
 {
 	FString NowStr = FString::FromInt(FDateTime::UtcNow().ToUnixTimestamp() * 1000 + FDateTime::Now().GetMillisecond());
-	FString TmpDir = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment");
+	FString TmpDir = GetCloudDepymentProjectIntermediateDir();
 	FString BatContent = TEXT("@echo off\n");
 	for (auto Tag : Tags)
 	{
@@ -1333,7 +1338,7 @@ void UChanneldEditorSubsystem::UploadDockerImage(const FString& ChanneldImageTag
 			return;
 		}
 		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add(TEXT("WorkDir"), FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment"));
+		FormatArgs.Add(TEXT("WorkDir"), GetCloudDepymentProjectIntermediateDir());
 		FormatArgs.Add(TEXT("ChanneldTag"), ChanneldImageTag);
 		FormatArgs.Add(TEXT("ChanneldRepoUrl"), FPaths::GetPath(FPaths::GetPath(ChanneldImageTag)));
 		FormatArgs.Add(TEXT("ServerTag"), ServerImageTag);
@@ -1341,7 +1346,7 @@ void UChanneldEditorSubsystem::UploadDockerImage(const FString& ChanneldImageTag
 		BatFileContent = FString::Format(*BatFileContent, FormatArgs);
 	}
 	// Save the cmd to a temp bat file
-	const FString TempBatFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+	const FString TempBatFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
 		"UploadDockerImage.bat");
 
 	FFileHelper::SaveStringToFile(BatFileContent, *TempBatFilePath);
@@ -1407,7 +1412,7 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 			TEXT("%jqPath%"),
 			FString::Printf(
 				TEXT("\"%s/channeld-getaway_pod_status.json\""),
-				*(FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment"))),
+				*(GetCloudDepymentProjectIntermediateDir())),
 			TEXT("\"app=channeld-getaway\""),
 			1,
 			TEXT("channeld-getaway")
@@ -1448,7 +1453,7 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 				TEXT("%jqPath%"),
 				FString::Printf(
 					TEXT("\"%s/server-%d_pod_status.json\""),
-					*(FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment")), I),
+					*(GetCloudDepymentProjectIntermediateDir()), I),
 				FString::Printf(TEXT("\"app=server-%d\""), I),
 				ServerGroup.ServerNum,
 				FString::Printf(TEXT("server-%d"), I)
@@ -1493,7 +1498,7 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 		YAMLTemplateContent = FString::Format(*YAMLTemplateContent, FormatArgs);
 	}
 
-	const FString TempYAMLFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+	const FString TempYAMLFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
 		"Deployment.yaml");
 	FFileHelper::SaveStringToFile(YAMLTemplateContent, *TempYAMLFilePath);
 
@@ -1502,7 +1507,7 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
 	if (!PlatformFile.CopyFile(
-		*(FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT("CheckPodStatus.bat")),
+		*(GetCloudDepymentProjectIntermediateDir() / TEXT("CheckPodStatus.bat")),
 		*(FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("CheckPodStatus.bat"))))
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to copy CheckPodStatus.bat"));
@@ -1511,9 +1516,9 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 		return;
 	}
 
-	FString ChanneldExternalIPFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+	FString ChanneldExternalIPFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
 		"ChannelExternalIP");
-	FString GrafanaExternalIPFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+	FString GrafanaExternalIPFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
 		"GrafanaExternalIP");
 
 	FString DeployBatTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("Deployment.bat");
@@ -1538,7 +1543,7 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 		FormatArgs.Add(TEXT("GrafanaExternalIPFilePath"), GrafanaExternalIPFilePath);
 		DeployBatFileContent = FString::Format(*DeployBatFileContent, FormatArgs);
 	}
-	const FString TempDeployBatFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+	const FString TempDeployBatFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
 		"Deployment.bat");
 	FFileHelper::SaveStringToFile(DeployBatFileContent, *TempDeployBatFilePath);
 
@@ -1564,7 +1569,7 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 		FormatArgs.Add(TEXT("Deployments"), DeploymentNamesString);
 		StopBatFileContent = FString::Format(*StopBatFileContent, FormatArgs);
 		FFileHelper::SaveStringToFile(StopBatFileContent,
-		                              *(FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+		                              *(GetCloudDepymentProjectIntermediateDir() / TEXT(
 			                              "StopDeployment.bat")));
 	}
 
@@ -1573,7 +1578,7 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 			TEXT("DeployToClusterThread"),
 			TempDeployBatFilePath,
 			TEXT(""),
-			FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment")
+			GetCloudDepymentProjectIntermediateDir()
 		)
 	);
 	DeployToClusterWorkThread->ProcOutputMsgDelegate.BindUObject(UpdateRepActorCacheNotify,
@@ -1631,7 +1636,7 @@ if %ERRORLEVEL% NEQ 0 (
 
 void UChanneldEditorSubsystem::GetCurrentContext(FString& CurrentContext, bool& Success, FString& Message)
 {
-	FString CurrentContextFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+	FString CurrentContextFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
 		"CurrentClusterContext");
 	int Result = system(
 		TCHAR_TO_ANSI(*(FString::Printf(TEXT("kubectl config current-context 1>%s 2>&1"), *CurrentContextFilePath))));
@@ -1661,7 +1666,7 @@ void UChanneldEditorSubsystem::GetCurrentContext(FString& CurrentContext, bool& 
 
 void UChanneldEditorSubsystem::GetCurrentContextNamespace(FString& Namespace, bool& Success, FString& Message)
 {
-	FString ClusterContextNamespaceFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") /
+	FString ClusterContextNamespaceFilePath = GetCloudDepymentProjectIntermediateDir() /
 		TEXT("ClusterContextNamespace");
 	int Result = system(TCHAR_TO_ANSI(
 		*(FString::Printf(TEXT("kubectl config view --minify --output \"jsonpath={..namespace}\" 1>%s 2>&1"), *
@@ -1704,7 +1709,7 @@ void UChanneldEditorSubsystem::StopDeployment(FPostStopDeployment PostStopDeploy
 	);
 	StopDeploymentNotify->SpawnRunningMissionNotification(nullptr);
 
-	FString StopBatFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+	FString StopBatFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
 		"StopDeployment.bat");
 	if (!FPaths::FileExists(StopBatFilePath))
 	{
@@ -1717,10 +1722,11 @@ void UChanneldEditorSubsystem::StopDeployment(FPostStopDeployment PostStopDeploy
 			TEXT("StopDeploymentThread"),
 			StopBatFilePath,
 			TEXT(""),
-			FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment")
+			GetCloudDepymentProjectIntermediateDir()
 		)
 	);
-	FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*(FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT("GrafanaExternalIP")));
+	FPlatformFileManager::Get().GetPlatformFile().DeleteFile(
+		*(GetCloudDepymentProjectIntermediateDir() / TEXT("GrafanaExternalIP")));
 
 	StopDeploymentWorkThread->ProcOutputMsgDelegate.BindUObject(UpdateRepActorCacheNotify,
 	                                                            &UChanneldMissionNotiProxy::ReceiveOutputMsg);
@@ -1755,7 +1761,7 @@ void UChanneldEditorSubsystem::StopDeployment(FPostStopDeployment PostStopDeploy
 
 void UChanneldEditorSubsystem::GetDeployedGrafanaURL(FString& URL, bool& Success, FString& Message)
 {
-	FString GrafanaExternalIPFilePath = FPaths::ProjectIntermediateDir() / TEXT("ChanneldClouldDeployment") / TEXT(
+	FString GrafanaExternalIPFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
 		"GrafanaExternalIP");
 
 	if (!FFileHelper::LoadFileToString(URL, *GrafanaExternalIPFilePath) || URL.IsEmpty())

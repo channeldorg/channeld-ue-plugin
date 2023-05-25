@@ -11,6 +11,9 @@
 void UCloudDeploymentController::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+
+	DeploymentParamJsonPath = GEditor->GetEditorSubsystem<UChanneldEditorSubsystem>()->GetCloudDepymentProjectIntermediateDir() / TEXT("CloudDeploymentParam.json");
+	OneClickDeploymentResultJsonPath = GEditor->GetEditorSubsystem<UChanneldEditorSubsystem>()->GetCloudDepymentProjectIntermediateDir() / TEXT("OneClickDeploymentResult.json");
 }
 
 FCloudDeploymentParams UCloudDeploymentController::LoadCloudDeploymentParams()

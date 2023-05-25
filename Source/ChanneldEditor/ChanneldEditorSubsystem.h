@@ -87,6 +87,9 @@ public:
 	bool CheckDockerCommand();
 
 	UFUNCTION(BlueprintCallable)
+	FString GetCloudDepymentProjectIntermediateDir() const;
+
+	UFUNCTION(BlueprintCallable)
 	void BuildServerDockerImage(const FString& Tag, const FPostBuildServerDockerImage& PostBuildServerDockerImage);
 
 	UFUNCTION(BlueprintCallable)
@@ -123,7 +126,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void GetDeployedGrafanaURL(FString& URL, bool& Success, FString& Message);
+
+
 private:
+	
 	TSharedPtr<FChanneldProcWorkerThread> UpdateRepActorCacheWorkThread;
 	UChanneldMissionNotiProxy* UpdateRepActorCacheNotify;
 	bool bUpdatingRepActorCache;

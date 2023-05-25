@@ -12,7 +12,7 @@ if ERRORLEVEL 1 (
         goto channeldlogin
     ) else (
         echo docker push failed.
-        pause
+        pause>nul
         Exit /b 1
     )
 )
@@ -33,7 +33,7 @@ if ERRORLEVEL 1 (
         goto serverlogin
     ) else (
         echo docker push failed.
-        pause
+        pause>nul
         Exit /b 1
     )
 )
