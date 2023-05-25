@@ -613,7 +613,7 @@ void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
 
 	AsyncTask(ENamedThreads::AnyNormalThreadNormalTask, [this, TempBatFilePath, PostBuildServerDockerImage]()
 	{
-		int Result = system(TCHAR_TO_ANSI(*TempBatFilePath));
+		int Result = system(TCHAR_TO_ANSI(*FString::Printf(TEXT("\"%s\""), *TempBatFilePath)));
 		if (Result == 0)
 		{
 			BuildServerDockerImageNotify->SpawnMissionSucceedNotification(nullptr);
@@ -738,7 +738,7 @@ void UChanneldEditorSubsystem::BuildChanneldDockerImage(const FString& Tag,
 
 	AsyncTask(ENamedThreads::AnyNormalThreadNormalTask, [this, TempBatFilePath, PostBuildChanneldDockerImage]()
 	{
-		int Result = system(TCHAR_TO_ANSI(*TempBatFilePath));
+		int Result = system(TCHAR_TO_ANSI(*FString::Printf(TEXT("\"%s\""), *TempBatFilePath)));
 		if (Result == 0)
 		{
 			BuildChanneldDockerImageNotify->SpawnMissionSucceedNotification(nullptr);
@@ -785,7 +785,7 @@ TMap<FString, FString> UChanneldEditorSubsystem::GetDockerImageId(const TArray<F
 	}
 	FString BatFilePath = TmpDir / TEXT("GetDocekerImage.bat");
 	FFileHelper::SaveStringToFile(BatContent, *BatFilePath);
-	system(TCHAR_TO_ANSI(*BatFilePath));
+	system(TCHAR_TO_ANSI(*FString::Printf(TEXT("\"%s\""), *BatFilePath)));
 	TMap<FString, FString> Result;
 	for (auto Tag : Tags)
 	{
@@ -1353,7 +1353,7 @@ void UChanneldEditorSubsystem::UploadDockerImage(const FString& ChanneldImageTag
 
 	AsyncTask(ENamedThreads::AnyNormalThreadNormalTask, [this, TempBatFilePath, PostUploadDockerImage]()
 	{
-		int Result = system(TCHAR_TO_ANSI(*TempBatFilePath));
+		int Result = system(TCHAR_TO_ANSI(*FString::Printf(TEXT("\"%s\""), *TempBatFilePath)));
 		if (Result == 0)
 		{
 			UploadDockerImageNotify->SpawnMissionSucceedNotification(nullptr);
@@ -1639,7 +1639,7 @@ void UChanneldEditorSubsystem::GetCurrentContext(FString& CurrentContext, bool& 
 	FString CurrentContextFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
 		"CurrentClusterContext");
 	int Result = system(
-		TCHAR_TO_ANSI(*(FString::Printf(TEXT("kubectl config current-context 1>%s 2>&1"), *CurrentContextFilePath))));
+		TCHAR_TO_ANSI(*(FString::Printf(TEXT("kubectl config current-context 1>\"%s\" 2>&1"), *CurrentContextFilePath))));
 	Success = true;
 	if (Result != 0)
 	{
@@ -1669,7 +1669,7 @@ void UChanneldEditorSubsystem::GetCurrentContextNamespace(FString& Namespace, bo
 	FString ClusterContextNamespaceFilePath = GetCloudDepymentProjectIntermediateDir() /
 		TEXT("ClusterContextNamespace");
 	int Result = system(TCHAR_TO_ANSI(
-		*(FString::Printf(TEXT("kubectl config view --minify --output \"jsonpath={..namespace}\" 1>%s 2>&1"), *
+		*(FString::Printf(TEXT("kubectl config view --minify --output \"jsonpath={..namespace}\" 1>\"%s\" 2>&1"), *
 			ClusterContextNamespaceFilePath))));
 	Success = true;
 	if (Result != 0)
