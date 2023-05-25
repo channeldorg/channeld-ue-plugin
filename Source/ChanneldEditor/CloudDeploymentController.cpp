@@ -92,7 +92,16 @@ FDeploymentStepParams UCloudDeploymentController::GetDefaultDeploymentStepParams
 		FServerGroupForDeployment ServerGroupForDeployment;
 		ServerGroupForDeployment.bEnabled = ServerGroup.bEnabled;
 		ServerGroupForDeployment.ServerNum = ServerGroup.ServerNum;
-		ServerGroupForDeployment.ServerMap = ServerGroup.ServerMap.IsValid() ? ServerGroup.ServerMap : GEditor->GetEditorWorldContext().World()->GetOuter()->GetName();
+		if(ServerGroup.ServerMap.IsValid())
+		{
+			ServerGroupForDeployment.ServerMap = ServerGroup.ServerMap;
+		}
+		else
+		{
+			FString PackageName = GEditor->GetEditorWorldContext().World()->GetOuter()->GetName();
+			FString MapName = FPaths::GetCleanFilename(PackageName);
+			ServerGroupForDeployment.ServerMap = PackageName + TEXT(".") + MapName;
+		}
 		ServerGroupForDeployment.ServerViewClass = ServerGroup.ServerViewClass;
 		ServerGroupForDeployment.AdditionalArgs = ServerGroup.AdditionalArgs;
 		if (I == 0)
