@@ -18,9 +18,9 @@ spec:
       initContainers:
       - name: init-wait-for-channeld
         image: alpine
-        command: ["/bin/sh", "-c", "for i in $(seq 1 300); do nc -zvw1 channeld-getaway 11288 && exit 0 || sleep 3; done; exit 1"]
+        command: ["/bin/sh", "-c", "for i in $(seq 1 300); do nc -zvw1 channeld-gateway 11288 && exit 0 || sleep 3; done; exit 1"]
       containers:
-        - command: ['./ChanneldIntegrationServer.sh', '{Map}', '-metrics', '-server', '-log', 'channeldServerAddr=channeld-getaway', 'ViewClass={ViewClass}', '-FPS=30', 'CHANNELDUEINI=/LinuxServer/ChanneldUE.ini', '{AdditionalArgs}']
+        - command: ['./ChanneldIntegrationServer.sh', '{Map}', '-metrics', '-server', '-log', 'channeldServerAddr=channeld-gateway', 'ViewClass={ViewClass}', '-FPS=30', 'CHANNELDUEINI=/LinuxServer/ChanneldUE.ini', '{AdditionalArgs}']
           image: {ServerDockerImage}
           name: {Name}
           ports:
