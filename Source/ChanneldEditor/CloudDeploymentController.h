@@ -47,6 +47,12 @@ struct CHANNELDEDITOR_API FUploadStepParams
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString ServerImageTag;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString RegistryUsername;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString RegistryPassword;
+
 	FUploadStepParams()
 	{
 	}

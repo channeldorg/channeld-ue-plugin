@@ -14,6 +14,22 @@ enum class EUpdateRepActorCacheResult : uint8
 	URRT_Failed,
 };
 
+USTRUCT()
+struct CHANNELDEDITOR_API FDockerConfigAuth
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString Username;
+
+	UPROPERTY()
+	FString Password;
+
+	FDockerConfigAuth()
+	{
+	}
+};
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FPostRepActorCache, EUpdateRepActorCacheResult, Result);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPostGenRepCode, bool, Result);
@@ -29,6 +45,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FPostUploadDockerImage, bool, Success);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FPostDeploymentToCluster, bool, Success);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FPostStopDeployment, bool, Success);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FPostCreateK8sSecret, bool, Success);
 
 UCLASS(Meta = (DisplayName = "Channeld Editor"))
 class CHANNELDEDITOR_API UChanneldEditorSubsystem : public UEditorSubsystem
@@ -93,11 +111,12 @@ public:
 	void BuildServerDockerImage(const FString& Tag, const FPostBuildServerDockerImage& PostBuildServerDockerImage);
 
 	UFUNCTION(BlueprintCallable)
-	void BuildChanneldDockerImage(const FString& Tag, const FPostBuildChanneldDockerImage& PostBuildChanneldDockerImage);
+	void BuildChanneldDockerImage(const FString& Tag,
+	                              const FPostBuildChanneldDockerImage& PostBuildChanneldDockerImage);
 
 	UFUNCTION(BlueprintCallable)
 	void OpenPackagingSettings();
-	
+
 	UFUNCTION(BlueprintCallable)
 	TMap<FString, FString> GetDockerImageId(const TArray<FString>& Tags);
 
@@ -108,12 +127,15 @@ public:
 	                   const FString& DocumentationLink);
 
 	UFUNCTION(BlueprintCallable)
-	void UploadDockerImage(const FString& ChanneldImageTag, const FString& ServerImageTag, const FPostUploadDockerImage& PostUploadDockerImage);
+	void UploadDockerImage(const FString& ChanneldImageTag, const FString& ServerImageTag, FString RegistryUsername,
+	                       FString RegistryPassword, const FPostUploadDockerImage& PostUploadDockerImage);
 
 	UFUNCTION(BlueprintCallable)
-	void DeployToCluster(const FDeploymentStepParams DeploymentParams, const FPostDeploymentToCluster& PostDeplymentToCluster);
+	void DeployToCluster(const FDeploymentStepParams DeploymentParams,
+	                     const FPostDeploymentToCluster& PostDeplymentToCluster);
 
-	FString GetCheckPodCommand(const FString& JQPath, const FString& PodStatusJSONPath, const FString& PodSelector, int32 PodReplicas, const FString& DescriptionName) const;
+	FString GetCheckPodCommand(const FString& JQPath, const FString& PodStatusJSONPath, const FString& PodSelector,
+	                           int32 PodReplicas, const FString& DescriptionName) const;
 
 	UFUNCTION(BlueprintCallable)
 	void GetCurrentContext(FString& CurrentContext, bool& Success, FString& Message);
@@ -127,9 +149,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GetDeployedGrafanaURL(FString& URL, bool& Success, FString& Message);
 
+	UFUNCTION(BlueprintCallable)
+	void CreateK8sSecret(const FString& Name, const FString& DockerImage, const FString& TargetClusterContext, const FString& Namespace,
+	                     const FString& Username, const FString& Password, FPostCreateK8sSecret PostCreateK8sSecret);
 
 private:
-	
 	TSharedPtr<FChanneldProcWorkerThread> UpdateRepActorCacheWorkThread;
 	UChanneldMissionNotiProxy* UpdateRepActorCacheNotify;
 	bool bUpdatingRepActorCache;
@@ -151,5 +175,7 @@ private:
 
 	TSharedPtr<FChanneldProcWorkerThread> StopDeploymentWorkThread;
 	UChanneldMissionNotiProxy* StopDeploymentNotify;
-	
+
+	TSharedPtr<FChanneldProcWorkerThread> CreateK8sSecretWorkThread;
+	UChanneldMissionNotiProxy* CreateK8sSecretNotify;
 };

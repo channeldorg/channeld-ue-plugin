@@ -15,6 +15,7 @@
 #include "InstalledPlatformInfo.h"
 #include "ISettingsModule.h"
 #include "IUATHelperModule.h"
+#include "JsonObjectConverter.h"
 #include "PlatformInfo.h"
 #include "ProtocHelper.h"
 #include "SourceCodeNavigation.h"
@@ -63,6 +64,9 @@ void UChanneldEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	StopDeploymentNotify = NewObject<UChanneldMissionNotiProxy>();
 	StopDeploymentNotify->AddToRoot();
+
+	CreateK8sSecretNotify = NewObject<UChanneldMissionNotiProxy>();
+	CreateK8sSecretNotify->AddToRoot();
 }
 
 void UChanneldEditorSubsystem::UpdateReplicationCacheAction(FPostRepActorCache PostUpdatedRepActorCache)
@@ -526,7 +530,8 @@ bool UChanneldEditorSubsystem::CheckDockerCommand()
 
 FString UChanneldEditorSubsystem::GetCloudDepymentProjectIntermediateDir() const
 {
-	return FPaths::ConvertRelativePathToFull(FPaths::ProjectDir() / TEXT("Intermediate") / TEXT("ChanneldClouldDeployment"));
+	return FPaths::ConvertRelativePathToFull(
+		FPaths::ProjectDir() / TEXT("Intermediate") / TEXT("ChanneldClouldDeployment"));
 }
 
 void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
@@ -613,7 +618,7 @@ void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
 
 	AsyncTask(ENamedThreads::AnyNormalThreadNormalTask, [this, TempBatFilePath, PostBuildServerDockerImage]()
 	{
-		int Result = system(TCHAR_TO_ANSI(*FString::Printf(TEXT("\"%s\""), *TempBatFilePath)));
+		int Result = system(TCHAR_TO_ANSI(*FString::Printf(TEXT("cmd /c \"%s\""), *TempBatFilePath)));
 		if (Result == 0)
 		{
 			BuildServerDockerImageNotify->SpawnMissionSucceedNotification(nullptr);
@@ -738,7 +743,7 @@ void UChanneldEditorSubsystem::BuildChanneldDockerImage(const FString& Tag,
 
 	AsyncTask(ENamedThreads::AnyNormalThreadNormalTask, [this, TempBatFilePath, PostBuildChanneldDockerImage]()
 	{
-		int Result = system(TCHAR_TO_ANSI(*FString::Printf(TEXT("\"%s\""), *TempBatFilePath)));
+		int Result = system(TCHAR_TO_ANSI(*FString::Printf(TEXT("cmd /c \"%s\""), *TempBatFilePath)));
 		if (Result == 0)
 		{
 			BuildChanneldDockerImageNotify->SpawnMissionSucceedNotification(nullptr);
@@ -785,7 +790,7 @@ TMap<FString, FString> UChanneldEditorSubsystem::GetDockerImageId(const TArray<F
 	}
 	FString BatFilePath = TmpDir / TEXT("GetDocekerImage.bat");
 	FFileHelper::SaveStringToFile(BatContent, *BatFilePath);
-	system(TCHAR_TO_ANSI(*FString::Printf(TEXT("\"%s\""), *BatFilePath)));
+	system(TCHAR_TO_ANSI(*FString::Printf(TEXT("cmd /c \"%s\""), *BatFilePath)));
 	TMap<FString, FString> Result;
 	for (auto Tag : Tags)
 	{
@@ -1308,6 +1313,7 @@ void UChanneldEditorSubsystem::AddMessageLog(const FText& Text, const FText& Det
 }
 
 void UChanneldEditorSubsystem::UploadDockerImage(const FString& ChanneldImageTag, const FString& ServerImageTag,
+                                                 FString RegistryUsername, FString RegistryPassword,
                                                  const FPostUploadDockerImage& PostUploadDockerImage)
 {
 	UploadDockerImageNotify->SetMissionNotifyText(
@@ -1339,10 +1345,10 @@ void UChanneldEditorSubsystem::UploadDockerImage(const FString& ChanneldImageTag
 		}
 		FStringFormatNamedArguments FormatArgs;
 		FormatArgs.Add(TEXT("WorkDir"), GetCloudDepymentProjectIntermediateDir());
+		FormatArgs.Add(TEXT("Username"), RegistryUsername);
 		FormatArgs.Add(TEXT("ChanneldTag"), ChanneldImageTag);
 		FormatArgs.Add(TEXT("ChanneldRepoUrl"), FPaths::GetPath(FPaths::GetPath(ChanneldImageTag)));
 		FormatArgs.Add(TEXT("ServerTag"), ServerImageTag);
-		FormatArgs.Add(TEXT("ServerRepoUrl"), FPaths::GetPath(FPaths::GetPath(ServerImageTag)));
 		BatFileContent = FString::Format(*BatFileContent, FormatArgs);
 	}
 	// Save the cmd to a temp bat file
@@ -1351,9 +1357,15 @@ void UChanneldEditorSubsystem::UploadDockerImage(const FString& ChanneldImageTag
 
 	FFileHelper::SaveStringToFile(BatFileContent, *TempBatFilePath);
 
+	if (!RegistryPassword.IsEmpty())
+	{
+		FFileHelper::SaveStringToFile(RegistryPassword,
+		                              *(GetCloudDepymentProjectIntermediateDir() / TEXT("TempRegistryPassword")));
+	}
+
 	AsyncTask(ENamedThreads::AnyNormalThreadNormalTask, [this, TempBatFilePath, PostUploadDockerImage]()
 	{
-		int Result = system(TCHAR_TO_ANSI(*FString::Printf(TEXT("\"%s\""), *TempBatFilePath)));
+		int Result = system(TCHAR_TO_ANSI(*FString::Printf(TEXT("cmd /c \"%s\""), *TempBatFilePath)));
 		if (Result == 0)
 		{
 			UploadDockerImageNotify->SpawnMissionSucceedNotification(nullptr);
@@ -1392,8 +1404,10 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 	}
 	FString ChanneldImageTag = DeploymentParams.ChanneldImageTag;
 	FString ServerImageTag = DeploymentParams.ServerImageTag;
-	FString ImagePullSecrets = DeploymentParams.ImagePullSecret.IsEmpty() ? TEXT("") : FString::Printf(
-		TEXT("imagePullSecrets: [{name: %s}]"), *DeploymentParams.ImagePullSecret);
+	FString ImagePullSecrets = DeploymentParams.ImagePullSecret.IsEmpty()
+		                           ? TEXT("")
+		                           : FString::Printf(
+			                           TEXT("imagePullSecrets: [{name: %s}]"), *DeploymentParams.ImagePullSecret);
 	FString YAMLTemplatePath = DeploymentParams.YAMLTemplatePath;
 
 	TArray<FString> DeploymentNames = {TEXT("channeld-gateway")};
@@ -1643,7 +1657,8 @@ void UChanneldEditorSubsystem::GetCurrentContext(FString& CurrentContext, bool& 
 	FString CurrentContextFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
 		"CurrentClusterContext");
 	int Result = system(
-		TCHAR_TO_ANSI(*(FString::Printf(TEXT("kubectl config current-context 1>\"%s\" 2>&1"), *CurrentContextFilePath))));
+		TCHAR_TO_ANSI(
+			*(FString::Printf(TEXT("kubectl config current-context 1>\"%s\" 2>&1"), *CurrentContextFilePath))));
 	Success = true;
 	if (Result != 0)
 	{
@@ -1781,5 +1796,106 @@ void UChanneldEditorSubsystem::GetDeployedGrafanaURL(FString& URL, bool& Success
 	URL.RemoveFromEnd(TEXT("'"));
 	URL = FString::Printf(TEXT("http://%s:3000"), *URL);
 }
+
+void UChanneldEditorSubsystem::CreateK8sSecret(const FString& Name, const FString& DockerImage, const FString& TargetClusterContext,
+                                               const FString& Namespace, const FString& Username,
+                                               const FString& Password, FPostCreateK8sSecret PostCreateK8sSecret)
+{
+	CreateK8sSecretNotify->SetMissionNotifyText(
+		FText::FromString(TEXT("Creating K8s Secret...")),
+		LOCTEXT("RunningNotificationCancelButton", "Cancel"),
+		FText::FromString(TEXT("Successfully created K8s Secret.")),
+		FText::FromString(TEXT("Failed to create K8s Secret."))
+	);
+	CreateK8sSecretNotify->SpawnRunningMissionNotification(nullptr);
+
+	if (Username.IsEmpty() || Password.IsEmpty())
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Username or password is empty."));
+		CreateK8sSecretNotify->SpawnMissionFailedNotification(nullptr);
+		PostCreateK8sSecret.ExecuteIfBound(false);
+		return;
+	}
+	FDockerConfigAuth Auth;
+	Auth.Username = Username;
+	Auth.Password = Password;
+	FString AuthJson;
+	FJsonObjectConverter::UStructToJsonObjectString(Auth, AuthJson);
+	AuthJson = FString::Printf(TEXT("{\"%s\": %s}"), *FPaths::GetPath(FPaths::GetPath(DockerImage)), *AuthJson);
+	FString AuthBase64 = FBase64::Encode(AuthJson);
+
+	FString SecretYAML = FString::Printf(TEXT(
+		"apiVersion: v1\n"
+		"kind: Secret\n"
+		"metadata:\n"
+		"  name: %s\n"
+		"  namespace: %s\n"
+		"type: kubernetes.io/dockercfg\n"
+		"data:\n"
+		"  .dockercfg: %s\n"
+	), *Name, Namespace.IsEmpty() ? TEXT("default") : *Namespace, *AuthBase64);
+
+	FString CreateK8sSecretFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
+		"CreateK8sSecret.yaml");
+	if (!FFileHelper::SaveStringToFile(SecretYAML, *CreateK8sSecretFilePath))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to save CreateK8sSecret.yaml."));
+		CreateK8sSecretNotify->SpawnMissionFailedNotification(nullptr);
+		PostCreateK8sSecret.ExecuteIfBound(false);
+		return;
+	}
+
+	FString CreateK8sSecretBatFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
+		"CreateK8sSecret.bat");
+	if (!FFileHelper::SaveStringToFile(FString::Printf(TEXT("kubectl --context %s apply -f CreateK8sSecret.yaml"),
+	                                                   *TargetClusterContext), *CreateK8sSecretBatFilePath))
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to save CreateK8sSecret.bat."));
+		CreateK8sSecretNotify->SpawnMissionFailedNotification(nullptr);
+		PostCreateK8sSecret.ExecuteIfBound(false);
+		return;
+	}
+
+	CreateK8sSecretWorkThread = MakeShareable(
+		new FChanneldProcWorkerThread(
+			TEXT("CreateK8sSecretThread"),
+			CreateK8sSecretBatFilePath,
+			TEXT(""),
+			GetCloudDepymentProjectIntermediateDir()
+		)
+	);
+
+	CreateK8sSecretWorkThread->ProcOutputMsgDelegate.BindUObject(UpdateRepActorCacheNotify,
+	                                                             &UChanneldMissionNotiProxy::ReceiveOutputMsg);
+	CreateK8sSecretNotify->MissionCanceled.AddLambda(
+		[this]()
+		{
+			if (CreateK8sSecretWorkThread.IsValid() && CreateK8sSecretWorkThread->GetThreadStatus() ==
+				EChanneldThreadStatus::Busy)
+			{
+				CreateK8sSecretWorkThread->Cancel();
+			}
+		});
+	CreateK8sSecretWorkThread->ProcSucceedDelegate.AddLambda(
+		[this, PostCreateK8sSecret](FChanneldProcWorkerThread*)
+		{
+			CreateK8sSecretNotify->SpawnMissionSucceedNotification(nullptr);
+			AsyncTask(ENamedThreads::GameThread, [this, PostCreateK8sSecret]()
+			{
+				PostCreateK8sSecret.ExecuteIfBound(true);
+			});
+		});
+	CreateK8sSecretWorkThread->ProcFailedDelegate.AddLambda(
+		[this, PostCreateK8sSecret](FChanneldProcWorkerThread*)
+		{
+			CreateK8sSecretNotify->SpawnMissionFailedNotification(nullptr);
+			AsyncTask(ENamedThreads::GameThread, [this, PostCreateK8sSecret]()
+			{
+				PostCreateK8sSecret.ExecuteIfBound(false);
+			});
+		});
+	CreateK8sSecretWorkThread->Execute();
+}
+
 
 #undef LOCTEXT_NAMESPACE

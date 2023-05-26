@@ -1,8 +1,13 @@
 @echo off
 
-cd "{WorkDir}"
+if NOT "{Username}" == "" (
+    type "{WorkDir}\TempRegistryPassword" | docker login {ChanneldRepoUrl} --username="{Username}" --password-stdin
+    if ERRORLEVEL 1 (
+        pause>nul
+        Exit /b 1
+    )
+)
 
-:channeldpush
 docker push {ChanneldTag} 2>docker_error.txt
 if ERRORLEVEL 1 (
     type docker_error.txt
@@ -16,14 +21,7 @@ if ERRORLEVEL 1 (
         Exit /b 1
     )
 )
-goto serverpush
 
-:channeldlogin
-echo Please login to {ChanneldRepoUrl} first.
-docker login {ChanneldRepoUrl}
-goto channeldpush
-
-:serverpush
 docker push {ServerTag} 2>docker_error.txt
 if ERRORLEVEL 1 (
     type docker_error.txt
@@ -38,8 +36,3 @@ if ERRORLEVEL 1 (
     )
 )
 Exit /b 0
-
-:channeldlogin
-echo Please login to {ServerRepoUrl} first.
-docker login {ServerRepoUrl}
-goto serverpush
