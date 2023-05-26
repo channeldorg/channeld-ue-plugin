@@ -35,8 +35,7 @@ spec:
           # envFrom:
           # - configMapRef:
           #     name: channeld-configmap
-      imagePullSecrets: # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-        - name: channeld-registry
+      {ImagePullSecrets}
       restartPolicy: Always
 ---
 apiVersion: v1
