@@ -36,14 +36,15 @@ channeld/tps-channeld:latest
 >提示：如果没有指定版本号，会默认使用`latest`。
 
 ## 步骤2：上传
-在上传镜像到对应的容器镜像仓库前，需要先使用`docker login`命令登录到仓库。如果没有登录，点击`Upload`按钮后，会弹出窗口，提示输入用户名和密码。
+如果上传镜像对应的容器镜像仓库是私有仓库时，可以填写`Registry Username`和`Registry Password`拉实现上传前自动登录到镜像仓库，也可以使用`docker login`命令登录到仓库。
 
+>提示：`Registry Username`和`Registry Password`也用于步骤3：部署中的生成Secret。
 ## 步骤3：部署
 部署步骤中各个设置项的含义如下：
 - `Target Cluster Context`：要使用的Kubernetes集群的上下文。点击`Detect`会获取并填入当前的上下。可以使用`kubectl config get-contexts`命令查看所有可用的上下文。
 - `Namespace`：要部署到的Kubernetes命名空间。点击`Detect`会获取并填入当前的命名空间。可以使用`kubectl get namespaces`命令查看所有可用的命名空间。
 - `YAML Template`：部署时使用的YAML模板文件，包含了`channeld`、`grafana`、`prometheus`的Deployment和Service。
-- `Image Pull Secret`：用于从私有仓库拉取镜像的Secret。如果使用的是公有仓库，可以留空。Secret可以使用[kubectl创建](https://kubernetes.io/zh-cn/docs/concepts/configuration/secret/#creating-a-secret)，也可以通过云服务商的控制台创建。
+- `Image Pull Secret`：用于从私有仓库拉取镜像的Secret。如果使用的是公有仓库，可以留空。填写完`Image Pull Secret`后点击右侧的`Generate`，则会根据已经填写的`Channeld Remote Image Tag`、`Target Cluster Context`、`Namespace`、`Registry Username`和`Registry Password`在集群中创建Secret。
 - `channeld Launch Args`：网关服务的启动参数。默认跟随编辑器配置中的启动参数。
 - `Main Server Group`：主服务器（组）的配置。默认跟随编辑器配置中的第一个服务器组配置。
   - `Enabled`：是否启用。关闭时不会部署主服务器。
@@ -61,6 +62,8 @@ channeld/tps-channeld:latest
 
 >注意：使用腾讯云容器镜像服务时请使用ChanneldUE插件目录下的`Template/DeploymentTencentCloud.yaml`作为 `YAML Template`。
 
+>提示：`Image Pull Secret`右侧的`Generate`功能只支持用户名密码的方式创建Secret。如需通过其他方式创建Secret，则可以使用[kubectl创建](https://kubernetes.io/zh-cn/docs/concepts/configuration/secret/#creating-a-secret)，也可以通过云服务商的控制台创建。
+
 ## 一键部署
 在上述步骤都顺利完成后，点击`One-Click Deploy`按钮，自动执行打包、上传和部署三个步骤，来加速云部署工作流。
 
@@ -75,4 +78,4 @@ channeld/tps-channeld:latest
 
 ### 部署
 - `Output Log`窗口输出`Something wrong with xxx pod`时，请根据下方给出的pod状态文件进行进一步排查
-- pod状态中出现`ImagePullBackOff`或`ErrImagePull`时，请检查`Image Pull Secret`字段中填入的Secret名称是否正确
+- pod状态中出现`ImagePullBackOff`或`ErrImagePull`时，请检查`Image Pull Secret`字段中填入的Secret名称是否正确。
