@@ -23,7 +23,7 @@ timeout /t 2 /nobreak 1>nul 2>&1
 
 {CheckPodStatusCommand}
 
-kubectl get svc channeld-getaway -o jsonpath='{.status.loadBalancer.ingress[0].ip}' -n {Namespace} > "{ChanneldExternalIPFilePath}"
+kubectl get svc channeld-gateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}' -n {Namespace} > "{ChanneldExternalIPFilePath}"
 kubectl get svc channeld-grafana -o jsonpath='{.status.loadBalancer.ingress[0].ip}' -n {Namespace} > "{GrafanaExternalIPFilePath}"
 
 echo Channeld External IP: 
