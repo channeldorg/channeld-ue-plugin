@@ -27,7 +27,7 @@ for /f "delims=" %%i in ('type %podStatusJsonPath% ^| %jqPath% -r ".[] | .status
 if %isPodPhaseRunning% == 0 (
     if %isContainerRunning% == 0 (
         if %readyCount% == %podReplicas% (
-            echo %podDescriptionName% pod(s) are ready
+            echo %podDescriptionName% pod^(s^) are ready
             EXIT /B 0
         )
     )
@@ -37,7 +37,7 @@ type %podStatusJsonPath% | %jqPath% -r ".[] | .status.containerStatuses[0].state
 set hasMessage=%ERRORLEVEL%
 
 if %hasMessage% == 0 (
-    echo ERROR: Something wrong with %podDescriptionName% pod(s) >&2
+    echo ERROR: Something wrong with %podDescriptionName% pod^(s^) >&2
     goto errorexit
 )
 goto recheck
@@ -47,7 +47,7 @@ for /f "delims=" %%a in ('type %podStatusJsonPath% ^| %jqPath% -r ".[] | .status
 if "%reason%" NEQ %prevReason% (
     if "%reason%" NEQ "" (
         if "%reason%" NEQ "null" (
-            echo Waiting for %podDescriptionName% pod(s) to be ready: %reason%
+            echo Waiting for %podDescriptionName% pod^(s^) to be ready: %reason%
             set prevReason="%reason%"
         )
     )
