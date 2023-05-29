@@ -35,6 +35,7 @@
 #include "Settings/ProjectPackagingSettings.h"
 #include "Windows/MinWindows.h"
 #include "Windows/WindowsHWrapper.h"
+#include "Windows/WindowsPlatformApplicationMisc.h"
 
 #define LOCTEXT_NAMESPACE "UChanneldEditorSubsystem"
 
@@ -1535,7 +1536,7 @@ void UChanneldEditorSubsystem::DeployToCluster(const FDeploymentStepParams Deplo
 	}
 
 	FString ChanneldExternalIPFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
-		"ChannelExternalIP");
+		"ChanneldExternalIP");
 	FString GrafanaExternalIPFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
 		"GrafanaExternalIP");
 
@@ -1745,8 +1746,7 @@ void UChanneldEditorSubsystem::StopDeployment(FPostStopDeployment PostStopDeploy
 		)
 	);
 	FPlatformFileManager::Get().GetPlatformFile().DeleteFile(
-		*(GetCloudDepymentProjectIntermediateDir() / TEXT("GrafanaExternalIP")));
-
+		*(GetCloudDepymentProjectIntermediateDir() / TEXT("ChanneldExternalIP")));
 	StopDeploymentWorkThread->ProcOutputMsgDelegate.BindUObject(UpdateRepActorCacheNotify,
 	                                                            &UChanneldMissionNotiProxy::ReceiveOutputMsg);
 	StopDeploymentNotify->MissionCanceled.AddLambda([this]()
@@ -1790,11 +1790,27 @@ void UChanneldEditorSubsystem::GetDeployedGrafanaURL(FString& URL, bool& Success
 		return;
 	}
 	Success = true;
-	// 删除url的开头和结尾的'符号
 	URL = URL.TrimStartAndEnd();
 	URL.RemoveFromStart(TEXT("'"));
 	URL.RemoveFromEnd(TEXT("'"));
 	URL = FString::Printf(TEXT("http://%s:3000"), *URL);
+}
+
+void UChanneldEditorSubsystem::GetChanneldExternalIP(FString& ExternalIP, bool& Success, FString& Message)
+{
+	FString GrafanaExternalIPFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
+	"ChanneldExternalIP");
+	
+	if (!FFileHelper::LoadFileToString(ExternalIP, *GrafanaExternalIPFilePath) || ExternalIP.IsEmpty())
+	{
+		Success = false;
+		Message = TEXT("Failed to load ChanneldExternalIP file.");
+		return;
+	}
+	Success = true;
+	ExternalIP = ExternalIP.TrimStartAndEnd();
+	ExternalIP.RemoveFromStart(TEXT("'"));
+	ExternalIP.RemoveFromEnd(TEXT("'"));
 }
 
 void UChanneldEditorSubsystem::CreateK8sSecret(const FString& Name, const FString& DockerImage, const FString& TargetClusterContext,
@@ -1895,6 +1911,11 @@ void UChanneldEditorSubsystem::CreateK8sSecret(const FString& Name, const FStrin
 			});
 		});
 	CreateK8sSecretWorkThread->Execute();
+}
+
+void UChanneldEditorSubsystem::CopyMessageToClipboard(const FString& Message)
+{
+	FPlatformApplicationMisc::ClipboardCopy(*Message);
 }
 
 

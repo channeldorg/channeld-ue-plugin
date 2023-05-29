@@ -150,8 +150,15 @@ public:
 	void GetDeployedGrafanaURL(FString& URL, bool& Success, FString& Message);
 
 	UFUNCTION(BlueprintCallable)
-	void CreateK8sSecret(const FString& Name, const FString& DockerImage, const FString& TargetClusterContext, const FString& Namespace,
+	void GetChanneldExternalIP(FString& ExternalIP, bool& Success, FString& Message);
+
+	UFUNCTION(BlueprintCallable)
+	void CreateK8sSecret(const FString& Name, const FString& DockerImage, const FString& TargetClusterContext,
+	                     const FString& Namespace,
 	                     const FString& Username, const FString& Password, FPostCreateK8sSecret PostCreateK8sSecret);
+
+	UFUNCTION(BlueprintCallable)
+	void CopyMessageToClipboard(const FString& Message);
 
 private:
 	TSharedPtr<FChanneldProcWorkerThread> UpdateRepActorCacheWorkThread;
