@@ -48,6 +48,9 @@ struct CHANNELDUE_API TableStruct_channeld_2eproto {
 };
 CHANNELDUE_API extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_channeld_2eproto;
 namespace channeldpb {
+class AddEntityGroupMessage;
+struct AddEntityGroupMessageDefaultTypeInternal;
+CHANNELDUE_API extern AddEntityGroupMessageDefaultTypeInternal _AddEntityGroupMessage_default_instance_;
 class AuthMessage;
 struct AuthMessageDefaultTypeInternal;
 CHANNELDUE_API extern AuthMessageDefaultTypeInternal _AuthMessage_default_instance_;
@@ -72,6 +75,9 @@ CHANNELDUE_API extern CreateChannelMessageDefaultTypeInternal _CreateChannelMess
 class CreateChannelResultMessage;
 struct CreateChannelResultMessageDefaultTypeInternal;
 CHANNELDUE_API extern CreateChannelResultMessageDefaultTypeInternal _CreateChannelResultMessage_default_instance_;
+class CreateEntityChannelMessage;
+struct CreateEntityChannelMessageDefaultTypeInternal;
+CHANNELDUE_API extern CreateEntityChannelMessageDefaultTypeInternal _CreateEntityChannelMessage_default_instance_;
 class CreateSpatialChannelsResultMessage;
 struct CreateSpatialChannelsResultMessageDefaultTypeInternal;
 CHANNELDUE_API extern CreateSpatialChannelsResultMessageDefaultTypeInternal _CreateSpatialChannelsResultMessage_default_instance_;
@@ -105,6 +111,9 @@ CHANNELDUE_API extern QuerySpatialChannelResultMessageDefaultTypeInternal _Query
 class RemoveChannelMessage;
 struct RemoveChannelMessageDefaultTypeInternal;
 CHANNELDUE_API extern RemoveChannelMessageDefaultTypeInternal _RemoveChannelMessage_default_instance_;
+class RemoveEntityGroupMessage;
+struct RemoveEntityGroupMessageDefaultTypeInternal;
+CHANNELDUE_API extern RemoveEntityGroupMessageDefaultTypeInternal _RemoveEntityGroupMessage_default_instance_;
 class ServerForwardMessage;
 struct ServerForwardMessageDefaultTypeInternal;
 CHANNELDUE_API extern ServerForwardMessageDefaultTypeInternal _ServerForwardMessage_default_instance_;
@@ -149,6 +158,7 @@ struct UpdateSpatialInterestMessageDefaultTypeInternal;
 CHANNELDUE_API extern UpdateSpatialInterestMessageDefaultTypeInternal _UpdateSpatialInterestMessage_default_instance_;
 }  // namespace channeldpb
 PROTOBUF_NAMESPACE_OPEN
+template<> CHANNELDUE_API ::channeldpb::AddEntityGroupMessage* Arena::CreateMaybeMessage<::channeldpb::AddEntityGroupMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::AuthMessage* Arena::CreateMaybeMessage<::channeldpb::AuthMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::AuthResultMessage* Arena::CreateMaybeMessage<::channeldpb::AuthResultMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::ChannelDataHandoverMessage* Arena::CreateMaybeMessage<::channeldpb::ChannelDataHandoverMessage>(Arena*);
@@ -157,6 +167,7 @@ template<> CHANNELDUE_API ::channeldpb::ChannelDataUpdateMessage* Arena::CreateM
 template<> CHANNELDUE_API ::channeldpb::ChannelSubscriptionOptions* Arena::CreateMaybeMessage<::channeldpb::ChannelSubscriptionOptions>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::CreateChannelMessage* Arena::CreateMaybeMessage<::channeldpb::CreateChannelMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::CreateChannelResultMessage* Arena::CreateMaybeMessage<::channeldpb::CreateChannelResultMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::CreateEntityChannelMessage* Arena::CreateMaybeMessage<::channeldpb::CreateEntityChannelMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::CreateSpatialChannelsResultMessage* Arena::CreateMaybeMessage<::channeldpb::CreateSpatialChannelsResultMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::DebugGetSpatialRegionsMessage* Arena::CreateMaybeMessage<::channeldpb::DebugGetSpatialRegionsMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::DisconnectMessage* Arena::CreateMaybeMessage<::channeldpb::DisconnectMessage>(Arena*);
@@ -168,6 +179,7 @@ template<> CHANNELDUE_API ::channeldpb::Packet* Arena::CreateMaybeMessage<::chan
 template<> CHANNELDUE_API ::channeldpb::QuerySpatialChannelMessage* Arena::CreateMaybeMessage<::channeldpb::QuerySpatialChannelMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::QuerySpatialChannelResultMessage* Arena::CreateMaybeMessage<::channeldpb::QuerySpatialChannelResultMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::RemoveChannelMessage* Arena::CreateMaybeMessage<::channeldpb::RemoveChannelMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::RemoveEntityGroupMessage* Arena::CreateMaybeMessage<::channeldpb::RemoveEntityGroupMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::ServerForwardMessage* Arena::CreateMaybeMessage<::channeldpb::ServerForwardMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::SpatialInfo* Arena::CreateMaybeMessage<::channeldpb::SpatialInfo>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::SpatialInterestQuery* Arena::CreateMaybeMessage<::channeldpb::SpatialInterestQuery>(Arena*);
@@ -274,6 +286,7 @@ enum ChannelType : int {
   PRIVATE = 2,
   SUBWORLD = 3,
   SPATIAL = 4,
+  ENTITY = 5,
   TEST = 100,
   TEST1 = 101,
   TEST2 = 102,
@@ -316,6 +329,9 @@ enum MessageType : int {
   CHANNEL_DATA_HANDOVER = 12,
   SPATIAL_REGIONS_UPDATE = 13,
   UPDATE_SPATIAL_INTEREST = 14,
+  CREATE_ENTITY_CHANNEL = 15,
+  ENTITY_GROUP_ADD = 16,
+  ENTITY_GROUP_REMOVE = 17,
   DEBUG_GET_SPATIAL_REGIONS = 99,
   USER_SPACE_START = 100,
   MessageType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
@@ -390,6 +406,31 @@ inline bool ChannelDataAccess_Parse(
     ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, ChannelDataAccess* value) {
   return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<ChannelDataAccess>(
     ChannelDataAccess_descriptor(), name, value);
+}
+enum EntityGroupType : int {
+  HANDOVER = 0,
+  LOCK = 1,
+  EntityGroupType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
+  EntityGroupType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
+};
+CHANNELDUE_API bool EntityGroupType_IsValid(int value);
+constexpr EntityGroupType EntityGroupType_MIN = HANDOVER;
+constexpr EntityGroupType EntityGroupType_MAX = LOCK;
+constexpr int EntityGroupType_ARRAYSIZE = EntityGroupType_MAX + 1;
+
+CHANNELDUE_API const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* EntityGroupType_descriptor();
+template<typename T>
+inline const std::string& EntityGroupType_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, EntityGroupType>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function EntityGroupType_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    EntityGroupType_descriptor(), enum_t_value);
+}
+inline bool EntityGroupType_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, EntityGroupType* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<EntityGroupType>(
+    EntityGroupType_descriptor(), name, value);
 }
 // ===================================================================
 
@@ -1408,6 +1449,7 @@ class CHANNELDUE_API ChannelSubscriptionOptions final :
     kFanOutIntervalMsFieldNumber = 3,
     kFanOutDelayMsFieldNumber = 4,
     kSkipSelfUpdateFanOutFieldNumber = 5,
+    kSkipFirstFanOutFieldNumber = 6,
   };
   // repeated string dataFieldMasks = 2;
   int datafieldmasks_size() const;
@@ -1485,6 +1527,19 @@ class CHANNELDUE_API ChannelSubscriptionOptions final :
   void _internal_set_skipselfupdatefanout(bool value);
   public:
 
+  // optional bool skipFirstFanOut = 6;
+  bool has_skipfirstfanout() const;
+  private:
+  bool _internal_has_skipfirstfanout() const;
+  public:
+  void clear_skipfirstfanout();
+  bool skipfirstfanout() const;
+  void set_skipfirstfanout(bool value);
+  private:
+  bool _internal_skipfirstfanout() const;
+  void _internal_set_skipfirstfanout(bool value);
+  public:
+
   // @@protoc_insertion_point(class_scope:channeldpb.ChannelSubscriptionOptions)
  private:
   class _Internal;
@@ -1500,6 +1555,7 @@ class CHANNELDUE_API ChannelSubscriptionOptions final :
     uint32_t fanoutintervalms_;
     int32_t fanoutdelayms_;
     bool skipselfupdatefanout_;
+    bool skipfirstfanout_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_channeld_2eproto;
@@ -6086,6 +6142,587 @@ class CHANNELDUE_API UpdateSpatialInterestMessage final :
 };
 // -------------------------------------------------------------------
 
+class CHANNELDUE_API CreateEntityChannelMessage final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.CreateEntityChannelMessage) */ {
+ public:
+  inline CreateEntityChannelMessage() : CreateEntityChannelMessage(nullptr) {}
+  ~CreateEntityChannelMessage() override;
+  explicit PROTOBUF_CONSTEXPR CreateEntityChannelMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  CreateEntityChannelMessage(const CreateEntityChannelMessage& from);
+  CreateEntityChannelMessage(CreateEntityChannelMessage&& from) noexcept
+    : CreateEntityChannelMessage() {
+    *this = ::std::move(from);
+  }
+
+  inline CreateEntityChannelMessage& operator=(const CreateEntityChannelMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline CreateEntityChannelMessage& operator=(CreateEntityChannelMessage&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const CreateEntityChannelMessage& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const CreateEntityChannelMessage* internal_default_instance() {
+    return reinterpret_cast<const CreateEntityChannelMessage*>(
+               &_CreateEntityChannelMessage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    32;
+
+  friend void swap(CreateEntityChannelMessage& a, CreateEntityChannelMessage& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(CreateEntityChannelMessage* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(CreateEntityChannelMessage* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  CreateEntityChannelMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<CreateEntityChannelMessage>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const CreateEntityChannelMessage& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const CreateEntityChannelMessage& from) {
+    CreateEntityChannelMessage::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(CreateEntityChannelMessage* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "channeldpb.CreateEntityChannelMessage";
+  }
+  protected:
+  explicit CreateEntityChannelMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kMetadataFieldNumber = 2,
+    kSubOptionsFieldNumber = 3,
+    kDataFieldNumber = 4,
+    kMergeOptionsFieldNumber = 5,
+    kEntityIdFieldNumber = 1,
+    kIsWellKnownFieldNumber = 6,
+  };
+  // string metadata = 2;
+  void clear_metadata();
+  const std::string& metadata() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_metadata(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_metadata();
+  PROTOBUF_NODISCARD std::string* release_metadata();
+  void set_allocated_metadata(std::string* metadata);
+  private:
+  const std::string& _internal_metadata() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_metadata(const std::string& value);
+  std::string* _internal_mutable_metadata();
+  public:
+
+  // .channeldpb.ChannelSubscriptionOptions subOptions = 3;
+  bool has_suboptions() const;
+  private:
+  bool _internal_has_suboptions() const;
+  public:
+  void clear_suboptions();
+  const ::channeldpb::ChannelSubscriptionOptions& suboptions() const;
+  PROTOBUF_NODISCARD ::channeldpb::ChannelSubscriptionOptions* release_suboptions();
+  ::channeldpb::ChannelSubscriptionOptions* mutable_suboptions();
+  void set_allocated_suboptions(::channeldpb::ChannelSubscriptionOptions* suboptions);
+  private:
+  const ::channeldpb::ChannelSubscriptionOptions& _internal_suboptions() const;
+  ::channeldpb::ChannelSubscriptionOptions* _internal_mutable_suboptions();
+  public:
+  void unsafe_arena_set_allocated_suboptions(
+      ::channeldpb::ChannelSubscriptionOptions* suboptions);
+  ::channeldpb::ChannelSubscriptionOptions* unsafe_arena_release_suboptions();
+
+  // .google.protobuf.Any data = 4;
+  bool has_data() const;
+  private:
+  bool _internal_has_data() const;
+  public:
+  void clear_data();
+  const ::PROTOBUF_NAMESPACE_ID::Any& data() const;
+  PROTOBUF_NODISCARD ::PROTOBUF_NAMESPACE_ID::Any* release_data();
+  ::PROTOBUF_NAMESPACE_ID::Any* mutable_data();
+  void set_allocated_data(::PROTOBUF_NAMESPACE_ID::Any* data);
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Any& _internal_data() const;
+  ::PROTOBUF_NAMESPACE_ID::Any* _internal_mutable_data();
+  public:
+  void unsafe_arena_set_allocated_data(
+      ::PROTOBUF_NAMESPACE_ID::Any* data);
+  ::PROTOBUF_NAMESPACE_ID::Any* unsafe_arena_release_data();
+
+  // .channeldpb.ChannelDataMergeOptions mergeOptions = 5;
+  bool has_mergeoptions() const;
+  private:
+  bool _internal_has_mergeoptions() const;
+  public:
+  void clear_mergeoptions();
+  const ::channeldpb::ChannelDataMergeOptions& mergeoptions() const;
+  PROTOBUF_NODISCARD ::channeldpb::ChannelDataMergeOptions* release_mergeoptions();
+  ::channeldpb::ChannelDataMergeOptions* mutable_mergeoptions();
+  void set_allocated_mergeoptions(::channeldpb::ChannelDataMergeOptions* mergeoptions);
+  private:
+  const ::channeldpb::ChannelDataMergeOptions& _internal_mergeoptions() const;
+  ::channeldpb::ChannelDataMergeOptions* _internal_mutable_mergeoptions();
+  public:
+  void unsafe_arena_set_allocated_mergeoptions(
+      ::channeldpb::ChannelDataMergeOptions* mergeoptions);
+  ::channeldpb::ChannelDataMergeOptions* unsafe_arena_release_mergeoptions();
+
+  // uint32 entityId = 1;
+  void clear_entityid();
+  uint32_t entityid() const;
+  void set_entityid(uint32_t value);
+  private:
+  uint32_t _internal_entityid() const;
+  void _internal_set_entityid(uint32_t value);
+  public:
+
+  // bool isWellKnown = 6;
+  void clear_iswellknown();
+  bool iswellknown() const;
+  void set_iswellknown(bool value);
+  private:
+  bool _internal_iswellknown() const;
+  void _internal_set_iswellknown(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:channeldpb.CreateEntityChannelMessage)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr metadata_;
+    ::channeldpb::ChannelSubscriptionOptions* suboptions_;
+    ::PROTOBUF_NAMESPACE_ID::Any* data_;
+    ::channeldpb::ChannelDataMergeOptions* mergeoptions_;
+    uint32_t entityid_;
+    bool iswellknown_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_channeld_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API AddEntityGroupMessage final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.AddEntityGroupMessage) */ {
+ public:
+  inline AddEntityGroupMessage() : AddEntityGroupMessage(nullptr) {}
+  ~AddEntityGroupMessage() override;
+  explicit PROTOBUF_CONSTEXPR AddEntityGroupMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  AddEntityGroupMessage(const AddEntityGroupMessage& from);
+  AddEntityGroupMessage(AddEntityGroupMessage&& from) noexcept
+    : AddEntityGroupMessage() {
+    *this = ::std::move(from);
+  }
+
+  inline AddEntityGroupMessage& operator=(const AddEntityGroupMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline AddEntityGroupMessage& operator=(AddEntityGroupMessage&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const AddEntityGroupMessage& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const AddEntityGroupMessage* internal_default_instance() {
+    return reinterpret_cast<const AddEntityGroupMessage*>(
+               &_AddEntityGroupMessage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    33;
+
+  friend void swap(AddEntityGroupMessage& a, AddEntityGroupMessage& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(AddEntityGroupMessage* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(AddEntityGroupMessage* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  AddEntityGroupMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<AddEntityGroupMessage>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const AddEntityGroupMessage& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const AddEntityGroupMessage& from) {
+    AddEntityGroupMessage::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(AddEntityGroupMessage* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "channeldpb.AddEntityGroupMessage";
+  }
+  protected:
+  explicit AddEntityGroupMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kEntitiesToAddFieldNumber = 2,
+    kTypeFieldNumber = 1,
+  };
+  // repeated uint32 EntitiesToAdd = 2;
+  int entitiestoadd_size() const;
+  private:
+  int _internal_entitiestoadd_size() const;
+  public:
+  void clear_entitiestoadd();
+  private:
+  uint32_t _internal_entitiestoadd(int index) const;
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >&
+      _internal_entitiestoadd() const;
+  void _internal_add_entitiestoadd(uint32_t value);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >*
+      _internal_mutable_entitiestoadd();
+  public:
+  uint32_t entitiestoadd(int index) const;
+  void set_entitiestoadd(int index, uint32_t value);
+  void add_entitiestoadd(uint32_t value);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >&
+      entitiestoadd() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >*
+      mutable_entitiestoadd();
+
+  // .channeldpb.EntityGroupType type = 1;
+  void clear_type();
+  ::channeldpb::EntityGroupType type() const;
+  void set_type(::channeldpb::EntityGroupType value);
+  private:
+  ::channeldpb::EntityGroupType _internal_type() const;
+  void _internal_set_type(::channeldpb::EntityGroupType value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:channeldpb.AddEntityGroupMessage)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t > entitiestoadd_;
+    mutable std::atomic<int> _entitiestoadd_cached_byte_size_;
+    int type_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_channeld_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API RemoveEntityGroupMessage final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.RemoveEntityGroupMessage) */ {
+ public:
+  inline RemoveEntityGroupMessage() : RemoveEntityGroupMessage(nullptr) {}
+  ~RemoveEntityGroupMessage() override;
+  explicit PROTOBUF_CONSTEXPR RemoveEntityGroupMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RemoveEntityGroupMessage(const RemoveEntityGroupMessage& from);
+  RemoveEntityGroupMessage(RemoveEntityGroupMessage&& from) noexcept
+    : RemoveEntityGroupMessage() {
+    *this = ::std::move(from);
+  }
+
+  inline RemoveEntityGroupMessage& operator=(const RemoveEntityGroupMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RemoveEntityGroupMessage& operator=(RemoveEntityGroupMessage&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const RemoveEntityGroupMessage& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RemoveEntityGroupMessage* internal_default_instance() {
+    return reinterpret_cast<const RemoveEntityGroupMessage*>(
+               &_RemoveEntityGroupMessage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    34;
+
+  friend void swap(RemoveEntityGroupMessage& a, RemoveEntityGroupMessage& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RemoveEntityGroupMessage* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RemoveEntityGroupMessage* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  RemoveEntityGroupMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<RemoveEntityGroupMessage>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const RemoveEntityGroupMessage& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const RemoveEntityGroupMessage& from) {
+    RemoveEntityGroupMessage::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RemoveEntityGroupMessage* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "channeldpb.RemoveEntityGroupMessage";
+  }
+  protected:
+  explicit RemoveEntityGroupMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kEntitiesToRemoveFieldNumber = 2,
+    kTypeFieldNumber = 1,
+  };
+  // repeated uint32 EntitiesToRemove = 2;
+  int entitiestoremove_size() const;
+  private:
+  int _internal_entitiestoremove_size() const;
+  public:
+  void clear_entitiestoremove();
+  private:
+  uint32_t _internal_entitiestoremove(int index) const;
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >&
+      _internal_entitiestoremove() const;
+  void _internal_add_entitiestoremove(uint32_t value);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >*
+      _internal_mutable_entitiestoremove();
+  public:
+  uint32_t entitiestoremove(int index) const;
+  void set_entitiestoremove(int index, uint32_t value);
+  void add_entitiestoremove(uint32_t value);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >&
+      entitiestoremove() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >*
+      mutable_entitiestoremove();
+
+  // .channeldpb.EntityGroupType type = 1;
+  void clear_type();
+  ::channeldpb::EntityGroupType type() const;
+  void set_type(::channeldpb::EntityGroupType value);
+  private:
+  ::channeldpb::EntityGroupType _internal_type() const;
+  void _internal_set_type(::channeldpb::EntityGroupType value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:channeldpb.RemoveEntityGroupMessage)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t > entitiestoremove_;
+    mutable std::atomic<int> _entitiestoremove_cached_byte_size_;
+    int type_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_channeld_2eproto;
+};
+// -------------------------------------------------------------------
+
 class CHANNELDUE_API DebugGetSpatialRegionsMessage final :
     public ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase /* @@protoc_insertion_point(class_definition:channeldpb.DebugGetSpatialRegionsMessage) */ {
  public:
@@ -6133,7 +6770,7 @@ class CHANNELDUE_API DebugGetSpatialRegionsMessage final :
                &_DebugGetSpatialRegionsMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    35;
 
   friend void swap(DebugGetSpatialRegionsMessage& a, DebugGetSpatialRegionsMessage& b) {
     a.Swap(&b);
@@ -6818,6 +7455,34 @@ inline void ChannelSubscriptionOptions::_internal_set_skipselfupdatefanout(bool 
 inline void ChannelSubscriptionOptions::set_skipselfupdatefanout(bool value) {
   _internal_set_skipselfupdatefanout(value);
   // @@protoc_insertion_point(field_set:channeldpb.ChannelSubscriptionOptions.skipSelfUpdateFanOut)
+}
+
+// optional bool skipFirstFanOut = 6;
+inline bool ChannelSubscriptionOptions::_internal_has_skipfirstfanout() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool ChannelSubscriptionOptions::has_skipfirstfanout() const {
+  return _internal_has_skipfirstfanout();
+}
+inline void ChannelSubscriptionOptions::clear_skipfirstfanout() {
+  _impl_.skipfirstfanout_ = false;
+  _impl_._has_bits_[0] &= ~0x00000010u;
+}
+inline bool ChannelSubscriptionOptions::_internal_skipfirstfanout() const {
+  return _impl_.skipfirstfanout_;
+}
+inline bool ChannelSubscriptionOptions::skipfirstfanout() const {
+  // @@protoc_insertion_point(field_get:channeldpb.ChannelSubscriptionOptions.skipFirstFanOut)
+  return _internal_skipfirstfanout();
+}
+inline void ChannelSubscriptionOptions::_internal_set_skipfirstfanout(bool value) {
+  _impl_._has_bits_[0] |= 0x00000010u;
+  _impl_.skipfirstfanout_ = value;
+}
+inline void ChannelSubscriptionOptions::set_skipfirstfanout(bool value) {
+  _internal_set_skipfirstfanout(value);
+  // @@protoc_insertion_point(field_set:channeldpb.ChannelSubscriptionOptions.skipFirstFanOut)
 }
 
 // -------------------------------------------------------------------
@@ -9897,11 +10562,518 @@ inline void UpdateSpatialInterestMessage::set_allocated_query(::channeldpb::Spat
 
 // -------------------------------------------------------------------
 
+// CreateEntityChannelMessage
+
+// uint32 entityId = 1;
+inline void CreateEntityChannelMessage::clear_entityid() {
+  _impl_.entityid_ = 0u;
+}
+inline uint32_t CreateEntityChannelMessage::_internal_entityid() const {
+  return _impl_.entityid_;
+}
+inline uint32_t CreateEntityChannelMessage::entityid() const {
+  // @@protoc_insertion_point(field_get:channeldpb.CreateEntityChannelMessage.entityId)
+  return _internal_entityid();
+}
+inline void CreateEntityChannelMessage::_internal_set_entityid(uint32_t value) {
+  
+  _impl_.entityid_ = value;
+}
+inline void CreateEntityChannelMessage::set_entityid(uint32_t value) {
+  _internal_set_entityid(value);
+  // @@protoc_insertion_point(field_set:channeldpb.CreateEntityChannelMessage.entityId)
+}
+
+// string metadata = 2;
+inline void CreateEntityChannelMessage::clear_metadata() {
+  _impl_.metadata_.ClearToEmpty();
+}
+inline const std::string& CreateEntityChannelMessage::metadata() const {
+  // @@protoc_insertion_point(field_get:channeldpb.CreateEntityChannelMessage.metadata)
+  return _internal_metadata();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void CreateEntityChannelMessage::set_metadata(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.metadata_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:channeldpb.CreateEntityChannelMessage.metadata)
+}
+inline std::string* CreateEntityChannelMessage::mutable_metadata() {
+  std::string* _s = _internal_mutable_metadata();
+  // @@protoc_insertion_point(field_mutable:channeldpb.CreateEntityChannelMessage.metadata)
+  return _s;
+}
+inline const std::string& CreateEntityChannelMessage::_internal_metadata() const {
+  return _impl_.metadata_.Get();
+}
+inline void CreateEntityChannelMessage::_internal_set_metadata(const std::string& value) {
+  
+  _impl_.metadata_.Set(value, GetArenaForAllocation());
+}
+inline std::string* CreateEntityChannelMessage::_internal_mutable_metadata() {
+  
+  return _impl_.metadata_.Mutable(GetArenaForAllocation());
+}
+inline std::string* CreateEntityChannelMessage::release_metadata() {
+  // @@protoc_insertion_point(field_release:channeldpb.CreateEntityChannelMessage.metadata)
+  return _impl_.metadata_.Release();
+}
+inline void CreateEntityChannelMessage::set_allocated_metadata(std::string* metadata) {
+  if (metadata != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.metadata_.SetAllocated(metadata, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.metadata_.IsDefault()) {
+    _impl_.metadata_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:channeldpb.CreateEntityChannelMessage.metadata)
+}
+
+// .channeldpb.ChannelSubscriptionOptions subOptions = 3;
+inline bool CreateEntityChannelMessage::_internal_has_suboptions() const {
+  return this != internal_default_instance() && _impl_.suboptions_ != nullptr;
+}
+inline bool CreateEntityChannelMessage::has_suboptions() const {
+  return _internal_has_suboptions();
+}
+inline void CreateEntityChannelMessage::clear_suboptions() {
+  if (GetArenaForAllocation() == nullptr && _impl_.suboptions_ != nullptr) {
+    delete _impl_.suboptions_;
+  }
+  _impl_.suboptions_ = nullptr;
+}
+inline const ::channeldpb::ChannelSubscriptionOptions& CreateEntityChannelMessage::_internal_suboptions() const {
+  const ::channeldpb::ChannelSubscriptionOptions* p = _impl_.suboptions_;
+  return p != nullptr ? *p : reinterpret_cast<const ::channeldpb::ChannelSubscriptionOptions&>(
+      ::channeldpb::_ChannelSubscriptionOptions_default_instance_);
+}
+inline const ::channeldpb::ChannelSubscriptionOptions& CreateEntityChannelMessage::suboptions() const {
+  // @@protoc_insertion_point(field_get:channeldpb.CreateEntityChannelMessage.subOptions)
+  return _internal_suboptions();
+}
+inline void CreateEntityChannelMessage::unsafe_arena_set_allocated_suboptions(
+    ::channeldpb::ChannelSubscriptionOptions* suboptions) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.suboptions_);
+  }
+  _impl_.suboptions_ = suboptions;
+  if (suboptions) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:channeldpb.CreateEntityChannelMessage.subOptions)
+}
+inline ::channeldpb::ChannelSubscriptionOptions* CreateEntityChannelMessage::release_suboptions() {
+  
+  ::channeldpb::ChannelSubscriptionOptions* temp = _impl_.suboptions_;
+  _impl_.suboptions_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::channeldpb::ChannelSubscriptionOptions* CreateEntityChannelMessage::unsafe_arena_release_suboptions() {
+  // @@protoc_insertion_point(field_release:channeldpb.CreateEntityChannelMessage.subOptions)
+  
+  ::channeldpb::ChannelSubscriptionOptions* temp = _impl_.suboptions_;
+  _impl_.suboptions_ = nullptr;
+  return temp;
+}
+inline ::channeldpb::ChannelSubscriptionOptions* CreateEntityChannelMessage::_internal_mutable_suboptions() {
+  
+  if (_impl_.suboptions_ == nullptr) {
+    auto* p = CreateMaybeMessage<::channeldpb::ChannelSubscriptionOptions>(GetArenaForAllocation());
+    _impl_.suboptions_ = p;
+  }
+  return _impl_.suboptions_;
+}
+inline ::channeldpb::ChannelSubscriptionOptions* CreateEntityChannelMessage::mutable_suboptions() {
+  ::channeldpb::ChannelSubscriptionOptions* _msg = _internal_mutable_suboptions();
+  // @@protoc_insertion_point(field_mutable:channeldpb.CreateEntityChannelMessage.subOptions)
+  return _msg;
+}
+inline void CreateEntityChannelMessage::set_allocated_suboptions(::channeldpb::ChannelSubscriptionOptions* suboptions) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.suboptions_;
+  }
+  if (suboptions) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(suboptions);
+    if (message_arena != submessage_arena) {
+      suboptions = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, suboptions, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.suboptions_ = suboptions;
+  // @@protoc_insertion_point(field_set_allocated:channeldpb.CreateEntityChannelMessage.subOptions)
+}
+
+// .google.protobuf.Any data = 4;
+inline bool CreateEntityChannelMessage::_internal_has_data() const {
+  return this != internal_default_instance() && _impl_.data_ != nullptr;
+}
+inline bool CreateEntityChannelMessage::has_data() const {
+  return _internal_has_data();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Any& CreateEntityChannelMessage::_internal_data() const {
+  const ::PROTOBUF_NAMESPACE_ID::Any* p = _impl_.data_;
+  return p != nullptr ? *p : reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Any&>(
+      ::PROTOBUF_NAMESPACE_ID::_Any_default_instance_);
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Any& CreateEntityChannelMessage::data() const {
+  // @@protoc_insertion_point(field_get:channeldpb.CreateEntityChannelMessage.data)
+  return _internal_data();
+}
+inline void CreateEntityChannelMessage::unsafe_arena_set_allocated_data(
+    ::PROTOBUF_NAMESPACE_ID::Any* data) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.data_);
+  }
+  _impl_.data_ = data;
+  if (data) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:channeldpb.CreateEntityChannelMessage.data)
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* CreateEntityChannelMessage::release_data() {
+  
+  ::PROTOBUF_NAMESPACE_ID::Any* temp = _impl_.data_;
+  _impl_.data_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* CreateEntityChannelMessage::unsafe_arena_release_data() {
+  // @@protoc_insertion_point(field_release:channeldpb.CreateEntityChannelMessage.data)
+  
+  ::PROTOBUF_NAMESPACE_ID::Any* temp = _impl_.data_;
+  _impl_.data_ = nullptr;
+  return temp;
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* CreateEntityChannelMessage::_internal_mutable_data() {
+  
+  if (_impl_.data_ == nullptr) {
+    auto* p = CreateMaybeMessage<::PROTOBUF_NAMESPACE_ID::Any>(GetArenaForAllocation());
+    _impl_.data_ = p;
+  }
+  return _impl_.data_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* CreateEntityChannelMessage::mutable_data() {
+  ::PROTOBUF_NAMESPACE_ID::Any* _msg = _internal_mutable_data();
+  // @@protoc_insertion_point(field_mutable:channeldpb.CreateEntityChannelMessage.data)
+  return _msg;
+}
+inline void CreateEntityChannelMessage::set_allocated_data(::PROTOBUF_NAMESPACE_ID::Any* data) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.data_);
+  }
+  if (data) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(
+                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(data));
+    if (message_arena != submessage_arena) {
+      data = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, data, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.data_ = data;
+  // @@protoc_insertion_point(field_set_allocated:channeldpb.CreateEntityChannelMessage.data)
+}
+
+// .channeldpb.ChannelDataMergeOptions mergeOptions = 5;
+inline bool CreateEntityChannelMessage::_internal_has_mergeoptions() const {
+  return this != internal_default_instance() && _impl_.mergeoptions_ != nullptr;
+}
+inline bool CreateEntityChannelMessage::has_mergeoptions() const {
+  return _internal_has_mergeoptions();
+}
+inline void CreateEntityChannelMessage::clear_mergeoptions() {
+  if (GetArenaForAllocation() == nullptr && _impl_.mergeoptions_ != nullptr) {
+    delete _impl_.mergeoptions_;
+  }
+  _impl_.mergeoptions_ = nullptr;
+}
+inline const ::channeldpb::ChannelDataMergeOptions& CreateEntityChannelMessage::_internal_mergeoptions() const {
+  const ::channeldpb::ChannelDataMergeOptions* p = _impl_.mergeoptions_;
+  return p != nullptr ? *p : reinterpret_cast<const ::channeldpb::ChannelDataMergeOptions&>(
+      ::channeldpb::_ChannelDataMergeOptions_default_instance_);
+}
+inline const ::channeldpb::ChannelDataMergeOptions& CreateEntityChannelMessage::mergeoptions() const {
+  // @@protoc_insertion_point(field_get:channeldpb.CreateEntityChannelMessage.mergeOptions)
+  return _internal_mergeoptions();
+}
+inline void CreateEntityChannelMessage::unsafe_arena_set_allocated_mergeoptions(
+    ::channeldpb::ChannelDataMergeOptions* mergeoptions) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.mergeoptions_);
+  }
+  _impl_.mergeoptions_ = mergeoptions;
+  if (mergeoptions) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:channeldpb.CreateEntityChannelMessage.mergeOptions)
+}
+inline ::channeldpb::ChannelDataMergeOptions* CreateEntityChannelMessage::release_mergeoptions() {
+  
+  ::channeldpb::ChannelDataMergeOptions* temp = _impl_.mergeoptions_;
+  _impl_.mergeoptions_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::channeldpb::ChannelDataMergeOptions* CreateEntityChannelMessage::unsafe_arena_release_mergeoptions() {
+  // @@protoc_insertion_point(field_release:channeldpb.CreateEntityChannelMessage.mergeOptions)
+  
+  ::channeldpb::ChannelDataMergeOptions* temp = _impl_.mergeoptions_;
+  _impl_.mergeoptions_ = nullptr;
+  return temp;
+}
+inline ::channeldpb::ChannelDataMergeOptions* CreateEntityChannelMessage::_internal_mutable_mergeoptions() {
+  
+  if (_impl_.mergeoptions_ == nullptr) {
+    auto* p = CreateMaybeMessage<::channeldpb::ChannelDataMergeOptions>(GetArenaForAllocation());
+    _impl_.mergeoptions_ = p;
+  }
+  return _impl_.mergeoptions_;
+}
+inline ::channeldpb::ChannelDataMergeOptions* CreateEntityChannelMessage::mutable_mergeoptions() {
+  ::channeldpb::ChannelDataMergeOptions* _msg = _internal_mutable_mergeoptions();
+  // @@protoc_insertion_point(field_mutable:channeldpb.CreateEntityChannelMessage.mergeOptions)
+  return _msg;
+}
+inline void CreateEntityChannelMessage::set_allocated_mergeoptions(::channeldpb::ChannelDataMergeOptions* mergeoptions) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.mergeoptions_;
+  }
+  if (mergeoptions) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(mergeoptions);
+    if (message_arena != submessage_arena) {
+      mergeoptions = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, mergeoptions, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.mergeoptions_ = mergeoptions;
+  // @@protoc_insertion_point(field_set_allocated:channeldpb.CreateEntityChannelMessage.mergeOptions)
+}
+
+// bool isWellKnown = 6;
+inline void CreateEntityChannelMessage::clear_iswellknown() {
+  _impl_.iswellknown_ = false;
+}
+inline bool CreateEntityChannelMessage::_internal_iswellknown() const {
+  return _impl_.iswellknown_;
+}
+inline bool CreateEntityChannelMessage::iswellknown() const {
+  // @@protoc_insertion_point(field_get:channeldpb.CreateEntityChannelMessage.isWellKnown)
+  return _internal_iswellknown();
+}
+inline void CreateEntityChannelMessage::_internal_set_iswellknown(bool value) {
+  
+  _impl_.iswellknown_ = value;
+}
+inline void CreateEntityChannelMessage::set_iswellknown(bool value) {
+  _internal_set_iswellknown(value);
+  // @@protoc_insertion_point(field_set:channeldpb.CreateEntityChannelMessage.isWellKnown)
+}
+
+// -------------------------------------------------------------------
+
+// AddEntityGroupMessage
+
+// .channeldpb.EntityGroupType type = 1;
+inline void AddEntityGroupMessage::clear_type() {
+  _impl_.type_ = 0;
+}
+inline ::channeldpb::EntityGroupType AddEntityGroupMessage::_internal_type() const {
+  return static_cast< ::channeldpb::EntityGroupType >(_impl_.type_);
+}
+inline ::channeldpb::EntityGroupType AddEntityGroupMessage::type() const {
+  // @@protoc_insertion_point(field_get:channeldpb.AddEntityGroupMessage.type)
+  return _internal_type();
+}
+inline void AddEntityGroupMessage::_internal_set_type(::channeldpb::EntityGroupType value) {
+  
+  _impl_.type_ = value;
+}
+inline void AddEntityGroupMessage::set_type(::channeldpb::EntityGroupType value) {
+  _internal_set_type(value);
+  // @@protoc_insertion_point(field_set:channeldpb.AddEntityGroupMessage.type)
+}
+
+// repeated uint32 EntitiesToAdd = 2;
+inline int AddEntityGroupMessage::_internal_entitiestoadd_size() const {
+  return _impl_.entitiestoadd_.size();
+}
+inline int AddEntityGroupMessage::entitiestoadd_size() const {
+  return _internal_entitiestoadd_size();
+}
+inline void AddEntityGroupMessage::clear_entitiestoadd() {
+  _impl_.entitiestoadd_.Clear();
+}
+inline uint32_t AddEntityGroupMessage::_internal_entitiestoadd(int index) const {
+  return _impl_.entitiestoadd_.Get(index);
+}
+inline uint32_t AddEntityGroupMessage::entitiestoadd(int index) const {
+  // @@protoc_insertion_point(field_get:channeldpb.AddEntityGroupMessage.EntitiesToAdd)
+  return _internal_entitiestoadd(index);
+}
+inline void AddEntityGroupMessage::set_entitiestoadd(int index, uint32_t value) {
+  _impl_.entitiestoadd_.Set(index, value);
+  // @@protoc_insertion_point(field_set:channeldpb.AddEntityGroupMessage.EntitiesToAdd)
+}
+inline void AddEntityGroupMessage::_internal_add_entitiestoadd(uint32_t value) {
+  _impl_.entitiestoadd_.Add(value);
+}
+inline void AddEntityGroupMessage::add_entitiestoadd(uint32_t value) {
+  _internal_add_entitiestoadd(value);
+  // @@protoc_insertion_point(field_add:channeldpb.AddEntityGroupMessage.EntitiesToAdd)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >&
+AddEntityGroupMessage::_internal_entitiestoadd() const {
+  return _impl_.entitiestoadd_;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >&
+AddEntityGroupMessage::entitiestoadd() const {
+  // @@protoc_insertion_point(field_list:channeldpb.AddEntityGroupMessage.EntitiesToAdd)
+  return _internal_entitiestoadd();
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >*
+AddEntityGroupMessage::_internal_mutable_entitiestoadd() {
+  return &_impl_.entitiestoadd_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >*
+AddEntityGroupMessage::mutable_entitiestoadd() {
+  // @@protoc_insertion_point(field_mutable_list:channeldpb.AddEntityGroupMessage.EntitiesToAdd)
+  return _internal_mutable_entitiestoadd();
+}
+
+// -------------------------------------------------------------------
+
+// RemoveEntityGroupMessage
+
+// .channeldpb.EntityGroupType type = 1;
+inline void RemoveEntityGroupMessage::clear_type() {
+  _impl_.type_ = 0;
+}
+inline ::channeldpb::EntityGroupType RemoveEntityGroupMessage::_internal_type() const {
+  return static_cast< ::channeldpb::EntityGroupType >(_impl_.type_);
+}
+inline ::channeldpb::EntityGroupType RemoveEntityGroupMessage::type() const {
+  // @@protoc_insertion_point(field_get:channeldpb.RemoveEntityGroupMessage.type)
+  return _internal_type();
+}
+inline void RemoveEntityGroupMessage::_internal_set_type(::channeldpb::EntityGroupType value) {
+  
+  _impl_.type_ = value;
+}
+inline void RemoveEntityGroupMessage::set_type(::channeldpb::EntityGroupType value) {
+  _internal_set_type(value);
+  // @@protoc_insertion_point(field_set:channeldpb.RemoveEntityGroupMessage.type)
+}
+
+// repeated uint32 EntitiesToRemove = 2;
+inline int RemoveEntityGroupMessage::_internal_entitiestoremove_size() const {
+  return _impl_.entitiestoremove_.size();
+}
+inline int RemoveEntityGroupMessage::entitiestoremove_size() const {
+  return _internal_entitiestoremove_size();
+}
+inline void RemoveEntityGroupMessage::clear_entitiestoremove() {
+  _impl_.entitiestoremove_.Clear();
+}
+inline uint32_t RemoveEntityGroupMessage::_internal_entitiestoremove(int index) const {
+  return _impl_.entitiestoremove_.Get(index);
+}
+inline uint32_t RemoveEntityGroupMessage::entitiestoremove(int index) const {
+  // @@protoc_insertion_point(field_get:channeldpb.RemoveEntityGroupMessage.EntitiesToRemove)
+  return _internal_entitiestoremove(index);
+}
+inline void RemoveEntityGroupMessage::set_entitiestoremove(int index, uint32_t value) {
+  _impl_.entitiestoremove_.Set(index, value);
+  // @@protoc_insertion_point(field_set:channeldpb.RemoveEntityGroupMessage.EntitiesToRemove)
+}
+inline void RemoveEntityGroupMessage::_internal_add_entitiestoremove(uint32_t value) {
+  _impl_.entitiestoremove_.Add(value);
+}
+inline void RemoveEntityGroupMessage::add_entitiestoremove(uint32_t value) {
+  _internal_add_entitiestoremove(value);
+  // @@protoc_insertion_point(field_add:channeldpb.RemoveEntityGroupMessage.EntitiesToRemove)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >&
+RemoveEntityGroupMessage::_internal_entitiestoremove() const {
+  return _impl_.entitiestoremove_;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >&
+RemoveEntityGroupMessage::entitiestoremove() const {
+  // @@protoc_insertion_point(field_list:channeldpb.RemoveEntityGroupMessage.EntitiesToRemove)
+  return _internal_entitiestoremove();
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >*
+RemoveEntityGroupMessage::_internal_mutable_entitiestoremove() {
+  return &_impl_.entitiestoremove_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< uint32_t >*
+RemoveEntityGroupMessage::mutable_entitiestoremove() {
+  // @@protoc_insertion_point(field_mutable_list:channeldpb.RemoveEntityGroupMessage.EntitiesToRemove)
+  return _internal_mutable_entitiestoremove();
+}
+
+// -------------------------------------------------------------------
+
 // DebugGetSpatialRegionsMessage
 
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
@@ -10007,6 +11179,11 @@ template <> struct is_proto_enum< ::channeldpb::ChannelDataAccess> : ::std::true
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::channeldpb::ChannelDataAccess>() {
   return ::channeldpb::ChannelDataAccess_descriptor();
+}
+template <> struct is_proto_enum< ::channeldpb::EntityGroupType> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::channeldpb::EntityGroupType>() {
+  return ::channeldpb::EntityGroupType_descriptor();
 }
 
 PROTOBUF_NAMESPACE_CLOSE

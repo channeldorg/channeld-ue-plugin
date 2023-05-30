@@ -47,7 +47,7 @@ static const TCHAR* ActorDecor_GetStateFromChannelData_Singleton =
 	LR"EOF(
 if({Code_Condition}) {
   bIsRemoved = false;
-  return {Declaration_ChannelDataMessage}->mutable_{Definition_ChannelDataFieldName}();
+  return {Declaration_ChannelDataMessage}->has_{Definition_ChannelDataFieldName}() ? &{Declaration_ChannelDataMessage}->{Definition_ChannelDataFieldName}() : nullptr;
 }
 )EOF";
 
@@ -339,7 +339,7 @@ public:
 
 	virtual FString GetCode_ChannelDataProcessor_SetStateToChannelData(const FString& ChannelDataMessageName);
 
-	virtual FString GetCode_ChannelDataProtoFieldDefinition(const int32& Index);
+	virtual FString GetCode_ChannelDataProtoFieldDefinition(const int32& FieldNum);
 
 	virtual bool IsStruct() override;
 

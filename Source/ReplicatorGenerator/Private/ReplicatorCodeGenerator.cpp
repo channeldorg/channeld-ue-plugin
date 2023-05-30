@@ -105,7 +105,10 @@ bool FReplicatorCodeGenerator::Generate(
 	FString RegisterChannelDataProcessorCode, DeleteChannelDataProcessorCode, ChannelDataProcessorPtrDecls,
 	        ChannelDataRegistrationGoCode;
 	ReplicationCodeBundle.ChannelDataMerge_GoCode.Append(FString::Printf(TEXT("package %s\n"), *ProtoPackageName));
-	ReplicationCodeBundle.ChannelDataMerge_GoCode.Append(CodeGen_Go_Data_ImportTemplate);
+	// Entity channel data.go imports anypb
+	bool bHasEntityChannelData = ChannelDataInfos.ContainsByPredicate([](const auto& Info) {return Info.Schema.ChannelType == EChanneldChannelType::ECT_Entity;});
+	ReplicationCodeBundle.ChannelDataMerge_GoCode.Append(FString::Format(CodeGen_Go_Data_ImportTemplate,
+		{{"Code_AnypbImport", bHasEntityChannelData	? TEXT("\"google.golang.org/protobuf/types/known/anypb\"") : TEXT("")}}));
 	for (const FChannelDataInfo& ChannelDataInfo : ChannelDataInfos)
 	{
 		ReplicationCodeBundle.ChannelDataCodes.Add(FChannelDataCode());
@@ -410,7 +413,8 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 		TSharedPtr<FReplicatedActorDecorator> ActorDecorator;
 		if (!CreateDecorateActor(ActorDecorator, Message, StateInfo.RepActorClass, StateInfo.Setting, ProtoPackageName, ProtoMessageSuffix, GoPackageImportPath, false))
 		{
-			UE_LOG(LogChanneldRepGenerator, Warning, TEXT("%s"), *Message);
+			UE_LOG(LogChanneldRepGenerator, Warning, TEXT("Failed to create ActorDecorator: %s"), *Message);
+			return false;
 		}
 		if (ActorDecorator->IsSkipGenChannelDataState())
 		{
@@ -422,6 +426,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	// Generate ChannelDataProcessor Proto definition file
 	if (!GenerateChannelDataProtoDefFile(
 		ActorDecoratorsToGenChannelData
+		, ChannelDataInfo.Schema.ChannelType
 		, ChannelDataProtoMsgName
 		, ProtoPackageName
 		, GoPackageImportPath
@@ -465,6 +470,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	if (!GenerateChannelDataProcessorCode(
 		SortedReplicationActorClasses,
 		ChildrenOfAActor,
+		ChannelDataInfo.Schema.ChannelType,
 		ChannelDataProtoMsgName,
 		ChannelDataProcessorNamespace,
 		ChannelDataProcessorClassName,
@@ -482,6 +488,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	if (!GenerateChannelDataMerge_GoCode(
 		SortedReplicationActorClasses,
 		ChildrenOfAActor,
+		ChannelDataInfo.Schema.ChannelType,
 		ChannelDataProtoMsgName,
 		ProtoPackageName,
 		GeneratedResult.Merge_GoCode
@@ -508,6 +515,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
 	const TArray<TSharedPtr<FReplicatedActorDecorator>>& ChildrenOfAActor,
+	const EChanneldChannelType ChannelType,
 	const FString& ChannelDataMessageName,
 	const FString& ChannelDataProcessorNamespace,
 	const FString& ChannelDataProcessorClassName,
@@ -524,6 +532,18 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	FString ChannelDataProcessor_GetStateCode;
 	FString ChannelDataProcessor_SetStateCode;
 	FString ChannelDataProcessor_GetRelevantNetGUIDsCode;
+
+	// Handle Merge/GetState/SetStsate of UnrealObjectRef for the Entity channel data
+	if (ChannelType == EChanneldChannelType::ECT_Entity)
+	{
+		ChannelDataProcessor_MergeCode.Append(CodeGen_MergeObjectState);
+	}
+	ChannelDataProcessor_GetStateCode.Append(FString::Format(ChannelType == EChanneldChannelType::ECT_Entity ?
+		CodeGen_GetObjectStateFromEntityChannelData : CodeGen_GetObjectStateFromChannelData,
+		{{"Declaration_ChannelDataMessage", ChannelDataMessageName}}));
+	ChannelDataProcessor_SetStateCode.Append(FString::Format(ChannelType == EChanneldChannelType::ECT_Entity ?
+		CodeGen_SetObjectStateToEntityChannelData : CodeGen_SetObjectStateToChannelData,
+		{{"Declaration_ChannelDataMessage", ChannelDataMessageName}}));
 
 	bool bHasAActor = false;
 	int32 ConstPathFNameVarDeclIndex = 0;
@@ -544,7 +564,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 		ChannelDataProcessor_RemovedStateDecl.Append(ActorDecorator->GetDeclaration_ChanneldDataProcessor_RemovedStata() + TEXT("\n"));
 		ChannelDataProcessor_InitRemovedStateCode.Append(ActorDecorator->GetCode_ChanneldDataProcessor_InitRemovedState());
 		ChannelDataProcessor_MergeCode.Append(ActorDecorator->GetCode_ChannelDataProcessor_Merge(ChildrenOfAActor));
-
+		
 		ChannelDataProcessor_GetStateCode.Append(
 			FString::Printf(
 				TEXT("%s%s"),
@@ -592,18 +612,6 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	CDPFormatArgs.Add(TEXT("Declaration_CDP_ProtoVar"), ChannelDataMessageName);
 	CDPFormatArgs.Add(TEXT("Code_GetStateFromChannelData"), ChannelDataProcessor_GetStateCode.IsEmpty() ? TEXT("") : ChannelDataProcessor_GetStateCode + TEXT("else"));
 	CDPFormatArgs.Add(TEXT("Code_SetStateToChannelData"), ChannelDataProcessor_SetStateCode.IsEmpty() ? TEXT("") : ChannelDataProcessor_SetStateCode + TEXT("else"));
-	if (bHasAActor)
-	{
-		CDPFormatArgs.Add(TEXT("Code_GetRelevantNetGUIDs"), ChannelDataProcessor_GetRelevantNetGUIDsCode);
-		CDPFormatArgs.Add(
-			TEXT("Code_GetRelevantNetGUIDsFromChannelDataInner"),
-			FString::Format(CodeGen_GetRelevantNetGUIDsFromChannelDataTemp, CDPFormatArgs)
-		);
-	}
-	else
-	{
-		CDPFormatArgs.Add(TEXT("Code_GetRelevantNetGUIDsFromChannelDataInner"), TEXT(""));
-	}
 
 	ChannelDataProcessorCode = FString::Format(*CodeGen_ChannelDataProcessorCPPTemp, CDPFormatArgs);
 	return true;
@@ -611,6 +619,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 
 bool FReplicatorCodeGenerator::GenerateChannelDataProtoDefFile(
 	const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
+	const EChanneldChannelType ChannelType,
 	const FString& ChannelDataMessageName,
 	const FString& ProtoPackageName,
 	const FString& GoPackageImportPath,
@@ -620,6 +629,12 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProtoDefFile(
 	FString ChannelDataFields;
 	FString ImportCode = FString::Printf(TEXT("import \"%s\";\n"), *GenManager_UnrealCommonProtoFile);
 	int32 I = 0;
+	// Entity channel data always has the UnrealObjectRef field
+	if (ChannelType == EChanneldChannelType::ECT_Entity)
+	{
+		I++;
+		ChannelDataFields.Append("optional unrealpb.UnrealObjectRef objRef = 1;\n");
+	}
 	for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
 	{
 		ChannelDataFields.Append(ActorDecorator->GetCode_ChannelDataProtoFieldDefinition(++I));
@@ -640,6 +655,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProtoDefFile(
 bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 	const TArray<TSharedPtr<FReplicatedActorDecorator>>& TargetActors,
 	const TArray<TSharedPtr<FReplicatedActorDecorator>>& ChildrenOfAActor,
+	const EChanneldChannelType ChannelType,
 	const FString& ChannelDataMessageName,
 	const FString& ProtoPackageName,
 	FString& GoCode
@@ -648,38 +664,6 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 	// The first letter of Go proto type name should be upper case.
 	FString ChannelDataProtoMsgGoName = ChannelDataMessageName;
 	ChannelDataProtoMsgGoName[0] = toupper(ChannelDataProtoMsgGoName[0]);
-
-	// Generate code: Implement [channeld.ChannelDataCollector]
-	bool bHasCollectStateInMap = false;
-	FString CollectStateGoCode;
-	{
-		FStringFormatNamedArguments FormatArgs;
-		for (const TSharedPtr<FReplicatedActorDecorator> ActorDecorator : TargetActors)
-		{
-			// No need to collect singleton state for handover
-			if (ActorDecorator->IsSingletonInChannelData())
-			{
-				continue;
-			}
-			bHasCollectStateInMap = true;
-			FormatArgs.Add("Definition_StatePackagePath", ActorDecorator->GetProtoPackagePathGo(ProtoPackageName));
-			FString StateClassName = ActorDecorator->GetProtoStateMessageTypeGo();
-			FormatArgs.Add("Definition_StateClassName", StateClassName);
-			FormatArgs.Add("Definition_StateVarName", "new" + StateClassName);
-			FormatArgs.Add("Definition_StateMapName", ActorDecorator->GetDefinition_ChannelDataFieldNameGo());
-
-			CollectStateGoCode.Append(FString::Format(CodeGen_Go_CollectStateInMapTemplate, FormatArgs));
-		}
-	}
-	{
-		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataProtoMsgGoName);
-		FormatArgs.Add("Decl_ChannelDataMsgVar", bHasCollectStateInMap ? TEXT("from") : TEXT("_"));
-		GoCode.Append(FString::Format(CodeGen_Go_CollectStatesTemplate, FormatArgs));
-		GoCode.Append(CollectStateGoCode);
-	}
-
-	GoCode.Append(TEXT("\treturn nil\n}\n"));
 
 	// Generate code: Implement [channeld.MergeableChannelData]
 	FString MergeStateCode = TEXT("");
@@ -738,6 +722,10 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 		// Add ActorState's merge code at last
 		MergeStateCode.Append(MergeActorStateCode);
 	}
+	FString CheckHandoverCode = TEXT("");
+	FString NotifyHandoverCode = TEXT("");
+	// Only generate handover code for entity channel data
+	if (ChannelType == EChanneldChannelType::ECT_Entity)
 	{
 		bool HasActor = false;
 		bool HasSceneComponent = false;
@@ -746,18 +734,34 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 			if (!HasActor) HasActor = ActorDecorator->GetTargetClass() == AActor::StaticClass();
 			if (!HasSceneComponent) HasSceneComponent = ActorDecorator->GetTargetClass() == USceneComponent::StaticClass();
 		}
-		FString SpatialNotifierCode = TEXT("");
-		if (HasActor) SpatialNotifierCode.Append(CodeGen_Go_ActorSpatialNotifierTemp);
-		if (HasSceneComponent) SpatialNotifierCode.Append(CodeGen_Go_SceneCompSpatialNotifierTemp);
+		if (HasActor || HasSceneComponent)
+		{
+			FString CheckHandoverInStatesCode = TEXT("");
+			if (HasActor) CheckHandoverInStatesCode.Append(CodeGen_Go_ActorCheckHandoverTemplate);
+			if (HasSceneComponent) CheckHandoverInStatesCode.Append(CodeGen_Go_SceneCompCheckHandoverTemplate);
+			CheckHandoverCode = FString::Format(CodeGen_Go_CheckHandoverTemplate, { { "Code_CheckHandoverInStates", CheckHandoverInStatesCode } });
+			NotifyHandoverCode = CodeGen_Go_NotifyHandover;
+		}
+	}
+	{
 		FStringFormatNamedArguments FormatArgs;
 		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataProtoMsgGoName);
-		FormatArgs.Add("Code_SpatialNotifier", SpatialNotifierCode);
+		FormatArgs.Add("Code_CheckHandover", CheckHandoverCode);
+		FormatArgs.Add("Code_MergeStates", MergeStateCode);
+		FormatArgs.Add("Code_NotifyHandover", NotifyHandoverCode);
 		FormatArgs.Add("Decl_ChannelDataMsgVar", bHasMergeStateInMap ? TEXT("srcData") : TEXT("_"));
 		GoCode.Append(FString::Format(CodeGen_Go_MergeTemplate, FormatArgs));
-		GoCode.Append(MergeStateCode);
 	}
 
-	GoCode.Append(TEXT("\treturn nil\n}\n"));
+	// GoCode.Append(TEXT("\treturn nil\n}\n"));
+
+	// Entity channel data needs to implemented a couple of more interfaces
+	if (ChannelType == EChanneldChannelType::ECT_Entity)
+	{
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataProtoMsgGoName);
+		GoCode.Append(FString::Format(CodeGen_Go_EntityChannelDataTemplate, FormatArgs));
+	}
 
 	return true;
 }
@@ -871,7 +875,7 @@ bool FReplicatorCodeGenerator::CreateDecorateActor(
 	// The module info is used to generate the include code in head file.
 	if (!ActorDecorator->IsBlueprintType() && !ModuleInfoByClassName.Contains(ActorDecorator->GetActorCPPClassName()))
 	{
-		OutResultMessage = FString::Printf(TEXT("Can not find the module %s belongs to"), *ActorDecorator->GetActorCPPClassName());
+		OutResultMessage = FString::Printf(TEXT("Can not find the module which the class '%s' belongs to"), *ActorDecorator->GetActorCPPClassName());
 		delete ActorDecorator;
 		ActorDecorator = nullptr;
 		OutActorDecorator = nullptr;

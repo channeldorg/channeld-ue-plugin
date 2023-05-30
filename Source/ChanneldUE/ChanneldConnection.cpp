@@ -8,8 +8,29 @@
 
 void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 {
-	if (ReceiveBufferSize > Channeld::MaxPacketSize)
+	// Command line arguments can override the INI settings
+	const TCHAR* CmdLine = FCommandLine::Get();
+	if (FParse::Value(CmdLine, TEXT("ReceiveBufferSize="), ReceiveBufferSize))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed ReceiveBufferSize from CLI: %d"), ReceiveBufferSize);
+	}
+	if (FParse::Value(CmdLine, TEXT("SendBufferSize="), SendBufferSize))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed SendBufferSize from CLI: %d"), SendBufferSize);
+	}
+	if (FParse::Bool(CmdLine, TEXT("ShowUserSpaceMessageLog="), bShowUserSpaceMessageLog))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed bShowUserSpaceMessageLog from CLI: %d"), bShowUserSpaceMessageLog);
+	}
+	
+	if (ReceiveBufferSize < Channeld::MaxPacketSize)
+	{
 		ReceiveBufferSize = Channeld::MaxPacketSize;
+	}
+	if (SendBufferSize < Channeld::MaxPacketSize)
+	{
+		SendBufferSize = Channeld::MaxPacketSize;
+	}
 	ReceiveBuffer = new uint8[ReceiveBufferSize];
 
 	// StubId=0 is reserved.
@@ -23,39 +44,43 @@ void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 	//	});
 
 	// The connection's internal handlers should always be called first, so we should not use the delegate as the order of its broadcast is not guaranteed.
-	RegisterMessageHandler((uint32)channeldpb::AUTH, new channeldpb::AuthResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::AUTH, new channeldpb::AuthResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleAuth(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::CREATE_CHANNEL, new channeldpb::CreateChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::CREATE_CHANNEL, new channeldpb::CreateChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleCreateChannel(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::REMOVE_CHANNEL, new channeldpb::RemoveChannelMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::REMOVE_CHANNEL, new channeldpb::RemoveChannelMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleRemoveChannel(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::LIST_CHANNEL, new channeldpb::ListChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::LIST_CHANNEL, new channeldpb::ListChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleListChannel(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::SUB_TO_CHANNEL, new channeldpb::SubscribedToChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::SUB_TO_CHANNEL, new channeldpb::SubscribedToChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleSubToChannel(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::UNSUB_FROM_CHANNEL, new channeldpb::UnsubscribedFromChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, new channeldpb::UnsubscribedFromChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleUnsubFromChannel(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, new channeldpb::ChannelDataUpdateMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::CHANNEL_DATA_UPDATE, new channeldpb::ChannelDataUpdateMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleChannelDataUpdate(Conn, ChId, Msg);
 		});
-	RegisterMessageHandler((uint32)channeldpb::CREATE_SPATIAL_CHANNEL, new channeldpb::CreateChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	RegisterMessageHandler(channeldpb::CREATE_SPATIAL_CHANNEL, new channeldpb::CreateSpatialChannelsResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 		{
 			HandleCreateSpatialChannel(Conn, ChId, Msg);
-		});	
-	RegisterMessageHandler(channeldpb::CREATE_SPATIAL_CHANNEL, new channeldpb::CreateSpatialChannelsResultMessage());
+		});
+	RegisterMessageHandler(channeldpb::CREATE_ENTITY_CHANNEL, new channeldpb::CreateChannelResultMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+		{
+			HandleCreateChannel(Conn, ChId, Msg);
+		});
+	
 	RegisterMessageHandler(channeldpb::QUERY_SPATIAL_CHANNEL, new channeldpb::QuerySpatialChannelResultMessage());
 	RegisterMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, new channeldpb::ChannelDataHandoverMessage());
 	RegisterMessageHandler(channeldpb::SPATIAL_REGIONS_UPDATE, new channeldpb::SpatialRegionsUpdateMessage());
@@ -106,6 +131,33 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int32
 
 	// Create TCP socket to channeld
 	Socket = SocketSubsystem->CreateSocket(NAME_Stream, TEXT("Connection to channeld"), RemoteAddr->GetProtocolType());
+
+	int32 NewSize = 0;
+	if (Socket->SetReceiveBufferSize(0x0fffff, NewSize))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Set Socket's receive buffer size to %d"), NewSize);
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to set Socket's receive buffer size"));
+	}
+	if (Socket->SetSendBufferSize(0x0fffff, NewSize))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Set Socket's send buffer size to %d"), NewSize);
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to set Socket's send buffer size"));
+	}
+	if(!Socket->SetNoDelay(true))
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to set Socket to NoDelay"));
+	}
+	if(!Socket->SetNonBlocking(true))
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to set Socket to NonBlocking"));
+	}
+	
 	UE_LOG(LogChanneld, Log, TEXT("Connecting to channeld with addr: %s"), *RemoteAddr->ToString(true));
 	bool bSocketConnected = Socket->Connect(*RemoteAddr);
 	if (!ensure(bSocketConnected))
@@ -134,6 +186,7 @@ void UChanneldConnection::OnDisconnected()
 	ReceiveBufferOffset = 0;
 	IncomingQueue.Empty();
 	OutgoingQueue.Empty();
+	OutgoingQueueSize = 0;
 	RpcCallbacks.Empty();
 	// StubId=0 is reserved.
 	RpcCallbacks.Add(0, nullptr);
@@ -203,31 +256,27 @@ void UChanneldConnection::Receive()
 			// Unfinished packet
 			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet header: %d"), BytesRead);
 			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->AddConnTypeLabel(Metrics->UnfinishedPacket).Increment();
+			Metrics->FragmentedPacket_Counter->Increment();
 			return;
 		}
 
-		if (ReceiveBuffer[0] != 67)
+		if (ReceiveBuffer[0] != 67 || ReceiveBuffer[1] != 72)
 		{
 			ReceiveBufferOffset = 0;
 			UE_LOG(LogChanneld, Error, TEXT("Invalid tag: %d, the packet will be dropped"), ReceiveBuffer[0]);
 			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->AddConnTypeLabel(Metrics->DroppedPacket).Increment();
+			Metrics->DroppedPacket_Counter->Increment();
 			return;
 		}
 
-		uint32 PacketSize = ReceiveBuffer[3];
-		if (ReceiveBuffer[1] != 72)
-			PacketSize = PacketSize | (ReceiveBuffer[1] << 16) | (ReceiveBuffer[2] << 8);
-		else if (ReceiveBuffer[2] != 78)
-			PacketSize = PacketSize | (ReceiveBuffer[2] << 8);
+		uint32 PacketSize = ReceiveBuffer[3] | (ReceiveBuffer[2]<<8);
 		
 		if (ReceiveBufferOffset < HeaderSize + PacketSize)
 		{
 			// Unfinished packet
 			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet body, read: %d, pos: %d/%d"), BytesRead, ReceiveBufferOffset, HeaderSize + PacketSize);
 			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->AddConnTypeLabel(Metrics->UnfinishedPacket).Increment();
+			Metrics->FragmentedPacket_Counter->Increment();
 			return;
 		}
 
@@ -239,7 +288,7 @@ void UChanneldConnection::Receive()
 			ReceiveBufferOffset = 0;
 			UE_LOG(LogChanneld, Error, TEXT("UChanneldConnection::Receive: Failed to parse packet, size: %d"), PacketSize);
 			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->AddConnTypeLabel(Metrics->DroppedPacket).Increment();
+			Metrics->DroppedPacket_Counter->Increment();
 			return;
 		}
 
@@ -407,20 +456,47 @@ void UChanneldConnection::TickOutgoing()
 		return;
 
 	channeldpb::Packet Packet;
-	uint32 Size = HeaderSize;
 	TSharedPtr<channeldpb::MessagePack> MessagePack;
-	while (OutgoingQueue.Dequeue(MessagePack))
+	while (OutgoingQueue.Peek(MessagePack))
 	{
-		Size += MessagePack->ByteSizeLong();
-		if (Size >= Channeld::MaxPacketSize)
-			break;
+		uint32 MsgSize = MessagePack->ByteSizeLong();
+		if (MsgSize >= Channeld::MaxPacketSize)
+		{
+			OutgoingQueue.Pop();
+			OutgoingQueueSize--;
+			UE_LOG(LogChanneld, Error, TEXT("Dropped oversized message pack: %d, type: %d, remaining in queue: %d"), MsgSize, MessagePack->msgtype(), OutgoingQueueSize);
+			return;
+		}
+
 		Packet.add_messages()->CopyFrom(*MessagePack);
+		if (Packet.ByteSizeLong() > Channeld::MaxPacketSize)
+		{
+			// Revert adding the message that causes oversize
+			Packet.mutable_messages()->RemoveLast();
+			UE_LOG(LogChanneld, Log, TEXT("Packet is going to be oversized: %d, message type: %d, size: %d, num in packet: %d, remaining in queue: %d"),
+				(uint32)Packet.ByteSizeLong(), MessagePack->msgtype(), MsgSize, Packet.messages_size(), OutgoingQueueSize);
+
+			if (Packet.messages_size() > 0)
+			{
+				SendDirect(Packet);
+				Packet.Clear();
+			}
+			// Keep sending packets until the queue is empty.
+			continue;
+		}
+
+		// Actually remove the message from the queue
+		OutgoingQueue.Pop();
+		OutgoingQueueSize--;
 	}
 
-	SendDirect(Packet);
+	if (Packet.messages_size() > 0)
+	{
+		SendDirect(Packet);
+	}
 }
 
-void UChanneldConnection::SendDirect(channeldpb::Packet Packet)
+void UChanneldConnection::SendDirect(const channeldpb::Packet& Packet)
 {
 	uint32 PacketSize = Packet.ByteSizeLong();
 	uint32 Size = HeaderSize + PacketSize;
@@ -428,7 +504,6 @@ void UChanneldConnection::SendDirect(channeldpb::Packet Packet)
 	uint8* PacketData = new uint8[Size];
 	if (!Packet.SerializeToArray(PacketData + HeaderSize, Size))
 	{
-		Packet.Clear();
 		delete[] PacketData;
 		UE_LOG(LogChanneld, Error, TEXT("Failed to serialize Packet, size: %d"), Size);
 		return;
@@ -436,20 +511,28 @@ void UChanneldConnection::SendDirect(channeldpb::Packet Packet)
 
 	// Set the header
 	PacketData[0] = 67;
-	PacketData[1] = PacketSize > 0xffff ? (0xff & (PacketSize >> 16)) : 72;
-	PacketData[2] = PacketSize > 0xff ? (0xff & (PacketSize >> 8)) : 78;
-	PacketData[3] = (uint8)(PacketSize & 0xff);
+	PacketData[1] = 72;
+	PacketData[2] = (PacketSize >> 8) & 0xff;
+	PacketData[3] = (PacketSize & 0xff);
 	// TODO: support Snappy compression
 	PacketData[4] = 0;
 
 	int32 BytesSent;
 	bool IsSent = Socket->Send(PacketData, Size, BytesSent);
 	// Free send buffer
-	Packet.Clear();
 	delete[] PacketData;
 	if (!IsSent || BytesSent != Size)
 	{
-		UE_LOG(LogChanneld, Error, TEXT("Failed to send packet to channeld, sent/full size: %d/%d"), BytesSent, Size);
+		FString MsgTypes;
+		for (int i = 0; i < Packet.messages_size(); i++)
+		{
+			MsgTypes.Appendf(TEXT("%d, "), Packet.messages(i).msgtype());
+		}
+		UE_LOG(LogChanneld, Error, TEXT("Failed to send packet to channeld, msgTypes: %s, sent/full size: %d/%d, last packet size: %d"), *MsgTypes, BytesSent, Size, LastPacketSize);
+	}
+	else
+	{
+		LastPacketSize = PacketSize;
 	}
 }
 
@@ -484,6 +567,7 @@ void UChanneldConnection::SendRaw(Channeld::ChannelId ChId, uint32 MsgType, cons
 	MsgPack->set_msgtype(MsgType);
 	MsgPack->set_msgbody(MsgBody);
 	OutgoingQueue.Enqueue(MsgPack);
+	OutgoingQueueSize++;
 
 	/*
 	channeldpb::MessagePack MsgPack;
@@ -575,6 +659,38 @@ void UChanneldConnection::CreateSpatialChannel(const FString& Metadata, const ch
 	Send(Channeld::GlobalChannelId, channeldpb::CREATE_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
 }
 
+void UChanneldConnection::CreateEntityChannel(Channeld::ChannelId ChId, UObject* Entity, uint32 EntityId,
+	const FString& Metadata, const channeldpb::ChannelSubscriptionOptions* SubOptions, 
+	const google::protobuf::Message* Data, const channeldpb::ChannelDataMergeOptions* MergeOptions,
+	const TFunction<void(const channeldpb::CreateChannelResultMessage*)>& Callback)
+{
+	channeldpb::CreateEntityChannelMessage CreateEntityMsg;
+	CreateEntityMsg.set_entityid(EntityId);
+	if (!Metadata.IsEmpty())
+	{
+		CreateEntityMsg.set_metadata(TCHAR_TO_UTF8(*Metadata));
+	}
+	if (SubOptions != nullptr)
+	{
+		CreateEntityMsg.mutable_suboptions()->MergeFrom(*SubOptions);
+	}
+	if (Data != nullptr)
+	{
+		CreateEntityMsg.mutable_data()->PackFrom(*Data);
+	}
+	if (MergeOptions != nullptr)
+	{
+		CreateEntityMsg.mutable_mergeoptions()->MergeFrom(*MergeOptions);
+	}
+	
+	if (const AActor* Actor = Cast<AActor>(Entity))
+	{
+		CreateEntityMsg.set_iswellknown(Actor->bAlwaysRelevant);
+	}
+	
+	Send(ChId, channeldpb::CREATE_ENTITY_CHANNEL, CreateEntityMsg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
+}
+
 void UChanneldConnection::RemoveChannel(uint32 ChannelToRemove, const TFunction<void(const channeldpb::RemoveChannelMessage*)>& Callback)
 {
 	channeldpb::RemoveChannelMessage Msg;
@@ -636,6 +752,30 @@ void UChanneldConnection::QuerySpatialChannel(const TArray<FVector>& Positions, 
 		SpatialInfo->set_z(Pos.Y);
 	}
 	Send(Channeld::GlobalChannelId, channeldpb::QUERY_SPATIAL_CHANNEL, Msg, channeldpb::NO_BROADCAST, WrapMessageHandler(Callback));
+}
+
+void UChanneldConnection::AddToEntityGroup(Channeld::EntityId EntityChId, channeldpb::EntityGroupType GroupType, const TArray<Channeld::EntityId> EntitiesToAdd)
+{
+	channeldpb::AddEntityGroupMessage addMsg;
+	addMsg.set_type(GroupType);
+	for (auto& EntityId : EntitiesToAdd)
+	{
+		addMsg.add_entitiestoadd(EntityId);
+	}
+	
+	Send(EntityChId, channeldpb::ENTITY_GROUP_ADD, addMsg);
+}
+
+void UChanneldConnection::RemoveFromEntityGroup(Channeld::EntityId EntityChId, channeldpb::EntityGroupType GroupType, const TArray<Channeld::EntityId> EntitiesToRemove)
+{
+	channeldpb::RemoveEntityGroupMessage removeMsg;
+	removeMsg.set_type(GroupType);
+	for (auto& EntityId : EntitiesToRemove)
+	{
+		removeMsg.add_entitiestoremove(EntityId);
+	}
+
+	Send(EntityChId, channeldpb::ENTITY_GROUP_REMOVE, removeMsg);
 }
 
 void UChanneldConnection::HandleAuth(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
@@ -704,8 +844,12 @@ void UChanneldConnection::HandleSubToChannel(UChanneldConnection* Conn, Channeld
 		FSubscribedChannelInfo* ExistingSub = SubscribedChannels.Find(ChId);
 		if (ExistingSub != nullptr)
 		{
-			// Merge the SubOptions if the subscription already exists
-			ExistingSub->Merge(*SubMsg);
+			if (SubMsg->has_suboptions())
+			{
+				UE_LOG(LogChanneld, Verbose, TEXT("Merged the SubOptions of the channel %d: %s"), ChId, UTF8_TO_TCHAR(SubMsg->suboptions().ShortDebugString().c_str()));
+				// Merge the SubOptions if the subscription already exists
+				ExistingSub->Merge(*SubMsg);
+			}
 		}
 		else
 		{

@@ -73,7 +73,7 @@ void UChanneldNetDriver::RemoveChanneldClientConnection(Channeld::ConnectionId C
 	}
 }
 
-void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg)
+void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg)
 {
 	FNetworkGUID NetId = FNetworkGUID(SpawnMsg->obj().netguid());
 	
@@ -136,17 +136,17 @@ void UChanneldNetDriver::OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMes
 				NewActor->SetRole(LocalRole);
 			}
 
-			if (SpawnMsg->has_owningconnid())
+			if (SpawnMsg->mutable_obj()->owningconnid() > 0)
 			{
-				ChanneldUtils::SetActorRoleByOwningConnId(NewActor, SpawnMsg->owningconnid());
+				ChanneldUtils::SetActorRoleByOwningConnId(NewActor, SpawnMsg->mutable_obj()->owningconnid());
 				LocalRole = NewActor->GetLocalRole();
 			}
 		}
 
 		if (ChannelDataView.IsValid())
 		{
-			ChannelDataView->AddObjectProvider(NewObj);
-			ChannelDataView->OnClientSpawnedObject(NewObj, SpawnMsg->channelid());
+			ChannelDataView->AddObjectProviderToDefaultChannel(NewObj);
+			ChannelDataView->OnNetSpawnedObject(NewObj, SpawnMsg->channelid());
 		}
 
 		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %d, owning channel: %d, local role: %d"), *NewObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), LocalRole);
@@ -200,6 +200,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, Channeld::Ch
 		}
 
 		HandleCustomRPC(RpcMsg);
+		OnReceivedRPC(*RpcMsg);
 	}
 	else if (MsgType == unrealpb::SPAWN)
 	{
@@ -210,7 +211,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, Channeld::Ch
 			return;
 		}
 
-		OnClientSpawnObject(SpawnMsg);
+		HandleSpawnObject(SpawnMsg);
 	}
 	else if (MsgType == unrealpb::DESTROY)
 	{
@@ -242,6 +243,15 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, Channeld::Ch
 	}
 }
 
+void UChanneldNetDriver::OnReceivedRPC(const unrealpb::RemoteFunctionMessage& RpcMsg)
+{
+	UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+	Metrics->ReceivedRPCs_Counter->Increment();
+#if !UE_BUILD_SHIPPING
+	Metrics->ReceivedRPCs->Add({{"funcName", RpcMsg.functionname()}}).Increment();
+#endif
+}
+
 void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg)
 {
 	// We should NEVER creates the actor via RPC
@@ -257,14 +267,14 @@ void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMess
 		// Case 2: the server receives the client RPC, but the actor has just been handed over to another server (deleted).
 		else
 		{
-			SendCrossServerRPC(Msg);
+			RedirectRPC(Msg);
 		}
 		return;
 	}
 	// Case 3: the server receives the client RPC, but the actor has just been handed over to another server (became non-authoritative).
 	if (IsServer() && !Actor->HasAuthority())
 	{
-		SendCrossServerRPC(Msg);
+		RedirectRPC(Msg);
 		return;
 	}
 
@@ -274,7 +284,7 @@ void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMess
 	ReceivedRPC(Actor, FuncName, Msg->paramspayload(), bDelayRPC);
 	if (bDelayRPC)
 	{
-		UE_LOG(LogChanneld, Log, TEXT("Delayed RPC '%s::%s' due to unmapped NetGUID: %d"), *Actor->GetName(), *FuncName.ToString(), Msg->targetobj().netguid());
+		UE_LOG(LogChanneld, Log, TEXT("Deferred RPC '%s::%s' due to unmapped NetGUID: %d"), *Actor->GetName(), *FuncName.ToString(), Msg->targetobj().netguid());
 		UnprocessedRPCs.Add(Msg);
 	}
 }
@@ -608,6 +618,13 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	{
 		return;
 	}
+	
+	/* Newly spawned actor always has LocalRole = Authority
+	*/
+	if (!Actor->HasAuthority())
+	{
+		return;
+	}
 
 	if (Actor->HasDeferredComponentRegistration())
 	{
@@ -618,13 +635,6 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 
 	// Make sure the NetGUID exists.
 	FNetworkGUID NetId = GuidCache->GetOrAssignNetGUID(Actor);
-	
-	/* Newly spawned actor always has LocalRole = Authority
-	if (!Actor->HasAuthority())
-	{
-		return;
-	}
-	*/
 
 	/* Moved to UChanneldGameInstanceSubsystem::OnActorSpawned
 	UChanneldGameInstanceSubsystem* ChanneldSubsystem = GetSubsystem();
@@ -699,24 +709,6 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		OwningConnId = NetConn->GetConnId();
 	}
 
-	// Send the spawning to the clients
-	/*
-	for (auto& Pair : ClientConnectionMap)
-	{
-		if (IsValid(Pair.Value))
-		{
-			if (ChannelDataView.IsValid())
-			{
-				ChannelDataView->SendSpawnToConn(Actor, Pair.Value, OwningConnId);
-			}
-			else
-			{
-				Pair.Value->SendSpawnMessage(Actor, Actor->GetRemoteRole(), Channeld::InvalidChannelId, OwningConnId);
-			}
-		}
-	}
-	*/
-
 	if (ChannelDataView.IsValid())
 	{
 		ChannelDataView->SendSpawnToClients(Actor, OwningConnId);
@@ -755,25 +747,40 @@ void UChanneldNetDriver::SetAllSentSpawn(const FNetworkGUID NetId)
 	}
 }
 
-void UChanneldNetDriver::SendCrossServerRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg)
+void UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg)
 {
-	if (ChannelDataView.IsValid())
+	if (Msg->redirectioncounter() < GetMutableDefault<UChanneldSettings>()->RpcRedirectionMaxRetries)
 	{
-		Channeld::ChannelId TargetChId = ChannelDataView->GetOwningChannelId(FNetworkGUID(Msg->targetobj().netguid()));
-		if (TargetChId != Channeld::InvalidChannelId)
+		if (ChannelDataView.IsValid())
 		{
-			ConnToChanneld->Broadcast(TargetChId, unrealpb::RPC, *Msg, channeldpb::SINGLE_CONNECTION);
-			UE_LOG(LogChanneld, Verbose, TEXT("Sent cross-server RPC to channel %d, netId: %d, func: %s"), TargetChId, Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
+			Channeld::ChannelId TargetChId = ChannelDataView->GetOwningChannelId(FNetworkGUID(Msg->targetobj().netguid()));
+			ensureMsgf(!ConnToChanneld->OwnedChannels.Contains(TargetChId), TEXT("Attempt to redirect RPC to the same server, netId: %d, func: %s"), Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
+		
+			if (TargetChId != Channeld::InvalidChannelId)
+			{
+				Msg->set_redirectioncounter(Msg->redirectioncounter() + 1);
+				ConnToChanneld->Broadcast(TargetChId, unrealpb::RPC, *Msg, channeldpb::SINGLE_CONNECTION);
+				UE_LOG(LogChanneld, Verbose, TEXT("Redirect RPC to channel %d, netId: %d, func: %s"), TargetChId, Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
+				
+				UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+				Metrics->RedirectedRPCs_Counter->Increment();
+#if !UE_BUILD_SHIPPING
+				Metrics->RedirectedRPCs->Add({{"funcName", Msg->functionname()}}).Increment();
+#endif
+
+				OnSentRPC(*Msg);
+				return;
+			}
+			
+			UE_LOG(LogChanneld, Warning, TEXT("Unable to redirect RPC as the mapping to the target channel doesn't exists, netId: %d"), Msg->targetobj().netguid());
 		}
 		else
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Unable to send cross-server RPC as the mapping to the target channel doesn't exists, netId: %d"), Msg->targetobj().netguid());
+			UE_LOG(LogChanneld, Warning, TEXT("Unable to redirect RPC as the view doesn't exist."));
 		}
 	}
-	else
-	{
-		UE_LOG(LogChanneld, Warning, TEXT("Unable to send cross-server RPC as the view doesn't exist."));
-	}
+
+	GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(Msg->functionname());
 }
 
 // Called only on client or the destination server of a handover.
@@ -867,6 +874,12 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 		UE_LOG(LogNet, Warning, TEXT("UNetDriver::ProcessRemoteFunction: Remote function %s called from actor %s while actor is being destroyed. Function will not be processed."), *FuncName, *Actor->GetName());
 		return;
 	}
+
+	if (!ChannelDataView.IsValid())
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Failed to send RPC %s::%s as the view doesn't exist"), *Actor->GetName(), *FuncName);
+		return;
+	}
 	
 	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
 	{
@@ -878,24 +891,24 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 			if (bSuccess)
 			{
 				UE_CLOG(bShouldLog && ParamsMsg.IsValid(), LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters: %s"), UTF8_TO_TCHAR(ParamsMsg->DebugString().c_str()));
+				
+				Channeld::ChannelId OwningChId = ChannelDataView->GetOwningChannelId(Actor);
 
 				// Server -> Client multicast RPC
 				if (ConnToChanneld->IsServer() && (Function->FunctionFlags & FUNC_NetMulticast))
 				{
-					if (ChannelDataView.IsValid() && ChannelDataView->SendMulticastRPC(Actor, FuncName, ParamsMsg))
+					if (ChannelDataView->SendMulticastRPC(Actor, FuncName, ParamsMsg))
 					{
-						OnSentRPC(Actor, FuncName);
 						return;
 					}
 				}
 				// Client or authoritative server sends the RPC directly
-				else if (ConnToChanneld->IsClient() || Actor->HasAuthority())
+				else if (ConnToChanneld->IsClient() || Actor->HasAuthority() || ConnToChanneld->OwnedChannels.Contains(OwningChId))
 				{
 					UChanneldNetConnection* NetConn = ConnToChanneld->IsClient() ? GetServerConnection() : Cast<UChanneldNetConnection>(Actor->GetNetConnection());
 					if (NetConn)
 					{
-						NetConn->SendRPCMessage(Actor, FuncName, ParamsMsg, ChannelDataView->GetOwningChannelId(Actor));
-						OnSentRPC(Actor, FuncName);
+						NetConn->SendRPCMessage(Actor, FuncName, ParamsMsg, OwningChId);
 						return;
 					}
 					UE_LOG(LogChanneld, Warning, TEXT("Failed to send RPC %s::%s as the actor doesn't have any NetConn"), *Actor->GetName(), *FuncName);
@@ -909,12 +922,11 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 					if (ParamsMsg)
 					{
 						RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
-						UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %d bytes"), RpcMsg.paramspayload().size());
+						UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %llu bytes"), RpcMsg.paramspayload().size());
 					}
-					Channeld::ChannelId ForwardChId = ChannelDataView->GetOwningChannelId(Actor);
-					ConnToChanneld->Broadcast(ForwardChId, unrealpb::RPC, RpcMsg, channeldpb::SINGLE_CONNECTION);
-					UE_LOG(LogChanneld, Log, TEXT("Forwarded RPC %s::%s to the owner of channel %d"), *Actor->GetName(), *FuncName, ForwardChId);
-					OnSentRPC(Actor, FuncName);
+					ConnToChanneld->Broadcast(OwningChId, unrealpb::RPC, RpcMsg, channeldpb::SINGLE_CONNECTION);
+					UE_LOG(LogChanneld, Log, TEXT("Forwarded RPC %s::%s to the owner of channel %d"), *Actor->GetName(), *FuncName, OwningChId);
+					OnSentRPC(RpcMsg);
 					return;
 				}
 			}
@@ -929,15 +941,19 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 		UE_LOG(LogChanneld, Warning, TEXT("Can't find the ReplicationComponent to serialize RPC: %s::%s"), *Actor->GetName(), *FuncName);
 	}
 
+	GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(std::string(TCHAR_TO_UTF8(*FuncName)));
+	
 	// Fallback to native RPC
 	Super::ProcessRemoteFunction(Actor, Function, Parameters, OutParms, Stack, SubObject);
 }
 
-void UChanneldNetDriver::OnSentRPC(class AActor* Actor, FString FuncName)
+void UChanneldNetDriver::OnSentRPC(const unrealpb::RemoteFunctionMessage& RpcMsg)
 {
-	//UE_LOG(LogChanneld, Verbose, TEXT("Sent RPC %s::%s via channeld"), *Actor->GetName(), *FuncName);
 	UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-	Metrics->AddConnTypeLabel(Metrics->SentRPCs).Increment();
+	Metrics->SentRPCs_Counter->Increment();
+#if !UE_BUILD_SHIPPING
+	Metrics->SentRPCs->Add({{"funcName", RpcMsg.functionname()}}).Increment();
+#endif
 }
 
 void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDeferredRPC)
@@ -988,7 +1004,7 @@ void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 	// Trigger the callings of ServerReplicateActors() and LowLevelSend()
 	UNetDriver::TickFlush(DeltaSeconds);
 
-	// Send ChannelDataUpdate to channeld even if there's no client connection yet.
+	// Send ChannelDataUpdate to channeld even if there's no client connection yet, and ServerReplicateActors() is skipped.
 	if (IsServer() && ClientConnections.Num() == 0 && !bSkipServerReplicateActors)
 	{
 		if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication && ChannelDataView.IsValid())

@@ -568,13 +568,13 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_GetStateFromChan
 	FormatArgs.Add(TEXT("Code_Condition"), GetCode_ChannelDataProcessor_IsTargetClass());
 	FormatArgs.Add(TEXT("Declaration_ChannelDataMessage"), ChannelDataMessageName);
 	FormatArgs.Add(TEXT("Definition_ChannelDataFieldName"), GetDefinition_ChannelDataFieldNameCpp());
-	if (TargetClass == AActor::StaticClass() || TargetClass->IsChildOf(UActorComponent::StaticClass()))
-	{
-		return FString::Format(ActorDecor_GetStateFromChannelData_Removable, FormatArgs);
-	}
-	else if (IsSingletonInChannelData())
+	if (IsSingletonInChannelData())
 	{
 		return FString::Format(ActorDecor_GetStateFromChannelData_Singleton, FormatArgs);
+	}
+	else if (TargetClass == AActor::StaticClass() || TargetClass->IsChildOf(UActorComponent::StaticClass()))
+	{
+		return FString::Format(ActorDecor_GetStateFromChannelData_Removable, FormatArgs);
 	}
 	return FString::Format(ActorDecor_GetStateFromChannelData, FormatArgs);
 }
@@ -587,26 +587,26 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_SetStateToChanne
 	FormatArgs.Add(TEXT("Definition_ChannelDataFieldName"), GetDefinition_ChannelDataFieldNameCpp());
 	FormatArgs.Add(TEXT("Definition_ProtoNamespace"), GetProtoNamespace());
 	FormatArgs.Add(TEXT("Definition_ProtoStateMsgName"), GetProtoStateMessageType());
-	if (TargetClass == AActor::StaticClass() || TargetClass->IsChildOf(UActorComponent::StaticClass()))
-	{
-		return FString::Format(ActorDecor_SetStateToChannelData_Removable, FormatArgs);
-	}
-	else if (IsSingletonInChannelData())
+	if (IsSingletonInChannelData())
 	{
 		return FString::Format(ActorDecor_SetStateToChannelData_Singleton, FormatArgs);
+	}
+	else if (TargetClass == AActor::StaticClass() || TargetClass->IsChildOf(UActorComponent::StaticClass()))
+	{
+		return FString::Format(ActorDecor_SetStateToChannelData_Removable, FormatArgs);
 	}
 	return FString::Format(ActorDecor_SetStateToChannelData, FormatArgs);
 }
 
-FString FReplicatedActorDecorator::GetCode_ChannelDataProtoFieldDefinition(const int32& Index)
+FString FReplicatedActorDecorator::GetCode_ChannelDataProtoFieldDefinition(const int32& FieldNum)
 {
 	if (IsSingletonInChannelData())
 	{
-		return FString::Printf(TEXT("%s.%s %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameProto(), Index);
+		return FString::Printf(TEXT("optional %s.%s %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameProto(), FieldNum);
 	}
 	else
 	{
-		return FString::Printf(TEXT("map<uint32, %s.%s> %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameProto(), Index);
+		return FString::Printf(TEXT("map<uint32, %s.%s> %s = %d;\n"), *GetProtoPackageName(), *GetProtoStateMessageType(), *GetDefinition_ChannelDataFieldNameProto(), FieldNum);
 	}
 }
 

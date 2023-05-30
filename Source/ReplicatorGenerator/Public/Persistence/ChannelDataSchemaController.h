@@ -118,8 +118,8 @@ protected:
 	UPROPERTY()
 	UChannelDataSchemaTransaction* ChannelDataSchemaTransaction;
 	
-	TJsonModel<FChannelDataSchema> ChannelDataSchemaModal = GenManager_ChannelDataSchemataPath;
-	TJsonModel<FChannelDataSchema> DefaultChannelDataSchemaModal;
+	TJsonModel<FChannelDataSchema> ChannelDataSchemaModel = GenManager_ChannelDataSchemataPath;
+	TJsonModel<FChannelDataSchema> DefaultChannelDataSchemaModel;
 
 public:
 	UPROPERTY(BlueprintAssignable)

@@ -104,19 +104,19 @@ public:
 		bool IsAuthenticated();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld")
-		EChanneldChannelType GetChannelTypeByChId(int32 ChId);
+		EChanneldChannelType GetChannelTypeByChId(int64 ChId);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld")
-		FString GetChannelTypeNameByChId(int32 ChId);
+		FString GetChannelTypeNameByChId(int64 ChId);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld")
 		TArray<FSubscribedChannelInfo> GetSubscribedChannels();
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld")
-		bool HasSubscribedToChannel(int32 ChId);
+		bool HasSubscribedToChannel(int64 ChId);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld")
-		bool HasOwnedChannel(int32 ChId);
+		bool HasOwnedChannel(int64 ChId);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Channeld")
 		TArray<FListedChannelInfo> GetListedChannels();
@@ -162,6 +162,21 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Spatial")
 	void QuerySpatialChannel(const AActor* Actor, const FOnceOnQuerySpatialChannel& Callback);
+
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Entity")
+	int64 GetEntityId(AActor* Actor);
+	
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Entity")
+	void AddToHandoverGroup(AActor* JunctionEntity, const TArray<AActor*> EntitiesToAdd);
+	
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Entity")
+	void RemoveFromHandoverGroup(AActor* JunctionEntity, const TArray<AActor*> EntitiesToRemove);
+	
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Entity")
+	void AddToLockGroup(AActor* JunctionEntity, const TArray<AActor*> EntitiesToAdd);
+	
+	UFUNCTION(BlueprintCallable, Category = "Channeld|Entity")
+	void RemoveFromLockGroup(AActor* JunctionEntity, const TArray<AActor*> EntitiesToRemove);
 
 	UFUNCTION(BlueprintCallable, Category = "Channeld|Net", Meta = (ToolTip = "Only run on server"))
 		void ServerBroadcast(int32 ChId, int32 ClientConnId, UProtoMessageObject* MessageObject, EChanneldBroadcastType BroadcastType);

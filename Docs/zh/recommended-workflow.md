@@ -153,3 +153,19 @@ ChannelUE提供了热编译兼容模式，该模式下每次生成同步代码�
 >channeldue.gen.go
 >*.gen.go
 >```
+
+## 插件升级
+项目升级ChanneldUE插件的流程：
+1. 确保UE编辑器关闭
+2. 拉取最新代码，并切换分支到新的版本tag，如：`git checkout v0.6.0`
+3. 如果已经执行过插件的`Setup.bat`，则channeld代码仓库会自动切换到和tag相匹配的分支；否则，需要手动在本地的channeld代码仓库中拉取最新代码，并切换到和tag相匹配的分支
+4. 删除项目Source中的`ChanneldGenerated`文件夹
+5. 重新生成项目解决方案
+6. 重新编译项目并启动
+7. 删除`Content/ChanneldUE/ReplicationRegistry`资产文件
+8. 打开频道数据模型编辑器（工具栏ChanneldUE插件下拉菜单 -> `Edit Channel Data Schema...`）
+9. 点击`Refresh...`按钮，刷新同步缓存
+10. 在`Global`和`Entity`频道添加项目中的C++和蓝图类
+11. 点击`Generate...`按钮，生成同步代码
+
+至此，项目可以在新版本的ChanneldUE插件下正常运行了。
