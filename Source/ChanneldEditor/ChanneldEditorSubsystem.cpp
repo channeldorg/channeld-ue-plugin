@@ -1350,6 +1350,7 @@ void UChanneldEditorSubsystem::UploadDockerImage(const FString& ChanneldImageTag
 		FormatArgs.Add(TEXT("ChanneldTag"), ChanneldImageTag);
 		FormatArgs.Add(TEXT("ChanneldRepoUrl"), FPaths::GetPath(FPaths::GetPath(ChanneldImageTag)));
 		FormatArgs.Add(TEXT("ServerTag"), ServerImageTag);
+		FormatArgs.Add(TEXT("ServerRepoUrl"), FPaths::GetPath(FPaths::GetPath(ServerImageTag)));
 		BatFileContent = FString::Format(*BatFileContent, FormatArgs);
 	}
 	// Save the cmd to a temp bat file
@@ -1837,7 +1838,12 @@ void UChanneldEditorSubsystem::CreateK8sSecret(const FString& Name, const FStrin
 	Auth.Password = Password;
 	FString AuthJson;
 	FJsonObjectConverter::UStructToJsonObjectString(Auth, AuthJson);
-	AuthJson = FString::Printf(TEXT("{\"%s\": %s}"), *FPaths::GetPath(FPaths::GetPath(DockerImage)), *AuthJson);
+	FString RepoURL = FPaths::GetPath(FPaths::GetPath(DockerImage));
+	if(RepoURL.IsEmpty())
+	{
+		RepoURL = TEXT("docekr.io");
+	}
+	AuthJson = FString::Printf(TEXT("{\"%s\": %s}"), *RepoURL, *AuthJson);
 	FString AuthBase64 = FBase64::Encode(AuthJson);
 
 	FString SecretYAML = FString::Printf(TEXT(
@@ -1863,7 +1869,7 @@ void UChanneldEditorSubsystem::CreateK8sSecret(const FString& Name, const FStrin
 
 	FString CreateK8sSecretBatFilePath = GetCloudDepymentProjectIntermediateDir() / TEXT(
 		"CreateK8sSecret.bat");
-	if (!FFileHelper::SaveStringToFile(FString::Printf(TEXT("kubectl --context %s apply -f CreateK8sSecret.yaml"),
+	if (!FFileHelper::SaveStringToFile(FString::Printf(TEXT("@echo off\nkubectl --context %s apply -f CreateK8sSecret.yaml"),
 	                                                   *TargetClusterContext), *CreateK8sSecretBatFilePath))
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to save CreateK8sSecret.bat."));
@@ -1918,5 +1924,15 @@ void UChanneldEditorSubsystem::CopyMessageToClipboard(const FString& Message)
 	FPlatformApplicationMisc::ClipboardCopy(*Message);
 }
 
+bool UChanneldEditorSubsystem::IsValidAssetPath(const FString& Path)
+{
+	if (Path.IsEmpty())
+	{
+		return false;
+	}
+
+	UObject* Object = StaticLoadObject(UObject::StaticClass(), nullptr, *Path);
+	return Object != nullptr;
+}
 
 #undef LOCTEXT_NAMESPACE

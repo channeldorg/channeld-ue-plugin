@@ -81,6 +81,7 @@ FDeploymentStepParams UCloudDeploymentController::LoadDeploymentStepParams()
 FDeploymentStepParams UCloudDeploymentController::GetDefaultDeploymentStepParams()
 {
 	FDeploymentStepParams DefaultParams;
+	DefaultParams.Namespace = TEXT("default");
 	DefaultParams.YAMLTemplatePath = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT(
 		"Deployment.yaml");
 	auto EditorSetting = GetMutableDefault<UChanneldEditorSettings>();

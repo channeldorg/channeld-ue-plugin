@@ -160,6 +160,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CopyMessageToClipboard(const FString& Message);
 
+	UFUNCTION(BlueprintCallable)
+	bool IsValidAssetPath(const FString& Path);
+
 private:
 	TSharedPtr<FChanneldProcWorkerThread> UpdateRepActorCacheWorkThread;
 	UChanneldMissionNotiProxy* UpdateRepActorCacheNotify;
