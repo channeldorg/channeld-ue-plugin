@@ -25,3 +25,14 @@
 
 ## 项目中存在其它Protobuf库的冲突
 ChanneldUE插件使用了Protobuf库，并以ProtobufUE模块的方式进行引用。如果您的项目中也使用了Protobuf库，则需要将ChanneldUE插件或项目对ProtobufUE模块的引用改为您自己的模块，并重新编译。注意ChannelUE引用Protobuf使用的路径是`google/protobuf/*.h`，如果您使用的Protobuf库的根路径不同，会导致ChanneldUE插件编译错误。
+
+## 项目出现资产“空引擎版本”警告
+如果项目中出现类似如下的警告信息：
+```log
+LogLinker: Warning: Asset 'Your_Project_Root/Plugins/channeld-ue-plugin/Content/Blueprints/BP_SpatialRegionBox.uasset' has been saved with empty engine version. The asset will be loaded but may be incompatible.
+```
+请在项目的`Config/DefaultEngine.ini`中添加如下内容：
+```ini
+[Core.System]
+ZeroEngineVersionWarning=False
+```
