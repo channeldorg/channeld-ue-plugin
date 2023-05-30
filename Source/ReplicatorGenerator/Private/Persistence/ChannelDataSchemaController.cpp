@@ -87,15 +87,25 @@ void UChannelDataSchemaController::GetChannelDataSchemata(TArray<FChannelDataSch
 
 void UChannelDataSchemaController::SaveChannelDataSchemata(const TArray<FChannelDataSchema>& ChannelDataSchemata)
 {
+	TArray<FChannelDataSchema>UpdatedChannelDataSchemata = ChannelDataSchemata;
+	for(int32 I = 0; I< UpdatedChannelDataSchemata.Num(); ++I)
+	{
+		UpdatedChannelDataSchemata[I].ChannelTypeOrder = I+1;
+		for(int32 J = 0; J < UpdatedChannelDataSchemata[I].StateSchemata.Num(); ++J)
+		{
+			UpdatedChannelDataSchemata[I].StateSchemata[J].StateOrder = J+1;
+		}
+	}
+	
 	// Save the channel data schemata to the json file.
-	ChannelDataSchemaModel.SaveDataArray(ChannelDataSchemata);
+	ChannelDataSchemaModel.SaveDataArray(UpdatedChannelDataSchemata);
 
 	// Save the channel data schemata to the transaction.
 	FScopedTransaction Transaction(TEXT("Replciation Generator"),LOCTEXT("SaveChannelDataSchemata", "Save Channel Data Schemata"), ChannelDataSchemaTransaction);
 	ChannelDataSchemaTransaction->Modify();
-	ChannelDataSchemaTransaction->ChannelDataSchemata = ChannelDataSchemata;
+	ChannelDataSchemaTransaction->ChannelDataSchemata = UpdatedChannelDataSchemata;
 
-	PostDataSchemaUpdated.Broadcast(ChannelDataSchemata);
+	PostDataSchemaUpdated.Broadcast(UpdatedChannelDataSchemata);
 }
 
 void UChannelDataSchemaController::ImportChannelDataSchemataFrom(const FString& FilePath, TArray<FChannelDataSchema>& ChannelDataSchemata, bool& Success)
