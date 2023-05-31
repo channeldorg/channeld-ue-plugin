@@ -82,11 +82,11 @@ void ChanneldReplication::RegisterReplicator(const FString& PathName, const FRep
 }
 
 // TODO: use the pool
-TArray<FChanneldReplicatorBase*> ChanneldReplication::FindAndCreateReplicators(UObject* ReplicatedObj)
+TArray<FChanneldReplicatorBase*> ChanneldReplication::FindAndCreateReplicators(UObject* ReplicatedObj, const UClass* SkipRootClass /*= nullptr*/)
 {
 	TArray<FChanneldReplicatorBase*> Result;
 	// Recurse the base class until find the matching replicator
-	for (const UClass* Class = ReplicatedObj->GetClass(); Class != UObject::StaticClass(); Class = Class->GetSuperClass())
+	for (const UClass* Class = ReplicatedObj->GetClass(); Class != SkipRootClass; Class = Class->GetSuperClass())
 	{
 		const FReplicatorCreateFunc* Func = nullptr;
 		if (ReplicatorRegistry.Contains(Class))

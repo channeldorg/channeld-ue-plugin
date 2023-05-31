@@ -54,11 +54,11 @@
 确保Enabled为勾选，Server Num为1，并设置Server View Class同样为`SingleChannelDataView`。Server Map留空则表示启动服务器时，会使用编辑器当前打开的地图。
 
 # 4.启动channeld服务和游戏服务器
-第一次启动channeld服务和游戏服务器前需要生成同步代码，点击`Generate Replication Code`选项，生成同步代码。首次生成时要遍历项目中所有的代码和蓝图，所以可能较长，请耐心等待。
+第一次启动channeld服务和游戏服务器前需要生成同步代码。打开工具栏中ChanneldUE插件的下拉菜单中，点击`Edit Channel Data Schema...`选项，打开频道数据模型编辑器。点击`Generate...`按钮开始生成同步代码。首次生成时要遍历项目中所有的代码和蓝图，所以可能较长，请耐心等待。
 
-<img height="200" src="../images/generate_replicaiton_code.png"/>
+<img src="../images/generate_replicaiton_code.png"/>
 
-等待代码生成成功后，点击工具栏中插件图标的下拉按钮，确保`Enable Channeld Networking`为选中状态：
+等待代码生成成功后，打开工具栏中ChanneldUE插件的下拉菜单，确保`Enable Channeld Networking`为选中状态：
 
 <img height="200" src="../images/toolbar_menu.png"/>
 

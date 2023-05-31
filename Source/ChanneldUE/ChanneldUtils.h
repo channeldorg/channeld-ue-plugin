@@ -183,6 +183,34 @@ public:
 		SpatialInfo->set_z(Vector.Y);
 	}
 
+	static FNetworkGUID GetNetId(UObject* Obj, bool bAssignOnServer = true)
+	{
+		FNetworkGUID NetId;
+		if (!Obj)
+		{
+			return NetId;
+		}
+		auto World = Obj->GetWorld();
+		if (!World)
+		{
+			return NetId;
+		}
+
+		if (const auto NetDriver = World->GetNetDriver())
+		{
+			if (NetDriver->IsServer() && bAssignOnServer)
+			{
+				NetId = NetDriver->GuidCache->GetOrAssignNetGUID(Obj);
+			}
+			else
+			{
+				NetId = NetDriver->GuidCache->GetNetGUID(Obj);
+			}
+		}
+		
+		return NetId;
+	}
+	
 	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr)
 	{
 		bool bUnmapped;
@@ -200,7 +228,7 @@ public:
 	 */
 	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
 	
-	static unrealpb::UnrealObjectRef GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr);
+	static TSharedRef<unrealpb::UnrealObjectRef> GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr, bool bFullExport = false);
 		
 	static UActorComponent* GetActorComponentByRef(const unrealpb::ActorComponentRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
 	
@@ -267,4 +295,13 @@ public:
 		return nullptr;
 	}
 	*/
+
+	static void InitNetConnForSpawn(UChanneldNetConnection* InNetConn)
+	{
+		NetConnForSpawn = InNetConn;
+	}
+private:
+	static TMap<uint32, TSharedRef<unrealpb::UnrealObjectRef>> ObjRefCache;
+	static UChanneldNetConnection* NetConnForSpawn;
+	static void ResetNetConnForSpawn();
 };

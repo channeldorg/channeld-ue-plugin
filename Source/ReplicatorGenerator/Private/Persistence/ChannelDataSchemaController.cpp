@@ -15,7 +15,7 @@ void UChannelDataSchemaController::Initialize(FSubsystemCollectionBase& Collecti
 {
 	Super::Initialize(Collection);
 	// The "PLUGIN_DIR" is defined in the ReplicatorGenerator.Build.cs, but it is not available in the header file, so we have to use it here.
-	DefaultChannelDataSchemaModal = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Config") / GenManager_DefaultChannelDataSchemataFile;
+	DefaultChannelDataSchemaModel = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Config") / GenManager_DefaultChannelDataSchemataFile;
 
 	ChannelDataSchemaTransaction = NewObject<UChannelDataSchemaTransaction>();
 	ChannelDataSchemaTransaction->SetFlags(RF_Transactional);
@@ -36,6 +36,11 @@ void UChannelDataSchemaController::GetUnhiddenChannelTypes(TArray<EChanneldChann
 	ChannelTypes.Empty();
 	for (int32 i = 0; i < EnumPtr->NumEnums(); ++i)
 	{
+		// Hide the spatial channel type for the schema editor.
+		if (EnumPtr->GetValueByIndex(i) == static_cast<int64>(EChanneldChannelType::ECT_Spatial))
+		{
+			continue;
+		}
 		if (EnumPtr->HasMetaData(TEXT("Hidden"), i))
 		{
 			continue;
@@ -59,28 +64,48 @@ void UChannelDataSchemaController::GetChannelDataStateOptions(TArray<FChannelDat
 
 void UChannelDataSchemaController::GetChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata)
 {
-	if (!ChannelDataSchemaModal.IsExist())
+	if (!ChannelDataSchemaModel.IsExist())
 	{
 		GetDefaultChannelDataSchemata(ChannelDataSchemata);
 	}
 	else
 	{
-		ChannelDataSchemaModal.GetDataArray(ChannelDataSchemata);
+		ChannelDataSchemaModel.GetDataArray(ChannelDataSchemata);
+
+		// v0.6 upgrade: remove the spatial channel data schema.
+		for (int32 i = 0; i < ChannelDataSchemata.Num(); ++i)
+		{
+			if (ChannelDataSchemata[i].ChannelType == EChanneldChannelType::ECT_Spatial)
+			{
+				ChannelDataSchemata.RemoveAt(i);
+				break;
+			}
+		}
 	}
 	SortChannelDataSchemata(ChannelDataSchemata);
 }
 
 void UChannelDataSchemaController::SaveChannelDataSchemata(const TArray<FChannelDataSchema>& ChannelDataSchemata)
 {
+	TArray<FChannelDataSchema>UpdatedChannelDataSchemata = ChannelDataSchemata;
+	for(int32 I = 0; I< UpdatedChannelDataSchemata.Num(); ++I)
+	{
+		UpdatedChannelDataSchemata[I].ChannelTypeOrder = I+1;
+		for(int32 J = 0; J < UpdatedChannelDataSchemata[I].StateSchemata.Num(); ++J)
+		{
+			UpdatedChannelDataSchemata[I].StateSchemata[J].StateOrder = J+1;
+		}
+	}
+	
 	// Save the channel data schemata to the json file.
-	ChannelDataSchemaModal.SaveDataArray(ChannelDataSchemata);
+	ChannelDataSchemaModel.SaveDataArray(UpdatedChannelDataSchemata);
 
 	// Save the channel data schemata to the transaction.
 	FScopedTransaction Transaction(TEXT("Replciation Generator"),LOCTEXT("SaveChannelDataSchemata", "Save Channel Data Schemata"), ChannelDataSchemaTransaction);
 	ChannelDataSchemaTransaction->Modify();
-	ChannelDataSchemaTransaction->ChannelDataSchemata = ChannelDataSchemata;
+	ChannelDataSchemaTransaction->ChannelDataSchemata = UpdatedChannelDataSchemata;
 
-	PostDataSchemaUpdated.Broadcast(ChannelDataSchemata);
+	PostDataSchemaUpdated.Broadcast(UpdatedChannelDataSchemata);
 }
 
 void UChannelDataSchemaController::ImportChannelDataSchemataFrom(const FString& FilePath, TArray<FChannelDataSchema>& ChannelDataSchemata, bool& Success)
@@ -108,12 +133,12 @@ void UChannelDataSchemaController::ExportChannelDataSchemataTo(const FString& Fi
 
 void UChannelDataSchemaController::GetDefaultChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata)
 {
-	DefaultChannelDataSchemaModal.GetDataArray(ChannelDataSchemata);
+	DefaultChannelDataSchemaModel.GetDataArray(ChannelDataSchemata);
 }
 
 FDateTime UChannelDataSchemaController::GetLastUpdatedTime() const
 {
-	return ChannelDataSchemaModal.LastUpdatedTime();
+	return ChannelDataSchemaModel.LastUpdatedTime();
 }
 
 void UChannelDataSchemaController::SortChannelDataSchemata(TArray<FChannelDataSchema>& ChannelDataSchemata)
@@ -130,7 +155,7 @@ void UChannelDataSchemaController::SortChannelDataSchemata(TArray<FChannelDataSc
 
 void UChannelDataSchemaController::HandlePostDataSchemaUndoRedo()
 {
-	ChannelDataSchemaModal.SaveDataArray(ChannelDataSchemaTransaction->ChannelDataSchemata);
+	ChannelDataSchemaModel.SaveDataArray(ChannelDataSchemaTransaction->ChannelDataSchemata);
 	PostDataSchemaUpdated.Broadcast(ChannelDataSchemaTransaction->ChannelDataSchemata);
 }
 

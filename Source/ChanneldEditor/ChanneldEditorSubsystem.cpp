@@ -196,8 +196,7 @@ bool UChanneldEditorSubsystem::NeedToGenerateReplicationCode(bool ShowDialog /*=
 	{
 		if (ShowDialog)
 		{
-			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("GenerateReplicationCode",
-			                                              "Replication code has not been generated yet, please generate replication code to continue"));
+			return FMessageDialog::Open(EAppMsgType::YesNo, LOCTEXT("GenerateReplicationCode", "Replication code has not been generated yet. Do you still want to proceed?")) == EAppReturnType::No;
 		}
 		return true;
 	}
@@ -205,8 +204,7 @@ bool UChanneldEditorSubsystem::NeedToGenerateReplicationCode(bool ShowDialog /*=
 	{
 		if (ShowDialog)
 		{
-			FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("GenerateReplicationCode",
-			                                              "Replication code is out of date, please generate replication code to continue"));
+			return FMessageDialog::Open(EAppMsgType::YesNo, LOCTEXT("GenerateReplicationCode", "Replication code is out of date. Do you still want to proceed?")) == EAppReturnType::No;
 		}
 		return true;
 	}
@@ -254,10 +252,14 @@ void UChanneldEditorSubsystem::GenerateReplicationAction()
 					FailedToGenRepCode();
 					return;
 				}
-				Settings->DefaultChannelDataMsgNames = LatestGeneratedManifest.ChannelDataMsgNames;
+				for (const auto& ChannelDataMsgName : LatestGeneratedManifest.ChannelDataMsgNames)
+				{
+					Settings->DefaultChannelDataMsgNames.Emplace(ChannelDataMsgName.Key, ChannelDataMsgName.Value);
+					UE_LOG(LogChanneldEditor, Log, TEXT("Updated the default channel data message name of %s: %s"),
+						*StaticEnum<EChanneldChannelType>()->GetNameStringByValue(static_cast<int64>(ChannelDataMsgName.Key)),
+						*ChannelDataMsgName.Value);
+				}
 				Settings->SaveConfig();
-				UE_LOG(LogChanneldEditor, Log,
-				       TEXT("Updated the channel data message names in the channeld settings."));
 				GetMutableDefault<UChanneldSettings>()->ReloadConfig();
 
 				if (GetMutableDefault<UChanneldEditorSettings>()->bEnableCompatibleRecompilation)

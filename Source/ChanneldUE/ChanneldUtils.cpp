@@ -4,6 +4,9 @@
 #include "ChanneldNetDriver.h"
 #include "ChanneldTypes.h"
 
+TMap<uint32, TSharedRef<unrealpb::UnrealObjectRef>> ChanneldUtils::ObjRefCache;
+UChanneldNetConnection* ChanneldUtils::NetConnForSpawn;
+
 UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache, UChanneldNetConnection* ClientConn)
 {
 	if (!Ref || !World)
@@ -68,6 +71,20 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 				}
 				else
 				{
+					// Fix 'Netguid mismatch' issue
+					if (FNetGuidCacheObject* ExistingCacheObjectPtr = GuidCache->ObjectLookup.Find(NewGUID))
+					{
+						if (ExistingCacheObjectPtr->Object != nullptr && GuidCache->NetGUIDLookup.FindRef(ExistingCacheObjectPtr->Object) != NewGUID)
+						{
+							FNetworkGUID CurrentNetGUID = GuidCache->NetGUIDLookup.FindRef(ExistingCacheObjectPtr->Object);
+							if (CurrentNetGUID != NewGUID)
+							{
+								GuidCache->NetGUIDLookup.Emplace(ExistingCacheObjectPtr->Object, NewGUID);
+								UE_LOG(LogChanneld, Verbose, TEXT("[Client] Updated NetGUIDLookup for %s: %d -> %d"), *ExistingCacheObjectPtr->Object->GetName(), CurrentNetGUID.Value, NewGUID.Value);
+							}
+						}
+					}
+					
 					GuidCache->RegisterNetGUIDFromPath_Client(NewGUID, PathName, CachedObj->outerguid(), 0, false, false);
 				}
 				UObject* NewObj = GuidCache->GetObjectFromNetGUID(NewGUID, false);
@@ -81,29 +98,71 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 			}
 
 			// Use the bunch to deserialize the object
-			if (Obj == nullptr && Ref->bunchbitsnum() > 0)
+			if (Obj == nullptr)
 			{
-				FInBunch InBunch(Connection, (uint8*)Ref->netguidbunch().data(), Ref->bunchbitsnum());
-				auto PackageMap = CastChecked<UPackageMapClient>(Connection->PackageMap);
-
-				UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);
-				UE_LOG(LogChanneld, VeryVerbose, TEXT("[Client] ActorChannels: %d"), Connection->ActorChannelsNum());
-				AActor* Actor;
-				//-----------------------------------------
-				// Copied from UActorChannel::ProcessBunch
-				//-----------------------------------------
-				if (ClientConn ? SerializeNewActor_Server(ClientConn, PackageMap, GuidCache, InBunch, Channel, Actor) : PackageMap->SerializeNewActor(InBunch, Channel, Actor))
+				if (Ref->bunchbitsnum() > 0)
 				{
-					Channel->SetChannelActor(Actor, ESetChannelActorFlags::SkipReplicatorCreation);
-					// Setup NetDriver, etc.
-					Channel->NotifyActorChannelOpen(Actor, InBunch);
-					// After all properties have been initialized, call PostNetInit. This should call BeginPlay() so initialization can be done with proper starting values.
-					Actor->PostNetInit();
-					UE_LOG(LogChanneld, Verbose, TEXT("[Client] Created new actor '%s' with NetGUID %d (%d)"), *Actor->GetName(), GuidCache->GetNetGUID(Actor).Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
+					FInBunch InBunch(Connection, (uint8*)Ref->netguidbunch().data(), Ref->bunchbitsnum());
+					auto PackageMap = CastChecked<UPackageMapClient>(Connection->PackageMap);
 
-					//// Remove the channel after using it
-					//Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
-					return Actor;
+					UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);
+					UE_LOG(LogChanneld, VeryVerbose, TEXT("[Client] ActorChannels: %d"), Connection->ActorChannelsNum());
+					AActor* Actor;
+					//-----------------------------------------
+					// Copied from UActorChannel::ProcessBunch
+					//-----------------------------------------
+					if (ClientConn ? SerializeNewActor_Server(ClientConn, PackageMap, GuidCache, InBunch, Channel, Actor) : PackageMap->SerializeNewActor(InBunch, Channel, Actor))
+					{
+						Channel->SetChannelActor(Actor, ESetChannelActorFlags::SkipReplicatorCreation);
+						// Setup NetDriver, etc.
+						Channel->NotifyActorChannelOpen(Actor, InBunch);
+						// After all properties have been initialized, call PostNetInit. This should call BeginPlay() so initialization can be done with proper starting values.
+						Actor->PostNetInit();
+						UE_LOG(LogChanneld, Verbose, TEXT("[Client] Created new actor '%s' with NetGUID %d (%d)"), *Actor->GetName(), GuidCache->GetNetGUID(Actor).Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
+
+						/* Called in UChanneldNetDriver::NotifyActorDestroyed 
+						// Remove the channel after using it
+						//Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
+						*/
+						
+						if (ClientConn && ClientConn == NetConnForSpawn)
+						{
+							// Always remember to reset the NetConnForSpawn after using it.
+							ResetNetConnForSpawn();
+						}
+						
+						return Actor;
+					}
+				}
+				else if (Ref->has_classpath())
+				{
+					FString PathName = UTF8_TO_TCHAR(Ref->classpath().c_str());
+					if (auto ObjClass = LoadObject<UClass>(nullptr, *PathName))
+					{
+						Obj = NewObject<UObject>(GetTransientPackage(), ObjClass);
+						if (ClientConn)
+						{
+							// GuidCache->RegisterNetGUIDFromPath_Server(NetGUID, PathName, 0, 0, false, false);
+							GuidCache->RegisterNetGUID_Server(NetGUID, Obj);
+						}
+						else
+						{
+							// GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, 0, 0, false, false);
+							GuidCache->RegisterNetGUID_Client(NetGUID, Obj);
+						}
+
+						if (AActor* Actor = Cast<AActor>(Obj))
+						{
+							// Triggers UChanneldNetDriver::NotifyActorChannelOpen
+							World->GetNetDriver()->NotifyActorChannelOpen(nullptr, Actor);
+							// After all properties have been initialized, call PostNetInit. This should call BeginPlay() so initialization can be done with proper starting values.
+							Actor->PostNetInit();
+						}
+					}
+					else
+					{
+						UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Failed to load class from path: %s"), *PathName);
+					}
 				}
 			}
 		}
@@ -118,16 +177,25 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 			UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Failed to create object from NetGUID: %d (%d)"), NetGUID.Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
 		}
 	}
+	else
+	{
+		/*
+		*/
+		if (!ObjRefCache.Contains(NetGUID.Value))
+		{
+			auto Cached = MakeShared<unrealpb::UnrealObjectRef>();
+			Cached->CopyFrom(*Ref);
+			ObjRefCache.Add(NetGUID.Value, Cached);
+			UE_LOG(LogChanneld, VeryVerbose, TEXT("Cached ObjRef: %d"), NetGUID.Value);
+		}
+	}
 	
 	return Obj;
 }
 
-unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnection* Connection /* = nullptr*/)
+TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnection* Connection /* = nullptr*/, bool bFullExport /*= false*/)
 {
-	unrealpb::UnrealObjectRef ObjRef;
-	ObjRef.set_netguid(0);
-	ObjRef.set_bunchbitsnum(0);
-	// ObjRef.set_objtype(ChanneldReplication::GetUnrealObjectType(Obj));
+	auto ObjRef = MakeShared<unrealpb::UnrealObjectRef>();
 
 	if (!Obj)
 	{
@@ -141,19 +209,46 @@ unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnec
 
 	auto GuidCache = World->GetNetDriver()->GuidCache;
 	auto NetGUID = GuidCache->GetNetGUID(Obj);
+	ObjRef->set_netguid(NetGUID.Value);
+
+	if (!bFullExport)
+	{
+		return ObjRef;
+	}
+	/*
+	*/
+	if (const auto Cached = ObjRefCache.Find(NetGUID.Value))
+	{
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Use cached ObjRef: %d"), NetGUID.Value);
+		return *Cached;
+	}
+	else
+	{
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Cached ObjRef: %d"), NetGUID.Value);
+		ObjRefCache.Add(NetGUID.Value, ObjRef);
+	}
+	
+	ObjRef->set_classpath(std::string(TCHAR_TO_UTF8(*Obj->GetClass()->GetPathName())));
+	
 	if (Obj->IsA<AActor>() && GuidCache->IsNetGUIDAuthority())
 	{
 		auto Actor = Cast<AActor>(Obj);
 		if (Connection == nullptr)
 		{
-			Connection = Cast<UChanneldNetConnection>(Actor->GetNetConnection());
+			Connection = Actor->GetNetConnection();
+		}
+		if (Connection == nullptr)
+		{
+			Connection = NetConnForSpawn;
 		}
 		if (!IsValid(Connection))
 		{
 			UE_LOG(LogChanneld, Log, TEXT("ChanneldUtils::GetRefOfObject: Unable to full-export '%s' as it doesn't have valid NetConnection"), *Obj->GetName());
-			ObjRef.set_netguid(NetGUID.Value);
 			return ObjRef;
 		}
+		
+		ObjRef->set_owningconnid(CastChecked<UChanneldNetConnection>(Connection)->GetConnId());
+		
 		auto PackageMap = Cast<UPackageMapClient>(Connection->PackageMap);
 
 		if (IsValid(PackageMap))
@@ -191,17 +286,23 @@ unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnec
 						continue;
 
 					auto NewCachedObj = GuidCache->GetCacheObject(NewGUID);
-					auto Context = ObjRef.add_context();
+					auto Context = ObjRef->add_context();
 					Context->set_netguid(NewGUID.Value);
 					Context->set_pathname(std::string(TCHAR_TO_UTF8(*NewCachedObj->PathName.ToString())));
 					Context->set_outerguid(NewCachedObj->OuterGUID.Value);
 					UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send registered NetGUID %d with path: %s"), NewGUID.Value, *NewCachedObj->PathName.ToString());
 				}
-				ObjRef.set_netguidbunch(Ar.GetData(), Ar.GetNumBytes());
-				ObjRef.set_bunchbitsnum(Ar.GetNumBits());
+				ObjRef->set_netguidbunch(Ar.GetData(), Ar.GetNumBytes());
+				ObjRef->set_bunchbitsnum(Ar.GetNumBits());
 
 				// Remove the channel after using it
 				Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
+
+				if (Connection == NetConnForSpawn)
+				{
+					// Clear the export map and ack state so everytime we can get a full export.
+					ResetNetConnForSpawn();
+				}
 			}
 			//else
 			//{
@@ -214,9 +315,16 @@ unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnec
 		}
 	}
 
-	ObjRef.set_netguid(NetGUID.Value);
 	// ObjRef.set_connid(GEngine->GetEngineSubsystem<UChanneldConnection>()->GetConnId());
 	return ObjRef;
+}
+
+void ChanneldUtils::ResetNetConnForSpawn()
+{
+	auto PacketMapClient = CastChecked<UPackageMapClient>(NetConnForSpawn->PackageMap);
+	PacketMapClient->NetGUIDExportCountMap.Empty();
+	const static FPackageMapAckState EmptyAckStatus;
+	PacketMapClient->RestorePackageMapExportAckStatus(EmptyAckStatus);
 }
 
 UActorComponent* ChanneldUtils::GetActorComponentByRef(const unrealpb::ActorComponentRef* Ref, UWorld* World, bool bCreateIfNotInCache, UChanneldNetConnection* ClientConn)
@@ -264,7 +372,7 @@ unrealpb::ActorComponentRef ChanneldUtils::GetRefOfActorComponent(UActorComponen
 		return CompRef;
 	}
 
-	CompRef.mutable_owner()->MergeFrom(GetRefOfObject(Comp->GetOwner(), Connection));
+	CompRef.mutable_owner()->MergeFrom(*GetRefOfObject(Comp->GetOwner(), Connection));
 	CompRef.set_compname(std::string(TCHAR_TO_UTF8(*Comp->GetFName().ToString())));
 	return CompRef;
 }

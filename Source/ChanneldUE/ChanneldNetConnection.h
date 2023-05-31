@@ -30,9 +30,13 @@ public:
 
 	FORCEINLINE Channeld::ConnectionId GetConnId() const
 	{
-		uint32 ConnId;
-		RemoteAddr->GetIp(ConnId);
-		return ConnId;
+		if (RemoteAddr.IsValid())
+		{
+			uint32 ConnId;
+			RemoteAddr->GetIp(ConnId);
+			return ConnId;
+		}
+		return 0;
 	}
 
 	Channeld::ChannelId GetSendToChannelId();

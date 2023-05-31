@@ -59,7 +59,8 @@ void UChanneldReplicationComponent::InitOnce()
 	}
 	for (auto RepComp : GetOwner()->GetReplicatedComponents())
 	{
-		auto CompReplicators = ChanneldReplication::FindAndCreateReplicators(RepComp);
+		// ActorComponent skips the ChanneldObjectReplicator
+		auto CompReplicators = ChanneldReplication::FindAndCreateReplicators(RepComp, UObject::StaticClass());
 		if (CompReplicators.Num() > 0)
 		{
 			Replicators.Append(CompReplicators);
@@ -174,15 +175,33 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 	{
 		return false;
 	}
+
+	AActor* Owner = GetOwner();
 	
-	if (!GetOwner()->HasAuthority())
+	if (!Owner->HasAuthority())
 	{
 		return false;
+	}
+
+	if (!IsRemoved())
+	{
+		// Apply AActor::NetUpdateFrequency
+		float t = GetWorld()->GetTimeSeconds();
+		if (t - LastUpdateTime < 1.0f / Owner->NetUpdateFrequency)
+		{
+			return false;
+		}
+		LastUpdateTime = t;
 	}
 
 	auto Processor = ChanneldReplication::FindChannelDataProcessor(UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()));
 	ensureMsgf(Processor, TEXT("Unable to find channel data processor for message: %s"), UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()));
 	if (!Processor)
+	{
+		return false;
+	}
+
+	if (!Processor->UpdateChannelData(Owner, ChannelData))
 	{
 		return false;
 	}
@@ -193,7 +212,7 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 		uint32 NetGUID = Replicator->GetNetGUID();
 		if (NetGUID == 0)
 		{
-			UE_LOG(LogChanneld, Log, TEXT("Replicator of %s doesn't has a NetGUID yet, skip setting channel data"), *Replicator->GetTargetClass()->GetName());
+			UE_LOG(LogChanneld, Warning, TEXT("Replicator of '%s' doesn't has a NetGUID yet, skip setting channel data"), *Replicator->GetTargetClass()->GetName());
 			continue;
 		}
 		
@@ -230,6 +249,11 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 	auto Processor = ChanneldReplication::FindChannelDataProcessor(UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()));
 	ensureMsgf(Processor, TEXT("Unable to find channel data processor for message: %s"), UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()));
 	if (!Processor)
+	{
+		return;
+	}
+
+	if (!Processor->OnChannelDataUpdated(GetOwner(), ChannelData))
 	{
 		return;
 	}

@@ -249,7 +249,7 @@ namespace {Declaration_CDP_Namespace}
       auto {Declaration_CDP_ProtoVar} = static_cast<{Definition_CDP_ProtoNamespace}::{Definition_CDP_ProtoMsgName}*>(ChannelData);
       {Code_GetStateFromChannelData}
       {
-        UE_LOG(LogChanneldGen, Warning, TEXT("State of '%s' is not supported in the ChannelData, NetGUID: %d"), *TargetClass->GetName(), NetGUID);
+        UE_LOG(LogChanneldGen, Warning, TEXT("State of '%s' is not supported in %s, NetGUID: %d"), *TargetClass->GetName(), UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()), NetGUID);
       }
     
       bIsRemoved = false;
@@ -265,29 +265,49 @@ namespace {Declaration_CDP_Namespace}
       auto {Declaration_CDP_ProtoVar} = static_cast<{Definition_CDP_ProtoNamespace}::{Definition_CDP_ProtoMsgName}*>(ChannelData);
       {Code_SetStateToChannelData}
       {
-        UE_LOG(LogChanneldGen, Warning, TEXT("State of '%s' is not supported in the ChannelData, NetGUID: %d"), *TargetClass->GetName(), NetGUID);
+        UE_LOG(LogChanneldGen, Warning, TEXT("State of '%s' is not supported in %s, NetGUID: %d"), *TargetClass->GetName(), UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()), NetGUID);
       }
-    }
-
-    virtual TArray<uint32> GetRelevantNetGUIDsFromChannelData(const google::protobuf::Message* ChannelData) override
-    {
-      TArray<uint32> NetGUIDs;
-      {Code_GetRelevantNetGUIDsFromChannelDataInner}
-	    return NetGUIDs;
     }
   };
 }
 )EOF";
-static const TCHAR* CodeGen_GetRelevantNetGUIDsFromChannelDataTemp = LR"EOF(
-      const auto {Declaration_CDP_ProtoVar} = static_cast<const {Definition_CDP_ProtoNamespace}::{Definition_CDP_ProtoMsgName}*>(ChannelData);
-      for (auto& Pair : {Declaration_CDP_ProtoVar}->actorstates())
-      {
-        if (Pair.second.has_replicatedmovement())
-        {
-          NetGUIDs.Add(Pair.first);
-        }
-        {Code_GetRelevantNetGUIDs}
-      }
+
+static const TCHAR* CodeGen_MergeObjectState =
+  LR"EOF(
+if (Src->has_objref())
+{
+  Dst->mutable_objref()->MergeFrom(Src->objref());
+}
+)EOF";
+
+static const TCHAR* CodeGen_GetObjectStateFromChannelData = LR"EOF(
+  if (TargetClass == UObject::StaticClass())
+	{
+    bIsRemoved = false;
+		// Do nothing - just suppress the warning
+	}
+)EOF";
+
+static const TCHAR* CodeGen_SetObjectStateToChannelData = LR"EOF(
+	if (TargetClass == UObject::StaticClass())
+	{
+		// Do nothing - just suppress the warning
+	}
+)EOF";
+
+static const TCHAR* CodeGen_GetObjectStateFromEntityChannelData = LR"EOF(
+  if (TargetClass == UObject::StaticClass())
+	{
+    bIsRemoved = false;
+		return {Declaration_ChannelDataMessage}->has_objref() ? &{Declaration_ChannelDataMessage}->objref() : nullptr;
+	}
+)EOF";
+
+static const TCHAR* CodeGen_SetObjectStateToEntityChannelData = LR"EOF(
+	if (TargetClass == UObject::StaticClass())
+	{
+		{Declaration_ChannelDataMessage}->mutable_objref()->CopyFrom(*State);
+	}
 )EOF";
 
 static const TCHAR* CodeGen_GetRelevantNetIdByStateTemplate = LR"EOF(

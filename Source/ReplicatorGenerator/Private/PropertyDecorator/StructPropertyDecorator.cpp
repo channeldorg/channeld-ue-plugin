@@ -6,6 +6,7 @@
 
 FStructPropertyDecorator::FStructPropertyDecorator(FProperty* InProperty, IPropertyDecoratorOwner* InOwner) : FPropertyDecorator(InProperty, InOwner)
 {
+	SetForceNotDirectlyAccessible(true);
 	if (OriginalProperty != nullptr)
 	{
 		FPropertyDecoratorFactory& PropertyDecoratorFactory = FPropertyDecoratorFactory::Get();
@@ -35,16 +36,6 @@ void FStructPropertyDecorator::PostInit()
 			}
 		);
 	}
-}
-
-bool FStructPropertyDecorator::IsExternallyAccessible()
-{
-	return false;
-}
-
-bool FStructPropertyDecorator::IsDeclaredInCPP()
-{
-	return false;
 }
 
 FString FStructPropertyDecorator::GetCompilableCPPType()
