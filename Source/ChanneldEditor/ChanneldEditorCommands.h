@@ -29,4 +29,5 @@ public:
 	TSharedPtr<FUICommandInfo> GenerateReplicatorCommand;
 	TSharedPtr<FUICommandInfo> AddRepComponentsToBPsCommand;
 	TSharedPtr<FUICommandInfo> OpenChannelDataEditorCommand;
+	TSharedPtr<FUICommandInfo> OpenCloudDeploymentCommand;
 };

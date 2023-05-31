@@ -28,6 +28,16 @@ void UChanneldMissionNotiProxy::SetMissionNotifyText(const FText& RunningText, c
 	MissionFailedNotifyText = FailedText; // LOCTEXT("CookFaildNotification", "Cook Faild!");
 }
 
+bool UChanneldMissionNotiProxy::ShowCancel()
+{
+	return bShowCancel;
+}
+
+void UChanneldMissionNotiProxy::SetShowCancel(bool InShowCancel)
+{
+	bShowCancel = InShowCancel;
+}
+
 FText UChanneldMissionNotiProxy::GetRunningNotifyText() const
 {
 	return RunningNotifyText;
@@ -93,7 +103,7 @@ void UChanneldMissionNotiProxy::ReceiveOutputMsg(FChanneldProcWorkerThread* Work
 void UChanneldMissionNotiProxy::SpawnRunningMissionNotification(FChanneldProcWorkerThread* ProcWorker)
 {
 	UChanneldMissionNotiProxy* MissionProxy = this;
-	AsyncTask(ENamedThreads::GameThread, [MissionProxy]()
+	AsyncTask(ENamedThreads::GameThread, [this, MissionProxy]()
 	{
 		if (MissionProxy->PendingProgressPtr.IsValid())
 		{
@@ -104,10 +114,13 @@ void UChanneldMissionNotiProxy::SpawnRunningMissionNotification(FChanneldProcWor
 		Info.bFireAndForget = false;
 		Info.Hyperlink = FSimpleDelegate::CreateStatic([]() { FGlobalTabmanager::Get()->TryInvokeTab(FName("OutputLog")); });
 		Info.HyperlinkText = LOCTEXT("ShowOutputLogHyperlink", "Show Output Log");
-		Info.ButtonDetails.Add(FNotificationButtonInfo(MissionProxy->RunningNotifyCancelText, FText(),
-		                                               FSimpleDelegate::CreateLambda([MissionProxy]() { MissionProxy->CancelMission(); }),
-		                                               SNotificationItem::CS_Pending
-		));
+		if(bShowCancel)
+		{
+			Info.ButtonDetails.Add(FNotificationButtonInfo(MissionProxy->RunningNotifyCancelText, FText(),
+			                                               FSimpleDelegate::CreateLambda([MissionProxy]() { MissionProxy->CancelMission(); }),
+			                                               SNotificationItem::CS_Pending
+			));
+		}
 
 		MissionProxy->PendingProgressPtr = FSlateNotificationManager::Get().AddNotification(Info);
 
