@@ -14,22 +14,21 @@ void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed ReceiveBufferSize from CLI: %d"), ReceiveBufferSize);
 	}
-	if (FParse::Value(CmdLine, TEXT("SendBufferSize="), SendBufferSize))
+	if (FParse::Value(CmdLine, TEXT("SocketSendBufferSize="), SocketSendBufferSize))
 	{
-		UE_LOG(LogChanneld, Log, TEXT("Parsed SendBufferSize from CLI: %d"), SendBufferSize);
+		UE_LOG(LogChanneld, Log, TEXT("Parsed SendBufferSize from CLI: %d"), SocketSendBufferSize);
+	}
+	if (FParse::Value(CmdLine, TEXT("SocketReceiveBufferSize="), SocketReceiveBufferSize))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed SocketReceiveBufferSize from CLI: %d"), SocketReceiveBufferSize);
 	}
 	if (FParse::Bool(CmdLine, TEXT("ShowUserSpaceMessageLog="), bShowUserSpaceMessageLog))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bShowUserSpaceMessageLog from CLI: %d"), bShowUserSpaceMessageLog);
 	}
-	
-	if (ReceiveBufferSize < Channeld::MaxPacketSize)
+	if (ReceiveBufferSize < int64(Channeld::MaxPacketSize + HeaderSize))
 	{
-		ReceiveBufferSize = Channeld::MaxPacketSize;
-	}
-	if (SendBufferSize < Channeld::MaxPacketSize)
-	{
-		SendBufferSize = Channeld::MaxPacketSize;
+		ReceiveBufferSize = Channeld::MaxPacketSize + HeaderSize;
 	}
 	ReceiveBuffer = new uint8[ReceiveBufferSize];
 
@@ -132,23 +131,31 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int32
 	// Create TCP socket to channeld
 	Socket = SocketSubsystem->CreateSocket(NAME_Stream, TEXT("Connection to channeld"), RemoteAddr->GetProtocolType());
 
-	int32 NewSize = 0;
-	if (Socket->SetReceiveBufferSize(0x0fffff, NewSize))
+	if(SocketReceiveBufferSize > 0) 
 	{
-		UE_LOG(LogChanneld, Log, TEXT("Set Socket's receive buffer size to %d"), NewSize);
+		int32 NewSize = 0;
+		if (Socket->SetReceiveBufferSize(SocketReceiveBufferSize, NewSize))
+		{
+			UE_LOG(LogChanneld, Log, TEXT("Set Socket's receive buffer size to %d"), NewSize);
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Error, TEXT("Failed to set Socket's receive buffer size"));
+		}
 	}
-	else
+	if(SocketSendBufferSize > 0) 
 	{
-		UE_LOG(LogChanneld, Error, TEXT("Failed to set Socket's receive buffer size"));
+		int32 NewSize = 0;
+		if (Socket->SetSendBufferSize(SocketSendBufferSize, NewSize))
+		{
+			UE_LOG(LogChanneld, Log, TEXT("Set Socket's send buffer size to %d"), NewSize);
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Error, TEXT("Failed to set Socket's send buffer size"));
+		}
 	}
-	if (Socket->SetSendBufferSize(0x0fffff, NewSize))
-	{
-		UE_LOG(LogChanneld, Log, TEXT("Set Socket's send buffer size to %d"), NewSize);
-	}
-	else
-	{
-		UE_LOG(LogChanneld, Error, TEXT("Failed to set Socket's send buffer size"));
-	}
+
 	if(!Socket->SetNoDelay(true))
 	{
 		UE_LOG(LogChanneld, Error, TEXT("Failed to set Socket to NoDelay"));
@@ -241,108 +248,166 @@ void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 }
 
 
+bool UChanneldConnection::DecodePacketHeader(uint8* Buffer, uint32& PacketSize, int& CompressionMethod)
+{
+	if (Buffer[0] != 67 || Buffer[1] != 72)
+	{
+		return false;
+	}
+	PacketSize = (static_cast<int>(Buffer[2]) << 8) | Buffer[3];
+	CompressionMethod = Buffer[4];
+	return true;
+}
+
+bool UChanneldConnection::EncodePacketHeader(uint8* Buffer, const uint32 PacketSize, int CompressionMethod)
+{
+	if (PacketSize > Channeld::MaxPacketSize)
+	{
+		return false;
+	}
+
+	Buffer[0] = 67;
+	Buffer[1] = 72;
+	Buffer[2] = PacketSize >> 8;
+	Buffer[3] = PacketSize & 0xFF;
+	Buffer[4] = CompressionMethod;
+	return true;
+}
+
+int32 UChanneldConnection::ProcessOnePacket(uint8* Buffer, int32 BufferLength)
+{
+	if (BufferLength < static_cast<int32>(HeaderSize))
+	{
+		// Unfinished packet
+		UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet header: %d"), BufferLength);
+		UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+		Metrics->FragmentedPacket_Counter->Increment();
+		return 0;
+	}
+	
+	uint32 PacketSize = 0;
+	int CompressionMethod = 0;
+	if(!DecodePacketHeader(Buffer, PacketSize, CompressionMethod))
+	{
+		UE_LOG(LogChanneld, Error, TEXT("UChanneldConnection::Receive: Invalid tag: %d, the packet will be dropped"), Buffer[0]);
+		UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+		Metrics->DroppedPacket_Counter->Increment();
+		return -1;	
+	}
+		
+	if (BufferLength < static_cast<int32>(HeaderSize + PacketSize))
+	{
+		// Unfinished packet
+		UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet body, pos: %d/%d"), BufferLength, HeaderSize + PacketSize);
+		UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+		Metrics->FragmentedPacket_Counter->Increment();
+		return 0;
+	}
+		
+	// TODO: support Snappy compression
+	if(CompressionMethod != 0)
+	{
+		UE_LOG(LogChanneld, Error, TEXT("UChanneldConnection::Receive: Do not support compression:%d yet!"), CompressionMethod);
+	}
+
+	channeldpb::Packet Packet;
+	if (!Packet.ParseFromArray(ReceiveBuffer + HeaderSize, PacketSize))
+	{
+		UE_LOG(LogChanneld, Error, TEXT("UChanneldConnection::Receive: Failed to parse packet, size: %d"), PacketSize);
+		UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+		Metrics->DroppedPacket_Counter->Increment();
+		return PacketSize + HeaderSize;
+	}
+
+	for (auto const& MessagePackData : Packet.messages())
+	{
+		uint32 MsgType = MessagePackData.msgtype();
+
+		MessageHandlerEntry Entry;
+		if (!MessageHandlers.Contains(MsgType))
+		{
+			if (MsgType >= channeldpb::USER_SPACE_START)
+			{
+				Entry = UserSpaceMessageHandlerEntry;
+			}
+			else
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("No message handler registered for type: %d"), MessagePackData.msgtype());
+				continue;
+			}
+		}
+		else
+		{
+			Entry = MessageHandlers[MsgType];
+		}
+
+		if (Entry.Msg == nullptr)
+		{
+			UE_LOG(LogChanneld, Error, TEXT("No message template registered for type: %d"), MessagePackData.msgtype());
+			continue;
+		}
+		
+		// Always make a clone!
+		google::protobuf::Message* Msg = Entry.Msg->New();
+		Msg->CopyFrom(*Entry.Msg);
+		if (!Msg->ParseFromString(MessagePackData.msgbody()))
+		{
+			UE_LOG(LogChanneld, Error, TEXT("Failed to parse message %s"), UTF8_TO_TCHAR(Msg->GetTypeName().c_str()));
+			continue;
+		}
+
+		MessageQueueEntry QueueEntry = {MsgType, Msg, MessagePackData.channelid(), MessagePackData.stubid(), Entry.Handlers, Entry.Delegate };
+		IncomingQueue.Enqueue(QueueEntry);
+	}
+	return HeaderSize + PacketSize;
+}
+
 void UChanneldConnection::Receive()
 {
 	uint32 PendingDataSize;
 	if (!Socket->HasPendingData(PendingDataSize))
+	{
 		return;
-
+	}
 	int32 BytesRead;
-	if (Socket->Recv(ReceiveBuffer + ReceiveBufferOffset, ReceiveBufferSize, BytesRead, ESocketReceiveFlags::None))
+	while(true)
 	{
-		ReceiveBufferOffset += BytesRead;
-		if (ReceiveBufferOffset < HeaderSize)
+		int UnusedBufferSize = ReceiveBufferSize-ReceiveBufferOffset;
+		if (Socket->Recv(ReceiveBuffer + ReceiveBufferOffset, UnusedBufferSize, BytesRead, ESocketReceiveFlags::None))
 		{
-			// Unfinished packet
-			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet header: %d"), BytesRead);
-			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->FragmentedPacket_Counter->Increment();
-			return;
-		}
+			ReceiveBufferOffset += BytesRead;
 
-		if (ReceiveBuffer[0] != 67 || ReceiveBuffer[1] != 72)
-		{
-			ReceiveBufferOffset = 0;
-			UE_LOG(LogChanneld, Error, TEXT("Invalid tag: %d, the packet will be dropped"), ReceiveBuffer[0]);
-			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->DroppedPacket_Counter->Increment();
-			return;
-		}
-
-		uint32 PacketSize = ReceiveBuffer[3] | (ReceiveBuffer[2]<<8);
-		
-		if (ReceiveBufferOffset < HeaderSize + PacketSize)
-		{
-			// Unfinished packet
-			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet body, read: %d, pos: %d/%d"), BytesRead, ReceiveBufferOffset, HeaderSize + PacketSize);
-			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->FragmentedPacket_Counter->Increment();
-			return;
-		}
-
-		// TODO: support Snappy compression
-
-		channeldpb::Packet Packet;
-		if (!Packet.ParseFromArray(ReceiveBuffer + HeaderSize, PacketSize))
-		{
-			ReceiveBufferOffset = 0;
-			UE_LOG(LogChanneld, Error, TEXT("UChanneldConnection::Receive: Failed to parse packet, size: %d"), PacketSize);
-			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->DroppedPacket_Counter->Increment();
-			return;
-		}
-
-		for (auto const& MessagePackData : Packet.messages())
-		{
-			uint32 MsgType = MessagePackData.msgtype();
-
-			MessageHandlerEntry Entry;
-			if (!MessageHandlers.Contains(MsgType))
+			int32 MsgOffset = 0;
+			int BufferLength = BytesRead;
+			while(BufferLength > 0)
 			{
-				if (MsgType >= channeldpb::USER_SPACE_START)
+				const int ProcessedLength = ProcessOnePacket(&ReceiveBuffer[0] + MsgOffset, BufferLength);
+				if (ProcessedLength <= 0)
 				{
-					Entry = UserSpaceMessageHandlerEntry;
+					//TODO::handle format error
+					break;
 				}
-				else
-				{
-					UE_LOG(LogChanneld, Warning, TEXT("No message handler registered for type: %d"), MessagePackData.msgtype());
-					continue;
-				}
-			}
-			else
+				MsgOffset += ProcessedLength;
+				BufferLength -= ProcessedLength;
+				assert(BufferLength >= 0);
+			} 
+			memmove(ReceiveBuffer,ReceiveBuffer+ReceiveBufferOffset, BufferLength);
+			ReceiveBufferOffset = BufferLength;
+			// all data has received
+			if(!bReceiveThreadRunning || BytesRead < UnusedBufferSize)
 			{
-				Entry = MessageHandlers[MsgType];
+				break;
 			}
-
-			if (Entry.Msg == nullptr)
-			{
-				UE_LOG(LogChanneld, Error, TEXT("No message template registered for type: %d"), MessagePackData.msgtype());
-				continue;
-			}
-
-			// Always make a clone!
-			google::protobuf::Message* Msg = Entry.Msg->New();
-			Msg->CopyFrom(*Entry.Msg);
-			if (!Msg->ParseFromString(MessagePackData.msgbody()))
-			{
-				UE_LOG(LogChanneld, Error, TEXT("Failed to parse message %s"), UTF8_TO_TCHAR(Msg->GetTypeName().c_str()));
-				continue;
-			}
-
-			MessageQueueEntry QueueEntry = {MsgType, Msg, MessagePackData.channelid(), MessagePackData.stubid(), Entry.Handlers, Entry.Delegate };
-			IncomingQueue.Enqueue(QueueEntry);
 		}
-
+		else
+		{
+			OnDisconnected();
+			// Handle disconnection or exception
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to receive data from channeld"));
+			return;
+		}
 	}
-	else
-	{
-		OnDisconnected();
-		// Handle disconnection or exception
-		UE_LOG(LogChanneld, Warning, TEXT("Failed to receive data from channeld"));
-	}
-
-	// Reset read position
-	ReceiveBufferOffset = 0;
+	return;
 }
 
 bool UChanneldConnection::StartReceiveThread()
@@ -509,13 +574,12 @@ void UChanneldConnection::SendDirect(const channeldpb::Packet& Packet)
 		return;
 	}
 
-	// Set the header
-	PacketData[0] = 67;
-	PacketData[1] = 72;
-	PacketData[2] = (PacketSize >> 8) & 0xff;
-	PacketData[3] = (PacketSize & 0xff);
-	// TODO: support Snappy compression
-	PacketData[4] = 0;
+	if(!EncodePacketHeader(PacketData,PacketSize, 0))
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to encode packet header, PacketSize:%d"), PacketSize);
+		return;
+	}
+	
 
 	int32 BytesSent;
 	bool IsSent = Socket->Send(PacketData, Size, BytesSent);
