@@ -97,13 +97,10 @@ public:
 
 	FORCEINLINE FInternetAddr& GetRemoteAddr() const { return *RemoteAddr; }
 
-	FORCEINLINE static bool DecodePacketHeader(uint8* Buffer, uint32& PacketSize, int& CompressionMethod);
-	FORCEINLINE static bool EncodePacketHeader(uint8* Buffer, const uint32 PacketSize, int CompressionMethod);
 	//virtual void BeginDestroy() override;
 
 	bool Connect(bool bInitAsClient, const FString& Host, int32 Port, FString& Error);
 	void Disconnect(bool bFlushAll = true);
-	int32 ProcessOnePacket(uint8* Buffer, int32 BufferLength);
 	// Send a message to channeld. Thread-safe.
 	void Send(Channeld::ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast = channeldpb::NO_BROADCAST, const FChanneldMessageHandlerFunc& HandlerFunc = nullptr);
 	// Send with underlying bytes.
@@ -158,12 +155,10 @@ public:
 	void TickOutgoing();
 
 	UPROPERTY(Config)
-	int32 ReceiveBufferSize = 0xfffff;
+	int32 ReceiveBufferSize = Channeld::MaxPacketSize * 2;
 
 	UPROPERTY(Config)
-	int32 SocketSendBufferSize = 0xfffff;
-	UPROPERTY(Config)
-	int32 SocketReceiveBufferSize = 0xfffff;
+	int32 SendBufferSize = Channeld::MaxPacketSize * 2;
 	
 	UPROPERTY(Config)
 	bool bShowUserSpaceMessageLog = false;
