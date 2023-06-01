@@ -14,7 +14,7 @@ disk_id=$(echo $disk_id | tr [:upper:] [:lower:])
 other_path=${tmp_path:1}
 local_channeld=/${disk_id}${other_path}
 
-if [ "$defualt_channeld_path" != $local_channeld ]; then
+if [ "$defualt_channeld_path" != "$local_channeld" ]; then
     echo "The channeld is not include in ChanneldUE, please update channeld manually"
     echo "    The channeld path is: $local_channeld"
     echo "    The default channeld path is: $defualt_channeld_path"
