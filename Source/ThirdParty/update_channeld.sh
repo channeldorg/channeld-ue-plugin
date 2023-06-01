@@ -1,5 +1,5 @@
 #!/bin/bash
-channeld_version=31-entity-channel
+channeld_version=master
 
 # Get this script's path
 script_dir=$(cd "$(dirname "$0")"; pwd)
