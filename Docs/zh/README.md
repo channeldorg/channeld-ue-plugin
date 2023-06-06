@@ -16,7 +16,7 @@
 ### ChannelUE的网络同步实现
 ### [和原生UE的差异以及替代方案](native-ue-comparison.md)
 ### 频道数据视图
-### 客户端兴趣管理
+### [客户端兴趣](client-interest.md)
 ### 跨服交互
 ### 扩展channeld和插件
 ## 常见问答
