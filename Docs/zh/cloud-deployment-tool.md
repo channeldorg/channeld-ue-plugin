@@ -4,6 +4,8 @@ ChanneldUE提供了一套针对云部署的工具，在进行配置后，可以�
 
 ## 运行环境要求
 - Windows 10/11操作系统
+- 源代码版本的虚幻引擎4.27.2（用于构建Linux目标平台的服务器包）
+- [Linux交叉编译工具链](https://docs.unrealengine.com/4.27/zh-CN/SharingAndReleasing/Linux/GettingStarted/)
 - [Docker Desktop for Windows](https://docs.docker.com/desktop/windows/install)
 - Kubernetes命令行工具[kubectl](https://kubernetes.io/docs/reference/kubectl)
 - 开通基于Kubernetes的云容器服务，例如：

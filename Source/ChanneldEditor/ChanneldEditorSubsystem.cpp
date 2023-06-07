@@ -896,6 +896,14 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 
 	UProjectPackagingSettings* PackagingSettings = Cast<UProjectPackagingSettings>(
 		UProjectPackagingSettings::StaticClass()->GetDefaultObject());
+	
+	// Force the server build target
+	if (!PackagingSettings->BuildTarget.EndsWith("Server"))
+	{
+		PackagingSettings->BuildTarget.Append("Server");
+		PackagingSettings->SaveConfig();
+	}
+	
 	const UProjectPackagingSettings::FConfigurationInfo& ConfigurationInfo =
 		UProjectPackagingSettings::ConfigurationInfo[PackagingSettings->BuildConfiguration];
 	bool bAssetNativizationEnabled = (PackagingSettings->BlueprintNativizationMethod !=
@@ -1162,7 +1170,8 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 	else
 	{
 		OptionalParams += TEXT(" -targetplatform=");
-		OptionalParams += *PlatformInfo->TargetPlatformName.ToString();
+		// LinuxServer -> Linux
+		OptionalParams += PlatformInfo->TargetPlatformName == TEXT("LinuxServer") ? TEXT("Linux") : *PlatformInfo->TargetPlatformName.ToString();
 	}
 
 	// Get the target to build
