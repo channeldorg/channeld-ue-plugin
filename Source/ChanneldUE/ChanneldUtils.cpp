@@ -155,7 +155,7 @@ unrealpb::UnrealObjectRef ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnec
 			return ObjRef;
 		}
 		auto PackageMap = Cast<UPackageMapClient>(Connection->PackageMap);
-
+		
 		if (IsValid(PackageMap))
 		{
 			// If the NetGUID is not created yet, assign an new one and send the new NetGUID CachedObjects to the client.

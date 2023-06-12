@@ -4,6 +4,9 @@
 #include "SlateBasics.h"
 #include "DetailWidgetRow.h"
 #include "DetailLayoutBuilder.h"
+#if ENGINE_MAJOR_VERSION == 5
+#include "EditorStyleSet.h"
+#endif
 #include "IDetailChildrenBuilder.h"
 
 
@@ -39,8 +42,13 @@ void FClientInterestSettingsCustomization::CustomizeHeader(TSharedRef<IPropertyH
 		.AutoWidth()
 		[
 			SNew(STextBlock)
-			.Font(FEditorStyle::GetFontStyle("PropertyWindow.NormalFont"))
-			.Text(FText::Format(LOCTEXT("ClientInterestSettingsAreaTypeString", "The area type is \"{0}\""), AreaTypeText))
+#if ENGINE_MAJOR_VERSION == 5
+		.Font(FAppStyle::GetFontStyle("PropertyWindow.NormalFont"))
+#else
+		.Font(FEditorStyle::GetFontStyle("PropertyWindow.NormalFont"))
+#endif
+		
+		.Text(FText::Format(LOCTEXT("ClientInterestSettingsAreaTypeString", "The area type is \"{0}\""), AreaTypeText))
 		]
 	];
 }
@@ -57,7 +65,8 @@ void FClientInterestSettingsCustomization::OnTypeChanged(TSharedPtr<IPropertyHan
 }
 
 void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> StructPropertyHandle,
-	IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
+                                                             IDetailChildrenBuilder& StructBuilder,
+                                                             IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
 	auto TypePropertyHandle = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FClientInterestSettingsPreset, AreaType));
 	auto SpotsPropertyHandle = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FClientInterestSettingsPreset, SpotsAndDists));
@@ -84,7 +93,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 				[
 					TypePropertyHandle->CreatePropertyNameWidget()
 				]
-				+SVerticalBox::Slot()
+				+ SVerticalBox::Slot()
 				.AutoHeight()
 				[
 					TypePropertyHandle->CreatePropertyValueWidget()
@@ -94,7 +103,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 			.Padding(5, 0)
 			[
 				SNew(SBox)
-				.IsEnabled_Lambda([=] {return AreaType == EClientInterestAreaType::StaticLocations; })
+				.IsEnabled_Lambda([=] { return AreaType == EClientInterestAreaType::StaticLocations; })
 				.MinDesiredWidth(200.f)
 				[
 					SNew(SVerticalBox)
@@ -103,7 +112,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 					[
 						SpotsPropertyHandle->CreatePropertyNameWidget()
 					]
-					+SVerticalBox::Slot()
+					+ SVerticalBox::Slot()
 					.AutoHeight()
 					[
 						SpotsPropertyHandle->CreateDefaultPropertyButtonWidgets()
@@ -114,7 +123,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 			.Padding(5, 0)
 			[
 				SNew(SBox)
-				.IsEnabled_Lambda([=] {return AreaType == EClientInterestAreaType::Box; })
+				.IsEnabled_Lambda([=] { return AreaType == EClientInterestAreaType::Box; })
 				.MinDesiredWidth(200.f)
 				[
 					SNew(SVerticalBox)
@@ -123,7 +132,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 					[
 						ExtentPropertyHandle->CreatePropertyNameWidget()
 					]
-					+SVerticalBox::Slot()
+					+ SVerticalBox::Slot()
 					.AutoHeight()
 					[
 						StructBuilder.GenerateStructValueWidget(ExtentPropertyHandle.ToSharedRef())
@@ -135,7 +144,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 			.Padding(5, 0)
 			[
 				SNew(SBox)
-				.IsEnabled_Lambda([=] {return AreaType == EClientInterestAreaType::Sphere || AreaType == EClientInterestAreaType::Cone; })
+				.IsEnabled_Lambda([=] { return AreaType == EClientInterestAreaType::Sphere || AreaType == EClientInterestAreaType::Cone; })
 				.MinDesiredWidth(70.f)
 				[
 					SNew(SVerticalBox)
@@ -144,7 +153,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 					[
 						RadiusPropertyHandle->CreatePropertyNameWidget()
 					]
-					+SVerticalBox::Slot()
+					+ SVerticalBox::Slot()
 					.AutoHeight()
 					[
 						RadiusPropertyHandle->CreatePropertyValueWidget()
@@ -155,7 +164,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 			.Padding(5, 0)
 			[
 				SNew(SBox)
-				.IsEnabled_Lambda([=] {return AreaType == EClientInterestAreaType::Cone; })
+				.IsEnabled_Lambda([=] { return AreaType == EClientInterestAreaType::Cone; })
 				.MinDesiredWidth(70.f)
 				[
 					SNew(SVerticalBox)
@@ -164,7 +173,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 					[
 						AnglePropertyHandle->CreatePropertyNameWidget()
 					]
-					+SVerticalBox::Slot()
+					+ SVerticalBox::Slot()
 					.AutoHeight()
 					[
 						AnglePropertyHandle->CreatePropertyValueWidget()
