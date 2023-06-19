@@ -904,11 +904,11 @@ TArray<TSharedPtr<FStructPropertyDecorator>> FReplicatorCodeGenerator::GetAllStr
 	TSet<FString> StructPropertyDecoratorNames;
 	for (const TSharedPtr<FStructPropertyDecorator>& StructPropertyDecorator : AllStructPropertyDecorators)
 	{
-		if (StructPropertyDecoratorNames.Contains(StructPropertyDecorator->GetPropertyName()))
+		if (StructPropertyDecoratorNames.Contains(StructPropertyDecorator->GetCPPType()))
 		{
 			continue;
 		}
-		StructPropertyDecoratorNames.Add(StructPropertyDecorator->GetPropertyName());
+		StructPropertyDecoratorNames.Add(StructPropertyDecorator->GetCPPType());
 		NonRepetitionStructPropertyDecorators.Add(StructPropertyDecorator);
 	}
 	return NonRepetitionStructPropertyDecorators;
