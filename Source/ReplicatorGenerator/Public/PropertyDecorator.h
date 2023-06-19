@@ -108,11 +108,6 @@ public:
 
 	bool IsForceNotDirectlyAccessible() const;
 	void SetForceNotDirectlyAccessible(bool bForceNotDirectlyAccessible);
-
-	/**
-	 * If the property cpp type is declared in cpp (e.g. uint32, FString), return true.
-	 */
-	virtual bool IsDeclaredInCPP();
 	
 	virtual bool HasAnyPropertyFlags(EPropertyFlags PropertyFlags);
 
@@ -288,6 +283,10 @@ public:
 	virtual TArray<FString> GetAdditionalIncludes() override;
 
 	virtual FString GetCode_GetWorldRef() override;
+
+	virtual bool IsStruct() override;
+
+	virtual TArray<TSharedPtr<FStructPropertyDecorator>> GetStructPropertyDecorators() override;
 
 protected:
 	bool bInitialized = false;

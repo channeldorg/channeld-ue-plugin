@@ -9,13 +9,14 @@
 ### [基本概念](basic-concepts.md)
 ### [配置ChanneldUE](settings.md)
 ### C++和蓝图API
-### 本地开发测试工作流
-### 生成同步代码
+### [频道数据模型](channel-data-schema.md)
+### [云部署工具](cloud-deployment-tool.md)
+### [推荐工作流](recommended-workflow.md)
 ## 进阶主题
 ### ChannelUE的网络同步实现
 ### [和原生UE的差异以及替代方案](native-ue-comparison.md)
 ### 频道数据视图
-### 客户端兴趣管理
+### [客户端兴趣](client-interest.md)
 ### 跨服交互
 ### 扩展channeld和插件
 ## 常见问答

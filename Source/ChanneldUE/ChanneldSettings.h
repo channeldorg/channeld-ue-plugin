@@ -27,12 +27,12 @@ public:
 	TSubclassOf<class UChannelDataView> ChannelDataViewClass = USingleChannelDataView::StaticClass();
 	// The default channel data message name for each channel type. The entries will be registered in UChannelDataView::Initialize.
 	// Every time the replication code is generated, the entries will be updated with the message names in the generated code.
-	UPROPERTY(Config, EditAnywhere, Category="View")
+	UPROPERTY(Config, BlueprintReadOnly, Category="View")
 	TMap<EChanneldChannelType, FString> DefaultChannelDataMsgNames =
 	{
 		{EChanneldChannelType::ECT_Global, TEXT("tpspb.TestRepChannelData")},
 		{EChanneldChannelType::ECT_SubWorld, TEXT("tpspb.TestRepChannelData")},
-		{EChanneldChannelType::ECT_Spatial, TEXT("tpspb.TestRepChannelData")},
+		{EChanneldChannelType::ECT_Spatial, TEXT("unrealpb.SpatialChannelData")},
 	};
 
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
@@ -55,6 +55,9 @@ public:
 	// If true, UNetConnection::SetInternalAck() will be called to internally ack all packets. Should be turned on for reliable connection (TCP) to save bandwidth.
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	bool bSetInternalAck = true;
+	// How many times an RPC will be redirected from a server that couldn't handle it to another server. 0 = No redirection. Setting this to a too high value can cause the RPC bouncing between servers and saturate the network.
+	UPROPERTY(Config, EditAnywhere, Category = "Transport")
+	int32 RpcRedirectionMaxRetries = 1;
 
 	// Should the server and client skip the custom replication system and use UE's default one. All traffic still goes through channeld either way.
 	UPROPERTY(Config, EditAnywhere, Category = "Replication")

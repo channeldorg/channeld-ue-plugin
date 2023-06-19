@@ -33,6 +33,9 @@ public:
 
 	virtual void SetMissionNotifyText(const FText& RunningText, const FText& CancelText, const FText& SucceedText, const FText& FailedText);
 
+	virtual bool ShowCancel();
+	virtual void SetShowCancel(bool InShowCancel);
+	
 	FMissionCanceled MissionCanceled;
 
 protected:
@@ -43,6 +46,8 @@ protected:
 	FText MissionSucceedNotifyText;
 	FText MissionFailedNotifyText;
 	FName MissionName;
+	bool bShowCancel = true;
+
 };
 
 #define GO_ZAP_LOGGER_LEVEL_DEBUG "DEBUG"

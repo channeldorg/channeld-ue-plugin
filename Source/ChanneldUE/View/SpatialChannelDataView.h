@@ -31,7 +31,7 @@ public:
 	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, Channeld::ChannelId ChId) override;
 	virtual void OnRemoveClientConnection(UChanneldNetConnection* ClientConn) override;
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
-	virtual void OnClientSpawnedObject(UObject* Obj, const Channeld::ChannelId ChId) override;
+	virtual void OnNetSpawnedObject(UObject* Obj, const Channeld::ChannelId ChId) override;
 	
 	virtual bool OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId) override;
 	virtual void OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId) override;
@@ -52,11 +52,14 @@ public:
 protected:
 	virtual void ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId) override;
 
+	virtual void SendSpawnToClients_EntityChannelReady(const FNetworkGUID NetId, UObject* Obj, uint32 OwningConnId, Channeld::ChannelId SpatialChId);
+	virtual void SendSpawnToConn_EntityChannelReady(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId);
 	// The client need to destroy the objects that are no longer relevant to the client.
 	virtual void OnRemovedProvidersFromChannel(Channeld::ChannelId ChId, channeldpb::ChannelType ChannelType, const TSet<FProviderInternal>& RemovedProviders) override;
 	bool ClientDeleteObject(UObject* Obj);
 
-	bool TryToResolveObjects(Channeld::ChannelId ChId, TArray<uint32> NetGUIDs);
+	virtual bool ConsumeChannelUpdateData(Channeld::ChannelId ChId, google::protobuf::Message* UpdateData) override;
+
 	// The client may have subscribed to the spatial channels that go beyond the interest area of the client's authoritative server.
 	// In that case, the client may receive ChannelDataUpdate that contains unresolved NetworkGUIDs, so it needs to spawn the objects before applying the update.
 	virtual bool CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData) override;
@@ -104,15 +107,11 @@ private:
 	// until the client gains interest in them again.
 	TSet<uint32> SuppressedNetIdsToResolve;
 
-	// Virtual NetConnection for sending Spawn message to channeld to broadcast in spatial channels.
-	// Exporting the NetId of the spawned object requires a NetConnection, but we don't have a specific client when broadcasting.
-	// So we use a virtual NetConnection that doesn't belong to any client, and clear the export map everytime to make sure the NetId is fully exported.
-	UPROPERTY()
-	UChanneldNetConnection* NetConnForSpawn;
-	void ResetNetConnForSpawn();
-
+	// Synchronize the NetworkGUIDs of the static and well-known objects across the spatial servers.
+	void SyncNetIds();
+	
+	void ServerHandleSyncNetId(UChanneldConnection* ChanneldConnection, unsigned I, const google::protobuf::Message* Message);
 	void ServerHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
-	void ServerHandleGetHandoverContext(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleHandover(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleHandover(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);

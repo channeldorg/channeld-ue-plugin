@@ -41,13 +41,27 @@ public class ChanneldEditor : ModuleRules
                 "LevelEditor",
                 "CoreUObject",
                 "Engine",
+                "EditorSubsystem",
                 "Slate",
                 "SlateCore",
-                "EditorStyle", 
+                "EditorStyle",
                 "ReplicatorGenerator",
                 "UATHelper",
                 "Kismet",
                 "LiveCoding",
+                "Blutility",
+                "UMG",
+                "UMGEditor",
+                "ClassViewer",
+                "EditorWidgets",
+                "ApplicationCore",
+                "GameProjectGeneration",
+                "ProjectTargetPlatformEditor",
+                "DesktopPlatform",
+                "TargetPlatform",
+                "EngineSettings",
+                "Json",
+                "JsonUtilities",
                 // ... add private dependencies that you statically link with here ...	
 			}
         );
@@ -66,6 +80,7 @@ public class ChanneldEditor : ModuleRules
         PrivateDefinitions.AddRange(
             new string[]
             {
+                "PLUGIN_DIR=R\"(" + PluginDirectory + ")\"",
                 "PROTOC_PATH=R\"(" + Path.Combine(PluginDirectory, "Source", "ProtobufUE", "ThirdParty", "bin", "protoc.exe") + ")\"",
                 "PROTOBUF_INCLUDE_PATH=R\"(" + Path.Combine(PluginDirectory, "Source", "ProtobufUE", "ThirdParty", "include") + ")\"",
             }

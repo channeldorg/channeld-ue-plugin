@@ -29,7 +29,7 @@ namespace ChanneldReplication
 	extern TMap<const FString, const FReplicatorCreateFunc> BPReplicatorRegistry;
 	CHANNELDUE_API void RegisterReplicator(const UClass* TargetClass, const FReplicatorCreateFunc& Func, bool bOverride = true, bool bIsInMap = true);
 	CHANNELDUE_API void RegisterReplicator(const FString& PathName, const FReplicatorCreateFunc& Func, bool bOverride = true, bool bIsInMap = true);
-	CHANNELDUE_API TArray<FChanneldReplicatorBase*> FindAndCreateReplicators(UObject* ReplicatedObj);
+	CHANNELDUE_API TArray<FChanneldReplicatorBase*> FindAndCreateReplicators(UObject* ReplicatedObj, const UClass* SkipRootClass = nullptr);
 	
 	extern TArray<FReplicatorStateInProto> ReplicatorStatesInProto;
 	extern TMap<const UClass*, FReplicatorStateInProto> ReplicatorTargetClassToStateInProto;

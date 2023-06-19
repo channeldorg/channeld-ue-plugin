@@ -12,6 +12,7 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 - Agile and extensible client interest management mechanism.
 - Support cross-server interaction (currently only support cross-server RPC; cross-server for Physics, AI, GAS and other systems requires additional integration).
 - Cloud-based dynamic load balancing can greatly save server costs (under development).
+- Support one-click cloud deployment.
 
 ## 特性
 - 无需修改引擎代码，便可将单个UE专用服务器的最大承载人数提升到100-200人
@@ -21,6 +22,7 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 - 灵活且可扩展的客户端兴趣管理机制
 - 支持跨服交互（目前仅支持跨服RPC；物理、AI、GAS等系统的跨服需要额外集成）
 - 基于云计算的动态负载均衡能够极大节省服务器成本（开发中）
+- 支持一键上云
 
 ## Links
 [ChanneldUE Example Project](https://github.com/metaworking/channeld-ue-demos)

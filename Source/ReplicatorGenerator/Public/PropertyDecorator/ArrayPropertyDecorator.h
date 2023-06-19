@@ -152,6 +152,8 @@ public:
 
 	virtual FString GetCode_GetWorldRef() override;
 
+	virtual TArray<TSharedPtr<FStructPropertyDecorator>> GetStructPropertyDecorators() override;
+
 protected:
 	TSharedPtr<FPropertyDecorator> InnerProperty;
 };

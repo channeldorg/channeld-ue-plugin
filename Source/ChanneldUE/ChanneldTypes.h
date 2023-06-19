@@ -12,20 +12,7 @@ namespace Channeld
 
 	typedef uint32 ChannelId;
 
-	/* Moved the definitions to unreal_common.proto
-	// User-space message types used in ChanneldUE
-	enum MessageType : uint32 {
-		// Used by LowLevelSend in NetConnection/NetDriver.
-		MessageType_LOW_LEVEL = 100,
-		// Used by ChanneldGameInstanceSubsystem to broadcast the ProtoMessageObject from server side. The message is packed as google::protobuf::any to support anonymous types.
-		MessageType_ANY = 101,
-		// Used by ReplicationDriver to send/receive UE's native RPC.
-		MessageType_RPC = 102,
-		MessageType_SPAWN = 103,
-		MessageType_DESTROY = 104,
-		MessageType_SERVER_PLAYER_SPAWNED = 201,
-	};
-	*/
+	typedef uint32 EntityId;
 
 	/*
 	UENUM(BlueprintType)
@@ -37,7 +24,7 @@ namespace Channeld
 	constexpr ChannelId GlobalChannelId = 0;
 	constexpr ChannelId InvalidChannelId = 0xffffffff;
 
-	constexpr uint32 GameStateNetId = 1;
+	constexpr uint32 GameStateNetId = 0x00080000;
 
 	constexpr uint32 MaxPacketSize = 0x00ffff;
 	constexpr uint32 MinPacketSize = 20;
@@ -53,6 +40,7 @@ enum class EChanneldChannelType : uint8
 	ECT_Private = 2 UMETA(DisplayName = "Private"),
 	ECT_SubWorld = 3 UMETA(DisplayName = "Subworld"),
 	ECT_Spatial = 4 UMETA(DisplayName = "Spatial"),
+	ECT_Entity = 5 UMETA(DisplayName = "Entity"),
 
 	/* Customized ChannelType */
 	ECT_CDChannelType1 = 100 UMETA(Hidden),
@@ -116,11 +104,15 @@ struct CHANNELDUE_API FChannelSubscriptionOptions
 	UPROPERTY(BlueprintReadWrite)
 	bool bSkipSelfUpdateFanOut;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool bSkipFirstFanOut;
+
 	FChannelSubscriptionOptions() :
 		DataAccess(EChannelDataAccess::EDA_WRITE_ACCESS),
 		FanOutIntervalMs(20),
 		FanOutDelayMs(0),
-		bSkipSelfUpdateFanOut(false)
+		bSkipSelfUpdateFanOut(true),
+		bSkipFirstFanOut(false)
 	{
 	}
 
@@ -164,6 +156,11 @@ struct CHANNELDUE_API FChannelSubscriptionOptions
 		if (Target.has_skipselfupdatefanout())
 		{
 			bSkipSelfUpdateFanOut = Target.skipselfupdatefanout();
+		}
+
+		if (Target.has_skipfirstfanout())
+		{
+			bSkipFirstFanOut = Target.skipfirstfanout();
 		}
 	}
 
@@ -217,6 +214,13 @@ struct CHANNELDUE_API FSubscribedChannelInfo
 
 		if (MsgReflection->HasField(Target, MsgDescriptor->FindFieldByNumber(Target.kChannelTypeFieldNumber)))
 			ChannelType = static_cast<EChanneldChannelType>(Target.channeltype());
+	}
+
+	bool ShouldSendRemovalUpdate() const
+	{
+		return	ChannelType != EChanneldChannelType::ECT_Unknown &&
+				ChannelType != EChanneldChannelType::ECT_Spatial &&
+				ChannelType != EChanneldChannelType::ECT_Entity;
 	}
 };
 

@@ -2,7 +2,7 @@
 ## Setup脚本没有下载channeld
 如果您在运行Setup前，已经配置了环境变量`%CHANNELD_PATH%`，Setup脚本会认为您已经安装了channeld，并跳过下载安装步骤。插件会根据环境变量`%CHANNELD_PATH%`来运行channeld。
 
-如果您需要下载安装channeld到插件目录中，请先删除环境变量`%CHANNELD_PATH%`。
+如果您需要下载安装channeld到插件目录中，请先删除环境变量`%CHANNELD_PATH%`，再运行Setup。
 
 ## 无法启动channeld服务
 - 检查任务管理器中是否存在channeld进程，如果存在，请手动“结束任务”
@@ -17,11 +17,25 @@
 
 ## 同步出现问题
 - 确保使用最新生成的同步代码
-- 有时候，生成的同步代码在编译后没有正常被热加载。此时需要重启UE编辑器。
+- 有时候，生成的同步代码在编译后没有正常被热加载。此时需要重新编译并启动UE编辑器。
 - 检查游戏服务器的日志，查看是否有同步相关的错误信息
+
+## 生成的同步代码编译失败
+该问题的产生可能是ChanneldUE插件的分支切换导致的。解决的方法是手动删除项目目录下的`Source/<项目名>/ChanneldGenerated`目录，然后重新编译项目，启动UE编辑器，再次生成同步代码。
 
 ## 角色跨服后，亮边的颜色不正确
 检查空间服务器是否都在正常运行。如果空间服务器已经退出，其控制的空间频道区域就无法正常模拟，跨服也会出现问题。
 
 ## 项目中存在其它Protobuf库的冲突
 ChanneldUE插件使用了Protobuf库，并以ProtobufUE模块的方式进行引用。如果您的项目中也使用了Protobuf库，则需要将ChanneldUE插件或项目对ProtobufUE模块的引用改为您自己的模块，并重新编译。注意ChannelUE引用Protobuf使用的路径是`google/protobuf/*.h`，如果您使用的Protobuf库的根路径不同，会导致ChanneldUE插件编译错误。
+
+## 项目出现资产“空引擎版本”警告
+如果项目中出现类似如下的警告信息：
+```log
+LogLinker: Warning: Asset 'Your_Project_Root/Plugins/channeld-ue-plugin/Content/Blueprints/BP_SpatialRegionBox.uasset' has been saved with empty engine version. The asset will be loaded but may be incompatible.
+```
+请在项目的`Config/DefaultEngine.ini`中添加如下内容：
+```ini
+[Core.System]
+ZeroEngineVersionWarning=False
+```

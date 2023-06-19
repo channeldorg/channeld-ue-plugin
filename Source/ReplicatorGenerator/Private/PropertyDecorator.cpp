@@ -17,7 +17,7 @@ bool FPropertyDecorator::Init(const TFunction<FString()>& SetNameForIllegalPropN
 	if (OriginalProperty != nullptr)
 	{
 		CompilablePropName = OriginalProperty->GetName();
-		if (!ChanneldReplicatorGeneratorUtils::IsCompilableClassName(CompilablePropName))
+		if (ChanneldReplicatorGeneratorUtils::ContainsUncompilableChar(CompilablePropName))
 		{
 			CompilablePropName = *SetNameForIllegalPropName();
 		}
@@ -44,7 +44,7 @@ bool FPropertyDecorator::IsExternallyAccessible()
 
 bool FPropertyDecorator::IsDirectlyAccessible()
 {
-	return !bForceNotDirectlyAccessible && IsExternallyAccessible() && !Owner->IsBlueprintType();
+	return !IsForceNotDirectlyAccessible() && IsExternallyAccessible() && !Owner->IsBlueprintType();
 }
 
 bool FPropertyDecorator::IsForceNotDirectlyAccessible() const
@@ -55,11 +55,6 @@ bool FPropertyDecorator::IsForceNotDirectlyAccessible() const
 void FPropertyDecorator::SetForceNotDirectlyAccessible(bool ForceNotDirectlyAccessible)
 {
 	this->bForceNotDirectlyAccessible = ForceNotDirectlyAccessible;
-}
-
-bool FPropertyDecorator::IsDeclaredInCPP()
-{
-	return true;
 }
 
 bool FPropertyDecorator::HasAnyPropertyFlags(EPropertyFlags PropertyFlags)
@@ -311,4 +306,14 @@ TArray<FString> FPropertyDecorator::GetAdditionalIncludes()
 FString FPropertyDecorator::GetCode_GetWorldRef()
 {
 	return TEXT("");
+}
+
+bool FPropertyDecorator::IsStruct()
+{
+	return false;
+}
+
+TArray<TSharedPtr<FStructPropertyDecorator>> FPropertyDecorator::GetStructPropertyDecorators()
+{
+	return TArray<TSharedPtr<FStructPropertyDecorator>>();
 }

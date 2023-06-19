@@ -104,7 +104,7 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	{
 		ClientSetViewTargetParams* TypedParams = (ClientSetViewTargetParams*)Params;
 		auto Msg = MakeShared<unrealpb::PlayerController_ClientSetViewTarget_Params>();
-		Msg->mutable_actor()->MergeFrom(ChanneldUtils::GetRefOfObject(TypedParams->A));
+		Msg->mutable_actor()->MergeFrom(*ChanneldUtils::GetRefOfObject(TypedParams->A));
 		Msg->set_blendtime(TypedParams->TransitionParams.BlendTime);
 		Msg->set_blendfunction(TypedParams->TransitionParams.BlendFunction);
 		Msg->set_blendexp(TypedParams->TransitionParams.BlendExp);
@@ -129,7 +129,7 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	{
 		ClientRestartParams* TypedParams = (ClientRestartParams*)Params;
 		auto Msg = MakeShared<unrealpb::PlayerController_ClientRestart_Params>();
-		Msg->mutable_pawn()->MergeFrom(ChanneldUtils::GetRefOfObject(TypedParams->Pawn));
+		Msg->mutable_pawn()->MergeFrom(*ChanneldUtils::GetRefOfObject(TypedParams->Pawn));
 		return Msg;
 	}
 	else if (Func->GetFName() == FName("ClientSetCameraMode"))
@@ -143,7 +143,7 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	{
 		ClientRetryClientRestartParams* TypedParams = (ClientRetryClientRestartParams*)Params;
 		auto Msg = MakeShared<unrealpb::PlayerController_ClientRetryClientRestart_Params>();
-		Msg->mutable_pawn()->MergeFrom(ChanneldUtils::GetRefOfObject(TypedParams->Pawn));
+		Msg->mutable_pawn()->MergeFrom(*ChanneldUtils::GetRefOfObject(TypedParams->Pawn));
 		return Msg;
 	}
 	else if (Func->GetFName() == FName("ServerSetSpectatorLocation"))
@@ -158,7 +158,7 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	{
 		ServerAcknowledgePossessionParams* TypedParams = (ServerAcknowledgePossessionParams*)Params;
 		auto Msg = MakeShared<unrealpb::PlayerController_ServerAcknowledgePossession_Params>();
-		Msg->mutable_pawn()->MergeFrom(ChanneldUtils::GetRefOfObject(TypedParams->Pawn));
+		Msg->mutable_pawn()->MergeFrom(*ChanneldUtils::GetRefOfObject(TypedParams->Pawn));
 		return Msg;
 	}
 	else if (Func->GetFName() == FName("ClientGotoState"))
@@ -177,9 +177,9 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 			Msg->set_message(std::string(TCHAR_TO_UTF8(*TypedParams->Message->GetName())));
 		}
 		Msg->set_switch_(TypedParams->Switch);
-		Msg->mutable_relatedplayerstate_1()->CopyFrom(ChanneldUtils::GetRefOfObject(TypedParams->RelatedPlayerState_1));
-		Msg->mutable_relatedplayerstate_2()->CopyFrom(ChanneldUtils::GetRefOfObject(TypedParams->RelatedPlayerState_2));
-		Msg->mutable_optionalobject()->CopyFrom(ChanneldUtils::GetRefOfObject(TypedParams->OptionalObject));
+		Msg->mutable_relatedplayerstate_1()->CopyFrom(*ChanneldUtils::GetRefOfObject(TypedParams->RelatedPlayerState_1));
+		Msg->mutable_relatedplayerstate_2()->CopyFrom(*ChanneldUtils::GetRefOfObject(TypedParams->RelatedPlayerState_2));
+		Msg->mutable_optionalobject()->CopyFrom(*ChanneldUtils::GetRefOfObject(TypedParams->OptionalObject));
 		return Msg;
 	}
 	else if (NoParamFunctions.Contains(Func->GetFName()))

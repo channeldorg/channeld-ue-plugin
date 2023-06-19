@@ -19,7 +19,6 @@ UCookAndFilterRepActorCommandlet::UCookAndFilterRepActorCommandlet()
 int32 UCookAndFilterRepActorCommandlet::Main(const FString& CmdLineParams)
 {
 	FReplicatorGeneratorManager& GeneratorManager = FReplicatorGeneratorManager::Get();
-	GeneratorManager.StartGenerateReplicator();
 
 	FString InFilterRule;
 	ChanneldReplicatorGeneratorUtils::EFilterRule FilterRule = ChanneldReplicatorGeneratorUtils::EFilterRule::NeedToGenerateReplicator;
@@ -57,7 +56,6 @@ int32 UCookAndFilterRepActorCommandlet::Main(const FString& CmdLineParams)
 	}
 	SaveResult(LoadedRepClassPath);
 
-	GeneratorManager.StopGenerateReplicator();
 	return Result;
 }
 

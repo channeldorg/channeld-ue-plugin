@@ -12,17 +12,15 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FProcStatusDelegate, FChanneldProcWorkerThre
 class FChanneldProcWorkerThread : public FChanneldThreadWorker
 {
 public:
-	explicit FChanneldProcWorkerThread(const TCHAR* InThreadName, const FString& InProgramPath, const FString& InParams)
+	explicit FChanneldProcWorkerThread(const TCHAR* InThreadName, const FString& InProgramPath, const FString& InParams,
+	                                   const FString& InWorkingDirectory = FString(), bool InLaunchDetached = false,
+	                                   bool InLaunchHidden = true, bool InLaunchReallyHidden = true,
+	                                   bool InCreatePipe = true)
 		: FChanneldThreadWorker(InThreadName, []()
-		{
-		}), mProgramPath(InProgramPath), mProgramParams(InParams)
-	{
-	}
-
-	explicit FChanneldProcWorkerThread(const TCHAR* InThreadName, const FString& InProgramPath, const FString& InParams, const FString& InWorkingDirectory)
-		: FChanneldThreadWorker(InThreadName, []()
-		{
-		}), mProgramPath(InProgramPath), mProgramParams(InParams), WorkingDirectory(InWorkingDirectory)
+		  {
+		  }), mProgramPath(InProgramPath), mProgramParams(InParams), WorkingDirectory(InWorkingDirectory),
+		  bLaunchDetached(InLaunchDetached),
+		  bLaunchHidden(InLaunchHidden), bLaunchReallyHidden(InLaunchReallyHidden), bCreatePipe(InCreatePipe)
 	{
 	}
 
@@ -36,12 +34,14 @@ public:
 	{
 		if (true || FPaths::FileExists(mProgramPath))
 		{
-			FPlatformProcess::CreatePipe(mReadPipe, mWritePipe);
-			// std::cout << TCHAR_TO_ANSI(*mProgramPath) << " " << TCHAR_TO_ANSI(*mPragramParams) << std::endl;
+			if (bCreatePipe)
+			{
+				FPlatformProcess::CreatePipe(mReadPipe, mWritePipe);
+			}
 
 			mProcessHandle = FPlatformProcess::CreateProc(
 				*mProgramPath, *mProgramParams,
-				false, true, true,
+				bLaunchDetached, bLaunchHidden, bLaunchReallyHidden,
 				&mProcessID, 1,
 				WorkingDirectory.IsEmpty() ? nullptr : *WorkingDirectory,
 				mWritePipe, mReadPipe
@@ -68,7 +68,7 @@ public:
 						{
 							if (Index == Count - 1)
 							{
-								if(!NewOutput.EndsWith(TEXT("\n")))
+								if (!NewOutput.EndsWith(TEXT("\n")))
 								{
 									Output = SubLines[Index];
 									continue;
@@ -149,7 +149,11 @@ public:
 
 	virtual uint32 GetProcessId() const { return mProcessID; }
 	virtual FProcHandle GetProcessHandle() const { return mProcessHandle; }
-	virtual bool IsProcRunning() const { return mProcessHandle.IsValid() && FPlatformProcess::IsApplicationRunning(mProcessID); }
+
+	virtual bool IsProcRunning() const
+	{
+		return mProcessHandle.IsValid() && FPlatformProcess::IsApplicationRunning(mProcessID);
+	}
 
 public:
 	FProcStatusDelegate ProcBeginDelegate;
@@ -162,6 +166,10 @@ private:
 	FString mProgramPath;
 	FString mProgramParams;
 	FString WorkingDirectory;
+	bool bLaunchDetached;
+	bool bLaunchHidden;
+	bool bLaunchReallyHidden;
+	bool bCreatePipe;
 	void* mReadPipe;
 	void* mWritePipe;
 	uint32 mProcessID;

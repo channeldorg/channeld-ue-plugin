@@ -45,26 +45,14 @@ namespace ChanneldReplicatorGeneratorUtils
 		GUObjectArray.RemoveUObjectCreateListener(this);
 	}
 
-	TSet<UClass*> ChanneldUEBuiltinClasses{
-		AActor::StaticClass(),
-		ACharacter::StaticClass(),
-		AController::StaticClass(),
-		AGameStateBase::StaticClass(),
-		APawn::StaticClass(),
-		APlayerController::StaticClass(),
-		APlayerState::StaticClass(),
-		UActorComponent::StaticClass(),
-		USceneComponent::StaticClass(),
-	};
-
-	TArray<UClass*> GetChanneldUEBuiltinClasses()
+	TArray<const UClass*> GetChanneldUEBuiltinClasses()
 	{
-		return ChanneldUEBuiltinClasses.Array();
+		return ChanneldUEBuiltinClasses;
 	}
 
 	bool IsChanneldUEBuiltinClass(const UClass* TargetClass)
 	{
-		return ChanneldUEBuiltinClasses.Contains(TargetClass);
+		return ChanneldUEBuiltinClassSet.Contains(TargetClass);
 	}
 
 	bool IsChanneldUEBuiltinSingletonClass(const UClass* TargetClass)
@@ -112,9 +100,18 @@ namespace ChanneldReplicatorGeneratorUtils
 
 	bool HasRepComponent(const UClass* TargetClass)
 	{
-		if (!TargetClass->IsChildOf(AActor::StaticClass()))
+		const UObject* TargetObj = TargetClass->GetDefaultObject();
+		const AActor* TargetActor = Cast<AActor>(TargetObj);
+		if (TargetActor == nullptr)
 		{
 			return false;
+		}
+		for (const UActorComponent* Comp : TargetActor->GetComponents())
+		{
+			if (Comp->GetClass()->IsChildOf(UChanneldReplicationComponent::StaticClass()))
+			{
+				return true;
+			}
 		}
 		for (TFieldIterator<FProperty> It(TargetClass, EFieldIteratorFlags::ExcludeSuper); It; ++It)
 		{
@@ -163,19 +160,20 @@ namespace ChanneldReplicatorGeneratorUtils
 
 	TArray<const UClass*> GetComponentClasses(const UClass* TargetClass)
 	{
-		TSet<const UClass*> ComponentClasses;
-		for (TFieldIterator<FProperty> It(TargetClass, EFieldIteratorFlags::ExcludeSuper); It; ++It)
+		if (TargetClass == AActor::StaticClass())
 		{
-			FProperty* Property = *It;
-
-			if (Property->IsA<FObjectProperty>())
-			{
-				const FObjectProperty* ObjProperty = CastFieldChecked<FObjectProperty>(Property);
-				if (ObjProperty->PropertyClass->IsChildOf(UActorComponent::StaticClass()))
-				{
-					ComponentClasses.Add(ObjProperty->PropertyClass);
-				}
-			}
+			return {USceneComponent::StaticClass()};
+		}
+		const UObject* TargetObj = TargetClass->GetDefaultObject();
+		const AActor* TargetActor = Cast<AActor>(TargetObj);
+		if (TargetActor == nullptr)
+		{
+			return {};
+		}
+		TSet<const UClass*> ComponentClasses;
+		for (const UActorComponent* Comp : TargetActor->GetComponents())
+		{
+			ComponentClasses.Add(Comp->GetClass());
 		}
 		if (const UBlueprintGeneratedClass* TargetBPClass = Cast<UBlueprintGeneratedClass>(TargetClass))
 		{
@@ -223,15 +221,36 @@ namespace ChanneldReplicatorGeneratorUtils
 			HasReplicatedPropertyOrRPC(TargetClass);
 	}
 
-	bool IsCompilableClassName(const FString& ClassName)
+	bool ContainsUncompilableChar(const FString& Test)
 	{
 		const FRegexPattern MatherPatter(TEXT("[^a-zA-Z0-9_]"));
-		FRegexMatcher Matcher(MatherPatter, ClassName);
+		FRegexMatcher Matcher(MatherPatter, Test);
 		if (Matcher.FindNext())
+		{
+			return true;
+		}
+		return false;
+	}
+
+	bool IsCompilableClassName(const FString& ClassName)
+	{
+		if (!iswalpha(ClassName[0]))
 		{
 			return false;
 		}
-		return true;
+		return !ContainsUncompilableChar(ClassName);
+	}
+
+	FString ReplaceUncompilableChar(const FString& String, const FString& ReplaceTo)
+	{
+		const FRegexPattern MatherPatter(TEXT("[^a-zA-Z0-9_]"));
+		FRegexMatcher Matcher(MatherPatter, String);
+		FString Result = String;
+		while (Matcher.FindNext())
+		{
+			Result.ReplaceInline(*Matcher.GetCaptureGroup(0), *ReplaceTo);
+		}
+		return Result;
 	}
 
 	FString GetDefaultModuleDir()
@@ -316,7 +335,11 @@ namespace ChanneldReplicatorGeneratorUtils
 
 		return FPaths::Combine(
 			FPaths::ConvertRelativePathToFull(FPaths::EngineDir()),
-			TEXT("Binaries"), PlatformName, FString::Printf(TEXT("%s%s-Cmd.exe"), *Binary, bIsDevelopment ? TEXT("") : *FString::Printf(TEXT("-%s-%s"), *PlatformName, *ConfigurationName)));
+			TEXT("Binaries"), PlatformName,
+			FString::Printf(TEXT("%s%s-Cmd.exe"), *Binary, bIsDevelopment
+				                                               ? TEXT("")
+				                                               : *FString::Printf(
+					                                               TEXT("-%s-%s"), *PlatformName, *ConfigurationName)));
 #endif
 
 #if PLATFORM_MAC
@@ -339,6 +362,15 @@ namespace ChanneldReplicatorGeneratorUtils
 		else
 		{
 			return FString::Printf(TEXT("%d"), Hash);
+		}
+	}
+
+	void EnsureRepGenIntermediateDir()
+	{
+		IFileManager& FileManager = IFileManager::Get();
+		if (!FileManager.DirectoryExists(*GenManager_IntermediateDir))
+		{
+			FileManager.MakeDirectory(*GenManager_IntermediateDir, true);
 		}
 	}
 }

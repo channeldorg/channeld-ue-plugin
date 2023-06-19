@@ -56,7 +56,10 @@ void UChanneldSettings::PostInitProperties()
 	if (FParse::Value(CmdLine, TEXT("ViewClass="), ViewClassName))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed View class name from CLI: %s"), *ViewClassName);
-		ChannelDataViewClass = LoadClass<UChannelDataView>(NULL, *ViewClassName);
+		if (auto LoadedViewClass = LoadClass<UChannelDataView>(NULL, *ViewClassName))
+		{
+			ChannelDataViewClass = LoadedViewClass;
+		}
 	}
 	if (FParse::Value(CmdLine, TEXT("channeldClientIp="), ChanneldIpForClient))
 	{
@@ -100,6 +103,11 @@ void UChanneldSettings::PostInitProperties()
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bDisableHandshaking from CLI: %d"), bDisableHandshaking);
 	}
+	
+	if (FParse::Value(CmdLine, TEXT("RpcRedirectionMaxRetries="), RpcRedirectionMaxRetries))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed RpcRedirectionMaxRetries from CLI: %d"), RpcRedirectionMaxRetries);
+	}
 
 	if (FParse::Bool(CmdLine, TEXT("SkipCustomReplication="), bSkipCustomReplication))
 	{
@@ -116,6 +124,9 @@ void UChanneldSettings::PostInitProperties()
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bEnableSpatialVisualizer from CLI: %d"), bEnableSpatialVisualizer);
 	}
+
+	// Upgrade to v0.6: use fixed SpatialChannelData message
+	DefaultChannelDataMsgNames.Emplace(EChanneldChannelType::ECT_Spatial, TEXT("unrealpb.SpatialChannelData"));
 }
 
 bool UChanneldSettings::IsNetworkingEnabled() const

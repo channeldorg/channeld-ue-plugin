@@ -220,7 +220,7 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 	}
 
 	unrealpb::SpawnObjectMessage SpawnMsg;
-	SpawnMsg.mutable_obj()->CopyFrom(ChanneldUtils::GetRefOfObject(Object, this));
+	SpawnMsg.mutable_obj()->CopyFrom(*ChanneldUtils::GetRefOfObject(Object, this, true));
 	SpawnMsg.set_channelid(OwningChannelId);
 	if (Role > ENetRole::ROLE_None)
 	{
@@ -228,7 +228,7 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 	}
 	if (OwningConnId > 0)
 	{
-		SpawnMsg.set_owningconnid(OwningConnId);
+		SpawnMsg.mutable_obj()->set_owningconnid(OwningConnId);
 	}
 	if (Location)
 	{
@@ -236,7 +236,7 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 	}
 	SendMessage(unrealpb::SPAWN, SpawnMsg, OwningChannelId);
 	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %d, role: %d, owning channel: %d, owning connId: %d, location: %s"),
-		GetConnId(), *GetNameSafe(Object), SpawnMsg.obj().netguid(), SpawnMsg.localrole(), SpawnMsg.channelid(), SpawnMsg.owningconnid(), Location ? *Location->ToCompactString() : TEXT("NULL"));
+		GetConnId(), *GetNameSafe(Object), SpawnMsg.obj().netguid(), SpawnMsg.localrole(), SpawnMsg.channelid(), SpawnMsg.obj().owningconnid(), Location ? *Location->ToCompactString() : TEXT("NULL"));
 
 	SetSentSpawned(NetId);
 }
@@ -259,6 +259,12 @@ void UChanneldNetConnection::SendDestroyMessage(UObject* Object, EChannelCloseRe
 	if (!Driver)
 	{
 		UE_LOG(LogChanneld, Warning, TEXT("SendDestroyMessage failed as the NetConn %d has no NetDriver"), GetConnId());
+		return;
+	}
+
+	if (!PackageMap)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("SendDestroyMessage failed as the NetConn %d has no PackageMap"), GetConnId());
 		return;
 	}
 	
@@ -308,7 +314,7 @@ void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncNa
 	
 	unrealpb::RemoteFunctionMessage RpcMsg;
 	// Don't send the whole UnrealObjectRef to the other side - the object spawning process goes its own way!
-	// RpcMsg.mutable_targetobj()->MergeFrom(ChanneldUtils::GetRefOfObject(Actor));
+	// RpcMsg.mutable_targetobj()->MergeFrom(*ChanneldUtils::GetRefOfObject(Actor));
 	RpcMsg.mutable_targetobj()->set_netguid(Driver->GuidCache->GetNetGUID(Actor).Value);
 	RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
 	if (ParamsMsg)
@@ -317,6 +323,11 @@ void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncNa
 		UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %d bytes"), RpcMsg.paramspayload().size());
 	}
 	SendMessage(unrealpb::RPC, RpcMsg, ChId);
+
+	if (auto NetDriver = Cast<UChanneldNetDriver>(Driver))
+	{
+		NetDriver->OnSentRPC(RpcMsg);
+	}
 }
 
 FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= false*/)
