@@ -157,8 +157,16 @@ FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetIn
 
 FString FPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode)
 {
-	return FString::Printf(TEXT("%s = %s;\nbStateChanged = true;\n%s"), *GetCode_GetPropertyValueFrom(TargetInstance), *GetCode_GetProtoFieldValueFrom(NewStateName), *AfterSetValueCode);
-}
+	const FString ValueStr = GetCode_GetPropertyValueFrom(TargetInstance);
+	const FString FieldValueStr = GetCode_GetProtoFieldValueFrom(NewStateName);
+	const FNumericProperty* NumericProperty = Cast<FNumericProperty>(OriginalProperty);
+	if (NumericProperty && NumericProperty->IsEnum())
+	{
+		return FString::Printf(
+			TEXT("using TProp = decltype(%s);\n %s = TEnumAsByte<TProp>((int32)%s);\nbStateChanged = true;\n%s"),
+			*ValueStr, *ValueStr, *FieldValueStr, *AfterSetValueCode);
+	}
+	return FString::Printf(TEXT("%s = %s;\nbStateChanged = true;\n%s"), *ValueStr, *FieldValueStr, *AfterSetValueCode);}
 
 FString FPropertyDecorator::GetDeclaration_PropertyPtr()
 {
