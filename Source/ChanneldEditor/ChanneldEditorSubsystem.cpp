@@ -125,7 +125,7 @@ void UChanneldEditorSubsystem::UpdateReplicationCache(
 				TEXT("CookAndUpdateRepActorCache"),
 				*FString::Printf(TEXT("\"%s\""), *FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())),
 				*FString::Printf(
-					TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout"))
+					TEXT(" -targetplatform=WindowsServer -AssetGatherAll=true -skipcompile -nop4 -cook -skipstage -utf8output -stdout"))
 			)
 		)
 	);
@@ -855,6 +855,9 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 		TEXT("GameProjectGeneration"));
 	bool bProjectHasCode = GameProjectModule.Get().ProjectHasCodeFiles();
 
+#if ENGINE_MAJOR_VERSION == 5
+	const PlatformInfo::FTargetPlatformInfo* const PlatformInfo = PlatformInfo::FindPlatformInfo(InPlatformInfoName);
+#else
 	const PlatformInfo::FPlatformInfo* const PlatformInfo = PlatformInfo::FindPlatformInfo(InPlatformInfoName);
 	check(PlatformInfo);
 
@@ -880,8 +883,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 	}
 
 	if (PlatformInfo->SDKStatus == PlatformInfo::EPlatformSDKStatus::NotInstalled || (bProjectHasCode &&
-		PlatformInfo->
-		bUsesHostCompiler && !FSourceCodeNavigation::IsCompilerAvailable()))
+		PlatformInfo->bUsesHostCompiler && !FSourceCodeNavigation::IsCompilerAvailable()))
 	{
 		IMainFrameModule& MainFrameModule = FModuleManager::GetModuleChecked<IMainFrameModule>(TEXT("MainFrame"));
 		MainFrameModule.BroadcastMainFrameSDKNotInstalled(PlatformInfo->TargetPlatformName.ToString(),
@@ -1303,6 +1305,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 		                                      });
 	                                      }
 	);
+#endif
 }
 
 void UChanneldEditorSubsystem::AddMessageLog(const FText& Text, const FText& Detail, const FString& TutorialLink,

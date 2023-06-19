@@ -108,7 +108,7 @@ bool FReplicatorCodeGenerator::Generate(
 	// Entity channel data.go imports anypb
 	bool bHasEntityChannelData = ChannelDataInfos.ContainsByPredicate([](const auto& Info) {return Info.Schema.ChannelType == EChanneldChannelType::ECT_Entity;});
 	ReplicationCodeBundle.ChannelDataMerge_GoCode.Append(FString::Format(CodeGen_Go_Data_ImportTemplate,
-		{{"Code_AnypbImport", bHasEntityChannelData	? TEXT("\"google.golang.org/protobuf/types/known/anypb\"") : TEXT("")}}));
+		FStringFormatNamedArguments{{"Code_AnypbImport", bHasEntityChannelData	? TEXT("\"google.golang.org/protobuf/types/known/anypb\"") : TEXT("")}}));
 	for (const FChannelDataInfo& ChannelDataInfo : ChannelDataInfos)
 	{
 		ReplicationCodeBundle.ChannelDataCodes.Add(FChannelDataCode());
@@ -540,10 +540,10 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	}
 	ChannelDataProcessor_GetStateCode.Append(FString::Format(ChannelType == EChanneldChannelType::ECT_Entity ?
 		CodeGen_GetObjectStateFromEntityChannelData : CodeGen_GetObjectStateFromChannelData,
-		{{"Declaration_ChannelDataMessage", ChannelDataMessageName}}));
+		FStringFormatNamedArguments{{"Declaration_ChannelDataMessage", ChannelDataMessageName}}));
 	ChannelDataProcessor_SetStateCode.Append(FString::Format(ChannelType == EChanneldChannelType::ECT_Entity ?
 		CodeGen_SetObjectStateToEntityChannelData : CodeGen_SetObjectStateToChannelData,
-		{{"Declaration_ChannelDataMessage", ChannelDataMessageName}}));
+		FStringFormatNamedArguments{{"Declaration_ChannelDataMessage", ChannelDataMessageName}}));
 
 	bool bHasAActor = false;
 	int32 ConstPathFNameVarDeclIndex = 0;
@@ -739,7 +739,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 			FString CheckHandoverInStatesCode = TEXT("");
 			if (HasActor) CheckHandoverInStatesCode.Append(CodeGen_Go_ActorCheckHandoverTemplate);
 			if (HasSceneComponent) CheckHandoverInStatesCode.Append(CodeGen_Go_SceneCompCheckHandoverTemplate);
-			CheckHandoverCode = FString::Format(CodeGen_Go_CheckHandoverTemplate, { { "Code_CheckHandoverInStates", CheckHandoverInStatesCode } });
+			CheckHandoverCode = FString::Format(CodeGen_Go_CheckHandoverTemplate, FStringFormatNamedArguments{ { "Code_CheckHandoverInStates", CheckHandoverInStatesCode } });
 			NotifyHandoverCode = CodeGen_Go_NotifyHandover;
 		}
 	}

@@ -68,6 +68,7 @@ public class ChanneldEditor : ModuleRules
         if (Target.Version.MajorVersion == 5)
         {
             PrivateDependencyModuleNames.Add("ToolMenus"); 
+            PrivateDependencyModuleNames.Add("DeveloperToolSettings"); 
         }
 
         DynamicallyLoadedModuleNames.AddRange(
