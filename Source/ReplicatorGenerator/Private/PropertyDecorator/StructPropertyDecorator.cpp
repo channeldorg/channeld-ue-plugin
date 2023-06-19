@@ -290,11 +290,11 @@ TArray<TSharedPtr<FStructPropertyDecorator>> FStructPropertyDecorator::GetStruct
 	TArray<TSharedPtr<FStructPropertyDecorator>> StructPropertyDecorators;
 	for (TSharedPtr<FPropertyDecorator>& Property : Properties)
 	{
+		StructPropertyDecorators.Append(Property->GetStructPropertyDecorators());
 		if (Property->IsStruct())
 		{
 			StructPropertyDecorators.Add(StaticCastSharedPtr<FStructPropertyDecorator>(Property));
 		}
-		StructPropertyDecorators.Append(Property->GetStructPropertyDecorators());
 	}
 	TArray<TSharedPtr<FStructPropertyDecorator>> NonRepetitionStructPropertyDecorators;
 	TSet<FString> StructPropertyDecoratorNames;
