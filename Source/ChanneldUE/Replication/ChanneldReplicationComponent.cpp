@@ -302,11 +302,11 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 	}
 }
 
-TSharedPtr<google::protobuf::Message> UChanneldReplicationComponent::SerializeFunctionParams(AActor* Actor, UFunction* Func, void* Params, FOutParmRec* OutParams, bool& bSuccess)
+TSharedPtr<google::protobuf::Message> UChanneldReplicationComponent::SerializeFunctionParams(UObject* Object, UFunction* Func, void* Params, FOutParmRec* OutParams, bool& bSuccess)
 {
 	for (auto& Replicator : Replicators)
 	{
-		if (Replicator->GetTargetObject() == Actor)
+		if (Replicator->GetTargetObject() == Object)
 		{
 			auto ParamsMsg = Replicator->SerializeFunctionParams(Func, Params, OutParams, bSuccess);
 			if (bSuccess)
@@ -320,11 +320,11 @@ TSharedPtr<google::protobuf::Message> UChanneldReplicationComponent::SerializeFu
 	return nullptr;
 }
 
-TSharedPtr<void> UChanneldReplicationComponent::DeserializeFunctionParams(AActor* Actor, UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC)
+TSharedPtr<void> UChanneldReplicationComponent::DeserializeFunctionParams(UObject* Object, UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC)
 {
 	for (auto& Replicator : Replicators)
 	{
-		if (Replicator->GetTargetObject() == Actor)
+		if (Replicator->GetTargetObject() == Object)
 		{
 			TSharedPtr<void> Params = Replicator->DeserializeFunctionParams(Func, ParamsPayload, bSuccess, bDeferredRPC);
 			if (bSuccess)
