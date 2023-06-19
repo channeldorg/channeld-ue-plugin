@@ -9,6 +9,7 @@ FChanneldActorComponentReplicator::FChanneldActorComponentReplicator(UObject* In
 	TArray<FLifetimeProperty> RepProps;
 	DisableAllReplicatedPropertiesOfClass(InTargetObj->GetClass(), UActorComponent::StaticClass(), EFieldIteratorFlags::ExcludeSuper, RepProps);
 
+	TargetComponentName = TCHAR_TO_UTF8(*InTargetObj->GetName());
 	FullState = new unrealpb::ActorComponentState;
 	DeltaState = new unrealpb::ActorComponentState;
 }

@@ -287,6 +287,7 @@ enum ChannelType : int {
   SUBWORLD = 3,
   SPATIAL = 4,
   ENTITY = 5,
+  PARALLEL_SERVER = 6,
   TEST = 100,
   TEST1 = 101,
   TEST2 = 102,
