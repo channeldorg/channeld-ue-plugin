@@ -9,6 +9,7 @@
 #include "unreal_common.pb.h"
 #include "ChanneldUtils.h"
 #include "ChanneldSettings.h"
+#include <numeric>
 #include "Interest/ClientInterestManager.h"
 
 UChanneldNetConnection::UChanneldNetConnection(const FObjectInitializer& ObjectInitializer)
@@ -341,7 +342,7 @@ FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= fa
 	if (RemoteAddr)
 	{
 		if (bAppendPort)
-			RemoteAddr->SetPort(GetSendToChannelId());
+			RemoteAddr->SetPort(GetSendToChannelId()%(std::numeric_limits<uint16_t>::max()+1));
 		return RemoteAddr->ToString(bAppendPort);
 	}
 	else
