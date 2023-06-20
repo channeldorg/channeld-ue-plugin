@@ -117,9 +117,3 @@ void FFlatStatesChannelDataProcessor::SetStateToChannelData(const google::protob
 		}
 	}
 }
-
-TArray<uint32> FFlatStatesChannelDataProcessor::GetRelevantNetGUIDsFromChannelData(const google::protobuf::Message* ChannelData)
-{
-	// TODO
-	return TArray<uint32>();
-}

@@ -23,7 +23,7 @@ public:
     // [Server] The accumulated delta change before next send
     virtual google::protobuf::Message* GetDeltaState() = 0;
     // [Server] Reset the state change (after send)
-	virtual void ClearState() { bStateChanged = true; }
+	virtual void ClearState() { bStateChanged = false; }
 	// [Server] Collect State change for sending ChannelDataUpdate to channeld
     virtual void Tick(float DeltaTime) = 0;
 	// [Client] Apply ChannelDataUpdate received from channeld

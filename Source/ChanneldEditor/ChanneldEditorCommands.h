@@ -25,6 +25,9 @@ public:
 	TSharedPtr<FUICommandInfo> LaunchServersCommand;
 	TSharedPtr<FUICommandInfo> ServerSettingsCommand;
 	TSharedPtr<FUICommandInfo> StopServersCommand;
+	TSharedPtr<FUICommandInfo> ToggleCompatibleRecompilationCommand;
 	TSharedPtr<FUICommandInfo> GenerateReplicatorCommand;
 	TSharedPtr<FUICommandInfo> AddRepComponentsToBPsCommand;
+	TSharedPtr<FUICommandInfo> OpenChannelDataEditorCommand;
+	TSharedPtr<FUICommandInfo> OpenCloudDeploymentCommand;
 };

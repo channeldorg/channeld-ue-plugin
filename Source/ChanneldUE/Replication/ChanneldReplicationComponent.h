@@ -13,6 +13,7 @@ class UChanneldReplicationComponent;
 DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FComponentAddedToChannelSignature, UChanneldReplicationComponent, OnComponentAddedToChannel, int64, ChId);
 DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FComponentRemovedFromChannelSignature, UChanneldReplicationComponent, OnComponentRemovedFromChannel, int64, ChId);
 DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE(FCrossServerHandoverSignature, UChanneldReplicationComponent, OnCrossServerHandover);
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FEntityChannelCreatedSignature, UChanneldReplicationComponent, OnEntityChannelCreated, int64, ChId);
 
 // Responsible for replicating the owning Actor and its replicated components via ChannelDataUpdate
 UCLASS(BlueprintType, ClassGroup = "Channeld", meta = (DisplayName = "Channeld Replication Component", BlueprintSpawnableComponent))
@@ -31,9 +32,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Components|Channeld")
 	FCrossServerHandoverSignature OnCrossServerHandover;
+
+	UPROPERTY(BlueprintAssignable, Category = "Components|Channeld")
+	FEntityChannelCreatedSignature OnEntityChannelCreated;
 	
 	TSet<Channeld::ChannelId> AddedToChannelIds;
-	
+
 protected:
 	bool bInitialized = false;
 	bool bUninitialized = false;
@@ -41,6 +45,7 @@ protected:
 	// EChanneldChannelType ChannelType;
 	// Channeld::ChannelId OwningChannelId;
 	bool bRemoved = false;
+	float LastUpdateTime = 0;
 
 	TArray< TUniquePtr<FChanneldReplicatorBase> > Replicators;
 

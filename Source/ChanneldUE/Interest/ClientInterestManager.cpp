@@ -21,7 +21,7 @@ void UClientInterestManager::ServerSetup(UChanneldNetConnection* InClientNetConn
 {
 	ClientNetConn = InClientNetConn;
 	
-	for (auto& Preset : GetMutableDefault<UChanneldSettings>()->ClientInterestPresets)
+	for (FClientInterestSettingsPreset& Preset : GetMutableDefault<UChanneldSettings>()->ClientInterestPresets)
 	{
 		UAreaOfInterestBase* AOI = nullptr;
 		

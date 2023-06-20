@@ -2,9 +2,15 @@
 
 #include "PropertyDecorator/BaseDataTypePropertyDecorator.h"
 
-TSharedPtr<FPropertyDecoratorBuilder> FPropertyDecoratorBuilder::SetNextBuilder(TSharedPtr<FPropertyDecoratorBuilder> InNextBuilder)
+TSharedPtr<FPropertyDecoratorBuilder> FPropertyDecoratorBuilder::SetNextBuilder(TSharedPtr<FPropertyDecoratorBuilder>& InNextBuilder)
 {
 	this->NextBuilder = InNextBuilder;
+	return NextBuilder;
+}
+
+TSharedPtr<FPropertyDecoratorBuilder> FPropertyDecoratorBuilder::SetNextBuilder(TSharedPtr<FPropertyDecoratorBuilder>&& InNextBuilder)
+{
+	this->NextBuilder = MoveTemp(InNextBuilder);
 	return NextBuilder;
 }
 

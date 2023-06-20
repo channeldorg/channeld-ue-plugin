@@ -86,7 +86,9 @@ public:
 	// Update the PackageMap of all connections that the specified NetId has been sent, so it's safe to send the actor's RPC message.
 	void SetAllSentSpawn(const FNetworkGUID NetId);
 	
-	void SendCrossServerRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
+	void RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
+
+	void OnSentRPC(const unrealpb::RemoteFunctionMessage& RpcMsg);
 	
 	void OnServerBeginPlay(UChanneldReplicationComponent* RepComp);
 
@@ -125,11 +127,10 @@ private:
 
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
 	void OnUserSpaceMessageReceived(uint32 MsgType, Channeld::ChannelId ChId, Channeld::ConnectionId ClientConnId, const std::string& Payload);
-	void OnClientSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg);
+	void OnReceivedRPC(const unrealpb::RemoteFunctionMessage& RpcMsg);
+	void HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg);
 	void HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
 	void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer);
-
-	void OnSentRPC(class AActor* Actor, FString FuncName);
 
 	UChanneldGameInstanceSubsystem* GetSubsystem() const;
 };

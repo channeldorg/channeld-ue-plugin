@@ -1,5 +1,5 @@
 @echo off
-set ChanneldVersion=v0.5.0
+set ChanneldVersion=v0.6.0
 set ChanneldRepoUrl=https://github.com/metaworking/channeld.git
 set WorkspaceDir=%~dp0
 set ChanneldLocalSourceDir=%~dp0Source\ThirdParty\channeld
@@ -112,11 +112,14 @@ if NOT DEFINED CHANNELD_PATH (
 )
 
 :setupPostMergeHook
-echo Set post-merge hook to .git\hooks
+echo Set git hook to .git\hooks
 set PostMergeHook=%~dp0.git\hooks\post-merge
 echo #!/bin/bash > "%PostMergeHook%"
 echo "$(cd $(dirname ${BASH_SOURCE[0]}); pwd)/../../Source/ThirdParty/update_channeld.sh" >> "%PostMergeHook%"
 echo exit 0 >> "%PostMergeHook%"
+
+set PostCheckoutHook=%~dp0.git\hooks\post-checkout
+copy /y "%PostMergeHook%" "%PostCheckoutHook%"
 
 echo Downloading channeld dependencies...
 cd "%ChanneldLocalSourceDir%"

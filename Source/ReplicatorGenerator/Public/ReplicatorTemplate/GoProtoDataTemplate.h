@@ -12,13 +12,14 @@ import (
 	"github.com/metaworking/channeld/pkg/unrealpb"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
+	{Code_AnypbImport}
 )
 )EOF";
 
 static const TCHAR* CodeGen_Go_CollectStatesTemplate = LR"EOF(
 // Implement [channeld.ChannelDataCollector]
 func (to *{Definition_ChannelDataMsgName}) CollectStates(netId uint32, src common.Message) error {
-from, ok := src.(*{Definition_ChannelDataMsgName})
+{Decl_ChannelDataMsgVar}, ok := src.(*{Definition_ChannelDataMsgName})
 if !ok {
 	return errors.New("src is not a {Definition_ChannelDataMsgName}")
 }
@@ -39,33 +40,57 @@ if exists {
 static const TCHAR* CodeGen_Go_MergeTemplate = LR"EOF(
 // Implement [channeld.MergeableChannelData]
 func (dst *{Definition_ChannelDataMsgName}) Merge(src common.ChannelDataMessage, options *channeldpb.ChannelDataMergeOptions, spatialNotifier common.SpatialInfoChangedNotifier) error {
-	srcData, ok := src.(*{Definition_ChannelDataMsgName})
+	{Decl_ChannelDataMsgVar}, ok := src.(*{Definition_ChannelDataMsgName})
 	if !ok {
 		return errors.New("src is not a {Definition_ChannelDataMsgName}")
 	}
 
-	if spatialNotifier != nil {
-		// src = the incoming update, dst = existing channel data
-		for netId, newActorState := range srcData.ActorStates {
-			oldActorState, exists := dst.ActorStates[netId]
-			if exists {
-				if newActorState.ReplicatedMovement != nil && newActorState.ReplicatedMovement.Location != nil &&
-					oldActorState.ReplicatedMovement != nil && oldActorState.ReplicatedMovement.Location != nil {
-					unreal.CheckSpatialInfoChange(netId, newActorState.ReplicatedMovement.Location, oldActorState.ReplicatedMovement.Location, spatialNotifier)
-				}
-			}
-		}
+	{Code_CheckHandover}
+	{Code_MergeStates}
+	{Code_NotifyHandover}
 
-		for netId, newSceneCompState := range srcData.SceneComponentStates {
-			oldSceneCompState, exists := dst.SceneComponentStates[netId]
-			if exists {
-				if newSceneCompState.RelativeLocation != nil && oldSceneCompState.RelativeLocation != nil {
-					unreal.CheckSpatialInfoChange(netId, newSceneCompState.RelativeLocation, oldSceneCompState.RelativeLocation, spatialNotifier)
-				}
-			}
-		}
+	return nil
+}
+)EOF";
+
+static const TCHAR* CodeGen_Go_CheckHandoverTemplate = LR"EOF(
+	hasHandover := false
+	var oldInfo, newInfo *common.SpatialInfo
+	if spatialNotifier != nil && dst.ObjRef != nil {
+		{Code_CheckHandoverInStates}
 	}
+)EOF";
 
+static const TCHAR* CodeGen_Go_ActorCheckHandoverTemplate = LR"EOF(
+		if srcData.ActorState != nil && srcData.ActorState.ReplicatedMovement != nil && srcData.ActorState.ReplicatedMovement.Location != nil &&
+			dst.ActorState != nil && dst.ActorState.ReplicatedMovement != nil && dst.ActorState.ReplicatedMovement.Location != nil {
+			hasHandover, oldInfo, newInfo = unreal.CheckEntityHandover(*dst.ObjRef.NetGUID, srcData.ActorState.ReplicatedMovement.Location, dst.ActorState.ReplicatedMovement.Location)
+		}
+)EOF";
+
+static const TCHAR* CodeGen_Go_SceneCompCheckHandoverTemplate = LR"EOF(
+		if !hasHandover && srcData.SceneComponentState != nil && srcData.SceneComponentState.RelativeLocation != nil &&
+			dst.SceneComponentState != nil && dst.SceneComponentState.RelativeLocation != nil {
+			hasHandover, oldInfo, newInfo = unreal.CheckEntityHandover(*dst.ObjRef.NetGUID, srcData.SceneComponentState.RelativeLocation, dst.SceneComponentState.RelativeLocation)
+		}
+)EOF";
+
+static const TCHAR* CodeGen_Go_NotifyHandover = LR"EOF(
+	if hasHandover {
+		spatialNotifier.Notify(*oldInfo, *newInfo,
+			func(srcChannelId common.ChannelId, dstChannelId common.ChannelId, handoverData interface{}) {
+				entityId, ok := handoverData.(*channeld.EntityId)
+				if !ok {
+					channeld.RootLogger().Error("handover data is not an entityId",
+						zap.Uint32("srcChannelId", uint32(srcChannelId)),
+						zap.Uint32("dstChannelId", uint32(dstChannelId)),
+					)
+					return
+				}
+				*entityId = channeld.EntityId(*dst.ObjRef.NetGUID)
+			},
+		)
+	}
 )EOF";
 
 static const TCHAR* CodeGen_Go_MergeStateTemplate = LR"EOF(
@@ -147,6 +172,40 @@ import (
 )
 
 func InitChannelDataTypes() {
-	channeld.RegisterChannelDataType(channeldpb.ChannelType_GLOBAL, &{Definition_GenPackageName}.{Definition_ChannelDataMsgName}{})
+	{Code_Registration}
+}
+)EOF";
+
+static const TCHAR* CodeGen_Go_EntityChannelDataTemplate = LR"EOF(
+// Implement [channeld.HandoverDataMerger]
+func (entityData *{Definition_ChannelDataMsgName}) MergeTo(msg common.Message, fullData bool) error {
+	handoverData, ok := msg.(*unrealpb.SpatialChannelData)
+	if !ok {
+		return errors.New("msg is not a SpatialChannelData")
+	}
+
+	entityState := &unrealpb.SpatialEntityState{
+		ObjRef: entityData.ObjRef,
+	}
+
+	if fullData {
+		anyData, err := anypb.New(entityData)
+		if err != nil {
+			return err
+		}
+		entityState.EntityData = anyData
+	}
+
+	if handoverData.Entities == nil {
+		handoverData.Entities = make(map[uint32]*unrealpb.SpatialEntityState)
+	}
+	handoverData.Entities[*entityData.ObjRef.NetGUID] = entityState
+
+	return nil
+}
+
+// Implement [unreal.UnrealObjectEntityData]
+func (entityData *{Definition_ChannelDataMsgName}) SetObjRef(objRef *unrealpb.UnrealObjectRef) {
+	entityData.ObjRef = objRef
 }
 )EOF";

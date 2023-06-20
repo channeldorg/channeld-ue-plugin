@@ -1,0 +1,211 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {Namespace}
+  name: channeld-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: channeld-gateway
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: channeld-gateway
+    spec:
+      containers:
+        - command: [{ChanneldParams}]
+          image: {ChanneldDockerImage}
+          name: channeld-gateway
+          ports:
+            - containerPort: 11288
+              name: server-port
+            - containerPort: 12108
+              name: client-port
+            - containerPort: 8080
+              name: metrics-port
+          resources:
+            limits:
+              cpu: 3500m
+              memory: 512M
+            requests:
+              cpu: "2"
+          # envFrom:
+          # - configMapRef:
+          #     name: channeld-configmap
+      {ImagePullSecrets}
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {Namespace}
+  name: channeld-gateway
+spec:
+  ports:
+    - name: "server"
+      port: 11288
+      targetPort: server-port
+    - name: "client"
+      port: 12108
+      targetPort: client-port
+    - name: "metrics"
+      port: 8080
+      targetPort: metrics-port
+  selector:
+    app: channeld-gateway
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: channeld-prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: channeld-prometheus
+  strategy: 
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: channeld-prometheus
+    spec:
+      containers:
+        - args:
+            - |-
+              sh -s <<EOF
+                cat > ./prometheus.yml <<EON
+              global:
+                scrape_interval:     2s
+                evaluation_interval: 2s
+              scrape_configs:
+                - job_name: channeld
+                  static_configs:
+                  - targets: [{MetricsAddr}]
+              EON
+              prometheus --config.file=./prometheus.yml
+              EOF
+          command:
+            - /bin/sh
+            - -c
+          image: prom/prometheus
+          name: prometheus
+          ports:
+            - containerPort: 9090
+              name: metrics-port
+          resources:
+            limits:
+              cpu: 3500m
+              memory: 512M
+            requests:
+              cpu: "0.5"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: channeld-prometheus
+  name: channeld-prometheus
+spec:
+  ports:
+    - name: "metrics"
+      port: 9090
+      targetPort: metrics-port
+  selector:
+    app: channeld-prometheus
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: channeld-grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: channeld-grafana
+  strategy: 
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: channeld-grafana
+    spec:
+      containers:
+        - args:
+            - |-
+              sh -s <<EOF
+                cat > /etc/grafana/provisioning/datasources/prometheus.yaml <<EON
+              apiVersion: 1
+              deleteDatasources:
+                - name: Prometheus
+                  orgId: 1
+              datasources:
+                - orgId: 1
+                  name: Prometheus
+                  type: prometheus
+                  access: proxy
+                  url: http://channeld-prometheus:9090
+                  database:
+                  basicAuth: false
+                  basicAuthUser: ""
+                  basicAuthPassword: ""
+                  withCredentials: false
+                  isDefault: false
+                  jsonData:
+                    keepCookies: []
+                  secureJsonFields: {}
+                  version: 1
+                  editable: true
+              EON
+                cat > /etc/grafana/provisioning/dashboards/channeld.yaml <<EON
+              apiVersion: 1
+              providers:
+               - name: 'Channeld'
+                 orgId: 1
+                 folder: ''
+                 type: file
+                 updateIntervalSeconds: 10
+                 options:
+                   path: /home/grafana/dashboards/dashboard.json
+              EON
+              mkdir /home/grafana/dashboards
+              wget -O /home/grafana/dashboards/dashboard.json https://raw.githubusercontent.com/metaworking/channeld/master/grafana/dashboard.json
+              /run.sh
+              EOF
+          command:
+            - /bin/sh
+            - -c
+          image: grafana/grafana
+          name: channeld-grafana
+          ports:
+            - containerPort: 3000
+              name: web-port
+          resources:
+            limits:
+              cpu: 3500m
+              memory: 512M
+            requests:
+              cpu: "0.5"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: default
+  name: channeld-grafana
+spec:
+  ports:
+    - name: "web"
+      port: 3000
+      targetPort: web-port
+  selector:
+    app: channeld-grafana
+  type: LoadBalancer
+---

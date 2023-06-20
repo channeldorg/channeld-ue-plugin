@@ -1,5 +1,5 @@
 #!/bin/bash
-channeld_version=v0.5.0
+channeld_version=v0.6.0
 
 # Get this script's path
 script_dir=$(cd "$(dirname "$0")"; pwd)
@@ -14,8 +14,8 @@ disk_id=$(echo $disk_id | tr [:upper:] [:lower:])
 other_path=${tmp_path:1}
 local_channeld=/${disk_id}${other_path}
 
-if [ "$defualt_channeld_path" != $local_channeld ]; then
-    echo "The channeld is not include in ChanneldUE, please update channeld by yourself"
+if [ "$defualt_channeld_path" != "$local_channeld" ]; then
+    echo "The channeld is not include in ChanneldUE, please update channeld manually"
     echo "    The channeld path is: $local_channeld"
     echo "    The default channeld path is: $defualt_channeld_path"
     exit 0

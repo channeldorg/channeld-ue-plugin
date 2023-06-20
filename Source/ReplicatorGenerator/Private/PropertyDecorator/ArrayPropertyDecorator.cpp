@@ -1,11 +1,12 @@
 ﻿#include "PropertyDecorator/ArrayPropertyDecorator.h"
-
+#include "PropertyDecorator/StructPropertyDecorator.h"
 #include "PropertyDecoratorFactory.h"
 
 FArrayPropertyDecorator::FArrayPropertyDecorator(FProperty* InProperty, IPropertyDecoratorOwner* InOwner)
 	: FPropertyDecorator(InProperty, InOwner)
 {
 	check(InProperty != nullptr)
+	SetForceNotDirectlyAccessible(true);
 	FPropertyDecoratorFactory& Factory = FPropertyDecoratorFactory::Get();
 	InnerProperty = Factory.GetPropertyDecorator(CastFieldChecked<FArrayProperty>(InProperty)->Inner, this);
 	ProtoFieldRule = TEXT("repeated");
@@ -57,7 +58,7 @@ FString FArrayPropertyDecorator::GetCode_SetDeltaState(const FString& TargetInst
 	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), Owner->GetProtoNamespace());
 	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), Owner->GetProtoStateMessageType());
 	FormatArgs.Add(TEXT("Definition_ProtoName"), GetProtoFieldName());
-	
+
 	FormatArgs.Add(TEXT("Code_GetProtoFieldValueFrom"), GetCode_GetProtoFieldValueFrom(TEXT("FullState")));
 	FormatArgs.Add(TEXT("Code_ConditionFullStateIsNull"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? 0 : ") : TEXT(""));
 	FormatArgs.Add(
@@ -82,7 +83,7 @@ FString FArrayPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString&
 	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), Owner->GetProtoNamespace());
 	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), Owner->GetProtoStateMessageType());
 	FormatArgs.Add(TEXT("Definition_ProtoName"), GetProtoFieldName());
-	
+
 	FormatArgs.Add(TEXT("Code_BeforeCondition"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? true :") : TEXT(""));
 	FormatArgs.Add(TEXT("Code_GetProtoFieldValueFrom"), GetCode_GetProtoFieldValueFrom(TEXT("FullState")));
 	FormatArgs.Add(TEXT("Code_ConditionFullStateIsNull"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? 0 : ") : TEXT(""));
@@ -152,4 +153,25 @@ TArray<FString> FArrayPropertyDecorator::GetAdditionalIncludes()
 FString FArrayPropertyDecorator::GetCode_GetWorldRef()
 {
 	return Owner->GetCode_GetWorldRef();
+}
+
+TArray<TSharedPtr<FStructPropertyDecorator>> FArrayPropertyDecorator::GetStructPropertyDecorators()
+{
+	TArray<TSharedPtr<FStructPropertyDecorator>> StructPropertyDecorators;
+	if (InnerProperty->IsStruct())
+	{
+		StructPropertyDecorators.Add(StaticCastSharedPtr<FStructPropertyDecorator>(InnerProperty));
+	}
+	StructPropertyDecorators.Append(InnerProperty->GetStructPropertyDecorators());
+	TArray<TSharedPtr<FStructPropertyDecorator>> NonRepetitionStructPropertyDecorators;
+	TSet<FString> StructPropertyDecoratorNames;
+	for (TSharedPtr<FStructPropertyDecorator>& StructPropertyDecorator : StructPropertyDecorators)
+	{
+		if (!StructPropertyDecoratorNames.Contains(StructPropertyDecorator->GetPropertyName()))
+		{
+			StructPropertyDecoratorNames.Add(StructPropertyDecorator->GetPropertyName());
+			NonRepetitionStructPropertyDecorators.Add(StructPropertyDecorator);
+		}
+	}
+	return NonRepetitionStructPropertyDecorators;
 }

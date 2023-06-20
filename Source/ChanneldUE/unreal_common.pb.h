@@ -29,6 +29,9 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/repeated_field.h>  // IWYU pragma: export
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
+#include <google/protobuf/map.h>  // IWYU pragma: export
+#include <google/protobuf/map_entry.h>
+#include <google/protobuf/map_field_inl.h>
 #include <google/protobuf/generated_enum_reflection.h>
 #include <google/protobuf/unknown_field_set.h>
 #include <google/protobuf/any.pb.h>
@@ -107,12 +110,6 @@ CHANNELDUE_API extern FVectorDefaultTypeInternal _FVector_default_instance_;
 class GameStateBase;
 struct GameStateBaseDefaultTypeInternal;
 CHANNELDUE_API extern GameStateBaseDefaultTypeInternal _GameStateBase_default_instance_;
-class GetHandoverContextMessage;
-struct GetHandoverContextMessageDefaultTypeInternal;
-CHANNELDUE_API extern GetHandoverContextMessageDefaultTypeInternal _GetHandoverContextMessage_default_instance_;
-class GetHandoverContextResultMessage;
-struct GetHandoverContextResultMessageDefaultTypeInternal;
-CHANNELDUE_API extern GetHandoverContextResultMessageDefaultTypeInternal _GetHandoverContextResultMessage_default_instance_;
 class GetUnrealObjectRefMessage;
 struct GetUnrealObjectRefMessageDefaultTypeInternal;
 CHANNELDUE_API extern GetUnrealObjectRefMessageDefaultTypeInternal _GetUnrealObjectRefMessage_default_instance_;
@@ -176,12 +173,24 @@ CHANNELDUE_API extern RemoteFunctionMessageDefaultTypeInternal _RemoteFunctionMe
 class SceneComponentState;
 struct SceneComponentStateDefaultTypeInternal;
 CHANNELDUE_API extern SceneComponentStateDefaultTypeInternal _SceneComponentState_default_instance_;
-class ServerSpawnedPlayerMessage;
-struct ServerSpawnedPlayerMessageDefaultTypeInternal;
-CHANNELDUE_API extern ServerSpawnedPlayerMessageDefaultTypeInternal _ServerSpawnedPlayerMessage_default_instance_;
+class SpatialChannelData;
+struct SpatialChannelDataDefaultTypeInternal;
+CHANNELDUE_API extern SpatialChannelDataDefaultTypeInternal _SpatialChannelData_default_instance_;
+class SpatialChannelData_EntitiesEntry_DoNotUse;
+struct SpatialChannelData_EntitiesEntry_DoNotUseDefaultTypeInternal;
+CHANNELDUE_API extern SpatialChannelData_EntitiesEntry_DoNotUseDefaultTypeInternal _SpatialChannelData_EntitiesEntry_DoNotUse_default_instance_;
+class SpatialEntityState;
+struct SpatialEntityStateDefaultTypeInternal;
+CHANNELDUE_API extern SpatialEntityStateDefaultTypeInternal _SpatialEntityState_default_instance_;
 class SpawnObjectMessage;
 struct SpawnObjectMessageDefaultTypeInternal;
 CHANNELDUE_API extern SpawnObjectMessageDefaultTypeInternal _SpawnObjectMessage_default_instance_;
+class SyncNetIdMessage;
+struct SyncNetIdMessageDefaultTypeInternal;
+CHANNELDUE_API extern SyncNetIdMessageDefaultTypeInternal _SyncNetIdMessage_default_instance_;
+class SyncNetIdMessage_NetIdPath;
+struct SyncNetIdMessage_NetIdPathDefaultTypeInternal;
+CHANNELDUE_API extern SyncNetIdMessage_NetIdPathDefaultTypeInternal _SyncNetIdMessage_NetIdPath_default_instance_;
 class UnrealObjectRef;
 struct UnrealObjectRefDefaultTypeInternal;
 CHANNELDUE_API extern UnrealObjectRefDefaultTypeInternal _UnrealObjectRef_default_instance_;
@@ -210,8 +219,6 @@ template<> CHANNELDUE_API ::unrealpb::FRootMotionSourceGroup* Arena::CreateMaybe
 template<> CHANNELDUE_API ::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings* Arena::CreateMaybeMessage<::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::FVector* Arena::CreateMaybeMessage<::unrealpb::FVector>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::GameStateBase* Arena::CreateMaybeMessage<::unrealpb::GameStateBase>(Arena*);
-template<> CHANNELDUE_API ::unrealpb::GetHandoverContextMessage* Arena::CreateMaybeMessage<::unrealpb::GetHandoverContextMessage>(Arena*);
-template<> CHANNELDUE_API ::unrealpb::GetHandoverContextResultMessage* Arena::CreateMaybeMessage<::unrealpb::GetHandoverContextResultMessage>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::GetUnrealObjectRefMessage* Arena::CreateMaybeMessage<::unrealpb::GetUnrealObjectRefMessage>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::GetUnrealObjectRefResultMessage* Arena::CreateMaybeMessage<::unrealpb::GetUnrealObjectRefResultMessage>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::HandoverContext* Arena::CreateMaybeMessage<::unrealpb::HandoverContext>(Arena*);
@@ -233,8 +240,12 @@ template<> CHANNELDUE_API ::unrealpb::PlayerController_ServerUpdateCamera_Params
 template<> CHANNELDUE_API ::unrealpb::PlayerState* Arena::CreateMaybeMessage<::unrealpb::PlayerState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::RemoteFunctionMessage* Arena::CreateMaybeMessage<::unrealpb::RemoteFunctionMessage>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::SceneComponentState* Arena::CreateMaybeMessage<::unrealpb::SceneComponentState>(Arena*);
-template<> CHANNELDUE_API ::unrealpb::ServerSpawnedPlayerMessage* Arena::CreateMaybeMessage<::unrealpb::ServerSpawnedPlayerMessage>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::SpatialChannelData* Arena::CreateMaybeMessage<::unrealpb::SpatialChannelData>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::SpatialChannelData_EntitiesEntry_DoNotUse* Arena::CreateMaybeMessage<::unrealpb::SpatialChannelData_EntitiesEntry_DoNotUse>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::SpatialEntityState* Arena::CreateMaybeMessage<::unrealpb::SpatialEntityState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::SpawnObjectMessage* Arena::CreateMaybeMessage<::unrealpb::SpawnObjectMessage>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::SyncNetIdMessage* Arena::CreateMaybeMessage<::unrealpb::SyncNetIdMessage>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::SyncNetIdMessage_NetIdPath* Arena::CreateMaybeMessage<::unrealpb::SyncNetIdMessage_NetIdPath>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::UnrealObjectRef* Arena::CreateMaybeMessage<::unrealpb::UnrealObjectRef>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::UnrealObjectRef_GuidCachedObject* Arena::CreateMaybeMessage<::unrealpb::UnrealObjectRef_GuidCachedObject>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
@@ -247,8 +258,7 @@ enum MessageType : int {
   RPC = 102,
   SPAWN = 103,
   DESTROY = 104,
-  HANDOVER_CONTEXT = 105,
-  GET_UNREAL_OBJECT_REF = 106,
+  SYNC_NET_ID = 107,
   SERVER_PLAYER_SPAWNED = 201,
   SERVER_PLAYER_LEAVE = 202,
   MessageType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
@@ -789,8 +799,10 @@ class CHANNELDUE_API UnrealObjectRef final :
   enum : int {
     kContextFieldNumber = 2,
     kNetGUIDBunchFieldNumber = 3,
+    kClassPathFieldNumber = 6,
     kNetGUIDFieldNumber = 1,
     kBunchBitsNumFieldNumber = 4,
+    kOwningConnIdFieldNumber = 7,
   };
   // repeated .unrealpb.UnrealObjectRef.GuidCachedObject context = 2;
   int context_size() const;
@@ -828,6 +840,24 @@ class CHANNELDUE_API UnrealObjectRef final :
   std::string* _internal_mutable_netguidbunch();
   public:
 
+  // optional string classPath = 6;
+  bool has_classpath() const;
+  private:
+  bool _internal_has_classpath() const;
+  public:
+  void clear_classpath();
+  const std::string& classpath() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_classpath(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_classpath();
+  PROTOBUF_NODISCARD std::string* release_classpath();
+  void set_allocated_classpath(std::string* classpath);
+  private:
+  const std::string& _internal_classpath() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_classpath(const std::string& value);
+  std::string* _internal_mutable_classpath();
+  public:
+
   // optional uint32 netGUID = 1;
   bool has_netguid() const;
   private:
@@ -854,6 +884,19 @@ class CHANNELDUE_API UnrealObjectRef final :
   void _internal_set_bunchbitsnum(uint32_t value);
   public:
 
+  // optional uint32 owningConnId = 7;
+  bool has_owningconnid() const;
+  private:
+  bool _internal_has_owningconnid() const;
+  public:
+  void clear_owningconnid();
+  uint32_t owningconnid() const;
+  void set_owningconnid(uint32_t value);
+  private:
+  uint32_t _internal_owningconnid() const;
+  void _internal_set_owningconnid(uint32_t value);
+  public:
+
   // @@protoc_insertion_point(class_scope:unrealpb.UnrealObjectRef)
  private:
   class _Internal;
@@ -866,8 +909,10 @@ class CHANNELDUE_API UnrealObjectRef final :
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObjectRef_GuidCachedObject > context_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr netguidbunch_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr classpath_;
     uint32_t netguid_;
     uint32_t bunchbitsnum_;
+    uint32_t owningconnid_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -1176,6 +1221,7 @@ class CHANNELDUE_API RemoteFunctionMessage final :
     kFunctionNameFieldNumber = 2,
     kParamsPayloadFieldNumber = 3,
     kTargetObjFieldNumber = 1,
+    kRedirectionCounterFieldNumber = 4,
   };
   // string functionName = 2;
   void clear_functionname();
@@ -1223,6 +1269,15 @@ class CHANNELDUE_API RemoteFunctionMessage final :
       ::unrealpb::UnrealObjectRef* targetobj);
   ::unrealpb::UnrealObjectRef* unsafe_arena_release_targetobj();
 
+  // int32 redirectionCounter = 4;
+  void clear_redirectioncounter();
+  int32_t redirectioncounter() const;
+  void set_redirectioncounter(int32_t value);
+  private:
+  int32_t _internal_redirectioncounter() const;
+  void _internal_set_redirectioncounter(int32_t value);
+  public:
+
   // @@protoc_insertion_point(class_scope:unrealpb.RemoteFunctionMessage)
  private:
   class _Internal;
@@ -1234,6 +1289,7 @@ class CHANNELDUE_API RemoteFunctionMessage final :
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr functionname_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr paramspayload_;
     ::unrealpb::UnrealObjectRef* targetobj_;
+    int32_t redirectioncounter_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -1366,7 +1422,6 @@ class CHANNELDUE_API SpawnObjectMessage final :
     kLocationFieldNumber = 5,
     kChannelIdFieldNumber = 2,
     kLocalRoleFieldNumber = 3,
-    kOwningConnIdFieldNumber = 4,
   };
   // .unrealpb.UnrealObjectRef obj = 1;
   bool has_obj() const;
@@ -1430,19 +1485,6 @@ class CHANNELDUE_API SpawnObjectMessage final :
   void _internal_set_localrole(uint32_t value);
   public:
 
-  // optional uint32 owningConnId = 4;
-  bool has_owningconnid() const;
-  private:
-  bool _internal_has_owningconnid() const;
-  public:
-  void clear_owningconnid();
-  uint32_t owningconnid() const;
-  void set_owningconnid(uint32_t value);
-  private:
-  uint32_t _internal_owningconnid() const;
-  void _internal_set_owningconnid(uint32_t value);
-  public:
-
   // @@protoc_insertion_point(class_scope:unrealpb.SpawnObjectMessage)
  private:
   class _Internal;
@@ -1457,175 +1499,6 @@ class CHANNELDUE_API SpawnObjectMessage final :
     ::unrealpb::FVector* location_;
     uint32_t channelid_;
     uint32_t localrole_;
-    uint32_t owningconnid_;
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_unreal_5fcommon_2eproto;
-};
-// -------------------------------------------------------------------
-
-class CHANNELDUE_API ServerSpawnedPlayerMessage final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.ServerSpawnedPlayerMessage) */ {
- public:
-  inline ServerSpawnedPlayerMessage() : ServerSpawnedPlayerMessage(nullptr) {}
-  ~ServerSpawnedPlayerMessage() override;
-  explicit PROTOBUF_CONSTEXPR ServerSpawnedPlayerMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  ServerSpawnedPlayerMessage(const ServerSpawnedPlayerMessage& from);
-  ServerSpawnedPlayerMessage(ServerSpawnedPlayerMessage&& from) noexcept
-    : ServerSpawnedPlayerMessage() {
-    *this = ::std::move(from);
-  }
-
-  inline ServerSpawnedPlayerMessage& operator=(const ServerSpawnedPlayerMessage& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline ServerSpawnedPlayerMessage& operator=(ServerSpawnedPlayerMessage&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetOwningArena() == from.GetOwningArena()
-  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetOwningArena() != nullptr
-  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const ServerSpawnedPlayerMessage& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const ServerSpawnedPlayerMessage* internal_default_instance() {
-    return reinterpret_cast<const ServerSpawnedPlayerMessage*>(
-               &_ServerSpawnedPlayerMessage_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    6;
-
-  friend void swap(ServerSpawnedPlayerMessage& a, ServerSpawnedPlayerMessage& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(ServerSpawnedPlayerMessage* other) {
-    if (other == this) return;
-  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() != nullptr &&
-        GetOwningArena() == other->GetOwningArena()) {
-   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() == other->GetOwningArena()) {
-  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(ServerSpawnedPlayerMessage* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  ServerSpawnedPlayerMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<ServerSpawnedPlayerMessage>(arena);
-  }
-  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const ServerSpawnedPlayerMessage& from);
-  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const ServerSpawnedPlayerMessage& from) {
-    ServerSpawnedPlayerMessage::MergeImpl(*this, from);
-  }
-  private:
-  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
-  public:
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  uint8_t* _InternalSerialize(
-      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
-  void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(ServerSpawnedPlayerMessage* other);
-
-  private:
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "unrealpb.ServerSpawnedPlayerMessage";
-  }
-  protected:
-  explicit ServerSpawnedPlayerMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                       bool is_message_owned = false);
-  public:
-
-  static const ClassData _class_data_;
-  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kStartPosFieldNumber = 2,
-    kClientConnIdFieldNumber = 1,
-  };
-  // .unrealpb.FVector startPos = 2;
-  bool has_startpos() const;
-  private:
-  bool _internal_has_startpos() const;
-  public:
-  void clear_startpos();
-  const ::unrealpb::FVector& startpos() const;
-  PROTOBUF_NODISCARD ::unrealpb::FVector* release_startpos();
-  ::unrealpb::FVector* mutable_startpos();
-  void set_allocated_startpos(::unrealpb::FVector* startpos);
-  private:
-  const ::unrealpb::FVector& _internal_startpos() const;
-  ::unrealpb::FVector* _internal_mutable_startpos();
-  public:
-  void unsafe_arena_set_allocated_startpos(
-      ::unrealpb::FVector* startpos);
-  ::unrealpb::FVector* unsafe_arena_release_startpos();
-
-  // uint32 clientConnId = 1;
-  void clear_clientconnid();
-  uint32_t clientconnid() const;
-  void set_clientconnid(uint32_t value);
-  private:
-  uint32_t _internal_clientconnid() const;
-  void _internal_set_clientconnid(uint32_t value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:unrealpb.ServerSpawnedPlayerMessage)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  struct Impl_ {
-    ::unrealpb::FVector* startpos_;
-    uint32_t clientconnid_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -1680,7 +1553,7 @@ class CHANNELDUE_API DestroyObjectMessage final :
                &_DestroyObjectMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    6;
 
   friend void swap(DestroyObjectMessage& a, DestroyObjectMessage& b) {
     a.Swap(&b);
@@ -1839,7 +1712,7 @@ class CHANNELDUE_API HandoverContext final :
                &_HandoverContext_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    7;
 
   friend void swap(HandoverContext& a, HandoverContext& b) {
     a.Swap(&b);
@@ -1964,366 +1837,6 @@ class CHANNELDUE_API HandoverContext final :
 };
 // -------------------------------------------------------------------
 
-class CHANNELDUE_API GetHandoverContextMessage final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.GetHandoverContextMessage) */ {
- public:
-  inline GetHandoverContextMessage() : GetHandoverContextMessage(nullptr) {}
-  ~GetHandoverContextMessage() override;
-  explicit PROTOBUF_CONSTEXPR GetHandoverContextMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  GetHandoverContextMessage(const GetHandoverContextMessage& from);
-  GetHandoverContextMessage(GetHandoverContextMessage&& from) noexcept
-    : GetHandoverContextMessage() {
-    *this = ::std::move(from);
-  }
-
-  inline GetHandoverContextMessage& operator=(const GetHandoverContextMessage& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline GetHandoverContextMessage& operator=(GetHandoverContextMessage&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetOwningArena() == from.GetOwningArena()
-  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetOwningArena() != nullptr
-  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const GetHandoverContextMessage& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const GetHandoverContextMessage* internal_default_instance() {
-    return reinterpret_cast<const GetHandoverContextMessage*>(
-               &_GetHandoverContextMessage_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    9;
-
-  friend void swap(GetHandoverContextMessage& a, GetHandoverContextMessage& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(GetHandoverContextMessage* other) {
-    if (other == this) return;
-  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() != nullptr &&
-        GetOwningArena() == other->GetOwningArena()) {
-   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() == other->GetOwningArena()) {
-  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(GetHandoverContextMessage* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  GetHandoverContextMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<GetHandoverContextMessage>(arena);
-  }
-  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const GetHandoverContextMessage& from);
-  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const GetHandoverContextMessage& from) {
-    GetHandoverContextMessage::MergeImpl(*this, from);
-  }
-  private:
-  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
-  public:
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  uint8_t* _InternalSerialize(
-      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
-  void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(GetHandoverContextMessage* other);
-
-  private:
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "unrealpb.GetHandoverContextMessage";
-  }
-  protected:
-  explicit GetHandoverContextMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                       bool is_message_owned = false);
-  public:
-
-  static const ClassData _class_data_;
-  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kNetIdFieldNumber = 1,
-    kSrcChannelIdFieldNumber = 2,
-    kDstChannelIdFieldNumber = 3,
-  };
-  // uint32 netId = 1;
-  void clear_netid();
-  uint32_t netid() const;
-  void set_netid(uint32_t value);
-  private:
-  uint32_t _internal_netid() const;
-  void _internal_set_netid(uint32_t value);
-  public:
-
-  // uint32 srcChannelId = 2;
-  void clear_srcchannelid();
-  uint32_t srcchannelid() const;
-  void set_srcchannelid(uint32_t value);
-  private:
-  uint32_t _internal_srcchannelid() const;
-  void _internal_set_srcchannelid(uint32_t value);
-  public:
-
-  // uint32 dstChannelId = 3;
-  void clear_dstchannelid();
-  uint32_t dstchannelid() const;
-  void set_dstchannelid(uint32_t value);
-  private:
-  uint32_t _internal_dstchannelid() const;
-  void _internal_set_dstchannelid(uint32_t value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:unrealpb.GetHandoverContextMessage)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  struct Impl_ {
-    uint32_t netid_;
-    uint32_t srcchannelid_;
-    uint32_t dstchannelid_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_unreal_5fcommon_2eproto;
-};
-// -------------------------------------------------------------------
-
-class CHANNELDUE_API GetHandoverContextResultMessage final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.GetHandoverContextResultMessage) */ {
- public:
-  inline GetHandoverContextResultMessage() : GetHandoverContextResultMessage(nullptr) {}
-  ~GetHandoverContextResultMessage() override;
-  explicit PROTOBUF_CONSTEXPR GetHandoverContextResultMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  GetHandoverContextResultMessage(const GetHandoverContextResultMessage& from);
-  GetHandoverContextResultMessage(GetHandoverContextResultMessage&& from) noexcept
-    : GetHandoverContextResultMessage() {
-    *this = ::std::move(from);
-  }
-
-  inline GetHandoverContextResultMessage& operator=(const GetHandoverContextResultMessage& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline GetHandoverContextResultMessage& operator=(GetHandoverContextResultMessage&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetOwningArena() == from.GetOwningArena()
-  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetOwningArena() != nullptr
-  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const GetHandoverContextResultMessage& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const GetHandoverContextResultMessage* internal_default_instance() {
-    return reinterpret_cast<const GetHandoverContextResultMessage*>(
-               &_GetHandoverContextResultMessage_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    10;
-
-  friend void swap(GetHandoverContextResultMessage& a, GetHandoverContextResultMessage& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(GetHandoverContextResultMessage* other) {
-    if (other == this) return;
-  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() != nullptr &&
-        GetOwningArena() == other->GetOwningArena()) {
-   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() == other->GetOwningArena()) {
-  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(GetHandoverContextResultMessage* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  GetHandoverContextResultMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<GetHandoverContextResultMessage>(arena);
-  }
-  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const GetHandoverContextResultMessage& from);
-  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const GetHandoverContextResultMessage& from) {
-    GetHandoverContextResultMessage::MergeImpl(*this, from);
-  }
-  private:
-  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
-  public:
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  uint8_t* _InternalSerialize(
-      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
-  void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(GetHandoverContextResultMessage* other);
-
-  private:
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "unrealpb.GetHandoverContextResultMessage";
-  }
-  protected:
-  explicit GetHandoverContextResultMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                       bool is_message_owned = false);
-  public:
-
-  static const ClassData _class_data_;
-  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kContextFieldNumber = 4,
-    kNetIdFieldNumber = 1,
-    kSrcChannelIdFieldNumber = 2,
-    kDstChannelIdFieldNumber = 3,
-  };
-  // repeated .unrealpb.HandoverContext context = 4;
-  int context_size() const;
-  private:
-  int _internal_context_size() const;
-  public:
-  void clear_context();
-  ::unrealpb::HandoverContext* mutable_context(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::HandoverContext >*
-      mutable_context();
-  private:
-  const ::unrealpb::HandoverContext& _internal_context(int index) const;
-  ::unrealpb::HandoverContext* _internal_add_context();
-  public:
-  const ::unrealpb::HandoverContext& context(int index) const;
-  ::unrealpb::HandoverContext* add_context();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::HandoverContext >&
-      context() const;
-
-  // uint32 netId = 1;
-  void clear_netid();
-  uint32_t netid() const;
-  void set_netid(uint32_t value);
-  private:
-  uint32_t _internal_netid() const;
-  void _internal_set_netid(uint32_t value);
-  public:
-
-  // uint32 srcChannelId = 2;
-  void clear_srcchannelid();
-  uint32_t srcchannelid() const;
-  void set_srcchannelid(uint32_t value);
-  private:
-  uint32_t _internal_srcchannelid() const;
-  void _internal_set_srcchannelid(uint32_t value);
-  public:
-
-  // uint32 dstChannelId = 3;
-  void clear_dstchannelid();
-  uint32_t dstchannelid() const;
-  void set_dstchannelid(uint32_t value);
-  private:
-  uint32_t _internal_dstchannelid() const;
-  void _internal_set_dstchannelid(uint32_t value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:unrealpb.GetHandoverContextResultMessage)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  struct Impl_ {
-    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::HandoverContext > context_;
-    uint32_t netid_;
-    uint32_t srcchannelid_;
-    uint32_t dstchannelid_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_unreal_5fcommon_2eproto;
-};
-// -------------------------------------------------------------------
-
 class CHANNELDUE_API HandoverData final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.HandoverData) */ {
  public:
@@ -2372,7 +1885,7 @@ class CHANNELDUE_API HandoverData final :
                &_HandoverData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    11;
+    8;
 
   friend void swap(HandoverData& a, HandoverData& b) {
     a.Swap(&b);
@@ -2550,7 +2063,7 @@ class CHANNELDUE_API GetUnrealObjectRefMessage final :
                &_GetUnrealObjectRefMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    9;
 
   friend void swap(GetUnrealObjectRefMessage& a, GetUnrealObjectRefMessage& b) {
     a.Swap(&b);
@@ -2712,7 +2225,7 @@ class CHANNELDUE_API GetUnrealObjectRefResultMessage final :
                &_GetUnrealObjectRefResultMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    10;
 
   friend void swap(GetUnrealObjectRefResultMessage& a, GetUnrealObjectRefResultMessage& b) {
     a.Swap(&b);
@@ -2821,6 +2334,705 @@ class CHANNELDUE_API GetUnrealObjectRefResultMessage final :
 };
 // -------------------------------------------------------------------
 
+class CHANNELDUE_API SyncNetIdMessage_NetIdPath final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.SyncNetIdMessage.NetIdPath) */ {
+ public:
+  inline SyncNetIdMessage_NetIdPath() : SyncNetIdMessage_NetIdPath(nullptr) {}
+  ~SyncNetIdMessage_NetIdPath() override;
+  explicit PROTOBUF_CONSTEXPR SyncNetIdMessage_NetIdPath(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  SyncNetIdMessage_NetIdPath(const SyncNetIdMessage_NetIdPath& from);
+  SyncNetIdMessage_NetIdPath(SyncNetIdMessage_NetIdPath&& from) noexcept
+    : SyncNetIdMessage_NetIdPath() {
+    *this = ::std::move(from);
+  }
+
+  inline SyncNetIdMessage_NetIdPath& operator=(const SyncNetIdMessage_NetIdPath& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SyncNetIdMessage_NetIdPath& operator=(SyncNetIdMessage_NetIdPath&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const SyncNetIdMessage_NetIdPath& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const SyncNetIdMessage_NetIdPath* internal_default_instance() {
+    return reinterpret_cast<const SyncNetIdMessage_NetIdPath*>(
+               &_SyncNetIdMessage_NetIdPath_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    11;
+
+  friend void swap(SyncNetIdMessage_NetIdPath& a, SyncNetIdMessage_NetIdPath& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SyncNetIdMessage_NetIdPath* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SyncNetIdMessage_NetIdPath* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  SyncNetIdMessage_NetIdPath* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<SyncNetIdMessage_NetIdPath>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const SyncNetIdMessage_NetIdPath& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const SyncNetIdMessage_NetIdPath& from) {
+    SyncNetIdMessage_NetIdPath::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SyncNetIdMessage_NetIdPath* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.SyncNetIdMessage.NetIdPath";
+  }
+  protected:
+  explicit SyncNetIdMessage_NetIdPath(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kPathFieldNumber = 2,
+    kNetIdFieldNumber = 1,
+  };
+  // string path = 2;
+  void clear_path();
+  const std::string& path() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_path(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_path();
+  PROTOBUF_NODISCARD std::string* release_path();
+  void set_allocated_path(std::string* path);
+  private:
+  const std::string& _internal_path() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_path(const std::string& value);
+  std::string* _internal_mutable_path();
+  public:
+
+  // uint32 netId = 1;
+  void clear_netid();
+  uint32_t netid() const;
+  void set_netid(uint32_t value);
+  private:
+  uint32_t _internal_netid() const;
+  void _internal_set_netid(uint32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:unrealpb.SyncNetIdMessage.NetIdPath)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr path_;
+    uint32_t netid_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API SyncNetIdMessage final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.SyncNetIdMessage) */ {
+ public:
+  inline SyncNetIdMessage() : SyncNetIdMessage(nullptr) {}
+  ~SyncNetIdMessage() override;
+  explicit PROTOBUF_CONSTEXPR SyncNetIdMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  SyncNetIdMessage(const SyncNetIdMessage& from);
+  SyncNetIdMessage(SyncNetIdMessage&& from) noexcept
+    : SyncNetIdMessage() {
+    *this = ::std::move(from);
+  }
+
+  inline SyncNetIdMessage& operator=(const SyncNetIdMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SyncNetIdMessage& operator=(SyncNetIdMessage&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const SyncNetIdMessage& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const SyncNetIdMessage* internal_default_instance() {
+    return reinterpret_cast<const SyncNetIdMessage*>(
+               &_SyncNetIdMessage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    12;
+
+  friend void swap(SyncNetIdMessage& a, SyncNetIdMessage& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SyncNetIdMessage* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SyncNetIdMessage* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  SyncNetIdMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<SyncNetIdMessage>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const SyncNetIdMessage& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const SyncNetIdMessage& from) {
+    SyncNetIdMessage::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SyncNetIdMessage* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.SyncNetIdMessage";
+  }
+  protected:
+  explicit SyncNetIdMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  typedef SyncNetIdMessage_NetIdPath NetIdPath;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kNetIdPathsFieldNumber = 1,
+  };
+  // repeated .unrealpb.SyncNetIdMessage.NetIdPath netIdPaths = 1;
+  int netidpaths_size() const;
+  private:
+  int _internal_netidpaths_size() const;
+  public:
+  void clear_netidpaths();
+  ::unrealpb::SyncNetIdMessage_NetIdPath* mutable_netidpaths(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::SyncNetIdMessage_NetIdPath >*
+      mutable_netidpaths();
+  private:
+  const ::unrealpb::SyncNetIdMessage_NetIdPath& _internal_netidpaths(int index) const;
+  ::unrealpb::SyncNetIdMessage_NetIdPath* _internal_add_netidpaths();
+  public:
+  const ::unrealpb::SyncNetIdMessage_NetIdPath& netidpaths(int index) const;
+  ::unrealpb::SyncNetIdMessage_NetIdPath* add_netidpaths();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::SyncNetIdMessage_NetIdPath >&
+      netidpaths() const;
+
+  // @@protoc_insertion_point(class_scope:unrealpb.SyncNetIdMessage)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::SyncNetIdMessage_NetIdPath > netidpaths_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API SpatialEntityState final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.SpatialEntityState) */ {
+ public:
+  inline SpatialEntityState() : SpatialEntityState(nullptr) {}
+  ~SpatialEntityState() override;
+  explicit PROTOBUF_CONSTEXPR SpatialEntityState(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  SpatialEntityState(const SpatialEntityState& from);
+  SpatialEntityState(SpatialEntityState&& from) noexcept
+    : SpatialEntityState() {
+    *this = ::std::move(from);
+  }
+
+  inline SpatialEntityState& operator=(const SpatialEntityState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SpatialEntityState& operator=(SpatialEntityState&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const SpatialEntityState& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const SpatialEntityState* internal_default_instance() {
+    return reinterpret_cast<const SpatialEntityState*>(
+               &_SpatialEntityState_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    13;
+
+  friend void swap(SpatialEntityState& a, SpatialEntityState& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SpatialEntityState* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SpatialEntityState* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  SpatialEntityState* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<SpatialEntityState>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const SpatialEntityState& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const SpatialEntityState& from) {
+    SpatialEntityState::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SpatialEntityState* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.SpatialEntityState";
+  }
+  protected:
+  explicit SpatialEntityState(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kObjRefFieldNumber = 1,
+    kEntityDataFieldNumber = 3,
+    kRemovedFieldNumber = 2,
+  };
+  // .unrealpb.UnrealObjectRef objRef = 1;
+  bool has_objref() const;
+  private:
+  bool _internal_has_objref() const;
+  public:
+  void clear_objref();
+  const ::unrealpb::UnrealObjectRef& objref() const;
+  PROTOBUF_NODISCARD ::unrealpb::UnrealObjectRef* release_objref();
+  ::unrealpb::UnrealObjectRef* mutable_objref();
+  void set_allocated_objref(::unrealpb::UnrealObjectRef* objref);
+  private:
+  const ::unrealpb::UnrealObjectRef& _internal_objref() const;
+  ::unrealpb::UnrealObjectRef* _internal_mutable_objref();
+  public:
+  void unsafe_arena_set_allocated_objref(
+      ::unrealpb::UnrealObjectRef* objref);
+  ::unrealpb::UnrealObjectRef* unsafe_arena_release_objref();
+
+  // optional .google.protobuf.Any entityData = 3;
+  bool has_entitydata() const;
+  private:
+  bool _internal_has_entitydata() const;
+  public:
+  void clear_entitydata();
+  const ::PROTOBUF_NAMESPACE_ID::Any& entitydata() const;
+  PROTOBUF_NODISCARD ::PROTOBUF_NAMESPACE_ID::Any* release_entitydata();
+  ::PROTOBUF_NAMESPACE_ID::Any* mutable_entitydata();
+  void set_allocated_entitydata(::PROTOBUF_NAMESPACE_ID::Any* entitydata);
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Any& _internal_entitydata() const;
+  ::PROTOBUF_NAMESPACE_ID::Any* _internal_mutable_entitydata();
+  public:
+  void unsafe_arena_set_allocated_entitydata(
+      ::PROTOBUF_NAMESPACE_ID::Any* entitydata);
+  ::PROTOBUF_NAMESPACE_ID::Any* unsafe_arena_release_entitydata();
+
+  // bool removed = 2;
+  void clear_removed();
+  bool removed() const;
+  void set_removed(bool value);
+  private:
+  bool _internal_removed() const;
+  void _internal_set_removed(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:unrealpb.SpatialEntityState)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+    ::unrealpb::UnrealObjectRef* objref_;
+    ::PROTOBUF_NAMESPACE_ID::Any* entitydata_;
+    bool removed_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
+class SpatialChannelData_EntitiesEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<SpatialChannelData_EntitiesEntry_DoNotUse, 
+    uint32_t, ::unrealpb::SpatialEntityState,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT32,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE> {
+public:
+  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<SpatialChannelData_EntitiesEntry_DoNotUse, 
+    uint32_t, ::unrealpb::SpatialEntityState,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT32,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE> SuperType;
+  SpatialChannelData_EntitiesEntry_DoNotUse();
+  explicit PROTOBUF_CONSTEXPR SpatialChannelData_EntitiesEntry_DoNotUse(
+      ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  explicit SpatialChannelData_EntitiesEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  void MergeFrom(const SpatialChannelData_EntitiesEntry_DoNotUse& other);
+  static const SpatialChannelData_EntitiesEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const SpatialChannelData_EntitiesEntry_DoNotUse*>(&_SpatialChannelData_EntitiesEntry_DoNotUse_default_instance_); }
+  static bool ValidateKey(void*) { return true; }
+  static bool ValidateValue(void*) { return true; }
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API SpatialChannelData final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.SpatialChannelData) */ {
+ public:
+  inline SpatialChannelData() : SpatialChannelData(nullptr) {}
+  ~SpatialChannelData() override;
+  explicit PROTOBUF_CONSTEXPR SpatialChannelData(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  SpatialChannelData(const SpatialChannelData& from);
+  SpatialChannelData(SpatialChannelData&& from) noexcept
+    : SpatialChannelData() {
+    *this = ::std::move(from);
+  }
+
+  inline SpatialChannelData& operator=(const SpatialChannelData& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SpatialChannelData& operator=(SpatialChannelData&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const SpatialChannelData& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const SpatialChannelData* internal_default_instance() {
+    return reinterpret_cast<const SpatialChannelData*>(
+               &_SpatialChannelData_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    15;
+
+  friend void swap(SpatialChannelData& a, SpatialChannelData& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SpatialChannelData* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SpatialChannelData* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  SpatialChannelData* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<SpatialChannelData>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const SpatialChannelData& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const SpatialChannelData& from) {
+    SpatialChannelData::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SpatialChannelData* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.SpatialChannelData";
+  }
+  protected:
+  explicit SpatialChannelData(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  private:
+  static void ArenaDtor(void* object);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kEntitiesFieldNumber = 1,
+  };
+  // map<uint32, .unrealpb.SpatialEntityState> entities = 1;
+  int entities_size() const;
+  private:
+  int _internal_entities_size() const;
+  public:
+  void clear_entities();
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Map< uint32_t, ::unrealpb::SpatialEntityState >&
+      _internal_entities() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< uint32_t, ::unrealpb::SpatialEntityState >*
+      _internal_mutable_entities();
+  public:
+  const ::PROTOBUF_NAMESPACE_ID::Map< uint32_t, ::unrealpb::SpatialEntityState >&
+      entities() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< uint32_t, ::unrealpb::SpatialEntityState >*
+      mutable_entities();
+
+  // @@protoc_insertion_point(class_scope:unrealpb.SpatialChannelData)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+        SpatialChannelData_EntitiesEntry_DoNotUse,
+        uint32_t, ::unrealpb::SpatialEntityState,
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT32,
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE> entities_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
 class CHANNELDUE_API FRepMovement final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.FRepMovement) */ {
  public:
@@ -2869,7 +3081,7 @@ class CHANNELDUE_API FRepMovement final :
                &_FRepMovement_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    14;
+    16;
 
   friend void swap(FRepMovement& a, FRepMovement& b) {
     a.Swap(&b);
@@ -3117,7 +3329,7 @@ class CHANNELDUE_API FRepAttachment final :
                &_FRepAttachment_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    17;
 
   friend void swap(FRepAttachment& a, FRepAttachment& b) {
     a.Swap(&b);
@@ -3375,7 +3587,7 @@ class CHANNELDUE_API ActorState final :
                &_ActorState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    18;
 
   friend void swap(ActorState& a, ActorState& b) {
     a.Swap(&b);
@@ -3709,7 +3921,7 @@ class CHANNELDUE_API ActorComponentState final :
                &_ActorComponentState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    19;
 
   friend void swap(ActorComponentState& a, ActorComponentState& b) {
     a.Swap(&b);
@@ -3888,7 +4100,7 @@ class CHANNELDUE_API SceneComponentState final :
                &_SceneComponentState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    20;
 
   friend void swap(SceneComponentState& a, SceneComponentState& b) {
     a.Swap(&b);
@@ -4262,7 +4474,7 @@ class CHANNELDUE_API FBasedMovementInfo final :
                &_FBasedMovementInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    19;
+    21;
 
   friend void swap(FBasedMovementInfo& a, FBasedMovementInfo& b) {
     a.Swap(&b);
@@ -4525,7 +4737,7 @@ class CHANNELDUE_API FRootMotionSource_FRootMotionFinishVelocitySettings final :
                &_FRootMotionSource_FRootMotionFinishVelocitySettings_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    20;
+    22;
 
   friend void swap(FRootMotionSource_FRootMotionFinishVelocitySettings& a, FRootMotionSource_FRootMotionFinishVelocitySettings& b) {
     a.Swap(&b);
@@ -4713,7 +4925,7 @@ class CHANNELDUE_API FRootMotionSource final :
                &_FRootMotionSource_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    23;
 
   friend void swap(FRootMotionSource& a, FRootMotionSource& b) {
     a.Swap(&b);
@@ -5103,7 +5315,7 @@ class CHANNELDUE_API FRootMotionSourceGroup final :
                &_FRootMotionSourceGroup_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    24;
 
   friend void swap(FRootMotionSourceGroup& a, FRootMotionSourceGroup& b) {
     a.Swap(&b);
@@ -5376,7 +5588,7 @@ class CHANNELDUE_API FRepRootMotionMontage final :
                &_FRepRootMotionMontage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    25;
 
   friend void swap(FRepRootMotionMontage& a, FRepRootMotionMontage& b) {
     a.Swap(&b);
@@ -5734,7 +5946,7 @@ class CHANNELDUE_API CharacterState final :
                &_CharacterState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    26;
 
   friend void swap(CharacterState& a, CharacterState& b) {
     a.Swap(&b);
@@ -6002,7 +6214,7 @@ class CHANNELDUE_API Character_ServerMovePacked_Params final :
                &_Character_ServerMovePacked_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    27;
 
   friend void swap(Character_ServerMovePacked_Params& a, Character_ServerMovePacked_Params& b) {
     a.Swap(&b);
@@ -6166,7 +6378,7 @@ class CHANNELDUE_API Character_ClientMoveResponsePacked_Params final :
                &_Character_ClientMoveResponsePacked_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    28;
 
   friend void swap(Character_ClientMoveResponsePacked_Params& a, Character_ClientMoveResponsePacked_Params& b) {
     a.Swap(&b);
@@ -6330,7 +6542,7 @@ class CHANNELDUE_API PlayerState final :
                &_PlayerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    29;
 
   friend void swap(PlayerState& a, PlayerState& b) {
     a.Swap(&b);
@@ -6533,7 +6745,7 @@ class CHANNELDUE_API ControllerState final :
                &_ControllerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    30;
 
   friend void swap(ControllerState& a, ControllerState& b) {
     a.Swap(&b);
@@ -6710,7 +6922,7 @@ class CHANNELDUE_API Controller_ClientSetLocation_Params final :
                &_Controller_ClientSetLocation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    31;
 
   friend void swap(Controller_ClientSetLocation_Params& a, Controller_ClientSetLocation_Params& b) {
     a.Swap(&b);
@@ -6887,7 +7099,7 @@ class CHANNELDUE_API Controller_ClientSetRotation_Params final :
                &_Controller_ClientSetRotation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    32;
 
   friend void swap(Controller_ClientSetRotation_Params& a, Controller_ClientSetRotation_Params& b) {
     a.Swap(&b);
@@ -7055,7 +7267,7 @@ class CHANNELDUE_API PlayerControllerState final :
                &_PlayerControllerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    33;
 
   friend void swap(PlayerControllerState& a, PlayerControllerState& b) {
     a.Swap(&b);
@@ -7233,7 +7445,7 @@ class CHANNELDUE_API PlayerController_ServerUpdateCamera_Params final :
                &_PlayerController_ServerUpdateCamera_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    34;
 
   friend void swap(PlayerController_ServerUpdateCamera_Params& a, PlayerController_ServerUpdateCamera_Params& b) {
     a.Swap(&b);
@@ -7401,7 +7613,7 @@ class CHANNELDUE_API PlayerController_ClientSetHUD_Params final :
                &_PlayerController_ClientSetHUD_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    35;
 
   friend void swap(PlayerController_ClientSetHUD_Params& a, PlayerController_ClientSetHUD_Params& b) {
     a.Swap(&b);
@@ -7559,7 +7771,7 @@ class CHANNELDUE_API PlayerController_ClientSetViewTarget_Params final :
                &_PlayerController_ClientSetViewTarget_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    36;
 
   friend void swap(PlayerController_ClientSetViewTarget_Params& a, PlayerController_ClientSetViewTarget_Params& b) {
     a.Swap(&b);
@@ -7760,7 +7972,7 @@ class CHANNELDUE_API PlayerController_ClientEnableNetworkVoice_Params final :
                &_PlayerController_ClientEnableNetworkVoice_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    37;
 
   friend void swap(PlayerController_ClientEnableNetworkVoice_Params& a, PlayerController_ClientEnableNetworkVoice_Params& b) {
     a.Swap(&b);
@@ -7913,7 +8125,7 @@ class CHANNELDUE_API PlayerController_ClientCapBandwidth_Params final :
                &_PlayerController_ClientCapBandwidth_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    38;
 
   friend void swap(PlayerController_ClientCapBandwidth_Params& a, PlayerController_ClientCapBandwidth_Params& b) {
     a.Swap(&b);
@@ -8061,7 +8273,7 @@ class CHANNELDUE_API PlayerController_ClientRestart_Params final :
                &_PlayerController_ClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    39;
 
   friend void swap(PlayerController_ClientRestart_Params& a, PlayerController_ClientRestart_Params& b) {
     a.Swap(&b);
@@ -8218,7 +8430,7 @@ class CHANNELDUE_API PlayerController_ClientSetCameraMode_Params final :
                &_PlayerController_ClientSetCameraMode_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    38;
+    40;
 
   friend void swap(PlayerController_ClientSetCameraMode_Params& a, PlayerController_ClientSetCameraMode_Params& b) {
     a.Swap(&b);
@@ -8371,7 +8583,7 @@ class CHANNELDUE_API PlayerController_ClientRetryClientRestart_Params final :
                &_PlayerController_ClientRetryClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    41;
 
   friend void swap(PlayerController_ClientRetryClientRestart_Params& a, PlayerController_ClientRetryClientRestart_Params& b) {
     a.Swap(&b);
@@ -8528,7 +8740,7 @@ class CHANNELDUE_API PlayerController_ServerSetSpectatorLocation_Params final :
                &_PlayerController_ServerSetSpectatorLocation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    40;
+    42;
 
   friend void swap(PlayerController_ServerSetSpectatorLocation_Params& a, PlayerController_ServerSetSpectatorLocation_Params& b) {
     a.Swap(&b);
@@ -8705,7 +8917,7 @@ class CHANNELDUE_API PlayerController_ServerAcknowledgePossession_Params final :
                &_PlayerController_ServerAcknowledgePossession_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    41;
+    43;
 
   friend void swap(PlayerController_ServerAcknowledgePossession_Params& a, PlayerController_ServerAcknowledgePossession_Params& b) {
     a.Swap(&b);
@@ -8862,7 +9074,7 @@ class CHANNELDUE_API PlayerController_ClientGotoState_Params final :
                &_PlayerController_ClientGotoState_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    42;
+    44;
 
   friend void swap(PlayerController_ClientGotoState_Params& a, PlayerController_ClientGotoState_Params& b) {
     a.Swap(&b);
@@ -9015,7 +9227,7 @@ class CHANNELDUE_API PlayerController_ClientReceiveLocalizedMessage_Params final
                &_PlayerController_ClientReceiveLocalizedMessage_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    43;
+    45;
 
   friend void swap(PlayerController_ClientReceiveLocalizedMessage_Params& a, PlayerController_ClientReceiveLocalizedMessage_Params& b) {
     a.Swap(&b);
@@ -9239,7 +9451,7 @@ class CHANNELDUE_API GameStateBase final :
                &_GameStateBase_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    44;
+    46;
 
   friend void swap(GameStateBase& a, GameStateBase& b) {
     a.Swap(&b);
@@ -9447,7 +9659,7 @@ class CHANNELDUE_API PawnState final :
                &_PawnState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    45;
+    47;
 
   friend void swap(PawnState& a, PawnState& b) {
     a.Swap(&b);
@@ -9640,7 +9852,7 @@ class CHANNELDUE_API FClientAdjustment final :
                &_FClientAdjustment_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    46;
+    48;
 
   friend void swap(FClientAdjustment& a, FClientAdjustment& b) {
     a.Swap(&b);
@@ -10123,7 +10335,7 @@ inline void UnrealObjectRef_GuidCachedObject::set_outerguid(uint32_t value) {
 
 // optional uint32 netGUID = 1;
 inline bool UnrealObjectRef::_internal_has_netguid() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
 inline bool UnrealObjectRef::has_netguid() const {
@@ -10131,7 +10343,7 @@ inline bool UnrealObjectRef::has_netguid() const {
 }
 inline void UnrealObjectRef::clear_netguid() {
   _impl_.netguid_ = 0u;
-  _impl_._has_bits_[0] &= ~0x00000002u;
+  _impl_._has_bits_[0] &= ~0x00000004u;
 }
 inline uint32_t UnrealObjectRef::_internal_netguid() const {
   return _impl_.netguid_;
@@ -10141,7 +10353,7 @@ inline uint32_t UnrealObjectRef::netguid() const {
   return _internal_netguid();
 }
 inline void UnrealObjectRef::_internal_set_netguid(uint32_t value) {
-  _impl_._has_bits_[0] |= 0x00000002u;
+  _impl_._has_bits_[0] |= 0x00000004u;
   _impl_.netguid_ = value;
 }
 inline void UnrealObjectRef::set_netguid(uint32_t value) {
@@ -10259,7 +10471,7 @@ inline void UnrealObjectRef::set_allocated_netguidbunch(std::string* netguidbunc
 
 // optional uint32 bunchBitsNum = 4;
 inline bool UnrealObjectRef::_internal_has_bunchbitsnum() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool UnrealObjectRef::has_bunchbitsnum() const {
@@ -10267,7 +10479,7 @@ inline bool UnrealObjectRef::has_bunchbitsnum() const {
 }
 inline void UnrealObjectRef::clear_bunchbitsnum() {
   _impl_.bunchbitsnum_ = 0u;
-  _impl_._has_bits_[0] &= ~0x00000004u;
+  _impl_._has_bits_[0] &= ~0x00000008u;
 }
 inline uint32_t UnrealObjectRef::_internal_bunchbitsnum() const {
   return _impl_.bunchbitsnum_;
@@ -10277,12 +10489,108 @@ inline uint32_t UnrealObjectRef::bunchbitsnum() const {
   return _internal_bunchbitsnum();
 }
 inline void UnrealObjectRef::_internal_set_bunchbitsnum(uint32_t value) {
-  _impl_._has_bits_[0] |= 0x00000004u;
+  _impl_._has_bits_[0] |= 0x00000008u;
   _impl_.bunchbitsnum_ = value;
 }
 inline void UnrealObjectRef::set_bunchbitsnum(uint32_t value) {
   _internal_set_bunchbitsnum(value);
   // @@protoc_insertion_point(field_set:unrealpb.UnrealObjectRef.bunchBitsNum)
+}
+
+// optional string classPath = 6;
+inline bool UnrealObjectRef::_internal_has_classpath() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool UnrealObjectRef::has_classpath() const {
+  return _internal_has_classpath();
+}
+inline void UnrealObjectRef::clear_classpath() {
+  _impl_.classpath_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& UnrealObjectRef::classpath() const {
+  // @@protoc_insertion_point(field_get:unrealpb.UnrealObjectRef.classPath)
+  return _internal_classpath();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void UnrealObjectRef::set_classpath(ArgT0&& arg0, ArgT... args) {
+ _impl_._has_bits_[0] |= 0x00000002u;
+ _impl_.classpath_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:unrealpb.UnrealObjectRef.classPath)
+}
+inline std::string* UnrealObjectRef::mutable_classpath() {
+  std::string* _s = _internal_mutable_classpath();
+  // @@protoc_insertion_point(field_mutable:unrealpb.UnrealObjectRef.classPath)
+  return _s;
+}
+inline const std::string& UnrealObjectRef::_internal_classpath() const {
+  return _impl_.classpath_.Get();
+}
+inline void UnrealObjectRef::_internal_set_classpath(const std::string& value) {
+  _impl_._has_bits_[0] |= 0x00000002u;
+  _impl_.classpath_.Set(value, GetArenaForAllocation());
+}
+inline std::string* UnrealObjectRef::_internal_mutable_classpath() {
+  _impl_._has_bits_[0] |= 0x00000002u;
+  return _impl_.classpath_.Mutable(GetArenaForAllocation());
+}
+inline std::string* UnrealObjectRef::release_classpath() {
+  // @@protoc_insertion_point(field_release:unrealpb.UnrealObjectRef.classPath)
+  if (!_internal_has_classpath()) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000002u;
+  auto* p = _impl_.classpath_.Release();
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.classpath_.IsDefault()) {
+    _impl_.classpath_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return p;
+}
+inline void UnrealObjectRef::set_allocated_classpath(std::string* classpath) {
+  if (classpath != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000002u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002u;
+  }
+  _impl_.classpath_.SetAllocated(classpath, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.classpath_.IsDefault()) {
+    _impl_.classpath_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.UnrealObjectRef.classPath)
+}
+
+// optional uint32 owningConnId = 7;
+inline bool UnrealObjectRef::_internal_has_owningconnid() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool UnrealObjectRef::has_owningconnid() const {
+  return _internal_has_owningconnid();
+}
+inline void UnrealObjectRef::clear_owningconnid() {
+  _impl_.owningconnid_ = 0u;
+  _impl_._has_bits_[0] &= ~0x00000010u;
+}
+inline uint32_t UnrealObjectRef::_internal_owningconnid() const {
+  return _impl_.owningconnid_;
+}
+inline uint32_t UnrealObjectRef::owningconnid() const {
+  // @@protoc_insertion_point(field_get:unrealpb.UnrealObjectRef.owningConnId)
+  return _internal_owningconnid();
+}
+inline void UnrealObjectRef::_internal_set_owningconnid(uint32_t value) {
+  _impl_._has_bits_[0] |= 0x00000010u;
+  _impl_.owningconnid_ = value;
+}
+inline void UnrealObjectRef::set_owningconnid(uint32_t value) {
+  _internal_set_owningconnid(value);
+  // @@protoc_insertion_point(field_set:unrealpb.UnrealObjectRef.owningConnId)
 }
 
 // -------------------------------------------------------------------
@@ -10641,6 +10949,26 @@ inline void RemoteFunctionMessage::set_allocated_paramspayload(std::string* para
   // @@protoc_insertion_point(field_set_allocated:unrealpb.RemoteFunctionMessage.paramsPayload)
 }
 
+// int32 redirectionCounter = 4;
+inline void RemoteFunctionMessage::clear_redirectioncounter() {
+  _impl_.redirectioncounter_ = 0;
+}
+inline int32_t RemoteFunctionMessage::_internal_redirectioncounter() const {
+  return _impl_.redirectioncounter_;
+}
+inline int32_t RemoteFunctionMessage::redirectioncounter() const {
+  // @@protoc_insertion_point(field_get:unrealpb.RemoteFunctionMessage.redirectionCounter)
+  return _internal_redirectioncounter();
+}
+inline void RemoteFunctionMessage::_internal_set_redirectioncounter(int32_t value) {
+  
+  _impl_.redirectioncounter_ = value;
+}
+inline void RemoteFunctionMessage::set_redirectioncounter(int32_t value) {
+  _internal_set_redirectioncounter(value);
+  // @@protoc_insertion_point(field_set:unrealpb.RemoteFunctionMessage.redirectionCounter)
+}
+
 // -------------------------------------------------------------------
 
 // SpawnObjectMessage
@@ -10791,34 +11119,6 @@ inline void SpawnObjectMessage::set_localrole(uint32_t value) {
   // @@protoc_insertion_point(field_set:unrealpb.SpawnObjectMessage.localRole)
 }
 
-// optional uint32 owningConnId = 4;
-inline bool SpawnObjectMessage::_internal_has_owningconnid() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
-  return value;
-}
-inline bool SpawnObjectMessage::has_owningconnid() const {
-  return _internal_has_owningconnid();
-}
-inline void SpawnObjectMessage::clear_owningconnid() {
-  _impl_.owningconnid_ = 0u;
-  _impl_._has_bits_[0] &= ~0x00000008u;
-}
-inline uint32_t SpawnObjectMessage::_internal_owningconnid() const {
-  return _impl_.owningconnid_;
-}
-inline uint32_t SpawnObjectMessage::owningconnid() const {
-  // @@protoc_insertion_point(field_get:unrealpb.SpawnObjectMessage.owningConnId)
-  return _internal_owningconnid();
-}
-inline void SpawnObjectMessage::_internal_set_owningconnid(uint32_t value) {
-  _impl_._has_bits_[0] |= 0x00000008u;
-  _impl_.owningconnid_ = value;
-}
-inline void SpawnObjectMessage::set_owningconnid(uint32_t value) {
-  _internal_set_owningconnid(value);
-  // @@protoc_insertion_point(field_set:unrealpb.SpawnObjectMessage.owningConnId)
-}
-
 // optional .unrealpb.FVector location = 5;
 inline bool SpawnObjectMessage::_internal_has_location() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
@@ -10907,120 +11207,6 @@ inline void SpawnObjectMessage::set_allocated_location(::unrealpb::FVector* loca
   }
   _impl_.location_ = location;
   // @@protoc_insertion_point(field_set_allocated:unrealpb.SpawnObjectMessage.location)
-}
-
-// -------------------------------------------------------------------
-
-// ServerSpawnedPlayerMessage
-
-// uint32 clientConnId = 1;
-inline void ServerSpawnedPlayerMessage::clear_clientconnid() {
-  _impl_.clientconnid_ = 0u;
-}
-inline uint32_t ServerSpawnedPlayerMessage::_internal_clientconnid() const {
-  return _impl_.clientconnid_;
-}
-inline uint32_t ServerSpawnedPlayerMessage::clientconnid() const {
-  // @@protoc_insertion_point(field_get:unrealpb.ServerSpawnedPlayerMessage.clientConnId)
-  return _internal_clientconnid();
-}
-inline void ServerSpawnedPlayerMessage::_internal_set_clientconnid(uint32_t value) {
-  
-  _impl_.clientconnid_ = value;
-}
-inline void ServerSpawnedPlayerMessage::set_clientconnid(uint32_t value) {
-  _internal_set_clientconnid(value);
-  // @@protoc_insertion_point(field_set:unrealpb.ServerSpawnedPlayerMessage.clientConnId)
-}
-
-// .unrealpb.FVector startPos = 2;
-inline bool ServerSpawnedPlayerMessage::_internal_has_startpos() const {
-  return this != internal_default_instance() && _impl_.startpos_ != nullptr;
-}
-inline bool ServerSpawnedPlayerMessage::has_startpos() const {
-  return _internal_has_startpos();
-}
-inline void ServerSpawnedPlayerMessage::clear_startpos() {
-  if (GetArenaForAllocation() == nullptr && _impl_.startpos_ != nullptr) {
-    delete _impl_.startpos_;
-  }
-  _impl_.startpos_ = nullptr;
-}
-inline const ::unrealpb::FVector& ServerSpawnedPlayerMessage::_internal_startpos() const {
-  const ::unrealpb::FVector* p = _impl_.startpos_;
-  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::FVector&>(
-      ::unrealpb::_FVector_default_instance_);
-}
-inline const ::unrealpb::FVector& ServerSpawnedPlayerMessage::startpos() const {
-  // @@protoc_insertion_point(field_get:unrealpb.ServerSpawnedPlayerMessage.startPos)
-  return _internal_startpos();
-}
-inline void ServerSpawnedPlayerMessage::unsafe_arena_set_allocated_startpos(
-    ::unrealpb::FVector* startpos) {
-  if (GetArenaForAllocation() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.startpos_);
-  }
-  _impl_.startpos_ = startpos;
-  if (startpos) {
-    
-  } else {
-    
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.ServerSpawnedPlayerMessage.startPos)
-}
-inline ::unrealpb::FVector* ServerSpawnedPlayerMessage::release_startpos() {
-  
-  ::unrealpb::FVector* temp = _impl_.startpos_;
-  _impl_.startpos_ = nullptr;
-#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
-  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
-  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  if (GetArenaForAllocation() == nullptr) { delete old; }
-#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
-  if (GetArenaForAllocation() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
-  return temp;
-}
-inline ::unrealpb::FVector* ServerSpawnedPlayerMessage::unsafe_arena_release_startpos() {
-  // @@protoc_insertion_point(field_release:unrealpb.ServerSpawnedPlayerMessage.startPos)
-  
-  ::unrealpb::FVector* temp = _impl_.startpos_;
-  _impl_.startpos_ = nullptr;
-  return temp;
-}
-inline ::unrealpb::FVector* ServerSpawnedPlayerMessage::_internal_mutable_startpos() {
-  
-  if (_impl_.startpos_ == nullptr) {
-    auto* p = CreateMaybeMessage<::unrealpb::FVector>(GetArenaForAllocation());
-    _impl_.startpos_ = p;
-  }
-  return _impl_.startpos_;
-}
-inline ::unrealpb::FVector* ServerSpawnedPlayerMessage::mutable_startpos() {
-  ::unrealpb::FVector* _msg = _internal_mutable_startpos();
-  // @@protoc_insertion_point(field_mutable:unrealpb.ServerSpawnedPlayerMessage.startPos)
-  return _msg;
-}
-inline void ServerSpawnedPlayerMessage::set_allocated_startpos(::unrealpb::FVector* startpos) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
-  if (message_arena == nullptr) {
-    delete _impl_.startpos_;
-  }
-  if (startpos) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(startpos);
-    if (message_arena != submessage_arena) {
-      startpos = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, startpos, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  _impl_.startpos_ = startpos;
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.ServerSpawnedPlayerMessage.startPos)
 }
 
 // -------------------------------------------------------------------
@@ -11187,174 +11373,6 @@ inline void HandoverContext::_internal_set_clientconnid(uint32_t value) {
 inline void HandoverContext::set_clientconnid(uint32_t value) {
   _internal_set_clientconnid(value);
   // @@protoc_insertion_point(field_set:unrealpb.HandoverContext.clientConnId)
-}
-
-// -------------------------------------------------------------------
-
-// GetHandoverContextMessage
-
-// uint32 netId = 1;
-inline void GetHandoverContextMessage::clear_netid() {
-  _impl_.netid_ = 0u;
-}
-inline uint32_t GetHandoverContextMessage::_internal_netid() const {
-  return _impl_.netid_;
-}
-inline uint32_t GetHandoverContextMessage::netid() const {
-  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextMessage.netId)
-  return _internal_netid();
-}
-inline void GetHandoverContextMessage::_internal_set_netid(uint32_t value) {
-  
-  _impl_.netid_ = value;
-}
-inline void GetHandoverContextMessage::set_netid(uint32_t value) {
-  _internal_set_netid(value);
-  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextMessage.netId)
-}
-
-// uint32 srcChannelId = 2;
-inline void GetHandoverContextMessage::clear_srcchannelid() {
-  _impl_.srcchannelid_ = 0u;
-}
-inline uint32_t GetHandoverContextMessage::_internal_srcchannelid() const {
-  return _impl_.srcchannelid_;
-}
-inline uint32_t GetHandoverContextMessage::srcchannelid() const {
-  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextMessage.srcChannelId)
-  return _internal_srcchannelid();
-}
-inline void GetHandoverContextMessage::_internal_set_srcchannelid(uint32_t value) {
-  
-  _impl_.srcchannelid_ = value;
-}
-inline void GetHandoverContextMessage::set_srcchannelid(uint32_t value) {
-  _internal_set_srcchannelid(value);
-  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextMessage.srcChannelId)
-}
-
-// uint32 dstChannelId = 3;
-inline void GetHandoverContextMessage::clear_dstchannelid() {
-  _impl_.dstchannelid_ = 0u;
-}
-inline uint32_t GetHandoverContextMessage::_internal_dstchannelid() const {
-  return _impl_.dstchannelid_;
-}
-inline uint32_t GetHandoverContextMessage::dstchannelid() const {
-  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextMessage.dstChannelId)
-  return _internal_dstchannelid();
-}
-inline void GetHandoverContextMessage::_internal_set_dstchannelid(uint32_t value) {
-  
-  _impl_.dstchannelid_ = value;
-}
-inline void GetHandoverContextMessage::set_dstchannelid(uint32_t value) {
-  _internal_set_dstchannelid(value);
-  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextMessage.dstChannelId)
-}
-
-// -------------------------------------------------------------------
-
-// GetHandoverContextResultMessage
-
-// uint32 netId = 1;
-inline void GetHandoverContextResultMessage::clear_netid() {
-  _impl_.netid_ = 0u;
-}
-inline uint32_t GetHandoverContextResultMessage::_internal_netid() const {
-  return _impl_.netid_;
-}
-inline uint32_t GetHandoverContextResultMessage::netid() const {
-  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextResultMessage.netId)
-  return _internal_netid();
-}
-inline void GetHandoverContextResultMessage::_internal_set_netid(uint32_t value) {
-  
-  _impl_.netid_ = value;
-}
-inline void GetHandoverContextResultMessage::set_netid(uint32_t value) {
-  _internal_set_netid(value);
-  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextResultMessage.netId)
-}
-
-// uint32 srcChannelId = 2;
-inline void GetHandoverContextResultMessage::clear_srcchannelid() {
-  _impl_.srcchannelid_ = 0u;
-}
-inline uint32_t GetHandoverContextResultMessage::_internal_srcchannelid() const {
-  return _impl_.srcchannelid_;
-}
-inline uint32_t GetHandoverContextResultMessage::srcchannelid() const {
-  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextResultMessage.srcChannelId)
-  return _internal_srcchannelid();
-}
-inline void GetHandoverContextResultMessage::_internal_set_srcchannelid(uint32_t value) {
-  
-  _impl_.srcchannelid_ = value;
-}
-inline void GetHandoverContextResultMessage::set_srcchannelid(uint32_t value) {
-  _internal_set_srcchannelid(value);
-  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextResultMessage.srcChannelId)
-}
-
-// uint32 dstChannelId = 3;
-inline void GetHandoverContextResultMessage::clear_dstchannelid() {
-  _impl_.dstchannelid_ = 0u;
-}
-inline uint32_t GetHandoverContextResultMessage::_internal_dstchannelid() const {
-  return _impl_.dstchannelid_;
-}
-inline uint32_t GetHandoverContextResultMessage::dstchannelid() const {
-  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextResultMessage.dstChannelId)
-  return _internal_dstchannelid();
-}
-inline void GetHandoverContextResultMessage::_internal_set_dstchannelid(uint32_t value) {
-  
-  _impl_.dstchannelid_ = value;
-}
-inline void GetHandoverContextResultMessage::set_dstchannelid(uint32_t value) {
-  _internal_set_dstchannelid(value);
-  // @@protoc_insertion_point(field_set:unrealpb.GetHandoverContextResultMessage.dstChannelId)
-}
-
-// repeated .unrealpb.HandoverContext context = 4;
-inline int GetHandoverContextResultMessage::_internal_context_size() const {
-  return _impl_.context_.size();
-}
-inline int GetHandoverContextResultMessage::context_size() const {
-  return _internal_context_size();
-}
-inline void GetHandoverContextResultMessage::clear_context() {
-  _impl_.context_.Clear();
-}
-inline ::unrealpb::HandoverContext* GetHandoverContextResultMessage::mutable_context(int index) {
-  // @@protoc_insertion_point(field_mutable:unrealpb.GetHandoverContextResultMessage.context)
-  return _impl_.context_.Mutable(index);
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::HandoverContext >*
-GetHandoverContextResultMessage::mutable_context() {
-  // @@protoc_insertion_point(field_mutable_list:unrealpb.GetHandoverContextResultMessage.context)
-  return &_impl_.context_;
-}
-inline const ::unrealpb::HandoverContext& GetHandoverContextResultMessage::_internal_context(int index) const {
-  return _impl_.context_.Get(index);
-}
-inline const ::unrealpb::HandoverContext& GetHandoverContextResultMessage::context(int index) const {
-  // @@protoc_insertion_point(field_get:unrealpb.GetHandoverContextResultMessage.context)
-  return _internal_context(index);
-}
-inline ::unrealpb::HandoverContext* GetHandoverContextResultMessage::_internal_add_context() {
-  return _impl_.context_.Add();
-}
-inline ::unrealpb::HandoverContext* GetHandoverContextResultMessage::add_context() {
-  ::unrealpb::HandoverContext* _add = _internal_add_context();
-  // @@protoc_insertion_point(field_add:unrealpb.GetHandoverContextResultMessage.context)
-  return _add;
-}
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::HandoverContext >&
-GetHandoverContextResultMessage::context() const {
-  // @@protoc_insertion_point(field_list:unrealpb.GetHandoverContextResultMessage.context)
-  return _impl_.context_;
 }
 
 // -------------------------------------------------------------------
@@ -11581,6 +11599,360 @@ inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::UnrealObject
 GetUnrealObjectRefResultMessage::objref() const {
   // @@protoc_insertion_point(field_list:unrealpb.GetUnrealObjectRefResultMessage.objRef)
   return _impl_.objref_;
+}
+
+// -------------------------------------------------------------------
+
+// SyncNetIdMessage_NetIdPath
+
+// uint32 netId = 1;
+inline void SyncNetIdMessage_NetIdPath::clear_netid() {
+  _impl_.netid_ = 0u;
+}
+inline uint32_t SyncNetIdMessage_NetIdPath::_internal_netid() const {
+  return _impl_.netid_;
+}
+inline uint32_t SyncNetIdMessage_NetIdPath::netid() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SyncNetIdMessage.NetIdPath.netId)
+  return _internal_netid();
+}
+inline void SyncNetIdMessage_NetIdPath::_internal_set_netid(uint32_t value) {
+  
+  _impl_.netid_ = value;
+}
+inline void SyncNetIdMessage_NetIdPath::set_netid(uint32_t value) {
+  _internal_set_netid(value);
+  // @@protoc_insertion_point(field_set:unrealpb.SyncNetIdMessage.NetIdPath.netId)
+}
+
+// string path = 2;
+inline void SyncNetIdMessage_NetIdPath::clear_path() {
+  _impl_.path_.ClearToEmpty();
+}
+inline const std::string& SyncNetIdMessage_NetIdPath::path() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SyncNetIdMessage.NetIdPath.path)
+  return _internal_path();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void SyncNetIdMessage_NetIdPath::set_path(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.path_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:unrealpb.SyncNetIdMessage.NetIdPath.path)
+}
+inline std::string* SyncNetIdMessage_NetIdPath::mutable_path() {
+  std::string* _s = _internal_mutable_path();
+  // @@protoc_insertion_point(field_mutable:unrealpb.SyncNetIdMessage.NetIdPath.path)
+  return _s;
+}
+inline const std::string& SyncNetIdMessage_NetIdPath::_internal_path() const {
+  return _impl_.path_.Get();
+}
+inline void SyncNetIdMessage_NetIdPath::_internal_set_path(const std::string& value) {
+  
+  _impl_.path_.Set(value, GetArenaForAllocation());
+}
+inline std::string* SyncNetIdMessage_NetIdPath::_internal_mutable_path() {
+  
+  return _impl_.path_.Mutable(GetArenaForAllocation());
+}
+inline std::string* SyncNetIdMessage_NetIdPath::release_path() {
+  // @@protoc_insertion_point(field_release:unrealpb.SyncNetIdMessage.NetIdPath.path)
+  return _impl_.path_.Release();
+}
+inline void SyncNetIdMessage_NetIdPath::set_allocated_path(std::string* path) {
+  if (path != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.path_.SetAllocated(path, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.path_.IsDefault()) {
+    _impl_.path_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.SyncNetIdMessage.NetIdPath.path)
+}
+
+// -------------------------------------------------------------------
+
+// SyncNetIdMessage
+
+// repeated .unrealpb.SyncNetIdMessage.NetIdPath netIdPaths = 1;
+inline int SyncNetIdMessage::_internal_netidpaths_size() const {
+  return _impl_.netidpaths_.size();
+}
+inline int SyncNetIdMessage::netidpaths_size() const {
+  return _internal_netidpaths_size();
+}
+inline void SyncNetIdMessage::clear_netidpaths() {
+  _impl_.netidpaths_.Clear();
+}
+inline ::unrealpb::SyncNetIdMessage_NetIdPath* SyncNetIdMessage::mutable_netidpaths(int index) {
+  // @@protoc_insertion_point(field_mutable:unrealpb.SyncNetIdMessage.netIdPaths)
+  return _impl_.netidpaths_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::SyncNetIdMessage_NetIdPath >*
+SyncNetIdMessage::mutable_netidpaths() {
+  // @@protoc_insertion_point(field_mutable_list:unrealpb.SyncNetIdMessage.netIdPaths)
+  return &_impl_.netidpaths_;
+}
+inline const ::unrealpb::SyncNetIdMessage_NetIdPath& SyncNetIdMessage::_internal_netidpaths(int index) const {
+  return _impl_.netidpaths_.Get(index);
+}
+inline const ::unrealpb::SyncNetIdMessage_NetIdPath& SyncNetIdMessage::netidpaths(int index) const {
+  // @@protoc_insertion_point(field_get:unrealpb.SyncNetIdMessage.netIdPaths)
+  return _internal_netidpaths(index);
+}
+inline ::unrealpb::SyncNetIdMessage_NetIdPath* SyncNetIdMessage::_internal_add_netidpaths() {
+  return _impl_.netidpaths_.Add();
+}
+inline ::unrealpb::SyncNetIdMessage_NetIdPath* SyncNetIdMessage::add_netidpaths() {
+  ::unrealpb::SyncNetIdMessage_NetIdPath* _add = _internal_add_netidpaths();
+  // @@protoc_insertion_point(field_add:unrealpb.SyncNetIdMessage.netIdPaths)
+  return _add;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::unrealpb::SyncNetIdMessage_NetIdPath >&
+SyncNetIdMessage::netidpaths() const {
+  // @@protoc_insertion_point(field_list:unrealpb.SyncNetIdMessage.netIdPaths)
+  return _impl_.netidpaths_;
+}
+
+// -------------------------------------------------------------------
+
+// SpatialEntityState
+
+// .unrealpb.UnrealObjectRef objRef = 1;
+inline bool SpatialEntityState::_internal_has_objref() const {
+  return this != internal_default_instance() && _impl_.objref_ != nullptr;
+}
+inline bool SpatialEntityState::has_objref() const {
+  return _internal_has_objref();
+}
+inline void SpatialEntityState::clear_objref() {
+  if (GetArenaForAllocation() == nullptr && _impl_.objref_ != nullptr) {
+    delete _impl_.objref_;
+  }
+  _impl_.objref_ = nullptr;
+}
+inline const ::unrealpb::UnrealObjectRef& SpatialEntityState::_internal_objref() const {
+  const ::unrealpb::UnrealObjectRef* p = _impl_.objref_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::UnrealObjectRef&>(
+      ::unrealpb::_UnrealObjectRef_default_instance_);
+}
+inline const ::unrealpb::UnrealObjectRef& SpatialEntityState::objref() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SpatialEntityState.objRef)
+  return _internal_objref();
+}
+inline void SpatialEntityState::unsafe_arena_set_allocated_objref(
+    ::unrealpb::UnrealObjectRef* objref) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.objref_);
+  }
+  _impl_.objref_ = objref;
+  if (objref) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.SpatialEntityState.objRef)
+}
+inline ::unrealpb::UnrealObjectRef* SpatialEntityState::release_objref() {
+  
+  ::unrealpb::UnrealObjectRef* temp = _impl_.objref_;
+  _impl_.objref_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* SpatialEntityState::unsafe_arena_release_objref() {
+  // @@protoc_insertion_point(field_release:unrealpb.SpatialEntityState.objRef)
+  
+  ::unrealpb::UnrealObjectRef* temp = _impl_.objref_;
+  _impl_.objref_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::UnrealObjectRef* SpatialEntityState::_internal_mutable_objref() {
+  
+  if (_impl_.objref_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::UnrealObjectRef>(GetArenaForAllocation());
+    _impl_.objref_ = p;
+  }
+  return _impl_.objref_;
+}
+inline ::unrealpb::UnrealObjectRef* SpatialEntityState::mutable_objref() {
+  ::unrealpb::UnrealObjectRef* _msg = _internal_mutable_objref();
+  // @@protoc_insertion_point(field_mutable:unrealpb.SpatialEntityState.objRef)
+  return _msg;
+}
+inline void SpatialEntityState::set_allocated_objref(::unrealpb::UnrealObjectRef* objref) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.objref_;
+  }
+  if (objref) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(objref);
+    if (message_arena != submessage_arena) {
+      objref = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, objref, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.objref_ = objref;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.SpatialEntityState.objRef)
+}
+
+// bool removed = 2;
+inline void SpatialEntityState::clear_removed() {
+  _impl_.removed_ = false;
+}
+inline bool SpatialEntityState::_internal_removed() const {
+  return _impl_.removed_;
+}
+inline bool SpatialEntityState::removed() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SpatialEntityState.removed)
+  return _internal_removed();
+}
+inline void SpatialEntityState::_internal_set_removed(bool value) {
+  
+  _impl_.removed_ = value;
+}
+inline void SpatialEntityState::set_removed(bool value) {
+  _internal_set_removed(value);
+  // @@protoc_insertion_point(field_set:unrealpb.SpatialEntityState.removed)
+}
+
+// optional .google.protobuf.Any entityData = 3;
+inline bool SpatialEntityState::_internal_has_entitydata() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.entitydata_ != nullptr);
+  return value;
+}
+inline bool SpatialEntityState::has_entitydata() const {
+  return _internal_has_entitydata();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Any& SpatialEntityState::_internal_entitydata() const {
+  const ::PROTOBUF_NAMESPACE_ID::Any* p = _impl_.entitydata_;
+  return p != nullptr ? *p : reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Any&>(
+      ::PROTOBUF_NAMESPACE_ID::_Any_default_instance_);
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Any& SpatialEntityState::entitydata() const {
+  // @@protoc_insertion_point(field_get:unrealpb.SpatialEntityState.entityData)
+  return _internal_entitydata();
+}
+inline void SpatialEntityState::unsafe_arena_set_allocated_entitydata(
+    ::PROTOBUF_NAMESPACE_ID::Any* entitydata) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.entitydata_);
+  }
+  _impl_.entitydata_ = entitydata;
+  if (entitydata) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.SpatialEntityState.entityData)
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* SpatialEntityState::release_entitydata() {
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::PROTOBUF_NAMESPACE_ID::Any* temp = _impl_.entitydata_;
+  _impl_.entitydata_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* SpatialEntityState::unsafe_arena_release_entitydata() {
+  // @@protoc_insertion_point(field_release:unrealpb.SpatialEntityState.entityData)
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::PROTOBUF_NAMESPACE_ID::Any* temp = _impl_.entitydata_;
+  _impl_.entitydata_ = nullptr;
+  return temp;
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* SpatialEntityState::_internal_mutable_entitydata() {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  if (_impl_.entitydata_ == nullptr) {
+    auto* p = CreateMaybeMessage<::PROTOBUF_NAMESPACE_ID::Any>(GetArenaForAllocation());
+    _impl_.entitydata_ = p;
+  }
+  return _impl_.entitydata_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* SpatialEntityState::mutable_entitydata() {
+  ::PROTOBUF_NAMESPACE_ID::Any* _msg = _internal_mutable_entitydata();
+  // @@protoc_insertion_point(field_mutable:unrealpb.SpatialEntityState.entityData)
+  return _msg;
+}
+inline void SpatialEntityState::set_allocated_entitydata(::PROTOBUF_NAMESPACE_ID::Any* entitydata) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.entitydata_);
+  }
+  if (entitydata) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(
+                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(entitydata));
+    if (message_arena != submessage_arena) {
+      entitydata = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, entitydata, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  _impl_.entitydata_ = entitydata;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.SpatialEntityState.entityData)
+}
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// SpatialChannelData
+
+// map<uint32, .unrealpb.SpatialEntityState> entities = 1;
+inline int SpatialChannelData::_internal_entities_size() const {
+  return _impl_.entities_.size();
+}
+inline int SpatialChannelData::entities_size() const {
+  return _internal_entities_size();
+}
+inline void SpatialChannelData::clear_entities() {
+  _impl_.entities_.Clear();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< uint32_t, ::unrealpb::SpatialEntityState >&
+SpatialChannelData::_internal_entities() const {
+  return _impl_.entities_.GetMap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< uint32_t, ::unrealpb::SpatialEntityState >&
+SpatialChannelData::entities() const {
+  // @@protoc_insertion_point(field_map:unrealpb.SpatialChannelData.entities)
+  return _internal_entities();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< uint32_t, ::unrealpb::SpatialEntityState >*
+SpatialChannelData::_internal_mutable_entities() {
+  return _impl_.entities_.MutableMap();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< uint32_t, ::unrealpb::SpatialEntityState >*
+SpatialChannelData::mutable_entities() {
+  // @@protoc_insertion_point(field_mutable_map:unrealpb.SpatialChannelData.entities)
+  return _internal_mutable_entities();
 }
 
 // -------------------------------------------------------------------
@@ -19922,6 +20294,10 @@ inline void FClientAdjustment::set_movementmode(uint32_t value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
