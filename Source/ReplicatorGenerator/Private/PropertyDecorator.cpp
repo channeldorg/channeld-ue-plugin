@@ -142,50 +142,12 @@ FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetIn
 {
 	return GetCode_GetPropertyValueFrom(TargetInstance, !IsDirectlyAccessible());
 }
-void DoDetermineBitfieldOffsetAndMask(uint32& Offset, uint8& BitMask, std::function<void (void*)> SetBit,
-									  const SIZE_T SizeOf)
-{
-	TUniquePtr<uint8[]> Buffer = MakeUnique<uint8[]>(SizeOf);
-
-	SetBit(Buffer.Get());
-
-	// Here we are making the assumption that bitfields are aligned in the struct. Probably true.
-	// If not, it may be ok unless we are on a page boundary or something, but the check will fire in that case.
-	// Have faith.
-	for (uint32 TestOffset = 0; TestOffset < SizeOf; TestOffset++)
-	{
-		if (uint8 Mask = Buffer[TestOffset])
-		{
-			Offset = TestOffset;
-			BitMask = Mask;
-			check(FMath::RoundUpToPowerOfTwo(BitMask) == BitMask); // better be only one bit on
-			break;
-		}
-	}
-};
-
 
 FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetInstance, bool ForceFromPointer/* = false */)
 {
 	if (!ForceFromPointer)
 	{
 		return FString::Printf(TEXT("%s->%s"), *TargetInstance, *GetPropertyName());
-	}
-	// BitBool Property
-	FBoolProperty* BoolProperty = Cast<FBoolProperty>(OriginalProperty);
-	if (BoolProperty && !BoolProperty->IsNativeBool())
-	{
-		uint32 Offset = 0;
-		uint8 BitMask = 0;
-		int OuterSize = this->OriginalProperty->GetOwnerProperty()->GetSize();
-		DoDetermineBitfieldOffsetAndMask(Offset, BitMask,
-										 [BoolProperty](void* Obj) { BoolProperty->SetPropertyValue(Obj, true); },
-										 OuterSize);
-		uint8 FieldMask = BitMask;
-		uint8 ByteOffset = Offset;
-
-		return FString::Printf(TEXT("!!(*((uint8*)(%s) + %d) & %d)"), *GetPointerName(),
-							   ByteOffset, FieldMask);
 	}
 	return TEXT("*") + GetPointerName();
 }
@@ -194,39 +156,9 @@ FString FPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInst
 {
 	const FString ValueStr = GetCode_GetPropertyValueFrom(TargetInstance);
 	const FString FieldValueStr = GetCode_GetProtoFieldValueFrom(NewStateName);
-	const FNumericProperty* NumericProperty = Cast<FNumericProperty>(OriginalProperty);
-	if (NumericProperty && NumericProperty->IsEnum())
-	{
-		return FString::Printf(
-			TEXT("using TProp = decltype(%s);\n %s = TEnumAsByte<TProp>((int32)%s);\nbStateChanged = true;\n%s"),
-			*ValueStr, *ValueStr, *FieldValueStr, *AfterSetValueCode);
-	}
-	FBoolProperty* BoolProperty = Cast<FBoolProperty>(OriginalProperty);
-	if (BoolProperty && !BoolProperty->IsNativeBool())
-	{
-		if (this->IsDirectlyAccessible())
-		{
-			return FString::Printf(
-				TEXT("%s = %s;\nbStateChanged = true;\n%s"), *GetCode_GetPropertyValueFrom(TargetInstance),
-				*GetCode_GetProtoFieldValueFrom(NewStateName), *AfterSetValueCode);
-		}
-		uint32 Offset = 0;
-		uint8 BitMask = 0;
-		DoDetermineBitfieldOffsetAndMask(Offset, BitMask,
-		                                 [BoolProperty](void* Obj) { BoolProperty->SetPropertyValue(Obj, true); },
-		                                 this->OriginalProperty->GetOwnerProperty()->GetSize());
 
-		uint8 FieldMask = BitMask;
-		uint8 ByteOffset = Offset;
-		return FString::Printf(
-			TEXT(
-				"uint8* ByteValue = (uint8*)(%s) + %d;\n*ByteValue = ((*ByteValue) & ~%d) | (%s ? %d : 0); bStateChanged = true; \n%s"),
-			*GetPointerName(),
-			ByteOffset,
-			BitMask, *FieldValueStr,
-			FieldMask, *AfterSetValueCode);
-	}
-	return FString::Printf(TEXT("%s = %s;\nbStateChanged = true;\n%s"), *ValueStr, *FieldValueStr, *AfterSetValueCode);}
+	return FString::Printf( TEXT("%s = %s;\nbStateChanged = true;\n%s"), *ValueStr, *FieldValueStr, *AfterSetValueCode);
+}
 
 FString FPropertyDecorator::GetDeclaration_PropertyPtr()
 {
