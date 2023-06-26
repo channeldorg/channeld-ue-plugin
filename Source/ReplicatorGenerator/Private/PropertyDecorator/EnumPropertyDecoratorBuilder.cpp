@@ -5,8 +5,8 @@ bool FEnumPropertyDecoratorBuilder::IsSpecialProperty(FProperty* Property)
 {
 	if(Property->IsA<FNumericProperty>())
 	{
-		auto ByteProperty = Cast<FNumericProperty>(Property);
-		if(ByteProperty->IsEnum())
+		auto NumericProperty = CastField<FNumericProperty>(Property);
+		if(NumericProperty->IsEnum())
 		{
 			return true;
 		}
