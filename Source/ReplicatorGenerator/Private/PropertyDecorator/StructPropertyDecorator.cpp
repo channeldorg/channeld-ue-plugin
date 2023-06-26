@@ -300,9 +300,9 @@ TArray<TSharedPtr<FStructPropertyDecorator>> FStructPropertyDecorator::GetStruct
 	TSet<FString> StructPropertyDecoratorNames;
 	for (TSharedPtr<FStructPropertyDecorator>& StructPropertyDecorator : StructPropertyDecorators)
 	{
-		if (!StructPropertyDecoratorNames.Contains(StructPropertyDecorator->GetPropertyName()))
+		if (!StructPropertyDecoratorNames.Contains(StructPropertyDecorator->GetCPPType()))
 		{
-			StructPropertyDecoratorNames.Add(StructPropertyDecorator->GetPropertyName());
+			StructPropertyDecoratorNames.Add(StructPropertyDecorator->GetCPPType());
 			NonRepetitionStructPropertyDecorators.Add(StructPropertyDecorator);
 		}
 	}
