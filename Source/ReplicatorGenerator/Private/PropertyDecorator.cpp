@@ -1,7 +1,7 @@
 ﻿#include "PropertyDecorator.h"
 
 #include "ReplicatorGeneratorUtils.h"
-
+TSet<FString> FPropertyDecorator::GlobalIncludeFile;
 FPropertyDecorator::FPropertyDecorator(FProperty* InProperty, IPropertyDecoratorOwner* InOwner)
 	: Owner(InOwner), OriginalProperty(InProperty)
 {
@@ -316,4 +316,9 @@ bool FPropertyDecorator::IsStruct()
 TArray<TSharedPtr<FStructPropertyDecorator>> FPropertyDecorator::GetStructPropertyDecorators()
 {
 	return TArray<TSharedPtr<FStructPropertyDecorator>>();
+}
+
+void FPropertyDecorator::AddGlobalIncludeFile(FString FileName)
+{
+	GlobalIncludeFile.Add(FileName);
 }
