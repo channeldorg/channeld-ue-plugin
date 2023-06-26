@@ -28,7 +28,12 @@ public class ReplicatorGenerator : ModuleRules
 				"JsonUtilities",
 			}
 		);
-
+        if (Target.Version.MajorVersion == 5)
+        {
+            PrivateDependencyModuleNames.Add("RenderCore"); 
+            PrivateDependencyModuleNames.Add("DeveloperToolSettings"); 
+            PrivateDependencyModuleNames.Add("AssetRegistry"); 
+        }
 		string CompilerConfigurationName;
 		switch (Target.Configuration)
 		{

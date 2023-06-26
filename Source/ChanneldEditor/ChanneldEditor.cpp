@@ -78,13 +78,26 @@ void FChanneldEditorModule::StartupModule()
 		FChanneldEditorCommands::Get().OpenCloudDeploymentCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::OpenCloudDeploymentAction));
 
+#if ENGINE_MAJOR_VERSION == 5
+	UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.User");
+	FToolMenuSection& Section = ToolbarMenu->AddSection("ChanneldComboButton");
+	Section.AddEntry(FToolMenuEntry::InitComboButton(
+		"ChanneldComboButton",
+		FUIAction(),
+		FOnGetContent::CreateRaw(this,&FChanneldEditorModule::CreateMenuContent, PluginCommands),
+		LOCTEXT("LevelEditorToolbarChanneldButtonLabel", "Channeld"),
+		LOCTEXT("LevelEditorToolbarChanneldButtonTooltip", "Tools and utilities provided by ChanneldUE"),
+		FSlateIcon(FChanneldEditorStyle::GetStyleSetName(), "ChanneldEditor.PluginCommand")
+	));
+#else
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
 	TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender());
 	ToolbarExtender->AddToolBarExtension("Compile", EExtensionHook::After, PluginCommands,
-	                                     FToolBarExtensionDelegate::CreateRaw(this, &FChanneldEditorModule::AddToolbarButton));
-	LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
+										 FToolBarExtensionDelegate::CreateRaw(this, &FChanneldEditorModule::AddToolbarButton));
 
+	LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
+#endif
 	// Stop all services launched during the session 
 	FEditorDelegates::EditorModeIDExit.AddLambda([&](const FEditorModeID&)
 	{
@@ -133,6 +146,14 @@ void FChanneldEditorModule::ShutdownModule()
 
 void FChanneldEditorModule::AddToolbarButton(FToolBarBuilder& Builder)
 {
+#if ENGINE_MAJOR_VERSION >= 5 
+	UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.User");
+	FToolMenuSection& Section = ToolbarMenu->AddSection("ChanneldComboButton");
+	Section.AddEntry(FToolMenuEntry::InitComboButton(
+		"ChanneldComboButton",
+		FUIAction(),
+		FOnGetContent::CreateRaw(this,&FChanneldEditorModule::CreateMenuContent, PluginCommands)));
+#else
 	Builder.AddToolBarButton(FChanneldEditorCommands::Get().PluginCommand);
 
 	FUIAction TempAction;
@@ -143,6 +164,7 @@ void FChanneldEditorModule::AddToolbarButton(FToolBarBuilder& Builder)
 	                       TAttribute<FSlateIcon>(),
 	                       true
 	);
+#endif
 }
 
 TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUICommandList> Commands)

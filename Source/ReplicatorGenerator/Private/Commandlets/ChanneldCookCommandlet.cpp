@@ -39,16 +39,19 @@
 #include "ProfilingDebugging/CookStats.h"
 #include "AssetRegistryModule.h"
 #include "StudioAnalytics.h"
+#if ENGINE_MAJOR_VERSION == 5
+#include "UObject/GCObjectScopeGuard.h"
+#endif
 // #include "UnrealEd/Private/Cooker/CookProfiling.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogChanneldCookCommandlet, Log, All);
 
+#if ENGINE_MAJOR_VERSION == 4
 #if ENABLE_COOK_STATS
 #include "ProfilingDebugging/ScopedTimers.h"
 #include "AnalyticsEventAttribute.h"
 #include "IAnalyticsProviderET.h"
 #include "AnalyticsET.h"
-
 namespace DetailedCookStats
 {
 	FString CookProject;
@@ -370,7 +373,7 @@ namespace DetailedCookStats
 	}
 }
 #endif
-
+#endif
 UChanneldCookCommandlet::UChanneldCookCommandlet( const FObjectInitializer& ObjectInitializer )
 	: Super(ObjectInitializer)
 {
@@ -380,6 +383,7 @@ UChanneldCookCommandlet::UChanneldCookCommandlet( const FObjectInitializer& Obje
 
 bool UChanneldCookCommandlet::CookOnTheFly( FGuid InstanceId, int32 Timeout, bool bForceClose, const TArray<ITargetPlatform*>& TargetPlatforms)
 {
+#if ENGINE_MAJOR_VERSION == 4
 	UCookOnTheFlyServer *CookOnTheFlyServer = NewObject<UCookOnTheFlyServer>();
 
 	struct FScopeRootObject
@@ -585,14 +589,38 @@ bool UChanneldCookCommandlet::CookOnTheFly( FGuid InstanceId, int32 Timeout, boo
 	}
 
 	CookOnTheFlyServer->EndNetworkFileServer();
+#endif
 	return true;
 }
 
 /* UCommandlet interface
  *****************************************************************************/
+#if ENGINE_MAJOR_VERSION >= 5
+
+int32 RunCommandlet(FString CmdLineParams)
+{
+	auto CommandletClass = Cast<UClass>(StaticFindFirstObject(UClass::StaticClass(), TEXT("CookCommandlet"), EFindFirstObjectOptions::None, ELogVerbosity::Warning, TEXT("looking for commandlet")));
+	if (!CommandletClass) {
+		UE_LOG(LogTemp, Warning, TEXT("Can't find CookCommandlet"));
+		return -1;
+	}
+	UCommandlet* Commandlet = NewObject<UCommandlet>(GetTransientPackage(), CommandletClass);
+	FGCObjectScopeGuard ScopeGuard(Commandlet);
+	PRIVATE_GIsRunningCookCommandlet = true;
+	auto ErrorLevel = Commandlet->Main(CmdLineParams);
+	if (ErrorLevel) {
+		UE_LOG(LogTemp, Warning, TEXT("Execute cook error:%d"), ErrorLevel);
+	}
+	return 0;
+}
+#endif
 
 int32 UChanneldCookCommandlet::Main(const FString& CmdLineParams)
 {
+#if ENGINE_MAJOR_VERSION == 5
+	RunCommandlet(CmdLineParams);
+	return 0;
+#else
 	COOK_STAT(double CookStartTime = FPlatformTime::Seconds());
 	Params = CmdLineParams;
 	ParseCommandLine(*Params, Tokens, Switches);
@@ -672,12 +700,13 @@ int32 UChanneldCookCommandlet::Main(const FString& CmdLineParams)
 			DetailedCookStats::LogChanneldCookStats(CmdLineParams);
 		});
 	}
-	
 	return 0;
+#endif	
 }
 
 bool UChanneldCookCommandlet::CookByTheBook( const TArray<ITargetPlatform*>& Platforms)
 {
+#if ENGINE_MAJOR_VERSION == 4
 	// TRACE_CPUPROFILER_EVENT_SCOPE_ON_CHANNEL(CookByTheBook, CookChannel);
 
 	COOK_STAT(FScopedDurationTimer CookByTheBookTimer(DetailedCookStats::CookByTheBookTimeSec));
@@ -1126,12 +1155,13 @@ bool UChanneldCookCommandlet::CookByTheBook( const TArray<ITargetPlatform*>& Pla
 	{
 		GShaderCompilingManager->SkipShaderCompilation(false);
 	}
-
+#endif
 	return true;
 }
 
 void UChanneldCookCommandlet::ProcessDeferredCommands()
 {
+#if ENGINE_MAJOR_VERSION ==4
 #if PLATFORM_MAC
 	// On Mac we need to process Cocoa events so that the console window for CookOnTheFlyServer is interactive
 	FPlatformApplicationMisc::PumpMessages(true);
@@ -1147,4 +1177,5 @@ void UChanneldCookCommandlet::ProcessDeferredCommands()
 	}
 
 	GEngine->DeferredCommands.Empty();
+#endif
 }

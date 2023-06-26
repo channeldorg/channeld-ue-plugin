@@ -23,9 +23,13 @@ FChanneldPlayerStateReplicator::FChanneldPlayerStateReplicator(UObject* InTarget
 		check(PlayerIdPtr);
 	}
 	{
+#if ENGINE_MAJOR_VERSION == 5
+		//TODO::fix this later
+#else
 		auto Property = CastFieldChecked<const FByteProperty>(PlayerState->GetClass()->FindPropertyByName(FName("Ping")));
 		PingPtr = Property->ContainerPtrToValuePtr<uint8>(PlayerState.Get());
 		check(PingPtr);
+#endif
 	}
 }
 
@@ -117,7 +121,11 @@ void FChanneldPlayerStateReplicator::OnStateChanged(const google::protobuf::Mess
 	}
 	if (NewState->has_ping())
 	{
+#if ENGINE_MAJOR_VERSION == 5
+		//TODO::fix this later
+#else
 		*PingPtr = NewState->ping();
+#endif
 	}
 	if (NewState->has_playername())
 	{

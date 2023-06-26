@@ -67,6 +67,7 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 	FString NewCmdLine = CmdLineParams;
 	NewCmdLine.Append(AdditionalParam);
 	int32 Result = Super::Main(NewCmdLine);
+	
 	ObjLoadedListener.StopListen();
 	if (Result != 0)
 	{
