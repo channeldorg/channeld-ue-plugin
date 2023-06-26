@@ -52,6 +52,7 @@ void FChanneldActorComponentReplicator::Tick(float DeltaTime)
 	if (bStateChanged)
 	{
 		FullState->MergeFrom(*DeltaState);
+		FullState->set_compname(TargetComponentName);
 	}
 }
 
