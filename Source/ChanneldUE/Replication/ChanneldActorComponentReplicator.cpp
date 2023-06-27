@@ -9,7 +9,6 @@ FChanneldActorComponentReplicator::FChanneldActorComponentReplicator(UObject* In
 	TArray<FLifetimeProperty> RepProps;
 	DisableAllReplicatedPropertiesOfClass(InTargetObj->GetClass(), UActorComponent::StaticClass(), EFieldIteratorFlags::ExcludeSuper, RepProps);
 
-	TargetComponentName = TCHAR_TO_UTF8(*InTargetObj->GetName());
 	FullState = new unrealpb::ActorComponentState;
 	DeltaState = new unrealpb::ActorComponentState;
 }
@@ -52,7 +51,6 @@ void FChanneldActorComponentReplicator::Tick(float DeltaTime)
 	if (bStateChanged)
 	{
 		FullState->MergeFrom(*DeltaState);
-		FullState->set_compname(TargetComponentName);
 	}
 }
 
