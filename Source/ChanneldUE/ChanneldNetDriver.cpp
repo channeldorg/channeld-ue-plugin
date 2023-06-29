@@ -284,13 +284,12 @@ void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMess
 	UObject* SubObject = nullptr;
 	if (Msg->subobjectpath().length() > 0)
 	{
-		FString ComponentClassPath = UTF8_TO_TCHAR(Msg->subobjectpath().c_str());
-		UClass* ComponentClass = FindObject<UClass>(ANY_PACKAGE, *ComponentClassPath);
-		if (ComponentClass == nullptr)
+		SubObject = Actor->GetDefaultSubobjectByName(Msg->subobjectpath().c_str());
+		if(!SubObject)
 		{
-			ComponentClass = LoadClass<UActorComponent>(NULL,  *ComponentClassPath);
+			UE_LOG(LogChanneld, Log, TEXT("Actor:%s, NetGuid:%d can not find Subobject:%s for Function:%s"),
+				*Actor->GetName(),  Msg->targetobj().netguid(), *FString(Msg->subobjectpath().c_str()), *FuncName.ToString());
 		}
-		SubObject = Actor->GetComponentByClass(ComponentClass);
 	}
 	ReceivedRPC(Actor, FuncName, Msg->paramspayload(), bDelayRPC, SubObject);
 	if (bDelayRPC)
@@ -903,7 +902,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 			if (SubObject)
 			{
 				TargetObject = SubObject;
-				SubObjectPathName = SubObject->GetClass()->GetPathName();
+				SubObjectPathName = SubObject->GetName();
 			}
 			
 			bool bSuccess = true;
