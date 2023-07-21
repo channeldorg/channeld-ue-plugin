@@ -218,11 +218,12 @@ void UClientInterestManager::OnPlayerEnterSpatialChannel(UChanneldNetConnection*
 		PawnLocation = NetConn->PlayerController->GetSpawnLocation();
 		PawnRotation = FRotator::ZeroRotator;
 	}
-	
+
+	auto Query = InterestMsg.mutable_query();
 	for (auto& AOI : ActiveAOIs)
 	{
 		// AOI->OnPlayerEnterSpatialChannel(NetConn, SpatialChId);
-		AOI->SetSpatialQuery(InterestMsg.mutable_query(), PawnLocation, PawnRotation);
+		AOI->SetSpatialQuery(Query, PawnLocation, PawnRotation);
 	}
 	
 	GEngine->GetEngineSubsystem<UChanneldConnection>()->Send(SpatialChId, channeldpb::UPDATE_SPATIAL_INTEREST, InterestMsg);
