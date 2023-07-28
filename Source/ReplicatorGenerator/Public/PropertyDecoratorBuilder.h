@@ -11,6 +11,7 @@ public:
 	virtual TSharedPtr<FPropertyDecoratorBuilder> SetNextBuilder(TSharedPtr<FPropertyDecoratorBuilder>&);
 	virtual TSharedPtr<FPropertyDecoratorBuilder> SetNextBuilder(TSharedPtr<FPropertyDecoratorBuilder>&&);
 
+	// Should we use a custom decorator for this type of property?
 	virtual bool IsSpecialProperty(FProperty*) = 0;
 
 	virtual FPropertyDecorator* GetPropertyDecorator(FProperty*, IPropertyDecoratorOwner*);
