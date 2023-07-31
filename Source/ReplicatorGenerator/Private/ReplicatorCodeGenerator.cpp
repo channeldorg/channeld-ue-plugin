@@ -193,7 +193,18 @@ bool FReplicatorCodeGenerator::GenerateReplicatorCode(
 	FString OnStateChangedAdditionalCondition;
 	FString TickAdditionalCondition;
 	FString IsClientCode;
-	if (TargetActorClass->IsChildOf(USceneComponent::StaticClass()))
+	if (TargetActorClass->IsChildOf(UStaticMeshComponent::StaticClass()))
+	{
+		if (bIsBlueprint)
+		{
+			TargetBaseClassName = TEXT("UStaticMeshComponent");
+		}
+		TargetInstanceRef = TEXT("Comp");
+		OnStateChangedAdditionalCondition = FString::Printf(TEXT(" || !%s->GetOwner()"), *TargetInstanceRef);
+		TickAdditionalCondition = FString::Printf(TEXT(" || !%s->GetOwner()"), *TargetInstanceRef);
+		IsClientCode = FString::Printf(TEXT("%s->GetOwner()->HasAuthority()"), *TargetInstanceRef);
+	}
+	else if (TargetActorClass->IsChildOf(USceneComponent::StaticClass()))
 	{
 		if (bIsBlueprint)
 		{
