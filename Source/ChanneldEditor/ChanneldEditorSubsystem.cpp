@@ -31,8 +31,10 @@
 #include "Logging/TokenizedMessage.h"
 #include "Misc/FileHelper.h"
 #include "Misc/HotReloadInterface.h"
+#include "Misc/Base64.h"
 #include "Settings/EditorExperimentalSettings.h"
 #include "Settings/ProjectPackagingSettings.h"
+#include "Settings/PlatformsMenuSettings.h"
 #include "Windows/MinWindows.h"
 #include "Windows/WindowsHWrapper.h"
 #include "Windows/WindowsPlatformApplicationMisc.h"
@@ -584,8 +586,15 @@ void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
 		return;
 	}
 
+#if ENGINE_MAJOR_VERSION >= 5
+	const UPlatformsMenuSettings* PlatformsSettings = GetDefault<UPlatformsMenuSettings>();
+	FDirectoryPath StagingDirectory = PlatformsSettings->StagingDirectory;
+#else
+	FDirectoryPath StagingDirectory = PackagingSettings->StagingDirectory;
+#endif
+
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-	if (!PlatformFile.CopyFile(*(PackagingSettings->StagingDirectory.Path / TEXT("LinuxServer/ChanneldUE.ini")),
+	if (!PlatformFile.CopyFile(*(StagingDirectory.Path / TEXT("LinuxServer/ChanneldUE.ini")),
 	                           *(FPaths::GetPath(FPaths::GetProjectFilePath()) / TEXT(
 		                           "/Saved/Config/Windows/ChanneldUE.ini"))))
 	{
@@ -596,7 +605,7 @@ void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
 	}
 
 	FString BuildArgs = FString::Printf(
-		TEXT("build -f \"%s\" -t %s \"%s\""), *ServerDockerfilePath, *Tag, *PackagingSettings->StagingDirectory.Path);
+		TEXT("build -f \"%s\" -t %s \"%s\""), *ServerDockerfilePath, *Tag, *StagingDirectory.Path);
 
 	FString BatTemplate = FString(ANSI_TO_TCHAR(PLUGIN_DIR)) / TEXT("Template") / TEXT("BuildDockerImage.bat");
 
@@ -855,9 +864,23 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 		TEXT("GameProjectGeneration"));
 	bool bProjectHasCode = GameProjectModule.Get().ProjectHasCodeFiles();
 
+#if ENGINE_MAJOR_VERSION >= 5
+	const PlatformInfo::FTargetPlatformInfo* PlatformInfo = nullptr;
+	if (FApp::IsInstalled())
+	{
+		PlatformInfo = PlatformInfo::FindPlatformInfo(InPlatformInfoName);
+}
+	else
+	{
+		PlatformInfo = PlatformInfo::FindPlatformInfo(GetMutableDefault<UPlatformsMenuSettings>()->GetTargetFlavorForPlatform(InPlatformInfoName));
+	}
+#else
 	const PlatformInfo::FPlatformInfo* const PlatformInfo = PlatformInfo::FindPlatformInfo(InPlatformInfoName);
+#endif
 	check(PlatformInfo);
 
+	//	NOTE: cannot find BinaryFolderName from PlatformInfo on UE5
+#if ENGINE_MAJOR_VERSION < 5
 	if (FInstalledPlatformInfo::Get().IsPlatformMissingRequiredFile(PlatformInfo->BinaryFolderName))
 	{
 		if (!FInstalledPlatformInfo::OpenInstallerOptions())
@@ -869,6 +892,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 		PostPackageProject.ExecuteIfBound(false);
 		return;
 	}
+#endif
 
 	if (UGameMapsSettings::GetGameDefaultMap().IsEmpty())
 	{
@@ -879,6 +903,8 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 		return;
 	}
 
+	//	NOTE: Cannot find SDKStatus in UE5
+#if ENGINE_MAJOR_VERSION < 5
 	if (PlatformInfo->SDKStatus == PlatformInfo::EPlatformSDKStatus::NotInstalled || (bProjectHasCode &&
 		PlatformInfo->
 		bUsesHostCompiler && !FSourceCodeNavigation::IsCompilerAvailable()))
@@ -893,6 +919,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 		PostPackageProject.ExecuteIfBound(false);
 		return;
 	}
+#endif
 
 	UProjectPackagingSettings* PackagingSettings = Cast<UProjectPackagingSettings>(
 		UProjectPackagingSettings::StaticClass()->GetDefaultObject());
@@ -905,12 +932,18 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 	}
 	
 	const UProjectPackagingSettings::FConfigurationInfo& ConfigurationInfo =
-		UProjectPackagingSettings::ConfigurationInfo[PackagingSettings->BuildConfiguration];
+		UProjectPackagingSettings::ConfigurationInfo[(int)PackagingSettings->BuildConfiguration];
 	bool bAssetNativizationEnabled = (PackagingSettings->BlueprintNativizationMethod !=
 		EProjectPackagingBlueprintNativizationMethod::Disabled);
 
+#if ENGINE_MAJOR_VERSION >= 5
+	FName TargetPlatformName = PlatformInfo->Name;
+#else
+	FName TargetPlatformName = PlatformInfo->TargetPlatformName;
+#endif
+
 	const ITargetPlatform* const Platform = GetTargetPlatformManager()->FindTargetPlatform(
-		PlatformInfo->TargetPlatformName.ToString());
+		TargetPlatformName.ToString());
 	{
 		if (Platform)
 		{
@@ -924,7 +957,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 
 			// report to analytics
 			FEditorAnalytics::ReportBuildRequirementsFailure(
-				TEXT("Editor.Package.Failed"), PlatformInfo->TargetPlatformName.ToString(), bProjectHasCode,
+				TEXT("Editor.Package.Failed"), TargetPlatformName.ToString(), bProjectHasCode,
 				Result);
 
 			// report to main frame
@@ -1042,16 +1075,30 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 		}
 	}
 
+	FName VanillaPlatformName = PlatformInfo->Name;
+#if ENGINE_MAJOR_VERSION >= 5
+	while (PlatformInfo != PlatformInfo->VanillaInfo)
+	{
+		VanillaPlatformName = PlatformInfo->Name;
+	}
+#endif
+
 	if (!FModuleManager::LoadModuleChecked<IProjectTargetPlatformEditorModule>("ProjectTargetPlatformEditor").
-		ShowUnsupportedTargetWarning(PlatformInfo->VanillaPlatformName))
+		ShowUnsupportedTargetWarning(VanillaPlatformName))
 	{
 		PostPackageProject.ExecuteIfBound(false);
 		return;
 	}
 
+#if ENGINE_MAJOR_VERSION >= 5
+	UPlatformsMenuSettings* PlatformsSettings = GetMutableDefault<UPlatformsMenuSettings>();
+	FDirectoryPath& StagingDirectory = PlatformsSettings->StagingDirectory;
+#else
+	FDirectoryPath& StagingDirectory = PackagingSettings->StagingDirectory;
+#endif
+
 	// let the user pick a target directory
-	if (PackagingSettings->StagingDirectory.Path.IsEmpty() || PackagingSettings->StagingDirectory.Path ==
-		FPaths::ProjectDir())
+	if (StagingDirectory.Path.IsEmpty() || StagingDirectory.Path == FPaths::ProjectDir())
 	{
 		FString OutFolderName;
 
@@ -1067,15 +1114,20 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 		                                                        LOCTEXT("PackageDirectoryDialogTitle",
 		                                                                "Package project...")
 		                                                        .ToString(),
-		                                                        PackagingSettings->StagingDirectory.Path,
+		                                                        StagingDirectory.Path,
 		                                                        OutFolderName))
 		{
 			PostPackageProject.ExecuteIfBound(false);
 			return;
 		}
 
-		PackagingSettings->StagingDirectory.Path = OutFolderName;
+		StagingDirectory.Path = OutFolderName;
+#if ENGINE_MAJOR_VERSION >= 5
+		PlatformsSettings->SaveConfig();
+#else
 		PackagingSettings->SaveConfig();
+#endif
+
 	}
 
 	// create the packager process
@@ -1146,8 +1198,12 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 		OptionalParams += TEXT(" -manifests");
 	}
 
+#if ENGINE_MAJOR_VERSION >= 5
+	bool bTargetPlatformCanUseCrashReporter = PlatformInfo->DataDrivenPlatformInfo->bCanUseCrashReporter;
+#else
 	bool bTargetPlatformCanUseCrashReporter = PlatformInfo->bTargetPlatformCanUseCrashReporter;
-	if (bTargetPlatformCanUseCrashReporter && PlatformInfo->TargetPlatformName == FName("WindowsNoEditor") &&
+#endif
+	if (bTargetPlatformCanUseCrashReporter && TargetPlatformName == FName("WindowsNoEditor") &&
 		PlatformInfo->PlatformFlavor == TEXT("Win32"))
 	{
 		FString MinumumSupportedWindowsOS;
@@ -1171,7 +1227,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 	{
 		OptionalParams += TEXT(" -targetplatform=");
 		// LinuxServer -> Linux
-		OptionalParams += PlatformInfo->TargetPlatformName == TEXT("LinuxServer") ? TEXT("Linux") : *PlatformInfo->TargetPlatformName.ToString();
+		OptionalParams += TargetPlatformName == TEXT("LinuxServer") ? TEXT("Linux") : *TargetPlatformName.ToString();
 	}
 
 	// Get the target to build
@@ -1226,9 +1282,6 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 					BaseDir = FPaths::EngineDir();
 				}
 			}
-
-			// Check if the receipt is for a matching promoted target
-			FString PlatformName = Platform->GetPlatformInfo().UBTTargetId.ToString();
 		}
 	}
 	else if (PackagingSettings->Build == EProjectPackagingBuild::IfEditorWasBuiltLocally)
@@ -1254,11 +1307,13 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 			*(PackagingSettings->HttpChunkInstallDataVersion));
 	}
 
+#if ENGINE_MAJOR_VERSION < 5
 	int32 NumCookers = GetDefault<UEditorExperimentalSettings>()->MultiProcessCooking;
 	if (NumCookers > 0)
 	{
 		OptionalParams += FString::Printf(TEXT(" -NumCookersToSpawn=%d"), NumCookers);
 	}
+#endif
 
 	if (Target == nullptr)
 	{
@@ -1286,7 +1341,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 		GetUATCompilationFlags(),
 		FApp::IsEngineInstalled() ? TEXT(" -installed") : TEXT(""),
 		*ProjectPath,
-		*PackagingSettings->StagingDirectory.Path,
+		*StagingDirectory.Path,
 		*FUnrealEdMisc::Get().GetExecutableForCommandlets(),
 		*OptionalParams
 	);
@@ -1294,7 +1349,11 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 	IUATHelperModule::Get().CreateUatTask(CommandLine, PlatformInfo->DisplayName,
 	                                      LOCTEXT("PackagingProjectTaskName", "Packaging project"),
 	                                      LOCTEXT("PackagingTaskName", "Packaging"),
-	                                      FEditorStyle::GetBrush(TEXT("MainFrame.PackageProject")),
+#if ENGINE_MAJOR_VERSION >= 5
+	                                      FAppStyle::GetBrush(TEXT("MainFrame.PackageProject")), nullptr,
+#else
+										  FEditorStyle::GetBrush(TEXT("MainFrame.PackageProject")),
+#endif
 	                                      [PostPackageProject](FString Message, double TimeSec)
 	                                      {
 		                                      AsyncTask(ENamedThreads::GameThread, [Message, PostPackageProject]()
