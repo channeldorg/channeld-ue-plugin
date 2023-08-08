@@ -90,9 +90,11 @@ void FChanneldStaticMeshComponentReplicator::OnStateChanged(const google::protob
 	FullState->MergeFrom(*NewState);
 	bStateChanged = false;
 
-	if (NewState->has_staticmesh() && *StaticMeshPtr != ChanneldUtils::GetAssetByRef(&NewState->staticmesh()))
+	auto OldStaticMesh = *StaticMeshPtr;
+	auto NewStaticMesh = ChanneldUtils::GetAssetByRef(&NewState->staticmesh());
+	if (NewState->has_staticmesh() && OldStaticMesh != NewStaticMesh)
 	{
-		*StaticMeshPtr = ChanneldUtils::GetAssetByRef(&NewState->staticmesh());
-		Comp->ProcessEvent(Comp->GetClass()->FindFunctionByName(FName(TEXT("OnRep_StaticMesh"))), &(*StaticMeshPtr));
+		*StaticMeshPtr = NewStaticMesh;
+		Comp->ProcessEvent(Comp->GetClass()->FindFunctionByName(FName(TEXT("OnRep_StaticMesh"))), OldStaticMesh);
 	}
 }
