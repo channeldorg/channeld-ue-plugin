@@ -46,6 +46,7 @@ namespace ChanneldReplicatorGeneratorUtils
 		APlayerState::StaticClass(),
 		UActorComponent::StaticClass(),
 		USceneComponent::StaticClass(),
+		UStaticMeshComponent::StaticClass(),
 	};
 
 	TSet<const UClass*> ChanneldUEBuiltinClassSet{ChanneldUEBuiltinClasses};
