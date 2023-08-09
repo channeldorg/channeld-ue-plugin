@@ -58,7 +58,7 @@ FString FAssetPropertyDecorator::GetCode_GetProtoFieldValueFrom(const FString& S
 
 FString FAssetPropertyDecorator::GetCode_SetProtoFieldValueTo(const FString& StateName, const FString& GetValueCode)
 {
-	return FString::Printf(TEXT("%s->mutable_%s()->CopyFrom(*ChanneldUtils::GetAssetByRef(%s))"), *StateName, *GetProtoFieldName(), *GetValueCode);
+	return FString::Printf(TEXT("%s->mutable_%s()->CopyFrom(ChanneldUtils::GetAssetRef(%s))"), *StateName, *GetProtoFieldName(), *GetValueCode);
 }
 
 FString FAssetPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode)
