@@ -23,7 +23,6 @@ int32 UChanneldCookCommandlet::Main(const FString& CmdLineParams)
 	UCommandlet* Commandlet = NewObject<UCommandlet>(GetTransientPackage(), CommandletClass);
 	FGCObjectScopeGuard ScopeGuard(Commandlet);
 
-	PRIVATE_GIsRunningCookCommandlet = true;
 	auto ErrorLevel = Commandlet->Main(CmdLineParams);
 	if (ErrorLevel) {
 		UE_LOG(LogTemp, Warning, TEXT("Execute cook error:%d"), ErrorLevel);

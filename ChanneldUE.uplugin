@@ -37,7 +37,7 @@
     {
       "Name": "ReplicatorGenerator",
       "Type": "Editor",
-      "LoadingPhase": "Default"
+      "LoadingPhase": "PostConfigInit"
     }
    ],
   "Plugins": [
