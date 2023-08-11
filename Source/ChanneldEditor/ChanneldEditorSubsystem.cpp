@@ -1081,6 +1081,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 	FName VanillaPlatformName = PlatformInfo->Name;
 	while (PlatformInfo != PlatformInfo->VanillaInfo)
 	{
+		PlatformInfo = PlatformInfo->VanillaInfo;
 		VanillaPlatformName = PlatformInfo->Name;
 	}
 #else
