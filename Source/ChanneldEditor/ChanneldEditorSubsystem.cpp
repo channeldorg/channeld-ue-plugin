@@ -34,7 +34,9 @@
 #include "Misc/Base64.h"
 #include "Settings/EditorExperimentalSettings.h"
 #include "Settings/ProjectPackagingSettings.h"
+#if ENGINE_MAJOR_VERSION >= 5
 #include "Settings/PlatformsMenuSettings.h"
+#endif
 #include "Windows/MinWindows.h"
 #include "Windows/WindowsHWrapper.h"
 #include "Windows/WindowsPlatformApplicationMisc.h"
@@ -1075,12 +1077,14 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 		}
 	}
 
-	FName VanillaPlatformName = PlatformInfo->Name;
 #if ENGINE_MAJOR_VERSION >= 5
+	FName VanillaPlatformName = PlatformInfo->Name;
 	while (PlatformInfo != PlatformInfo->VanillaInfo)
 	{
 		VanillaPlatformName = PlatformInfo->Name;
 	}
+#else
+	FName VanillaPlatformName = PlatformInfo->VanillaPlatformName;
 #endif
 
 	if (!FModuleManager::LoadModuleChecked<IProjectTargetPlatformEditorModule>("ProjectTargetPlatformEditor").
