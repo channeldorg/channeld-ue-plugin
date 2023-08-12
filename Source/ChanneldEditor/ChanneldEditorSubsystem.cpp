@@ -238,6 +238,22 @@ void UChanneldEditorSubsystem::GenerateReplicationAction()
 			EditorSettings->bEnableCompatibleRecompilation
 		);
 
+#ifdef CLANG_FORMAT_PATH
+
+		IFileManager& FileManager = IFileManager::Get();
+		FString ClangFormatPath(ANSI_TO_TCHAR(CLANG_FORMAT_PATH));
+		if (FileManager.FileExists(*ClangFormatPath))
+		{
+			FString ReplicatorStorageDir = GeneratorManager.GetReplicatorStorageDir();
+			FString Args = FString::Printf(TEXT("-i -style=Microsoft *.cpp *.h"));
+			TSharedPtr<FChanneldProcWorkerThread> ClangFormatThread = MakeShareable(
+				new FChanneldProcWorkerThread(TEXT("RunClangFormatForRepCode"), ClangFormatPath, Args, ReplicatorStorageDir)
+			);
+			ClangFormatThread->Execute();
+			ClangFormatThread->Join();
+		}
+#endif // CLANG_FORMAT_PATH
+
 		const TArray<FString> GeneratedProtoFiles = GeneratorManager.GetGeneratedProtoFiles();
 		GenRepProtoCppCode(GeneratedProtoFiles, [this, GeneratedProtoFiles]()
 		{
