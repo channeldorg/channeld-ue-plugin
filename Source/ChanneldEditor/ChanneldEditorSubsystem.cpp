@@ -121,6 +121,12 @@ void UChanneldEditorSubsystem::UpdateReplicationCache(
 	}
 	bUpdatingRepActorCache = true;
 
+#if ENGINE_MAJOR_VERSION >=5
+	constexpr TCHAR* AdditionalArguments = TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout -AssetGatherAll=true");
+#else
+	constexpr TCHAR* AdditionalArguments = TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout");
+#endif
+
 	UpdateRepActorCacheWorkThread = MakeShareable(
 		new FChanneldProcWorkerThread(
 			TEXT("CookAndUpdateRepActorCacheThread"),
@@ -128,8 +134,7 @@ void UChanneldEditorSubsystem::UpdateReplicationCache(
 			CommandletHelpers::BuildCommandletProcessArguments(
 				TEXT("CookAndUpdateRepActorCache"),
 				*FString::Printf(TEXT("\"%s\""), *FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath())),
-				*FString::Printf(
-					TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout"))
+				AdditionalArguments
 			)
 		)
 	);
