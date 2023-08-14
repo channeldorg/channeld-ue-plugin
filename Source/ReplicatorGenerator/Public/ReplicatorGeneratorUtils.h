@@ -6,6 +6,15 @@
 
 namespace ChanneldReplicatorGeneratorUtils
 {
+	class IExternalTargetToGenerateChanneldDataFieldCallback
+	{
+	public:
+		virtual ~IExternalTargetToGenerateChanneldDataFieldCallback() {}
+		virtual bool ShouldGenerate(const UClass* TargetClass) const = 0;
+	};
+
+	extern TArray<TUniquePtr<IExternalTargetToGenerateChanneldDataFieldCallback>> ExternalTargetToGenerateChannelDataFieldList;
+
 	enum class EFilterRule: uint8
 	{
 		NeedToGenerateReplicator,
@@ -50,6 +59,8 @@ namespace ChanneldReplicatorGeneratorUtils
 	};
 
 	TSet<const UClass*> ChanneldUEBuiltinClassSet{ChanneldUEBuiltinClasses};
+
+	REPLICATORGENERATOR_API void AddTargetToGenerateChannelDataFieldCallback(IExternalTargetToGenerateChanneldDataFieldCallback* CB);
 
 	REPLICATORGENERATOR_API TArray<const UClass*> GetChanneldUEBuiltinClasses();
 

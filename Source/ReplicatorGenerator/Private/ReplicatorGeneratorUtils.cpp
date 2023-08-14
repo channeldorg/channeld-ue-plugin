@@ -7,6 +7,8 @@
 
 namespace ChanneldReplicatorGeneratorUtils
 {
+	TArray<TUniquePtr<IExternalTargetToGenerateChanneldDataFieldCallback>> ExternalTargetToGenerateChannelDataFieldList;
+
 	void FReplicationActorFilter::StartListen()
 	{
 		GUObjectArray.AddUObjectCreateListener(this);
@@ -45,6 +47,10 @@ namespace ChanneldReplicatorGeneratorUtils
 		GUObjectArray.RemoveUObjectCreateListener(this);
 	}
 
+	void AddTargetToGenerateChannelDataFieldCallback(IExternalTargetToGenerateChanneldDataFieldCallback* CB)
+	{
+		ExternalTargetToGenerateChannelDataFieldList.Emplace(CB);
+	}
 	TArray<const UClass*> GetChanneldUEBuiltinClasses()
 	{
 		return ChanneldUEBuiltinClasses;
@@ -214,11 +220,23 @@ namespace ChanneldReplicatorGeneratorUtils
 	bool TargetToGenerateChannelDataField(const UClass* TargetClass)
 	{
 		const FString ClassName = TargetClass->GetName();
-		return
+		if (
 			(TargetClass->IsChildOf(AActor::StaticClass()) || TargetClass->IsChildOf(UActorComponent::StaticClass())) &&
 			!TargetClass->IsChildOf(ALevelScriptActor::StaticClass()) &&
 			!(ClassName.StartsWith(TEXT("SKEL_")) || ClassName.StartsWith(TEXT("REINST_"))) &&
-			HasReplicatedPropertyOrRPC(TargetClass);
+			HasReplicatedPropertyOrRPC(TargetClass))
+		{
+			return true;
+		}
+		for (auto& Checker : ExternalTargetToGenerateChannelDataFieldList)
+		{
+			if (Checker->ShouldGenerate(TargetClass))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	bool ContainsUncompilableChar(const FString& Test)
