@@ -158,18 +158,18 @@ FString FArrayPropertyDecorator::GetCode_GetWorldRef()
 TArray<TSharedPtr<FStructPropertyDecorator>> FArrayPropertyDecorator::GetStructPropertyDecorators()
 {
 	TArray<TSharedPtr<FStructPropertyDecorator>> StructPropertyDecorators;
+	StructPropertyDecorators.Append(InnerProperty->GetStructPropertyDecorators());
 	if (InnerProperty->IsStruct())
 	{
 		StructPropertyDecorators.Add(StaticCastSharedPtr<FStructPropertyDecorator>(InnerProperty));
 	}
-	StructPropertyDecorators.Append(InnerProperty->GetStructPropertyDecorators());
 	TArray<TSharedPtr<FStructPropertyDecorator>> NonRepetitionStructPropertyDecorators;
-	TSet<FString> StructPropertyDecoratorNames;
+	TSet<FString> StructPropertyDecoratorFieldTypes;
 	for (TSharedPtr<FStructPropertyDecorator>& StructPropertyDecorator : StructPropertyDecorators)
 	{
-		if (!StructPropertyDecoratorNames.Contains(StructPropertyDecorator->GetPropertyName()))
+		if (!StructPropertyDecoratorFieldTypes.Contains(StructPropertyDecorator->GetProtoFieldType()))
 		{
-			StructPropertyDecoratorNames.Add(StructPropertyDecorator->GetPropertyName());
+			StructPropertyDecoratorFieldTypes.Add(StructPropertyDecorator->GetProtoFieldType());
 			NonRepetitionStructPropertyDecorators.Add(StructPropertyDecorator);
 		}
 	}

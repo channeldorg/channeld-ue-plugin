@@ -169,8 +169,20 @@ bool FReplicatorCodeGenerator::Generate(
 	ReplicationCodeBundle.GlobalStructCodes.Append(FString::Printf(TEXT("#include \"%s\"\n"), *GenManager_GlobalStructProtoHeaderFile));
 	for (auto StructDecorator : GlobalStructDecorators)
 	{
+		if (StructDecorator->GetProtoFieldType().Contains(TEXT("RPCParams")))
+		{
+			continue;
+		}
 		ReplicationCodeBundle.GlobalStructCodes.Append(StructDecorator->GetDeclaration_PropPtrGroupStruct());
 		ReplicationCodeBundle.GlobalStructProtoDefinitions.Append(StructDecorator->GetDefinition_ProtoStateMessage());
+	}
+	for (auto StructDecorator : GlobalStructDecorators)
+	{
+		if (StructDecorator->GetProtoFieldType().Contains(TEXT("RPCParams")))
+		{
+			ReplicationCodeBundle.GlobalStructCodes.Append(StructDecorator->GetDeclaration_PropPtrGroupStruct());
+			ReplicationCodeBundle.GlobalStructProtoDefinitions.Append(StructDecorator->GetDefinition_ProtoStateMessage());
+		}
 	}
 
 	FStringFormatNamedArguments ProtoFormatArgs;
@@ -924,14 +936,15 @@ TArray<TSharedPtr<FStructPropertyDecorator>> FReplicatorCodeGenerator::GetAllStr
 		AllStructPropertyDecorators.Append(ActorDecoratorPtr->GetStructPropertyDecorators());
 	}
 	TArray<TSharedPtr<FStructPropertyDecorator>> NonRepetitionStructPropertyDecorators;
-	TSet<FString> StructPropertyDecoratorNames;
+	TSet<FString> StructPropertyDecoratorFieldTypes;
 	for (const TSharedPtr<FStructPropertyDecorator>& StructPropertyDecorator : AllStructPropertyDecorators)
 	{
-		if (StructPropertyDecoratorNames.Contains(StructPropertyDecorator->GetPropertyName()))
+		FString FieldType = StructPropertyDecorator->GetProtoFieldType();
+		if (StructPropertyDecoratorFieldTypes.Contains(FieldType))
 		{
 			continue;
 		}
-		StructPropertyDecoratorNames.Add(StructPropertyDecorator->GetPropertyName());
+		StructPropertyDecoratorFieldTypes.Add(FieldType);
 		NonRepetitionStructPropertyDecorators.Add(StructPropertyDecorator);
 	}
 	return NonRepetitionStructPropertyDecorators;
