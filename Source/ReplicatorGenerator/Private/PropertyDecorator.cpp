@@ -270,7 +270,7 @@ FString FPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceN
 	FormatArgs.Add(
 		TEXT("Code_SetPropertyValue"),
 		(NeedCallRepNotify && HasOnRepNotifyParam()
-			 ? FString::Printf(TEXT("auto OldOne = %s;\n"), *GetCode_GetPropertyValueFrom(TargetInstanceName))
+			 ? FString::Printf(TEXT("auto OldValue = %s;\n"), *GetCode_GetPropertyValueFrom(TargetInstanceName))
 			 : "")
 		.Append(GetCode_SetPropertyValueTo(
 			TargetInstanceName, NewStateName,
