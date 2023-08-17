@@ -274,7 +274,7 @@ FString FPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceN
 			 : "")
 		.Append(GetCode_SetPropertyValueTo(
 			TargetInstanceName, NewStateName,
-			NeedCallRepNotify ? GetCode_CallRepNotify(TargetInstanceName, TEXT("&OldOne")) : TEXT("")
+			NeedCallRepNotify ? GetCode_CallRepNotify(TargetInstanceName, TEXT("&OldValue")) : TEXT("")
 		))
 	);
 	return FString::Format(PropDecorator_OnChangeStateTemplate, FormatArgs);
