@@ -117,7 +117,7 @@ FString FArrayPropertyDecorator::GetCode_OnStateChange(const FString& TargetInst
 	FormatArgs.Add(TEXT("Code_GetProtoFieldValueFrom"), GetCode_GetProtoFieldValueFrom(NewStateName));
 	FormatArgs.Add(
 		TEXT("Code_CallRepNotify"),
-		NeedCallRepNotify ? GetCode_CallRepNotify(TargetInstanceName, TEXT("&OldOne")) : TEXT("")
+		NeedCallRepNotify ? GetCode_CallRepNotify(TargetInstanceName, TEXT("&OldValue")) : TEXT("")
 	);
 	return FString::Format(ArrPropDeco_OnChangeStateTemp, FormatArgs);
 }
