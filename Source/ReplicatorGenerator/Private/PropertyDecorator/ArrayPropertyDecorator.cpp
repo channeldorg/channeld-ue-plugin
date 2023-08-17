@@ -102,6 +102,10 @@ FString FArrayPropertyDecorator::GetCode_HasProtoFieldValueIn(const FString& Sta
 FString FArrayPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, bool NeedCallRepNotify)
 {
 	FStringFormatNamedArguments FormatArgs;
+	if(NeedCallRepNotify && HasOnRepNotifyParam())
+	{
+		FormatArgs.Add(TEXT("Definition_OldValue"), FString::Printf(TEXT("auto OldOne = %s;\n"), *GetCode_GetPropertyValueFrom(TargetInstanceName)));
+	}
 	FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName));
 	FormatArgs.Add(
 		TEXT("Code_SetPropertyValue"),
@@ -113,7 +117,7 @@ FString FArrayPropertyDecorator::GetCode_OnStateChange(const FString& TargetInst
 	FormatArgs.Add(TEXT("Code_GetProtoFieldValueFrom"), GetCode_GetProtoFieldValueFrom(NewStateName));
 	FormatArgs.Add(
 		TEXT("Code_CallRepNotify"),
-		NeedCallRepNotify ? GetCode_CallRepNotify(TargetInstanceName) : TEXT("")
+		NeedCallRepNotify ? GetCode_CallRepNotify(TargetInstanceName, TEXT("&OldOne")) : TEXT("")
 	);
 	return FString::Format(ArrPropDeco_OnChangeStateTemp, FormatArgs);
 }
