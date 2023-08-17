@@ -104,7 +104,7 @@ FString FArrayPropertyDecorator::GetCode_OnStateChange(const FString& TargetInst
 	FStringFormatNamedArguments FormatArgs;
 	if(NeedCallRepNotify && HasOnRepNotifyParam())
 	{
-		FormatArgs.Add(TEXT("Definition_OldValue"), FString::Printf(TEXT("auto OldOne = %s;\n"), *GetCode_GetPropertyValueFrom(TargetInstanceName)));
+		FormatArgs.Add(TEXT("Definition_OldValue"), FString::Printf(TEXT("auto OldValue = %s;\n"), *GetCode_GetPropertyValueFrom(TargetInstanceName)));
 	}
 	FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName));
 	FormatArgs.Add(
