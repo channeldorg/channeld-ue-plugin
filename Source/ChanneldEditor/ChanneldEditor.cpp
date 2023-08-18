@@ -98,8 +98,6 @@ void FChanneldEditorModule::StartupModule()
 	LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
 #endif
 
-	LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
-#endif
 	// Stop all services launched during the session 
 	FEditorDelegates::EditorModeIDExit.AddLambda([&](const FEditorModeID&)
 	{
