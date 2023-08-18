@@ -327,8 +327,25 @@ FString FReplicatedActorDecorator::GetCode_AllPropertiesOnStateChange(const FStr
 	FString OnChangeStateCodeBuilder;
 	for (const TSharedPtr<FPropertyDecorator> Property : Properties)
 	{
-		OnChangeStateCodeBuilder.Append(Property->GetCode_OnStateChange(InstanceRefName, NewStateName, true));
+		// 'b{PropertyName}Changed` variable is used to avoid calling OnRep() function when the property value is not changed.
+		OnChangeStateCodeBuilder.Append(FString::Printf(TEXT("\nbool b%sChanged = false;"), *Property->GetPropertyName()));
+		if (Property->HasOnRepNotifyParam())
+		{
+			// `Old{PropertyName}` variable is used to pass the old property value to OnRep() function.
+			OnChangeStateCodeBuilder.Append(FString::Printf(TEXT("auto Old%s = %s;\n"),
+				*Property->GetPropertyName(), *Property->GetCode_GetPropertyValueFrom(InstanceRefName)));
+		}
+		OnChangeStateCodeBuilder.Append(Property->GetCode_OnStateChange(InstanceRefName, NewStateName,
+			FString::Printf(TEXT("b%sChanged = true;\n"), *Property->GetPropertyName())
+		));
 	}
+	
+	// Generate code for calling OnRep() functions after all the properties are updated, to align with the native UE's behavior.
+	for (const TSharedPtr<FPropertyDecorator> Property : Properties)
+	{
+		OnChangeStateCodeBuilder.Append(Property->GetCode_CallRepNotify(InstanceRefName, FString::Printf(TEXT("&Old%s"), *Property->GetPropertyName())));
+	}
+	
 	return OnChangeStateCodeBuilder;
 }
 

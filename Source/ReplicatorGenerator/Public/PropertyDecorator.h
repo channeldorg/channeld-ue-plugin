@@ -45,7 +45,10 @@ if (!bPropChanged)
 
 const static TCHAR* PropDecorator_CallRepNotifyTemplate =
 	LR"EOF(
-{Declare_TargetInstance}->ProcessEvent({Declare_TargetInstance}->GetClass()->FindFunctionByName(FName(TEXT("{Declare_FunctionName}"))), {Code_OnRepParams});
+if (b{Declare_PropertyName}Changed)
+{
+	{Declare_TargetInstance}->ProcessEvent({Declare_TargetInstance}->GetClass()->FindFunctionByName(FName(TEXT("{Declare_FunctionName}"))), {Code_OnRepParams});
+}
 )EOF";
 
 
@@ -74,9 +77,9 @@ const static TCHAR* PropDeco_OnChangeStateArrayInnerTemp =
 if ((*{Declare_PropertyPtr})[i] != MessageArr[i])
 {
   (*{Declare_PropertyPtr})[i] = MessageArr[i];
-  if (!bPropChanged)
+  if (!b{Declare_PropertyName}Changed)
   {
-    bPropChanged = true;
+    b{Declare_PropertyName}Changed = true;
   }
 }
 )EOF";
@@ -279,7 +282,7 @@ public:
 	 *     Character->bIsCrouched = NewState->biscrouched();
 	 *   }
 	 */
-	virtual FString GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, bool NeedCallRepNotify = false);
+	virtual FString GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, const FString& AfterSetValueCode = TEXT(""));
 
 	virtual FString GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName);
 
