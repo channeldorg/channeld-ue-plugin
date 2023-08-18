@@ -6,6 +6,7 @@
 #include "Engine/ActorChannel.h"
 #include "ChanneldConnection.h"
 #include "ChanneldNetConnection.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/DemoNetDriver.h"
 //#define CHANNELD_TOLERANCE (1.e-8f)
 #define CHANNELD_TOLERANCE (0.001)
@@ -281,6 +282,24 @@ public:
 	 *		returns true if a new actor was spawned. false means an existing actor was found for the netguid.
 	 */
 	bool static SerializeNewActor_Server(UNetConnection* Connection, UPackageMapClient* PackageMap, TSharedPtr<FNetGUIDCache> GuidCache, FArchive& Ar, class UActorChannel *Channel, class AActor*& Actor);
+
+	static unrealpb::AssetRef GetAssetRef(const UObject* Obj)
+	{
+		unrealpb::AssetRef Ref;
+		Ref.set_objectpath(std::string(TCHAR_TO_UTF8(*Obj->GetPathName())));
+		return Ref;
+	}
+	
+	static UObject* GetAssetByRef(const unrealpb::AssetRef* Ref)
+	{
+		const FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+		const FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(UTF8_TO_TCHAR(Ref->objectpath().c_str()));
+		if (AssetData.IsValid())
+		{
+			return AssetData.GetAsset();
+		}
+		return nullptr;
+	}
 	
 	// Set the actor's NetRole on the client based on the NetConnection that owns the actor.
 	static void SetActorRoleByOwningConnId(AActor* Actor, Channeld::ConnectionId OwningConnId);

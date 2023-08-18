@@ -22,6 +22,8 @@ FChanneldPlayerStateReplicator::FChanneldPlayerStateReplicator(UObject* InTarget
 		PlayerIdPtr = Property->ContainerPtrToValuePtr<int32>(PlayerState.Get());
 		check(PlayerIdPtr);
 	}
+	//	"Ping" property doesn't exist anymore on 5
+#if ENGINE_MAJOR_VERSION < 5
 	{
 #if ENGINE_MAJOR_VERSION == 5
 		//TODO::fix this later
@@ -31,6 +33,7 @@ FChanneldPlayerStateReplicator::FChanneldPlayerStateReplicator(UObject* InTarget
 		check(PingPtr);
 #endif
 	}
+#endif
 }
 
 FChanneldPlayerStateReplicator::~FChanneldPlayerStateReplicator()

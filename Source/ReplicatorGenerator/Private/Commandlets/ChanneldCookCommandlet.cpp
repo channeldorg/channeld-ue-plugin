@@ -3,6 +3,34 @@
 =============================================================================*/
 
 #include "Commandlets/ChanneldCookCommandlet.h"
+
+#if ENGINE_MAJOR_VERSION >= 5
+#include "UObject/GCObjectScopeGuard.h"
+
+UChanneldCookCommandlet::UChanneldCookCommandlet(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	LogToConsole = false;
+}
+
+int32 UChanneldCookCommandlet::Main(const FString& CmdLineParams)
+{
+	auto CommandletClass = Cast<UClass>(StaticFindFirstObject(UClass::StaticClass(), TEXT("CookCommandlet"), EFindFirstObjectOptions::None, ELogVerbosity::Warning, TEXT("looking for commandlet")));
+	if (!CommandletClass) {
+		UE_LOG(LogTemp, Warning, TEXT("Can't find CookCommandlet"));
+		return -1;
+	}
+	UCommandlet* Commandlet = NewObject<UCommandlet>(GetTransientPackage(), CommandletClass);
+	FGCObjectScopeGuard ScopeGuard(Commandlet);
+
+	PRIVATE_GIsRunningCookCommandlet = true;
+	auto ErrorLevel = Commandlet->Main(CmdLineParams);
+	if (ErrorLevel) {
+		UE_LOG(LogTemp, Warning, TEXT("Execute cook error:%d"), ErrorLevel);
+	}
+	return 0;
+}
+#else
 #include "HAL/PlatformFilemanager.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Misc/MessageDialog.h"
@@ -1179,3 +1207,5 @@ void UChanneldCookCommandlet::ProcessDeferredCommands()
 	GEngine->DeferredCommands.Empty();
 #endif
 }
+
+#endif
