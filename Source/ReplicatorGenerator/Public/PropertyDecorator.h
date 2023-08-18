@@ -286,7 +286,7 @@ public:
 
 	virtual FString GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName);
 
-	virtual FString GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName);
+	virtual FString GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName);
 
 	virtual TArray<FString> GetAdditionalIncludes() override;
 

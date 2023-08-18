@@ -18,9 +18,9 @@ FString NewString = UTF8_TO_TCHAR(MessageArr[i].c_str());
 if ((*{Declare_PropertyPtr})[i] != NewString)
 {
   (*{Declare_PropertyPtr})[i] = NewString;
-  if (!bPropChanged)
+  if (!b{Declare_PropertyName}Changed)
   {
-    bPropChanged = true;
+    b{Declare_PropertyName}Changed = true;
   }
 }
 )EOF";
@@ -41,5 +41,5 @@ public:
 
 	virtual FString GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull) override;
 
-	virtual FString GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName) override;
+	virtual FString GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName) override;
 };

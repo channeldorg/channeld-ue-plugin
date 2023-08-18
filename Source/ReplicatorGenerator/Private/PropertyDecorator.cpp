@@ -291,10 +291,10 @@ FString FPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString& Cont
 	return FString::Format(PropDeco_OnChangeStateByMemOffsetTemp, FormatArgs);
 }
 
-FString FPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName)
+FString FPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName)
 {
 	FStringFormatNamedArguments FormatArgs;
-	FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
+	FormatArgs.Add(TEXT("Declare_PropertyName"), ArrayPropertyName);
 	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	return FString::Format(PropDeco_OnChangeStateArrayInnerTemp, FormatArgs);
 }

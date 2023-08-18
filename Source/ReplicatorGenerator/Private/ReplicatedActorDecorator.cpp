@@ -332,7 +332,7 @@ FString FReplicatedActorDecorator::GetCode_AllPropertiesOnStateChange(const FStr
 		if (Property->HasOnRepNotifyParam())
 		{
 			// `Old{PropertyName}` variable is used to pass the old property value to OnRep() function.
-			OnChangeStateCodeBuilder.Append(FString::Printf(TEXT("auto Old%s = %s;\n"),
+			OnChangeStateCodeBuilder.Append(FString::Printf(TEXT("auto Old%s = %s;"),
 				*Property->GetPropertyName(), *Property->GetCode_GetPropertyValueFrom(InstanceRefName)));
 		}
 		OnChangeStateCodeBuilder.Append(Property->GetCode_OnStateChange(InstanceRefName, NewStateName,

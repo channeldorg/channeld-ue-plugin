@@ -62,9 +62,10 @@ FString FActorCompPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FStri
 	return FString::Format(ActorCompPropDeco_SetDeltaStateArrayInnerTemp, FormatArgs);
 }
 
-FString FActorCompPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName)
+FString FActorCompPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName)
 {
 	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_PropertyName"), ArrayPropertyName);
 	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	FormatArgs.Add(TEXT("Code_GetWorldRef"), Owner->GetCode_GetWorldRef());
 	return FString::Format(ActorCompPropDeco_OnChangeStateArrayInnerTemp, FormatArgs);
