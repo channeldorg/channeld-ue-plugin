@@ -25,13 +25,9 @@ FChanneldPlayerStateReplicator::FChanneldPlayerStateReplicator(UObject* InTarget
 	//	"Ping" property doesn't exist anymore on 5
 #if ENGINE_MAJOR_VERSION < 5
 	{
-#if ENGINE_MAJOR_VERSION == 5
-		//TODO::fix this later
-#else
 		auto Property = CastFieldChecked<const FByteProperty>(PlayerState->GetClass()->FindPropertyByName(FName("Ping")));
 		PingPtr = Property->ContainerPtrToValuePtr<uint8>(PlayerState.Get());
 		check(PingPtr);
-#endif
 	}
 #endif
 }

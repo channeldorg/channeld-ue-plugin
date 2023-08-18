@@ -57,8 +57,7 @@ public:
 		}
 	}
 
-	[[deprecated("Use SetVectorFromPB instead. Use GetVector can cause the value of x/y/z to be 0 if the it is not set."
-	)]]
+	[[deprecated("Use SetVectorFromPB instead. Use GetVector can cause the value of x/y/z to be 0 if the it is not set.")]]
 	static FVector GetVector(const unrealpb::FVector& InVec)
 	{
 		return FVector(InVec.x(), InVec.y(), InVec.z());
@@ -83,7 +82,6 @@ public:
 
 	static bool CheckDifference(const FVector& VectorToCheck, const unrealpb::FVector* VectorPBToCheck)
 	{
-#if ENGINE_MAJOR_VERSION == 5
 		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X, CHANNELD_TOLERANCE))
 		{
 			return true;
@@ -96,26 +94,12 @@ public:
 		{
 			return true;
 		}
-#else
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X))
-		{
-			return true;
-		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y))
-		{
-			return true;
-		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z))
-		{
-			return true;
-		}
-#endif
+		
 		return false;
 	}
 
 	static bool CheckDifference(const FRotator& RotatorToCheck, const unrealpb::FVector* RotatorPBToCheck)
 	{
-#if ENGINE_MAJOR_VERSION == 5
 		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch, CHANNELD_TOLERANCE))
 		{
 			return true;
@@ -128,20 +112,7 @@ public:
 		{
 			return true;
 		}
-#else
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch))
-		{
-			return true;
-		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw))
-		{
-			return true;
-		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll))
-		{
-			return true;
-		}
-#endif
+		
 		return false;
 	}
 
@@ -158,17 +129,17 @@ public:
 			VectorPBToCheck = VectorToSet;
 		
 		bool bNotSame = false;
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X, CHANNELD_TOLERANCE))
 		{
 			VectorToSet->set_x(VectorToCheck.X);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y, CHANNELD_TOLERANCE))
 		{
 			VectorToSet->set_y(VectorToCheck.Y);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z, CHANNELD_TOLERANCE))
 		{
 			VectorToSet->set_z(VectorToCheck.Z);
 			bNotSame = true;
@@ -183,17 +154,17 @@ public:
 			RotatorPBToCheck = RotatorToSet;
 		
 		bool bNotSame = false;
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch, CHANNELD_TOLERANCE))
 		{
 			RotatorToSet->set_x(RotatorToCheck.Pitch);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw, CHANNELD_TOLERANCE))
 		{
 			RotatorToSet->set_y(RotatorToCheck.Yaw);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll, CHANNELD_TOLERANCE))
 		{
 			RotatorToSet->set_z(RotatorToCheck.Roll);
 			bNotSame = true;

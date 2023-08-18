@@ -62,18 +62,13 @@ public class ChanneldEditor : ModuleRules
                 "EngineSettings",
                 "Json",
                 "JsonUtilities",
- #if UE_5_0_OR_LATER
+#if UE_5_0_OR_LATER
                 "DeveloperToolSettings",
                 "ToolMenus",
 #endif
                 // ... add private dependencies that you statically link with here ...	
 			}
         );
-        if (Target.Version.MajorVersion == 5)
-        {
-            PrivateDependencyModuleNames.Add("ToolMenus"); 
-            PrivateDependencyModuleNames.Add("DeveloperToolSettings"); 
-        }
 
         DynamicallyLoadedModuleNames.AddRange(
             new string[]
