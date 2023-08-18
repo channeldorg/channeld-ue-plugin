@@ -70,10 +70,6 @@ else
 b{Declare_PropertyName}Changed = {Declare_PropPtrName}->Num() != {Code_GetProtoFieldValueFrom}.size();
 {Declare_PropPtrName}->Empty();
 }
-if(b{Declare_PropertyName}Changed)
-{
-bStateChanged = true;
-}
 )EOF";
 
 const static TCHAR* ArrPropDeco_SetPropertyValueTemp =
