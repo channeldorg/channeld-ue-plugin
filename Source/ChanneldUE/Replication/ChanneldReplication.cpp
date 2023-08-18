@@ -109,7 +109,7 @@ TArray<FChanneldReplicatorBase*> ChanneldReplication::FindAndCreateReplicators(U
 		auto Replicator = (*Func)(ReplicatedObj);
 		UE_LOG(LogChanneld, Verbose, TEXT("Created %sReplicator for object: %s"), *Class->GetName(), *ReplicatedObj->GetName());
 		// Add the replicators in the order as base class -> inherited class (e.g. Actor->GameStateBase),
-		// to make sure the property replication and OnRep functions are executed in the right order (e.g. Actor.Role -> GameStateBase.bReplicatedHasBegunPlay -> NotifyBeginPlay())
+		// to make sure the property updates are executed in the right order (e.g. Actor.Role -> GameStateBase.bReplicatedHasBegunPlay)
 		Result.Insert(Replicator, 0);
 	}
 
