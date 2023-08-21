@@ -22,11 +22,14 @@ FChanneldPlayerStateReplicator::FChanneldPlayerStateReplicator(UObject* InTarget
 		PlayerIdPtr = Property->ContainerPtrToValuePtr<int32>(PlayerState.Get());
 		check(PlayerIdPtr);
 	}
+	//	"Ping" property doesn't exist anymore on 5
+#if ENGINE_MAJOR_VERSION < 5
 	{
 		auto Property = CastFieldChecked<const FByteProperty>(PlayerState->GetClass()->FindPropertyByName(FName("Ping")));
 		PingPtr = Property->ContainerPtrToValuePtr<uint8>(PlayerState.Get());
 		check(PingPtr);
 	}
+#endif
 }
 
 FChanneldPlayerStateReplicator::~FChanneldPlayerStateReplicator()

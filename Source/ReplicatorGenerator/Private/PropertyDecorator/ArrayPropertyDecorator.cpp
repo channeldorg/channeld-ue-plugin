@@ -102,7 +102,12 @@ FString FArrayPropertyDecorator::GetCode_HasProtoFieldValueIn(const FString& Sta
 FString FArrayPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, bool NeedCallRepNotify)
 {
 	FStringFormatNamedArguments FormatArgs;
-	FormatArgs.Add(TEXT("Code_GetProtoUpdateValue"), FString::Printf(TEXT("%s->update_%s()"), *NewStateName, *GetProtoFieldName()));
+
+	if(NeedCallRepNotify && HasOnRepNotifyParam())
+	{
+		FormatArgs.Add(TEXT("Definition_OldValue"), FString::Printf(TEXT("auto OldValue = %s;\n"), *GetCode_GetPropertyValueFrom(TargetInstanceName)));
+	}
+
 	FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName));
 	FormatArgs.Add(
 		TEXT("Code_SetPropertyValue"),
@@ -114,7 +119,7 @@ FString FArrayPropertyDecorator::GetCode_OnStateChange(const FString& TargetInst
 	FormatArgs.Add(TEXT("Code_GetProtoFieldValueFrom"), GetCode_GetProtoFieldValueFrom(NewStateName));
 	FormatArgs.Add(
 		TEXT("Code_CallRepNotify"),
-		NeedCallRepNotify ? GetCode_CallRepNotify(TargetInstanceName) : TEXT("")
+		NeedCallRepNotify ? GetCode_CallRepNotify(TargetInstanceName, TEXT("&OldValue")) : TEXT("")
 	);
 	return FString::Format(ArrPropDeco_OnChangeStateTemp, FormatArgs);
 }
@@ -159,18 +164,18 @@ FString FArrayPropertyDecorator::GetCode_GetWorldRef()
 TArray<TSharedPtr<FStructPropertyDecorator>> FArrayPropertyDecorator::GetStructPropertyDecorators()
 {
 	TArray<TSharedPtr<FStructPropertyDecorator>> StructPropertyDecorators;
+	StructPropertyDecorators.Append(InnerProperty->GetStructPropertyDecorators());
 	if (InnerProperty->IsStruct())
 	{
 		StructPropertyDecorators.Add(StaticCastSharedPtr<FStructPropertyDecorator>(InnerProperty));
 	}
-	StructPropertyDecorators.Append(InnerProperty->GetStructPropertyDecorators());
 	TArray<TSharedPtr<FStructPropertyDecorator>> NonRepetitionStructPropertyDecorators;
-	TSet<FString> StructPropertyDecoratorNames;
+	TSet<FString> StructPropertyDecoratorFieldTypes;
 	for (TSharedPtr<FStructPropertyDecorator>& StructPropertyDecorator : StructPropertyDecorators)
 	{
-		if (!StructPropertyDecoratorNames.Contains(StructPropertyDecorator->GetPropertyName()))
+		if (!StructPropertyDecoratorFieldTypes.Contains(StructPropertyDecorator->GetProtoFieldType()))
 		{
-			StructPropertyDecoratorNames.Add(StructPropertyDecorator->GetPropertyName());
+			StructPropertyDecoratorFieldTypes.Add(StructPropertyDecorator->GetProtoFieldType());
 			NonRepetitionStructPropertyDecorators.Add(StructPropertyDecorator);
 		}
 	}

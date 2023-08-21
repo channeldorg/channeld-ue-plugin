@@ -65,6 +65,7 @@ const static TCHAR* ArrPropDeco_OnChangeStateTemp =
 	LR"EOF(
 {
   bool bPropChanged = false;
+  {Definition_OldValue}
   if ({Code_HasProtoFieldValue})
   {
     {Code_SetPropertyValue}
