@@ -71,6 +71,7 @@ FString FStructPropertyDecorator::GetCode_AssignPropPointer(const FString& Conta
 	FormatArgs.Add(TEXT("Declare_PropertyCPPType"), GetCPPType());
 	FormatArgs.Add(TEXT("Num_PropMemOffset"), MemOffset);
 	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
+    FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
 
 	return FString::Format(StructPropDeco_AssignPropPtrTemp, FormatArgs);
 }
@@ -84,7 +85,6 @@ FString FStructPropertyDecorator::GetCode_AssignPropPointerForGlobalStruct(const
     FormatArgs.Add(TEXT("Num_PropMemOffset"), MemOffset);
     FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
     FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
-
 
     return FString::Format(StructPropDeco_AssignPropPtrForGlobalStructTemp, FormatArgs);
 }

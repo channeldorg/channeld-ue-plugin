@@ -70,6 +70,11 @@ else {
 }
 )EOF";
 
+const static TCHAR* StructPropDeco_AssignPropPtrForGlobalStructTemp =
+    LR"EOF(
+void* PropertyAddr = (uint8*){Ref_ContainerAddr} + {Num_PropMemOffset};
+{Ref_AssignTo} = {Declare_PropPtrGroupStructName}(PropertyAddr))EOF";
+
 const static TCHAR* StructPropDeco_SetDeltaStateArrayInnerTemp =
 	LR"EOF(
 {

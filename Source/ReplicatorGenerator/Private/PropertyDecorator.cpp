@@ -182,6 +182,7 @@ FString FPropertyDecorator::GetCode_AssignPropPointer(const FString& Container, 
 	FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
 	FormatArgs.Add(TEXT("Declare_PropertyCPPType"), GetCPPType());
 	FormatArgs.Add(TEXT("Num_PropMemOffset"), MemOffset);
+    FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
 
 	return FString::Format(PropDecorator_AssignPropPtrTemp, FormatArgs);
 }
