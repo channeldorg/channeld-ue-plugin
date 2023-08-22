@@ -57,9 +57,18 @@ struct {Declare_PropCompilableStructName}
 )EOF";
 
 const static TCHAR* StructPropDeco_AssignPropPtrTemp =
-	LR"EOF(
-void* PropertyAddr = (uint8*){Ref_ContainerAddr} + {Num_PropMemOffset};
-{Ref_AssignTo} = {Declare_PropPtrGroupStructName}(PropertyAddr))EOF";
+    LR"EOF(
+FString PropertyName = TEXT("{Declare_PropertyName}");
+FProperty* Property = ActorClass->FindPropertyByName(FName(*PropertyName));
+if (Property) {
+	void* PropertyAddr = (uint8*){Ref_ContainerAddr} + Property->GetOffset_ForInternal();
+	{Ref_AssignTo} = {Declare_PropPtrGroupStructName}(PropertyAddr);
+}
+else {
+	void* PropertyAddr = (uint8*){Ref_ContainerAddr} + {Num_PropMemOffset};
+	{Ref_AssignTo} = {Declare_PropPtrGroupStructName}(PropertyAddr);
+}
+)EOF";
 
 const static TCHAR* StructPropDeco_SetDeltaStateArrayInnerTemp =
 	LR"EOF(
@@ -102,6 +111,7 @@ public:
 	virtual FString GetDeclaration_PropertyPtr() override;
 	
 	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset) override;
+    virtual FString GetCode_AssignPropPointerForGlobalStruct(const FString& Container, const FString& AssignTo, int32 MemOffset) override;
 	
 	virtual TArray<FString> GetAdditionalIncludes() override;
 	
