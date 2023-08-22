@@ -11,6 +11,7 @@
 class FSandboxPlatformFile;
 class ITargetPlatform;
 
+
 UCLASS(config=Editor)
 class UChanneldCookCommandlet
 	: public UCommandlet
@@ -21,6 +22,7 @@ class UChanneldCookCommandlet
 	UPROPERTY(config)
 	TArray<FString> FullGCAssetClassNames;
 
+#if ENGINE_MAJOR_VERSION < 5
 	/** If true, iterative cooking is being done */
 	bool bIterativeCooking;
 	/** Prototype cook-on-the-fly server */
@@ -71,6 +73,7 @@ class UChanneldCookCommandlet
 
 	/**	Process deferred commands */
 	void ProcessDeferredCommands();
+#endif
 
 public:
 

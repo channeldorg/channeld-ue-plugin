@@ -56,18 +56,12 @@ CHANNELDUE_API extern ActorComponentRefDefaultTypeInternal _ActorComponentRef_de
 class ActorComponentState;
 struct ActorComponentStateDefaultTypeInternal;
 CHANNELDUE_API extern ActorComponentStateDefaultTypeInternal _ActorComponentState_default_instance_;
-class ActorComponentStates;
-struct ActorComponentStatesDefaultTypeInternal;
-CHANNELDUE_API extern ActorComponentStatesDefaultTypeInternal _ActorComponentStates_default_instance_;
-class ActorComponentStates_StatesEntry_DoNotUse;
-struct ActorComponentStates_StatesEntry_DoNotUseDefaultTypeInternal;
-CHANNELDUE_API extern ActorComponentStates_StatesEntry_DoNotUseDefaultTypeInternal _ActorComponentStates_StatesEntry_DoNotUse_default_instance_;
-class ActorComponentSubObjectRef;
-struct ActorComponentSubObjectRefDefaultTypeInternal;
-CHANNELDUE_API extern ActorComponentSubObjectRefDefaultTypeInternal _ActorComponentSubObjectRef_default_instance_;
 class ActorState;
 struct ActorStateDefaultTypeInternal;
 CHANNELDUE_API extern ActorStateDefaultTypeInternal _ActorState_default_instance_;
+class AssetRef;
+struct AssetRefDefaultTypeInternal;
+CHANNELDUE_API extern AssetRefDefaultTypeInternal _AssetRef_default_instance_;
 class CharacterState;
 struct CharacterStateDefaultTypeInternal;
 CHANNELDUE_API extern CharacterStateDefaultTypeInternal _CharacterState_default_instance_;
@@ -194,6 +188,9 @@ CHANNELDUE_API extern SpatialEntityStateDefaultTypeInternal _SpatialEntityState_
 class SpawnObjectMessage;
 struct SpawnObjectMessageDefaultTypeInternal;
 CHANNELDUE_API extern SpawnObjectMessageDefaultTypeInternal _SpawnObjectMessage_default_instance_;
+class StaticMeshComponentState;
+struct StaticMeshComponentStateDefaultTypeInternal;
+CHANNELDUE_API extern StaticMeshComponentStateDefaultTypeInternal _StaticMeshComponentState_default_instance_;
 class SyncNetIdMessage;
 struct SyncNetIdMessageDefaultTypeInternal;
 CHANNELDUE_API extern SyncNetIdMessageDefaultTypeInternal _SyncNetIdMessage_default_instance_;
@@ -210,10 +207,8 @@ CHANNELDUE_API extern UnrealObjectRef_GuidCachedObjectDefaultTypeInternal _Unrea
 PROTOBUF_NAMESPACE_OPEN
 template<> CHANNELDUE_API ::unrealpb::ActorComponentRef* Arena::CreateMaybeMessage<::unrealpb::ActorComponentRef>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::ActorComponentState* Arena::CreateMaybeMessage<::unrealpb::ActorComponentState>(Arena*);
-template<> CHANNELDUE_API ::unrealpb::ActorComponentStates* Arena::CreateMaybeMessage<::unrealpb::ActorComponentStates>(Arena*);
-template<> CHANNELDUE_API ::unrealpb::ActorComponentStates_StatesEntry_DoNotUse* Arena::CreateMaybeMessage<::unrealpb::ActorComponentStates_StatesEntry_DoNotUse>(Arena*);
-template<> CHANNELDUE_API ::unrealpb::ActorComponentSubObjectRef* Arena::CreateMaybeMessage<::unrealpb::ActorComponentSubObjectRef>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::ActorState* Arena::CreateMaybeMessage<::unrealpb::ActorState>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::AssetRef* Arena::CreateMaybeMessage<::unrealpb::AssetRef>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::CharacterState* Arena::CreateMaybeMessage<::unrealpb::CharacterState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::Character_ClientMoveResponsePacked_Params* Arena::CreateMaybeMessage<::unrealpb::Character_ClientMoveResponsePacked_Params>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::Character_ServerMovePacked_Params* Arena::CreateMaybeMessage<::unrealpb::Character_ServerMovePacked_Params>(Arena*);
@@ -256,6 +251,7 @@ template<> CHANNELDUE_API ::unrealpb::SpatialChannelData* Arena::CreateMaybeMess
 template<> CHANNELDUE_API ::unrealpb::SpatialChannelData_EntitiesEntry_DoNotUse* Arena::CreateMaybeMessage<::unrealpb::SpatialChannelData_EntitiesEntry_DoNotUse>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::SpatialEntityState* Arena::CreateMaybeMessage<::unrealpb::SpatialEntityState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::SpawnObjectMessage* Arena::CreateMaybeMessage<::unrealpb::SpawnObjectMessage>(Arena*);
+template<> CHANNELDUE_API ::unrealpb::StaticMeshComponentState* Arena::CreateMaybeMessage<::unrealpb::StaticMeshComponentState>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::SyncNetIdMessage* Arena::CreateMaybeMessage<::unrealpb::SyncNetIdMessage>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::SyncNetIdMessage_NetIdPath* Arena::CreateMaybeMessage<::unrealpb::SyncNetIdMessage_NetIdPath>(Arena*);
 template<> CHANNELDUE_API ::unrealpb::UnrealObjectRef* Arena::CreateMaybeMessage<::unrealpb::UnrealObjectRef>(Arena*);
@@ -1109,24 +1105,24 @@ class CHANNELDUE_API ActorComponentRef final :
 };
 // -------------------------------------------------------------------
 
-class CHANNELDUE_API ActorComponentSubObjectRef final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.ActorComponentSubObjectRef) */ {
+class CHANNELDUE_API AssetRef final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.AssetRef) */ {
  public:
-  inline ActorComponentSubObjectRef() : ActorComponentSubObjectRef(nullptr) {}
-  ~ActorComponentSubObjectRef() override;
-  explicit PROTOBUF_CONSTEXPR ActorComponentSubObjectRef(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline AssetRef() : AssetRef(nullptr) {}
+  ~AssetRef() override;
+  explicit PROTOBUF_CONSTEXPR AssetRef(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  ActorComponentSubObjectRef(const ActorComponentSubObjectRef& from);
-  ActorComponentSubObjectRef(ActorComponentSubObjectRef&& from) noexcept
-    : ActorComponentSubObjectRef() {
+  AssetRef(const AssetRef& from);
+  AssetRef(AssetRef&& from) noexcept
+    : AssetRef() {
     *this = ::std::move(from);
   }
 
-  inline ActorComponentSubObjectRef& operator=(const ActorComponentSubObjectRef& from) {
+  inline AssetRef& operator=(const AssetRef& from) {
     CopyFrom(from);
     return *this;
   }
-  inline ActorComponentSubObjectRef& operator=(ActorComponentSubObjectRef&& from) noexcept {
+  inline AssetRef& operator=(AssetRef&& from) noexcept {
     if (this == &from) return *this;
     if (GetOwningArena() == from.GetOwningArena()
   #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
@@ -1149,20 +1145,20 @@ class CHANNELDUE_API ActorComponentSubObjectRef final :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return default_instance().GetMetadata().reflection;
   }
-  static const ActorComponentSubObjectRef& default_instance() {
+  static const AssetRef& default_instance() {
     return *internal_default_instance();
   }
-  static inline const ActorComponentSubObjectRef* internal_default_instance() {
-    return reinterpret_cast<const ActorComponentSubObjectRef*>(
-               &_ActorComponentSubObjectRef_default_instance_);
+  static inline const AssetRef* internal_default_instance() {
+    return reinterpret_cast<const AssetRef*>(
+               &_AssetRef_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     4;
 
-  friend void swap(ActorComponentSubObjectRef& a, ActorComponentSubObjectRef& b) {
+  friend void swap(AssetRef& a, AssetRef& b) {
     a.Swap(&b);
   }
-  inline void Swap(ActorComponentSubObjectRef* other) {
+  inline void Swap(AssetRef* other) {
     if (other == this) return;
   #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
     if (GetOwningArena() != nullptr &&
@@ -1175,7 +1171,7 @@ class CHANNELDUE_API ActorComponentSubObjectRef final :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(ActorComponentSubObjectRef* other) {
+  void UnsafeArenaSwap(AssetRef* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
     InternalSwap(other);
@@ -1183,14 +1179,14 @@ class CHANNELDUE_API ActorComponentSubObjectRef final :
 
   // implements Message ----------------------------------------------
 
-  ActorComponentSubObjectRef* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<ActorComponentSubObjectRef>(arena);
+  AssetRef* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<AssetRef>(arena);
   }
   using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const ActorComponentSubObjectRef& from);
+  void CopyFrom(const AssetRef& from);
   using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const ActorComponentSubObjectRef& from) {
-    ActorComponentSubObjectRef::MergeImpl(*this, from);
+  void MergeFrom( const AssetRef& from) {
+    AssetRef::MergeImpl(*this, from);
   }
   private:
   static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
@@ -1208,15 +1204,15 @@ class CHANNELDUE_API ActorComponentSubObjectRef final :
   void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
   void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(ActorComponentSubObjectRef* other);
+  void InternalSwap(AssetRef* other);
 
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "unrealpb.ActorComponentSubObjectRef";
+    return "unrealpb.AssetRef";
   }
   protected:
-  explicit ActorComponentSubObjectRef(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+  explicit AssetRef(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                        bool is_message_owned = false);
   public:
 
@@ -1230,65 +1226,23 @@ class CHANNELDUE_API ActorComponentSubObjectRef final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kCompNameFieldNumber = 2,
-    kObjNameFieldNumber = 3,
-    kOwnerFieldNumber = 1,
+    kObjectPathFieldNumber = 1,
   };
-  // optional string compName = 2;
-  bool has_compname() const;
-  private:
-  bool _internal_has_compname() const;
-  public:
-  void clear_compname();
-  const std::string& compname() const;
+  // string objectPath = 1;
+  void clear_objectpath();
+  const std::string& objectpath() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_compname(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_compname();
-  PROTOBUF_NODISCARD std::string* release_compname();
-  void set_allocated_compname(std::string* compname);
+  void set_objectpath(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_objectpath();
+  PROTOBUF_NODISCARD std::string* release_objectpath();
+  void set_allocated_objectpath(std::string* objectpath);
   private:
-  const std::string& _internal_compname() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_compname(const std::string& value);
-  std::string* _internal_mutable_compname();
+  const std::string& _internal_objectpath() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_objectpath(const std::string& value);
+  std::string* _internal_mutable_objectpath();
   public:
 
-  // optional string objName = 3;
-  bool has_objname() const;
-  private:
-  bool _internal_has_objname() const;
-  public:
-  void clear_objname();
-  const std::string& objname() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_objname(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_objname();
-  PROTOBUF_NODISCARD std::string* release_objname();
-  void set_allocated_objname(std::string* objname);
-  private:
-  const std::string& _internal_objname() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_objname(const std::string& value);
-  std::string* _internal_mutable_objname();
-  public:
-
-  // optional .unrealpb.UnrealObjectRef owner = 1;
-  bool has_owner() const;
-  private:
-  bool _internal_has_owner() const;
-  public:
-  void clear_owner();
-  const ::unrealpb::UnrealObjectRef& owner() const;
-  PROTOBUF_NODISCARD ::unrealpb::UnrealObjectRef* release_owner();
-  ::unrealpb::UnrealObjectRef* mutable_owner();
-  void set_allocated_owner(::unrealpb::UnrealObjectRef* owner);
-  private:
-  const ::unrealpb::UnrealObjectRef& _internal_owner() const;
-  ::unrealpb::UnrealObjectRef* _internal_mutable_owner();
-  public:
-  void unsafe_arena_set_allocated_owner(
-      ::unrealpb::UnrealObjectRef* owner);
-  ::unrealpb::UnrealObjectRef* unsafe_arena_release_owner();
-
-  // @@protoc_insertion_point(class_scope:unrealpb.ActorComponentSubObjectRef)
+  // @@protoc_insertion_point(class_scope:unrealpb.AssetRef)
  private:
   class _Internal;
 
@@ -1296,11 +1250,8 @@ class CHANNELDUE_API ActorComponentSubObjectRef final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
-    ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr objectpath_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr compname_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr objname_;
-    ::unrealpb::UnrealObjectRef* owner_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -1430,7 +1381,6 @@ class CHANNELDUE_API RemoteFunctionMessage final :
   enum : int {
     kFunctionNameFieldNumber = 2,
     kParamsPayloadFieldNumber = 3,
-    kSubObjectPathFieldNumber = 5,
     kTargetObjFieldNumber = 1,
     kRedirectionCounterFieldNumber = 4,
   };
@@ -1460,20 +1410,6 @@ class CHANNELDUE_API RemoteFunctionMessage final :
   const std::string& _internal_paramspayload() const;
   inline PROTOBUF_ALWAYS_INLINE void _internal_set_paramspayload(const std::string& value);
   std::string* _internal_mutable_paramspayload();
-  public:
-
-  // string subObjectPath = 5;
-  void clear_subobjectpath();
-  const std::string& subobjectpath() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_subobjectpath(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_subobjectpath();
-  PROTOBUF_NODISCARD std::string* release_subobjectpath();
-  void set_allocated_subobjectpath(std::string* subobjectpath);
-  private:
-  const std::string& _internal_subobjectpath() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_subobjectpath(const std::string& value);
-  std::string* _internal_mutable_subobjectpath();
   public:
 
   // .unrealpb.UnrealObjectRef targetObj = 1;
@@ -1513,7 +1449,6 @@ class CHANNELDUE_API RemoteFunctionMessage final :
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr functionname_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr paramspayload_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr subobjectpath_;
     ::unrealpb::UnrealObjectRef* targetobj_;
     int32_t redirectioncounter_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -4220,29 +4155,10 @@ class CHANNELDUE_API ActorComponentState final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kCompNameFieldNumber = 4,
     kRemovedFieldNumber = 1,
     kBIsActiveFieldNumber = 2,
     kBReplicatedFieldNumber = 3,
   };
-  // optional string compName = 4;
-  bool has_compname() const;
-  private:
-  bool _internal_has_compname() const;
-  public:
-  void clear_compname();
-  const std::string& compname() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_compname(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_compname();
-  PROTOBUF_NODISCARD std::string* release_compname();
-  void set_allocated_compname(std::string* compname);
-  private:
-  const std::string& _internal_compname() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_compname(const std::string& value);
-  std::string* _internal_mutable_compname();
-  public:
-
   // bool removed = 1;
   void clear_removed();
   bool removed() const;
@@ -4288,199 +4204,9 @@ class CHANNELDUE_API ActorComponentState final :
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr compname_;
     bool removed_;
     bool bisactive_;
     bool breplicated_;
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_unreal_5fcommon_2eproto;
-};
-// -------------------------------------------------------------------
-
-class ActorComponentStates_StatesEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ActorComponentStates_StatesEntry_DoNotUse, 
-    std::string, ::unrealpb::ActorComponentState,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE> {
-public:
-  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ActorComponentStates_StatesEntry_DoNotUse, 
-    std::string, ::unrealpb::ActorComponentState,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE> SuperType;
-  ActorComponentStates_StatesEntry_DoNotUse();
-  explicit PROTOBUF_CONSTEXPR ActorComponentStates_StatesEntry_DoNotUse(
-      ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-  explicit ActorComponentStates_StatesEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  void MergeFrom(const ActorComponentStates_StatesEntry_DoNotUse& other);
-  static const ActorComponentStates_StatesEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const ActorComponentStates_StatesEntry_DoNotUse*>(&_ActorComponentStates_StatesEntry_DoNotUse_default_instance_); }
-  static bool ValidateKey(std::string* s) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "unrealpb.ActorComponentStates.StatesEntry.key");
- }
-  static bool ValidateValue(void*) { return true; }
-  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  friend struct ::TableStruct_unreal_5fcommon_2eproto;
-};
-
-// -------------------------------------------------------------------
-
-class CHANNELDUE_API ActorComponentStates final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.ActorComponentStates) */ {
- public:
-  inline ActorComponentStates() : ActorComponentStates(nullptr) {}
-  ~ActorComponentStates() override;
-  explicit PROTOBUF_CONSTEXPR ActorComponentStates(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  ActorComponentStates(const ActorComponentStates& from);
-  ActorComponentStates(ActorComponentStates&& from) noexcept
-    : ActorComponentStates() {
-    *this = ::std::move(from);
-  }
-
-  inline ActorComponentStates& operator=(const ActorComponentStates& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline ActorComponentStates& operator=(ActorComponentStates&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetOwningArena() == from.GetOwningArena()
-  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetOwningArena() != nullptr
-  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const ActorComponentStates& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const ActorComponentStates* internal_default_instance() {
-    return reinterpret_cast<const ActorComponentStates*>(
-               &_ActorComponentStates_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    22;
-
-  friend void swap(ActorComponentStates& a, ActorComponentStates& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(ActorComponentStates* other) {
-    if (other == this) return;
-  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() != nullptr &&
-        GetOwningArena() == other->GetOwningArena()) {
-   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetOwningArena() == other->GetOwningArena()) {
-  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(ActorComponentStates* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  ActorComponentStates* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<ActorComponentStates>(arena);
-  }
-  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const ActorComponentStates& from);
-  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom( const ActorComponentStates& from) {
-    ActorComponentStates::MergeImpl(*this, from);
-  }
-  private:
-  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
-  public:
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  uint8_t* _InternalSerialize(
-      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
-  void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(ActorComponentStates* other);
-
-  private:
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "unrealpb.ActorComponentStates";
-  }
-  protected:
-  explicit ActorComponentStates(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                       bool is_message_owned = false);
-  private:
-  static void ArenaDtor(void* object);
-  public:
-
-  static const ClassData _class_data_;
-  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-
-  // nested types ----------------------------------------------------
-
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kStatesFieldNumber = 1,
-  };
-  // map<string, .unrealpb.ActorComponentState> states = 1;
-  int states_size() const;
-  private:
-  int _internal_states_size() const;
-  public:
-  void clear_states();
-  private:
-  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::unrealpb::ActorComponentState >&
-      _internal_states() const;
-  ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::unrealpb::ActorComponentState >*
-      _internal_mutable_states();
-  public:
-  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::unrealpb::ActorComponentState >&
-      states() const;
-  ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::unrealpb::ActorComponentState >*
-      mutable_states();
-
-  // @@protoc_insertion_point(class_scope:unrealpb.ActorComponentStates)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  struct Impl_ {
-    ::PROTOBUF_NAMESPACE_ID::internal::MapField<
-        ActorComponentStates_StatesEntry_DoNotUse,
-        std::string, ::unrealpb::ActorComponentState,
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE> states_;
-    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -4535,7 +4261,7 @@ class CHANNELDUE_API SceneComponentState final :
                &_SceneComponentState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    21;
 
   friend void swap(SceneComponentState& a, SceneComponentState& b) {
     a.Swap(&b);
@@ -4909,7 +4635,7 @@ class CHANNELDUE_API FBasedMovementInfo final :
                &_FBasedMovementInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    22;
 
   friend void swap(FBasedMovementInfo& a, FBasedMovementInfo& b) {
     a.Swap(&b);
@@ -5172,7 +4898,7 @@ class CHANNELDUE_API FRootMotionSource_FRootMotionFinishVelocitySettings final :
                &_FRootMotionSource_FRootMotionFinishVelocitySettings_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    23;
 
   friend void swap(FRootMotionSource_FRootMotionFinishVelocitySettings& a, FRootMotionSource_FRootMotionFinishVelocitySettings& b) {
     a.Swap(&b);
@@ -5360,7 +5086,7 @@ class CHANNELDUE_API FRootMotionSource final :
                &_FRootMotionSource_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    24;
 
   friend void swap(FRootMotionSource& a, FRootMotionSource& b) {
     a.Swap(&b);
@@ -5750,7 +5476,7 @@ class CHANNELDUE_API FRootMotionSourceGroup final :
                &_FRootMotionSourceGroup_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    25;
 
   friend void swap(FRootMotionSourceGroup& a, FRootMotionSourceGroup& b) {
     a.Swap(&b);
@@ -6023,7 +5749,7 @@ class CHANNELDUE_API FRepRootMotionMontage final :
                &_FRepRootMotionMontage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    26;
 
   friend void swap(FRepRootMotionMontage& a, FRepRootMotionMontage& b) {
     a.Swap(&b);
@@ -6381,7 +6107,7 @@ class CHANNELDUE_API CharacterState final :
                &_CharacterState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    27;
 
   friend void swap(CharacterState& a, CharacterState& b) {
     a.Swap(&b);
@@ -6649,7 +6375,7 @@ class CHANNELDUE_API Character_ServerMovePacked_Params final :
                &_Character_ServerMovePacked_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    28;
 
   friend void swap(Character_ServerMovePacked_Params& a, Character_ServerMovePacked_Params& b) {
     a.Swap(&b);
@@ -6813,7 +6539,7 @@ class CHANNELDUE_API Character_ClientMoveResponsePacked_Params final :
                &_Character_ClientMoveResponsePacked_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    29;
 
   friend void swap(Character_ClientMoveResponsePacked_Params& a, Character_ClientMoveResponsePacked_Params& b) {
     a.Swap(&b);
@@ -6977,7 +6703,7 @@ class CHANNELDUE_API PlayerState final :
                &_PlayerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    30;
 
   friend void swap(PlayerState& a, PlayerState& b) {
     a.Swap(&b);
@@ -7180,7 +6906,7 @@ class CHANNELDUE_API ControllerState final :
                &_ControllerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    31;
 
   friend void swap(ControllerState& a, ControllerState& b) {
     a.Swap(&b);
@@ -7357,7 +7083,7 @@ class CHANNELDUE_API Controller_ClientSetLocation_Params final :
                &_Controller_ClientSetLocation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    32;
 
   friend void swap(Controller_ClientSetLocation_Params& a, Controller_ClientSetLocation_Params& b) {
     a.Swap(&b);
@@ -7534,7 +7260,7 @@ class CHANNELDUE_API Controller_ClientSetRotation_Params final :
                &_Controller_ClientSetRotation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    33;
 
   friend void swap(Controller_ClientSetRotation_Params& a, Controller_ClientSetRotation_Params& b) {
     a.Swap(&b);
@@ -7702,7 +7428,7 @@ class CHANNELDUE_API PlayerControllerState final :
                &_PlayerControllerState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    34;
 
   friend void swap(PlayerControllerState& a, PlayerControllerState& b) {
     a.Swap(&b);
@@ -7880,7 +7606,7 @@ class CHANNELDUE_API PlayerController_ServerUpdateCamera_Params final :
                &_PlayerController_ServerUpdateCamera_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    35;
 
   friend void swap(PlayerController_ServerUpdateCamera_Params& a, PlayerController_ServerUpdateCamera_Params& b) {
     a.Swap(&b);
@@ -8048,7 +7774,7 @@ class CHANNELDUE_API PlayerController_ClientSetHUD_Params final :
                &_PlayerController_ClientSetHUD_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    38;
+    36;
 
   friend void swap(PlayerController_ClientSetHUD_Params& a, PlayerController_ClientSetHUD_Params& b) {
     a.Swap(&b);
@@ -8206,7 +7932,7 @@ class CHANNELDUE_API PlayerController_ClientSetViewTarget_Params final :
                &_PlayerController_ClientSetViewTarget_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    37;
 
   friend void swap(PlayerController_ClientSetViewTarget_Params& a, PlayerController_ClientSetViewTarget_Params& b) {
     a.Swap(&b);
@@ -8407,7 +8133,7 @@ class CHANNELDUE_API PlayerController_ClientEnableNetworkVoice_Params final :
                &_PlayerController_ClientEnableNetworkVoice_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    40;
+    38;
 
   friend void swap(PlayerController_ClientEnableNetworkVoice_Params& a, PlayerController_ClientEnableNetworkVoice_Params& b) {
     a.Swap(&b);
@@ -8560,7 +8286,7 @@ class CHANNELDUE_API PlayerController_ClientCapBandwidth_Params final :
                &_PlayerController_ClientCapBandwidth_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    41;
+    39;
 
   friend void swap(PlayerController_ClientCapBandwidth_Params& a, PlayerController_ClientCapBandwidth_Params& b) {
     a.Swap(&b);
@@ -8708,7 +8434,7 @@ class CHANNELDUE_API PlayerController_ClientRestart_Params final :
                &_PlayerController_ClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    42;
+    40;
 
   friend void swap(PlayerController_ClientRestart_Params& a, PlayerController_ClientRestart_Params& b) {
     a.Swap(&b);
@@ -8865,7 +8591,7 @@ class CHANNELDUE_API PlayerController_ClientSetCameraMode_Params final :
                &_PlayerController_ClientSetCameraMode_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    43;
+    41;
 
   friend void swap(PlayerController_ClientSetCameraMode_Params& a, PlayerController_ClientSetCameraMode_Params& b) {
     a.Swap(&b);
@@ -9018,7 +8744,7 @@ class CHANNELDUE_API PlayerController_ClientRetryClientRestart_Params final :
                &_PlayerController_ClientRetryClientRestart_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    44;
+    42;
 
   friend void swap(PlayerController_ClientRetryClientRestart_Params& a, PlayerController_ClientRetryClientRestart_Params& b) {
     a.Swap(&b);
@@ -9175,7 +8901,7 @@ class CHANNELDUE_API PlayerController_ServerSetSpectatorLocation_Params final :
                &_PlayerController_ServerSetSpectatorLocation_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    45;
+    43;
 
   friend void swap(PlayerController_ServerSetSpectatorLocation_Params& a, PlayerController_ServerSetSpectatorLocation_Params& b) {
     a.Swap(&b);
@@ -9352,7 +9078,7 @@ class CHANNELDUE_API PlayerController_ServerAcknowledgePossession_Params final :
                &_PlayerController_ServerAcknowledgePossession_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    46;
+    44;
 
   friend void swap(PlayerController_ServerAcknowledgePossession_Params& a, PlayerController_ServerAcknowledgePossession_Params& b) {
     a.Swap(&b);
@@ -9509,7 +9235,7 @@ class CHANNELDUE_API PlayerController_ClientGotoState_Params final :
                &_PlayerController_ClientGotoState_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    47;
+    45;
 
   friend void swap(PlayerController_ClientGotoState_Params& a, PlayerController_ClientGotoState_Params& b) {
     a.Swap(&b);
@@ -9662,7 +9388,7 @@ class CHANNELDUE_API PlayerController_ClientReceiveLocalizedMessage_Params final
                &_PlayerController_ClientReceiveLocalizedMessage_Params_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    48;
+    46;
 
   friend void swap(PlayerController_ClientReceiveLocalizedMessage_Params& a, PlayerController_ClientReceiveLocalizedMessage_Params& b) {
     a.Swap(&b);
@@ -9886,7 +9612,7 @@ class CHANNELDUE_API GameStateBase final :
                &_GameStateBase_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    49;
+    47;
 
   friend void swap(GameStateBase& a, GameStateBase& b) {
     a.Swap(&b);
@@ -10094,7 +9820,7 @@ class CHANNELDUE_API PawnState final :
                &_PawnState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    50;
+    48;
 
   friend void swap(PawnState& a, PawnState& b) {
     a.Swap(&b);
@@ -10287,7 +10013,7 @@ class CHANNELDUE_API FClientAdjustment final :
                &_FClientAdjustment_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    51;
+    49;
 
   friend void swap(FClientAdjustment& a, FClientAdjustment& b) {
     a.Swap(&b);
@@ -10571,6 +10297,174 @@ class CHANNELDUE_API FClientAdjustment final :
     bool backgoodmove_;
     bool bbaserelativeposition_;
     uint32_t movementmode_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_unreal_5fcommon_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API StaticMeshComponentState final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:unrealpb.StaticMeshComponentState) */ {
+ public:
+  inline StaticMeshComponentState() : StaticMeshComponentState(nullptr) {}
+  ~StaticMeshComponentState() override;
+  explicit PROTOBUF_CONSTEXPR StaticMeshComponentState(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  StaticMeshComponentState(const StaticMeshComponentState& from);
+  StaticMeshComponentState(StaticMeshComponentState&& from) noexcept
+    : StaticMeshComponentState() {
+    *this = ::std::move(from);
+  }
+
+  inline StaticMeshComponentState& operator=(const StaticMeshComponentState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline StaticMeshComponentState& operator=(StaticMeshComponentState&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const StaticMeshComponentState& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const StaticMeshComponentState* internal_default_instance() {
+    return reinterpret_cast<const StaticMeshComponentState*>(
+               &_StaticMeshComponentState_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    50;
+
+  friend void swap(StaticMeshComponentState& a, StaticMeshComponentState& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(StaticMeshComponentState* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(StaticMeshComponentState* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  StaticMeshComponentState* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<StaticMeshComponentState>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const StaticMeshComponentState& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const StaticMeshComponentState& from) {
+    StaticMeshComponentState::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(StaticMeshComponentState* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "unrealpb.StaticMeshComponentState";
+  }
+  protected:
+  explicit StaticMeshComponentState(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kStaticMeshFieldNumber = 2,
+    kRemovedFieldNumber = 1,
+  };
+  // .unrealpb.AssetRef staticMesh = 2;
+  bool has_staticmesh() const;
+  private:
+  bool _internal_has_staticmesh() const;
+  public:
+  void clear_staticmesh();
+  const ::unrealpb::AssetRef& staticmesh() const;
+  PROTOBUF_NODISCARD ::unrealpb::AssetRef* release_staticmesh();
+  ::unrealpb::AssetRef* mutable_staticmesh();
+  void set_allocated_staticmesh(::unrealpb::AssetRef* staticmesh);
+  private:
+  const ::unrealpb::AssetRef& _internal_staticmesh() const;
+  ::unrealpb::AssetRef* _internal_mutable_staticmesh();
+  public:
+  void unsafe_arena_set_allocated_staticmesh(
+      ::unrealpb::AssetRef* staticmesh);
+  ::unrealpb::AssetRef* unsafe_arena_release_staticmesh();
+
+  // bool removed = 1;
+  void clear_removed();
+  bool removed() const;
+  void set_removed(bool value);
+  private:
+  bool _internal_removed() const;
+  void _internal_set_removed(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:unrealpb.StaticMeshComponentState)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::unrealpb::AssetRef* staticmesh_;
+    bool removed_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_unreal_5fcommon_2eproto;
@@ -11192,232 +11086,56 @@ inline void ActorComponentRef::set_allocated_compname(std::string* compname) {
 
 // -------------------------------------------------------------------
 
-// ActorComponentSubObjectRef
+// AssetRef
 
-// optional .unrealpb.UnrealObjectRef owner = 1;
-inline bool ActorComponentSubObjectRef::_internal_has_owner() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
-  PROTOBUF_ASSUME(!value || _impl_.owner_ != nullptr);
-  return value;
+// string objectPath = 1;
+inline void AssetRef::clear_objectpath() {
+  _impl_.objectpath_.ClearToEmpty();
 }
-inline bool ActorComponentSubObjectRef::has_owner() const {
-  return _internal_has_owner();
-}
-inline void ActorComponentSubObjectRef::clear_owner() {
-  if (_impl_.owner_ != nullptr) _impl_.owner_->Clear();
-  _impl_._has_bits_[0] &= ~0x00000004u;
-}
-inline const ::unrealpb::UnrealObjectRef& ActorComponentSubObjectRef::_internal_owner() const {
-  const ::unrealpb::UnrealObjectRef* p = _impl_.owner_;
-  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::UnrealObjectRef&>(
-      ::unrealpb::_UnrealObjectRef_default_instance_);
-}
-inline const ::unrealpb::UnrealObjectRef& ActorComponentSubObjectRef::owner() const {
-  // @@protoc_insertion_point(field_get:unrealpb.ActorComponentSubObjectRef.owner)
-  return _internal_owner();
-}
-inline void ActorComponentSubObjectRef::unsafe_arena_set_allocated_owner(
-    ::unrealpb::UnrealObjectRef* owner) {
-  if (GetArenaForAllocation() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.owner_);
-  }
-  _impl_.owner_ = owner;
-  if (owner) {
-    _impl_._has_bits_[0] |= 0x00000004u;
-  } else {
-    _impl_._has_bits_[0] &= ~0x00000004u;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.ActorComponentSubObjectRef.owner)
-}
-inline ::unrealpb::UnrealObjectRef* ActorComponentSubObjectRef::release_owner() {
-  _impl_._has_bits_[0] &= ~0x00000004u;
-  ::unrealpb::UnrealObjectRef* temp = _impl_.owner_;
-  _impl_.owner_ = nullptr;
-#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
-  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
-  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  if (GetArenaForAllocation() == nullptr) { delete old; }
-#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
-  if (GetArenaForAllocation() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
-  return temp;
-}
-inline ::unrealpb::UnrealObjectRef* ActorComponentSubObjectRef::unsafe_arena_release_owner() {
-  // @@protoc_insertion_point(field_release:unrealpb.ActorComponentSubObjectRef.owner)
-  _impl_._has_bits_[0] &= ~0x00000004u;
-  ::unrealpb::UnrealObjectRef* temp = _impl_.owner_;
-  _impl_.owner_ = nullptr;
-  return temp;
-}
-inline ::unrealpb::UnrealObjectRef* ActorComponentSubObjectRef::_internal_mutable_owner() {
-  _impl_._has_bits_[0] |= 0x00000004u;
-  if (_impl_.owner_ == nullptr) {
-    auto* p = CreateMaybeMessage<::unrealpb::UnrealObjectRef>(GetArenaForAllocation());
-    _impl_.owner_ = p;
-  }
-  return _impl_.owner_;
-}
-inline ::unrealpb::UnrealObjectRef* ActorComponentSubObjectRef::mutable_owner() {
-  ::unrealpb::UnrealObjectRef* _msg = _internal_mutable_owner();
-  // @@protoc_insertion_point(field_mutable:unrealpb.ActorComponentSubObjectRef.owner)
-  return _msg;
-}
-inline void ActorComponentSubObjectRef::set_allocated_owner(::unrealpb::UnrealObjectRef* owner) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
-  if (message_arena == nullptr) {
-    delete _impl_.owner_;
-  }
-  if (owner) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(owner);
-    if (message_arena != submessage_arena) {
-      owner = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, owner, submessage_arena);
-    }
-    _impl_._has_bits_[0] |= 0x00000004u;
-  } else {
-    _impl_._has_bits_[0] &= ~0x00000004u;
-  }
-  _impl_.owner_ = owner;
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.ActorComponentSubObjectRef.owner)
-}
-
-// optional string compName = 2;
-inline bool ActorComponentSubObjectRef::_internal_has_compname() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool ActorComponentSubObjectRef::has_compname() const {
-  return _internal_has_compname();
-}
-inline void ActorComponentSubObjectRef::clear_compname() {
-  _impl_.compname_.ClearToEmpty();
-  _impl_._has_bits_[0] &= ~0x00000001u;
-}
-inline const std::string& ActorComponentSubObjectRef::compname() const {
-  // @@protoc_insertion_point(field_get:unrealpb.ActorComponentSubObjectRef.compName)
-  return _internal_compname();
+inline const std::string& AssetRef::objectpath() const {
+  // @@protoc_insertion_point(field_get:unrealpb.AssetRef.objectPath)
+  return _internal_objectpath();
 }
 template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
-void ActorComponentSubObjectRef::set_compname(ArgT0&& arg0, ArgT... args) {
- _impl_._has_bits_[0] |= 0x00000001u;
- _impl_.compname_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:unrealpb.ActorComponentSubObjectRef.compName)
+void AssetRef::set_objectpath(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.objectpath_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:unrealpb.AssetRef.objectPath)
 }
-inline std::string* ActorComponentSubObjectRef::mutable_compname() {
-  std::string* _s = _internal_mutable_compname();
-  // @@protoc_insertion_point(field_mutable:unrealpb.ActorComponentSubObjectRef.compName)
+inline std::string* AssetRef::mutable_objectpath() {
+  std::string* _s = _internal_mutable_objectpath();
+  // @@protoc_insertion_point(field_mutable:unrealpb.AssetRef.objectPath)
   return _s;
 }
-inline const std::string& ActorComponentSubObjectRef::_internal_compname() const {
-  return _impl_.compname_.Get();
+inline const std::string& AssetRef::_internal_objectpath() const {
+  return _impl_.objectpath_.Get();
 }
-inline void ActorComponentSubObjectRef::_internal_set_compname(const std::string& value) {
-  _impl_._has_bits_[0] |= 0x00000001u;
-  _impl_.compname_.Set(value, GetArenaForAllocation());
+inline void AssetRef::_internal_set_objectpath(const std::string& value) {
+  
+  _impl_.objectpath_.Set(value, GetArenaForAllocation());
 }
-inline std::string* ActorComponentSubObjectRef::_internal_mutable_compname() {
-  _impl_._has_bits_[0] |= 0x00000001u;
-  return _impl_.compname_.Mutable(GetArenaForAllocation());
+inline std::string* AssetRef::_internal_mutable_objectpath() {
+  
+  return _impl_.objectpath_.Mutable(GetArenaForAllocation());
 }
-inline std::string* ActorComponentSubObjectRef::release_compname() {
-  // @@protoc_insertion_point(field_release:unrealpb.ActorComponentSubObjectRef.compName)
-  if (!_internal_has_compname()) {
-    return nullptr;
-  }
-  _impl_._has_bits_[0] &= ~0x00000001u;
-  auto* p = _impl_.compname_.Release();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.compname_.IsDefault()) {
-    _impl_.compname_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  return p;
+inline std::string* AssetRef::release_objectpath() {
+  // @@protoc_insertion_point(field_release:unrealpb.AssetRef.objectPath)
+  return _impl_.objectpath_.Release();
 }
-inline void ActorComponentSubObjectRef::set_allocated_compname(std::string* compname) {
-  if (compname != nullptr) {
-    _impl_._has_bits_[0] |= 0x00000001u;
+inline void AssetRef::set_allocated_objectpath(std::string* objectpath) {
+  if (objectpath != nullptr) {
+    
   } else {
-    _impl_._has_bits_[0] &= ~0x00000001u;
+    
   }
-  _impl_.compname_.SetAllocated(compname, GetArenaForAllocation());
+  _impl_.objectpath_.SetAllocated(objectpath, GetArenaForAllocation());
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.compname_.IsDefault()) {
-    _impl_.compname_.Set("", GetArenaForAllocation());
+  if (_impl_.objectpath_.IsDefault()) {
+    _impl_.objectpath_.Set("", GetArenaForAllocation());
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.ActorComponentSubObjectRef.compName)
-}
-
-// optional string objName = 3;
-inline bool ActorComponentSubObjectRef::_internal_has_objname() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
-inline bool ActorComponentSubObjectRef::has_objname() const {
-  return _internal_has_objname();
-}
-inline void ActorComponentSubObjectRef::clear_objname() {
-  _impl_.objname_.ClearToEmpty();
-  _impl_._has_bits_[0] &= ~0x00000002u;
-}
-inline const std::string& ActorComponentSubObjectRef::objname() const {
-  // @@protoc_insertion_point(field_get:unrealpb.ActorComponentSubObjectRef.objName)
-  return _internal_objname();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void ActorComponentSubObjectRef::set_objname(ArgT0&& arg0, ArgT... args) {
- _impl_._has_bits_[0] |= 0x00000002u;
- _impl_.objname_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:unrealpb.ActorComponentSubObjectRef.objName)
-}
-inline std::string* ActorComponentSubObjectRef::mutable_objname() {
-  std::string* _s = _internal_mutable_objname();
-  // @@protoc_insertion_point(field_mutable:unrealpb.ActorComponentSubObjectRef.objName)
-  return _s;
-}
-inline const std::string& ActorComponentSubObjectRef::_internal_objname() const {
-  return _impl_.objname_.Get();
-}
-inline void ActorComponentSubObjectRef::_internal_set_objname(const std::string& value) {
-  _impl_._has_bits_[0] |= 0x00000002u;
-  _impl_.objname_.Set(value, GetArenaForAllocation());
-}
-inline std::string* ActorComponentSubObjectRef::_internal_mutable_objname() {
-  _impl_._has_bits_[0] |= 0x00000002u;
-  return _impl_.objname_.Mutable(GetArenaForAllocation());
-}
-inline std::string* ActorComponentSubObjectRef::release_objname() {
-  // @@protoc_insertion_point(field_release:unrealpb.ActorComponentSubObjectRef.objName)
-  if (!_internal_has_objname()) {
-    return nullptr;
-  }
-  _impl_._has_bits_[0] &= ~0x00000002u;
-  auto* p = _impl_.objname_.Release();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.objname_.IsDefault()) {
-    _impl_.objname_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  return p;
-}
-inline void ActorComponentSubObjectRef::set_allocated_objname(std::string* objname) {
-  if (objname != nullptr) {
-    _impl_._has_bits_[0] |= 0x00000002u;
-  } else {
-    _impl_._has_bits_[0] &= ~0x00000002u;
-  }
-  _impl_.objname_.SetAllocated(objname, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.objname_.IsDefault()) {
-    _impl_.objname_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.ActorComponentSubObjectRef.objName)
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.AssetRef.objectPath)
 }
 
 // -------------------------------------------------------------------
@@ -11632,56 +11350,6 @@ inline void RemoteFunctionMessage::_internal_set_redirectioncounter(int32_t valu
 inline void RemoteFunctionMessage::set_redirectioncounter(int32_t value) {
   _internal_set_redirectioncounter(value);
   // @@protoc_insertion_point(field_set:unrealpb.RemoteFunctionMessage.redirectionCounter)
-}
-
-// string subObjectPath = 5;
-inline void RemoteFunctionMessage::clear_subobjectpath() {
-  _impl_.subobjectpath_.ClearToEmpty();
-}
-inline const std::string& RemoteFunctionMessage::subobjectpath() const {
-  // @@protoc_insertion_point(field_get:unrealpb.RemoteFunctionMessage.subObjectPath)
-  return _internal_subobjectpath();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void RemoteFunctionMessage::set_subobjectpath(ArgT0&& arg0, ArgT... args) {
- 
- _impl_.subobjectpath_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:unrealpb.RemoteFunctionMessage.subObjectPath)
-}
-inline std::string* RemoteFunctionMessage::mutable_subobjectpath() {
-  std::string* _s = _internal_mutable_subobjectpath();
-  // @@protoc_insertion_point(field_mutable:unrealpb.RemoteFunctionMessage.subObjectPath)
-  return _s;
-}
-inline const std::string& RemoteFunctionMessage::_internal_subobjectpath() const {
-  return _impl_.subobjectpath_.Get();
-}
-inline void RemoteFunctionMessage::_internal_set_subobjectpath(const std::string& value) {
-  
-  _impl_.subobjectpath_.Set(value, GetArenaForAllocation());
-}
-inline std::string* RemoteFunctionMessage::_internal_mutable_subobjectpath() {
-  
-  return _impl_.subobjectpath_.Mutable(GetArenaForAllocation());
-}
-inline std::string* RemoteFunctionMessage::release_subobjectpath() {
-  // @@protoc_insertion_point(field_release:unrealpb.RemoteFunctionMessage.subObjectPath)
-  return _impl_.subobjectpath_.Release();
-}
-inline void RemoteFunctionMessage::set_allocated_subobjectpath(std::string* subobjectpath) {
-  if (subobjectpath != nullptr) {
-    
-  } else {
-    
-  }
-  _impl_.subobjectpath_.SetAllocated(subobjectpath, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.subobjectpath_.IsDefault()) {
-    _impl_.subobjectpath_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.RemoteFunctionMessage.subObjectPath)
 }
 
 // -------------------------------------------------------------------
@@ -14218,7 +13886,7 @@ inline void ActorComponentState::set_removed(bool value) {
 
 // optional bool bIsActive = 2;
 inline bool ActorComponentState::_internal_has_bisactive() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
 inline bool ActorComponentState::has_bisactive() const {
@@ -14226,7 +13894,7 @@ inline bool ActorComponentState::has_bisactive() const {
 }
 inline void ActorComponentState::clear_bisactive() {
   _impl_.bisactive_ = false;
-  _impl_._has_bits_[0] &= ~0x00000002u;
+  _impl_._has_bits_[0] &= ~0x00000001u;
 }
 inline bool ActorComponentState::_internal_bisactive() const {
   return _impl_.bisactive_;
@@ -14236,7 +13904,7 @@ inline bool ActorComponentState::bisactive() const {
   return _internal_bisactive();
 }
 inline void ActorComponentState::_internal_set_bisactive(bool value) {
-  _impl_._has_bits_[0] |= 0x00000002u;
+  _impl_._has_bits_[0] |= 0x00000001u;
   _impl_.bisactive_ = value;
 }
 inline void ActorComponentState::set_bisactive(bool value) {
@@ -14246,7 +13914,7 @@ inline void ActorComponentState::set_bisactive(bool value) {
 
 // optional bool bReplicated = 3;
 inline bool ActorComponentState::_internal_has_breplicated() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool ActorComponentState::has_breplicated() const {
@@ -14254,7 +13922,7 @@ inline bool ActorComponentState::has_breplicated() const {
 }
 inline void ActorComponentState::clear_breplicated() {
   _impl_.breplicated_ = false;
-  _impl_._has_bits_[0] &= ~0x00000004u;
+  _impl_._has_bits_[0] &= ~0x00000002u;
 }
 inline bool ActorComponentState::_internal_breplicated() const {
   return _impl_.breplicated_;
@@ -14264,115 +13932,12 @@ inline bool ActorComponentState::breplicated() const {
   return _internal_breplicated();
 }
 inline void ActorComponentState::_internal_set_breplicated(bool value) {
-  _impl_._has_bits_[0] |= 0x00000004u;
+  _impl_._has_bits_[0] |= 0x00000002u;
   _impl_.breplicated_ = value;
 }
 inline void ActorComponentState::set_breplicated(bool value) {
   _internal_set_breplicated(value);
   // @@protoc_insertion_point(field_set:unrealpb.ActorComponentState.bReplicated)
-}
-
-// optional string compName = 4;
-inline bool ActorComponentState::_internal_has_compname() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool ActorComponentState::has_compname() const {
-  return _internal_has_compname();
-}
-inline void ActorComponentState::clear_compname() {
-  _impl_.compname_.ClearToEmpty();
-  _impl_._has_bits_[0] &= ~0x00000001u;
-}
-inline const std::string& ActorComponentState::compname() const {
-  // @@protoc_insertion_point(field_get:unrealpb.ActorComponentState.compName)
-  return _internal_compname();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void ActorComponentState::set_compname(ArgT0&& arg0, ArgT... args) {
- _impl_._has_bits_[0] |= 0x00000001u;
- _impl_.compname_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:unrealpb.ActorComponentState.compName)
-}
-inline std::string* ActorComponentState::mutable_compname() {
-  std::string* _s = _internal_mutable_compname();
-  // @@protoc_insertion_point(field_mutable:unrealpb.ActorComponentState.compName)
-  return _s;
-}
-inline const std::string& ActorComponentState::_internal_compname() const {
-  return _impl_.compname_.Get();
-}
-inline void ActorComponentState::_internal_set_compname(const std::string& value) {
-  _impl_._has_bits_[0] |= 0x00000001u;
-  _impl_.compname_.Set(value, GetArenaForAllocation());
-}
-inline std::string* ActorComponentState::_internal_mutable_compname() {
-  _impl_._has_bits_[0] |= 0x00000001u;
-  return _impl_.compname_.Mutable(GetArenaForAllocation());
-}
-inline std::string* ActorComponentState::release_compname() {
-  // @@protoc_insertion_point(field_release:unrealpb.ActorComponentState.compName)
-  if (!_internal_has_compname()) {
-    return nullptr;
-  }
-  _impl_._has_bits_[0] &= ~0x00000001u;
-  auto* p = _impl_.compname_.Release();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.compname_.IsDefault()) {
-    _impl_.compname_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  return p;
-}
-inline void ActorComponentState::set_allocated_compname(std::string* compname) {
-  if (compname != nullptr) {
-    _impl_._has_bits_[0] |= 0x00000001u;
-  } else {
-    _impl_._has_bits_[0] &= ~0x00000001u;
-  }
-  _impl_.compname_.SetAllocated(compname, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (_impl_.compname_.IsDefault()) {
-    _impl_.compname_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:unrealpb.ActorComponentState.compName)
-}
-
-// -------------------------------------------------------------------
-
-// -------------------------------------------------------------------
-
-// ActorComponentStates
-
-// map<string, .unrealpb.ActorComponentState> states = 1;
-inline int ActorComponentStates::_internal_states_size() const {
-  return _impl_.states_.size();
-}
-inline int ActorComponentStates::states_size() const {
-  return _internal_states_size();
-}
-inline void ActorComponentStates::clear_states() {
-  _impl_.states_.Clear();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::unrealpb::ActorComponentState >&
-ActorComponentStates::_internal_states() const {
-  return _impl_.states_.GetMap();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::unrealpb::ActorComponentState >&
-ActorComponentStates::states() const {
-  // @@protoc_insertion_point(field_map:unrealpb.ActorComponentStates.states)
-  return _internal_states();
-}
-inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::unrealpb::ActorComponentState >*
-ActorComponentStates::_internal_mutable_states() {
-  return _impl_.states_.MutableMap();
-}
-inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::unrealpb::ActorComponentState >*
-ActorComponentStates::mutable_states() {
-  // @@protoc_insertion_point(field_mutable_map:unrealpb.ActorComponentStates.states)
-  return _internal_mutable_states();
 }
 
 // -------------------------------------------------------------------
@@ -21109,11 +20674,123 @@ inline void FClientAdjustment::set_movementmode(uint32_t value) {
   // @@protoc_insertion_point(field_set:unrealpb.FClientAdjustment.movementMode)
 }
 
+// -------------------------------------------------------------------
+
+// StaticMeshComponentState
+
+// bool removed = 1;
+inline void StaticMeshComponentState::clear_removed() {
+  _impl_.removed_ = false;
+}
+inline bool StaticMeshComponentState::_internal_removed() const {
+  return _impl_.removed_;
+}
+inline bool StaticMeshComponentState::removed() const {
+  // @@protoc_insertion_point(field_get:unrealpb.StaticMeshComponentState.removed)
+  return _internal_removed();
+}
+inline void StaticMeshComponentState::_internal_set_removed(bool value) {
+  
+  _impl_.removed_ = value;
+}
+inline void StaticMeshComponentState::set_removed(bool value) {
+  _internal_set_removed(value);
+  // @@protoc_insertion_point(field_set:unrealpb.StaticMeshComponentState.removed)
+}
+
+// .unrealpb.AssetRef staticMesh = 2;
+inline bool StaticMeshComponentState::_internal_has_staticmesh() const {
+  return this != internal_default_instance() && _impl_.staticmesh_ != nullptr;
+}
+inline bool StaticMeshComponentState::has_staticmesh() const {
+  return _internal_has_staticmesh();
+}
+inline void StaticMeshComponentState::clear_staticmesh() {
+  if (GetArenaForAllocation() == nullptr && _impl_.staticmesh_ != nullptr) {
+    delete _impl_.staticmesh_;
+  }
+  _impl_.staticmesh_ = nullptr;
+}
+inline const ::unrealpb::AssetRef& StaticMeshComponentState::_internal_staticmesh() const {
+  const ::unrealpb::AssetRef* p = _impl_.staticmesh_;
+  return p != nullptr ? *p : reinterpret_cast<const ::unrealpb::AssetRef&>(
+      ::unrealpb::_AssetRef_default_instance_);
+}
+inline const ::unrealpb::AssetRef& StaticMeshComponentState::staticmesh() const {
+  // @@protoc_insertion_point(field_get:unrealpb.StaticMeshComponentState.staticMesh)
+  return _internal_staticmesh();
+}
+inline void StaticMeshComponentState::unsafe_arena_set_allocated_staticmesh(
+    ::unrealpb::AssetRef* staticmesh) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.staticmesh_);
+  }
+  _impl_.staticmesh_ = staticmesh;
+  if (staticmesh) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:unrealpb.StaticMeshComponentState.staticMesh)
+}
+inline ::unrealpb::AssetRef* StaticMeshComponentState::release_staticmesh() {
+  
+  ::unrealpb::AssetRef* temp = _impl_.staticmesh_;
+  _impl_.staticmesh_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::unrealpb::AssetRef* StaticMeshComponentState::unsafe_arena_release_staticmesh() {
+  // @@protoc_insertion_point(field_release:unrealpb.StaticMeshComponentState.staticMesh)
+  
+  ::unrealpb::AssetRef* temp = _impl_.staticmesh_;
+  _impl_.staticmesh_ = nullptr;
+  return temp;
+}
+inline ::unrealpb::AssetRef* StaticMeshComponentState::_internal_mutable_staticmesh() {
+  
+  if (_impl_.staticmesh_ == nullptr) {
+    auto* p = CreateMaybeMessage<::unrealpb::AssetRef>(GetArenaForAllocation());
+    _impl_.staticmesh_ = p;
+  }
+  return _impl_.staticmesh_;
+}
+inline ::unrealpb::AssetRef* StaticMeshComponentState::mutable_staticmesh() {
+  ::unrealpb::AssetRef* _msg = _internal_mutable_staticmesh();
+  // @@protoc_insertion_point(field_mutable:unrealpb.StaticMeshComponentState.staticMesh)
+  return _msg;
+}
+inline void StaticMeshComponentState::set_allocated_staticmesh(::unrealpb::AssetRef* staticmesh) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.staticmesh_;
+  }
+  if (staticmesh) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(staticmesh);
+    if (message_arena != submessage_arena) {
+      staticmesh = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, staticmesh, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.staticmesh_ = staticmesh;
+  // @@protoc_insertion_point(field_set_allocated:unrealpb.StaticMeshComponentState.staticMesh)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
-// -------------------------------------------------------------------
-
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "EditorSubsystem.h"
 #include "AddCompToBPSubsystem.generated.h"
 
 /**
