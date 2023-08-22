@@ -4,7 +4,19 @@
 
 
 static const TCHAR* PropDecorator_AssignPropPtrTemp =
-	LR"EOF({Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + {Num_PropMemOffset}))EOF";
+		LR"EOF(
+FString PropertyName = TEXT("{Declare_PropertyName}");
+FProperty* Property = ActorClass->FindPropertyByName(FName(*PropertyName));
+if (Property) {
+	{Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + Property->GetOffset_ForInternal());
+}
+else {
+	{Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + {Num_PropMemOffset});
+}
+)EOF";
+
+static const TCHAR* PropDecorator_AssignPropPtrForGlobalStructTemp =
+LR"EOF({Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + {Num_PropMemOffset}))EOF";
 
 const static TCHAR* PropDecorator_SetDeltaStateTemplate =
 	LR"EOF(
@@ -219,6 +231,8 @@ public:
 
 	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo);
 	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset);
+    virtual FString GetCode_AssignPropPointerForGlobalStruct(const FString& Container, const FString& AssignTo);
+    virtual FString GetCode_AssignPropPointerForGlobalStruct(const FString& Container, const FString& AssignTo, int32 MemOffset);
 
 	/**
 	 * Code that get field value from protobuf message

@@ -75,6 +75,20 @@ FString FStructPropertyDecorator::GetCode_AssignPropPointer(const FString& Conta
 	return FString::Format(StructPropDeco_AssignPropPtrTemp, FormatArgs);
 }
 
+FString FStructPropertyDecorator::GetCode_AssignPropPointerForGlobalStruct(const FString& Container, const FString& AssignTo, int32 MemOffset)
+{
+    FStringFormatNamedArguments FormatArgs;
+    FormatArgs.Add(TEXT("Ref_AssignTo"), AssignTo);
+    FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
+    FormatArgs.Add(TEXT("Declare_PropertyCPPType"), GetCPPType());
+    FormatArgs.Add(TEXT("Num_PropMemOffset"), MemOffset);
+    FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
+    FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
+
+
+    return FString::Format(StructPropDeco_AssignPropPtrForGlobalStructTemp, FormatArgs);
+}
+
 TArray<FString> FStructPropertyDecorator::GetAdditionalIncludes()
 {
 	TSet<FString> IncludeFileSet{GenManager_GlobalStructHeaderFile, GenManager_GlobalStructProtoHeaderFile};
