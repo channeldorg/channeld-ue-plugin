@@ -60,9 +60,10 @@ const static TCHAR* StructPropDeco_AssignPropPtrTemp =
     LR"EOF(
 FString PropertyName = TEXT("{Declare_PropertyName}");
 void* PropertyAddr = (uint8*){Ref_ContainerAddr};
-if (StructPropPointerMemOffsetCache.Contains(PropertyName))
+int32* OffsetPtr = PropPointerMemOffsetCache.Find(PropertyName);
+if (OffsetPtr != nullptr)
 {    
-    {Ref_AssignTo} = ({Declare_PropPtrGroupStructName})(PropertyAddr + StructPropPointerMemOffsetCache[PropertyName]);
+    {Ref_AssignTo} = ({Declare_PropPtrGroupStructName})(PropertyAddr + *OffsetPtr);
 }
 else
 {
@@ -70,7 +71,7 @@ else
     if (Property)
     {
         int32 Offset = Property->GetOffset_ForInternal();
-        StructPropPointerMemOffsetCache.Emplace(PropertyName, Offset);
+        PropPointerMemOffsetCache.Emplace(PropertyName, Offset);
         {Ref_AssignTo} = ({Declare_PropPtrGroupStructName})(PropertyAddr + Offset);
     }
     else
@@ -122,7 +123,6 @@ public:
 	virtual FString GetDeclaration_PropertyPtr() override;
 	
 	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset) override;
-    static TMap<FString, int32> StructPropPointerMemOffsetCache;
 	
 	virtual TArray<FString> GetAdditionalIncludes() override;
 	
