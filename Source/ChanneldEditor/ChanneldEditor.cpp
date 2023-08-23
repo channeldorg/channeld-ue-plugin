@@ -78,13 +78,13 @@ void FChanneldEditorModule::StartupModule()
 		FChanneldEditorCommands::Get().OpenCloudDeploymentCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::OpenCloudDeploymentAction));
 
-#if ENGINE_MAJOR_VERSION == 5
+#if ENGINE_MAJOR_VERSION >= 5
 	UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.User");
 	FToolMenuSection& Section = ToolbarMenu->AddSection("ChanneldComboButton");
 	Section.AddEntry(FToolMenuEntry::InitComboButton(
 		"ChanneldComboButton",
 		FUIAction(),
-		FOnGetContent::CreateRaw(this,&FChanneldEditorModule::CreateMenuContent, PluginCommands),
+		FOnGetContent::CreateRaw(this, &FChanneldEditorModule::CreateMenuContent, PluginCommands),
 		LOCTEXT("LevelEditorToolbarChanneldButtonLabel", "Channeld"),
 		LOCTEXT("LevelEditorToolbarChanneldButtonTooltip", "Tools and utilities provided by ChanneldUE"),
 		FSlateIcon(FChanneldEditorStyle::GetStyleSetName(), "ChanneldEditor.PluginCommand")
@@ -94,10 +94,10 @@ void FChanneldEditorModule::StartupModule()
 
 	TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender());
 	ToolbarExtender->AddToolBarExtension("Compile", EExtensionHook::After, PluginCommands,
-										 FToolBarExtensionDelegate::CreateRaw(this, &FChanneldEditorModule::AddToolbarButton));
-
+	FToolBarExtensionDelegate::CreateRaw(this, &FChanneldEditorModule::AddToolbarButton));
 	LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
 #endif
+
 	// Stop all services launched during the session 
 	FEditorDelegates::EditorModeIDExit.AddLambda([&](const FEditorModeID&)
 	{
@@ -152,7 +152,7 @@ void FChanneldEditorModule::AddToolbarButton(FToolBarBuilder& Builder)
 	Section.AddEntry(FToolMenuEntry::InitComboButton(
 		"ChanneldComboButton",
 		FUIAction(),
-		FOnGetContent::CreateRaw(this,&FChanneldEditorModule::CreateMenuContent, PluginCommands)));
+		FOnGetContent::CreateRaw(this, &FChanneldEditorModule::CreateMenuContent, PluginCommands)));
 #else
 	Builder.AddToolBarButton(FChanneldEditorCommands::Get().PluginCommand);
 

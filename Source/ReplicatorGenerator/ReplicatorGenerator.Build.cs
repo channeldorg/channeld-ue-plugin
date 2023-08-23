@@ -26,14 +26,14 @@ public class ReplicatorGenerator : ModuleRules
 				"ChanneldUE",
 				"AnalyticsET",
 				"JsonUtilities",
+#if UE_5_0_OR_LATER
+				"RenderCore",
+				"DeveloperToolSettings",
+				"AssetRegistry",
+#endif
 			}
 		);
-        if (Target.Version.MajorVersion == 5)
-        {
-            PrivateDependencyModuleNames.Add("RenderCore"); 
-            PrivateDependencyModuleNames.Add("DeveloperToolSettings"); 
-            PrivateDependencyModuleNames.Add("AssetRegistry"); 
-        }
+		
 		string CompilerConfigurationName;
 		switch (Target.Configuration)
 		{

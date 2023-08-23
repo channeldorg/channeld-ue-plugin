@@ -107,9 +107,11 @@ bool FReplicatorCodeGenerator::Generate(
 	        ChannelDataRegistrationGoCode;
 	ReplicationCodeBundle.ChannelDataMerge_GoCode.Append(FString::Printf(TEXT("package %s\n"), *ProtoPackageName));
 	// Entity channel data.go imports anypb
+
 	bool bHasEntityChannelData = ChannelDataInfos.ContainsByPredicate([](const auto& Info) {return Info.Schema.ChannelType == EChanneldChannelType::ECT_Entity;});
 	ReplicationCodeBundle.ChannelDataMerge_GoCode.Append(FString::Format(CodeGen_Go_Data_ImportTemplate,
 		FStringFormatNamedArguments{{"Code_AnypbImport", bHasEntityChannelData	? TEXT("\"google.golang.org/protobuf/types/known/anypb\"") : TEXT("")}}));
+
 	for (const FChannelDataInfo& ChannelDataInfo : ChannelDataInfos)
 	{
 		ReplicationCodeBundle.ChannelDataCodes.Add(FChannelDataCode());
@@ -163,8 +165,20 @@ bool FReplicatorCodeGenerator::Generate(
 	ReplicationCodeBundle.GlobalStructCodes.Append(FString::Printf(TEXT("#include \"%s\"\n"), *GenManager_GlobalStructProtoHeaderFile));
 	for (auto StructDecorator : GlobalStructDecorators)
 	{
+		if (StructDecorator->GetProtoFieldType().Contains(TEXT("RPCParams")))
+		{
+			continue;
+		}
 		ReplicationCodeBundle.GlobalStructCodes.Append(StructDecorator->GetDeclaration_PropPtrGroupStruct());
 		ReplicationCodeBundle.GlobalStructProtoDefinitions.Append(StructDecorator->GetDefinition_ProtoStateMessage());
+	}
+	for (auto StructDecorator : GlobalStructDecorators)
+	{
+		if (StructDecorator->GetProtoFieldType().Contains(TEXT("RPCParams")))
+		{
+			ReplicationCodeBundle.GlobalStructCodes.Append(StructDecorator->GetDeclaration_PropPtrGroupStruct());
+			ReplicationCodeBundle.GlobalStructProtoDefinitions.Append(StructDecorator->GetDefinition_ProtoStateMessage());
+		}
 	}
 
 	FStringFormatNamedArguments ProtoFormatArgs;
@@ -198,7 +212,18 @@ bool FReplicatorCodeGenerator::GenerateReplicatorCode(
 	FString OnStateChangedAdditionalCondition;
 	FString TickAdditionalCondition;
 	FString IsClientCode;
-	if (TargetActorClass->IsChildOf(USceneComponent::StaticClass()))
+	if (TargetActorClass->IsChildOf(UStaticMeshComponent::StaticClass()))
+	{
+		if (bIsBlueprint)
+		{
+			TargetBaseClassName = TEXT("UStaticMeshComponent");
+		}
+		TargetInstanceRef = TEXT("Comp");
+		OnStateChangedAdditionalCondition = FString::Printf(TEXT(" || !%s->GetOwner()"), *TargetInstanceRef);
+		TickAdditionalCondition = FString::Printf(TEXT(" || !%s->GetOwner()"), *TargetInstanceRef);
+		IsClientCode = FString::Printf(TEXT("%s->GetOwner()->HasAuthority()"), *TargetInstanceRef);
+	}
+	else if (TargetActorClass->IsChildOf(USceneComponent::StaticClass()))
 	{
 		if (bIsBlueprint)
 		{
@@ -543,12 +568,13 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 	{
 		ChannelDataProcessor_MergeCode.Append(CodeGen_MergeObjectState);
 	}
+
 	ChannelDataProcessor_GetStateCode.Append(FString::Format(ChannelType == EChanneldChannelType::ECT_Entity ?
 		CodeGen_GetObjectStateFromEntityChannelData : CodeGen_GetObjectStateFromChannelData,
-		FStringFormatNamedArguments{{"Declaration_ChannelDataMessage", ChannelDataMessageName}}));
+		FStringFormatNamedArguments{{TEXT("Declaration_ChannelDataMessage"), ChannelDataMessageName}}));
 	ChannelDataProcessor_SetStateCode.Append(FString::Format(ChannelType == EChanneldChannelType::ECT_Entity ?
 		CodeGen_SetObjectStateToEntityChannelData : CodeGen_SetObjectStateToChannelData,
-		FStringFormatNamedArguments{{"Declaration_ChannelDataMessage", ChannelDataMessageName}}));
+		FStringFormatNamedArguments{{TEXT("Declaration_ChannelDataMessage"), ChannelDataMessageName}}));
 
 	bool bHasAActor = false;
 	int32 ConstPathFNameVarDeclIndex = 0;
@@ -744,7 +770,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 			FString CheckHandoverInStatesCode = TEXT("");
 			if (HasActor) CheckHandoverInStatesCode.Append(CodeGen_Go_ActorCheckHandoverTemplate);
 			if (HasSceneComponent) CheckHandoverInStatesCode.Append(CodeGen_Go_SceneCompCheckHandoverTemplate);
-			CheckHandoverCode = FString::Format(CodeGen_Go_CheckHandoverTemplate, FStringFormatNamedArguments{ { "Code_CheckHandoverInStates", CheckHandoverInStatesCode } });
+			CheckHandoverCode = FString::Format(CodeGen_Go_CheckHandoverTemplate, FStringFormatNamedArguments{ { TEXT("Code_CheckHandoverInStates"), CheckHandoverInStatesCode } });
 			NotifyHandoverCode = CodeGen_Go_NotifyHandover;
 		}
 	}
@@ -906,14 +932,17 @@ TArray<TSharedPtr<FStructPropertyDecorator>> FReplicatorCodeGenerator::GetAllStr
 		AllStructPropertyDecorators.Append(ActorDecoratorPtr->GetStructPropertyDecorators());
 	}
 	TArray<TSharedPtr<FStructPropertyDecorator>> NonRepetitionStructPropertyDecorators;
-	TSet<FString> StructPropertyDecoratorNames;
+	TSet<FString> StructPropertyDecoratorFieldTypes;
 	for (const TSharedPtr<FStructPropertyDecorator>& StructPropertyDecorator : AllStructPropertyDecorators)
 	{
-		if (StructPropertyDecoratorNames.Contains(StructPropertyDecorator->GetCPPType()))
+
+		FString FieldType = StructPropertyDecorator->GetProtoFieldType();
+		if (StructPropertyDecoratorFieldTypes.Contains(FieldType))
 		{
 			continue;
 		}
-		StructPropertyDecoratorNames.Add(StructPropertyDecorator->GetCPPType());
+		StructPropertyDecoratorFieldTypes.Add(FieldType);
+
 		NonRepetitionStructPropertyDecorators.Add(StructPropertyDecorator);
 	}
 	return NonRepetitionStructPropertyDecorators;

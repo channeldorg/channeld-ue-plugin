@@ -4,7 +4,7 @@
 #include "SlateBasics.h"
 #include "DetailWidgetRow.h"
 #include "DetailLayoutBuilder.h"
-#if ENGINE_MAJOR_VERSION == 5
+#if ENGINE_MAJOR_VERSION >= 5
 #include "EditorStyleSet.h"
 #endif
 #include "IDetailChildrenBuilder.h"
@@ -42,7 +42,7 @@ void FClientInterestSettingsCustomization::CustomizeHeader(TSharedRef<IPropertyH
 		.AutoWidth()
 		[
 			SNew(STextBlock)
-#if ENGINE_MAJOR_VERSION == 5
+#if ENGINE_MAJOR_VERSION >= 5
 		.Font(FAppStyle::GetFontStyle("PropertyWindow.NormalFont"))
 #else
 		.Font(FEditorStyle::GetFontStyle("PropertyWindow.NormalFont"))

@@ -243,7 +243,12 @@ FString FPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString& Prope
 	return FString::Format(PropDeco_SetDeltaStateArrayInnerTemp, FormatArgs);
 }
 
-FString FPropertyDecorator::GetCode_CallRepNotify(const FString& TargetInstanceName)
+bool FPropertyDecorator::HasOnRepNotifyParam()
+{
+	return OriginalProperty->HasAnyPropertyFlags(CPF_RepNotify) && Owner->FindFunctionByName(OriginalProperty->RepNotifyFunc)->NumParms > 0;
+}
+
+FString FPropertyDecorator::GetCode_CallRepNotify(const FString& TargetInstanceName, const FString& OldValuePointer)
 {
 	if (OriginalProperty->HasAnyPropertyFlags(CPF_RepNotify))
 	{
@@ -251,10 +256,7 @@ FString FPropertyDecorator::GetCode_CallRepNotify(const FString& TargetInstanceN
 		FormatArgs.Add(TEXT("Declare_TargetInstance"), TargetInstanceName);
 		FormatArgs.Add(TEXT("Declare_FunctionName"), OriginalProperty->RepNotifyFunc.ToString());
 		const UFunction* RepNotifyFunc = Owner->FindFunctionByName(OriginalProperty->RepNotifyFunc);
-		FormatArgs.Add(
-			TEXT("Code_OnRepParams"),
-			RepNotifyFunc->NumParms > 0 ? FString::Printf(TEXT("&(%s)"), *GetCode_GetPropertyValueFrom(TargetInstanceName)) : TEXT("nullptr")
-		);
+		FormatArgs.Add(TEXT("Code_OnRepParams"),RepNotifyFunc->NumParms > 0 ? OldValuePointer: TEXT("nullptr"));
 		return FString::Format(PropDecorator_CallRepNotifyTemplate, FormatArgs);
 	}
 	return TEXT("");
@@ -267,10 +269,13 @@ FString FPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceN
 	FormatArgs.Add(TEXT("Code_ActorPropEqualToProtoState"), GetCode_ActorPropEqualToProtoState(TargetInstanceName, NewStateName));
 	FormatArgs.Add(
 		TEXT("Code_SetPropertyValue"),
-		GetCode_SetPropertyValueTo(
+		(NeedCallRepNotify && HasOnRepNotifyParam()
+			 ? FString::Printf(TEXT("auto OldValue = %s;\n"), *GetCode_GetPropertyValueFrom(TargetInstanceName))
+			 : "")
+		.Append(GetCode_SetPropertyValueTo(
 			TargetInstanceName, NewStateName,
-			NeedCallRepNotify ? GetCode_CallRepNotify(TargetInstanceName) : TEXT("")
-		)
+			NeedCallRepNotify ? GetCode_CallRepNotify(TargetInstanceName, TEXT("&OldValue")) : TEXT("")
+		))
 	);
 	return FString::Format(PropDecorator_OnChangeStateTemplate, FormatArgs);
 }

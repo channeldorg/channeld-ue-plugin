@@ -6,6 +6,7 @@
 #include "Engine/ActorChannel.h"
 #include "ChanneldConnection.h"
 #include "ChanneldNetConnection.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/DemoNetDriver.h"
 //#define CHANNELD_TOLERANCE (1.e-8f)
 #define CHANNELD_TOLERANCE (0.001)
@@ -56,8 +57,7 @@ public:
 		}
 	}
 
-	[[deprecated("Use SetVectorFromPB instead. Use GetVector can cause the value of x/y/z to be 0 if the it is not set."
-	)]]
+	[[deprecated("Use SetVectorFromPB instead. Use GetVector can cause the value of x/y/z to be 0 if the it is not set.")]]
 	static FVector GetVector(const unrealpb::FVector& InVec)
 	{
 		return FVector(InVec.x(), InVec.y(), InVec.z());
@@ -82,7 +82,6 @@ public:
 
 	static bool CheckDifference(const FVector& VectorToCheck, const unrealpb::FVector* VectorPBToCheck)
 	{
-#if ENGINE_MAJOR_VERSION == 5
 		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X, CHANNELD_TOLERANCE))
 		{
 			return true;
@@ -95,26 +94,12 @@ public:
 		{
 			return true;
 		}
-#else
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X))
-		{
-			return true;
-		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y))
-		{
-			return true;
-		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z))
-		{
-			return true;
-		}
-#endif
+		
 		return false;
 	}
 
 	static bool CheckDifference(const FRotator& RotatorToCheck, const unrealpb::FVector* RotatorPBToCheck)
 	{
-#if ENGINE_MAJOR_VERSION == 5
 		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch, CHANNELD_TOLERANCE))
 		{
 			return true;
@@ -127,20 +112,7 @@ public:
 		{
 			return true;
 		}
-#else
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch))
-		{
-			return true;
-		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw))
-		{
-			return true;
-		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll))
-		{
-			return true;
-		}
-#endif
+		
 		return false;
 	}
 
@@ -157,17 +129,17 @@ public:
 			VectorPBToCheck = VectorToSet;
 		
 		bool bNotSame = false;
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X, CHANNELD_TOLERANCE))
 		{
 			VectorToSet->set_x(VectorToCheck.X);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y, CHANNELD_TOLERANCE))
 		{
 			VectorToSet->set_y(VectorToCheck.Y);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z, CHANNELD_TOLERANCE))
 		{
 			VectorToSet->set_z(VectorToCheck.Z);
 			bNotSame = true;
@@ -182,17 +154,17 @@ public:
 			RotatorPBToCheck = RotatorToSet;
 		
 		bool bNotSame = false;
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch, CHANNELD_TOLERANCE))
 		{
 			RotatorToSet->set_x(RotatorToCheck.Pitch);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw, CHANNELD_TOLERANCE))
 		{
 			RotatorToSet->set_y(RotatorToCheck.Yaw);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll, CHANNELD_TOLERANCE))
 		{
 			RotatorToSet->set_z(RotatorToCheck.Roll);
 			bNotSame = true;
@@ -281,6 +253,24 @@ public:
 	 *		returns true if a new actor was spawned. false means an existing actor was found for the netguid.
 	 */
 	bool static SerializeNewActor_Server(UNetConnection* Connection, UPackageMapClient* PackageMap, TSharedPtr<FNetGUIDCache> GuidCache, FArchive& Ar, class UActorChannel *Channel, class AActor*& Actor);
+
+	static unrealpb::AssetRef GetAssetRef(const UObject* Obj)
+	{
+		unrealpb::AssetRef Ref;
+		Ref.set_objectpath(std::string(TCHAR_TO_UTF8(*Obj->GetPathName())));
+		return Ref;
+	}
+	
+	static UObject* GetAssetByRef(const unrealpb::AssetRef* Ref)
+	{
+		const FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+		const FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(UTF8_TO_TCHAR(Ref->objectpath().c_str()));
+		if (AssetData.IsValid())
+		{
+			return AssetData.GetAsset();
+		}
+		return nullptr;
+	}
 	
 	// Set the actor's NetRole on the client based on the NetConnection that owns the actor.
 	static void SetActorRoleByOwningConnId(AActor* Actor, Channeld::ConnectionId OwningConnId);

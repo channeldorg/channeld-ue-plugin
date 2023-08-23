@@ -264,7 +264,12 @@ public:
 
 	virtual FString GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull = false);
 
-	virtual FString GetCode_CallRepNotify(const FString& TargetInstanceName);
+	/**
+	 * The property has RepNotify function and the RepNotify function has parameter
+	 */
+	virtual bool HasOnRepNotifyParam();
+
+	virtual FString GetCode_CallRepNotify(const FString& TargetInstanceName, const FString& OldValuePointer);
 
 	/**
 	 * Code that handle state changes

@@ -62,14 +62,13 @@ public class ChanneldEditor : ModuleRules
                 "EngineSettings",
                 "Json",
                 "JsonUtilities",
+#if UE_5_0_OR_LATER
+                "DeveloperToolSettings",
+                "ToolMenus",
+#endif
                 // ... add private dependencies that you statically link with here ...	
 			}
         );
-        if (Target.Version.MajorVersion == 5)
-        {
-            PrivateDependencyModuleNames.Add("ToolMenus"); 
-            PrivateDependencyModuleNames.Add("DeveloperToolSettings"); 
-        }
 
         DynamicallyLoadedModuleNames.AddRange(
             new string[]
@@ -84,6 +83,7 @@ public class ChanneldEditor : ModuleRules
                 "PLUGIN_DIR=R\"(" + PluginDirectory + ")\"",
                 "PROTOC_PATH=R\"(" + Path.Combine(PluginDirectory, "Source", "ProtobufUE", "ThirdParty", "bin", "protoc.exe") + ")\"",
                 "PROTOBUF_INCLUDE_PATH=R\"(" + Path.Combine(PluginDirectory, "Source", "ProtobufUE", "ThirdParty", "include") + ")\"",
+                "CLANG_FORMAT_PATH=R\"(" + Path.Combine(PluginDirectory, "Source", "ThirdParty", "clang-format.exe") + ")\"",
             }
         );
         

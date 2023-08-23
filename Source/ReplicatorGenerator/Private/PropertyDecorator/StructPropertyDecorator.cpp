@@ -297,12 +297,14 @@ TArray<TSharedPtr<FStructPropertyDecorator>> FStructPropertyDecorator::GetStruct
 		}
 	}
 	TArray<TSharedPtr<FStructPropertyDecorator>> NonRepetitionStructPropertyDecorators;
-	TSet<FString> StructPropertyDecoratorNames;
+	TSet<FString> StructPropertyDecoratorFieldTypes;
 	for (TSharedPtr<FStructPropertyDecorator>& StructPropertyDecorator : StructPropertyDecorators)
 	{
-		if (!StructPropertyDecoratorNames.Contains(StructPropertyDecorator->GetCPPType()))
+
+		if (!StructPropertyDecoratorFieldTypes.Contains(StructPropertyDecorator->GetProtoFieldType()))
 		{
-			StructPropertyDecoratorNames.Add(StructPropertyDecorator->GetCPPType());
+			StructPropertyDecoratorFieldTypes.Add(StructPropertyDecorator->GetProtoFieldType());
+
 			NonRepetitionStructPropertyDecorators.Add(StructPropertyDecorator);
 		}
 	}
