@@ -6,9 +6,10 @@
 const static TCHAR* PropDecorator_AssignPropPtrTemp =
 		LR"EOF(
 FString PropertyName = TEXT("{Declare_PropertyName}");
-if (PropPointerMemOffsetCache.Contains(PropertyName))
+int32* OffsetPtr = PropPointerMemOffsetCache.Find(PropertyName);
+if (OffsetPtr != nullptr)
 {
-    {Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + PropPointerMemOffsetCache[PropertyName]);
+    {Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + *OffsetPtr);
 }
 else
 {
@@ -240,7 +241,6 @@ public:
 
 	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo);
 	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset);
-    static TMap<FString, int32> PropPointerMemOffsetCache;
 
 	/**
 	 * Code that get field value from protobuf message

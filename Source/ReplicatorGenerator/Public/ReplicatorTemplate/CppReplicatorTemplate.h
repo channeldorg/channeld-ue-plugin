@@ -30,6 +30,7 @@ public:
 
 protected:
   TWeakObjectPtr<{Declare_TargetClassName}> {Ref_TargetInstanceRef};
+  static TMap<FString, int32> PropPointerMemOffsetCache;  
 
   // [Server+Client] The accumulated channel data of the target object
   {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* FullState;
