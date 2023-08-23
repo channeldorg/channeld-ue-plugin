@@ -170,11 +170,6 @@ FString FPropertyDecorator::GetCode_AssignPropPointer(const FString& Container, 
 	return GetCode_AssignPropPointer(Container, AssignTo, GetMemOffset());
 }
 
-FString FPropertyDecorator::GetCode_AssignPropPointerForGlobalStruct(const FString& Container, const FString& AssignTo)
-{
-    return GetCode_AssignPropPointerForGlobalStruct(Container, AssignTo, GetMemOffset());
-}
-
 FString FPropertyDecorator::GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset)
 {
 	FStringFormatNamedArguments FormatArgs;
@@ -185,18 +180,6 @@ FString FPropertyDecorator::GetCode_AssignPropPointer(const FString& Container, 
     FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
 
 	return FString::Format(PropDecorator_AssignPropPtrTemp, FormatArgs);
-}
-
-FString FPropertyDecorator::GetCode_AssignPropPointerForGlobalStruct(const FString& Container, const FString& AssignTo, int32 MemOffset)
-{
-    FStringFormatNamedArguments FormatArgs;
-    FormatArgs.Add(TEXT("Ref_AssignTo"), AssignTo);
-    FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
-    FormatArgs.Add(TEXT("Declare_PropertyCPPType"), GetCPPType());
-    FormatArgs.Add(TEXT("Num_PropMemOffset"), MemOffset);
-    FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
-
-    return FString::Format(PropDecorator_AssignPropPtrTemp, FormatArgs);
 }
 
 FString FPropertyDecorator::GetCode_GetProtoFieldValueFrom(const FString& StateName)
@@ -238,7 +221,7 @@ FString FPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString& Cont
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(
 		TEXT("Code_AssignPropPointers"),
-		GetCode_AssignPropPointerForGlobalStruct(
+		GetCode_AssignPropPointer(
 			ContainerName,
 			FString::Printf(TEXT("%s* PropAddr"), *GetCPPType())
 		)
@@ -298,7 +281,7 @@ FString FPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString& Cont
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(
 		TEXT("Code_AssignPropPointers"),
-		GetCode_AssignPropPointerForGlobalStruct(
+		GetCode_AssignPropPointer(
 			ContainerName,
 			FString::Printf(TEXT("%s* PropAddr"), *GetCPPType())
 		)
