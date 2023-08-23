@@ -59,21 +59,27 @@ struct {Declare_PropCompilableStructName}
 const static TCHAR* StructPropDeco_AssignPropPtrTemp =
     LR"EOF(
 FString PropertyName = TEXT("{Declare_PropertyName}");
-FProperty* Property = ActorClass->FindPropertyByName(FName(*PropertyName));
-if (Property) {
-	void* PropertyAddr = (uint8*){Ref_ContainerAddr} + Property->GetOffset_ForInternal();
-	{Ref_AssignTo} = {Declare_PropPtrGroupStructName}(PropertyAddr);
+void* PropertyAddr = (uint8*){Ref_ContainerAddr};
+if (StructPropPointerMemOffsetCache.Contains(PropertyName))
+{    
+    {Ref_AssignTo} = ({Declare_PropPtrGroupStructName})(PropertyAddr + StructPropPointerMemOffsetCache[PropertyName]);
 }
-else {
-	void* PropertyAddr = (uint8*){Ref_ContainerAddr} + {Num_PropMemOffset};
-	{Ref_AssignTo} = {Declare_PropPtrGroupStructName}(PropertyAddr);
+else
+{
+    FProperty* Property = ActorClass->FindPropertyByName(FName(*PropertyName));
+    if (Property)
+    {
+        int32 Offset = Property->GetOffset_ForInternal();
+        StructPropPointerMemOffsetCache.Emplace(PropertyName, Offset);
+        {Ref_AssignTo} = ({Declare_PropPtrGroupStructName})(PropertyAddr + Offset);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("%s Replicator construct, but could not find property(%s) in cache or by name."), *ActorClass->GetName(), *PropertyName);
+        {Ref_AssignTo} = ({Declare_PropPtrGroupStructName})(PropertyAddr + {Num_PropMemOffset});
+    }
 }
 )EOF";
-
-const static TCHAR* StructPropDeco_AssignPropPtrForGlobalStructTemp =
-    LR"EOF(
-void* PropertyAddr = (uint8*){Ref_ContainerAddr} + {Num_PropMemOffset};
-{Ref_AssignTo} = {Declare_PropPtrGroupStructName}(PropertyAddr))EOF";
 
 const static TCHAR* StructPropDeco_SetDeltaStateArrayInnerTemp =
 	LR"EOF(
@@ -116,7 +122,7 @@ public:
 	virtual FString GetDeclaration_PropertyPtr() override;
 	
 	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset) override;
-    virtual FString GetCode_AssignPropPointerForGlobalStruct(const FString& Container, const FString& AssignTo, int32 MemOffset) override;
+    static TMap<FString, int32> StructPropPointerMemOffsetCache;
 	
 	virtual TArray<FString> GetAdditionalIncludes() override;
 	

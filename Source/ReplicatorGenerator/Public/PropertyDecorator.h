@@ -3,20 +3,29 @@
 #include "IPropertyDecoratorOwner.h"
 
 
-static const TCHAR* PropDecorator_AssignPropPtrTemp =
+const static TCHAR* PropDecorator_AssignPropPtrTemp =
 		LR"EOF(
 FString PropertyName = TEXT("{Declare_PropertyName}");
-FProperty* Property = ActorClass->FindPropertyByName(FName(*PropertyName));
-if (Property) {
-	{Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + Property->GetOffset_ForInternal());
+if (PropPointerMemOffsetCache.Contains(PropertyName))
+{
+    {Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + PropPointerMemOffsetCache[PropertyName]);
 }
-else {
-	{Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + {Num_PropMemOffset});
+else
+{
+    FProperty* Property = ActorClass->FindPropertyByName(FName(*PropertyName));
+    if (Property)
+    {   
+        int32 Offset = Property->GetOffset_ForInternal();
+        PropPointerMemOffsetCache.Emplace(PropertyName, Offset);
+        {Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + Offset);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("%s Replicator construct, but could not find property(%s) in cache or by name."), *ActorClass->GetName(), *PropertyName);
+        {Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + {Num_PropMemOffset});
+    }
 }
 )EOF";
-
-static const TCHAR* PropDecorator_AssignPropPtrForGlobalStructTemp =
-LR"EOF({Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + {Num_PropMemOffset}))EOF";
 
 const static TCHAR* PropDecorator_SetDeltaStateTemplate =
 	LR"EOF(
@@ -228,8 +237,7 @@ public:
 
 	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo);
 	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset);
-    virtual FString GetCode_AssignPropPointerForGlobalStruct(const FString& Container, const FString& AssignTo);
-    virtual FString GetCode_AssignPropPointerForGlobalStruct(const FString& Container, const FString& AssignTo, int32 MemOffset);
+    static TMap<FString, int32> PropPointerMemOffsetCache;
 
 	/**
 	 * Code that get field value from protobuf message
