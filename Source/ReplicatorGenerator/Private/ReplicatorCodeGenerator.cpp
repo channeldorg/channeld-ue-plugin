@@ -387,7 +387,11 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	, FString& ResultMessage
 )
 {
+#if ENGINE_MAJOR_VERSION < 5
 	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EChanneldChannelType"), true);
+#else
+	const UEnum* EnumPtr = FindObject<UEnum>(FTopLevelAssetPath(TEXT("/Script/ChanneldUE.EChanneldChannelType")), true);
+#endif
 	if (!EnumPtr)
 	{
 		ResultMessage = TEXT("Cannot find EChanneldChannelType enum");

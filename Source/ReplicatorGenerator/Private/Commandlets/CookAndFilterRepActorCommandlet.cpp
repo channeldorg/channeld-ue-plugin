@@ -50,7 +50,11 @@ int32 UCookAndFilterRepActorCommandlet::Main(const FString& CmdLineParams)
 	TArray<FString> LoadedRepClassPath;
 	for (const FSoftClassPath& ObjSoftPath : ObjLoadedListener.FilteredClasses)
 	{
+#if ENGINE_MAJOR_VERSION < 5
 		FString AssetPath = ObjSoftPath.GetAssetPathName().ToString();
+#else
+		FString AssetPath = ObjSoftPath.GetAssetPath().ToString();
+#endif
 		// AssetPath.RemoveFromEnd(TEXT("_C"));
 		LoadedRepClassPath.Add(AssetPath);
 	}
