@@ -5,6 +5,7 @@
 #include "GameFramework/PlayerState.h"
 #include "unreal_common.pb.h"
 
+// Deprecated: Missing some properties like UniqueId, PlayerName, etc. Will be replaced with the generated code.
 class CHANNELDUE_API FChanneldPlayerStateReplicator : public FChanneldReplicatorBase
 {
 public:

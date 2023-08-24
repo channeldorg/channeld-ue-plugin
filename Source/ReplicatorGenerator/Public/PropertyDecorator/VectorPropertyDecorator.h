@@ -48,9 +48,9 @@ const static TCHAR* VectorPropDeco_OnChangeStateArrayInnerTemp =
 if (ChanneldUtils::CheckDifference((*{Declare_PropertyPtr})[i], &MessageArr[i]))
 {
   ChanneldUtils::{FunctionName_SetXXXFromPB}((*{Declare_PropertyPtr})[i], MessageArr[i]);
-  if (!bPropChanged)
+  if (!b{Declare_PropertyName}Changed)
   {
-    bPropChanged = true;
+    b{Declare_PropertyName}Changed = true;
   }
 }
 )EOF";
@@ -88,7 +88,7 @@ public:
 
 	virtual FString GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName) override;
 
-	virtual FString GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName) override;
+	virtual FString GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName) override;
 
 	virtual TArray<FString> GetAdditionalIncludes() override;
 };

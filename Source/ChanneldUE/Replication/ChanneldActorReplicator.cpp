@@ -243,9 +243,7 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 	if (NewState->has_breplicatemovement())
 	{
 		Actor->SetReplicateMovement(NewState->breplicatemovement());
-		Actor->OnRep_ReplicateMovement();
 	}
-
 
 	if (Actor->IsNetMode(NM_DedicatedServer))
 	{
@@ -303,6 +301,7 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 	}
 	*/
 
+	bool bOwnerChanged = false;
 	if (NewState->has_owner())
 	{
 		// if (Actor->HasAuthority())
@@ -316,7 +315,7 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 			if (!bNetGUIDUnmapped)
 			{
 				Actor->SetOwner(Cast<AActor>(Owner));
-				Actor->ProcessEvent(OnRep_OwnerFunc, NULL);
+				bOwnerChanged = true;
 				UE_LOG(LogChanneld, Verbose, TEXT("Replicator set Actor's Owner to %s"), *GetNameSafe(Owner));
 			}
 			else
@@ -337,6 +336,7 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 	{
 		Actor->SetCanBeDamaged(NewState->bcanbedamaged());
 	}
+	bool bInstigatorChanged = false;
 	if (NewState->has_instigator())
 	{
 		bool bNetGUIDUnmapped = false;
@@ -344,7 +344,7 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 		if (!bNetGUIDUnmapped)
 		{
 			Actor->SetInstigator(Cast<APawn>(Instigator));
-			Actor->OnRep_Instigator();
+			bInstigatorChanged = true;
 		}
 		else
 		{
@@ -378,12 +378,28 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 		{
 			ReplicatedMovementPtr->bRepPhysics = NewState->replicatedmovement().brepphysics();
 		}
-
-		Actor->ProcessEvent(OnRep_ReplicatedMovementFunc, NULL);
 	}
 
 	// In Debug builds, Actor->PostNetReceive() will throw a check error as the owner is already set.
 	// Calling the base Actor::PreNetReceive() can avoid the error. Do not call the derived class's PreNetReceive()!
 	Actor->AActor::PreNetReceive();
+
+	// Process the RepNotify functions after all the replicated properties are updated.
+	if (NewState->has_breplicatemovement())
+	{
+		Actor->OnRep_ReplicateMovement();
+	}
+	if (bOwnerChanged)
+	{
+		Actor->ProcessEvent(OnRep_OwnerFunc, nullptr);
+	}
+	if (bInstigatorChanged)
+	{
+		Actor->OnRep_Instigator();
+	}
+	if (NewState->has_replicatedmovement())
+	{
+		Actor->ProcessEvent(OnRep_ReplicatedMovementFunc, nullptr);
+	}
 }
 

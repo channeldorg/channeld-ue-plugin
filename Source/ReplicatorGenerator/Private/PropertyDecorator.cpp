@@ -157,7 +157,7 @@ FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetIn
 
 FString FPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode)
 {
-	return FString::Printf(TEXT("%s = %s;\nbStateChanged = true;\n%s"), *GetCode_GetPropertyValueFrom(TargetInstance), *GetCode_GetProtoFieldValueFrom(NewStateName), *AfterSetValueCode);
+	return FString::Printf(TEXT("%s = %s;\n%s"), *GetCode_GetPropertyValueFrom(TargetInstance), *GetCode_GetProtoFieldValueFrom(NewStateName), *AfterSetValueCode);
 }
 
 FString FPropertyDecorator::GetDeclaration_PropertyPtr()
@@ -253,6 +253,7 @@ FString FPropertyDecorator::GetCode_CallRepNotify(const FString& TargetInstanceN
 	if (OriginalProperty->HasAnyPropertyFlags(CPF_RepNotify))
 	{
 		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
 		FormatArgs.Add(TEXT("Declare_TargetInstance"), TargetInstanceName);
 		FormatArgs.Add(TEXT("Declare_FunctionName"), OriginalProperty->RepNotifyFunc.ToString());
 		const UFunction* RepNotifyFunc = Owner->FindFunctionByName(OriginalProperty->RepNotifyFunc);
@@ -262,20 +263,14 @@ FString FPropertyDecorator::GetCode_CallRepNotify(const FString& TargetInstanceN
 	return TEXT("");
 }
 
-FString FPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, bool NeedCallRepNotify)
+FString FPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, const FString& AfterSetValueCode)
 {
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName));
 	FormatArgs.Add(TEXT("Code_ActorPropEqualToProtoState"), GetCode_ActorPropEqualToProtoState(TargetInstanceName, NewStateName));
 	FormatArgs.Add(
-		TEXT("Code_SetPropertyValue"),
-		(NeedCallRepNotify && HasOnRepNotifyParam()
-			 ? FString::Printf(TEXT("auto OldValue = %s;\n"), *GetCode_GetPropertyValueFrom(TargetInstanceName))
-			 : "")
-		.Append(GetCode_SetPropertyValueTo(
-			TargetInstanceName, NewStateName,
-			NeedCallRepNotify ? GetCode_CallRepNotify(TargetInstanceName, TEXT("&OldValue")) : TEXT("")
-		))
+	TEXT("Code_SetPropertyValue"),
+		GetCode_SetPropertyValueTo(TargetInstanceName, NewStateName, AfterSetValueCode)
 	);
 	return FString::Format(PropDecorator_OnChangeStateTemplate, FormatArgs);
 }
@@ -296,9 +291,10 @@ FString FPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString& Cont
 	return FString::Format(PropDeco_OnChangeStateByMemOffsetTemp, FormatArgs);
 }
 
-FString FPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName)
+FString FPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName)
 {
 	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_PropertyName"), ArrayPropertyName);
 	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	return FString::Format(PropDeco_OnChangeStateArrayInnerTemp, FormatArgs);
 }

@@ -82,9 +82,10 @@ FString FUnrealObjectPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FS
 	return FString::Format(UObjPropDeco_SetDeltaStateArrayInnerTemp, FormatArgs);
 }
 
-FString FUnrealObjectPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName)
+FString FUnrealObjectPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName)
 {
 	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_PropertyName"), ArrayPropertyName);
 	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	FormatArgs.Add(TEXT("Code_GetWorldRef"), Owner->GetCode_GetWorldRef());
 	return FString::Format(UObjPropDeco_OnChangeStateArrayInnerTemp, FormatArgs);

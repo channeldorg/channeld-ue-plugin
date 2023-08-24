@@ -25,9 +25,10 @@ FString FStringPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString&
 	return FString::Format(StrPropDeco_SetDeltaStateArrayInnerTemp, FormatArgs);
 }
 
-FString FStringPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName)
+FString FStringPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName)
 {
 	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_PropertyName"), ArrayPropertyName);
 	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	return FString::Format(StrPropDeco_OnChangeStateArrayInnerTemp, FormatArgs);
 }
