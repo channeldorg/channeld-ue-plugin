@@ -301,8 +301,6 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 		{
 			*BasedMovementValuePtr = BasedMovement;
 		}
-		// Call the OnRep function to apply the change internally
-		Character->OnRep_ReplicatedBasedMovement();
 	}
 
 	if (NewState->has_serverlasttransformupdatetimestamp() && !FMath::IsNearlyEqual(NewState->serverlasttransformupdatetimestamp(), Character->GetReplicatedServerLastTransformUpdateTimeStamp()))
@@ -318,10 +316,11 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 		Character->GetCharacterMovement()->ApplyNetworkMovementMode(*MovementModeValuePtr);
 	}
 
+	bool bIsCrouchedChanged = false;
 	if (NewState->has_biscrouched() && NewState->biscrouched() != Character->bIsCrouched)
 	{
 		Character->bIsCrouched = NewState->biscrouched();
-		Character->OnRep_IsCrouched();
+		bIsCrouchedChanged = true;
 	}
 
 	if (NewState->has_bproxyisjumpforceapplied() && NewState->bproxyisjumpforceapplied() != Character->bProxyIsJumpForceApplied)
@@ -334,9 +333,25 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 		*AnimRootMotionTranslationScaleValuePtr = NewState->animrootmotiontranslationscale();
 	}
 
+	bool bReplayLastTransformUpdateTimeStampChanged = false;
 	if (NewState->has_replaylasttransformupdatetimestamp() && !FMath::IsNearlyEqual(NewState->replaylasttransformupdatetimestamp(), *ReplayLastTransformUpdateTimeStampPtr))
 	{
 		*ReplayLastTransformUpdateTimeStampPtr = NewState->replaylasttransformupdatetimestamp();
+		bReplayLastTransformUpdateTimeStampChanged = true;
+	}
+
+	// Process the RepNotify functions after all the replicated properties are updated.
+	if (NewState->has_basedmovement())
+	{
+		// Call the OnRep function to apply the change internally
+		Character->OnRep_ReplicatedBasedMovement();
+	}
+	if (bIsCrouchedChanged)
+	{
+		Character->OnRep_IsCrouched();
+	}
+	if (bReplayLastTransformUpdateTimeStampChanged)
+	{
 		Character->OnRep_ReplayLastTransformUpdateTimeStamp();
 	}
 }

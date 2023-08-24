@@ -147,9 +147,10 @@ FString FStructPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString
 	);
 }
 
-FString FStructPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName)
+FString FStructPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName)
 {
 	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_PropertyName"), ArrayPropertyName);
 	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
 	FormatArgs.Add(TEXT("Code_GetWorldRef"), Owner->GetCode_GetWorldRef());

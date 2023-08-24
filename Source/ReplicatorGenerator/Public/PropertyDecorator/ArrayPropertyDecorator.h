@@ -63,23 +63,14 @@ const static TCHAR* ArrPropDeco_SetDeltaStateByMemOffsetTemp =
 
 const static TCHAR* ArrPropDeco_OnChangeStateTemp =
 	LR"EOF(
+if ({Code_HasProtoFieldValue})
 {
-  bool bPropChanged = false;
-  {Definition_OldValue}
-  if ({Code_HasProtoFieldValue})
-  {
-    {Code_SetPropertyValue}
-  }
-  else if({Code_GetProtoUpdateValue}) 
-  {
-    bPropChanged = {Declare_PropPtrName}->Num() != {Code_GetProtoFieldValueFrom}.size();
-    {Declare_PropPtrName}->Empty();
-  }
-  if(bPropChanged)
-  {
-    bStateChanged = true;
-    {Code_CallRepNotify}
-  }
+{Code_SetPropertyValue}
+}
+else if({Code_GetProtoUpdateValue}) 
+{
+b{Declare_PropertyName}Changed = {Declare_PropPtrName}->Num() != {Code_GetProtoFieldValueFrom}.size();
+{Declare_PropPtrName}->Empty();
 }
 )EOF";
 
@@ -90,7 +81,7 @@ auto & MessageArr = {Code_GetProtoFieldValueFrom};
 const int32 NewStateValueLength = MessageArr.size();
 if (ActorPropLength != NewStateValueLength)
 { 
-  bPropChanged = true; 
+  b{Declare_PropertyName}Changed = true; 
 }
 {Declare_PropPtrName}->SetNum(NewStateValueLength);
 for (int32 i = 0; i < NewStateValueLength; ++i)
@@ -147,7 +138,7 @@ public:
 
 	virtual FString GetCode_HasProtoFieldValueIn(const FString& StateName) override;
 
-	virtual FString GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, bool NeedCallRepNotify = false) override;
+	virtual FString GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, const FString& AfterSetValueCode) override;
 	virtual FString GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode) override;
 	virtual FString GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName) override;
 

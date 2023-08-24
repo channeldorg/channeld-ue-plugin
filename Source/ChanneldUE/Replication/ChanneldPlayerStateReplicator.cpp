@@ -111,12 +111,10 @@ void FChanneldPlayerStateReplicator::OnStateChanged(const google::protobuf::Mess
 	if (NewState->has_score())
 	{
 		*ScorePtr = NewState->score();
-		PlayerState->OnRep_Score();
 	}
 	if (NewState->has_playerid())
 	{
 		*PlayerIdPtr = NewState->playerid();
-		PlayerState->OnRep_PlayerId();
 	}
 	if (NewState->has_ping())
 	{
@@ -125,6 +123,15 @@ void FChanneldPlayerStateReplicator::OnStateChanged(const google::protobuf::Mess
 	if (NewState->has_playername())
 	{
 		PlayerState->SetPlayerName(FString(UTF8_TO_TCHAR(NewState->playername().c_str())));
+	}
+
+	if (NewState->has_score())
+	{
+		PlayerState->OnRep_Score();
+	}
+	if (NewState->has_playerid())
+	{
+		PlayerState->OnRep_PlayerId();
 	}
 }
 

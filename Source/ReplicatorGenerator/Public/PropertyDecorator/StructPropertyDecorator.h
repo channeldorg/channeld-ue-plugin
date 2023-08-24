@@ -77,9 +77,9 @@ const static TCHAR* StructPropDeco_SetDeltaStateArrayInnerTemp =
 
 const static TCHAR* StructPropDeco_SetPropertyValueArrayInnerTemp =
 	LR"EOF(
-if ({Declare_PropPtrGroupStructName}::SetPropertyValue(&(*{Declare_PropertyPtr})[i], &MessageArr[i], {Code_GetWorldRef}) && !bPropChanged)
+if ({Declare_PropPtrGroupStructName}::SetPropertyValue(&(*{Declare_PropertyPtr})[i], &MessageArr[i], {Code_GetWorldRef}) && !b{Declare_PropertyName}Changed)
 {
-  bPropChanged = true;
+  b{Declare_PropertyName}Changed = true;
 }
 )EOF";
 
@@ -118,7 +118,7 @@ public:
 
 	virtual FString GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName) override;
 
-	virtual FString GetCode_SetPropertyValueArrayInner(const FString& TargetInstance, const FString& NewStateName) override;
+	virtual FString GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& TargetInstance, const FString& NewStateName) override;
 
 	FString GetDeclaration_PropPtrGroupStruct();
 
