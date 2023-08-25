@@ -22,11 +22,14 @@ FChanneldPlayerStateReplicator::FChanneldPlayerStateReplicator(UObject* InTarget
 		PlayerIdPtr = Property->ContainerPtrToValuePtr<int32>(PlayerState.Get());
 		check(PlayerIdPtr);
 	}
+	//	"Ping" property doesn't exist anymore on 5
+#if ENGINE_MAJOR_VERSION < 5
 	{
 		auto Property = CastFieldChecked<const FByteProperty>(PlayerState->GetClass()->FindPropertyByName(FName("Ping")));
 		PingPtr = Property->ContainerPtrToValuePtr<uint8>(PlayerState.Get());
 		check(PingPtr);
 	}
+#endif
 }
 
 FChanneldPlayerStateReplicator::~FChanneldPlayerStateReplicator()
@@ -108,12 +111,10 @@ void FChanneldPlayerStateReplicator::OnStateChanged(const google::protobuf::Mess
 	if (NewState->has_score())
 	{
 		*ScorePtr = NewState->score();
-		PlayerState->OnRep_Score();
 	}
 	if (NewState->has_playerid())
 	{
 		*PlayerIdPtr = NewState->playerid();
-		PlayerState->OnRep_PlayerId();
 	}
 	if (NewState->has_ping())
 	{
@@ -122,6 +123,15 @@ void FChanneldPlayerStateReplicator::OnStateChanged(const google::protobuf::Mess
 	if (NewState->has_playername())
 	{
 		PlayerState->SetPlayerName(FString(UTF8_TO_TCHAR(NewState->playername().c_str())));
+	}
+
+	if (NewState->has_score())
+	{
+		PlayerState->OnRep_Score();
+	}
+	if (NewState->has_playerid())
+	{
+		PlayerState->OnRep_PlayerId();
 	}
 }
 

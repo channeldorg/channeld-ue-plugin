@@ -45,7 +45,10 @@ if (!bPropChanged)
 
 const static TCHAR* PropDecorator_CallRepNotifyTemplate =
 	LR"EOF(
-{Declare_TargetInstance}->ProcessEvent({Declare_TargetInstance}->GetClass()->FindFunctionByName(FName(TEXT("{Declare_FunctionName}"))), {Code_OnRepParams});
+if (b{Declare_PropertyName}Changed)
+{
+	{Declare_TargetInstance}->ProcessEvent({Declare_TargetInstance}->GetClass()->FindFunctionByName(FName(TEXT("{Declare_FunctionName}"))), {Code_OnRepParams});
+}
 )EOF";
 
 
@@ -74,9 +77,9 @@ const static TCHAR* PropDeco_OnChangeStateArrayInnerTemp =
 if ((*{Declare_PropertyPtr})[i] != MessageArr[i])
 {
   (*{Declare_PropertyPtr})[i] = MessageArr[i];
-  if (!bPropChanged)
+  if (!b{Declare_PropertyName}Changed)
   {
-    bPropChanged = true;
+    b{Declare_PropertyName}Changed = true;
   }
 }
 )EOF";
@@ -186,7 +189,7 @@ public:
 	 * For example:
 	 *   optional bool bIsCrouched = 6
 	 */
-	virtual FString GetDefinition_ProtoField(int32 FieldNumber);
+	virtual FString GetDefinition_ProtoField(int32& FieldNumber);
 
 	/**
 	 * Code that getting property value from outer actor
@@ -264,7 +267,12 @@ public:
 
 	virtual FString GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull = false);
 
-	virtual FString GetCode_CallRepNotify(const FString& TargetInstanceName);
+	/**
+	 * The property has RepNotify function and the RepNotify function has parameter
+	 */
+	virtual bool HasOnRepNotifyParam();
+
+	virtual FString GetCode_CallRepNotify(const FString& TargetInstanceName, const FString& OldValuePointer);
 
 	/**
 	 * Code that handle state changes
@@ -274,11 +282,11 @@ public:
 	 *     Character->bIsCrouched = NewState->biscrouched();
 	 *   }
 	 */
-	virtual FString GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, bool NeedCallRepNotify = false);
+	virtual FString GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, const FString& AfterSetValueCode = TEXT(""));
 
 	virtual FString GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName);
 
-	virtual FString GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName);
+	virtual FString GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName);
 
 	virtual TArray<FString> GetAdditionalIncludes() override;
 

@@ -18,9 +18,9 @@ FRotator NewVector = ChanneldUtils::GetRotator(MessageArr[i]);
 if ((*{Declare_PropertyPtr})[i] != NewVector)
 {
   (*{Declare_PropertyPtr})[i] = NewVector;
-  if (!bPropChanged)
+  if (!b{Declare_PropertyName}Changed)
   {
-    bPropChanged = true;
+    b{Declare_PropertyName}Changed = true;
   }
 }
 )EOF";

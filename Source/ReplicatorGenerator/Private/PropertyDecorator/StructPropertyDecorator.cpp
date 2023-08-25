@@ -147,9 +147,10 @@ FString FStructPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString
 	);
 }
 
-FString FStructPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName)
+FString FStructPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName)
 {
 	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_PropertyName"), ArrayPropertyName);
 	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
 	FormatArgs.Add(TEXT("Code_GetWorldRef"), Owner->GetCode_GetWorldRef());
@@ -290,19 +291,19 @@ TArray<TSharedPtr<FStructPropertyDecorator>> FStructPropertyDecorator::GetStruct
 	TArray<TSharedPtr<FStructPropertyDecorator>> StructPropertyDecorators;
 	for (TSharedPtr<FPropertyDecorator>& Property : Properties)
 	{
+		StructPropertyDecorators.Append(Property->GetStructPropertyDecorators());
 		if (Property->IsStruct())
 		{
 			StructPropertyDecorators.Add(StaticCastSharedPtr<FStructPropertyDecorator>(Property));
 		}
-		StructPropertyDecorators.Append(Property->GetStructPropertyDecorators());
 	}
 	TArray<TSharedPtr<FStructPropertyDecorator>> NonRepetitionStructPropertyDecorators;
-	TSet<FString> StructPropertyDecoratorNames;
+	TSet<FString> StructPropertyDecoratorFieldTypes;
 	for (TSharedPtr<FStructPropertyDecorator>& StructPropertyDecorator : StructPropertyDecorators)
 	{
-		if (!StructPropertyDecoratorNames.Contains(StructPropertyDecorator->GetPropertyName()))
+		if (!StructPropertyDecoratorFieldTypes.Contains(StructPropertyDecorator->GetProtoFieldType()))
 		{
-			StructPropertyDecoratorNames.Add(StructPropertyDecorator->GetPropertyName());
+			StructPropertyDecoratorFieldTypes.Add(StructPropertyDecorator->GetProtoFieldType());
 			NonRepetitionStructPropertyDecorators.Add(StructPropertyDecorator);
 		}
 	}
