@@ -254,18 +254,10 @@ FString FStructPropertyDecorator::GetDeclaration_PropPtrGroupStructName()
 FString FStructPropertyDecorator::GetDefinition_ProtoStateMessage()
 {
 	FString FieldDefinitionCodes;
-	int32 i = 0;
+	int32 i = 1;
 	for (TSharedPtr<FPropertyDecorator> PropDecorator : Properties)
 	{
-		FieldDefinitionCodes.Append(
-			FString::Printf(
-				TEXT("%s %s %s = %d;\n"),
-				*PropDecorator->GetProtoFieldRule(),
-				*PropDecorator->GetProtoFieldType(),
-				*PropDecorator->GetProtoFieldName(),
-				++i
-			)
-		);
+		FieldDefinitionCodes.Append(PropDecorator->GetProtoFieldsDefinition(&i));
 	}
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_StateMessageType"), GetProtoStateMessageType());

@@ -5,9 +5,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "ChanneldUtils.h"
 #include "ChanneldSettings.h"
+#include "ChanneldTypes.h"
 
 void UChanneldGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
+	ChanneldUtils::LoadStaticObjectExportedNetGUIDFromFile(GenManager_ChannelStaticObjectExportPath);
+
 	GetMutableDefault<UChanneldSettings>()->UpdateNetDriverDefinitions();
 	InitConnection();
 }

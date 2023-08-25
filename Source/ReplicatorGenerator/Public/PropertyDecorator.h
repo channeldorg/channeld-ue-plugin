@@ -149,6 +149,9 @@ public:
 	virtual FString GetProtoNamespace() override;
 	virtual FString GetProtoStateMessageType() override;
 
+	//	NextIndex will updated
+	virtual FString GetProtoFieldsDefinition(int* NextIndex);
+
 	/**
 	 * Get the protobuf field rule
 	 */
@@ -172,21 +175,6 @@ public:
 
 	virtual UFunction* FindFunctionByName(const FName& FuncName) override;
 
-	/**
-	 * Get the protobuf field definition
-	 * 
-	 * For example:
-	 *   optional bool bIsCrouched
-	 */
-	virtual FString GetDefinition_ProtoField();
-
-	/**
-	 * Get the protobuf field definition with field number
-	 * 
-	 * For example:
-	 *   optional bool bIsCrouched = 6
-	 */
-	virtual FString GetDefinition_ProtoField(int32 FieldNumber);
 
 	/**
 	 * Code that getting property value from outer actor
@@ -266,6 +254,9 @@ public:
 
 	virtual FString GetCode_CallRepNotify(const FString& TargetInstanceName);
 
+	FString GetCode_PropertyShadowValue(const FString& TargetInstanceName);
+
+	FString GetCode_RepNotifyFuncDefine(const FString& TargetInstanceName);
 	/**
 	 * Code that handle state changes
 	 * For example:

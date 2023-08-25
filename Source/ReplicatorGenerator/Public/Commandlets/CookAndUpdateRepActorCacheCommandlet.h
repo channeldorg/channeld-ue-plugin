@@ -19,6 +19,7 @@ public:
 
 	virtual void OnUObjectArrayShutdown() override;
 
+	TArray<UObject*> CreatedUObjects;
 	TSet<FString> CheckedClasses;
 	TSet<FSoftClassPath> FilteredClasses;
 };

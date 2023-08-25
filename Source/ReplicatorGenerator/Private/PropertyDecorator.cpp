@@ -126,17 +126,6 @@ UFunction* FPropertyDecorator::FindFunctionByName(const FName& FuncName)
 	return Owner->FindFunctionByName(FuncName);
 }
 
-FString FPropertyDecorator::GetDefinition_ProtoField()
-{
-	const FString& FieldRule = GetProtoFieldRule();
-	const FString SpaceChar = TEXT(" ");
-	return FString(FieldRule.IsEmpty() ? TEXT("") : FieldRule + SpaceChar) + GetProtoFieldType() + SpaceChar + GetProtoFieldName();
-}
-
-FString FPropertyDecorator::GetDefinition_ProtoField(int32 FieldNumber)
-{
-	return GetDefinition_ProtoField() + TEXT(" = ") + FString::FromInt(FieldNumber);
-}
 
 FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetInstance)
 {
@@ -316,4 +305,80 @@ bool FPropertyDecorator::IsStruct()
 TArray<TSharedPtr<FStructPropertyDecorator>> FPropertyDecorator::GetStructPropertyDecorators()
 {
 	return TArray<TSharedPtr<FStructPropertyDecorator>>();
+}
+
+FString FPropertyDecorator::GetProtoFieldsDefinition(int *NextIndex)
+{
+	FString Result = FString::Printf(
+		TEXT("%s %s %s = %d;\n"),
+		*GetProtoFieldRule(),
+		*GetProtoFieldType(),
+		*GetProtoFieldName(),
+		(*NextIndex)
+	);
+	(*NextIndex)++;
+	return Result;
+}
+
+FString FPropertyDecorator::GetCode_PropertyShadowValue(const FString& TargetInstanceName)
+{
+	constexpr TCHAR* PropDecorator_PropertyValueShadowTemplate =
+		LR"EOF(
+    FMemMark M(FMemStack::Get());
+	if (RepNotifyFunc->ParmsSize > 0)
+	{
+		Parms = new(FMemStack::Get(), MEM_Zeroed, RepNotifyFunc->ParmsSize)uint8;
+		TFieldIterator<FProperty> Itr(RepNotifyFunc);
+		check(Itr)
+		Itr->CopyCompleteValue(Itr->ContainerPtrToValuePtr<void>(Parms), {Code_OnRepParams});
+	}
+)EOF";
+	if (OriginalProperty->HasAnyPropertyFlags(CPF_RepNotify))
+	{
+		const UFunction* RepNotifyFunc = Owner->FindFunctionByName(OriginalProperty->RepNotifyFunc);
+		if (RepNotifyFunc->NumParms <= 0)
+		{
+			return TEXT("");
+		}
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("Declare_TargetInstance"), TargetInstanceName);
+		FormatArgs.Add(TEXT("Declare_FunctionName"), OriginalProperty->RepNotifyFunc.ToString());
+		if (OriginalProperty->HasAnyPropertyFlags(CPF_NativeAccessSpecifierPublic))
+		{
+			FormatArgs.Add(
+				TEXT("Code_OnRepParams"),
+				RepNotifyFunc->NumParms > 0
+				? FString::Printf(TEXT("&(%s)"), *GetCode_GetPropertyValueFrom(TargetInstanceName, false))
+				: TEXT("nullptr")
+			);
+		}
+		else
+		{
+			FormatArgs.Add(
+				TEXT("Code_OnRepParams"),
+				RepNotifyFunc->NumParms > 0
+				? FString::Printf(TEXT("%s"), *GetPointerName())
+				: TEXT("nullptr")
+			);
+		}
+		return FString::Format(PropDecorator_PropertyValueShadowTemplate, FormatArgs);
+	}
+	return TEXT("");
+}
+
+FString FPropertyDecorator::GetCode_RepNotifyFuncDefine(const FString& TargetInstanceName)
+{
+	constexpr TCHAR* PropDecorator_RepNotifyFuncDefine =
+		LR"EOF(
+	auto RepNotifyFunc = {Declare_TargetInstance}->GetClass()->FindFunctionByName(FName(TEXT("{Declare_FunctionName}")));
+	uint8* Parms = nullptr;
+)EOF";
+	if (OriginalProperty->HasAnyPropertyFlags(CPF_RepNotify))
+	{
+		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("Declare_TargetInstance"), TargetInstanceName);
+		FormatArgs.Add(TEXT("Declare_FunctionName"), OriginalProperty->RepNotifyFunc.ToString());
+		return FString::Format(PropDecorator_RepNotifyFuncDefine, FormatArgs);
+	}
+	return TEXT("");
 }

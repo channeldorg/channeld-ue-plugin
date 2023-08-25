@@ -319,8 +319,83 @@ public:
 	{
 		NetConnForSpawn = InNetConn;
 	}
+
+	static UChanneldNetConnection* GetNetConnForSpawn()
+	{
+		return NetConnForSpawn;
+	}
+
+	static UNetConnection* GetActorNetConnection(const AActor* Actor);
+	static void ResetNetConnForSpawn();
+
+	static void MarkArUseCustomSerializeObject(FArchive& Ar);
+	static bool CheckArUseCustomSerializeObject(const FArchive& Ar);
+
+	static bool LoadStaticObjectExportedNetGUIDFromFile(const FString& FilePath);
+	static uint32 GetStaticObjectExportedNetGUID(const FString& PathName);
+	static FString GetStaticObjectExportedPathName(uint32 NetGUID);
+	static void RegisterStaticObjectNetGUID_Authority(UObject* Obj, uint32 ExportID);
+	static void RegisterStaticObjectNetGUID_NonAuthority(const UObject* Obj, uint32 ExportID, UNetConnection* Connection, bool bRunningOnServer = false);
+	static UObject* TryLoadStaticObject(uint32 NetGUID, UNetConnection* Connection, bool bRunningOnServer = false);
+
 private:
 	static TMap<uint32, TSharedRef<unrealpb::UnrealObjectRef>> ObjRefCache;
 	static UChanneldNetConnection* NetConnForSpawn;
-	static void ResetNetConnForSpawn();
 };
+
+
+struct CHANNELDUE_API FChanneldNetDeltaSerializeInfo : FNetDeltaSerializeInfo
+{
+	FChanneldNetDeltaSerializeInfo() {}
+
+	static bool DeltaSerializeRead(UNetDriver* NetDriver, FNetBitReader& Reader, UObject* Object, UScriptStruct* NetDeltaStruct, void* Destination);
+	static bool DeltaSerializeWrite(UNetDriver* NetDriver, FNetBitWriter& Writer, UObject* Object, UScriptStruct* NetDeltaStruct, void* Source, TSharedPtr<INetDeltaBaseState>& OldState);
+};
+
+
+//void RepLayout_SerializeProperties(FRepLayout& RepLayout, FArchive& Ar, UPackageMap* Map, const int32 CmdStart, const int32 CmdEnd,
+//	void* Data, bool& bHasUnmapped);
+//
+//inline void RepLayout_SerializeProperties_DynamicArray(FRepLayout& RepLayout, FArchive& Ar, UPackageMap* Map, const int32 CmdIndex,
+//	uint8* Data, bool& bHasUnmapped)
+//{
+//
+//	const FRepLayoutCmd& Cmd = RepLayout.Cmds[CmdIndex];
+//
+//	FScriptArray* Array = (FScriptArray*)Data;
+//
+//	uint16 OutArrayNum = Array->Num();
+//	Ar << OutArrayNum;
+//
+//	// If loading from the archive, OutArrayNum will contain the number of elements.
+//	// Otherwise, use the input number of elements.
+//	const int32 ArrayNum = Ar.IsLoading() ? (int32)OutArrayNum : Array->Num();
+//
+//	// When loading, we may need to resize the array to properly fit the number of elements.
+//	if (Ar.IsLoading() && OutArrayNum != Array->Num())
+//	{
+//		FScriptArrayHelper ArrayHelper((FArrayProperty*)Cmd.Property, Data);
+//		ArrayHelper.Resize(OutArrayNum);
+//	}
+//
+//	Data = (uint8*)Array->GetData();
+//
+//	for (int32 i = 0; i < Array->Num() && !Ar.IsError(); i++)
+//	{
+//		RepLayout_SerializeProperties(RepLayout, Ar, Map, CmdIndex + 1, Cmd.EndCmd - 1, Data + i * Cmd.ElementSize, bHasUnmapped);
+//	}
+//}
+//
+//
+//inline void RepLayout_SerializePropertiesForStruct(FRepLayout& RepLayout, FArchive& Ar, UPackageMap* Map, void* Data, bool& bHasUnmapped)
+//{
+//	for (auto& Parent : RepLayout.Parents)
+//	{
+//		RepLayout_SerializeProperties(RepLayout, Ar, Map, Parent.CmdStart, Parent.CmdEnd, Data, bHasUnmapped);
+//
+//		if (Ar.IsError())
+//		{
+//			return;
+//		}
+//	}
+//}
