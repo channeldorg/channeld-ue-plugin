@@ -128,7 +128,12 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 		AssetRegistry.GetAllAssets(AssetList);
 		for (auto AssetData : AssetList)
 		{
-			UObject* Object = LoadObject<UObject>(nullptr, *AssetData.GetObjectPathString());
+#if ENGINE_MAJOR_VERSION >= 5
+			FString ObjectPath = AssetData.GetObjectPathString();
+#else
+			FString ObjectPath = AssetData.ObjectPath.ToString();
+#endif
+			UObject* Object = LoadObject<UObject>(nullptr, *ObjectPath);
 
 			if (Object && IsValid(Object) && Object->IsFullNameStableForNetworking() && !AddedObjectPath.Contains(Object->GetPathName()))
 			{
@@ -144,7 +149,7 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 				// Blueprint CDO
 				if (UBlueprint* Blueprint = Cast<UBlueprint>(Object))
 				{
-					FString GeneratedClassNameString = FString::Printf(TEXT("%s_C"), *AssetData.GetObjectPathString());
+					FString GeneratedClassNameString = FString::Printf(TEXT("%s_C"), *ObjectPath);
 					if (AActor* Actor = Cast<AActor>(Object))
 					{
 						UClass* Class = LoadClass<AActor>(nullptr, *GeneratedClassNameString);
