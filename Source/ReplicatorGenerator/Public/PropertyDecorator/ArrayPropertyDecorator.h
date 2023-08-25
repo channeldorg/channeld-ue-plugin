@@ -17,6 +17,7 @@ const static TCHAR* ArrPropDeco_SetDeltaStateTemplate =
   if (bPropChanged)
   {
     bStateChanged = true;
+    {Declare_DeltaStateName}->set_update_{Definition_ProtoName}(true);
     if({Declare_FullStateName} != nullptr && {Declare_FullStateName}->{Definition_ProtoName}_size() > 0)
     {
       const_cast<{Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}*>({Declare_FullStateName})->clear_{Definition_ProtoName}();
@@ -47,6 +48,7 @@ const static TCHAR* ArrPropDeco_SetDeltaStateByMemOffsetTemp =
   if(bPropChanged)
   {
     bStateChanged = true;
+	{Declare_DeltaStateName}->set_update_{Definition_ProtoName}(true);
     if({Declare_FullStateName} != nullptr && {Declare_FullStateName}->{Definition_ProtoName}_size() > 0)
     {
       const_cast<{Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}*>({Declare_FullStateName})->clear_{Definition_ProtoName}();
@@ -65,7 +67,7 @@ if ({Code_HasProtoFieldValue})
 {
 {Code_SetPropertyValue}
 }
-else 
+else if({Code_GetProtoUpdateValue}) 
 {
 b{Declare_PropertyName}Changed = {Declare_PropPtrName}->Num() != {Code_GetProtoFieldValueFrom}.size();
 {Declare_PropPtrName}->Empty();
@@ -146,6 +148,7 @@ public:
 
 	virtual TArray<TSharedPtr<FStructPropertyDecorator>> GetStructPropertyDecorators() override;
 
+	virtual FString GetDefinition_ProtoField(int32& FieldNumber) override;
 protected:
 	TSharedPtr<FPropertyDecorator> InnerProperty;
 };
