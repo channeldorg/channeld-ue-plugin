@@ -5,7 +5,7 @@ const static TCHAR* UAssetPropDeco_SetDeltaStateArrayInnerTemp =
 	LR"EOF(
 UObject * & PropItem = (*{Declare_PropertyPtr})[i];
 unrealpb::AssetRef* NewOne = {Declare_DeltaStateName}->add_{Definition_ProtoName}();
-*NewOne = ChanneldUtils::GetRefOfAsset(PropItem);
+*NewOne = ChanneldUtils::GetAssetRef(PropItem);
 if (!bPropChanged)
 {
   bPropChanged = !(PropItem == ChanneldUtils::GetAssetByRef(&{Declare_FullStateName}->{Definition_ProtoName}()[i]));

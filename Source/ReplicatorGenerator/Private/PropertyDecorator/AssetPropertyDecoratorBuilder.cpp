@@ -9,7 +9,7 @@ bool FAssetPropertyDecoratorBuilder::IsSpecialProperty(FProperty* Property)
 	if (Property->IsA<FObjectProperty>())
 	{
 		const UClass* PropertyClass = CastFieldChecked<FObjectProperty>(Property)->PropertyClass;
-		return PropertyClass->IsAsset() || PropertyClass->IsChildOf<UPhysicsAsset>() ||
+		return PropertyClass->IsChildOf<UPhysicsAsset>() ||
 			(PropertyClass->ImplementsInterface(UInterface_AssetUserData::StaticClass())
 				&& !PropertyClass->IsChildOf<UActorComponent>()
 				&& !PropertyClass->IsChildOf<AWorldSettings>()
