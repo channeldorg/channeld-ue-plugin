@@ -251,17 +251,23 @@ public:
 	static unrealpb::AssetRef GetAssetRef(const UObject* Obj)
 	{
 		unrealpb::AssetRef Ref;
-		Ref.set_objectpath(std::string(TCHAR_TO_UTF8(*Obj->GetPathName())));
+		if (Obj)
+		{
+			Ref.set_objectpath(std::string(TCHAR_TO_UTF8(*Obj->GetPathName())));
+		}
 		return Ref;
 	}
 	
 	static UObject* GetAssetByRef(const unrealpb::AssetRef* Ref)
 	{
-		const FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
-		const FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(UTF8_TO_TCHAR(Ref->objectpath().c_str()));
-		if (AssetData.IsValid())
+		if (Ref->objectpath().size() > 0)
 		{
-			return AssetData.GetAsset();
+			const FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+			const FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(UTF8_TO_TCHAR(Ref->objectpath().c_str()));
+			if (AssetData.IsValid())
+			{
+				return AssetData.GetAsset();
+			}
 		}
 		return nullptr;
 	}
