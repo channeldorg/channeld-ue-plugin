@@ -126,7 +126,6 @@ UFunction* FPropertyDecorator::FindFunctionByName(const FName& FuncName)
 	return Owner->FindFunctionByName(FuncName);
 }
 
-
 FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetInstance)
 {
 	return GetCode_GetPropertyValueFrom(TargetInstance, !IsDirectlyAccessible());
@@ -146,7 +145,7 @@ FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetIn
 
 FString FPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode)
 {
-	return FString::Printf(TEXT("%s = %s;\nbStateChanged = true;\n%s"), *GetCode_GetPropertyValueFrom(TargetInstance), *GetCode_GetProtoFieldValueFrom(NewStateName), *AfterSetValueCode);
+	return FString::Printf(TEXT("%s = %s;\n%s"), *GetCode_GetPropertyValueFrom(TargetInstance), *GetCode_GetProtoFieldValueFrom(NewStateName), *AfterSetValueCode);
 }
 
 FString FPropertyDecorator::GetDeclaration_PropertyPtr()
@@ -198,6 +197,7 @@ FString FPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FString& Fr
 FString FPropertyDecorator::GetCode_SetDeltaState(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
 {
 	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
 	FormatArgs.Add(TEXT("Code_BeforeCondition"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? true :") : TEXT(""));
 	FormatArgs.Add(TEXT("Code_ActorPropEqualToProtoState"), GetCode_ActorPropEqualToProtoState(TargetInstance, FullStateName));
 	FormatArgs.Add(TEXT("Code_SetProtoFieldValue"), GetCode_SetProtoFieldValueTo(DeltaStateName, GetCode_GetPropertyValueFrom(TargetInstance)));
@@ -216,6 +216,7 @@ FString FPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString& Cont
 	);
 	FormatArgs.Add(TEXT("Code_BeforeCondition"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? true :") : TEXT(""));
 	FormatArgs.Add(TEXT("Declare_PropertyPtr"), TEXT("PropAddr"));
+	FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
 	FormatArgs.Add(TEXT("Code_GetProtoFieldValue"), GetCode_GetProtoFieldValueFrom(FullStateName));
 	FormatArgs.Add(TEXT("Code_SetProtoFieldValue"), GetCode_SetProtoFieldValueTo(DeltaStateName, TEXT("*PropAddr")));
 	return FString::Format(PropDeco_SetDeltaStateByMemOffsetTemp, FormatArgs);
@@ -232,34 +233,35 @@ FString FPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString& Prope
 	return FString::Format(PropDeco_SetDeltaStateArrayInnerTemp, FormatArgs);
 }
 
-FString FPropertyDecorator::GetCode_CallRepNotify(const FString& TargetInstanceName)
+bool FPropertyDecorator::HasOnRepNotifyParam()
+{
+	return OriginalProperty->HasAnyPropertyFlags(CPF_RepNotify) && Owner->FindFunctionByName(OriginalProperty->RepNotifyFunc)->NumParms > 0;
+}
+
+FString FPropertyDecorator::GetCode_CallRepNotify(const FString& TargetInstanceName, const FString& OldValuePointer)
 {
 	if (OriginalProperty->HasAnyPropertyFlags(CPF_RepNotify))
 	{
 		FStringFormatNamedArguments FormatArgs;
+		FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
 		FormatArgs.Add(TEXT("Declare_TargetInstance"), TargetInstanceName);
 		FormatArgs.Add(TEXT("Declare_FunctionName"), OriginalProperty->RepNotifyFunc.ToString());
 		const UFunction* RepNotifyFunc = Owner->FindFunctionByName(OriginalProperty->RepNotifyFunc);
-		FormatArgs.Add(
-			TEXT("Code_OnRepParams"),
-			RepNotifyFunc->NumParms > 0 ? FString::Printf(TEXT("&(%s)"), *GetCode_GetPropertyValueFrom(TargetInstanceName)) : TEXT("nullptr")
-		);
+		FormatArgs.Add(TEXT("Code_OnRepParams"),RepNotifyFunc->NumParms > 0 ? OldValuePointer: TEXT("nullptr"));
 		return FString::Format(PropDecorator_CallRepNotifyTemplate, FormatArgs);
 	}
 	return TEXT("");
 }
 
-FString FPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, bool NeedCallRepNotify)
+FString FPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, const FString& AfterSetValueCode)
 {
 	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
 	FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName));
 	FormatArgs.Add(TEXT("Code_ActorPropEqualToProtoState"), GetCode_ActorPropEqualToProtoState(TargetInstanceName, NewStateName));
 	FormatArgs.Add(
-		TEXT("Code_SetPropertyValue"),
-		GetCode_SetPropertyValueTo(
-			TargetInstanceName, NewStateName,
-			NeedCallRepNotify ? GetCode_CallRepNotify(TargetInstanceName) : TEXT("")
-		)
+	TEXT("Code_SetPropertyValue"),
+		GetCode_SetPropertyValueTo(TargetInstanceName, NewStateName, AfterSetValueCode)
 	);
 	return FString::Format(PropDecorator_OnChangeStateTemplate, FormatArgs);
 }
@@ -276,13 +278,15 @@ FString FPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString& Cont
 	);
 	FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName));
 	FormatArgs.Add(TEXT("Declare_PropertyPtr"), TEXT("PropAddr"));
+	FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
 	FormatArgs.Add(TEXT("Code_GetProtoFieldValue"), GetCode_GetProtoFieldValueFrom(NewStateName));
 	return FString::Format(PropDeco_OnChangeStateByMemOffsetTemp, FormatArgs);
 }
 
-FString FPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName)
+FString FPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName)
 {
 	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_PropertyName"), ArrayPropertyName);
 	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	return FString::Format(PropDeco_OnChangeStateArrayInnerTemp, FormatArgs);
 }
@@ -318,67 +322,4 @@ FString FPropertyDecorator::GetProtoFieldsDefinition(int *NextIndex)
 	);
 	(*NextIndex)++;
 	return Result;
-}
-
-FString FPropertyDecorator::GetCode_PropertyShadowValue(const FString& TargetInstanceName)
-{
-	constexpr TCHAR* PropDecorator_PropertyValueShadowTemplate =
-		LR"EOF(
-    FMemMark M(FMemStack::Get());
-	if (RepNotifyFunc->ParmsSize > 0)
-	{
-		Parms = new(FMemStack::Get(), MEM_Zeroed, RepNotifyFunc->ParmsSize)uint8;
-		TFieldIterator<FProperty> Itr(RepNotifyFunc);
-		check(Itr)
-		Itr->CopyCompleteValue(Itr->ContainerPtrToValuePtr<void>(Parms), {Code_OnRepParams});
-	}
-)EOF";
-	if (OriginalProperty->HasAnyPropertyFlags(CPF_RepNotify))
-	{
-		const UFunction* RepNotifyFunc = Owner->FindFunctionByName(OriginalProperty->RepNotifyFunc);
-		if (RepNotifyFunc->NumParms <= 0)
-		{
-			return TEXT("");
-		}
-		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add(TEXT("Declare_TargetInstance"), TargetInstanceName);
-		FormatArgs.Add(TEXT("Declare_FunctionName"), OriginalProperty->RepNotifyFunc.ToString());
-		if (OriginalProperty->HasAnyPropertyFlags(CPF_NativeAccessSpecifierPublic))
-		{
-			FormatArgs.Add(
-				TEXT("Code_OnRepParams"),
-				RepNotifyFunc->NumParms > 0
-				? FString::Printf(TEXT("&(%s)"), *GetCode_GetPropertyValueFrom(TargetInstanceName, false))
-				: TEXT("nullptr")
-			);
-		}
-		else
-		{
-			FormatArgs.Add(
-				TEXT("Code_OnRepParams"),
-				RepNotifyFunc->NumParms > 0
-				? FString::Printf(TEXT("%s"), *GetPointerName())
-				: TEXT("nullptr")
-			);
-		}
-		return FString::Format(PropDecorator_PropertyValueShadowTemplate, FormatArgs);
-	}
-	return TEXT("");
-}
-
-FString FPropertyDecorator::GetCode_RepNotifyFuncDefine(const FString& TargetInstanceName)
-{
-	constexpr TCHAR* PropDecorator_RepNotifyFuncDefine =
-		LR"EOF(
-	auto RepNotifyFunc = {Declare_TargetInstance}->GetClass()->FindFunctionByName(FName(TEXT("{Declare_FunctionName}")));
-	uint8* Parms = nullptr;
-)EOF";
-	if (OriginalProperty->HasAnyPropertyFlags(CPF_RepNotify))
-	{
-		FStringFormatNamedArguments FormatArgs;
-		FormatArgs.Add(TEXT("Declare_TargetInstance"), TargetInstanceName);
-		FormatArgs.Add(TEXT("Declare_FunctionName"), OriginalProperty->RepNotifyFunc.ToString());
-		return FString::Format(PropDecorator_RepNotifyFuncDefine, FormatArgs);
-	}
-	return TEXT("");
 }

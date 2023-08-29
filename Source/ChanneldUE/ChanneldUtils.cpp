@@ -991,8 +991,6 @@ public:
 		//ChanneldUtils::MarkArUseCustomSerializeObject(Ar);
 		Params.bOutHasMoreUnmapped = false;
 
-
-
 		if (EnumHasAnyFlags(Struct->StructFlags, STRUCT_NetSerializeNative))
 		{
 			UScriptStruct::ICppStructOps* CppStructOps = Struct->GetCppStructOps();
@@ -1014,14 +1012,6 @@ public:
 			TSharedPtr<FRepLayout> RepLayout = NetDriver->GetStructRepLayout(Params.Struct);
 			RepLayout->SerializePropertiesForStruct(Params.Struct, Ar, Params.Map, Params.Data, Params.bOutHasMoreUnmapped, Params.Object);
 		}
-		//else
-		//{
-		////	TSharedPtr<FRepLayout> RepLayout = NetDriver->GetStructRepLayout(Struct);
-		////	NetDriver->GuidCache->IsExportingNetGUIDBunch = true;
-		////	RepLayout_SerializePropertiesForStruct(*RepLayout, Ar, Params.Map, Params.Data, Params.bOutHasMoreUnmapped);
-		////	NetDriver->GuidCache->IsExportingNetGUIDBunch = false;
-		//}
-
 	}
 
 	void GatherGuidReferencesForFastArray(struct FFastArrayDeltaSerializeParams& Params) override
@@ -1091,41 +1081,4 @@ bool FChanneldNetDeltaSerializeInfo::DeltaSerializeWrite(UNetDriver* NetDriver, 
 		return true;
 	}
 	return false;
-}
-
-
-//
-//void RepLayout_SerializeProperties(FRepLayout& RepLayout, FArchive& Ar, UPackageMap* Map, const int32 CmdStart, const int32 CmdEnd,
-//	void* Data, bool& bHasUnmapped)
-//{
-//
-//	for (int32 CmdIndex = CmdStart; CmdIndex < CmdEnd && !Ar.IsError(); CmdIndex++)
-//	{
-//		const FRepLayoutCmd& Cmd = RepLayout.Cmds[CmdIndex];
-//
-//		check(Cmd.Type != ERepLayoutCmdType::Return);
-//
-//		if (Cmd.Type == ERepLayoutCmdType::DynamicArray)
-//		{
-//			RepLayout_SerializeProperties_DynamicArray(RepLayout, Ar, Map, CmdIndex, (uint8*)Data + Cmd.Offset, bHasUnmapped);
-//			CmdIndex = Cmd.EndCmd - 1; // The -1 to handle the ++ in the for loop
-//			continue;
-//		}
-//
-//		if (!Cmd.Property->NetSerializeItem(Ar, Map, (void*)((uint8*)Data + Cmd.Offset)))
-//		{
-//			bHasUnmapped = true;
-//		}
-//	}
-//}
-
-
-void ChanneldUtils::MarkArUseCustomSerializeObject(FArchive& Ar)
-{
-	Ar.SetCustomVersion(FGuid(1, 1, 1, 1), 1, "CustomSerializeObject");
-}
-
-bool ChanneldUtils::CheckArUseCustomSerializeObject(const FArchive& Ar)
-{
-	return Ar.GetCustomVersions().GetFriendlyName(FGuid(1, 1, 1, 1)) == "CustomSerializeObject";
 }

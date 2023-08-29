@@ -11,9 +11,10 @@ FString FFastArrayPropertyDecorator::GetPropertyName()
 }
 
 FString FFastArrayPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceName,
-                                                           const FString& NewStateName, bool NeedCallRepNotify)
+                                                           const FString& NewStateName, const FString& AfterSetValueCode)
 {
 	const TCHAR* T = LR"EOF(
+bool b{Declare_PropertyName}Changed = false;
 {
 if ({Code_HasProtoFieldValue})
 {
@@ -22,8 +23,6 @@ if ({Code_HasProtoFieldValue})
 	{
 		if(NewState->{Declare_ProtoFieldName}_full().size() > 0 || NewState->{Declare_ProtoFieldName}().size() > 0)
 		{
-			{Code_RepNotifyFuncDefine}
-			{Code_PropertyValueShadow}
 			UScriptStruct* NetDeltaStruct = Cast<UScriptStruct>(StructProperty->Struct);
 			auto NetDriver = {Declare_PropertyOwner}->GetNetDriver();
 			UNetConnection* Conn = ChanneldUtils::GetActorNetConnection({Declare_PropertyOwner});
@@ -47,42 +46,37 @@ if ({Code_HasProtoFieldValue})
 				{
 					UE_LOG(LogTemp, Log, TEXT("DeltaSerializeRead {Declare_PropertyName} Success"));
 				}
-
 			}
+
+			b{Declare_PropertyName}Changed = true;	//	GetCode_OnStateChange
+			{Code_AfterSetValue}
+
 
             if (Conn == ChanneldUtils::GetNetConnForSpawn()){
                 ChanneldUtils::ResetNetConnForSpawn();
             }
-			{Code_OnRep}
-
 		}
 	}
 }
+bStateChanged |= b{Declare_PropertyName}Changed;
 })EOF";
 
 	FStringFormatNamedArguments FormatArgs;
-	FormatArgs.Add(TEXT("Code_RepNotifyFuncDefine"), GetCode_RepNotifyFuncDefine(TargetInstanceName));
-	FormatArgs.Add(TEXT("Code_PropertyValueShadow"), GetCode_PropertyShadowValue(TargetInstanceName));
+	FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName));
+	FormatArgs.Add(TEXT("Declare_ProtoFieldName"), GetProtoFieldName());
+	FormatArgs.Add(TEXT("Declare_Target"), TargetInstanceName);
+	FormatArgs.Add(TEXT("Declare_PropertyPointer"), GetPointerName());
+	FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
+	FormatArgs.Add(TEXT("Code_AfterSetValue"), AfterSetValueCode);
+
 	if (this->OriginalProperty->Owner.IsUObject() && this->OriginalProperty->Owner.GetOwnerClass()->IsChildOf(
 		UActorComponent::StaticClass()))
 	{
-		FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName));
-		FormatArgs.Add(TEXT("Declare_ProtoFieldName"), GetProtoFieldName());
-		FormatArgs.Add(TEXT("Declare_Target"), TargetInstanceName);
-		FormatArgs.Add(TEXT("Declare_PropertyPointer"), GetPointerName());
-		FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
-		FormatArgs.Add(TEXT("Code_OnRep"), NeedCallRepNotify ? GetCode_CallRepNotify(TargetInstanceName) : TEXT(""));
 		FString Declare_Target = FString::Printf(TEXT("%s->GetOwnerActor()"), *TargetInstanceName);
 		FormatArgs.Add(TEXT("Declare_PropertyOwner"), Declare_Target);
 	}
 	else
 	{
-		FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName));
-		FormatArgs.Add(TEXT("Declare_ProtoFieldName"), GetProtoFieldName());
-		FormatArgs.Add(TEXT("Declare_Target"), TargetInstanceName);
-		FormatArgs.Add(TEXT("Declare_PropertyPointer"), GetPointerName());
-		FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
-		FormatArgs.Add(TEXT("Code_OnRep"), NeedCallRepNotify ? GetCode_CallRepNotify(TargetInstanceName) : TEXT(""));
 		FormatArgs.Add(TEXT("Declare_PropertyOwner"), TargetInstanceName);
 	}
 
@@ -101,6 +95,7 @@ FString FFastArrayPropertyDecorator::GetCode_SetDeltaState(const FString& Target
 	FStringFormatNamedArguments FormatArgs;
 
 	const TCHAR* T = LR"EOF(
+bool b{Declare_PropertyName}Changed = false;
 {
 	auto StructProperty = CastFieldChecked<const FStructProperty>({Declare_Target}->GetClass()->FindPropertyByName(FName("{Declare_PropertyName}")));
 	if (StructProperty)
@@ -143,7 +138,7 @@ FString FFastArrayPropertyDecorator::GetCode_SetDeltaState(const FString& Target
 					}
 				}
 
-				bStateChanged = true;
+				b{Declare_PropertyName}Changed = true;	// GetCode_SetDeltaState
 			}
 
 			{Declare_OldStateKey} = {Declare_PropertyPointer}->ArrayReplicationKey ;
@@ -153,6 +148,7 @@ FString FFastArrayPropertyDecorator::GetCode_SetDeltaState(const FString& Target
             }
 		}
 	}
+	bStateChanged |= b{Declare_PropertyName}Changed;
 })EOF";
 	
 	FormatArgs.Add(TEXT("Declare_OldStateKey"), FString::Printf(TEXT("%sReplicationKey"), *GetPropertyName()));

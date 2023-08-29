@@ -15,8 +15,9 @@ const static TCHAR* VectorPropDeco_SetDeltaStateByMemOffsetTemp =
     {
       {Code_SetProtoFieldValue};
     }
-    bStateChanged = true;
+	b{Declare_PropertyName}Changed = true;	//	VectorPropDeco_SetDeltaStateByMemOffsetTemp
   }
+  bStateChanged |= b{Declare_PropertyName}Changed;
 }
 )EOF";
 
@@ -34,12 +35,14 @@ if (!bPropChanged)
 const static TCHAR* VectorPropDeco_OnChangeStateByMemOffsetTemp =
 	LR"EOF(
 {
+	// Testing oii VectorPropDeco_OnChangeStateByMemOffsetTemp
   {Code_AssignPropPointers};
   if ({Code_HasProtoFieldValue} && ChanneldUtils::CheckDifference(*{Declare_PropertyPtr}, &{Code_GetProtoFieldValue}))
   {
     ChanneldUtils::{FunctionName_SetXXXFromPB}(*{Declare_PropertyPtr}, {Code_GetProtoFieldValue});
-    bStateChanged = true;
+	b{Declare_PropertyName}Changed = true;	//	VectorPropDeco_SetDeltaStateByMemOffsetTemp
   }
+  bStateChanged |= b{Declare_PropertyName}Changed;
 }
 )EOF";
 
@@ -48,11 +51,9 @@ const static TCHAR* VectorPropDeco_OnChangeStateArrayInnerTemp =
 if (ChanneldUtils::CheckDifference((*{Declare_PropertyPtr})[i], &MessageArr[i]))
 {
   ChanneldUtils::{FunctionName_SetXXXFromPB}((*{Declare_PropertyPtr})[i], MessageArr[i]);
-  if (!bPropChanged)
-  {
-    bPropChanged = true;
-  }
+  b{Declare_PropertyName}Changed = true;	//	VectorPropDeco_OnChangeStateArrayInnerTemp
 }
+bStateChanged |= b{Declare_PropertyName}Changed;
 )EOF";
 
 class FVectorPropertyDecorator : public FPropertyDecorator
@@ -88,7 +89,7 @@ public:
 
 	virtual FString GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName) override;
 
-	virtual FString GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName) override;
+	virtual FString GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName) override;
 
 	virtual TArray<FString> GetAdditionalIncludes() override;
 };

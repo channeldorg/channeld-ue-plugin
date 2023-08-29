@@ -64,10 +64,10 @@ FString FUnrealObjectPropertyDecorator::GetCode_SetProtoFieldValueTo(const FStri
 FString FUnrealObjectPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode)
 {
 	return FString::Printf(
-		TEXT("%s = ChanneldUtils::GetObjectByRef(&%s->%s(), %s);\n  bStateChanged = true;\n%s"),
+		TEXT("%s = ChanneldUtils::GetObjectByRef(&%s->%s(), %s);\n  b%sChanged = true;\n%s"),
 		*GetCode_GetPropertyValueFrom(TargetInstance),
 		*NewStateName, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef(),
-		*AfterSetValueCode
+		*GetPropertyName(), *AfterSetValueCode
 	);
 }
 
@@ -82,9 +82,10 @@ FString FUnrealObjectPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FS
 	return FString::Format(UObjPropDeco_SetDeltaStateArrayInnerTemp, FormatArgs);
 }
 
-FString FUnrealObjectPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName)
+FString FUnrealObjectPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName)
 {
 	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_PropertyName"), ArrayPropertyName);
 	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	FormatArgs.Add(TEXT("Code_GetWorldRef"), Owner->GetCode_GetWorldRef());
 	return FString::Format(UObjPropDeco_OnChangeStateArrayInnerTemp, FormatArgs);

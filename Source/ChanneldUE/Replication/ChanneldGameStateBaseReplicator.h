@@ -30,6 +30,8 @@ protected:
 private:
 	float* ReplicatedWorldTimeSecondsPtr;
 	bool* bReplicatedHasBegunPlayPtr;
+	UFunction* OnRep_GameModeClassFunc;
+	UFunction* OnRep_SpectatorClassFunc;
 	UFunction* OnRep_ReplicatedWorldTimeSecondsFunc;
 	UFunction* OnRep_ReplicatedHasBegunPlayFunc;
 };
