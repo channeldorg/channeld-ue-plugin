@@ -303,6 +303,7 @@ TSharedRef<FInternetAddr> UChanneldNetDriver::ConnIdToAddr(Channeld::ConnectionI
 	{
 		auto Addr = GetSocketSubsystem()->CreateInternetAddr();
 		Addr->SetIp(ConnId);
+		// Won't set the port until UChanneldNetConnection::LowLevelGetRemoteAddress(true) is called.
 		CachedAddr.Add(ConnId, Addr);
 		AddrPtr = &Addr;
 	}
