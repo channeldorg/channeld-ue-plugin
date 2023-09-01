@@ -58,6 +58,9 @@ public:
 	// How many times an RPC will be redirected from a server that couldn't handle it to another server. 0 = No redirection. Setting this to a too high value can cause the RPC bouncing between servers and saturate the network.
 	UPROPERTY(Config, EditAnywhere, Category = "Transport")
 	int32 RpcRedirectionMaxRetries = 1;
+	// If true, FRepLayout will always be used for the RPC parameter serialization instead of using the replicators. Default is false (FRepLayout will only be used when failed to serialize the parameters with replicators).
+	UPROPERTY(Config, EditAnywhere, Category = "Transport")
+	bool bForceRepLayoutForRPC = false;
 
 	// Should the server and client skip the custom replication system and use UE's default one. All traffic still goes through channeld either way.
 	UPROPERTY(Config, EditAnywhere, Category = "Replication")

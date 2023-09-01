@@ -1,11 +1,11 @@
 ﻿#include "ChanneldNetDriver.h"
 
 #include "Net/DataReplication.h"
-#include "Net/RepLayout.h"
 #include "Misc/ScopeExit.h"
 #include "google/protobuf/message_lite.h"
 #include "Engine/NetConnection.h"
 #include "PacketHandler.h"
+#include "Net/RepLayout.h"
 #include "Net/Core/Misc/PacketAudit.h"
 #include "ChanneldGameInstanceSubsystem.h"
 #include "ChanneldUtils.h"
@@ -281,7 +281,7 @@ void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMess
 	//TSet<FNetworkGUID> UnmappedGUID;
 	bool bDelayRPC = false;
 	FName FuncName = UTF8_TO_TCHAR(Msg->functionname().c_str());
-	ReceivedRPC(Actor, FuncName, Msg->paramspayload(), bDelayRPC);
+	ReceivedRPC(Actor, FuncName, Msg, bDelayRPC);
 	if (bDelayRPC)
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Deferred RPC '%s::%s' due to unmapped NetGUID: %d"), *Actor->GetName(), *FuncName.ToString(), Msg->targetobj().netguid());
@@ -855,6 +855,19 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 	return Result;
 }
 
+UActorChannel* UChanneldNetDriver::CreateActorChannelForRPC()
+{
+	// Lazy-instantiation
+	if (!NetConnForRPC)
+	{
+		NetConnForRPC = NewObject<UChanneldNetConnection>(GetTransientPackage(), UChanneldNetConnection::StaticClass());
+		NetConnForRPC->InitBase(this, this->GetSocket(), FURL(), USOCK_Open);
+	}
+
+	auto Channel = NetConnForRPC->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);
+	return CastChecked<UActorChannel>(Channel);
+}
+
 void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunction* Function, void* Parameters, struct FOutParmRec* OutParms, struct FFrame* Stack, class UObject* SubObject /*= nullptr*/)
 {
 	const FName FuncFName = Function->GetFName();
@@ -883,21 +896,42 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 	
 	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
 	{
-		auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
-		if (RepComp)
+		// auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
+		// if (RepComp)
 		{
 			bool bSuccess = true;
-			auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters, OutParms, bSuccess);
+			// auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters, OutParms, bSuccess);
+
+			int32 NumBits = 0;
+			UActorChannel* ActorChannel = nullptr;
+			UPackageMap* PackageMap = nullptr;
+			if (auto NetConn = Actor->GetNetConnection())
+			{
+				ActorChannel = NetConn->FindActorChannelRef(Actor);
+				PackageMap = NetConn->PackageMap;
+			}
+			if (!ActorChannel)
+			{
+				ActorChannel = CreateActorChannelForRPC();
+				PackageMap = ActorChannel->Connection->PackageMap;
+			}
+			FNetBitWriter TempWriter(PackageMap, 0 );
+			auto RepLayout = GetFunctionRepLayout(Function);//FRepLayout::CreateFromFunction(Function);
+			RepLayout->SendPropertiesForRPC(Function, ActorChannel, TempWriter, Parameters);
+			std::string ParamsPayload(reinterpret_cast<const char*>(TempWriter.GetData()), TempWriter.GetNumBytes());
+			NumBits = TempWriter.GetNumBits();
+			UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %llu bytes"), ParamsPayload.size());
+			
 			if (bSuccess)
 			{
-				UE_CLOG(bShouldLog && ParamsMsg.IsValid(), LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters: %s"), UTF8_TO_TCHAR(ParamsMsg->DebugString().c_str()));
+				// UE_CLOG(bShouldLog && ParamsMsg.IsValid(), LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters: %s"), UTF8_TO_TCHAR(ParamsMsg->DebugString().c_str()));
 				
 				Channeld::ChannelId OwningChId = ChannelDataView->GetOwningChannelId(Actor);
 
 				// Server -> Client multicast RPC
 				if (ConnToChanneld->IsServer() && (Function->FunctionFlags & FUNC_NetMulticast))
 				{
-					if (ChannelDataView->SendMulticastRPC(Actor, FuncName, ParamsMsg))
+					if (ChannelDataView->SendMulticastRPC(Actor, FuncName, ParamsPayload, NumBits))
 					{
 						return;
 					}
@@ -908,7 +942,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 					UChanneldNetConnection* NetConn = ConnToChanneld->IsClient() ? GetServerConnection() : Cast<UChanneldNetConnection>(Actor->GetNetConnection());
 					if (NetConn)
 					{
-						NetConn->SendRPCMessage(Actor, FuncName, ParamsMsg, OwningChId);
+						NetConn->SendRPCMessage(Actor, FuncName, ParamsPayload, NumBits, OwningChId);
 						return;
 					}
 					UE_LOG(LogChanneld, Warning, TEXT("Failed to send RPC %s::%s as the actor doesn't have any NetConn"), *Actor->GetName(), *FuncName);
@@ -919,10 +953,13 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 					unrealpb::RemoteFunctionMessage RpcMsg;
 					RpcMsg.mutable_targetobj()->set_netguid(GuidCache->GetNetGUID(Actor).Value);
 					RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
-					if (ParamsMsg)
+					if (ParamsPayload.size() > 0)
 					{
-						RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
-						UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %llu bytes"), RpcMsg.paramspayload().size());
+						RpcMsg.set_paramspayload(ParamsPayload);
+					}
+					if (NumBits > 0)
+					{
+						RpcMsg.set_paramsreplayoutbits(NumBits);
 					}
 					ConnToChanneld->Broadcast(OwningChId, unrealpb::RPC, RpcMsg, channeldpb::SINGLE_CONNECTION);
 					UE_LOG(LogChanneld, Log, TEXT("Forwarded RPC %s::%s to the owner of channel %d"), *Actor->GetName(), *FuncName, OwningChId);
@@ -956,7 +993,7 @@ void UChanneldNetDriver::OnSentRPC(const unrealpb::RemoteFunctionMessage& RpcMsg
 #endif
 }
 
-void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDeferredRPC)
+void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, TSharedPtr<unrealpb::RemoteFunctionMessage> Msg, bool& bDeferredRPC)
 {
 	const bool bShouldLog = FunctionName != ServerMovePackedFuncName && FunctionName != ClientMoveResponsePackedFuncName && FunctionName != ServerUpdateCameraFuncName;
 	UE_CLOG(bShouldLog,	LogChanneld, Verbose, TEXT("Received RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
@@ -978,19 +1015,39 @@ void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, c
 		}
 	}
 
-	auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
-	if (RepComp)
+	// auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
+	// if (RepComp)
 	{
 		bool bSuccess = true;
-		TSharedPtr<void> Params = RepComp->DeserializeFunctionParams(Actor, Function, ParamsPayload, bSuccess, bDeferredRPC);
-		if (bDeferredRPC)
+		// TSharedPtr<void> Params = RepComp->DeserializeFunctionParams(Actor, Function, ParamsPayload, bSuccess, bDeferredRPC);
+
+		UActorChannel* ActorChannel = nullptr;
+		UPackageMap* PackageMap = nullptr;
+		if (auto NetConn = Actor->GetNetConnection())
+		{
+			ActorChannel = NetConn->FindActorChannelRef(Actor);
+			PackageMap = NetConn->PackageMap;
+		}
+		if (!ActorChannel)
+		{
+			ActorChannel = CreateActorChannelForRPC();
+			PackageMap = ActorChannel->Connection->PackageMap;
+		}
+		// FOutBunch Bunch(ActorChannel, 0);
+		FNetBitReader Reader(PackageMap, (uint8*)Msg->paramspayload().data(), Msg->paramsreplayoutbits());
+		uint8* Params = new(FMemStack::Get(), MEM_Zeroed, Function->ParmsSize)uint8;
+		TSet<FNetworkGUID> UnmappedGuids;
+		auto RepLayout = GetFunctionRepLayout(Function);
+		RepLayout->ReceivePropertiesForRPC(Actor, Function, ActorChannel, Reader, Params, UnmappedGuids);
+		
+		if (UnmappedGuids.Num() > 0)
 		{
 			return;
 		}
 
 		if (bSuccess)
 		{
-			Actor->ProcessEvent(Function, Params.Get());
+			Actor->ProcessEvent(Function, Params);
 		}
 		else
 		{

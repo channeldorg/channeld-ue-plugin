@@ -57,7 +57,7 @@ public:
 	 */
 	void SendSpawnMessage(UObject* Object, ENetRole Role = ENetRole::ROLE_None, uint32 OwningChannelId = Channeld::InvalidChannelId, uint32 OwningConnId = 0, FVector* Location = nullptr);
 	void SendDestroyMessage(UObject* Object, EChannelCloseReason Reason = EChannelCloseReason::Destroyed);
-	void SendRPCMessage(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg = nullptr, Channeld::ChannelId ChId = Channeld::InvalidChannelId);
+	void SendRPCMessage(AActor* Actor, const FString& FuncName, std::string& ParamsPayload, uint32 ParamsRepLayoutBits, Channeld::ChannelId ChId = Channeld::InvalidChannelId);
 	// Flush the handshake packets that are queued before received AuthResultMessage to the server.
 	void FlushUnauthData();
 
@@ -85,7 +85,9 @@ private:
 	{
 		AActor* Actor;
 		FString FuncName;
-		TSharedPtr<google::protobuf::Message> ParamsMsg;
+		// TSharedPtr<google::protobuf::Message> ParamsMsg;
+		std::string ParamsPayload;
+		uint32 ParamsRepLayoutBits;
 		Channeld::ChannelId ChId;
 	};
 	// RPCs queued on the caller's side that don't have the NetId exported yet.

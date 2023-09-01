@@ -294,7 +294,7 @@ void UChanneldNetConnection::SendDestroyMessage(UObject* Object, EChannelCloseRe
 	}
 }
 
-void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg, Channeld::ChannelId ChId)
+void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncName, std::string& ParamsPayload, uint32 ParamsRepLayoutBits, Channeld::ChannelId ChId)
 {
 	if (GetMutableDefault<UChanneldSettings>()->bQueueUnexportedActorRPC)
 	{
@@ -305,7 +305,7 @@ void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncNa
 			NetConn->SendSpawnMessage(Actor, Actor->GetRemoteRole());
 			*/
 
-			UnexportedRPCs.Add(FOutgoingRPC{Actor, FuncName, ParamsMsg, ChId});
+			UnexportedRPCs.Add(FOutgoingRPC{Actor, FuncName, ParamsPayload, ParamsRepLayoutBits, ChId});
 			UE_LOG(LogChanneld, Log, TEXT("Calling RPC %s::%s while the NetConnection(%d) doesn't have the NetId exported yet. Pushed to the next tick."),
 				*Actor->GetName(), *FuncName, GetConnId());
 			return;
@@ -317,10 +317,13 @@ void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncNa
 	// RpcMsg.mutable_targetobj()->MergeFrom(*ChanneldUtils::GetRefOfObject(Actor));
 	RpcMsg.mutable_targetobj()->set_netguid(Driver->GuidCache->GetNetGUID(Actor).Value);
 	RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
-	if (ParamsMsg)
+	if (ParamsPayload.size() > 0)
 	{
-		RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
-		UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %d bytes"), RpcMsg.paramspayload().size());
+		RpcMsg.set_paramspayload(ParamsPayload);
+	}
+	if (ParamsRepLayoutBits > 0)
+	{
+		RpcMsg.set_paramsreplayoutbits(ParamsRepLayoutBits);
 	}
 	SendMessage(unrealpb::RPC, RpcMsg, ChId);
 
@@ -383,7 +386,7 @@ void UChanneldNetConnection::Tick(float DeltaSeconds)
 		FOutgoingRPC& RPC = UnexportedRPCs[i];
 		if (IsValid(RPC.Actor))
 		{
-			SendRPCMessage(RPC.Actor, RPC.FuncName, RPC.ParamsMsg, RPC.ChId);
+			SendRPCMessage(RPC.Actor, RPC.FuncName, RPC.ParamsPayload, RPC.ParamsRepLayoutBits, RPC.ChId);
 		}
 	}
 	UnexportedRPCs.RemoveAt(0, RpcNum);

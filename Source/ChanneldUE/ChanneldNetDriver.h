@@ -62,7 +62,7 @@ public:
 	UChanneldNetConnection* AddChanneldClientConnection(Channeld::ConnectionId ClientConnId, Channeld::ChannelId ChId);
 	void RemoveChanneldClientConnection(Channeld::ConnectionId ClientConnId);
 
-	void ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDeferredRPC);
+	void ReceivedRPC(AActor* Actor, const FName& FunctionName, TSharedPtr<unrealpb::RemoteFunctionMessage> Msg, bool& bDeferredRPC);
 
 	UChanneldConnection* GetConnToChanneld() const { return ConnToChanneld; }
 
@@ -115,6 +115,10 @@ private:
 
 	UPROPERTY()
 	TMap<uint32, UChanneldNetConnection*> ClientConnectionMap;
+
+	UPROPERTY()
+	UChanneldNetConnection* NetConnForRPC;
+	UActorChannel* CreateActorChannelForRPC();
 
 	// RPCs queued on the callee's side that dont' have the actor resolved yet.
 	TArray<TSharedPtr<unrealpb::RemoteFunctionMessage>> UnprocessedRPCs;
