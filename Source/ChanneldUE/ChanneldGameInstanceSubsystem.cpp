@@ -654,15 +654,22 @@ void UChanneldGameInstanceSubsystem::InitChannelDataView()
 {
 	TSubclassOf<UChannelDataView> ChannelDataViewClass = nullptr;
 
-	ChannelDataViewClass = GetMutableDefault<UChanneldSettings>()->ChannelDataViewClass;
+	const auto Settings = GetMutableDefault<UChanneldSettings>();
+	ChannelDataViewClass = Settings->ChannelDataViewClass;
 
 	if (ChannelDataViewClass)
 	{
 		ChannelDataView = NewObject<UChannelDataView>(this, ChannelDataViewClass);
-		//ConnToChanneld->OnAuthenticated.AddUObject(ChannelDataView, &UChannelDataView::Initialize);
-		ChannelDataView->Initialize(ConnectionInstance);
 
-		OnViewInitialized.Broadcast(ChannelDataView);
+		if (Settings->DelayViewInitInSeconds > 0)
+		{
+			FTimerHandle Handle;
+			GetWorld()->GetTimerManager().SetTimer(Handle, [&](){ChannelDataView->Initialize(ConnectionInstance);}, 1, false, Settings->DelayViewInitInSeconds);
+		}
+		else
+		{
+			ChannelDataView->Initialize(ConnectionInstance);
+		}
 	}
 	else
 	{

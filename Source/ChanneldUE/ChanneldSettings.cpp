@@ -125,6 +125,11 @@ void UChanneldSettings::PostInitProperties()
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bEnableSpatialVisualizer from CLI: %d"), bEnableSpatialVisualizer);
 	}
 
+	if (FParse::Value(CmdLine, TEXT("DelayViewInitInSeconds="), DelayViewInitInSeconds))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed DelayViewInitInSeconds from CLI: %f"), DelayViewInitInSeconds);
+	}
+
 	// Upgrade to v0.6: use fixed SpatialChannelData message
 	DefaultChannelDataMsgNames.Emplace(EChanneldChannelType::ECT_Spatial, TEXT("unrealpb.SpatialChannelData"));
 }
