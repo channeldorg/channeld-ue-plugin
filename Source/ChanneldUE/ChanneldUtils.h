@@ -230,6 +230,24 @@ public:
 	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
 	
 	static TSharedRef<unrealpb::UnrealObjectRef> GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr, bool bFullExport = false);
+
+	static bool CheckObjectWithRef(UObject* Obj, const unrealpb::UnrealObjectRef* Ref, UWorld* World)
+	{
+		bool bUnmapped = false;
+		return GetObjectByRef(Ref, World, bUnmapped, false) == Obj && !bUnmapped;
+	}
+
+	static bool SetObjectPtrByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, UObject** ObjPtr)
+	{
+		bool bUnmapped = false;
+		const auto NewValue = ChanneldUtils::GetObjectByRef(Ref, World, bUnmapped, false);
+		if (!bUnmapped && *ObjPtr != NewValue)
+		{
+			*ObjPtr = NewValue;
+			return true;
+		}
+		return false;
+	}
 		
 	static UActorComponent* GetActorComponentByRef(const unrealpb::ActorComponentRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
 	

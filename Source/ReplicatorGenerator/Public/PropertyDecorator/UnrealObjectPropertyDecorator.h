@@ -8,7 +8,7 @@ unrealpb::UnrealObjectRef* NewOne = {Declare_DeltaStateName}->add_{Definition_Pr
 *NewOne = *ChanneldUtils::GetRefOfObject(PropItem);
 if (!bPropChanged)
 {
-  bPropChanged = !(PropItem == ChanneldUtils::GetObjectByRef(&{Declare_FullStateName}->{Definition_ProtoName}()[i], {Code_GetWorldRef}));
+  bPropChanged = ChanneldUtils::CheckObjectWithRef(PropItem, &{Declare_FullStateName}->{Definition_ProtoName}()[i], {Code_GetWorldRef});
 }
 )EOF";
 
