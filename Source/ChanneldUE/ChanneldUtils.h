@@ -9,7 +9,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/DemoNetDriver.h"
 //#define CHANNELD_TOLERANCE (1.e-8f)
-#define CHANNELD_TOLERANCE (0.001)
+#define CHANNELD_TOLERANCE (0.001f)
 
 class CHANNELDUE_API ChanneldUtils
 {
