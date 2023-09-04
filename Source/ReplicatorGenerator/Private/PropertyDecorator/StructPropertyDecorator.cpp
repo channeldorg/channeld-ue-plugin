@@ -63,16 +63,28 @@ FString FStructPropertyDecorator::GetDeclaration_PropertyPtr()
 	return FString::Printf(TEXT("%s %s"), *GetDeclaration_PropPtrGroupStructName(), *GetPointerName());
 }
 
-FString FStructPropertyDecorator::GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset)
+FString FStructPropertyDecorator::GetCode_AssignPropPointerStatic(const FString& Container, const FString& AssignTo)
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Ref_AssignTo"), AssignTo);
+	FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
+	FormatArgs.Add(TEXT("Num_PropMemOffset"), GetMemOffset());
+	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
+
+	return FString::Format(StructPropDeco_AssignPropPtrStatic, FormatArgs);
+}
+
+FString FStructPropertyDecorator::GetCode_AssignPropPointerDynamic(const FString& Container, const FString& AssignTo)
 {
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Ref_AssignTo"), AssignTo);
 	FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
 	FormatArgs.Add(TEXT("Declare_PropertyCPPType"), GetCPPType());
-	FormatArgs.Add(TEXT("Num_PropMemOffset"), MemOffset);
+	FormatArgs.Add(TEXT("Num_PropMemOffset"), GetMemOffset());
 	FormatArgs.Add(TEXT("Declare_PropPtrGroupStructName"), GetDeclaration_PropPtrGroupStructName());
+    FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
 
-	return FString::Format(StructPropDeco_AssignPropPtrTemp, FormatArgs);
+	return FString::Format(StructPropDeco_AssignPropPtrDynamic, FormatArgs);
 }
 
 TArray<FString> FStructPropertyDecorator::GetAdditionalIncludes()
@@ -179,7 +191,7 @@ FString FStructPropertyDecorator::GetDeclaration_PropPtrGroupStruct()
 		AssignPropertyPointerCodes.Append(
 			FString::Printf(
 				TEXT("{\n%s;\n}\n"),
-				*PropDecorator->GetCode_AssignPropPointer(TEXT("Container"), PropDecorator->GetPointerName())
+				*PropDecorator->GetCode_AssignPropPointerStatic(TEXT("Container"), PropDecorator->GetPointerName())
 			)
 		);
 
@@ -188,7 +200,7 @@ FString FStructPropertyDecorator::GetDeclaration_PropPtrGroupStruct()
 			AssignPropPointersForRPCCodes.Append(
 				FString::Printf(
 					TEXT("{\n%s;\nOutParams = OutParams->NextOutParm;\n}\n"),
-					*PropDecorator->GetCode_AssignPropPointer(TEXT("OutParams->PropAddr"), PropDecorator->GetPointerName(), 0)
+					*PropDecorator->GetCode_AssignPropPointerStatic(TEXT("OutParams->PropAddr"), PropDecorator->GetPointerName())
 				)
 			);
 		}
@@ -197,7 +209,7 @@ FString FStructPropertyDecorator::GetDeclaration_PropPtrGroupStruct()
 			AssignPropPointersForRPCCodes.Append(
 				FString::Printf(
 					TEXT("{\n%s;\n}\n"),
-					*PropDecorator->GetCode_AssignPropPointer(TEXT("Params"), PropDecorator->GetPointerName())
+					*PropDecorator->GetCode_AssignPropPointerStatic(TEXT("Params"), PropDecorator->GetPointerName())
 				)
 			);
 		}

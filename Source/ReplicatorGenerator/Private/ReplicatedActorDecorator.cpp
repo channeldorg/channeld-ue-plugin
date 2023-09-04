@@ -202,7 +202,7 @@ FString FReplicatedActorDecorator::GetCode_AssignPropertyPointers()
 		{
 			Result += FString::Printf(
 				TEXT("{ %s; }\n"),
-				*Property->GetCode_AssignPropPointer(
+				*Property->GetCode_AssignPropPointerDynamic(
 					FString::Printf(TEXT("%s.Get()"), *InstanceRefName),
 					Property->GetPointerName()
 				)
