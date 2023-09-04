@@ -165,21 +165,28 @@ FString FPropertyDecorator::GetDeclaration_PropertyPtr()
 	return FString::Printf(TEXT("%s* %s"), *this->GetCPPType(), *this->GetPointerName());
 }
 
-FString FPropertyDecorator::GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo)
-{
-	return GetCode_AssignPropPointer(Container, AssignTo, GetMemOffset());
-}
-
-FString FPropertyDecorator::GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset)
+FString FPropertyDecorator::GetCode_AssignPropPointerStatic(const FString& Container, const FString& AssignTo)
 {
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Ref_AssignTo"), AssignTo);
 	FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
 	FormatArgs.Add(TEXT("Declare_PropertyCPPType"), GetCPPType());
-	FormatArgs.Add(TEXT("Num_PropMemOffset"), MemOffset);
+	FormatArgs.Add(TEXT("Num_PropMemOffset"), GetMemOffset());
+	FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
+
+	return FString::Format(PropDecorator_AssignPropPtrStatic, FormatArgs);
+}
+
+FString FPropertyDecorator::GetCode_AssignPropPointerDynamic(const FString& Container, const FString& AssignTo)
+{
+	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Ref_AssignTo"), AssignTo);
+	FormatArgs.Add(TEXT("Ref_ContainerAddr"), Container);
+	FormatArgs.Add(TEXT("Declare_PropertyCPPType"), GetCPPType());
+	FormatArgs.Add(TEXT("Num_PropMemOffset"), GetMemOffset());
     FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
 
-	return FString::Format(PropDecorator_AssignPropPtrTemp, FormatArgs);
+	return FString::Format(PropDecorator_AssignPropPtrDynamic, FormatArgs);
 }
 
 FString FPropertyDecorator::GetCode_GetProtoFieldValueFrom(const FString& StateName)
@@ -221,7 +228,7 @@ FString FPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString& Cont
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(
 		TEXT("Code_AssignPropPointers"),
-		GetCode_AssignPropPointer(
+		GetCode_AssignPropPointerStatic(
 			ContainerName,
 			FString::Printf(TEXT("%s* PropAddr"), *GetCPPType())
 		)
@@ -281,7 +288,7 @@ FString FPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString& Cont
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(
 		TEXT("Code_AssignPropPointers"),
-		GetCode_AssignPropPointer(
+		GetCode_AssignPropPointerStatic(
 			ContainerName,
 			FString::Printf(TEXT("%s* PropAddr"), *GetCPPType())
 		)

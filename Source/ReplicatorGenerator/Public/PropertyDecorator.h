@@ -3,7 +3,11 @@
 #include "IPropertyDecoratorOwner.h"
 
 
-const static TCHAR* PropDecorator_AssignPropPtrTemp =
+const static TCHAR* PropDecorator_AssignPropPtrStatic =
+	LR"EOF(
+{Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + {Num_PropMemOffset}))EOF";
+
+const static TCHAR* PropDecorator_AssignPropPtrDynamic =
 		LR"EOF(
 FString PropertyName = TEXT("{Declare_PropertyName}");
 int32* OffsetPtr = PropPointerMemOffsetCache.Find(PropertyName);
@@ -236,8 +240,10 @@ public:
       */
 	virtual FString GetDeclaration_PropertyPtr();
 
-	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo);
-	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset);
+	// Get the property/field pointer via static memory offset. Used for C++ struct and UStruct that follow the Standard Layout.
+	virtual FString GetCode_AssignPropPointerStatic(const FString& Container, const FString& AssignTo);
+	// Get the property pointer via dynamic memory offset. Used for UObject/AActor that memory offset can be different across different platforms.
+	virtual FString GetCode_AssignPropPointerDynamic(const FString& Container, const FString& AssignTo);
 
 	/**
 	 * Code that get field value from protobuf message

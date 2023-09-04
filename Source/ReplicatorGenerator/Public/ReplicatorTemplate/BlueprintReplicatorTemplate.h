@@ -54,7 +54,7 @@ static const TCHAR* CodeGen_BP_ConstructorImplTemplate =
   FullState = new {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName};
   DeltaState = new {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName};
   
-  UClass* ActorClass = {Declare_TargetClassName}::StaticClass();
+  UClass* ActorClass = GetTargetClass();
   if (!ActorClass) {
     return;
   }

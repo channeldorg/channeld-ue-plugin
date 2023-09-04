@@ -73,7 +73,7 @@ FString FArrayPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString&
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(
 		TEXT("Code_AssignPropPointers"),
-		GetCode_AssignPropPointer(
+		GetCode_AssignPropPointerStatic(
 			ContainerName,
 			FString::Printf(TEXT("%s* PropAddr"), *GetCPPType())
 		)
@@ -133,7 +133,7 @@ FString FArrayPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString&
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(
 		TEXT("Code_AssignPropPointers"),
-		GetCode_AssignPropPointer(
+		GetCode_AssignPropPointerStatic(
 			ContainerName,
 			FString::Printf(TEXT("%s* PropAddr"), *GetCPPType())
 		)
