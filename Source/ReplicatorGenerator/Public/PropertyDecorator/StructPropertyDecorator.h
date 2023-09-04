@@ -56,7 +56,12 @@ struct {Declare_PropCompilableStructName}
 };
 )EOF";
 
-const static TCHAR* StructPropDeco_AssignPropPtrTemp =
+const static TCHAR* StructPropDeco_AssignPropPtrStatic =
+	LR"EOF(
+void* PropertyAddr = (uint8*){Ref_ContainerAddr} + {Num_PropMemOffset};
+{Ref_AssignTo} = {Declare_PropPtrGroupStructName}(PropertyAddr))EOF";
+
+const static TCHAR* StructPropDeco_AssignPropPtrDynamic =
     LR"EOF(
 FString PropertyName = TEXT("{Declare_PropertyName}");
 void* PropertyAddr = (uint8*){Ref_ContainerAddr};
@@ -121,8 +126,9 @@ public:
 	virtual FString GetPropertyType() override;
 	
 	virtual FString GetDeclaration_PropertyPtr() override;
-	
-	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset) override;
+
+	virtual FString GetCode_AssignPropPointerStatic(const FString& Container, const FString& AssignTo) override;
+	virtual FString GetCode_AssignPropPointerDynamic(const FString& Container, const FString& AssignTo) override;
 	
 	virtual TArray<FString> GetAdditionalIncludes() override;
 	
@@ -141,7 +147,7 @@ public:
 
 	virtual FString GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& TargetInstance, const FString& NewStateName) override;
 
-	FString GetDeclaration_PropPtrGroupStruct();
+	virtual FString GetDeclaration_PropPtrGroupStruct();
 
 	FString GetDeclaration_PropPtrGroupStructName();
 

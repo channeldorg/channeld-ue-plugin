@@ -298,6 +298,9 @@ bool FReplicatorCodeGenerator::GenerateReplicatorCode(
 	CppCodeBuilder.Append(FString::Printf(TEXT("#include \"%s\"\n"), *GeneratedResult.HeadFileName));
 	CppCodeBuilder.Append(FString::Printf(TEXT("#include \"%s\"\n\n"), *GenManager_TypeDefinitionHeadFile));
 
+	// Define and initialize the static PropPointerMemOffsetCache for the constructor
+	CppCodeBuilder.Append(FString::Printf(TEXT("TMap<FString, int32> %s::PropPointerMemOffsetCache;\n\n"), *ActorDecorator->GetReplicatorClassName()));
+	
 	FormatArgs.Add(
 		TEXT("Code_AssignPropertyPointers"),
 		ActorDecorator->GetCode_AssignPropertyPointers()
