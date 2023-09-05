@@ -20,10 +20,18 @@ UChanneldSettings::UChanneldSettings(const FObjectInitializer& ObjectInitializer
 	SpatialOutlinerClass(LoadClass<AOutlinerActor>(NULL, TEXT("BlueprintGeneratedClass'/ChanneldUE/Blueprints/BP_SpatialOutliner.BP_SpatialOutliner_C'")))
 {
 	FClientInterestSettingsPreset DefaultInterestPreset;
+	DefaultInterestPreset.bActivateByDefault = true;
 	DefaultInterestPreset.AreaType = EClientInterestAreaType::Sphere;
 	DefaultInterestPreset.PresetName = "ThirdPerson";
 	DefaultInterestPreset.Radius = 1000;
 	ClientInterestPresets.Add(DefaultInterestPreset);
+
+	FClientInterestSettingsPreset InspectorInterestPreset;
+	InspectorInterestPreset.bActivateByDefault = false;
+	InspectorInterestPreset.AreaType = EClientInterestAreaType::Box;
+	InspectorInterestPreset.PresetName = "Inspector";
+	InspectorInterestPreset.Extent = FVector(100000, 100000, 100000);
+	ClientInterestPresets.Add(InspectorInterestPreset);
 }
 
 void UChanneldSettings::PostInitProperties()

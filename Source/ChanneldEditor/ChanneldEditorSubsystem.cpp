@@ -34,7 +34,7 @@
 #include "Misc/Base64.h"
 #include "Settings/EditorExperimentalSettings.h"
 #include "Settings/ProjectPackagingSettings.h"
-#if ENGINE_MAJOR_VERSION >= 5
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 2
 #include "Settings/PlatformsMenuSettings.h"
 #endif
 #include "Windows/MinWindows.h"
@@ -609,7 +609,7 @@ void UChanneldEditorSubsystem::BuildServerDockerImage(const FString& Tag,
 		return;
 	}
 
-#if ENGINE_MAJOR_VERSION >= 5
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 2
 	const UPlatformsMenuSettings* PlatformsSettings = GetDefault<UPlatformsMenuSettings>();
 	FDirectoryPath StagingDirectory = PlatformsSettings->StagingDirectory;
 #else
@@ -888,15 +888,19 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 	bool bProjectHasCode = GameProjectModule.Get().ProjectHasCodeFiles();
 
 #if ENGINE_MAJOR_VERSION >= 5
-	const PlatformInfo::FTargetPlatformInfo* PlatformInfo = nullptr;
-	if (FApp::IsInstalled())
-	{
-		PlatformInfo = PlatformInfo::FindPlatformInfo(InPlatformInfoName);
-}
-	else
-	{
-		PlatformInfo = PlatformInfo::FindPlatformInfo(GetMutableDefault<UPlatformsMenuSettings>()->GetTargetFlavorForPlatform(InPlatformInfoName));
-	}
+	#if ENGINE_MINOR_VERSION >= 2
+		const PlatformInfo::FTargetPlatformInfo* PlatformInfo = nullptr;
+		if (FApp::IsInstalled())
+		{
+			PlatformInfo = PlatformInfo::FindPlatformInfo(InPlatformInfoName);
+	    }
+		else
+		{
+			PlatformInfo = PlatformInfo::FindPlatformInfo(GetMutableDefault<UPlatformsMenuSettings>()->GetTargetFlavorForPlatform(InPlatformInfoName));
+		}
+	#else
+		const PlatformInfo::FTargetPlatformInfo* PlatformInfo = PlatformInfo::FindPlatformInfo(InPlatformInfoName);
+	#endif
 #else
 	const PlatformInfo::FPlatformInfo* const PlatformInfo = PlatformInfo::FindPlatformInfo(InPlatformInfoName);
 #endif
@@ -929,8 +933,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 	//	NOTE: Cannot find SDKStatus in UE5
 #if ENGINE_MAJOR_VERSION < 5
 	if (PlatformInfo->SDKStatus == PlatformInfo::EPlatformSDKStatus::NotInstalled || (bProjectHasCode &&
-		PlatformInfo->
-		bUsesHostCompiler && !FSourceCodeNavigation::IsCompilerAvailable()))
+		PlatformInfo->bUsesHostCompiler && !FSourceCodeNavigation::IsCompilerAvailable()))
 	{
 		IMainFrameModule& MainFrameModule = FModuleManager::GetModuleChecked<IMainFrameModule>(TEXT("MainFrame"));
 		MainFrameModule.BroadcastMainFrameSDKNotInstalled(PlatformInfo->TargetPlatformName.ToString(),
@@ -1116,7 +1119,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 		return;
 	}
 
-#if ENGINE_MAJOR_VERSION >= 5
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 2
 	UPlatformsMenuSettings* PlatformsSettings = GetMutableDefault<UPlatformsMenuSettings>();
 	FDirectoryPath& StagingDirectory = PlatformsSettings->StagingDirectory;
 #else
@@ -1148,7 +1151,7 @@ void UChanneldEditorSubsystem::PackageProject(const FName InPlatformInfoName,
 		}
 
 		StagingDirectory.Path = OutFolderName;
-#if ENGINE_MAJOR_VERSION >= 5
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 2
 		PlatformsSettings->SaveConfig();
 #else
 		PackagingSettings->SaveConfig();

@@ -106,20 +106,11 @@ bool FReplicatorCodeGenerator::Generate(
 	        ChannelDataRegistrationGoCode;
 	ReplicationCodeBundle.ChannelDataMerge_GoCode.Append(FString::Printf(TEXT("package %s\n"), *ProtoPackageName));
 	// Entity channel data.go imports anypb
-	bool bHasEntityChannelData = ChannelDataInfos.ContainsByPredicate(
-		[](const auto& Info) 
-		{
-			return Info.Schema.ChannelType == EChanneldChannelType::ECT_Entity;
-		}
-	);
-	ReplicationCodeBundle.ChannelDataMerge_GoCode.Append(
-		FString::Format(
-			CodeGen_Go_Data_ImportTemplate,
-			FStringFormatNamedArguments{
-				{"Code_AnypbImport", bHasEntityChannelData	? TEXT("\"google.golang.org/protobuf/types/known/anypb\"") : TEXT("")}
-			}
-		)
-	);
+
+	bool bHasEntityChannelData = ChannelDataInfos.ContainsByPredicate([](const auto& Info) {return Info.Schema.ChannelType == EChanneldChannelType::ECT_Entity;});
+	ReplicationCodeBundle.ChannelDataMerge_GoCode.Append(FString::Format(CodeGen_Go_Data_ImportTemplate,
+		FStringFormatNamedArguments{{"Code_AnypbImport", bHasEntityChannelData	? TEXT("\"google.golang.org/protobuf/types/known/anypb\"") : TEXT("")}}));
+
 	for (const FChannelDataInfo& ChannelDataInfo : ChannelDataInfos)
 	{
 		ReplicationCodeBundle.ChannelDataCodes.Add(FChannelDataCode());
@@ -399,7 +390,11 @@ bool FReplicatorCodeGenerator::GenerateChannelDataCode(
 	, FString& ResultMessage
 )
 {
+#if ENGINE_MAJOR_VERSION < 5
 	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EChanneldChannelType"), true);
+#else
+	const UEnum* EnumPtr = FindObject<UEnum>(FTopLevelAssetPath(TEXT("/Script/ChanneldUE.EChanneldChannelType")), true);
+#endif
 	if (!EnumPtr)
 	{
 		ResultMessage = TEXT("Cannot find EChanneldChannelType enum");

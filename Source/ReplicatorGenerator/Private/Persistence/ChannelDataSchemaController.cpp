@@ -27,7 +27,11 @@ void UChannelDataSchemaController::Initialize(FSubsystemCollectionBase& Collecti
 
 void UChannelDataSchemaController::GetUnhiddenChannelTypes(TArray<EChanneldChannelType>& ChannelTypes) const
 {
+#if ENGINE_MAJOR_VERSION < 5
 	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EChanneldChannelType"), true);
+#else
+	const UEnum* EnumPtr = FindObject<UEnum>(FTopLevelAssetPath(TEXT("/Script/ChanneldUE.EChanneldChannelType")), true);
+#endif
 	if (!EnumPtr)
 	{
 		UE_LOG(LogChanneldRepGenerator, Error, TEXT("Failed to find enum EChanneldChannelType"));

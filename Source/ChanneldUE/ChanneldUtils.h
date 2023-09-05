@@ -8,6 +8,8 @@
 #include "ChanneldNetConnection.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/DemoNetDriver.h"
+//#define CHANNELD_TOLERANCE (1.e-8f)
+#define CHANNELD_TOLERANCE (0.001f)
 
 class CHANNELDUE_API ChanneldUtils
 {
@@ -70,7 +72,9 @@ public:
 		return Vec;
 	}
 
-	[[deprecated("Use SetRotatorFromPB instead. Use GetRotator can cause the value of pitch/yaw/roll to be 0 if the it is not set.")]]
+	[[deprecated(
+		"Use SetRotatorFromPB instead. Use GetRotator can cause the value of pitch/yaw/roll to be 0 if the it is not set."
+	)]]
 	static FRotator GetRotator(const unrealpb::FVector& InVec)
 	{
 		return FRotator(InVec.x(), InVec.y(), InVec.z());
@@ -78,35 +82,37 @@ public:
 
 	static bool CheckDifference(const FVector& VectorToCheck, const unrealpb::FVector* VectorPBToCheck)
 	{
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X, CHANNELD_TOLERANCE))
 		{
 			return true;
 		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y, CHANNELD_TOLERANCE))
 		{
 			return true;
 		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z, CHANNELD_TOLERANCE))
 		{
 			return true;
 		}
+		
 		return false;
 	}
 
 	static bool CheckDifference(const FRotator& RotatorToCheck, const unrealpb::FVector* RotatorPBToCheck)
 	{
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch, CHANNELD_TOLERANCE))
 		{
 			return true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw, CHANNELD_TOLERANCE))
 		{
 			return true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll, CHANNELD_TOLERANCE))
 		{
 			return true;
 		}
+		
 		return false;
 	}
 
@@ -123,17 +129,17 @@ public:
 			VectorPBToCheck = VectorToSet;
 		
 		bool bNotSame = false;
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X, CHANNELD_TOLERANCE))
 		{
 			VectorToSet->set_x(VectorToCheck.X);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y, CHANNELD_TOLERANCE))
 		{
 			VectorToSet->set_y(VectorToCheck.Y);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z, CHANNELD_TOLERANCE))
 		{
 			VectorToSet->set_z(VectorToCheck.Z);
 			bNotSame = true;
@@ -148,17 +154,17 @@ public:
 			RotatorPBToCheck = RotatorToSet;
 		
 		bool bNotSame = false;
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch, CHANNELD_TOLERANCE))
 		{
 			RotatorToSet->set_x(RotatorToCheck.Pitch);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw, CHANNELD_TOLERANCE))
 		{
 			RotatorToSet->set_y(RotatorToCheck.Yaw);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll, CHANNELD_TOLERANCE))
 		{
 			RotatorToSet->set_z(RotatorToCheck.Roll);
 			bNotSame = true;

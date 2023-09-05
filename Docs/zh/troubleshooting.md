@@ -9,8 +9,9 @@
 - 如果输出日志中出现`failed to listen`的错误，说明端口被占用。请检查默认的端口12108和11288是否被其它程序占用，或者在channeld配置文件中修改端口号
 
 ## 游戏服务器启动后自动退出
-- 检查channeld服务是否正常运行。在开启了channeld网络（`Enable Channeld Networking`）时，游戏服务器会尝试连接channeld服务。如果连接失败，游戏服务器会自动退出
-- 检查游戏服务器的日志。日志文件通常位于项目目录下的`Saved/Logs`目录中，以项目名_{数字}命名。在单服模式下，数字为2是游戏服务器日志；在多服模式下，数字为2是主服务器日志，数字从3开始是空间服务器日志
+- 检查channeld服务是否正常运行。在开启了channeld网络（`Enable Channeld Networking`）时，游戏服务器会尝试连接channeld服务。如果连接失败，游戏服务器会自动退出；
+- 确认[Live Coding](https://docs.unrealengine.com/5.0/en-US/using-live-coding-to-recompile-unreal-engine-applications-at-runtime/)的设置是关闭的，否则会日志中会出现`Error: Failed to register channel data type by name`；
+- 如果上述方法仍无法解决，请检查游戏服务器的日志。日志文件通常位于项目目录下的`Saved/Logs`目录中，以项目名_{数字}命名。在单服模式下，数字为2是游戏服务器日志；在多服模式下，数字为2是主服务器日志，数字从3开始是空间服务器日志。
 
 ## 无法保存蓝图
 如果出现“无法保存资产”的错误提示，通常是由于游戏服务器仍在运行，导致蓝图文件被占用。请先关闭游戏服务器，再保存蓝图。

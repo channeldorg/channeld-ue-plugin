@@ -9,6 +9,7 @@
 #include "unreal_common.pb.h"
 #include "ChanneldUtils.h"
 #include "ChanneldSettings.h"
+#include <numeric>
 #include "Interest/ClientInterestManager.h"
 
 UChanneldNetConnection::UChanneldNetConnection(const FObjectInitializer& ObjectInitializer)
@@ -341,12 +342,16 @@ FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= fa
 	if (RemoteAddr)
 	{
 		if (bAppendPort)
-			RemoteAddr->SetPort(GetSendToChannelId());
+		{
+			// Use the native UNetConnection::ConnectionId as the port (which is limited to 1024 by default).
+			// If we use the GetConnId(), FInternetAddrBSD::SetPort() will throw check error when ConnId > 65535.
+			RemoteAddr->SetPort(GetConnectionId());
+		}
 		return RemoteAddr->ToString(bAppendPort);
 	}
 	else
 	{
-		return bAppendPort ? FString::Printf(TEXT("0.0.0.0:%d"), GetSendToChannelId()) : TEXT("0.0.0.0");
+		return bAppendPort ? FString::Printf(TEXT("0.0.0.0:%d"), GetConnectionId()) : TEXT("0.0.0.0");
 	}
 }
 

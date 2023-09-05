@@ -28,7 +28,7 @@ void FChanneldUEModule::StartupModule()
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 	{
 		SettingsModule->RegisterSettings("Project", "Plugins", "ChanneldSettings",
-			LOCTEXT("RuntimeSettingsName", "Channeld"), 
+			LOCTEXT("RuntimeSettingsName", "Channeld"),
 			LOCTEXT("RuntimeSettingsDesc", ""),
 			GetMutableDefault<UChanneldSettings>());
 	}
@@ -60,5 +60,5 @@ void FChanneldUEModule::ShutdownModule()
 }
 
 #undef LOCTEXT_NAMESPACE
-	
+
 IMPLEMENT_MODULE(FChanneldUEModule, ChanneldUE)

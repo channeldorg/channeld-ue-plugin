@@ -94,7 +94,7 @@ void FChanneldEditorModule::StartupModule()
 
 	TSharedPtr<FExtender> ToolbarExtender = MakeShareable(new FExtender());
 	ToolbarExtender->AddToolBarExtension("Compile", EExtensionHook::After, PluginCommands,
-	                                     FToolBarExtensionDelegate::CreateRaw(this, &FChanneldEditorModule::AddToolbarButton));
+	FToolBarExtensionDelegate::CreateRaw(this, &FChanneldEditorModule::AddToolbarButton));
 	LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(ToolbarExtender);
 #endif
 

@@ -118,7 +118,11 @@ void FChanneldPlayerStateReplicator::OnStateChanged(const google::protobuf::Mess
 	}
 	if (NewState->has_ping())
 	{
+#if ENGINE_MAJOR_VERSION == 5
+		//TODO::fix this later
+#else
 		*PingPtr = NewState->ping();
+#endif
 	}
 	if (NewState->has_playername())
 	{

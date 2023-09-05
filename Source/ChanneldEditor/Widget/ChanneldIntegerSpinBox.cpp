@@ -33,7 +33,11 @@ UChanneldIntegerSpinBox::UChanneldIntegerSpinBox(const FObjectInitializer& Objec
 	MinDesiredWidth = 0;
 	ClearKeyboardFocusOnCommit = false;
 	SelectAllTextOnCommit = true;
+#if ENGINE_MAJOR_VERSION < 5
 	ForegroundColor = FSlateColor(FLinearColor::Black);
+#else
+	ForegroundColor = FSlateColor(FLinearColor::White);
+#endif
 
 	if (DefaultSpinBoxStyle == nullptr)
 	{
