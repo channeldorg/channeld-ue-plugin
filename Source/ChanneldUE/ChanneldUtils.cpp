@@ -347,10 +347,19 @@ UActorComponent* ChanneldUtils::GetActorComponentByRefChecked(const unrealpb::Ac
 	}
 
 	FName CompName = FName(UTF8_TO_TCHAR(Ref->compname().c_str()));
+	/* GetDefaultSubobjectByName() doesn't work for dynamic components (e.g. CollisionComponent in Landscape)
 	UObject* Comp = Actor->GetDefaultSubobjectByName(CompName);
 	if (Comp)
 	{
 		return Cast<UActorComponent>(Comp);
+	}
+	*/
+	for (auto Comp : Actor->GetComponents())
+	{
+		if (Comp->GetFName() == CompName)
+		{
+			return Cast<UActorComponent>(Comp);
+		}
 	}
 
 	UE_LOG(LogChanneld, Warning, TEXT("Cannot find component '%s' of actor %s"), *CompName.ToString(), *Actor->GetName());
