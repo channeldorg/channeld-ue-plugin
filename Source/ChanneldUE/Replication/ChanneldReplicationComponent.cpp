@@ -218,14 +218,14 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 		
 		if (IsRemoved())
 		{
-			Processor->SetStateToChannelData(nullptr, ChannelData, Replicator->GetTargetClass(), NetGUID);
+			Processor->SetStateToChannelData(nullptr, ChannelData, Replicator->GetTargetClass(), Replicator->GetTargetObject(), NetGUID);
 			continue;
 		}
 		
 		Replicator->Tick(FApp::GetDeltaTime());
 		if (Replicator->IsStateChanged())
 		{
-			Processor->SetStateToChannelData(Replicator->GetDeltaState(), ChannelData, Replicator->GetTargetClass(), NetGUID);
+			Processor->SetStateToChannelData(Replicator->GetDeltaState(), ChannelData, Replicator->GetTargetClass(), Replicator->GetTargetObject(), NetGUID);
 			Replicator->ClearState();
 			bUpdated = true;
 		}
@@ -277,7 +277,7 @@ void UChanneldReplicationComponent::OnChannelDataUpdated(google::protobuf::Messa
 			continue;
 		}
 		bool bIsRemoved = false;
-		auto State = Processor->GetStateFromChannelData(ChannelData, Replicator->GetTargetClass(), NetGUID, bIsRemoved);
+		auto State = Processor->GetStateFromChannelData(ChannelData, Replicator->GetTargetClass(), Replicator->GetTargetObject(), NetGUID, bIsRemoved);
 		if (State)
 		{
 			if (bIsRemoved)

@@ -245,7 +245,7 @@ namespace {Declaration_CDP_Namespace}
       return true;
     }
     
-    virtual const google::protobuf::Message* GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved) override
+    virtual const google::protobuf::Message* GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, UObject* TargetObject, uint32 NetGUID, bool& bIsRemoved) override
     {
       if(ChannelData == nullptr) {
         UE_LOG(LogChanneldGen, Error, TEXT("ChannelData is nullptr"));
@@ -262,7 +262,7 @@ namespace {Declaration_CDP_Namespace}
       return nullptr;
     }
     
-    virtual void SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID) override
+    virtual void SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UClass* TargetClass, UObject* TargetObject, uint32 NetGUID) override
     {
       if(ChannelData == nullptr) {
         UE_LOG(LogChanneldGen, Error, TEXT("ChannelData is nullptr"));

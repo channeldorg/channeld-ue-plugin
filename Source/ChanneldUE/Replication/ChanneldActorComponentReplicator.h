@@ -20,6 +20,7 @@ public:
 
 protected:
 	TWeakObjectPtr<UActorComponent> ActorComponent;
+	std::string TargetComponentName;
 	unrealpb::ActorComponentState* FullState;
 	unrealpb::ActorComponentState* DeltaState;
 };
