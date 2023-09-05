@@ -35,7 +35,6 @@ if (!bPropChanged)
 const static TCHAR* VectorPropDeco_OnChangeStateByMemOffsetTemp =
 	LR"EOF(
 {
-	// Testing oii VectorPropDeco_OnChangeStateByMemOffsetTemp
   {Code_AssignPropPointers};
   if ({Code_HasProtoFieldValue} && ChanneldUtils::CheckDifference(*{Declare_PropertyPtr}, &{Code_GetProtoFieldValue}))
   {

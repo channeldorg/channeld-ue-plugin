@@ -85,7 +85,6 @@ if (b{Declare_PropertyName}Changed)
 
 const static TCHAR* PropDecorator_OnChangeStateTemplate =
 	LR"EOF(
-//	Testing oi PropDecorator_OnChangeStateTemplate
 bool b{Declare_PropertyName}Changed = false;
 if ({Code_HasProtoFieldValue} && !({Code_ActorPropEqualToProtoState}))
 {
@@ -99,7 +98,6 @@ const static TCHAR* PropDeco_OnChangeStateByMemOffsetTemp =
 	LR"EOF(
 bool b{Declare_PropertyName}Changed = false;
 {
-	//	Testing oi PropDeco_OnChangeStateByMemOffsetTemp
   {Code_AssignPropPointers};
   if ({Code_HasProtoFieldValue} && *{Declare_PropertyPtr} != {Code_GetProtoFieldValue})
   {

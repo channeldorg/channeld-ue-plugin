@@ -58,13 +58,13 @@ struct {Declare_PropCompilableStructName}
 
 const static TCHAR* StructPropDeco_AssignPropPtrStatic =
 	LR"EOF(
-void* PropertyAddr = (uint8*){Ref_ContainerAddr} + {Num_PropMemOffset};
+uint8* PropertyAddr = (uint8*){Ref_ContainerAddr} + {Num_PropMemOffset};
 {Ref_AssignTo} = {Declare_PropPtrGroupStructName}(PropertyAddr))EOF";
 
 const static TCHAR* StructPropDeco_AssignPropPtrDynamic =
     LR"EOF(
 FString PropertyName = TEXT("{Declare_PropertyName}");
-void* PropertyAddr = (uint8*){Ref_ContainerAddr};
+uint8* PropertyAddr = (uint8*){Ref_ContainerAddr};
 int32* OffsetPtr = PropPointerMemOffsetCache.Find(PropertyName);
 if (OffsetPtr != nullptr)
 {    

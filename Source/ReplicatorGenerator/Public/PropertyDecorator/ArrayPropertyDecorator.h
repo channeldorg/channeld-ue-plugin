@@ -67,7 +67,6 @@ bStateChanged |= b{Declare_PropertyName}Changed;
 
 const static TCHAR* ArrPropDeco_OnChangeStateTemp =
 	LR"EOF(
-// Testing oii ArrPropDeco_OnChangeStateTemp
 bool  b{Declare_PropertyName}Changed = false; 
 if ({Code_HasProtoFieldValue})
 {
@@ -84,7 +83,6 @@ bStateChanged |= b{Declare_PropertyName}Changed;
 
 const static TCHAR* ArrPropDeco_SetPropertyValueTemp =
 	LR"EOF(
-// Testing oi ArrPropDeco_SetPropertyValueTemp
 const int32 ActorPropLength = {Declare_PropPtrName}->Num();
 auto & MessageArr = {Code_GetProtoFieldValueFrom};
 const int32 NewStateValueLength = MessageArr.size();
