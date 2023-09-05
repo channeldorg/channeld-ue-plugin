@@ -33,6 +33,7 @@ UChanneldIntegerSpinBox::UChanneldIntegerSpinBox(const FObjectInitializer& Objec
 	MinDesiredWidth = 0;
 	ClearKeyboardFocusOnCommit = false;
 	SelectAllTextOnCommit = true;
+	BackgroundColor = FLinearColor::White;
 	ForegroundColor = FSlateColor(FLinearColor::Black);
 
 	if (DefaultSpinBoxStyle == nullptr)
@@ -79,6 +80,7 @@ void UChanneldIntegerSpinBox::SynchronizeProperties()
 	MySpinBox->SetSliderExponent(SliderExponent);
 	MySpinBox->SetMinDesiredWidth(MinDesiredWidth);
 
+	MySpinBox->SetColorAndOpacity(BackgroundColor);
 	MySpinBox->SetForegroundColor(ForegroundColor);
 
 	MySpinBox->SetMinFractionalDigits(MinFractionalDigits);
