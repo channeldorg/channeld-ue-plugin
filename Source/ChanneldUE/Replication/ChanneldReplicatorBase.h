@@ -49,7 +49,7 @@ class CHANNELDUE_API FChanneldReplicatorBase_BP : public FChanneldReplicatorBase
 public:
     FChanneldReplicatorBase_BP(UObject* InTargetObj, const FString& BlueprintPath) : FChanneldReplicatorBase(InTargetObj)
     {
-        BpClass = LoadClass<AActor>(nullptr, *FString::Printf(TEXT("Blueprint'%s'"), *BlueprintPath));
+        BpClass = LoadClass<UObject>(nullptr, *FString::Printf(TEXT("Blueprint'%s'"), *BlueprintPath));
     }
     virtual UClass* GetTargetClass() override { return BpClass; }
 
