@@ -988,7 +988,6 @@ public:
 	{
 		UScriptStruct* Struct = CastChecked<UScriptStruct>(Params.Struct);
 		FBitArchive& Ar = Params.Reader ? static_cast<FBitArchive&>(*Params.Reader) : static_cast<FBitArchive&>(*Params.Writer);
-		//ChanneldUtils::MarkArUseCustomSerializeObject(Ar);
 		Params.bOutHasMoreUnmapped = false;
 
 		if (EnumHasAnyFlags(Struct->StructFlags, STRUCT_NetSerializeNative))
