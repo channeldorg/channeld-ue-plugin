@@ -79,9 +79,6 @@ public:
 	bool SelectAllTextOnCommit;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Style")
-	FLinearColor BackgroundColor;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Style")
 	FSlateColor ForegroundColor;
 
 public:
