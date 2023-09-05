@@ -230,6 +230,24 @@ public:
 	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
 	
 	static TSharedRef<unrealpb::UnrealObjectRef> GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr, bool bFullExport = false);
+
+	static bool CheckObjectWithRef(UObject* Obj, const unrealpb::UnrealObjectRef* Ref, UWorld* World)
+	{
+		bool bUnmapped = false;
+		return GetObjectByRef(Ref, World, bUnmapped, false) == Obj && !bUnmapped;
+	}
+
+	static bool SetObjectPtrByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, UObject** ObjPtr)
+	{
+		bool bUnmapped = false;
+		const auto NewValue = ChanneldUtils::GetObjectByRef(Ref, World, bUnmapped, false);
+		if (!bUnmapped && *ObjPtr != NewValue)
+		{
+			*ObjPtr = NewValue;
+			return true;
+		}
+		return false;
+	}
 		
 	static UActorComponent* GetActorComponentByRef(const unrealpb::ActorComponentRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
 	
@@ -251,17 +269,23 @@ public:
 	static unrealpb::AssetRef GetAssetRef(const UObject* Obj)
 	{
 		unrealpb::AssetRef Ref;
-		Ref.set_objectpath(std::string(TCHAR_TO_UTF8(*Obj->GetPathName())));
+		if (Obj)
+		{
+			Ref.set_objectpath(std::string(TCHAR_TO_UTF8(*Obj->GetPathName())));
+		}
 		return Ref;
 	}
 	
 	static UObject* GetAssetByRef(const unrealpb::AssetRef* Ref)
 	{
-		const FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
-		const FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(UTF8_TO_TCHAR(Ref->objectpath().c_str()));
-		if (AssetData.IsValid())
+		if (Ref->objectpath().size() > 0)
 		{
-			return AssetData.GetAsset();
+			const FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+			const FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(UTF8_TO_TCHAR(Ref->objectpath().c_str()));
+			if (AssetData.IsValid())
+			{
+				return AssetData.GetAsset();
+			}
 		}
 		return nullptr;
 	}

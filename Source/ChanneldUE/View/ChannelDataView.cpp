@@ -73,6 +73,9 @@ void UChannelDataView::Initialize(UChanneldConnection* InConn)
 	}
 	
 	UE_LOG(LogChanneld, Log, TEXT("%s initialized channels."), *this->GetClass()->GetName());
+
+	
+	GetChanneldSubsystem()->OnViewInitialized.Broadcast(this);
 }
 
 void UChannelDataView::InitServer()

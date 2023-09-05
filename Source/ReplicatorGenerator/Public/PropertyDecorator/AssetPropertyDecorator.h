@@ -1,23 +1,23 @@
 ﻿#pragma once
 #include "PropertyDecorator.h"
 
-const static TCHAR* UObjPropDeco_SetDeltaStateArrayInnerTemp =
+const static TCHAR* UAssetPropDeco_SetDeltaStateArrayInnerTemp =
 	LR"EOF(
 UObject * & PropItem = (*{Declare_PropertyPtr})[i];
-unrealpb::UnrealObjectRef* NewOne = {Declare_DeltaStateName}->add_{Definition_ProtoName}();
-*NewOne = *ChanneldUtils::GetRefOfObject(PropItem);
+unrealpb::AssetRef* NewOne = {Declare_DeltaStateName}->add_{Definition_ProtoName}();
+*NewOne = ChanneldUtils::GetAssetRef(PropItem);
 if (!bPropChanged)
 {
-  bPropChanged = ChanneldUtils::CheckObjectWithRef(PropItem, &{Declare_FullStateName}->{Definition_ProtoName}()[i], {Code_GetWorldRef});
+  bPropChanged = !(PropItem == ChanneldUtils::GetAssetByRef(&{Declare_FullStateName}->{Definition_ProtoName}()[i]));
 }
 )EOF";
 
-const static TCHAR* UObjPropDeco_OnChangeStateArrayInnerTemp =
+const static TCHAR* UAssetPropDeco_OnChangeStateArrayInnerTemp =
 	LR"EOF(
-UObject* NewObjRef = ChanneldUtils::GetObjectByRef(&MessageArr[i], {Code_GetWorldRef});
-if ((*{Declare_PropertyPtr})[i] != NewObjRef)
+UObject* NewAsset = ChanneldUtils::GetAssetByRef(&MessageArr[i]);
+if ((*{Declare_PropertyPtr})[i] != NewAsset)
 {
-  (*{Declare_PropertyPtr})[i] = NewObjRef;
+  (*{Declare_PropertyPtr})[i] = NewAsset;
   if (!b{Declare_PropertyName}Changed)
   {
     b{Declare_PropertyName}Changed = true;
@@ -25,10 +25,10 @@ if ((*{Declare_PropertyPtr})[i] != NewObjRef)
 }
 )EOF";
 
-class FUnrealObjectPropertyDecorator : public FPropertyDecorator
+class FAssetPropertyDecorator : public FPropertyDecorator
 {
 public:
-	FUnrealObjectPropertyDecorator(FProperty* InProperty, IPropertyDecoratorOwner* InOwner)
+	FAssetPropertyDecorator(FProperty* InProperty, IPropertyDecoratorOwner* InOwner)
 		: FPropertyDecorator(InProperty, InOwner)
 	{
 		bForceNotDirectlyAccessible = true;

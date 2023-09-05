@@ -33,7 +33,7 @@ FString FUnrealObjectPropertyDecorator::GetProtoStateMessageType()
 FString FUnrealObjectPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState)
 {
 	return FString::Printf(
-		TEXT("%s == ChanneldUtils::GetObjectByRef(&%s->%s(), %s)"),
+		TEXT("ChanneldUtils::CheckObjectWithRef(%s, &%s->%s(), %s)"),
 		*GetCode_GetPropertyValueFrom(FromActor),
 		*FromState, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef()
 	);
@@ -42,7 +42,7 @@ FString FUnrealObjectPropertyDecorator::GetCode_ActorPropEqualToProtoState(const
 FString FUnrealObjectPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState, bool ForceFromPointer)
 {
 	return FString::Printf(
-		TEXT("%s == ChanneldUtils::GetObjectByRef(&%s->%s(), %s)"),
+		TEXT("ChanneldUtils::CheckObjectWithRef(%s, &%s->%s(), %s)"),
 		*GetCode_GetPropertyValueFrom(FromActor, ForceFromPointer),
 		*FromState, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef()
 	);

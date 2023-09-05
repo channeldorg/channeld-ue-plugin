@@ -99,8 +99,8 @@ public:
 	// If set to true, the RPC with the actor that hasn't been exported to the client will be postponed until being exported.
 	UPROPERTY(Config, EditAnywhere, Category = "Server")
 	bool bQueueUnexportedActorRPC = false;
-	// Delay the calling of InitServer() for attaching the debugger or other purpose.
-	UPROPERTY(Config, EditAnywhere, Category = "Server|Debug")
+	// Delay the calling of UChannelDataView::Initialize() for attaching the debugger or other purpose.
+	UPROPERTY(Config, EditAnywhere, Category = "Debug")
 	float DelayViewInitInSeconds = 0;
 
 	

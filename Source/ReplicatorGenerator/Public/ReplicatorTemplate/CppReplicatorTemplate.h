@@ -30,6 +30,7 @@ public:
 
 protected:
   TWeakObjectPtr<{Declare_TargetClassName}> {Ref_TargetInstanceRef};
+  static TMap<FString, int32> PropPointerMemOffsetCache;  
 
   // [Server+Client] The accumulated channel data of the target object
   {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* FullState;
@@ -59,6 +60,11 @@ static const TCHAR* CodeGen_CPP_ConstructorImplTemplate =
 
   FullState = new {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName};
   DeltaState = new {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName};
+
+  UClass* ActorClass = {Declare_TargetClassName}::StaticClass();
+  if (!ActorClass) {
+    return;
+  }
 
 {Code_AssignPropertyPointers}
 }

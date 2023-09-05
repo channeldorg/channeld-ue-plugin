@@ -3,8 +3,34 @@
 #include "IPropertyDecoratorOwner.h"
 
 
-static const TCHAR* PropDecorator_AssignPropPtrTemp =
-	LR"EOF({Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + {Num_PropMemOffset}))EOF";
+const static TCHAR* PropDecorator_AssignPropPtrStatic =
+	LR"EOF(
+{Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + {Num_PropMemOffset}))EOF";
+
+const static TCHAR* PropDecorator_AssignPropPtrDynamic =
+		LR"EOF(
+FString PropertyName = TEXT("{Declare_PropertyName}");
+int32* OffsetPtr = PropPointerMemOffsetCache.Find(PropertyName);
+if (OffsetPtr != nullptr)
+{
+    {Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + *OffsetPtr);
+}
+else
+{
+    FProperty* Property = ActorClass->FindPropertyByName(FName(*PropertyName));
+    if (Property)
+    {   
+        int32 Offset = Property->GetOffset_ForInternal();
+        PropPointerMemOffsetCache.Emplace(PropertyName, Offset);
+        {Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + Offset);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("%s Replicator construct, but could not find property(%s) in cache or by name."), *ActorClass->GetName(), *PropertyName);
+        {Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + {Num_PropMemOffset});
+    }
+}
+)EOF";
 
 const static TCHAR* PropDecorator_SetDeltaStateTemplate =
 	LR"EOF(
@@ -217,8 +243,10 @@ public:
       */
 	virtual FString GetDeclaration_PropertyPtr();
 
-	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo);
-	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset);
+	// Get the property/field pointer via static memory offset. Used for C++ struct and UStruct that follow the Standard Layout.
+	virtual FString GetCode_AssignPropPointerStatic(const FString& Container, const FString& AssignTo);
+	// Get the property pointer via dynamic memory offset. Used for UObject/AActor that memory offset can be different across different platforms.
+	virtual FString GetCode_AssignPropPointerDynamic(const FString& Container, const FString& AssignTo);
 
 	/**
 	 * Code that get field value from protobuf message
