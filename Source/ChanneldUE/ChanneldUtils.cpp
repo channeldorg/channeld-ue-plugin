@@ -916,7 +916,7 @@ void ChanneldUtils::SetActorRoleByOwningConnId(AActor* Actor, Channeld::Connecti
 		Actor->SetRole(ROLE_SimulatedProxy);
 	}
 	const static UEnum* Enum = StaticEnum<ENetRole>();
-	UE_LOG(LogChanneld, Verbose, TEXT("[Client] Uphannelddated actor %s's role from %s to %s, local/remote owning connId: %d/%d"),
+	UE_LOG(LogChanneld, Verbose, TEXT("[Client] Updated actor %s's role from %s to %s, local/remote owning connId: %d/%d"),
 		*Actor->GetName(),
 		*Enum->GetNameStringByValue(OldRole),
 		*Enum->GetNameStringByValue(Actor->GetLocalRole()),
