@@ -8,6 +8,7 @@ const static TCHAR* TextPropDeco_SetDeltaStateByMemOffsetTemp =
   if(ForceMarge)
   {
     {Code_SetProtoFieldValue};
+	b{Declare_PropertyName}Changed = true;	//	TextPropDeco_SetDeltaStateByMemOffsetTemp
   }
   if ({Code_BeforeCondition}{Declare_PropertyPtr}->EqualTo({Code_GetProtoFieldValue}))
   {
@@ -15,7 +16,7 @@ const static TCHAR* TextPropDeco_SetDeltaStateByMemOffsetTemp =
     {
       {Code_SetProtoFieldValue};
     }
-    bStateChanged = true;
+	b{Declare_PropertyName}Changed = true;	// TextPropDeco_SetDeltaStateByMemOffsetTemp
   }
 }
 )EOF";
@@ -28,17 +29,19 @@ std::string* NewOne = {Declare_DeltaStateName}->add_{Definition_ProtoName}();
 if (!bPropChanged)
 {
   bPropChanged = !(PropItem == {Declare_FullStateName}->{Definition_ProtoName}()[i]);
+  b{Declare_PropertyName}Changed = true;	//	TextPropDeco_SetDeltaStateArrayInnerTemp
 }
 )EOF";
 
 const static TCHAR* TextPropDeco_OnChangeStateByMemOffsetTemp =
 	LR"EOF(
 {
+	// Testing again oi TextPropDeco_OnChangeStateByMemOffsetTemp
   {Code_AssignPropPointers};
   if ({Code_HasProtoFieldValue} && {Declare_PropertyPtr}->EqualTo({Code_GetProtoFieldValue}))
   {
     *{Declare_PropertyPtr} = {Code_GetProtoFieldValue};
-    bStateChanged = true;
+    b{Declare_PropertyName}Changed = true;	//	TextPropDeco_OnChangeStateByMemOffsetTemp
   }
 }
 )EOF";
@@ -49,10 +52,7 @@ FText NewText = FText::FromString(UTF8_TO_TCHAR(MessageArr[i].c_str()));
 if (!(*{Declare_PropertyPtr})[i].EqualTo(NewText))
 {
   (*{Declare_PropertyPtr})[i] = NewText;
-  if (!b{Declare_PropertyName}Changed)
-  {
-    b{Declare_PropertyName}Changed = true;
-  }
+  b{Declare_PropertyName}Changed = true;	// TextPropDeco_OnChangeStateArrayInnerTemp
 }
 )EOF";
 

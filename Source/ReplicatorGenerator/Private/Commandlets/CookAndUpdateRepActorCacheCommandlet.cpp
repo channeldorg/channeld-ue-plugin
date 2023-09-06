@@ -6,6 +6,9 @@
 #include "ReplicatorGeneratorUtils.h"
 #include "Components/TimelineComponent.h"
 #include "Persistence/RepActorCacheController.h"
+#include "Persistence/StaticObjectExportController.h"
+#include "AssetRegistry/IAssetRegistry.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 
 void FLoadedObjectListener::StartListen()
 {
@@ -27,6 +30,9 @@ void FLoadedObjectListener::NotifyUObjectCreated(const UObjectBase* Object, int3
 		{
 			break;
 		}
+		UObject* Obj = (UObject*)Object;
+		CreatedUObjects.Add(Obj);
+
 		CheckedClasses.Add(ClassPath);
 		if (LoadedClass == AActor::StaticClass() || LoadedClass == UActorComponent::StaticClass())
 		{
@@ -96,6 +102,87 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 			}
 		}
 	}
+
+
+	if (NewCmdLine.Contains("-exportstatic"))
+	{
+		TArray<const UObject*> NameStableObjects;
+		TSet<FString> AddedObjectPath;
+
+		for (auto Obj : ObjLoadedListener.CreatedUObjects)
+		{
+			if (Obj && IsValid(Obj) && Obj->IsFullNameStableForNetworking() && !AddedObjectPath.Contains(Obj->GetPathName()))
+			{
+				NameStableObjects.Add(Obj);
+				AddedObjectPath.Add(Obj->GetPathName());
+			}
+		}
+
+		IAssetRegistry& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
+		TArray< FString > ContentPaths;
+		ContentPaths.Add(TEXT("/Game"));
+		ContentPaths.Add(TEXT("/Script"));
+
+		AssetRegistry.ScanPathsSynchronous(ContentPaths);
+
+		TArray< FAssetData > AssetList;
+		AssetRegistry.GetAllAssets(AssetList);
+		for (auto AssetData : AssetList)
+		{
+#if ENGINE_MAJOR_VERSION >= 5
+			FString ObjectPath = AssetData.GetObjectPathString();
+#else
+			FString ObjectPath = AssetData.ObjectPath.ToString();
+#endif
+			UObject* Object = LoadObject<UObject>(nullptr, *ObjectPath);
+
+			if (Object && IsValid(Object) && Object->IsFullNameStableForNetworking() && !AddedObjectPath.Contains(Object->GetPathName()))
+			{
+				NameStableObjects.Add(Object);
+				AddedObjectPath.Add(Object->GetPathName());
+
+				if (Object->GetOuter() && !AddedObjectPath.Contains(Object->GetOuter()->GetPathName()))
+				{
+					NameStableObjects.Add(Object->GetOuter());
+					AddedObjectPath.Add(Object->GetOuter()->GetPathName());
+				}
+
+				// Blueprint CDO
+				if (UBlueprint* Blueprint = Cast<UBlueprint>(Object))
+				{
+					FString GeneratedClassNameString = FString::Printf(TEXT("%s_C"), *ObjectPath);
+					if (AActor* Actor = Cast<AActor>(Object))
+					{
+						UClass* Class = LoadClass<AActor>(nullptr, *GeneratedClassNameString);
+						if (Class)
+						{
+							NameStableObjects.Add(Class->GetDefaultObject(true));
+						}
+					}
+					else
+					{
+						UClass* Class = LoadClass<UObject>(nullptr, *GeneratedClassNameString);
+						if (Class)
+						{
+							NameStableObjects.Add(Class->GetDefaultObject(true));
+						}
+					}
+				}
+			}
+		}
+
+		UStaticObjectExportController* StaticObjectExportController = GEditor->GetEditorSubsystem<
+			UStaticObjectExportController>();
+		if (!StaticObjectExportController->SaveStaticObjectExportInfo(NameStableObjects))
+		{
+			UE_LOG(LogChanneldRepGenerator, Error, TEXT("SaveStaticObjectExportInfo failed"));
+		}
+	}
+	else
+	{
+		IFileManager::Get().Delete(*(GenManager_ChannelStaticObjectExportPath));
+	}
+
 	URepActorCacheController* RepActorCacheController = GEditor->GetEditorSubsystem<URepActorCacheController>();
 	if (RepActorCacheController == nullptr || !RepActorCacheController->SaveRepActorCache(TargetClasses))
 	{

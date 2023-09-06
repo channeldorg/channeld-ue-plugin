@@ -333,17 +333,13 @@ FString FReplicatedActorDecorator::GetCode_AllPropertiesOnStateChange(const FStr
 	FString OnChangeStateCodeBuilder;
 	for (const TSharedPtr<FPropertyDecorator> Property : Properties)
 	{
-		// 'b{PropertyName}Changed` variable is used to avoid calling OnRep() function when the property value is not changed.
-		OnChangeStateCodeBuilder.Append(FString::Printf(TEXT("\nbool b%sChanged = false;"), *Property->GetPropertyName()));
 		if (Property->HasOnRepNotifyParam())
 		{
 			// `Old{PropertyName}` variable is used to pass the old property value to OnRep() function.
 			OnChangeStateCodeBuilder.Append(FString::Printf(TEXT("auto Old%s = %s;"),
 				*Property->GetPropertyName(), *Property->GetCode_GetPropertyValueFrom(InstanceRefName)));
 		}
-		OnChangeStateCodeBuilder.Append(Property->GetCode_OnStateChange(InstanceRefName, NewStateName,
-			FString::Printf(TEXT("b%sChanged = true;\n"), *Property->GetPropertyName())
-		));
+		OnChangeStateCodeBuilder.Append(Property->GetCode_OnStateChange(InstanceRefName, NewStateName));
 	}
 	
 	// Generate code for calling OnRep() functions after all the properties are updated, to align with the native UE's behavior.
@@ -362,18 +358,14 @@ FString FReplicatedActorDecorator::GetDefinition_ProtoStateMessage()
 	int32 Offset = 1;
 	if (TargetClass->IsChildOf(UActorComponent::StaticClass()))
 	{
-		FieldDefinitions.Append(TEXT("bool removed = 1;"));
+		FieldDefinitions.Append(TEXT("bool removed = 1;\n"));
 		Offset = 2;
 	}
-	int32 ProtoIndex = Offset;
-	for (int32 i = 0; i < Properties.Num(); i++)
+	for (auto Property : Properties)
 	{
-		const TSharedPtr<FPropertyDecorator> Property = Properties[i];
-		FString ProtoField = Property->GetDefinition_ProtoField(ProtoIndex) + TEXT(";\n");
-		FieldDefinitions += ProtoField;
-		ProtoIndex++;
-	
+		FieldDefinitions += Property->GetProtoFieldsDefinition(&Offset);
 	}
+
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_StateMessageType"), GetProtoStateMessageType());
 	FormatArgs.Add(TEXT("Declare_ProtoFields"), FieldDefinitions);

@@ -309,3 +309,50 @@ struct CHANNELDUE_API FClientInterestSettingsPreset
 	UPROPERTY(EditAnywhere, Category="Cone AOI")
 	float Angle = 120.0f;
 };
+
+
+USTRUCT(BlueprintType)
+struct CHANNELDUE_API FStaticObjectInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	FString PathName;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	int32 ExportID = 0;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	int32 OuterExportID = 0;
+
+	FStaticObjectInfo() = default;
+
+	FStaticObjectInfo(FString InPathName, int32 InExportID, int32 InOuterExportID)
+		: PathName(InPathName)
+		, ExportID(InExportID), OuterExportID(InOuterExportID)
+	{
+	}
+};
+
+USTRUCT(BlueprintType)
+struct CHANNELDUE_API FStaticObjectCache
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	FDateTime CacheTime;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	TArray<FStaticObjectInfo> StaticObjectCacheCaches;
+
+	FStaticObjectCache() = default;
+
+	FStaticObjectCache(const TArray<FStaticObjectInfo>& InStaticObjectCacheCaches)
+		: StaticObjectCacheCaches(InStaticObjectCacheCaches)
+	{
+		CacheTime = FDateTime::UtcNow();
+	}
+};
+
+static const FString GenManager_ChannelStaticObjectExportPath = FPaths::ProjectConfigDir() / TEXT("ChannelStaticObjectExport.json");
+static constexpr int GenManager_ChannelStaticObjectExportStartID = 100000001;

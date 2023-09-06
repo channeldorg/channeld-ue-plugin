@@ -44,9 +44,9 @@ FString FActorCompPropertyDecorator::GetCode_SetProtoFieldValueTo(const FString&
 FString FActorCompPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode)
 {
 	return FString::Printf(
-		TEXT("%s = ChanneldUtils::GetActorComponentByRef(&%s->%s(), %s);\n  bStateChanged = true;\n%s"),
+		TEXT("%s = ChanneldUtils::GetActorComponentByRef(&%s->%s(), %s);\n  b%sChanged = true;\n%s"),
 		*GetCode_GetPropertyValueFrom(TargetInstance),
-		*NewStateName, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef(),
+		*NewStateName, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef(), *GetPropertyName(),
 		*AfterSetValueCode
 	);
 }

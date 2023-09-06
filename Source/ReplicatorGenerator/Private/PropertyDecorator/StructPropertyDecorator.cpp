@@ -109,22 +109,26 @@ FString FStructPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FStri
 
 FString FStructPropertyDecorator::GetCode_SetDeltaState(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
 {
+	FString ChangedBool = FString::Printf(TEXT("b%sChanged"), *GetPropertyName());
 	return FString::Printf(
-		TEXT("if (%s.Merge(%s&%s->%s(), %s->mutable_%s(), %s))\n{\n  bStateChanged = true;\n}\n"),
+		TEXT("bool %s = false;\nif (%s.Merge(%s&%s->%s(), %s->mutable_%s(), %s))\n{\n  %s = true;\n}\nbStateChanged = %s;"),
+		*ChangedBool,
 		*GetPointerName(),
 		ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? nullptr : ") : TEXT(""),
-		*FullStateName, *GetProtoFieldName(), *DeltaStateName, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef()
+		*FullStateName, *GetProtoFieldName(), *DeltaStateName, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef(), *ChangedBool, *ChangedBool
 	);
 }
 
 FString FStructPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString& ContainerName, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
 {
+	FString ChangedBool = FString::Printf(TEXT("b%sChanged"), *GetPropertyName());
 	return FString::Printf(
-		TEXT("{\nvoid* PropAddr = (uint8*)%s + %d; if (%s::Merge(PropAddr, %s&%s->%s(), %s->mutable_%s(), World, ForceMarge))\n{\n  bStateChanged = true;\n}\n}\n"),
+		TEXT("bool %s = false;\n{\n\nvoid* PropAddr = (uint8*)%s + %d; if (%s::Merge(PropAddr, %s&%s->%s(), %s->mutable_%s(), World, ForceMarge))\n{\n  %s = true;\n}\n}\nbStateChanged = %s;"),
+		*ChangedBool,
 		*ContainerName, GetMemOffset(),
 		*GetDeclaration_PropPtrGroupStructName(),
 		ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? nullptr : ") : TEXT(""),
-		*FullStateName, *GetProtoFieldName(), *DeltaStateName, *GetProtoFieldName()
+		*FullStateName, *GetProtoFieldName(), *DeltaStateName, *GetProtoFieldName(), *ChangedBool, *ChangedBool
 	);
 }
 
@@ -152,10 +156,11 @@ FString FStructPropertyDecorator::GetCode_SetPropertyValueTo(const FString& Targ
 
 FString FStructPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName)
 {
+	FString ChangedBool = FString::Printf(TEXT("b%sChanged"), *GetPropertyName());
 	return FString::Printf(
-		TEXT("{\nvoid* PropAddr = (uint8*)%s + %d; if (%s::SetPropertyValue(PropAddr, &%s->%s(), %s))\n{\n  bStateChanged = true;\n}\n}\n"),
-		*ContainerName, GetMemOffset(),
-		*GetDeclaration_PropPtrGroupStructName(), *NewStateName, *GetProtoFieldName(), *GetCode_GetWorldRef()
+		TEXT("bool %s = false;\n{\nvoid* PropAddr = (uint8*)%s + %d; if (%s::SetPropertyValue(PropAddr, &%s->%s(), %s))\n{\n  %s = true;\n}\n}\nbStateChanged = %s;"),
+		*ChangedBool , *ContainerName, GetMemOffset(),
+		*GetDeclaration_PropPtrGroupStructName(), *NewStateName, *GetProtoFieldName(), *GetCode_GetWorldRef(), *ChangedBool, *ChangedBool
 	);
 }
 
@@ -267,18 +272,10 @@ FString FStructPropertyDecorator::GetDeclaration_PropPtrGroupStructName()
 FString FStructPropertyDecorator::GetDefinition_ProtoStateMessage()
 {
 	FString FieldDefinitionCodes;
-	int32 i = 0;
+	int32 i = 1;
 	for (TSharedPtr<FPropertyDecorator> PropDecorator : Properties)
 	{
-		FieldDefinitionCodes.Append(
-			FString::Printf(
-				TEXT("%s %s %s = %d;\n"),
-				*PropDecorator->GetProtoFieldRule(),
-				*PropDecorator->GetProtoFieldType(),
-				*PropDecorator->GetProtoFieldName(),
-				++i
-			)
-		);
+		FieldDefinitionCodes.Append(PropDecorator->GetProtoFieldsDefinition(&i));
 	}
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_StateMessageType"), GetProtoStateMessageType());

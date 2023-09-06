@@ -25,6 +25,7 @@ public class ReplicatorGenerator : ModuleRules
 				"EditorSubsystem",
 				"ChanneldUE",
 				"AnalyticsET",
+				"Json",
 				"JsonUtilities",
 #if UE_5_0_OR_LATER
 				"RenderCore",

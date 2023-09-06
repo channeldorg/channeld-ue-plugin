@@ -64,10 +64,10 @@ FString FUnrealObjectPropertyDecorator::GetCode_SetProtoFieldValueTo(const FStri
 FString FUnrealObjectPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode)
 {
 	return FString::Printf(
-		TEXT("%s = ChanneldUtils::GetObjectByRef(&%s->%s(), %s);\n  bStateChanged = true;\n%s"),
+		TEXT("%s = ChanneldUtils::GetObjectByRef(&%s->%s(), %s);\n  b%sChanged = true;\n%s"),
 		*GetCode_GetPropertyValueFrom(TargetInstance),
 		*NewStateName, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef(),
-		*AfterSetValueCode
+		*GetPropertyName(), *AfterSetValueCode
 	);
 }
 

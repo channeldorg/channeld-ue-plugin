@@ -58,6 +58,7 @@ FString FArrayPropertyDecorator::GetCode_SetDeltaState(const FString& TargetInst
 	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), Owner->GetProtoNamespace());
 	FormatArgs.Add(TEXT("Declare_ProtoStateMsgName"), Owner->GetProtoStateMessageType());
 	FormatArgs.Add(TEXT("Definition_ProtoName"), GetProtoFieldName());
+	FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
 
 	FormatArgs.Add(TEXT("Code_GetProtoFieldValueFrom"), GetCode_GetProtoFieldValueFrom(TEXT("FullState")));
 	FormatArgs.Add(TEXT("Code_ConditionFullStateIsNull"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? 0 : ") : TEXT(""));
@@ -78,6 +79,7 @@ FString FArrayPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString&
 			FString::Printf(TEXT("%s* PropAddr"), *GetCPPType())
 		)
 	);
+	FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
 	FormatArgs.Add(TEXT("Declare_FullStateName"), FullStateName);
 	FormatArgs.Add(TEXT("Declare_DeltaStateName"), DeltaStateName);
 	FormatArgs.Add(TEXT("Declare_ProtoNamespace"), Owner->GetProtoNamespace());
@@ -137,6 +139,7 @@ FString FArrayPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString&
 			FString::Printf(TEXT("%s* PropAddr"), *GetCPPType())
 		)
 	);
+	FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
 	FormatArgs.Add(TEXT("Declare_PropPtrName"), TEXT("PropAddr"));
 	FormatArgs.Add(TEXT("Code_GetProtoFieldValueFrom"), GetCode_GetProtoFieldValueFrom(NewStateName));
 	FormatArgs.Add(TEXT("Code_SetPropertyValueArrayInner"), InnerProperty->GetCode_SetPropertyValueArrayInner(TEXT("Prop"), TEXT("PropAddr"), NewStateName));
@@ -175,10 +178,11 @@ TArray<TSharedPtr<FStructPropertyDecorator>> FArrayPropertyDecorator::GetStructP
 	return NonRepetitionStructPropertyDecorators;
 }
 
-FString FArrayPropertyDecorator::GetDefinition_ProtoField(int32& FieldNumber)
+FString FArrayPropertyDecorator::GetProtoFieldsDefinition(int* NextIndex)
 {
-	FString FieldDefinitions = FString::Printf(TEXT("bool update_%s = %d;\n"), *GetProtoFieldName(), FieldNumber);
-	FieldNumber++;
-	FieldDefinitions += FPropertyDecorator::GetDefinition_ProtoField(FieldNumber);
-	return FieldDefinitions;
+	FString Result = FPropertyDecorator::GetProtoFieldsDefinition(NextIndex);
+	Result += FString::Printf(TEXT("bool update_%s = %d;\n"), *GetProtoFieldName(), *NextIndex);
+	(*NextIndex)++;
+	return Result;
 }
+

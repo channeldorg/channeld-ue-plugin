@@ -34,15 +34,19 @@ else
 
 const static TCHAR* PropDecorator_SetDeltaStateTemplate =
 	LR"EOF(
+bool b{Declare_PropertyName}Changed = false;
 if ({Code_BeforeCondition}!({Code_ActorPropEqualToProtoState}))
 {
   {Code_SetProtoFieldValue};
-  bStateChanged = true;
+  b{Declare_PropertyName}Changed = true;	//	PropDecorator_SetDeltaStateTemplate
 }
+bStateChanged |= b{Declare_PropertyName}Changed;
+
 )EOF";
 
 const static TCHAR* PropDeco_SetDeltaStateByMemOffsetTemp =
 	LR"EOF(
+bool b{Declare_PropertyName}Changed  = false;
 {
   {Code_AssignPropPointers};
   if(ForceMarge)
@@ -54,9 +58,10 @@ const static TCHAR* PropDeco_SetDeltaStateByMemOffsetTemp =
     if(!ForceMarge)
     {
       {Code_SetProtoFieldValue};
+	  b{Declare_PropertyName}Changed = true;	//	PropDeco_SetDeltaStateByMemOffsetTemp
     }
-    bStateChanged = true;
   }
+  bStateChanged |= b{Declare_PropertyName}Changed;
 }
 )EOF";
 
@@ -80,21 +85,26 @@ if (b{Declare_PropertyName}Changed)
 
 const static TCHAR* PropDecorator_OnChangeStateTemplate =
 	LR"EOF(
+bool b{Declare_PropertyName}Changed = false;
 if ({Code_HasProtoFieldValue} && !({Code_ActorPropEqualToProtoState}))
 {
   {Code_SetPropertyValue}
+  b{Declare_PropertyName}Changed = true;	//	PropDecorator_OnChangeStateTemplate
 }
+bStateChanged |= b{Declare_PropertyName}Changed;
 )EOF";
 
 const static TCHAR* PropDeco_OnChangeStateByMemOffsetTemp =
 	LR"EOF(
+bool b{Declare_PropertyName}Changed = false;
 {
   {Code_AssignPropPointers};
   if ({Code_HasProtoFieldValue} && *{Declare_PropertyPtr} != {Code_GetProtoFieldValue})
   {
     *{Declare_PropertyPtr} = {Code_GetProtoFieldValue};
-    bStateChanged = true;
+    b{Declare_PropertyName}Changed = true;	//	PropDeco_OnChangeStateByMemOffsetTemp
   }
+  bStateChanged |= b{Declare_PropertyName}Changed;
 }
 )EOF";
 
@@ -105,8 +115,9 @@ if ((*{Declare_PropertyPtr})[i] != MessageArr[i])
   (*{Declare_PropertyPtr})[i] = MessageArr[i];
   if (!b{Declare_PropertyName}Changed)
   {
-    b{Declare_PropertyName}Changed = true;
+    b{Declare_PropertyName}Changed = true;	//	PropDeco_OnChangeStateArrayInnerTemp
   }
+  bStateChanged |= b{Declare_PropertyName}Changed;
 }
 )EOF";
 
@@ -178,6 +189,9 @@ public:
 	virtual FString GetProtoNamespace() override;
 	virtual FString GetProtoStateMessageType() override;
 
+	//	NextIndex will updated
+	virtual FString GetProtoFieldsDefinition(int* NextIndex);
+
 	/**
 	 * Get the protobuf field rule
 	 */
@@ -200,22 +214,6 @@ public:
 	}
 
 	virtual UFunction* FindFunctionByName(const FName& FuncName) override;
-
-	/**
-	 * Get the protobuf field definition
-	 * 
-	 * For example:
-	 *   optional bool bIsCrouched
-	 */
-	virtual FString GetDefinition_ProtoField();
-
-	/**
-	 * Get the protobuf field definition with field number
-	 * 
-	 * For example:
-	 *   optional bool bIsCrouched = 6
-	 */
-	virtual FString GetDefinition_ProtoField(int32& FieldNumber);
 
 	/**
 	 * Code that getting property value from outer actor

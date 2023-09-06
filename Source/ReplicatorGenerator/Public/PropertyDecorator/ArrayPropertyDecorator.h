@@ -2,6 +2,7 @@
 #include "PropertyDecorator.h"
 const static TCHAR* ArrPropDeco_SetDeltaStateTemplate =
 	LR"EOF(
+bool b{Declare_PropertyName}Changed = false;	//	ArrPropDeco_SetDeltaStateTemplate
 {
   bool bPropChanged = false;
   const int32 ActorPropLength = {Declare_PropPtrName}->Num();
@@ -16,7 +17,7 @@ const static TCHAR* ArrPropDeco_SetDeltaStateTemplate =
   }
   if (bPropChanged)
   {
-    bStateChanged = true;
+	b{Declare_PropertyName}Changed = true;	//	ArrPropDeco_SetDeltaStateTemplate
     {Declare_DeltaStateName}->set_update_{Definition_ProtoName}(true);
     if({Declare_FullStateName} != nullptr && {Declare_FullStateName}->{Definition_ProtoName}_size() > 0)
     {
@@ -28,10 +29,12 @@ const static TCHAR* ArrPropDeco_SetDeltaStateTemplate =
     {Declare_DeltaStateName}->clear_{Definition_ProtoName}();
   }
 }
+bStateChanged |= b{Declare_PropertyName}Changed;	//	ArrPropDeco_SetDeltaStateTemplate
 )EOF";
 
 const static TCHAR* ArrPropDeco_SetDeltaStateByMemOffsetTemp =
 	LR"EOF(
+bool b{Declare_PropertyName}Changed = false;	//	ArrPropDeco_SetDeltaStateByMemOffsetTemp
 {
   bool bPropChanged = false;
   {Code_AssignPropPointers};
@@ -47,7 +50,7 @@ const static TCHAR* ArrPropDeco_SetDeltaStateByMemOffsetTemp =
   }
   if(bPropChanged)
   {
-    bStateChanged = true;
+	b{Declare_PropertyName}Changed = true;	//	ArrPropDeco_SetDeltaStateByMemOffsetTemp
 	{Declare_DeltaStateName}->set_update_{Definition_ProtoName}(true);
     if({Declare_FullStateName} != nullptr && {Declare_FullStateName}->{Definition_ProtoName}_size() > 0)
     {
@@ -59,19 +62,23 @@ const static TCHAR* ArrPropDeco_SetDeltaStateByMemOffsetTemp =
     {Declare_DeltaStateName}->clear_{Definition_ProtoName}();
   }
 }
+bStateChanged |= b{Declare_PropertyName}Changed;
 )EOF";
 
 const static TCHAR* ArrPropDeco_OnChangeStateTemp =
 	LR"EOF(
+bool  b{Declare_PropertyName}Changed = false; 
 if ({Code_HasProtoFieldValue})
 {
 {Code_SetPropertyValue}
+b{Declare_PropertyName}Changed = true;	//	ArrPropDeco_OnChangeStateTemp
 }
 else if({Code_GetProtoUpdateValue}) 
 {
-b{Declare_PropertyName}Changed = {Declare_PropPtrName}->Num() != {Code_GetProtoFieldValueFrom}.size();
+b{Declare_PropertyName}Changed = {Declare_PropPtrName}->Num() != {Code_GetProtoFieldValueFrom}.size();	//	ArrPropDeco_OnChangeStateTemp
 {Declare_PropPtrName}->Empty();
 }
+bStateChanged |= b{Declare_PropertyName}Changed;
 )EOF";
 
 const static TCHAR* ArrPropDeco_SetPropertyValueTemp =
@@ -81,7 +88,7 @@ auto & MessageArr = {Code_GetProtoFieldValueFrom};
 const int32 NewStateValueLength = MessageArr.size();
 if (ActorPropLength != NewStateValueLength)
 { 
-  b{Declare_PropertyName}Changed = true; 
+  b{Declare_PropertyName}Changed = true; //	ArrPropDeco_SetPropertyValueTemp
 }
 {Declare_PropPtrName}->SetNum(NewStateValueLength);
 for (int32 i = 0; i < NewStateValueLength; ++i)
@@ -92,6 +99,7 @@ for (int32 i = 0; i < NewStateValueLength; ++i)
 
 const static TCHAR* ArrPropDeco_SetPropertyValueByMemOffsetTemp =
 	LR"EOF(
+bool b{Declare_PropertyName}Changed = false;
 {
   bool bPropChanged = false;
   {Code_AssignPropPointers};
@@ -109,9 +117,10 @@ const static TCHAR* ArrPropDeco_SetPropertyValueByMemOffsetTemp =
   }
   if (bPropChanged)
   {
-    bStateChanged = true;
+    b{Declare_PropertyName}Changed = true;	//	ArrPropDeco_SetPropertyValueByMemOffsetTemp
   }
 }
+bStateChanged |= b{Declare_PropertyName}Changed;
 )EOF";
 
 
@@ -148,7 +157,7 @@ public:
 
 	virtual TArray<TSharedPtr<FStructPropertyDecorator>> GetStructPropertyDecorators() override;
 
-	virtual FString GetDefinition_ProtoField(int32& FieldNumber) override;
+	virtual FString GetProtoFieldsDefinition(int* NextIndex) override;
 protected:
 	TSharedPtr<FPropertyDecorator> InnerProperty;
 };
