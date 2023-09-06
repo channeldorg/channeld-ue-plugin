@@ -22,7 +22,7 @@
 
 <img height="300" src="../images/settings_spatial_visualizer.png"/>
 
-空间频道可视化工具可以为角色增加不同颜色的描边，已区分角色所在的空间频道。要开启描边功能，需要在主菜单`编辑 -> 项目设置 -> 引擎 -> 渲染 -> Postprocessing`中设置`自定义深度-模具通道`为`以模具启用`：
+空间频道可视化工具可以为角色增加不同颜色的描边，以区分角色所在的空间频道。要开启描边功能，需要在主菜单`编辑 -> 项目设置 -> 引擎 -> 渲染 -> Postprocessing`中设置`自定义深度-模具通道`为`以模具启用`：
 
 <img height="200" src="../images/settings_stencil.png"/>
 
@@ -31,9 +31,9 @@
 ## 7.3.在编辑器设置中配置主服务器和空间服务器
 在7.1.中介绍过，空间频道运行于空间服务器上，一个空间服务器可以对应一到多个空间频道。然而一个游戏世界背后的服务器往往不止有空间服务器，因为像玩家进入游戏后初始位置（即所属空间频道）的分配、全局的状态管理（如GameState）等逻辑，都需要一个跨越空间的服务器来处理，这个服务器在channeld中被称为**主服务器**。主服务器即全局频道的所有者。
 
-打开主菜单`编辑 -> 编辑器偏好设置 -> 插件 -> Channeld Editor`。在`Server Groups`中，将第一服务器组的视图类(Server View Class)改为`SpatialChannelDataView`。
+打开主菜单`编辑 -> 编辑器偏好设置 -> 插件 -> Channeld Editor`。在`Server Groups`中，将第一服务器组的视图类(Server View Class)改为`SpatialMasterServerView`。
 
-接下来，点击`Server Groups`右侧的加号，添加一个新的服务器组。将新的服务器组的视图类(Server View Class)改为`SpatialSpaceServerView`。将服务器数量(Server Num)改为2，表示有两个空间服务器。将启动延时(Delay Time)改为2.0秒，保证主服务器启动后，再启动空间服务器。设置好的服务器组如下图所示：
+接下来，点击`Server Groups`右侧的加号，添加一个新的服务器组。将新的服务器组的视图类(Server View Class)改为`SpatialChannelDataView`。将服务器数量(Server Num)改为2，表示有两个空间服务器。将启动延时(Delay Time)改为2.0秒，保证主服务器启动后，再启动空间服务器。设置好的服务器组如下图所示：
 
 <img height="400" src="../images/settings_server_groups_spatial.png"/>
 
