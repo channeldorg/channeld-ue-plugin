@@ -16,7 +16,9 @@
 下面将介绍如何在UE中通过配置的方式使用空间频道。示例中将使用4个空间频道，每个频道大小为2000x2000；每2个空间频道运行在一个UE服务器上（称为“空间服务器”），所以共有2个空间服务器。这个空间频道配置内置在channeld中，并作为ChanneldUE的默认配置。
 
 ## 7.2.在项目设置中配置空间频道
-打开主菜单`编辑 -> 项目设置 -> 插件 -> Channeld`，将Channel Data View Class改为`SpatialChannelDataView`。该类会成为客户端使用的频道数据视图类。
+打开主菜单`编辑 -> 项目设置 -> 插件 -> Channeld`，将Channel Data View Class改为`SpatialChannelDataView`。该类会成为客户端使用的频道数据视图类：
+
+<img height="200" src="../images/settings_view_spatial.png"/>
 
 为了让空间频道更直观地显示出来，在相同的设置界面中勾选`Spatial -> Debug -> Enable Spatial Visualizer`，开启ChannelUE内置的空间频道可视化工具：
 
