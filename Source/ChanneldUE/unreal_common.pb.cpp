@@ -1912,7 +1912,7 @@ const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_
   "\0132\031.unrealpb.UnrealObjectRef\"\207\002\n\rGameSta"
   "teBase\022\037\n\022spectatorClassName\030\002 \001(\tH\000\210\001\001\022"
   "\036\n\021gameModeClassName\030\003 \001(\tH\001\210\001\001\022\'\n\032repli"
-  "catedWorldTimeSeconds\030\004 \001(\002H\002\210\001\001\022$\n\027bRep"
+  "catedWorldTimeSeconds\030\004 \001(\001H\002\210\001\001\022$\n\027bRep"
   "licatedHasBegunPlay\030\005 \001(\010H\003\210\001\001B\025\n\023_spect"
   "atorClassNameB\024\n\022_gameModeClassNameB\035\n\033_"
   "replicatedWorldTimeSecondsB\032\n\030_bReplicat"
@@ -16334,12 +16334,12 @@ const char* GameStateBase::_InternalParse(const char* ptr, ::_pbi::ParseContext*
         } else
           goto handle_unusual;
         continue;
-      // optional float replicatedWorldTimeSeconds = 4;
+      // optional double replicatedWorldTimeSeconds = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 37)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 33)) {
           _Internal::set_has_replicatedworldtimeseconds(&has_bits);
-          _impl_.replicatedworldtimeseconds_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
-          ptr += sizeof(float);
+          _impl_.replicatedworldtimeseconds_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
         } else
           goto handle_unusual;
         continue;
@@ -16402,10 +16402,10 @@ uint8_t* GameStateBase::_InternalSerialize(
         3, this->_internal_gamemodeclassname(), target);
   }
 
-  // optional float replicatedWorldTimeSeconds = 4;
+  // optional double replicatedWorldTimeSeconds = 4;
   if (_internal_has_replicatedworldtimeseconds()) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteFloatToArray(4, this->_internal_replicatedworldtimeseconds(), target);
+    target = ::_pbi::WireFormatLite::WriteDoubleToArray(4, this->_internal_replicatedworldtimeseconds(), target);
   }
 
   // optional bool bReplicatedHasBegunPlay = 5;
@@ -16446,9 +16446,9 @@ size_t GameStateBase::ByteSizeLong() const {
           this->_internal_gamemodeclassname());
     }
 
-    // optional float replicatedWorldTimeSeconds = 4;
+    // optional double replicatedWorldTimeSeconds = 4;
     if (cached_has_bits & 0x00000004u) {
-      total_size += 1 + 4;
+      total_size += 1 + 8;
     }
 
     // optional bool bReplicatedHasBegunPlay = 5;

@@ -9959,17 +9959,17 @@ class CHANNELDUE_API GameStateBase final :
   std::string* _internal_mutable_gamemodeclassname();
   public:
 
-  // optional float replicatedWorldTimeSeconds = 4;
+  // optional double replicatedWorldTimeSeconds = 4;
   bool has_replicatedworldtimeseconds() const;
   private:
   bool _internal_has_replicatedworldtimeseconds() const;
   public:
   void clear_replicatedworldtimeseconds();
-  float replicatedworldtimeseconds() const;
-  void set_replicatedworldtimeseconds(float value);
+  double replicatedworldtimeseconds() const;
+  void set_replicatedworldtimeseconds(double value);
   private:
-  float _internal_replicatedworldtimeseconds() const;
-  void _internal_set_replicatedworldtimeseconds(float value);
+  double _internal_replicatedworldtimeseconds() const;
+  void _internal_set_replicatedworldtimeseconds(double value);
   public:
 
   // optional bool bReplicatedHasBegunPlay = 5;
@@ -9997,7 +9997,7 @@ class CHANNELDUE_API GameStateBase final :
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr spectatorclassname_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr gamemodeclassname_;
-    float replicatedworldtimeseconds_;
+    double replicatedworldtimeseconds_;
     bool breplicatedhasbegunplay_;
   };
   union { Impl_ _impl_; };
@@ -20068,7 +20068,7 @@ inline void GameStateBase::set_allocated_gamemodeclassname(std::string* gamemode
   // @@protoc_insertion_point(field_set_allocated:unrealpb.GameStateBase.gameModeClassName)
 }
 
-// optional float replicatedWorldTimeSeconds = 4;
+// optional double replicatedWorldTimeSeconds = 4;
 inline bool GameStateBase::_internal_has_replicatedworldtimeseconds() const {
   bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
   return value;
@@ -20080,18 +20080,18 @@ inline void GameStateBase::clear_replicatedworldtimeseconds() {
   _impl_.replicatedworldtimeseconds_ = 0;
   _impl_._has_bits_[0] &= ~0x00000004u;
 }
-inline float GameStateBase::_internal_replicatedworldtimeseconds() const {
+inline double GameStateBase::_internal_replicatedworldtimeseconds() const {
   return _impl_.replicatedworldtimeseconds_;
 }
-inline float GameStateBase::replicatedworldtimeseconds() const {
+inline double GameStateBase::replicatedworldtimeseconds() const {
   // @@protoc_insertion_point(field_get:unrealpb.GameStateBase.replicatedWorldTimeSeconds)
   return _internal_replicatedworldtimeseconds();
 }
-inline void GameStateBase::_internal_set_replicatedworldtimeseconds(float value) {
+inline void GameStateBase::_internal_set_replicatedworldtimeseconds(double value) {
   _impl_._has_bits_[0] |= 0x00000004u;
   _impl_.replicatedworldtimeseconds_ = value;
 }
-inline void GameStateBase::set_replicatedworldtimeseconds(float value) {
+inline void GameStateBase::set_replicatedworldtimeseconds(double value) {
   _internal_set_replicatedworldtimeseconds(value);
   // @@protoc_insertion_point(field_set:unrealpb.GameStateBase.replicatedWorldTimeSeconds)
 }
