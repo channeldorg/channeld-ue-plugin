@@ -35,6 +35,10 @@
 
 <img height="300" src="../images/project_settings_game_mode.png"/>
 
+```
+提示：在UE5中，还需要将世界场景设置中的“游戏模式重载”也设置为`ThirdPersonGameMode`。
+```
+
 # 3.配置插件
 ## 3.1.配置频道数据视图
 频道数据视图是ChanneldUE插件的核心概念之一。它主要用于关联同步对象（角色，控制器，Game State等）与频道数据。UE客户端和服务端都会存在一个视图对象。
@@ -42,7 +46,7 @@
 
 <img height="200" src="../images/settings_view_class.png"/>
 
-`SingleChannelDataView`是插件中内置的视图蓝图类，它会在服务端创建**全局频道**，并在客户端连接成功后订阅到该频道。订阅成功后，客户端发送的网络数据会通过channeld转发到全局频道的所有者，即创建该频道的服务端。
+`SingleChannelDataView`是插件中内置的视图类，它会在服务端创建**全局频道**，并在客户端连接成功后订阅到该频道。订阅成功后，客户端发送的网络数据会通过channeld转发到全局频道的所有者，即创建该频道的服务端。
 
 ## 3.2.配置服务器组
 作为UE的分布式架构扩展，ChanneldUE插件支持同时启动多个UE服务器进程，每个进程可以配置自己的视图和启动参数。
@@ -57,6 +61,10 @@
 第一次启动channeld服务和游戏服务器前需要生成同步代码。打开工具栏中ChanneldUE插件的下拉菜单中，点击`Edit Channel Data Schema...`选项，打开频道数据模型编辑器。点击`Generate...`按钮开始生成同步代码。首次生成时要遍历项目中所有的代码和蓝图，所以时间可能较长，请耐心等待。
 
 <img src="../images/generate_replicaiton_code.png"/>
+
+```
+注意：使用Live Coding可能会导致链接失败。如果碰到这种情况，您需要关闭Live Coding功能并重新生成，或是关闭UE编辑器并重新编译启动项目。
+```
 
 等待代码生成成功后，打开工具栏中ChanneldUE插件的下拉菜单，确保`Enable Channeld Networking`为选中状态：
 
