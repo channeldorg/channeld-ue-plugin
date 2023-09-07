@@ -38,6 +38,23 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 
 [channeld网关服务代码仓库](https://github.com/metaworking/channeld)
 
+## Engine Versions Support Matrix
+| Components | UE 4.27.2 | UE 5.1.1 | UE 5.2.1 |
+| ------ | ------ | ------ |------ |
+| Getting Started | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Demos Project | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Codegen Tool | :white_check_mark: | :white_check_mark: `*` | :white_check_mark: `*` |
+| Cloud Deployment Tool | :white_check_mark: | :x: | :x:
+`*` Need to turn off `Live Coding` in order to hot-reload the generated code.
+## 引擎版本支持
+| 覆盖功能 | UE 4.27.2 | UE 5.1.1 | UE 5.2.1 |
+| ------ | ------ | ------ |------ |
+| 快速开始文档 | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| 示例项目 | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| 代码生成工具 | :white_check_mark: | :white_check_mark: `*` | :white_check_mark: `*` |
+| 云部署工具 | :white_check_mark: | :x: | :x:
+`*` 需要关闭`实施代码编写`功能才能正常热加载生成的代码。
+
 ## License and Disclaimer
 - ChanneldUE plugin is licensed under the Apache 2.0 license, see [LICENSE](LICENSE) for details.
 - ChanneldUE plugin and channeld gateway service are free to use for any purpose, including commercial use.
@@ -47,7 +64,7 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 
 ## 使用许可和免责声明
 - ChanneldUE插件使用Apache 2.0许可证，详情请参考[LICENSE](LICENSE)文件。
-- ChanneldUE插件及channeld网关服务的代码供所有人免费使用，可以用于任何目的，包括商业用途。
+- ChanneldUE插件及channeld网关服务的代码供所有人免费使用，可以用于任何目的，包括商业用途（欢迎白嫖，更欢迎提交PR）。
 - 使用者在使用本插件及channeld网关服务时，应自行承担所有风险。
 - 我们以GitHub [Issues](/../../issues)和[Discussions](/../../discussions)的形式提供基本的技术支持，但不保证能够及时解决所有问题。
 - 联系开发者：

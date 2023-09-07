@@ -63,7 +63,7 @@
 <img src="../images/generate_replicaiton_code.png"/>
 
 ```
-注意：使用Live Coding可能会导致链接失败。如果碰到这种情况，您需要关闭Live Coding功能并重新生成，或是关闭UE编辑器并重新编译启动项目。
+注意：UE5默认开启的Live Coding可能会导致链接失败，也可能会导致之后的服务器启动失败。如果碰到这种情况，您需要关闭Live Coding功能并重新生成，或是关闭UE编辑器并重新编译启动项目。
 ```
 
 等待代码生成成功后，打开工具栏中ChanneldUE插件的下拉菜单，确保`Enable Channeld Networking`为选中状态：
@@ -89,7 +89,7 @@
 <img height="300" src="../images/server_replication_output.png"/>
 
 ## 5.2.测试多个客户端
-如果要同时开启多个客户端，需要对默认的编辑器设置做一些修改。打开主菜单`编辑 -> 编辑器偏好设置 -> 关卡编辑器 -> 播放`，在`Multiplayer options`中，**取消**`单进程下的运行`的勾选：
+如果要同时开启多个客户端，需要对默认的编辑器设置做一些修改。打开主菜单`编辑 -> 编辑器偏好设置 -> 关卡编辑器 -> 播放`，在`Multiplayer Options`中，**取消**`单进程下的运行`的勾选：
 
 ![](../images/settings_run_under_one_process.png)
 

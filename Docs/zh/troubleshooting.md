@@ -16,6 +16,12 @@
 ## 无法保存蓝图
 如果出现“无法保存资产”的错误提示，通常是由于游戏服务器仍在运行，导致蓝图文件被占用。请先关闭游戏服务器，再保存蓝图。
 
+## 第二个PIE客户端无法进入场景
+查看UE服务端的日志，如果出现如下信息：
+```log
+LogNetTraffic: Error: Received channel open command for channel that was already opened locally.
+```
+请检查`编辑器偏好设置 -> 关卡编辑器 -> 播放 -> Multiplayer Options`中的`单进程下的运行`，确保为**未勾选**的状态。
 ## 同步出现问题
 - 确保使用最新生成的同步代码
 - 有时候，生成的同步代码在编译后没有正常被热加载。此时需要重新编译并启动UE编辑器。
