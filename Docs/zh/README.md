@@ -4,7 +4,7 @@
 ### [运行第三人称模板项目](third-person-template.md)
 ### [添加网络同步Actor](add-replication.md)
 ### [使用空间频道](use-spatial-channel.md)
-### [故障排查](troubleshooting.md)
+
 ## 插件介绍
 ### [基本概念](basic-concepts.md)
 ### [配置ChanneldUE](settings.md)
@@ -12,6 +12,7 @@
 ### [频道数据模型](channel-data-schema.md)
 ### [云部署工具](cloud-deployment-tool.md)
 ### [推荐工作流](recommended-workflow.md)
+
 ## 进阶主题
 ### ChannelUE的网络同步实现
 ### [和原生UE的差异以及替代方案](native-ue-comparison.md)
@@ -19,4 +20,5 @@
 ### [客户端兴趣](client-interest.md)
 ### 跨服交互
 ### 扩展channeld和插件
-## 常见问答
+
+## [故障排查](troubleshooting.md)
