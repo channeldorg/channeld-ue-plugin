@@ -76,6 +76,6 @@
 <img height="300" src="../images/test_actor_spawn.png"/>
 
 ## 下一步
-在下面的章节里，将介绍如何通过多个UE服务器来运行同一个地图。[点击这里](use-spatial-channel.md)继续。
+在下面的章节里，将介绍如何通过多个UE服务器来无缝运行同一个地图。[点击这里](use-spatial-channel.md)继续。
 
 [回到文档首页](README.md)

@@ -39,7 +39,7 @@ PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engi
 ##### 2.1.4.修改项目的配置文件
 打开项目的配置文件`Config/DefaultEngine.ini`，并添加插件相关的日志输出等级：
 
-```
+```ini
 [Core.log]
 LogChanneld=Verbose
 LogChanneldGen=Verbose

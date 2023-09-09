@@ -39,12 +39,30 @@ ChanneldUE内置如下类型的兴趣范围（AOI，Area Of Interest）：
 | `Radius` | 15000.0 | 半径 | 球形，锥形 |
 | `Angle` | 120.0 | 锥形的顶角度数(0-360)。应该比摄像机视角略大，以保证玩家角色在旋转时，观察到的对象能够及时出现 | 锥形 |
 
-客户端的实际兴趣范围是上述的兴趣范围的***组合***。开发者也可以自行扩展兴趣类型。要添加、删除或者修改兴趣范围，需要打开主菜单`编辑 -> 项目设置 -> 插件 -> Channeld`，在`Spatial -> Client Interest -> Client Interest Presets`中添加一个预设。下图示例添加了一个1000立方米范围的兴趣，并设置为默认关闭：
+客户端的实际兴趣范围是上述的兴趣范围的**组合**。开发者也可以自行扩展兴趣类型。要添加、删除或者修改兴趣范围，需要打开主菜单`编辑 -> 项目设置 -> 插件 -> Channeld`，在`Spatial -> Client Interest -> Client Interest Presets`中添加一个预设。下图示例添加了一个1000立方米范围的兴趣，并设置为默认关闭：
 
 ![](../images/add_box_interest.png)
 
-## 兴趣范围的订阅频率
-所有兴趣范围的订阅频率，即对应的空间频道同步数据更新到客户端的频率，由一组参数统一控制。
+## 兴趣范围的同步频率
+所有兴趣范围的同步频率，即对应的空间频道同步数据更新到客户端的频率，由channeld中的一组参数统一控制：
+```go
+var spatialDampingSettings []*SpatialDampingSettings = []*SpatialDampingSettings{
+	{
+		MaxDistance:      0,
+		FanOutIntervalMs: 20,
+	},
+	{
+		MaxDistance:      1,
+		FanOutIntervalMs: 50,
+	},
+	{
+		MaxDistance:      2,
+		FanOutIntervalMs: 100,
+	},
+}
+```
+
+这段代码表示空间频道的同步频率以频道距离衰减，默认为50Hz（距离为0，即同一空间频道），20Hz（距离为1个空间频道），10Hz（距离为2个及以上空间频道）。目前这段参数只能通过修改代码[message_spatial.go](/../../../channeld/blob/master/pkg/channeld/message_spatial.go)来调整。
 
 ## 扩展兴趣类型
 您的兴趣范围类需要继承自`UAreaOfInterestBase`（不可跟随）或`UPlayerFollowingAOI`（可跟随），并实现虚方法：

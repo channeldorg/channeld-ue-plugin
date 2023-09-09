@@ -22,6 +22,7 @@
 LogNetTraffic: Error: Received channel open command for channel that was already opened locally.
 ```
 请检查`编辑器偏好设置 -> 关卡编辑器 -> 播放 -> Multiplayer Options`中的`单进程下的运行`，确保为**未勾选**的状态。
+
 ## 同步出现问题
 - 确保使用最新生成的同步代码
 - 有时候，生成的同步代码在编译后没有正常被热加载。此时需要重新编译并启动UE编辑器。
