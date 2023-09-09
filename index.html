@@ -15,7 +15,10 @@
     <div id="app"></div>
     <script>
       window.$docsify = {
-        
+        alias: {
+          "/Docs/en/(.*)": "/$1",
+          "/Docs/zh/(.*)": "/$1",
+        }
       };
     </script>
     <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
