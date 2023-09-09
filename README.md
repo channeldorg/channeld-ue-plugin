@@ -25,6 +25,10 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 - 支持一键上云
 
 ## Links
+[Getting Started](Docs/en/installation.md)
+
+[Documentation](Docs/en/README.md)
+
 [ChanneldUE Example Project](https://github.com/metaworking/channeld-ue-demos)
 
 [Code repo of channeld, the Gateway Service behind ChanneldUE](https://github.com/metaworking/channeld)

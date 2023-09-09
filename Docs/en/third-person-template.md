@@ -12,7 +12,7 @@ Open the Blueprint `ThirdPersonCharacter` of the third-person character and add 
 ##### 2.3.2.Create `PlayerController`, `GameState` and `PlayerState` Blueprints
 Respectively create three Blueprints that inherits from `PlayerController`, `ChanneldGameState` and `PlayerState`, and name them `ThirdPersonPlayerController`, `ThirdPersonGameState` and `ThirdPersonPlayerState`:
 
-![](../images/new_Blueprints.png)
+![](../images/new_blueprints.png)
 
 ```
 Tip: You can use either GameStateBase or ChanneldGameState as the base class. If the cross-server function will be used in the later development, you sholud use ChanneldGameState.
