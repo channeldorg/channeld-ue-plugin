@@ -1,4 +1,4 @@
-* Quick Start
+* Getting Started
 ** [Install and Enable the Plugin](installation.md)
 ** [Run the Third Person Template Project](third-person-template.md)
 ** [Add a Replicated Actor](add-replication.md)
