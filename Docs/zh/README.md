@@ -1,24 +1,22 @@
-# 文档目录
-## 快速开始
-### [安装并启用插件](installation.md)
-### [运行第三人称模板项目](third-person-template.md)
-### [添加网络同步Actor](add-replication.md)
-### [使用空间频道](use-spatial-channel.md)
+# ChanneldUE 插件
+ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源插件。
 
-## 插件介绍
-### [基本概念](basic-concepts.md)
-### [配置ChanneldUE](settings.md)
-### C++和蓝图API
-### [频道数据模型](channel-data-schema.md)
-### [云部署工具](cloud-deployment-tool.md)
-### [推荐工作流](recommended-workflow.md)
+## 特性
+- 无需修改引擎代码，便可将单个UE专用服务器的最大承载人数提升到100-200人
+- 可以将多个UE专用服务器组合成一个大世界，支持上千玩家同时在线
+- 支持多种应用场景，包括无缝大世界，以及传统的多房间架构和中转服务器架构
+- 开箱即用的同步方案，与原生UE的开发方式无缝集成
+- 灵活且可扩展的客户端兴趣管理机制
+- 支持跨服交互（目前仅支持跨服RPC；物理、AI、GAS等系统的跨服需要额外集成）
+- 基于云计算的动态负载均衡能够极大节省服务器成本（开发中）
+- 支持一键上云
 
-## 进阶主题
-### ChannelUE的网络同步实现
-### [和原生UE的差异以及替代方案](native-ue-comparison.md)
-### 频道数据视图
-### [客户端兴趣](client-interest.md)
-### 跨服交互
-### 扩展channeld和插件
+## 引擎版本支持
+| 覆盖功能 | UE 4.27.2 | UE 5.1.1 | UE 5.2.1 |
+| ------ | ------ | ------ |------ |
+| 快速开始文档 | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| 示例项目 | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| 代码生成工具 | :white_check_mark: | :white_check_mark: `*` | :white_check_mark: `*` |
+| 云部署工具 | :white_check_mark: | :x: | :x:
 
-## [故障排查](troubleshooting.md)
+`*` 需要关闭`实时代码编写`功能才能正常热加载生成的代码。

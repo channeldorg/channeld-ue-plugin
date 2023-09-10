@@ -52,7 +52,7 @@
 
 #### 配置频道数据模型
 为同步Actor添加同步组件后，还需要配置频道数据模型来映射同步Actor和频道数据的关系。
->频道数据模型详细说明和使用可参考[频道数据模型](./channel-data-schema.md)
+>频道数据模型详细说明和使用可参考[频道数据模型](zh/channel-data-schema.md)
 
 点击ChannelUE插件的`Editor Channel Data Schema` 按钮：
 

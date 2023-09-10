@@ -5,12 +5,12 @@ In daily development, it is recommended to use [native UE networking](https://do
 
 >To use the native UE networking, please make sure that ChanneldUE's networking is disabled:
 >
->![](../images/disable_channeld_networking.png)
+>![](images/disable_channeld_networking.png)
 
 ### Use ChanneldUE for testing
 Enable ChanneldUE networking to switch the native UE networking to ChanneldUE networking:
 
-![](../images/enable_channeld_networking.png)
+![](images/enable_channeld_networking.png)
 
 #### Enable ChanneldUE replication for an Actor
 An Actor that uses networking or RPC needs to add a replication component. The specific steps are as follows:
@@ -38,12 +38,12 @@ An Actor that uses networking or RPC needs to add a replication component. The s
     ```
 * Add a replication component to a Blueprint Actor
   
-  ![](../images/character_rep_component.png)
+  ![](images/character_rep_component.png)
 
 #### Add replication components to Actors in batches
 In addition to manually adding replication components to Actors, ChanneldUE provides a tool to add replication components to existing Actors in batches:
 
-![](../images/add_rep_comp_to_bpactor.png)
+![](images/add_rep_comp_to_bpactor.png)
 
 > Note: This tool will load all Actors in the project. If there are a large number of Actors in the project, it may cause a long loading time.
 
@@ -53,23 +53,23 @@ After adding a replication component to the Actor, you also need to configure th
 
 Click the `Editor Channel Data Schema` button of the ChannelUE plugin:
 
-![](../images/open_channel_data_schema_editor.png)
+![](images/open_channel_data_schema_editor.png)
 
 The following editor window will be opened:
 
-<img src="../images/default_channel_data_schema_editor.png" height = "400" alt="" />
+<img src="images/default_channel_data_schema_editor.png" height = "400" alt="" />
 
 ##### Add Actor state to the Channel Data Schema
 First, if the replication cache is expired (yellow exclamation mark), you need to update it. Click the `Refresh...` button above the channel data editor:
 
-![](../images/refresh_rep_actor_cache.png)
+![](images/refresh_rep_actor_cache.png)
 
 After the replication cache is updated, add the newly added replicated Actor to a channel: (The following figure shows that `BP_TestRep` is mapped to the Global channel. Because `BP_TestRep` depends on the `StaticMeshComponent` component, this component is also added to the Global channel at the same time.)
 
 ##### GameState
 Usually, there is only one instance of GameState on the server, so you can set the state of GameState to singleton:
 
-![](../images/singleton_channel_data_state.png)
+![](images/singleton_channel_data_state.png)
 
 > In the case of multiple servers, it is recommended to put the state of GameState in the Global channel and set it to singleton to ensure that the state of GameState is consistent across all servers.
 > In addition to GameState, WorldSettings class also has only one instance in a game world, so it is also recommended to set its state to singleton.
@@ -77,12 +77,12 @@ Usually, there is only one instance of GameState on the server, so you can set t
 #### Generate replication code
 After configuring the Channel Data Schema, you need to generate the replication code. The replication code is mainly used to implement the state replication in the Channel Data Schema.
 
-![](../images/generate_rep_code.png)
+![](images/generate_rep_code.png)
 
 ##### Hot-reload compatible mode
 ChanneldUE provides a hot-reload compatible mode. In this mode, the project source code is automatically hot-reloaded after the replication code is generated. If the hot-reload compatible mode is turned off, you need to close the UE editor and recompile the project code before running the game again.
 
-![](../images/enable_compatible_recompilation.png)
+![](images/enable_compatible_recompilation.png)
 
 > In the hot-reload compatible mode, the generated replication code will be different each time, so it is recommended to turn off the hot-reload compatible mode and generate the replication code again before the release packaging.
 
@@ -91,26 +91,26 @@ Since ChanneldUE uses a distributed dedicated server architecture, you need to s
 
 Open the gateway service and dedicated server through the dropdown menu of the plugin, the steps are as follows:
 
-![](../images/toolbar_menu.png)
+![](images/toolbar_menu.png)
 1. Make sure that the ChanneldUE networking is enabled
 2. Click `Launch Channeld` to start the channel gateway service
 
     The following output will be displayed when the channeld gateway service is started successfully:
-    ![](../images/launch_channeld_success.png)
+    ![](images/launch_channeld_success.png)
 
 3. Click `Launch Servers` to start the dedicated server
     
 #### Test multiple clients
 If you want to start multiple clients at the same time, you need to make some modifications to the default editor settings. Open the `Editor Preferences -> Level Editor -> Play`, in `Multiplayer options`, **uncheck** `Run Under One Process`:
 
-![](../images/settings_run_under_one_process.png)
+![](images/settings_run_under_one_process.png)
 
 #### Stop the dedicated server or gateway service
 If you need to modify assets such as Blueprints or levels during the test, please remember to close the dedicated server before saving the changes, otherwise the UE editor will prompt that the changes cannot be saved.
 
 After the test is completed, you can stop the dedicated server and gateway service through the dropdown menu of the plugin. Click `Stop Servers` and `Stop Channeld` in turn to stop the dedicated server and gateway service.
 
-![](../images/stop_servers_and_channeld.png)
+![](images/stop_servers_and_channeld.png)
 
 ## Collaboration and Version Control
 ### Channel Data Schema

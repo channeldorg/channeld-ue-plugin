@@ -6,9 +6,7 @@ channeld Gateway Service is written in Go. The `Setup.bat` initialization script
 
 It is strongly recommended to deploy channeld and game servers nearby. If they are in the same cluster but on different physical servers, the network latency between channeld and game servers is usually only 1-2 milliseconds; if they are on the same physical server, the latency will be as low as tens of microseconds. What really needs to be considered is the update latency brought by the fan-out mechanism of channeld itself. If the `FanOutIntervalMs` in the subscription options is too high, after the server sends the synchronization message to channeld, theoretically the worst case is that channeld will send these update to the client after `FanOutIntervalMs` time. In FPS games that are highly sensitive to latency, it is recommended to set `FanOutIntervalMs` to 10 or less.
 
-```
-Note: The smaller the FanOutIntervalMs, the higher the CPU load of the channel.
-```
+>Note: The smaller the `FanOutIntervalMs`, the higher the CPU load of the channel.
 
 ## Connection
 For channeld, both the client and the server are a type of connection. channeld supports TCP, KCP and WebSocket protocols; currently, the client and server of ChanneldUE connect to channeld via TCP.

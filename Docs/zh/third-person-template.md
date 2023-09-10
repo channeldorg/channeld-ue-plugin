@@ -1,5 +1,5 @@
 # 运行第三人称模板项目
-[上一章](installation.md)介绍了如何为项目安装和启用ChanneldUE插件。插件启用后，运行游戏仍然会使用UE的原生网络框架。本章将介绍如何让项目运行在ChanneldUE的网络框架上。
+[上一章](zh/installation.md)介绍了如何为项目安装和启用ChanneldUE插件。插件启用后，运行游戏仍然会使用UE的原生网络框架。本章将介绍如何让项目运行在ChanneldUE的网络框架上。
 
 ## 2.3.为项目创建基础同步类和Game Mode
 因为项目默认用到的Gameplay框架并不支持基于channeld的网络同步，所以需要创建一批添加了同步组件的蓝图类。
@@ -14,16 +14,12 @@
 
 ![](../images/new_blueprints.png)
 
-```
-提示：此处选择GameStateBase或ChanneldGameState都可以。如果要在之后的开发中使用到跨服的GameState功能，则需要选择ChanneldGameState。
-```
+>提示：此处选择`GameStateBase`或`ChanneldGameState`都可以。如果要在之后的开发中使用到跨服的GameState功能，则需要选择`ChanneldGameState`。
 
 ##### 2.3.3.为新创建的蓝图开启同步
 仿照2.3.1.步骤，为新创建的三个蓝图开启`复制(Replicates)`，并添加同步组件`ChanneldReplicationComponent`。
 
-```
-小贴士：记得在开启Relicates和添加同步组件后，编译和保存上述蓝图！
-```
+>提示：记得在开启Relicates和添加同步组件后，编译和保存上述蓝图！
 
  ##### 2.3.4.创建`GameMode`蓝图
 创建一个新的GameMode蓝图`ThirdPersonGameMode`（如果已存在，则打开），将`Game State Class`, `Player Controller Class`, `Player State Class`和`Default Pawn Class`分别设置为`ThirdPersonGameState`、`ThirdPersonPlayerController`、`ThirdPersonPlayerState`和`ThirdPersonCharacter`：
@@ -35,9 +31,7 @@
 
 <img height="300" src="../images/project_settings_game_mode.png"/>
 
-```
-提示：在UE5中，还需要将世界场景设置中的“游戏模式重载”也设置为`ThirdPersonGameMode`。
-```
+>提示：在UE5中，还需要将世界场景设置中的“游戏模式重载”也设置为`ThirdPersonGameMode`。
 
 # 3.配置插件
 ## 3.1.配置频道数据视图
@@ -62,9 +56,7 @@
 
 <img src="../images/generate_replicaiton_code.png"/>
 
-```
-注意：UE5默认开启的Live Coding可能会导致链接失败，也可能会导致之后的服务器启动失败。如果碰到这种情况，您需要关闭Live Coding功能并重新生成，或是关闭UE编辑器并重新编译启动项目。
-```
+>注意：UE5默认开启的Live Coding可能会导致链接失败，也可能会导致之后的服务器启动失败。如果碰到这种情况，您需要关闭Live Coding功能并重新生成，或是关闭UE编辑器并重新编译启动项目。
 
 等待代码生成成功后，打开工具栏中ChanneldUE插件的下拉菜单，确保`Enable Channeld Networking`为选中状态：
 
@@ -76,9 +68,7 @@
 
 <img height="200" src="../images/server_view_initialized.png"/>
 
-```
-注意：如果UE服务器连接channeld失败，则会退出。
-```
+>注意：如果UE服务器连接channeld失败，则会退出。
 
 # 5.运行游戏并测试
 ## 5.1.测试单个客户端
@@ -102,11 +92,9 @@
 
 在每个客户端窗口中，打开控制台并输入`open 127.0.0.1`。观察多个客户端之间的同步。
 
-```
-提示：在本章后面的空间频道示例中，会介绍如何在蓝图中建立到channeld的连接。
-```
+>提示：在本章后面的空间频道示例中，会介绍如何在蓝图中建立到channeld的连接。
 
 ## 下一步
-在下面的章节里，将介绍如何在ChanneldUE的网络框架中添加新的同步Actor。[点击这里](add-replication.md)继续。
+在下面的章节里，将介绍如何在ChanneldUE的网络框架中添加新的同步Actor。[点击这里](zh/add-replication.md)继续。
 
-[回到文档首页](README.md)
+[回到文档首页](zh/README.md)

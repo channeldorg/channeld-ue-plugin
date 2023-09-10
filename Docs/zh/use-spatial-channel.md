@@ -1,5 +1,5 @@
 # 7.使用空间频道运行地图
-[上一章](add-replication.md)介绍了使用ChanneldUE进行网络开发的基本工作流。本章将介绍如何将第三人称模板项目的地图切分到两个UE服务器上运行。
+[上一章](zh/add-replication.md)介绍了使用ChanneldUE进行网络开发的基本工作流。本章将介绍如何将第三人称模板项目的地图切分到两个UE服务器上运行。
 
 ## 7.1.空间频道简介
 前面在配置频道数据视图时提到了频道的概念——频道是订阅和状态数据的集合。订阅是指哪些连接（包括客户端和服务端）关心该频道的状态数据更新；状态数据则是游戏中的需要同步的对象（比如Actor，Character，PlayerController等）的同步属性的集合。
@@ -83,9 +83,9 @@ LogChanneld: Created spatial channels: 65538,65539 （空间服务器2）
 2. 修改channeld的空间频道设置。默认的配置文件位于`%CHANNELD_PATH%/config/spatial_static_2x2.json`。将`WorldOffsetX`和`WorldOffsetY`修改为0，然后重新启动channeld和游戏服务器。
 
 # 8.总结
-恭喜你！到这里，你已经了解了ChanneldUE的基本功能。如果想要深入理解channeld的概念，可以浏览[基本概念](basic-concepts.md)章节；如果想要动手尝试更多的功能，比如：
+恭喜你！到这里，你已经了解了ChanneldUE的基本功能。如果想要深入理解channeld的概念，可以浏览[基本概念](zh/basic-concepts.md)章节；如果想要动手尝试更多的功能，比如：
 - 配置更多空间服务器来运行更多的空间频道
 - 控制客户端接收的同步范围
 - 让GameState在多个空间服务器上同步属性
 
-可以继续浏览[文档](README.md)；也可以下载[ChanneldUE示例项目](https://github.com/metaworking/channeld-ue-demos)。
+可以继续浏览[文档](zh/README.md)；也可以下载[ChanneldUE示例项目](https://github.com/metaworking/channeld-ue-demos)。

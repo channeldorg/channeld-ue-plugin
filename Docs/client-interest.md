@@ -19,7 +19,7 @@ With the default 150-meter update range of UE as a reference, the recommended sp
 
 The update of the client interest is triggered only when the client is handed over by default. Developers can also enable interest following, that is, the client interest is updated immediately after the condition is met (such as moving a certain distance). This will also increase the system load, so it is recommended to enable interest following only in scenes where the interest area is very sensitive, such as when aiming with a sniper scope. The following screenshot shows how to enable interest following through Blueprint:
 
-![](../images/interest_follow_actor.png)
+![](images/interest_follow_actor.png)
 
 > Note: The logic of interest management is controlled by the UE server, and the channeld gateway service finally calculates and takes effect. So the logic in the above figure should happen on the UE server, not the client.
 
@@ -42,7 +42,7 @@ The following table lists the parameters of the interest area and the types of i
 
 The actual interest area of the client is the **combination** of the above interest areas. Developers can also extend the interest type by themselves. To add, delete, or modify the interest area, you need to open the `Project Settings -> Plugins -> Channeld`, and add a preset in `Spatial -> Client Interest -> Client Interest Presets`. The following example adds an interest area with a range of 1000 cubic meters and sets it to be off by default:
 
-![](../images/add_box_interest.png)
+![](images/add_box_interest.png)
 
 ## Update Frequency of Interest Areas
 The update frequency of all interest areas, that is, the frequency at which the corresponding spatial channel data is updated to the client, is uniformly controlled by a set of parameters in channeld:
@@ -84,4 +84,4 @@ The main way to observe the client interest area is to use the built-in spatial 
 
 The following GIF shows the interest area of a cone area with following enabled. When the player character moves and rotates, the interest area will follow the change:
 
-![](../images/cone_interest.gif)
+![](images/cone_interest.gif)

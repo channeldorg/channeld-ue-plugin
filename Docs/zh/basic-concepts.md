@@ -6,9 +6,7 @@ channeld网关服务使用Go语言编写。ChanneldUE插件的`Setup.bat`初始�
 
 强烈建议将channeld和游戏服务器就近部署。如果是在同一集群，不同的物理服务器上，channeld和游戏服务器之间的网络延迟通常只有1-2毫秒；如果是在同一物理服务器上，其延迟会低至几十微秒。真正要考虑的是channeld本身的扇出机制带来的同步延迟。如果订阅时设置的`FanOutIntervalMs`太高，理论上，服务器发给channeld同步消息后，最差的情况下，`FanOutIntervalMs`时间后channeld才会给客户端发送这些同步。在FPS这种对延迟高敏感的游戏项目中，建议将`FanOutIntervalMs`设置为10或更小。
 
-```
-注意：FanOutIntervalMs越小，频道的CPU负载越大。
-```
+>注意：`FanOutIntervalMs越小`，频道的CPU负载越大。
 
 ## 连接
 对于channeld而言，无论是客户端还是服务端，都是一种连接。channeld支持TCP、KCP、WebSocket等协议；目前ChanneldUE的客户端和服务端都通过TCP连接channeld。

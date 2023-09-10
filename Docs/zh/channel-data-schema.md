@@ -1,6 +1,6 @@
 # 频道数据模型
 ## 什么是频道数据模型
-频道数据模型定义了[频道](./basic-concepts.md#频道)对应的[频道数据状态](./basic-concepts.md#频道数据中的状态)。channeld每次进行频道数据同步时，都会根据频道对应的频道数据模型进行同步。
+频道数据模型定义了[频道](zh/basic-concepts.md#频道)对应的[频道数据状态](zh/basic-concepts.md#频道数据中的状态)。channeld每次进行频道数据同步时，都会根据频道对应的频道数据模型进行同步。
 >GameState、WorldSetting等同步Actor在一个虚拟世界中仅存在一个实例，其在频道数据模型中应该为单例。
 
 ## 频道数据模型编辑器

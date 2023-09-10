@@ -1,5 +1,5 @@
 # ChanneldUE和原生UE的差异
-本章介绍了ChanneldUE和虚幻引擎自带的网络同步机制的差异。部分差异可以通过替代方案解决，但是部分差异目前还没有替代方案。如果你的游戏需要使用这些功能，请在[Issues](/../../issues)中提出。
+本章介绍了ChanneldUE和虚幻引擎自带的网络同步机制的差异。部分差异可以通过替代方案解决，但是部分差异目前还没有替代方案。如果你的游戏需要使用这些功能，请在[Issues](https://github.com/metaworking/channeld-ue-plugin/issues)中提出。
 
 ## 条件属性复制
 ChanneldUE尚不支持[条件属性复制](https://docs.unrealengine.com/4.27/zh-CN/InteractiveExperiences/Networking/Actors/Properties/Conditions/)。
@@ -14,8 +14,8 @@ ChanneldUE支持[网络更新频率](https://docs.unrealengine.com/4.27/zh-CN/In
 ## 网络裁剪距离
 ChanneldUE不支持Actor的`Net Cull Distance Squared`属性，但是可以作为替代方案使用。
 
-在原生UE中，一个客户端能够被同步到的空间范围由每个网络Actor的`Net Cull Distance Squared`属性来控制，默认为150米的平方。在ChanneldUE中，客户端的兴趣范围（Area of Interest）即客户端订阅的空间频道的集合。客户端能够接收到的最小同步范围是一个空间频道，在[入门指南](getting-started.md)使用的第三人称示例里，为10x10米。
-具体的配置方法见[客户端兴趣管理](client-interest.md)文档。
+在原生UE中，一个客户端能够被同步到的空间范围由每个网络Actor的`Net Cull Distance Squared`属性来控制，默认为150米的平方。在ChanneldUE中，客户端的兴趣范围（Area of Interest）即客户端订阅的空间频道的集合。客户端能够接收到的最小同步范围是一个空间频道，在[入门指南](zh/getting-started.md)使用的第三人称示例里，为10x10米。
+具体的配置方法见[客户端兴趣管理](zh/client-interest.md)文档。
 
 若要实现以玩家为中心的，半径为150米的球型兴趣范围，打开主菜单`编辑 -> 项目设置 -> 插件 -> Channeld -> Spatial -> Client Interest`，添加一个`Client Interest Preset`，设置`Area Type`为**Sphere**，`Radius`为**15000**。
 

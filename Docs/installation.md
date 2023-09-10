@@ -20,11 +20,9 @@ protoc-gen-go - Protobuf code generator for golang
 ## 2.1.Create a project
 #### 2.1.1.Create a new UE project based on the Third Person Template
 Create a new UE project based on the Third Person Template. Choose the project type as `C++`:
-![](../images/create_project.png)
+![](images/create_project.png)
 
-```
-Note: ChanneldUE plugin only supports C++ projects. If you are using a Blueprint-only project, you need to convert it to a C++ project first.
-```
+>Note: ChanneldUE plugin only supports C++ projects. If you are using a Blueprint-only project, you need to convert it to a C++ project first.
 
 ##### 2.1.2.Copy the plugin
 Copy the cloned plugin code repository directory from step 1.1. to the `Plugins` directory of the project.
@@ -45,15 +43,13 @@ LogChanneldEditor=Verbose
 LogChanneldRepGenerator=Verbose
 ```
 
-```
-Note: This configuration uses a lower log output level. It is recommended to enable Verbose logs during development to for better troubleshooting and issue reporting. For publish, it is recommended to change the log level to Log or Warn to reduce performance and file storage overhead.
-```
+>Note: This configuration uses a lower log output level. It is recommended to enable Verbose logs during development to for better troubleshooting and issue reporting. For publish, it is recommended to change the log level to Log or Warn to reduce performance and file storage overhead.
 
 ## 2.2.Recompile and run the project and enable the plugin
 Right-click on the `*.uproject` file of the project in the file browser, select "Generate Visual Studio project files" to regenerate the project's solution file.
 Reload the solution in Visual Studio and recompile and run the project. When the UE editor opens again, the plugin icon should appear in the toolbar:
 
-![](../images/toolbar_channeld.png)
+![](images/toolbar_channeld.png)
 
 If the plugin icon doesn't show up, select `Edit -> Plugins -> Other -> ChanneldUE -> Enabled` in the top menu bar of the editor to enable the plugin.
 
