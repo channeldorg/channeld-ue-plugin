@@ -25,18 +25,18 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 - 支持一键上云
 
 ## Links
-[Getting Started](Docs/en/installation.md)
+[Getting Started](https://metaworking.github.io/channeld-ue-plugin/#/installation)
 
-[Documentation](Docs/en/README.md)
+[Documentation](https://metaworking.github.io/channeld-ue-plugin/)
 
 [ChanneldUE Example Project](https://github.com/metaworking/channeld-ue-demos)
 
 [Code repo of channeld, the Gateway Service behind ChanneldUE](https://github.com/metaworking/channeld)
 
 ## 链接
-[快速开始](Docs/zh/installation.md)
+[快速开始](https://metaworking.github.io/channeld-ue-plugin/#/zh/installation)
 
-[中文文档](Docs/zh/README.md)
+[中文文档](https://metaworking.github.io/channeld-ue-plugin/#/zh/)
 
 [ChanneldUE示例项目](https://github.com/metaworking/channeld-ue-demos)
 
@@ -49,6 +49,7 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 | Demos Project | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | Codegen Tool | :white_check_mark: | :white_check_mark: `*` | :white_check_mark: `*` |
 | Cloud Deployment Tool | :white_check_mark: | :x: | :x:
+
 `*` Need to turn off `Live Coding` in order to hot-reload the generated code.
 ## 引擎版本支持
 | 覆盖功能 | UE 4.27.2 | UE 5.1.1 | UE 5.2.1 |
@@ -57,6 +58,7 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 | 示例项目 | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | 代码生成工具 | :white_check_mark: | :white_check_mark: `*` | :white_check_mark: `*` |
 | 云部署工具 | :white_check_mark: | :x: | :x:
+
 `*` 需要关闭`实施代码编写`功能才能正常热加载生成的代码。
 
 ## License and Disclaimer
