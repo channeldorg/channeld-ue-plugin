@@ -293,6 +293,11 @@ public:
 
 	virtual TArray<TSharedPtr<FStructPropertyDecorator>> GetStructPropertyDecorators() override;
 
+	void AddGlobalIncludeFile(FString FileName);
+	static TSet<FString> GetGlobalIncludeFile()
+	{
+		return GlobalIncludeFile;
+	}
 protected:
 	bool bInitialized = false;
 	
@@ -309,4 +314,6 @@ protected:
 	FString ProtoFieldType;
 
 	bool bForceNotDirectlyAccessible = false;
+
+	static TSet<FString> GlobalIncludeFile;
 };

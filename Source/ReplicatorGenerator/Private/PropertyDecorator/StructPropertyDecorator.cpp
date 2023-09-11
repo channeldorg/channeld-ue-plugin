@@ -300,9 +300,11 @@ TArray<TSharedPtr<FStructPropertyDecorator>> FStructPropertyDecorator::GetStruct
 	TSet<FString> StructPropertyDecoratorFieldTypes;
 	for (TSharedPtr<FStructPropertyDecorator>& StructPropertyDecorator : StructPropertyDecorators)
 	{
+
 		if (!StructPropertyDecoratorFieldTypes.Contains(StructPropertyDecorator->GetProtoFieldType()))
 		{
 			StructPropertyDecoratorFieldTypes.Add(StructPropertyDecorator->GetProtoFieldType());
+
 			NonRepetitionStructPropertyDecorators.Add(StructPropertyDecorator);
 		}
 	}

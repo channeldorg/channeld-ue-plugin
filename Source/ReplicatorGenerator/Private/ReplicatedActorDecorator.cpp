@@ -630,15 +630,18 @@ TArray<TSharedPtr<FStructPropertyDecorator>> FReplicatedActorDecorator::GetStruc
 	{
 		StructPropertyDecorators.Append(RPC->GetStructPropertyDecorators());
 		// The RPC parameters be seen as numbers of struct, so the RPC decorator be seen as a struct decorator. 
+
 		StructPropertyDecorators.Add(RPC);
 	}
 	TArray<TSharedPtr<FStructPropertyDecorator>> NonRepetitionStructPropertyDecorators;
 	TSet<FString> StructPropertyDecoratorFieldTypes;
 	for (TSharedPtr<FStructPropertyDecorator>& StructPropertyDecorator : StructPropertyDecorators)
 	{
+
 		if (!StructPropertyDecoratorFieldTypes.Contains(StructPropertyDecorator->GetProtoFieldType()))
 		{
 			StructPropertyDecoratorFieldTypes.Add(StructPropertyDecorator->GetProtoFieldType());
+
 			NonRepetitionStructPropertyDecorators.Add(StructPropertyDecorator);
 		}
 	}
