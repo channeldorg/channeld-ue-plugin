@@ -28,6 +28,9 @@ LogNetTraffic: Error: Received channel open command for channel that was already
 - 有时候，生成的同步代码在编译后没有正常被热加载。此时需要重新编译并启动UE编辑器。
 - 检查游戏服务器的日志，查看是否有同步相关的错误信息
 
+## 刷新同步缓存后，无法找到Actor状态
+如果同步Actor的状态在Channel Data Schema编辑器的`Add State`上下文菜单中没有出现，请尝试删除项目目录下的`Intermediate`目录，然后重新编译项目，启动UE编辑器。再次刷新同步缓存，状态应该会出现了。
+
 ## 生成的同步代码编译失败
 该问题的产生可能是ChanneldUE插件的分支切换导致的。解决的方法是手动删除项目目录下的`Source/<项目名>/ChanneldGenerated`目录，然后重新编译项目，启动UE编辑器，再次生成同步代码。
 

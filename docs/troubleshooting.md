@@ -29,7 +29,7 @@ Please check `Edit -> Editor Preferences -> Level Editor -> Play -> Multiplayer 
 - Check the log of the game server to see if there are any synchronization related error messages
 
 ## Missing actor state after refreshing replication cache
-If the state of the replicated actor doesn't appear in the `Add State` context menu in the Channel Data Schema editor, try deleting the `Intermediate` directory under the project directory, then recompile the project, start the UE editor. This should solve the problem.
+If the state of the replicated actor doesn't appear in the `Add State` context menu in the Channel Data Schema editor, try deleting the `Intermediate` directory under the project directory, then recompile the project, start the UE editor. After refreshing the replication cache again, the state should appear.
 
 ## The generated replication code failed to compile
 This problem may be caused by the branch switching of the ChanneldUE plugin. The solution is to manually delete the `Source/<Project Name>/ChanneldGenerated` directory under the project directory, then recompile the project, start the UE editor, and generate the replication code again.
