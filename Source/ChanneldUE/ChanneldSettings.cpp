@@ -138,6 +138,11 @@ void UChanneldSettings::PostInitProperties()
 		UE_LOG(LogChanneld, Log, TEXT("Parsed DelayViewInitInSeconds from CLI: %f"), DelayViewInitInSeconds);
 	}
 
+	if (FParse::Bool(CmdLine, TEXT("DisableSimulatedProxyTick="), bDisableSimulatedProxyTick))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed bDisableSimulatedProxyTick from CLI: %d"), bDisableSimulatedProxyTick);
+	}
+
 	// Upgrade to v0.6: use fixed SpatialChannelData message
 	DefaultChannelDataMsgNames.Emplace(EChanneldChannelType::ECT_Spatial, TEXT("unrealpb.SpatialChannelData"));
 }

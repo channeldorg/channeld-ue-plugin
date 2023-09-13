@@ -732,6 +732,16 @@ void ChanneldUtils::SetActorRoleByOwningConnId(AActor* Actor, Channeld::Connecti
 		ConnToChanneld->GetConnId(),
 		OwningConnId
 	);
+
+	// DEBUG: Disable tick for simulated proxies
+	if (GetMutableDefault<UChanneldSettings>()->bDisableSimulatedProxyTick && Actor->GetLocalRole() == ROLE_SimulatedProxy)
+	{
+		Actor->SetActorTickEnabled(false);
+		Actor->ForEachComponent(true, [](UActorComponent* Comp)
+		{
+			Comp->SetComponentTickEnabled(false);
+		});
+	}
 }
 
 ENetRole ChanneldUtils::ServerGetActorNetRole(AActor* Actor)

@@ -102,8 +102,9 @@ public:
 	// Delay the calling of UChannelDataView::Initialize() for attaching the debugger or other purpose.
 	UPROPERTY(Config, EditAnywhere, Category = "Debug")
 	float DelayViewInitInSeconds = 0;
-
-	
+	// If set to true, the simulated proxy actors and their components will not tick.
+	UPROPERTY(Config, EditAnywhere, Category = "Debug")
+	bool bDisableSimulatedProxyTick = false;
 	
 private:
 	void AddChanneldNetDriverDefinition();
