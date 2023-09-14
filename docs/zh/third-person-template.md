@@ -24,12 +24,12 @@
  ##### 2.3.4.创建`GameMode`蓝图
 创建一个新的GameMode蓝图`ThirdPersonGameMode`（如果已存在，则打开），将`Game State Class`, `Player Controller Class`, `Player State Class`和`Default Pawn Class`分别设置为`ThirdPersonGameState`、`ThirdPersonPlayerController`、`ThirdPersonPlayerState`和`ThirdPersonCharacter`：
 
-<img height="300" src="../images/game_mode.png"/>
+![](../images/game_mode.png)
 
 ##### 2.3.5.应用GameMode蓝图
 在项目设置中将`ThirdPersonGameMode`设置为默认Game Mode
 
-<img height="300" src="../images/project_settings_game_mode.png"/>
+![](../images/project_settings_game_mode.png)
 
 >提示：在UE5中，还需要将世界场景设置中的“游戏模式重载”也设置为`ThirdPersonGameMode`。
 
@@ -38,7 +38,7 @@
 频道数据视图是ChanneldUE插件的核心概念之一。它主要用于关联同步对象（角色，控制器，Game State等）与频道数据。UE客户端和服务端都会存在一个视图对象。
 接下来，打开主菜单`编辑 -> 项目设置 -> 插件 -> Channeld`，我们需要为项目设置一个默认视图：
 
-<img height="200" src="../images/settings_view_class.png"/>
+![](../images/settings_view_class.png)
 
 `SingleChannelDataView`是插件中内置的视图类，它会在服务端创建**全局频道**，并在客户端连接成功后订阅到该频道。订阅成功后，客户端发送的网络数据会通过channeld转发到全局频道的所有者，即创建该频道的服务端。
 
@@ -47,26 +47,26 @@
 
 要添加一个服务器组，打开主菜单`编辑 -> 编辑器偏好设置 -> 插件 -> Channeld Editor`。点击`Server Groups`一栏的加号按钮，并展开设置项：
 
-<img height="300" src="../images/settings_server_group.png"/>
+![](../images/settings_server_group.png)
 
 确保Enabled为勾选，Server Num为1，并设置Server View Class同样为`SingleChannelDataView`。Server Map留空则表示启动服务器时，会使用编辑器当前打开的地图。
 
 # 4.启动channeld服务和游戏服务器
 第一次启动channeld服务和游戏服务器前需要生成同步代码。打开工具栏中ChanneldUE插件的下拉菜单中，点击`Edit Channel Data Schema...`选项，打开频道数据模型编辑器。点击`Generate...`按钮开始生成同步代码。首次生成时要遍历项目中所有的代码和蓝图，所以时间可能较长，请耐心等待。
 
-<img src="../images/generate_replicaiton_code.png"/>
+![](../images/generate_replicaiton_code.png)
 
 >注意：UE5默认开启的Live Coding可能会导致链接失败，也可能会导致之后的服务器启动失败。如果碰到这种情况，您需要关闭Live Coding功能并重新生成，或是关闭UE编辑器并重新编译启动项目。
 
 等待代码生成成功后，打开工具栏中ChanneldUE插件的下拉菜单，确保`Enable Channeld Networking`为选中状态：
 
-<img height="200" src="../images/toolbar_menu.png"/>
+![](../images/toolbar_menu.png)
 
 然后，点击`Launch Channeld`选项，启动channeld服务（如上图中标记2所示）。如果弹出Windows防火墙提示，请允许channeld通过防火墙。
 
 最后，点击`Launch Servers`选择，启动游戏服务器（如上图中标记3所示）。此时每一个命令行窗口，都对应一个UE服务器进程。正常启动的UE服务器进程，会在控制台中打印以下类似信息：
 
-<img height="200" src="../images/server_view_initialized.png"/>
+![](../images/server_view_initialized.png)
 
 >注意：如果UE服务器连接channeld失败，则会退出。
 
@@ -76,7 +76,7 @@
 
 在地图中移动角色，并观察服务器的控制台中打印的日志，会出现对应的同步数据输出：
 
-<img height="300" src="../images/server_replication_output.png"/>
+![](../images/server_replication_output.png)
 
 ## 5.2.测试多个客户端
 如果要同时开启多个客户端，需要对默认的编辑器设置做一些修改。打开主菜单`编辑 -> 编辑器偏好设置 -> 关卡编辑器 -> 播放`，在`Multiplayer Options`中，**取消**`单进程下的运行`的勾选：

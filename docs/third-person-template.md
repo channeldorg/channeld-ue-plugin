@@ -24,12 +24,12 @@ Follow the steps in 2.3.1. to enable `Replicates` and add the replication compon
  ##### 2.3.4.Create the `GameMode` Blueprint
 Create a new GameMode Blueprint `ThirdPersonGameMode` (if it already exists, open it), and set `Game State Class`, `Player Controller Class`, `Player State Class` and `Default Pawn Class` to `ThirdPersonGameState`, `ThirdPersonPlayerController`, `ThirdPersonPlayerState` and `ThirdPersonCharacter` respectively:
 
-<img height="300" src="images/game_mode.png"/>
+![](images/game_mode.png)
 
 ##### 2.3.5.Apply the GameMode Blueprint
 Set `ThirdPersonGameMode` as the default Game Mode in the project settings
 
-<img height="300" src="images/project_settings_game_mode.png"/>
+![](images/project_settings_game_mode.png)
 
 >Tip: In UE5, you also need to set "Game Mode Override" in the World Settings to `ThirdPersonGameMode`.
 
@@ -38,7 +38,7 @@ Set `ThirdPersonGameMode` as the default Game Mode in the project settings
 The Channel Data View is one of the core concepts of the ChanneldUE plugin. It is mainly used to associate the replicated objects (Characters, Controllers, Game State, etc.) with the channel data. There is one view object for each the UE client and the server.
 Next, open the `Project Settings -> Plugins -> Channeld`. We need to set a default view for the project:
 
-<img height="200" src="images/settings_view_class.png"/>
+![](images/settings_view_class.png)
 
 `SingleChannelDataView` is a built-in view class in the plugin. It will create the **Global Channel** on the server and subscribe the client to the channel after the it connects successfully. After the subscription, the network data sent by the client will be forwarded to the owner of the global channel, that is, the server that created the channel, through channeld.
 
@@ -47,26 +47,26 @@ As an extension focuses on the distributed simulation with UE, the ChanneldUE pl
 
 To add a server group, open the `Editor Preferences -> Plugins -> Channeld Editor`. Click the plus button in the `Server Groups` section and expand the settings:
 
-<img height="300" src="images/settings_server_group.png"/>
+![](images/settings_server_group.png)
 
 Make sure that `Enabled` is checked, `Server Num` is 1, and `Server View Class` is also set to `SingleChannelDataView`. If `Server Map` is left blank, the currently opened map in the editor will be used when the server is started.
 
 # 4.Start the channeld service and game server
 Before you start the channeld service and game server for the first time, you need to generate the replication code. Open the drop-down menu of the ChanneldUE plugin in the toolbar, click the `Edit Channel Data Schema...` to open the Channel Data Schema editor. Click the `Generate...` button to start generating the replication code. It may take a long time for the first generation, as it will traverse all the code and Blueprints in the project, so please be patient.
 
-<img src="images/generate_replicaiton_code.png"/>
+![](images/generate_replicaiton_code.png)
 
 >Note: The Live Coding feature which enabled by default in UE5 may cause the link error or the server to fail to start. If you encounter this problem, you need to disable the Live Coding feature and regenerate the code, or close the UE editor and then recompile and launch the project.
 
 After the code generation is successful, open the drop-down menu of the ChanneldUE plugin in the toolbar, and make sure that `Enable Channeld Networking` is checked:
 
-<img height="200" src="images/toolbar_menu.png"/>
+![](images/toolbar_menu.png)
 
 Then, click `Launch Channeld` to start the channeld service (as shown in the figure above marked 2). If the Windows Firewall prompt pops up, please allow channeld to pass through the firewall.
 
 Finally, click `Launch Servers` to start the game server (as shown in the figure above marked 3). At this time, each command line window corresponds to a UE server process. A normal-started UE server will print similar information in the console:
 
-<img height="200" src="images/server_view_initialized.png"/>
+![](images/server_view_initialized.png)
 
 >Note: If the UE server fails to connect to channeld, it will exit.
 
@@ -76,7 +76,7 @@ Make sure to run the game in `Standalone` network mode. By default, the client h
 
 Move the character in the map and observe the log printed in the server's console. The corresponding replication data will be output:
 
-<img height="300" src="images/server_replication_output.png"/>
+![](images/server_replication_output.png)
 
 ## 5.2.Test multiple clients
 If you want to open multiple clients at the same time, you need to make some changes to the default editor settings. Open the `Editor Preferences -> Level Editor -> Play`, in `Multiplayer Options`, **uncheck** `Run Under One Process`:

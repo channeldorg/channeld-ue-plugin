@@ -18,15 +18,15 @@ The following will introduce how to use spatial channels in UE through configura
 ## 7.2.Configure the Spatial Channel in the Project Settings
 Open the `Project Settings -> Plugins -> Channeld`, and change the Channel Data View Class to `SpatialChannelDataView`. This class will become the Channel Data View class used by the client:
 
-<img height="200" src="images/settings_view_spatial.png"/>
+![](images/settings_view_spatial.png)
 
 In order to visualize the spatial channels, check `Spatial -> Debug -> Enable Spatial Visualizer` in the same settings page to enable the built-in visualization tool of ChannelUE:
 
-<img height="300" src="images/settings_spatial_visualizer.png"/>
+![](images/settings_spatial_visualizer.png)
 
 The spatial channel visualization tool can add different colors of outline to the character to distinguish the spatial channel where the character is located. To enable the outline function, you need to set `Custom Depth - Stencil Pass` to `Enabled with Stencil` in the `Project Settings -> Engine -> Rendering -> Postprocessing`:
 
-<img height="200" src="images/settings_stencil.png"/>
+![](images/settings_stencil.png)
 
 Next, you also need to configure the Channel Data View class used by the server.
 
@@ -37,23 +37,23 @@ Open the `Editor Preferences -> Plugins -> Channeld Editor`. In `Server Groups`,
 
 Next, click the plus button on the right of `Server Groups` to add a new server group. Change the Server View Class of the new server group to `SpatialChannelDataView`. Change the Server Num to 2, which means there are two spatial servers. Change the Delay Time to 2.0 seconds to ensure that the spatial servers are started after the master server is started. The configured server group is shown in the figure below:
 
-<img height="400" src="images/settings_server_groups_spatial.png"/>
+![](images/settings_server_groups_spatial.png)
 
 ## 7.4.Modify the Player Controller Blueprint to automatically connect to channeld
 In step 5, we introduced the method of connecting to channeld by entering `open 127.0.0.1` in the console. This method is no longer applicable in the spatial channel scenario. In fact, in most cases, it is recommended to use C++ or Blueprint to automatically connect to channeld. The following is an example of connecting to channeld through Blueprint:
 
 Open the `ThirdPersonPlayerController` Blueprint, first add a `Get ChanneldGameInstanceSubsystem` node. Then add the following nodes in the `BeginPlay` event:
 
-<img height="300" src="images/player_controller_connect.png"/>
+![](images/player_controller_connect.png)
 
 ## 7.5.Configure the Channel Data Schema
 Click the `Editor Channel Data Schema...` button in the plugin toolbar to open the Channel Data Schema editor:
 
-<img height="220" src="images/open_channel_data_schema_editor.png"/>
+![](images/open_channel_data_schema_editor.png)
 
 In the Channel Data Schema editor, do the following:
 
-<img height="400" src="images/add_spatial_demo_channel_data_state.png"/>
+![](images/add_spatial_demo_channel_data_state.png)
 
 1. Find the `Entity` channel, click the `Add State` button, and add `BP_TestActor`
 2. In the `Entity` channel, click the `Add State` button again, and add `ThirdPersonPlayerController`

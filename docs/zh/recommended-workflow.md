@@ -60,7 +60,7 @@
 
 将会打开如下编辑器窗口：
 
-<img src="../images/default_channel_data_schema_editor.png" height = "400" alt="" />
+![](../images/default_channel_data_schema_editor.png)
 
 ##### 将Actor状态添加到频道数据模型
 首先，如果同步缓存过期（出现黄色叹号），需要先对其进行更新。在频道数据编辑器上方点击`Refresh...`按钮：

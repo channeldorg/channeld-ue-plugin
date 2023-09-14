@@ -57,7 +57,7 @@ Click the `Editor Channel Data Schema` button of the ChannelUE plugin:
 
 The following editor window will be opened:
 
-<img src="images/default_channel_data_schema_editor.png" height = "400" alt="" />
+![](images/default_channel_data_schema_editor.png)
 
 ##### Add Actor state to the Channel Data Schema
 First, if the replication cache is expired (yellow exclamation mark), you need to update it. Click the `Refresh...` button above the channel data editor:

@@ -16,7 +16,7 @@ As shown in the figure below, click the `Editor Channel Data Schema...` button o
 
 The opened editor is shown in the figure below:
 
-<img src="images/default_channel_data_schema_editor.png" height = "600" alt="" />
+![](images/default_channel_data_schema_editor.png)
 
 >When opening the Channel Data Schema editor for the first time in a new project, the default Channel Data Schema will be automatically created.
 
@@ -28,7 +28,7 @@ When a replicated Actor or ActorComponent is added or deleted in the project, th
 
 As shown in the figure below, click the `Refresh...` button above the Channel Data Schema editor to update the replication cache.
 
-<img src="images/refresh_rep_actor_cache.png" width = "600" alt="" />
+![](images/refresh_rep_actor_cache.png)
 
 >When the replication cache has not ever been updated, or any asset in the project has changed, there will be a warning icon on the left of the <img src="images/refresh_rep_actor_cache_button_alarm.png" height = "20" alt="" /> button to indicate that the replication cache needs to be updated. But you can decide whether to update the replication cache according to your needs.
 
