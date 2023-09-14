@@ -1394,7 +1394,7 @@ void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnecti
 			SendSpawnToConn_EntityChannelReady(Obj, NetConn, OwningConnId);
 		});
 
-	UE_LOG(LogChanneld, Verbose, TEXT("Creating entity channel for obj: %s, netId: %d"), *Obj->GetName(), NetId);
+	UE_LOG(LogChanneld, Verbose, TEXT("Creating entity channel for obj: %s, netId: %d, owningConnId: %d"), *Obj->GetName(), NetId, OwningConnId);
 }
 
 void USpatialChannelDataView::SendSpawnToClients_EntityChannelReady(const FNetworkGUID NetId, UObject* Obj, uint32 OwningConnId, Channeld::ChannelId SpatialChId)
@@ -1479,7 +1479,7 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 			SendSpawnToClients_EntityChannelReady(NetId, Obj, OwningConnId, SpatialChId);
 		});
 
-	UE_LOG(LogChanneld, Verbose, TEXT("Creating entity channel for obj: %s, netId: %d, spatial channelId: %d"), *Obj->GetName(), NetId.Value, SpatialChId);
+	UE_LOG(LogChanneld, Verbose, TEXT("Creating entity channel for obj: %s, netId: %d, owningConnId: %d, spatial channelId: %d"), *Obj->GetName(), NetId.Value, OwningConnId, SpatialChId);
 }
 
 void USpatialChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkGUID NetId)
@@ -1488,7 +1488,7 @@ void USpatialChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkG
 	{
 		return;
 	}
-
+	
 	int BroadcastType = channeldpb::ALL_BUT_SENDER;
 	// Don't broadcast the destroy of objects that are only spawned in the owning client.
 	// Spatial channels don't support Gameplayer Debugger yet.
@@ -1516,7 +1516,7 @@ void USpatialChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkG
 	unrealpb::DestroyObjectMessage DestroyMsg;
 	DestroyMsg.set_netid(NetId.Value);
 	DestroyMsg.set_reason(static_cast<uint8>(EChannelCloseReason::Destroyed));
-	Connection->Broadcast(SpatialChId, unrealpb::DESTROY, DestroyMsg, /*channeldpb::ADJACENT_CHANNELS |*/ channeldpb::ALL_BUT_SENDER);
+	Connection->Broadcast(SpatialChId, unrealpb::DESTROY, DestroyMsg, BroadcastType);
 	UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Destroy message to spatial channel %d, obj: %s, netId: %d"), SpatialChId, *GetNameSafe(Obj), NetId.Value);
 }
 

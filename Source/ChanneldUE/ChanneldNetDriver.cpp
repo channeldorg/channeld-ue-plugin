@@ -676,15 +676,15 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		UE_LOG(LogChanneld, Log, TEXT("ChannelDataView is not initialized yet. If the actor '%s' is a DataProvider, it will not be registered."), *Actor->GetName());
 	}
 
-	// Send the spawn of PlayerController and PlayerState in OnClientPostLogin instead, because
-	// 1) we only want to send PC to owning client, but at this moment, Actor doesn't have NetConnection set yet;
-	// 2) NetConnection is not set up for the PlayerState yet, but we need it for setting the actor location in the spawn message.
-	if (Actor->IsA<APlayerController>() || Actor->IsA<APlayerState>())
+	if (!Actor->GetIsReplicated())
 	{
 		return;
 	}
 
-	if (!Actor->GetIsReplicated())
+	// Send the spawn of PlayerController and PlayerState in OnClientPostLogin instead, because
+	// 1) we only want to send PC to owning client, but at this moment, Actor doesn't have NetConnection set yet;
+	// 2) NetConnection is not set up for the PlayerState yet, but we need it for setting the actor location in the spawn message.
+	if (Actor->IsA<APlayerController>() || Actor->IsA<APlayerState>())
 	{
 		return;
 	}
@@ -718,6 +718,11 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	if (auto NetConn = Cast<UChanneldNetConnection>(Actor->GetNetConnection()))
 	{
 		OwningConnId = NetConn->GetConnId();
+	}
+	else
+	{
+		// Character should have owner connection at this moment.
+		ensureAlwaysMsgf(!Actor->IsA<ACharacter>(), TEXT("%s doesn't have a valid NetConnection"), *GetNameSafe(Actor));
 	}
 
 	if (ChannelDataView.IsValid())

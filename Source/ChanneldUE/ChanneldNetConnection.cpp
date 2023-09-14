@@ -236,7 +236,7 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 		SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(*Location));
 	}
 	SendMessage(unrealpb::SPAWN, SpawnMsg, OwningChannelId);
-	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %d, role: %d, owning channel: %d, owning connId: %d, location: %s"),
+	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %d, role: %d, owning channel: %d, owningConnId: %d, location: %s"),
 		GetConnId(), *GetNameSafe(Object), SpawnMsg.obj().netguid(), SpawnMsg.localrole(), SpawnMsg.channelid(), SpawnMsg.obj().owningconnid(), Location ? *Location->ToCompactString() : TEXT("NULL"));
 
 	SetSentSpawned(NetId);
