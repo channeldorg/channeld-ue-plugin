@@ -14,7 +14,7 @@
 
 ![](../images/new_blueprints.png)
 
->提示：此处选择`GameStateBase`或`ChanneldGameState`都可以。如果要在之后的开发中使用到跨服的GameState功能，则需要选择`ChanneldGameState`。
+>提示：此处选择`GameStateBase`或`ChanneldGameState`都可以。如果要在之后的开发中要通过GameState实现跨服属性同步，则需要选择`ChanneldGameState`。
 
 ##### 2.3.3.为新创建的蓝图开启同步
 仿照2.3.1.步骤，为新创建的三个蓝图开启`复制(Replicates)`，并添加同步组件`ChanneldReplicationComponent`。
@@ -25,6 +25,8 @@
 创建一个新的GameMode蓝图`ThirdPersonGameMode`（如果已存在，则打开），将`Game State Class`, `Player Controller Class`, `Player State Class`和`Default Pawn Class`分别设置为`ThirdPersonGameState`、`ThirdPersonPlayerController`、`ThirdPersonPlayerState`和`ThirdPersonCharacter`：
 
 ![](../images/game_mode.png)
+
+>提示：GameMode的基类选择`GameModeBase`或`ChanneldGameMode`都可以。如果要在之后的开发中使用到空间频道，则需要选择`ChanneldGameMode`。
 
 ##### 2.3.5.应用GameMode蓝图
 在项目设置中将`ThirdPersonGameMode`设置为默认Game Mode

@@ -14,7 +14,7 @@ Respectively create three Blueprints that inherits from `PlayerController`, `Cha
 
 ![](images/new_blueprints.png)
 
->Tip: You can use either `GameStateBase` or `ChanneldGameState` as the base class. If the cross-server function will be used in the later development, you sholud use `ChanneldGameState`.
+>Tip: You can use either `GameStateBase` or `ChanneldGameState` as the base class. If the cross-server replication will be used via GameState in the later development, you sholud use `ChanneldGameState`.
 
 ##### 2.3.3.Enable replication for the newly created Blueprints
 Follow the steps in 2.3.1. to enable `Replicates` and add the replication component `ChanneldReplicationComponent` to the newly created three Blueprints.
@@ -25,6 +25,8 @@ Follow the steps in 2.3.1. to enable `Replicates` and add the replication compon
 Create a new GameMode Blueprint `ThirdPersonGameMode` (if it already exists, open it), and set `Game State Class`, `Player Controller Class`, `Player State Class` and `Default Pawn Class` to `ThirdPersonGameState`, `ThirdPersonPlayerController`, `ThirdPersonPlayerState` and `ThirdPersonCharacter` respectively:
 
 ![](images/game_mode.png)
+
+>Tip: You can use either `GameModeBase` or `ChanneldGameMode` as the base class. If the spatial channel will be used in the later development, you should use `ChanneldGameMode`.
 
 ##### 2.3.5.Apply the GameMode Blueprint
 Set `ThirdPersonGameMode` as the default Game Mode in the project settings

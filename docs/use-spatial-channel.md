@@ -39,12 +39,19 @@ Next, click the plus button on the right of `Server Groups` to add a new server 
 
 ![](images/settings_server_groups_spatial.png)
 
-## 7.4.Modify the Player Controller Blueprint to automatically connect to channeld
-In step 5, we introduced the method of connecting to channeld by entering `open 127.0.0.1` in the console. This method is no longer applicable in the spatial channel scenario. In fact, in most cases, it is recommended to use C++ or Blueprint to automatically connect to channeld. The following is an example of connecting to channeld through Blueprint:
+## 7.4.Modify the blueprint classes
+### 7.4.1.Player Controller Blueprint
+In step 5, we introduced the method of connecting to channeld by entering `open 127.0.0.1` in the console. This method is no longer applicable in the spatial channel scenario. The following is an example of connecting to channeld through Blueprint:
 
 Open the `ThirdPersonPlayerController` Blueprint, first add a `Get ChanneldGameInstanceSubsystem` node. Then add the following nodes in the `BeginPlay` event:
 
 ![](images/player_controller_connect.png)
+
+### 7.4.2.Character Blueprint
+Change the base class of `ThirdPersonCharacter` from `ACharacter` to `AChanneldCharacter` to support cross-server movement and RPC.
+
+### 7.4.3.GameMode Blueprint
+Change the base class of `ThirdPersonGameMode` from `AGameModeBase` to `AChanneldGameMode` to solve the problem of the player character entering the spatial server.
 
 ## 7.5.Configure the Channel Data Schema
 Click the `Editor Channel Data Schema...` button in the plugin toolbar to open the Channel Data Schema editor:

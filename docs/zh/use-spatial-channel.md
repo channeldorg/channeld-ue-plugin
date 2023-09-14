@@ -39,12 +39,19 @@
 
 ![](../images/settings_server_groups_spatial.png)
 
-## 7.4.修改玩家控制器蓝图，实现自动连接channeld
-在步骤5中，介绍了通过控制台输入`open 127.0.0.1`连接channeld的方法。在空间频道的场景中，这种方式就不再适用了。事实上，大部分情况下都推荐使用C++或蓝图实现自动连接channeld。下面是通过蓝图连接channeld的示例：
+## 7.4.修改蓝图类
+### 7.4.1.玩家控制器蓝图
+在步骤5中，介绍了通过控制台输入`open 127.0.0.1`连接channeld的方法。在空间频道的场景中，这种方式就不再适用了。下面是通过蓝图连接channeld的示例：
 
 打开`ThirdPersonPlayerController`蓝图，先添加一个`Get ChanneldGameInstanceSubsystem`节点。然后在`BeginPlay`事件中添加以下节点：
 
 ![](../images/player_controller_connect.png)
+
+### 7.4.2.角色蓝图
+将`ThirdPersonCharacter`的基类从`ACharacter`改为`AChanneldCharacter`，以支持跨服移动和RPC。
+
+### 7.4.3.GameMode蓝图
+将`ThirdPersonGameMode`的基类从`AGameModeBase`改为`AChanneldGameMode`，以解决角色进入空间服务器的相关问题。
 
 ## 7.5.配置频道数据模型
 点击插件工具栏中的`Editor Channel Data Schema...`按钮，打开频道数据模型编辑器：
