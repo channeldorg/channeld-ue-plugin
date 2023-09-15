@@ -304,13 +304,9 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 	bool bOwnerChanged = false;
 	if (NewState->has_owner())
 	{
-		// if (Actor->HasAuthority())
+		if (ChanneldUtils::ShouldSetPlayerControllerOrPlayerStateForActor(Actor.Get()))
 		{
 			bool bNetGUIDUnmapped = false;
-			/* Actor's owner should always be created before this moment.
-			// Special case: the client won't create other player's controller. Pawn and PlayerState's owner is PlayerController.
-			bool bCreateIfNotInCache = !Actor->IsA<APawn>() && !Actor->IsA<APlayerState>();
-			*/
 			UObject* Owner = ChanneldUtils::GetObjectByRef(&NewState->owner(), Actor->GetWorld(), bNetGUIDUnmapped, false);
 			if (!bNetGUIDUnmapped)
 			{

@@ -112,14 +112,14 @@ void FChanneldPawnReplicator::OnStateChanged(const google::protobuf::Message* In
 	FullState->MergeFrom(*NewState);
 	bStateChanged = false;
 
-	if (NewState->has_playerstate())
+	if (NewState->has_playerstate() && ChanneldUtils::ShouldSetPlayerControllerOrPlayerStateForActor(Pawn.Get()))
 	{
 		*PlayerStatePtr = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(&NewState->playerstate(), Pawn->GetWorld()));
 		UE_LOG(LogChanneld, Verbose, TEXT("Replicator set Pawn's PlayerState to %s"), *GetNameSafe(*PlayerStatePtr));
 	}
 
 	bool bShouldCallOnRepController= false;
-	if (NewState->has_controller())
+	if (NewState->has_controller() && ChanneldUtils::ShouldSetPlayerControllerOrPlayerStateForActor(Pawn.Get()))
 	{
 		Pawn->Controller = Cast<AController>(ChanneldUtils::GetObjectByRef(&NewState->controller(), Pawn->GetWorld()));
 		if (auto PC = Cast<APlayerController>(Pawn->Controller))

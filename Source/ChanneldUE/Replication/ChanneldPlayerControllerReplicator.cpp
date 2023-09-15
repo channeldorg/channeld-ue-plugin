@@ -94,7 +94,7 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	{
 		ClientSetHUDParams* TypedParams = (ClientSetHUDParams*)Params;
 		auto Msg = MakeShared<unrealpb::PlayerController_ClientSetHUD_Params>();
-		if (TypedParams->NewHUDClass)
+		if (TypedParams->NewHUDClass.Get())
 		{
 			Msg->set_hudclassname(std::string(TCHAR_TO_UTF8(*TypedParams->NewHUDClass->GetName())));
 		}
@@ -172,7 +172,7 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	{
 		ClientReceiveLocalizedMessageParams* TypedParams = (ClientReceiveLocalizedMessageParams*)Params;
 		auto Msg = MakeShared<unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params>();
-		if (*TypedParams->Message)
+		if (TypedParams->Message.Get())
 		{
 			Msg->set_message(std::string(TCHAR_TO_UTF8(*TypedParams->Message->GetName())));
 		}
@@ -209,7 +209,7 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 		unrealpb::PlayerController_ClientSetHUD_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ClientSetHUDParams>();
-		if (Msg.has_hudclassname())
+		if (Msg.has_hudclassname() && Msg.hudclassname().length() > 0)
 		{
 			Params->NewHUDClass = LoadClass<AHUD>(NULL, UTF8_TO_TCHAR(Msg.hudclassname().c_str()));
 		}
@@ -327,7 +327,10 @@ TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(
 		unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params Msg;
 		Msg.ParseFromString(ParamsPayload);
 		auto Params = MakeShared<ClientReceiveLocalizedMessageParams>();
-		Params->Message = LoadClass<ULocalMessage>(NULL, UTF8_TO_TCHAR(Msg.message().c_str()));
+		if (Msg.message().length() > 0)
+		{
+			Params->Message = LoadClass<ULocalMessage>(NULL, UTF8_TO_TCHAR(Msg.message().c_str()));
+		}
 		Params->Switch = Msg.switch_();
 		Params->RelatedPlayerState_1 = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(&Msg.relatedplayerstate_1(), PC->GetWorld()));
 		Params->RelatedPlayerState_2 = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(&Msg.relatedplayerstate_2(), PC->GetWorld()));

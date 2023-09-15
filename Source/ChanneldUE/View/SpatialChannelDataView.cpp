@@ -672,8 +672,8 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 		TCHAR* ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
 		if (UClass* EntityClass = LoadObject<UClass>(nullptr, ClassPath))
 		{
-			// Do not resolve other PlayerController on the client.
-			if (EntityClass->IsChildOf(APlayerController::StaticClass()))
+			// Do not resolve other PlayerController or PlayerState on the client.
+			if (EntityClass->IsChildOf(APlayerController::StaticClass()) || EntityClass->IsChildOf(APlayerState::StaticClass()))
 			{
 				return true;
 			}

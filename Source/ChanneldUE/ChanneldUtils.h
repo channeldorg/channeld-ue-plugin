@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "unreal_common.pb.h"
 #include "Engine/PackageMapClient.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerState.h"
 #include "Engine/ActorChannel.h"
 #include "ChanneldConnection.h"
 #include "ChanneldNetConnection.h"
@@ -298,6 +300,17 @@ public:
 	
 	// Set the actor's NetRole on the client based on the NetConnection that owns the actor.
 	static void SetActorRoleByOwningConnId(AActor* Actor, Channeld::ConnectionId OwningConnId);
+
+	// Should the owner of the actor, or the PlayerController or PlayerState of the pawn should be set?
+	static bool ShouldSetPlayerControllerOrPlayerStateForActor(AActor* Actor)
+	{
+		auto World = Actor->GetWorld();
+		const bool bIsServer = World != nullptr && World->IsServer();
+		// Special case: the client won't create other player's controller. Pawn and PlayerState's owner is PlayerController.
+		const bool bOwnerIsPC = Actor->IsA<APawn>() || Actor->IsA<APlayerState>();
+		const bool bClientShouldSetOwner = !bOwnerIsPC || Actor->GetLocalRole() > ROLE_SimulatedProxy;
+		return bIsServer || bClientShouldSetOwner;
+	}
 
 	static ENetRole ServerGetActorNetRole(AActor* Actor);
 	
