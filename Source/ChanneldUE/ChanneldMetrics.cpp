@@ -97,10 +97,10 @@ void UChanneldMetrics::Tick(float DeltaTime)
 	MEM_Gauge->Set(FPlatformMemory::GetStats().UsedPhysical >> 20);
 }
 
-void UChanneldMetrics::OnDroppedRPC(const std::string& FuncName)
+void UChanneldMetrics::OnDroppedRPC(const std::string& FuncName, ERPCDropReason Reason)
 {
 	DroppedRPCs_Counter->Increment();
 #if !UE_BUILD_SHIPPING
-	DroppedRPCs->Add({{"funcName", FuncName}}).Increment();
+	DroppedRPCs->Add({{"funcName", FuncName}, {"reason", std::to_string(Reason)}}).Increment();
 #endif
 }

@@ -128,6 +128,23 @@ void UChanneldSettings::PostInitProperties()
 		UE_LOG(LogChanneld, Log, TEXT("Parsed PlayerStartLocator class name from CLI: %s"), *PlayerStartLocatorClassName);
 		PlayerStartLocatorClass = LoadClass<UChannelDataView>(NULL, *PlayerStartLocatorClassName);
 	}
+
+	float InterestRange;
+	if (FParse::Value(CmdLine, TEXT("InterestRange="), InterestRange))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed InterestRange from CLI: %f"), InterestRange);
+		for (auto& Preset : ClientInterestPresets)
+		{
+			// Only affects the first active preset
+			if (Preset.bActivateByDefault)
+			{
+				Preset.Radius = InterestRange;
+				Preset.Extent = FVector(InterestRange, InterestRange, InterestRange);
+				break;
+			}
+		}
+	}
+	
 	if (FParse::Bool(CmdLine, TEXT("EnableSpatialVisualizer="), bEnableSpatialVisualizer))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bEnableSpatialVisualizer from CLI: %d"), bEnableSpatialVisualizer);
