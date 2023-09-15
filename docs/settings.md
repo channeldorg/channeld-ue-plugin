@@ -40,7 +40,7 @@ This is the runtime settings. Can be found in `Edit > Project Settings > Plugins
 | `Activate by Default` | true | Whether to enable by default |
 | `Min Distance To Trigger Update` | 100.0 | The minimum distance to trigger an update |
 | `Spots and Dists` | Empty | Spots and distances of the interest area. Only valid when `Area Type` is set to `Static Locations` |
-| `Extent` | Vector( 15000.0, 15000.0, 15000.0 ) | The length (world x-axis direction), width (world y-axis direction), and height (world z-axis direction) of the box. Only valid when `Area Type` is set to `Box` |
+| `Extent` | Vector( 15000.0, 15000.0, 15000.0 ) | The half length (world x-axis direction), width (world y-axis direction), and height (world z-axis direction) of the box. Only valid when `Area Type` is set to `Box` |
 | `Radius` | 15000.0 | The radius of the sphere. Only valid when `Area Type` is set to `Sphere` or `Cone` |
 | `Angle` | 15000.0 | The angle of the cone's longitudinal section. Only valid when `Area Type` is set to `Cone` |
 

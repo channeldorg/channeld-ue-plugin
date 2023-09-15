@@ -41,7 +41,7 @@ ChannelUE插件在游戏运行时的相关设置。可以在`编辑 > 项目设�
 | `Activate by Default` | true | 默认启用 |
 | `Min Distance To Trigger Update` | 100.0 | 触发更新的最小距离 |
 | `Spots and Dists` | Empty | 位置点和空间网格距离。仅当`Area Type`设置为`Static Locations`时有效 |
-| `Extent` | Vector( 15000.0, 15000.0, 15000.0 ) | 长方体的长（世界x轴方向）、宽（世界y轴方向）、高（世界z轴方向）。仅当`Area Type`设置为`Box`时有效 |
+| `Extent` | Vector( 15000.0, 15000.0, 15000.0 ) | 长方体的长（世界x轴方向）、宽（世界y轴方向）、高（世界z轴方向）的一半。仅当`Area Type`设置为`Box`时有效 |
 | `Radius` | 15000.0 | 球体的半径。仅当`Area Type`设置为`Sphere`或`Cone`时有效 |
 | `Angle` | 15000.0 | 圆锥纵截面的角度。仅当`Area Type`设置为`Cone`时有效 |
 
