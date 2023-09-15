@@ -14,6 +14,7 @@
 * Advanced Topics
 ** [Comparison with the native UE and alternatives](native-ue-comparison.md)
 ** [Client Interest](client-interest.md)
+** [Benchmark](benchmark.md)
 
 * [Troubleshooting](troubleshooting.md)
 
