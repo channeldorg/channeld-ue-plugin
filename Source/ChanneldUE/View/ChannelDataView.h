@@ -150,6 +150,9 @@ protected:
 	
 	// Give the subclass a chance to mess with the removed providers, e.g. add a provider back to a channel.
 	virtual void OnRemovedProvidersFromChannel(Channeld::ChannelId ChId, channeldpb::ChannelType ChannelType, const TSet<FProviderInternal>& RemovedProviders) {}
+	
+	// Send all the existing actors to the new player (including the static level actors) at the end of PostLogin.
+	virtual void SendExistingActorsToNewPlayer(APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn);
 
 	/**
 	 * @brief Checks if the channel data contains any unsolved NetworkGUID.

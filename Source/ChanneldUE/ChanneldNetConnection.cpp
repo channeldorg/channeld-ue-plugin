@@ -233,6 +233,7 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 	}
 	if (Location)
 	{
+		ensureAlwaysMsgf(SpawnMsg.mutable_obj()->context_size() > 0, TEXT("Spawn message has no context! NetId: %d"), NetId.Value);
 		SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(*Location));
 	}
 	SendMessage(unrealpb::SPAWN, SpawnMsg, OwningChannelId);

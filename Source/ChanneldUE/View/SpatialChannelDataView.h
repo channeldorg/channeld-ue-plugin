@@ -63,6 +63,8 @@ protected:
 	// The client may have subscribed to the spatial channels that go beyond the interest area of the client's authoritative server.
 	// In that case, the client may receive ChannelDataUpdate that contains unresolved NetworkGUIDs, so it needs to spawn the objects before applying the update.
 	virtual bool CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData) override;
+
+	virtual void SendExistingActorsToNewPlayer(APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
 	
 	/**
 	 * @brief The source server decides which objects get handed over to the destination server.
@@ -79,8 +81,6 @@ protected:
 	TSet<uint32> ResolvingNetGUIDs;
 	
 private:
-	const FName GameplayerDebuggerClassName = FName("GameplayDebuggerCategoryReplicator");
-
     // [Server only] Map the client to the channels, so the spatial server's LowLevelSend() can use the right channelId.
 	TMap<Channeld::ConnectionId, Channeld::ChannelId> ClientInChannels;
 	

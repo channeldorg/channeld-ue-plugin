@@ -274,8 +274,10 @@ void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMess
 	// Case 3: the server receives the client RPC, but the actor has just been handed over to another server (became non-authoritative).
 	if (IsServer() && !Actor->HasAuthority())
 	{
-		RedirectRPC(Msg);
-		return;
+		if (RedirectRPC(Msg))
+		{
+			return;
+		}
 	}
 
 	//TSet<FNetworkGUID> UnmappedGUID;
@@ -605,6 +607,10 @@ void UChanneldNetDriver::LowLevelDestroy()
 			ConnToChanneld->Disconnect(true);
 		}
 		*/
+		if (ConnToChanneld->IsConnected() && ConnToChanneld->GetConnectionType() == channeldpb::SERVER)
+		{
+			ConnToChanneld->SendDisconnectMessage(ConnToChanneld->GetConnId());
+		}
 	}
 	ConnToChanneld = nullptr;
 
@@ -680,6 +686,13 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	{
 		return;
 	}
+	
+	// Gameplay Debugger is not supported yet.
+	if (Actor->GetClass()->GetFName() == Channeld::GameplayerDebuggerClassName)
+	{
+		return;
+	}
+
 
 	// Send the spawn of PlayerController and PlayerState in OnClientPostLogin instead, because
 	// 1) we only want to send PC to owning client, but at this moment, Actor doesn't have NetConnection set yet;
@@ -719,11 +732,13 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	{
 		OwningConnId = NetConn->GetConnId();
 	}
+	/* Only applies for the spatial view
 	else
 	{
 		// Character should have owner connection at this moment.
 		ensureAlwaysMsgf(!Actor->IsA<ACharacter>(), TEXT("%s doesn't have a valid NetConnection"), *GetNameSafe(Actor));
 	}
+	*/
 
 	if (ChannelDataView.IsValid())
 	{
@@ -763,7 +778,7 @@ void UChanneldNetDriver::SetAllSentSpawn(const FNetworkGUID NetId)
 	}
 }
 
-void UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg)
+bool UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg)
 {
 	ERPCDropReason DropReason = RPCDropReason_Unknown;
 	if (Msg->redirectioncounter() < GetMutableDefault<UChanneldSettings>()->RpcRedirectionMaxRetries)
@@ -771,7 +786,11 @@ void UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage>
 		if (ChannelDataView.IsValid())
 		{
 			Channeld::ChannelId TargetChId = ChannelDataView->GetOwningChannelId(FNetworkGUID(Msg->targetobj().netguid()));
-			ensureMsgf(!ConnToChanneld->OwnedChannels.Contains(TargetChId), TEXT("Attempt to redirect RPC to the same server, netId: %d, func: %s"), Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
+			if (ConnToChanneld->OwnedChannels.Contains(TargetChId))
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("Attempt to redirect RPC to the same server, netId: %d, func: %s"), Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
+				return false;
+			}
 		
 			if (TargetChId != Channeld::InvalidChannelId)
 			{
@@ -786,7 +805,7 @@ void UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage>
 #endif
 
 				OnSentRPC(*Msg);
-				return;
+				return true;
 			}
 			
 			UE_LOG(LogChanneld, Warning, TEXT("Unable to redirect RPC as the mapping to the target channel doesn't exists, netId: %d"), Msg->targetobj().netguid());
@@ -804,6 +823,7 @@ void UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage>
 	}
 
 	GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(Msg->functionname(), DropReason);
+	return true;
 }
 
 // Called only on client or the destination server of a handover.
@@ -1101,6 +1121,12 @@ void UChanneldNetDriver::NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTrav
 	if (GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
 	{
 		Super::NotifyActorDestroyed(Actor, IsSeamlessTravel);
+		return;
+	}
+	
+	// Gameplay Debugger is not supported yet.
+	if (Actor->GetClass()->GetFName() == Channeld::GameplayerDebuggerClassName)
+	{
 		return;
 	}
 

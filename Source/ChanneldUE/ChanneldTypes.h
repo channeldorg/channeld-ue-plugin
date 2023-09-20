@@ -30,6 +30,9 @@ namespace Channeld
 	constexpr uint32 MinPacketSize = 20;
 	constexpr uint8 MaxConnectionIdBits = 13;
 	constexpr uint8 ConnectionIdBitOffset = (31 - MaxConnectionIdBits);
+
+	const FName GameplayerDebuggerClassName = FName("GameplayDebuggerCategoryReplicator");
+	
 }
 
 UENUM(BlueprintType)

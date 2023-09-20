@@ -116,8 +116,15 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 						Channel->SetChannelActor(Actor, ESetChannelActorFlags::SkipReplicatorCreation);
 						// Setup NetDriver, etc.
 						Channel->NotifyActorChannelOpen(Actor, InBunch);
+
+						/* Doesn't work: to turn off the warning in AActor::PostNetInit, add [Core.Log]LogActor=Error to DefaultEngine.ini
+						// HACK: turn off the warning in AActor::PostNetInit temporarily
+						GEngine->Exec(nullptr, TEXT("log Actor off"));
+						*/
 						// After all properties have been initialized, call PostNetInit. This should call BeginPlay() so initialization can be done with proper starting values.
 						Actor->PostNetInit();
+						// GEngine->Exec(nullptr, TEXT("log Actor on"));
+
 						UE_LOG(LogChanneld, Verbose, TEXT("[Client] Created new actor '%s' with NetGUID %d (%d)"), *Actor->GetName(), GuidCache->GetNetGUID(Actor).Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
 
 						/* Called in UChanneldNetDriver::NotifyActorDestroyed 
@@ -131,7 +138,7 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 							ResetNetConnForSpawn();
 						}
 						
-						return Actor;
+						Obj = Actor;
 					}
 				}
 				else if (Ref->has_classpath())
@@ -179,14 +186,13 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 	}
 	else
 	{
-		/*
-		*/
-		if (!ObjRefCache.Contains(NetGUID.Value))
+		// Only cache the full-exported UnrealObjectRef
+		if (Ref->context_size() > 0 && !ObjRefCache.Contains(NetGUID.Value))
 		{
 			auto Cached = MakeShared<unrealpb::UnrealObjectRef>();
 			Cached->CopyFrom(*Ref);
-			ObjRefCache.Add(NetGUID.Value, Cached);
-			UE_LOG(LogChanneld, VeryVerbose, TEXT("Cached ObjRef: %d"), NetGUID.Value);
+			ObjRefCache.Emplace(NetGUID.Value, Cached);
+			UE_LOG(LogChanneld, Verbose, TEXT("Cached ObjRef: %d, context size: %d"), NetGUID.Value, Ref->context_size());
 		}
 	}
 	
@@ -222,12 +228,8 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 		UE_LOG(LogChanneld, VeryVerbose, TEXT("Use cached ObjRef: %d"), NetGUID.Value);
 		return *Cached;
 	}
-	else
-	{
-		UE_LOG(LogChanneld, VeryVerbose, TEXT("Cached ObjRef: %d"), NetGUID.Value);
-		ObjRefCache.Add(NetGUID.Value, ObjRef);
-	}
-	
+
+	// Always set the classpath as it will be used in USpatialChannelDataView::CheckUnspawnedObject
 	ObjRef->set_classpath(std::string(TCHAR_TO_UTF8(*Obj->GetClass()->GetPathName())));
 	
 	if (Obj->IsA<AActor>() && GuidCache->IsNetGUIDAuthority())
@@ -303,6 +305,10 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 					// Clear the export map and ack state so everytime we can get a full export.
 					ResetNetConnForSpawn();
 				}
+
+				// Only cache the full-exported UnrealObjectRef
+				ObjRefCache.Emplace(NetGUID.Value, ObjRef);
+				UE_LOG(LogChanneld, Verbose, TEXT("Cached ObjRef: %d, context size: %d"), NetGUID.Value, ObjRef->context_size());
 			}
 			//else
 			//{

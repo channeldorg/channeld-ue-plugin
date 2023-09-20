@@ -454,13 +454,18 @@ void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerControl
 	}
 	*/
 
-	// Send all the existing actors to the new player, including the static level actors.
+	SendExistingActorsToNewPlayer(NewPlayer, NewPlayerConn);
+}
+
+void UChannelDataView::SendExistingActorsToNewPlayer(APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn)
+{
 	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
 	{
 		for(TActorIterator<AActor> It(GetWorld(), AActor::StaticClass()); It; ++It)
 		{
 			AActor* Actor = *It;
-			if (Actor != GameMode->GameState && Actor != NewPlayer && Actor != NewPlayer->PlayerState)
+		
+			if (!Actor->IsA<AGameModeBase>() && Actor != NewPlayer && Actor != NewPlayer->PlayerState)
 			{
 				NetDriver->OnServerSpawnedActor(Actor);
 			}
@@ -548,6 +553,12 @@ void UChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkGUID Net
 
 void UChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId)
 {
+	// Gameplay Debugger is not supported yet.
+	if (Obj->GetClass()->GetFName() == Channeld::GameplayerDebuggerClassName)
+	{
+		return;
+	}
+	
 	ENetRole Role = ROLE_None;
 	if (const AActor* Actor = Cast<AActor>(Obj))
 	{
