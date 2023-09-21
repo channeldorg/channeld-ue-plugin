@@ -3,8 +3,34 @@
 #include "IPropertyDecoratorOwner.h"
 
 
-static const TCHAR* PropDecorator_AssignPropPtrTemp =
-	LR"EOF({Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + {Num_PropMemOffset}))EOF";
+const static TCHAR* PropDecorator_AssignPropPtrStatic =
+	LR"EOF(
+{Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + {Num_PropMemOffset}))EOF";
+
+const static TCHAR* PropDecorator_AssignPropPtrDynamic =
+		LR"EOF(
+FString PropertyName = TEXT("{Declare_PropertyName}");
+int32* OffsetPtr = PropPointerMemOffsetCache.Find(PropertyName);
+if (OffsetPtr != nullptr)
+{
+    {Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + *OffsetPtr);
+}
+else
+{
+    FProperty* Property = ActorClass->FindPropertyByName(FName(*PropertyName));
+    if (Property)
+    {   
+        int32 Offset = Property->GetOffset_ForInternal();
+        PropPointerMemOffsetCache.Emplace(PropertyName, Offset);
+        {Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + Offset);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("%s Replicator construct, but could not find property(%s) in cache or by name."), *ActorClass->GetName(), *PropertyName);
+        {Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + {Num_PropMemOffset});
+    }
+}
+)EOF";
 
 const static TCHAR* PropDecorator_SetDeltaStateTemplate =
 	LR"EOF(
@@ -45,7 +71,10 @@ if (!bPropChanged)
 
 const static TCHAR* PropDecorator_CallRepNotifyTemplate =
 	LR"EOF(
-{Declare_TargetInstance}->ProcessEvent({Declare_TargetInstance}->GetClass()->FindFunctionByName(FName(TEXT("{Declare_FunctionName}"))), {Code_OnRepParams});
+if (b{Declare_PropertyName}Changed)
+{
+	{Declare_TargetInstance}->ProcessEvent({Declare_TargetInstance}->GetClass()->FindFunctionByName(FName(TEXT("{Declare_FunctionName}"))), {Code_OnRepParams});
+}
 )EOF";
 
 
@@ -74,9 +103,9 @@ const static TCHAR* PropDeco_OnChangeStateArrayInnerTemp =
 if ((*{Declare_PropertyPtr})[i] != MessageArr[i])
 {
   (*{Declare_PropertyPtr})[i] = MessageArr[i];
-  if (!bPropChanged)
+  if (!b{Declare_PropertyName}Changed)
   {
-    bPropChanged = true;
+    b{Declare_PropertyName}Changed = true;
   }
 }
 )EOF";
@@ -186,7 +215,7 @@ public:
 	 * For example:
 	 *   optional bool bIsCrouched = 6
 	 */
-	virtual FString GetDefinition_ProtoField(int32 FieldNumber);
+	virtual FString GetDefinition_ProtoField(int32& FieldNumber);
 
 	/**
 	 * Code that getting property value from outer actor
@@ -214,8 +243,10 @@ public:
       */
 	virtual FString GetDeclaration_PropertyPtr();
 
-	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo);
-	virtual FString GetCode_AssignPropPointer(const FString& Container, const FString& AssignTo, int32 MemOffset);
+	// Get the property/field pointer via static memory offset. Used for C++ struct and UStruct that follow the Standard Layout.
+	virtual FString GetCode_AssignPropPointerStatic(const FString& Container, const FString& AssignTo);
+	// Get the property pointer via dynamic memory offset. Used for UObject/AActor that memory offset can be different across different platforms.
+	virtual FString GetCode_AssignPropPointerDynamic(const FString& Container, const FString& AssignTo);
 
 	/**
 	 * Code that get field value from protobuf message
@@ -264,7 +295,12 @@ public:
 
 	virtual FString GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull = false);
 
-	virtual FString GetCode_CallRepNotify(const FString& TargetInstanceName);
+	/**
+	 * The property has RepNotify function and the RepNotify function has parameter
+	 */
+	virtual bool HasOnRepNotifyParam();
+
+	virtual FString GetCode_CallRepNotify(const FString& TargetInstanceName, const FString& OldValuePointer);
 
 	/**
 	 * Code that handle state changes
@@ -274,11 +310,11 @@ public:
 	 *     Character->bIsCrouched = NewState->biscrouched();
 	 *   }
 	 */
-	virtual FString GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, bool NeedCallRepNotify = false);
+	virtual FString GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, const FString& AfterSetValueCode = TEXT(""));
 
 	virtual FString GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName);
 
-	virtual FString GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName);
+	virtual FString GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName);
 
 	virtual TArray<FString> GetAdditionalIncludes() override;
 

@@ -112,14 +112,14 @@ void FChanneldPawnReplicator::OnStateChanged(const google::protobuf::Message* In
 	FullState->MergeFrom(*NewState);
 	bStateChanged = false;
 
-	if (NewState->has_playerstate())
+	if (NewState->has_playerstate() && ChanneldUtils::ShouldSetPlayerControllerOrPlayerStateForActor(Pawn.Get()))
 	{
 		*PlayerStatePtr = Cast<APlayerState>(ChanneldUtils::GetObjectByRef(&NewState->playerstate(), Pawn->GetWorld()));
-		Pawn->OnRep_PlayerState();
 		UE_LOG(LogChanneld, Verbose, TEXT("Replicator set Pawn's PlayerState to %s"), *GetNameSafe(*PlayerStatePtr));
 	}
 
-	if (NewState->has_controller())
+	bool bShouldCallOnRepController= false;
+	if (NewState->has_controller() && ChanneldUtils::ShouldSetPlayerControllerOrPlayerStateForActor(Pawn.Get()))
 	{
 		Pawn->Controller = Cast<AController>(ChanneldUtils::GetObjectByRef(&NewState->controller(), Pawn->GetWorld()));
 		if (auto PC = Cast<APlayerController>(Pawn->Controller))
@@ -127,12 +127,12 @@ void FChanneldPawnReplicator::OnStateChanged(const google::protobuf::Message* In
 			// Special case: the PlayerController is under destruction, so calling OnRep_Controller() will cause crash
 			if (PC->PlayerCameraManager)
 			{
-				Pawn->OnRep_Controller();
+				bShouldCallOnRepController = true;
 			}
 		}
 		else
 		{
-			Pawn->OnRep_Controller();
+			bShouldCallOnRepController = true;
 		}
 		UE_LOG(LogChanneld, Verbose, TEXT("Replicator set Pawn's Controller to %s"), *GetNameSafe(Pawn->Controller));
 	}
@@ -140,5 +140,14 @@ void FChanneldPawnReplicator::OnStateChanged(const google::protobuf::Message* In
 	if (NewState->has_remoteviewpitch())
 	{
 		Pawn->RemoteViewPitch = NewState->remoteviewpitch();
+	}
+
+	if (NewState->has_playerstate())
+	{
+		Pawn->OnRep_PlayerState();
+	}
+	if (bShouldCallOnRepController)
+	{
+		Pawn->OnRep_Controller();
 	}
 }

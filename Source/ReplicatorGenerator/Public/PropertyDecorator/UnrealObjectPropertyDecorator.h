@@ -5,10 +5,10 @@ const static TCHAR* UObjPropDeco_SetDeltaStateArrayInnerTemp =
 	LR"EOF(
 UObject * & PropItem = (*{Declare_PropertyPtr})[i];
 unrealpb::UnrealObjectRef* NewOne = {Declare_DeltaStateName}->add_{Definition_ProtoName}();
-*NewOne = ChanneldUtils::GetRefOfObject(PropItem);
+*NewOne = *ChanneldUtils::GetRefOfObject(PropItem);
 if (!bPropChanged)
 {
-  bPropChanged = !(PropItem == ChanneldUtils::GetObjectByRef(&{Declare_FullStateName}->{Definition_ProtoName}()[i], {Code_GetWorldRef}));
+  bPropChanged = ChanneldUtils::CheckObjectWithRef(PropItem, &{Declare_FullStateName}->{Definition_ProtoName}()[i], {Code_GetWorldRef});
 }
 )EOF";
 
@@ -18,9 +18,9 @@ UObject* NewObjRef = ChanneldUtils::GetObjectByRef(&MessageArr[i], {Code_GetWorl
 if ((*{Declare_PropertyPtr})[i] != NewObjRef)
 {
   (*{Declare_PropertyPtr})[i] = NewObjRef;
-  if (!bPropChanged)
+  if (!b{Declare_PropertyName}Changed)
   {
-    bPropChanged = true;
+    b{Declare_PropertyName}Changed = true;
   }
 }
 )EOF";
@@ -51,7 +51,7 @@ public:
 	virtual FString GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode) override;
 	virtual FString GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull) override;
 
-	virtual FString GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName) override;
+	virtual FString GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName) override;
 
 	virtual TArray<FString> GetAdditionalIncludes() override;
 

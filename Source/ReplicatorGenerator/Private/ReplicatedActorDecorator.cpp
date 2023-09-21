@@ -1,5 +1,6 @@
 ﻿#include "ReplicatedActorDecorator.h"
 
+#include "Engine/ActorChannel.h"
 #include "PropertyDecoratorFactory.h"
 #include "ReplicatorGeneratorDefinition.h"
 #include "ReplicatorGeneratorUtils.h"
@@ -202,7 +203,7 @@ FString FReplicatedActorDecorator::GetCode_AssignPropertyPointers()
 		{
 			Result += FString::Printf(
 				TEXT("{ %s; }\n"),
-				*Property->GetCode_AssignPropPointer(
+				*Property->GetCode_AssignPropPointerDynamic(
 					FString::Printf(TEXT("%s.Get()"), *InstanceRefName),
 					Property->GetPointerName()
 				)
@@ -274,6 +275,11 @@ FString FReplicatedActorDecorator::GetProtoStateMessageType()
 	{
 		return TEXT("PlayerState");
 	}
+	if (TargetClass == UActorComponent::StaticClass())
+	{
+		return TEXT("ActorComponentStates");
+	}
+	
 	if (IsChanneldUEBuiltinType())
 	{
 		return GetActorName() + TEXT("State");
@@ -327,8 +333,25 @@ FString FReplicatedActorDecorator::GetCode_AllPropertiesOnStateChange(const FStr
 	FString OnChangeStateCodeBuilder;
 	for (const TSharedPtr<FPropertyDecorator> Property : Properties)
 	{
-		OnChangeStateCodeBuilder.Append(Property->GetCode_OnStateChange(InstanceRefName, NewStateName, true));
+		// 'b{PropertyName}Changed` variable is used to avoid calling OnRep() function when the property value is not changed.
+		OnChangeStateCodeBuilder.Append(FString::Printf(TEXT("\nbool b%sChanged = false;"), *Property->GetPropertyName()));
+		if (Property->HasOnRepNotifyParam())
+		{
+			// `Old{PropertyName}` variable is used to pass the old property value to OnRep() function.
+			OnChangeStateCodeBuilder.Append(FString::Printf(TEXT("auto Old%s = %s;"),
+				*Property->GetPropertyName(), *Property->GetCode_GetPropertyValueFrom(InstanceRefName)));
+		}
+		OnChangeStateCodeBuilder.Append(Property->GetCode_OnStateChange(InstanceRefName, NewStateName,
+			FString::Printf(TEXT("b%sChanged = true;\n"), *Property->GetPropertyName())
+		));
 	}
+	
+	// Generate code for calling OnRep() functions after all the properties are updated, to align with the native UE's behavior.
+	for (const TSharedPtr<FPropertyDecorator> Property : Properties)
+	{
+		OnChangeStateCodeBuilder.Append(Property->GetCode_CallRepNotify(InstanceRefName, FString::Printf(TEXT("&Old%s"), *Property->GetPropertyName())));
+	}
+	
 	return OnChangeStateCodeBuilder;
 }
 
@@ -342,10 +365,14 @@ FString FReplicatedActorDecorator::GetDefinition_ProtoStateMessage()
 		FieldDefinitions.Append(TEXT("bool removed = 1;"));
 		Offset = 2;
 	}
+	int32 ProtoIndex = Offset;
 	for (int32 i = 0; i < Properties.Num(); i++)
 	{
 		const TSharedPtr<FPropertyDecorator> Property = Properties[i];
-		FieldDefinitions += Property->GetDefinition_ProtoField(i + Offset) + TEXT(";\n");
+		FString ProtoField = Property->GetDefinition_ProtoField(ProtoIndex) + TEXT(";\n");
+		FieldDefinitions += ProtoField;
+		ProtoIndex++;
+	
 	}
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_StateMessageType"), GetProtoStateMessageType());
@@ -501,6 +528,10 @@ FString FReplicatedActorDecorator::GetDeclaration_ChanneldDataProcessor_RemovedS
 
 FString FReplicatedActorDecorator::GetCode_ChanneldDataProcessor_InitRemovedState()
 {
+	if (TargetClass == UActorComponent::StaticClass())
+	{
+		return TEXT("");
+	}
 	if (TargetClass == AActor::StaticClass() || TargetClass->IsChildOf(UActorComponent::StaticClass()))
 	{
 		return FString::Printf(TEXT("Removed%s = MakeUnique<%s::%s>();\nRemoved%s->set_removed(true);\n"), *GetProtoStateMessageType(), *GetProtoNamespace(), *GetProtoStateMessageType(), *GetProtoStateMessageType());
@@ -539,6 +570,9 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_Merge(const TArr
 			FormatArgs.Add(TEXT("Code_MergeEraseInner"), Code_MergeEraseInner);
 			FormatArgs.Add(TEXT("Code_DoMerge"), FString::Format(ActorDecor_ChannelDataProcessorMerge_DoMarge, FormatArgs));
 			Code_MergeLoopInner = FString::Format(ActorDecor_ChannelDataProcessorMerge_Erase, FormatArgs);
+		}else if  (TargetClass == UActorComponent::StaticClass())
+		{
+			Code_MergeLoopInner = FString::Format(ActorDecor_ChannelDataProcessorMerge_DoMarge, FormatArgs);
 		}
 		else if (TargetClass->IsChildOf(UActorComponent::StaticClass()))
 		{
@@ -570,7 +604,17 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_GetStateFromChan
 	FormatArgs.Add(TEXT("Definition_ChannelDataFieldName"), GetDefinition_ChannelDataFieldNameCpp());
 	if (IsSingletonInChannelData())
 	{
-		return FString::Format(ActorDecor_GetStateFromChannelData_Singleton, FormatArgs);
+		if (TargetClass == UActorComponent::StaticClass())
+		{
+			return FString::Format(ActorDecor_GetStateFromChannelData_AC_Singleton, FormatArgs);
+		}
+		else
+		{
+			return FString::Format(ActorDecor_GetStateFromChannelData_Singleton, FormatArgs);
+		}
+	}else if (TargetClass == UActorComponent::StaticClass())
+	{
+		return FString::Format(ActorDecor_GetStateFromChannelData_AC, FormatArgs);
 	}
 	else if (TargetClass == AActor::StaticClass() || TargetClass->IsChildOf(UActorComponent::StaticClass()))
 	{
@@ -589,7 +633,14 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProcessor_SetStateToChanne
 	FormatArgs.Add(TEXT("Definition_ProtoStateMsgName"), GetProtoStateMessageType());
 	if (IsSingletonInChannelData())
 	{
-		return FString::Format(ActorDecor_SetStateToChannelData_Singleton, FormatArgs);
+		if (TargetClass == UActorComponent::StaticClass()){
+			return FString::Format(ActorDecor_SetStateToChannelData_AC_Singleton, FormatArgs);
+		}else
+		{
+			return FString::Format(ActorDecor_SetStateToChannelData_Singleton, FormatArgs);
+		}
+	}else if (TargetClass == UActorComponent::StaticClass()){
+		return FString::Format(ActorDecor_SetStateToChannelData_AC, FormatArgs);
 	}
 	else if (TargetClass == AActor::StaticClass() || TargetClass->IsChildOf(UActorComponent::StaticClass()))
 	{
@@ -620,25 +671,25 @@ TArray<TSharedPtr<FStructPropertyDecorator>> FReplicatedActorDecorator::GetStruc
 	TArray<TSharedPtr<FStructPropertyDecorator>> StructPropertyDecorators;
 	for (TSharedPtr<FPropertyDecorator>& Property : Properties)
 	{
+		StructPropertyDecorators.Append(Property->GetStructPropertyDecorators());
 		if (Property->IsStruct())
 		{
 			StructPropertyDecorators.Add(StaticCastSharedPtr<FStructPropertyDecorator>(Property));
 		}
-		StructPropertyDecorators.Append(Property->GetStructPropertyDecorators());
 	}
 	for (TSharedPtr<FRPCDecorator> RPC : RPCs)
 	{
+		StructPropertyDecorators.Append(RPC->GetStructPropertyDecorators());
 		// The RPC parameters be seen as numbers of struct, so the RPC decorator be seen as a struct decorator. 
 		StructPropertyDecorators.Add(RPC);
-		StructPropertyDecorators.Append(RPC->GetStructPropertyDecorators());
 	}
 	TArray<TSharedPtr<FStructPropertyDecorator>> NonRepetitionStructPropertyDecorators;
-	TSet<FString> StructPropertyDecoratorNames;
+	TSet<FString> StructPropertyDecoratorFieldTypes;
 	for (TSharedPtr<FStructPropertyDecorator>& StructPropertyDecorator : StructPropertyDecorators)
 	{
-		if (!StructPropertyDecoratorNames.Contains(StructPropertyDecorator->GetPropertyName()))
+		if (!StructPropertyDecoratorFieldTypes.Contains(StructPropertyDecorator->GetProtoFieldType()))
 		{
-			StructPropertyDecoratorNames.Add(StructPropertyDecorator->GetPropertyName());
+			StructPropertyDecoratorFieldTypes.Add(StructPropertyDecorator->GetProtoFieldType());
 			NonRepetitionStructPropertyDecorators.Add(StructPropertyDecorator);
 		}
 	}

@@ -9,6 +9,7 @@
 #include "unreal_common.pb.h"
 #include "ChanneldUtils.h"
 #include "ChanneldSettings.h"
+#include <numeric>
 #include "Interest/ClientInterestManager.h"
 
 UChanneldNetConnection::UChanneldNetConnection(const FObjectInitializer& ObjectInitializer)
@@ -232,10 +233,11 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 	}
 	if (Location)
 	{
+		ensureAlwaysMsgf(SpawnMsg.mutable_obj()->context_size() > 0, TEXT("Spawn message has no context! NetId: %d"), NetId.Value);
 		SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(*Location));
 	}
 	SendMessage(unrealpb::SPAWN, SpawnMsg, OwningChannelId);
-	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %d, role: %d, owning channel: %d, owning connId: %d, location: %s"),
+	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %d, role: %d, owning channel: %d, owningConnId: %d, location: %s"),
 		GetConnId(), *GetNameSafe(Object), SpawnMsg.obj().netguid(), SpawnMsg.localrole(), SpawnMsg.channelid(), SpawnMsg.obj().owningconnid(), Location ? *Location->ToCompactString() : TEXT("NULL"));
 
 	SetSentSpawned(NetId);
@@ -294,7 +296,7 @@ void UChanneldNetConnection::SendDestroyMessage(UObject* Object, EChannelCloseRe
 	}
 }
 
-void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg, Channeld::ChannelId ChId)
+void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg, Channeld::ChannelId ChId, const FString& SubObjectPath)
 {
 	if (GetMutableDefault<UChanneldSettings>()->bQueueUnexportedActorRPC)
 	{
@@ -317,6 +319,10 @@ void UChanneldNetConnection::SendRPCMessage(AActor* Actor, const FString& FuncNa
 	// RpcMsg.mutable_targetobj()->MergeFrom(*ChanneldUtils::GetRefOfObject(Actor));
 	RpcMsg.mutable_targetobj()->set_netguid(Driver->GuidCache->GetNetGUID(Actor).Value);
 	RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
+	if (!SubObjectPath.IsEmpty())
+	{
+		RpcMsg.set_subobjectpath(TCHAR_TO_UTF8(*SubObjectPath), SubObjectPath.Len());
+	}
 	if (ParamsMsg)
 	{
 		RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
@@ -341,12 +347,16 @@ FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= fa
 	if (RemoteAddr)
 	{
 		if (bAppendPort)
-			RemoteAddr->SetPort(GetSendToChannelId());
+		{
+			// Use the native UNetConnection::ConnectionId as the port (which is limited to 1024 by default).
+			// If we use the GetConnId(), FInternetAddrBSD::SetPort() will throw check error when ConnId > 65535.
+			RemoteAddr->SetPort(GetConnectionId());
+		}
 		return RemoteAddr->ToString(bAppendPort);
 	}
 	else
 	{
-		return bAppendPort ? FString::Printf(TEXT("0.0.0.0:%d"), GetSendToChannelId()) : TEXT("0.0.0.0");
+		return bAppendPort ? FString::Printf(TEXT("0.0.0.0:%d"), GetConnectionId()) : TEXT("0.0.0.0");
 	}
 }
 

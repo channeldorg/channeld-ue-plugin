@@ -1,5 +1,5 @@
 # 运行环境要求
-ChanneldUE插件目前仅在Windows 10/11操作系统+UE 4.27下进行过测试。在其它环境下可能会出现未知的问题。
+ChanneldUE插件目前仅在Windows 10/11操作系统及UE 4.27/5.1/5.2下进行过测试。在其它环境下可能会出现未知的问题。
 
 # 1.安装ChanneldUE插件
 ## 1.1.克隆代码仓库
@@ -22,9 +22,7 @@ protoc-gen-go - Protobuf的go代码生成工具
 使用第三人称模板的创建UE项目。选择项目类型为`C++`：
 ![](../images/create_project.png)
 
-```
-注意：ChannelUE插件只支持C++项目。如果您使用的是纯蓝图项目，需要先转换为C++项目。
-```
+>注意：ChannelUE插件只支持C++项目。如果您使用的是纯蓝图项目，需要先转换为C++项目。
 
 ##### 2.1.2.复制插件
 将1.1.步骤中克隆的插件代码仓库目录复制到项目的`Plugins`目录下。
@@ -39,7 +37,7 @@ PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engi
 ##### 2.1.4.修改项目的配置文件
 打开项目的配置文件`Config/DefaultEngine.ini`，并添加插件相关的日志输出等级：
 
-```
+```ini
 [Core.log]
 LogChanneld=Verbose
 LogChanneldGen=Verbose
@@ -47,9 +45,7 @@ LogChanneldEditor=Verbose
 LogChanneldRepGenerator=Verbose
 ```
 
-```
-提示：该配置使用较低的日志输出级别。建议在开发阶段开启Verbose日志，以方便排查和报告问题。在发布阶段，建议将日志等级改为Log或Warn以减少性能和文件存储开销。
-```
+>提示：该配置使用较低的日志输出级别。建议在开发阶段开启Verbose日志，以方便排查和报告问题。在发布阶段，建议将日志等级改为Log或Warn以减少性能和文件存储开销。
 
 ## 2.2.重新编译运行项目并开启插件
 在文件浏览器中右键点击项目的`*.uproject`文件，选择"Generate Visual Studio project files"，重新生成项目的解决方案文件。
@@ -60,6 +56,6 @@ LogChanneldRepGenerator=Verbose
 如果插件图标未显示，在编辑器的顶部菜单栏中选择`编辑 -> 插件 -> Other -> ChanneldUE -> 已启用`，启用插件。
 
 ## 下一步
-在下面的章节里，将介绍如何基于ChanneldUE的网络框架运行第三人称模板项目。[点击这里](third-person-template.md)继续。
+在下面的章节里，将介绍如何基于ChanneldUE的网络框架运行第三人称模板项目。[点击这里](zh/third-person-template.md)继续。
 
-[回到文档首页](README.md)
+[回到文档首页](zh/README.md)

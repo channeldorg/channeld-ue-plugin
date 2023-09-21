@@ -17,8 +17,13 @@ FChanneldGameStateBaseReplicator::FChanneldGameStateBaseReplicator(UObject* InTa
 
 	// Prepare Reflection pointers
 	{
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 2)
 		auto Property = CastFieldChecked<const FFloatProperty>(GameStateBase->GetClass()->FindPropertyByName(FName("ReplicatedWorldTimeSeconds")));
 		ReplicatedWorldTimeSecondsPtr = Property->ContainerPtrToValuePtr<float>(GameStateBase.Get());
+#else
+		auto Property = CastFieldChecked<const FDoubleProperty>(GameStateBase->GetClass()->FindPropertyByName(FName("ReplicatedWorldTimeSecondsDouble")));
+		ReplicatedWorldTimeSecondsPtr = Property->ContainerPtrToValuePtr<double>(GameStateBase.Get());
+#endif
 		check(ReplicatedWorldTimeSecondsPtr);
 	}
 	{
@@ -26,8 +31,18 @@ FChanneldGameStateBaseReplicator::FChanneldGameStateBaseReplicator(UObject* InTa
 		bReplicatedHasBegunPlayPtr = Property->ContainerPtrToValuePtr<bool>(GameStateBase.Get());
 		check(bReplicatedHasBegunPlayPtr);
 	}
+	OnRep_GameModeClassFunc = GameStateBase->GetClass()->FindFunctionByName(FName("OnRep_GameModeClass"));
+	check(OnRep_GameModeClassFunc);
+	OnRep_SpectatorClassFunc = GameStateBase->GetClass()->FindFunctionByName(FName("OnRep_SpectatorClass"));
+	check(OnRep_SpectatorClassFunc);
+
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 2)
 	OnRep_ReplicatedWorldTimeSecondsFunc = GameStateBase->GetClass()->FindFunctionByName(FName("OnRep_ReplicatedWorldTimeSeconds"));
+#else
+	OnRep_ReplicatedWorldTimeSecondsFunc = GameStateBase->GetClass()->FindFunctionByName(FName("OnRep_ReplicatedWorldTimeSecondsDouble"));
+#endif
 	check(OnRep_ReplicatedWorldTimeSecondsFunc);
+
 	OnRep_ReplicatedHasBegunPlayFunc = GameStateBase->GetClass()->FindFunctionByName(FName("OnRep_ReplicatedHasBegunPlay"));
 	check(OnRep_ReplicatedHasBegunPlayFunc);
 }
@@ -83,7 +98,7 @@ void FChanneldGameStateBaseReplicator::Tick(float DeltaTime)
 		bStateChanged = true;
 	}
 
-	if (!FMath::IsNearlyEqual(*ReplicatedWorldTimeSecondsPtr, FullState->replicatedworldtimeseconds(), 5.0f))
+	if (!FMath::IsNearlyEqual((double)*ReplicatedWorldTimeSecondsPtr, FullState->replicatedworldtimeseconds(), 5.0))
 	{
 		DeltaState->set_replicatedworldtimeseconds(*ReplicatedWorldTimeSecondsPtr);
 		bStateChanged = true;
@@ -120,24 +135,35 @@ void FChanneldGameStateBaseReplicator::OnStateChanged(const google::protobuf::Me
 	if (NewState->has_spectatorclassname())
 	{
 		GameStateBase->SpectatorClass = LoadClass<ASpectatorPawn>(NULL, UTF8_TO_TCHAR(NewState->spectatorclassname().c_str()));
-		GameStateBase->ReceivedSpectatorClass();
 	}
-
 	if (NewState->has_gamemodeclassname())
 	{
 		GameStateBase->GameModeClass = LoadClass<AGameModeBase>(NULL, UTF8_TO_TCHAR(NewState->gamemodeclassname().c_str()));
-		GameStateBase->ReceivedGameModeClass();
 	}
-
 	if (NewState->has_replicatedworldtimeseconds())
 	{
 		*ReplicatedWorldTimeSecondsPtr = NewState->replicatedworldtimeseconds();
-		GameStateBase->ProcessEvent(OnRep_ReplicatedWorldTimeSecondsFunc, NULL);
 	}
 	if (NewState->has_breplicatedhasbegunplay())
 	{
 		*bReplicatedHasBegunPlayPtr = NewState->breplicatedhasbegunplay();
-		GameStateBase->ProcessEvent(OnRep_ReplicatedHasBegunPlayFunc, NULL);
+	}
+
+	if (NewState->has_spectatorclassname())
+	{
+		GameStateBase->ProcessEvent(OnRep_GameModeClassFunc, nullptr);
+	}
+	if (NewState->has_gamemodeclassname())
+	{
+		GameStateBase->ProcessEvent(OnRep_SpectatorClassFunc, nullptr);
+	}
+	if (NewState->has_replicatedworldtimeseconds())
+	{
+		GameStateBase->ProcessEvent(OnRep_ReplicatedWorldTimeSecondsFunc, nullptr);
+	}
+	if (NewState->has_breplicatedhasbegunplay())
+	{
+		GameStateBase->ProcessEvent(OnRep_ReplicatedHasBegunPlayFunc, nullptr);
 	}
 }
 

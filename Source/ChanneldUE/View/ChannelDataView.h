@@ -86,7 +86,7 @@ public:
 	virtual Channeld::ChannelId GetOwningChannelId(const FNetworkGUID NetId) const;
 	virtual Channeld::ChannelId GetOwningChannelId(AActor* Actor) const;
 
-	virtual bool SendMulticastRPC(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg);
+	virtual bool SendMulticastRPC(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg, const FString& SubObjectPathName);
 
 	int32 SendChannelUpdate(Channeld::ChannelId ChId);
 	int32 SendAllChannelUpdates();
@@ -150,6 +150,9 @@ protected:
 	
 	// Give the subclass a chance to mess with the removed providers, e.g. add a provider back to a channel.
 	virtual void OnRemovedProvidersFromChannel(Channeld::ChannelId ChId, channeldpb::ChannelType ChannelType, const TSet<FProviderInternal>& RemovedProviders) {}
+	
+	// Send all the existing actors to the new player (including the static level actors) at the end of PostLogin.
+	virtual void SendExistingActorsToNewPlayer(APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn);
 
 	/**
 	 * @brief Checks if the channel data contains any unsolved NetworkGUID.

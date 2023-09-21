@@ -428,7 +428,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 			HandoverPC->ServerAcknowledgePossession(HandoverPC->GetPawn());
 
 			ensureAlwaysMsgf(HandoverPC->GetPawn() && HandoverPC->GetPawn()->GetNetConnection(),
-				TEXT("Handover Pawn '%s' should have NetConn set!"), *GetNameSafe(HandoverPC->GetPawn()));
+				TEXT("Handover Pawn '%s' of '%s' should have NetConn set!"), *GetNameSafe(HandoverPC->GetPawn()), *GetNameSafe(HandoverPC));
 		}
 	}
 
@@ -672,8 +672,8 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 		TCHAR* ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
 		if (UClass* EntityClass = LoadObject<UClass>(nullptr, ClassPath))
 		{
-			// Do not resolve other PlayerController on the client.
-			if (EntityClass->IsChildOf(APlayerController::StaticClass()))
+			// Do not resolve other PlayerController or PlayerState on the client.
+			if (EntityClass->IsChildOf(APlayerController::StaticClass()) || EntityClass->IsChildOf(APlayerState::StaticClass()))
 			{
 				return true;
 			}
@@ -709,7 +709,7 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 			if (UClass* EntityClass = LoadObject<UClass>(nullptr, ClassPath))
 			{
 				// Do not resolve other PlayerController on the client.
-				if (EntityClass->IsChildOf(APlayerController::StaticClass()))
+				if (EntityClass->IsChildOf(APlayerController::StaticClass()) || EntityClass->IsChildOf(APlayerState::StaticClass()))
 				{
 					continue;
 				}
@@ -735,6 +735,44 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 	}
 	
 	return false;
+}
+
+void USpatialChannelDataView::SendExistingActorsToNewPlayer(APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn)
+{
+	FTimerHandle Handle;
+	// Delay 2 seconds to make sure the new player's Pawn is set, to avoid duplicate sending.
+	// FIXME: move to the ServerAcknowledgePossession()
+	GetWorld()->GetTimerManager().SetTimer(Handle, [this, NewPlayer, NewPlayerConn]()
+	{
+		for(TActorIterator<AActor> It(GetWorld(), AActor::StaticClass()); It; ++It)
+		{
+			AActor* Actor = *It;
+			if (Actor != NewPlayer->GetPawn() && Actor->HasAuthority() && Actor->GetIsReplicated() &&
+				!Actor->IsA<AGameModeBase>() && !Actor->IsA<APlayerController>() && !Actor->IsA<APlayerState>())
+			{
+				if (Actor->GetWorld() == nullptr)
+				{
+					UE_LOG(LogChanneld, Warning, TEXT("%s->GetWorld() is null!"), *GetNameSafe(Actor));
+					continue;
+				}
+
+				// No need to call OnServerSpawnedObject -> AddObjectProviderToDefaultChannel
+				// as static actor are already added in SyncNetGUIDs()
+
+				uint32 OwningConnId = 0;
+				if (auto NetConn = Cast<UChanneldNetConnection>(Actor->GetNetConnection()))
+				{
+					OwningConnId = NetConn->GetConnId();
+				}
+				else
+				{
+					// Character should have owner connection at this moment.
+					ensureAlwaysMsgf(!Actor->IsA<ACharacter>(), TEXT("%s doesn't have a valid NetConnection"), *GetNameSafe(Actor));
+				}
+				SendSpawnToConn(Actor, NewPlayerConn, OwningConnId);
+			}
+		}
+	}, 1, false, 2.0f);
 }
 
 void USpatialChannelDataView::ClientHandleGetUnrealObjectRef(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
@@ -1288,12 +1326,6 @@ void USpatialChannelDataView::OnNetSpawnedObject(UObject* Obj, const Channeld::C
 
 bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId)
 {
-	// Spatial channels don't support Gameplay Debugger yet.
-	if (Obj->GetClass()->GetFName() == GameplayerDebuggerClassName)
-	{
-		return false;
-	}
-
 	// GameState is in GLOBAL channel
 	if (Obj->IsA<AGameStateBase>())
 	{
@@ -1362,12 +1394,18 @@ void USpatialChannelDataView::SendSpawnToConn_EntityChannelReady(UObject* Obj, U
 	}
 	else
 	{
-		Super::SendSpawnToConn(Obj, NetConn, OwningConnId);
+		UChannelDataView::SendSpawnToConn(Obj, NetConn, OwningConnId);
 	}
 }
 
 void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId)
 {
+	// Gameplay Debugger is not supported yet.
+	if (Obj->GetClass()->GetFName() == Channeld::GameplayerDebuggerClassName)
+	{
+		return;
+	}
+	
 	// GameState is spawned via GLOBAL channel
 	if (Obj->IsA<AGameStateBase>())
 	{
@@ -1394,19 +1432,27 @@ void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnecti
 			SendSpawnToConn_EntityChannelReady(Obj, NetConn, OwningConnId);
 		});
 
-	UE_LOG(LogChanneld, Verbose, TEXT("Creating entity channel for obj: %s, netId: %d"), *Obj->GetName(), NetId);
+	UE_LOG(LogChanneld, Verbose, TEXT("Creating entity channel for obj: %s, netId: %d, owningConnId: %d"), *Obj->GetName(), NetId, OwningConnId);
 }
 
 void USpatialChannelDataView::SendSpawnToClients_EntityChannelReady(const FNetworkGUID NetId, UObject* Obj, uint32 OwningConnId, Channeld::ChannelId SpatialChId)
 {
-	unrealpb::SpawnObjectMessage SpawnMsg;
+	if (Obj->GetWorld() == nullptr)
+	{
+		if (Obj->GetWorld())
+		{
+			
+		}
+	}
 	
+	unrealpb::SpawnObjectMessage SpawnMsg;
 	// As we don't have any specific NetConnection to export the NetId, use a virtual one.
 	SpawnMsg.mutable_obj()->CopyFrom(*ChanneldUtils::GetRefOfObject(Obj, NetConnForSpawn, true));
 	/* Moved to ChanneldUtils::GetRefOfObject
 	// Clear the export map and ack state so everytime we can get a full export.
 	ResetNetConnForSpawn();
 	*/
+	ensureAlwaysMsgf(SpawnMsg.mutable_obj()->context_size() > 0, TEXT("Spawn message has no context! NetId: %d"), NetId.Value);
 
 	bool bWellKnown = false;
 	if (const AActor* Actor = Cast<AActor>(Obj))
@@ -1479,7 +1525,7 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
 			SendSpawnToClients_EntityChannelReady(NetId, Obj, OwningConnId, SpatialChId);
 		});
 
-	UE_LOG(LogChanneld, Verbose, TEXT("Creating entity channel for obj: %s, netId: %d, spatial channelId: %d"), *Obj->GetName(), NetId.Value, SpatialChId);
+	UE_LOG(LogChanneld, Verbose, TEXT("Creating entity channel for obj: %s, netId: %d, owningConnId: %d, spatial channelId: %d"), *Obj->GetName(), NetId.Value, OwningConnId, SpatialChId);
 }
 
 void USpatialChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkGUID NetId)
@@ -1488,11 +1534,11 @@ void USpatialChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkG
 	{
 		return;
 	}
-
+	
 	int BroadcastType = channeldpb::ALL_BUT_SENDER;
 	// Don't broadcast the destroy of objects that are only spawned in the owning client.
 	// Spatial channels don't support Gameplayer Debugger yet.
-	if (/*Obj->IsA<APlayerState>() ||*/ Obj->IsA<APlayerController>() || Obj->GetClass()->GetFName() == GameplayerDebuggerClassName)
+	if (/*Obj->IsA<APlayerState>() ||*/ Obj->IsA<APlayerController>())
 	{
 		/* Still need to send the Destroy message to interested servers, and channeld to clean up the entity channel and SpatialEntityState.
 		// return;
@@ -1516,7 +1562,7 @@ void USpatialChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkG
 	unrealpb::DestroyObjectMessage DestroyMsg;
 	DestroyMsg.set_netid(NetId.Value);
 	DestroyMsg.set_reason(static_cast<uint8>(EChannelCloseReason::Destroyed));
-	Connection->Broadcast(SpatialChId, unrealpb::DESTROY, DestroyMsg, /*channeldpb::ADJACENT_CHANNELS |*/ channeldpb::ALL_BUT_SENDER);
+	Connection->Broadcast(SpatialChId, unrealpb::DESTROY, DestroyMsg, BroadcastType);
 	UE_LOG(LogChanneld, Log, TEXT("[Server] Broadcasted Destroy message to spatial channel %d, obj: %s, netId: %d"), SpatialChId, *GetNameSafe(Obj), NetId.Value);
 }
 

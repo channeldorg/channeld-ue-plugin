@@ -3,10 +3,15 @@
 #include "CoreMinimal.h"
 #include "unreal_common.pb.h"
 #include "Engine/PackageMapClient.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerState.h"
 #include "Engine/ActorChannel.h"
 #include "ChanneldConnection.h"
 #include "ChanneldNetConnection.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/DemoNetDriver.h"
+//#define CHANNELD_TOLERANCE (1.e-8f)
+#define CHANNELD_TOLERANCE (0.001f)
 
 class CHANNELDUE_API ChanneldUtils
 {
@@ -69,7 +74,9 @@ public:
 		return Vec;
 	}
 
-	[[deprecated("Use SetRotatorFromPB instead. Use GetRotator can cause the value of pitch/yaw/roll to be 0 if the it is not set.")]]
+	[[deprecated(
+		"Use SetRotatorFromPB instead. Use GetRotator can cause the value of pitch/yaw/roll to be 0 if the it is not set."
+	)]]
 	static FRotator GetRotator(const unrealpb::FVector& InVec)
 	{
 		return FRotator(InVec.x(), InVec.y(), InVec.z());
@@ -77,35 +84,37 @@ public:
 
 	static bool CheckDifference(const FVector& VectorToCheck, const unrealpb::FVector* VectorPBToCheck)
 	{
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X, CHANNELD_TOLERANCE))
 		{
 			return true;
 		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y, CHANNELD_TOLERANCE))
 		{
 			return true;
 		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z, CHANNELD_TOLERANCE))
 		{
 			return true;
 		}
+		
 		return false;
 	}
 
 	static bool CheckDifference(const FRotator& RotatorToCheck, const unrealpb::FVector* RotatorPBToCheck)
 	{
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch, CHANNELD_TOLERANCE))
 		{
 			return true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw, CHANNELD_TOLERANCE))
 		{
 			return true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll, CHANNELD_TOLERANCE))
 		{
 			return true;
 		}
+		
 		return false;
 	}
 
@@ -122,17 +131,17 @@ public:
 			VectorPBToCheck = VectorToSet;
 		
 		bool bNotSame = false;
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->x(), VectorToCheck.X, CHANNELD_TOLERANCE))
 		{
 			VectorToSet->set_x(VectorToCheck.X);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->y(), VectorToCheck.Y, CHANNELD_TOLERANCE))
 		{
 			VectorToSet->set_y(VectorToCheck.Y);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z))
+		if (!FMath::IsNearlyEqual(VectorPBToCheck->z(), VectorToCheck.Z, CHANNELD_TOLERANCE))
 		{
 			VectorToSet->set_z(VectorToCheck.Z);
 			bNotSame = true;
@@ -147,17 +156,17 @@ public:
 			RotatorPBToCheck = RotatorToSet;
 		
 		bool bNotSame = false;
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->x(), RotatorToCheck.Pitch, CHANNELD_TOLERANCE))
 		{
 			RotatorToSet->set_x(RotatorToCheck.Pitch);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->y(), RotatorToCheck.Yaw, CHANNELD_TOLERANCE))
 		{
 			RotatorToSet->set_y(RotatorToCheck.Yaw);
 			bNotSame = true;
 		}
-		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll))
+		if (!FMath::IsNearlyEqual(RotatorPBToCheck->z(), RotatorToCheck.Roll, CHANNELD_TOLERANCE))
 		{
 			RotatorToSet->set_z(RotatorToCheck.Roll);
 			bNotSame = true;
@@ -229,6 +238,24 @@ public:
 	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
 	
 	static TSharedRef<unrealpb::UnrealObjectRef> GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr, bool bFullExport = false);
+
+	static bool CheckObjectWithRef(UObject* Obj, const unrealpb::UnrealObjectRef* Ref, UWorld* World)
+	{
+		bool bUnmapped = false;
+		return GetObjectByRef(Ref, World, bUnmapped, false) == Obj && !bUnmapped;
+	}
+
+	static bool SetObjectPtrByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, UObject** ObjPtr)
+	{
+		bool bUnmapped = false;
+		const auto NewValue = ChanneldUtils::GetObjectByRef(Ref, World, bUnmapped, false);
+		if (!bUnmapped && *ObjPtr != NewValue)
+		{
+			*ObjPtr = NewValue;
+			return true;
+		}
+		return false;
+	}
 		
 	static UActorComponent* GetActorComponentByRef(const unrealpb::ActorComponentRef* Ref, UWorld* World, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
 	
@@ -246,9 +273,44 @@ public:
 	 *		returns true if a new actor was spawned. false means an existing actor was found for the netguid.
 	 */
 	bool static SerializeNewActor_Server(UNetConnection* Connection, UPackageMapClient* PackageMap, TSharedPtr<FNetGUIDCache> GuidCache, FArchive& Ar, class UActorChannel *Channel, class AActor*& Actor);
+
+	static unrealpb::AssetRef GetAssetRef(const UObject* Obj)
+	{
+		unrealpb::AssetRef Ref;
+		if (Obj)
+		{
+			Ref.set_objectpath(std::string(TCHAR_TO_UTF8(*Obj->GetPathName())));
+		}
+		return Ref;
+	}
+	
+	static UObject* GetAssetByRef(const unrealpb::AssetRef* Ref)
+	{
+		if (Ref->objectpath().size() > 0)
+		{
+			const FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+			const FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(UTF8_TO_TCHAR(Ref->objectpath().c_str()));
+			if (AssetData.IsValid())
+			{
+				return AssetData.GetAsset();
+			}
+		}
+		return nullptr;
+	}
 	
 	// Set the actor's NetRole on the client based on the NetConnection that owns the actor.
 	static void SetActorRoleByOwningConnId(AActor* Actor, Channeld::ConnectionId OwningConnId);
+
+	// Should the owner of the actor, or the PlayerController or PlayerState of the pawn should be set?
+	static bool ShouldSetPlayerControllerOrPlayerStateForActor(AActor* Actor)
+	{
+		auto World = Actor->GetWorld();
+		const bool bIsServer = World != nullptr && World->IsServer();
+		// Special case: the client won't create other player's controller. Pawn and PlayerState's owner is PlayerController.
+		const bool bOwnerIsPC = Actor->IsA<APawn>() || Actor->IsA<APlayerState>();
+		const bool bClientShouldSetOwner = !bOwnerIsPC || Actor->GetLocalRole() > ROLE_SimulatedProxy;
+		return bIsServer || bClientShouldSetOwner;
+	}
 
 	static ENetRole ServerGetActorNetRole(AActor* Actor);
 	

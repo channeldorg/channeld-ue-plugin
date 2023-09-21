@@ -52,7 +52,7 @@
 
 #### 配置频道数据模型
 为同步Actor添加同步组件后，还需要配置频道数据模型来映射同步Actor和频道数据的关系。
->频道数据模型详细说明和使用可参考[频道数据模型](./channel-data-schema.md)
+>频道数据模型详细说明和使用可参考[频道数据模型](zh/channel-data-schema.md)
 
 点击ChannelUE插件的`Editor Channel Data Schema` 按钮：
 
@@ -60,7 +60,7 @@
 
 将会打开如下编辑器窗口：
 
-<img src="../images/default_channel_data_schema_editor.png" height = "400" alt="" />
+![](../images/default_channel_data_schema_editor.png)
 
 ##### 将Actor状态添加到频道数据模型
 首先，如果同步缓存过期（出现黄色叹号），需要先对其进行更新。在频道数据编辑器上方点击`Refresh...`按钮：
@@ -110,8 +110,10 @@ ChannelUE提供了热编译兼容模式，该模式下每次生成同步代码�
 
 ![](../images/settings_run_under_one_process.png)
 
-#### 关闭专用服务器和网关
-测试完成后，可以通过插件的二级菜单关闭专用服务器和网关，依次点击`Stop Servers`和`Stop Channeld`即可关闭专用服务器和网关。
+#### 关闭专用服务器或网关
+如果测试的过程中需要修改蓝图或关卡等资产，请记得在保存修改前关闭专用服务器，否则UE编辑器会提示无法保存。
+
+测试完毕后，可以通过插件的二级菜单关闭专用服务器和网关，依次点击`Stop Servers`和`Stop Channeld`即可关闭专用服务器和网关。
 
 ![](../images/stop_servers_and_channeld.png)
 
@@ -121,7 +123,7 @@ ChannelUE提供了热编译兼容模式，该模式下每次生成同步代码�
 #### 频道数据模型定义文件
 频道数据模型定义文件建议通过版本控制工具进行版本控制，以保证多人协作时，生成的同步代码是一致的。频道数据模型定义文件路径为`Config/ChanneldChannelDataSchema.json`。
 
-#### 配置频道数据模型
+#### 同步频道数据模型
 如果在配置频道数据模型之前通过版本控制变更了项目代码，那么请先[更新一次同步Actor缓存](#新增Actor)以确保频道数据状态能正确的显示在频道数据编辑器中。
 
 ### 同步代码
@@ -135,18 +137,15 @@ ChannelUE提供了热编译兼容模式，该模式下每次生成同步代码�
 
 在UE编辑器**已开启**时，通过版本控制更新了项目代码后，需要重新[生成同步代码](#生成同步代码)。
 
-#### 无需上传至版本控制
-##### 同步代码
-推荐将ChanneldUE生成的同步代码忽略，以免版本控制工具将其纳入版本控制中。
+#### 需要忽略的文件
+推荐将ChanneldUE生成的同步代码加入版本控制工具的忽略列表。
 >如使用git作为版本控制工具，可以在项目根目录下的`.gitignore`文件中添加如下内容：
 >```
 ># ChanneldUE生成的同步代码
 >/Source/**/ChanneldGenerated
 >```
 
-##### channeld网关
 通常，channeld网关不会纳入版本控制。但是当开发者需要修改channeld网关源码并将其纳入版本控制时，推荐将ChanneldUE生成的同步代码忽略：
-
 >如使用git作为版本控制工具，可以在channeld网关根目录下的`.gitignore`文件中添加如下内容：
 >```
 ># ChanneldUE生成的同步代码
@@ -157,15 +156,14 @@ ChannelUE提供了热编译兼容模式，该模式下每次生成同步代码�
 ## 插件升级
 项目升级ChanneldUE插件的流程：
 1. 确保UE编辑器关闭
-2. 拉取最新代码，并切换分支到新的版本tag，如：`git checkout v0.6.0`
+2. 拉取最新代码，并切换分支到新的版本tag，如：`git checkout v0.6.0`。如果已经在`release`分支上，则无需切换分支。
 3. 如果已经执行过插件的`Setup.bat`，则channeld代码仓库会自动切换到和tag相匹配的分支；否则，需要手动在本地的channeld代码仓库中拉取最新代码，并切换到和tag相匹配的分支
 4. 删除项目Source中的`ChanneldGenerated`文件夹
-5. 重新生成项目解决方案
+5. 重新生成项目解决方案文件
 6. 重新编译项目并启动
-7. 删除`Content/ChanneldUE/ReplicationRegistry`资产文件
-8. 打开频道数据模型编辑器（工具栏ChanneldUE插件下拉菜单 -> `Edit Channel Data Schema...`）
-9. 点击`Refresh...`按钮，刷新同步缓存
-10. 在`Global`和`Entity`频道添加项目中的C++和蓝图类
-11. 点击`Generate...`按钮，生成同步代码
+7. 打开频道数据模型编辑器（工具栏ChanneldUE插件下拉菜单 -> `Edit Channel Data Schema...`）
+8. 点击`Refresh...`按钮，刷新同步缓存
+9. v0.6版本对空间频道进行了重大升级。如果还没有操作过，请将v0.6之前`Spatial`频道的状态重新添加到`Entity`频道
+10. 点击`Generate...`按钮，生成同步代码
 
 至此，项目可以在新版本的ChanneldUE插件下正常运行了。

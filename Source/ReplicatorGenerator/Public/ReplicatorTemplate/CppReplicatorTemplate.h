@@ -30,6 +30,7 @@ public:
 
 protected:
   TWeakObjectPtr<{Declare_TargetClassName}> {Ref_TargetInstanceRef};
+  static TMap<FString, int32> PropPointerMemOffsetCache;  
 
   // [Server+Client] The accumulated channel data of the target object
   {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* FullState;
@@ -59,6 +60,11 @@ static const TCHAR* CodeGen_CPP_ConstructorImplTemplate =
 
   FullState = new {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName};
   DeltaState = new {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName};
+
+  UClass* ActorClass = {Declare_TargetClassName}::StaticClass();
+  if (!ActorClass) {
+    return;
+  }
 
 {Code_AssignPropertyPointers}
 }
@@ -239,7 +245,7 @@ namespace {Declaration_CDP_Namespace}
       return true;
     }
     
-    virtual const google::protobuf::Message* GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID, bool& bIsRemoved) override
+    virtual const google::protobuf::Message* GetStateFromChannelData(google::protobuf::Message* ChannelData, UClass* TargetClass, UObject* TargetObject, uint32 NetGUID, bool& bIsRemoved) override
     {
       if(ChannelData == nullptr) {
         UE_LOG(LogChanneldGen, Error, TEXT("ChannelData is nullptr"));
@@ -256,7 +262,7 @@ namespace {Declaration_CDP_Namespace}
       return nullptr;
     }
     
-    virtual void SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UClass* TargetClass, uint32 NetGUID) override
+    virtual void SetStateToChannelData(const google::protobuf::Message* State, google::protobuf::Message* ChannelData, UClass* TargetClass, UObject* TargetObject, uint32 NetGUID) override
     {
       if(ChannelData == nullptr) {
         UE_LOG(LogChanneldGen, Error, TEXT("ChannelData is nullptr"));

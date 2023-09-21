@@ -1,6 +1,6 @@
 # 频道数据模型
 ## 什么是频道数据模型
-频道数据模型定义了[频道](./basic-concepts.md#频道)对应的[频道数据状态](./basic-concepts.md#频道数据中的状态)。channeld每次进行频道数据同步时，都会根据频道对应的频道数据模型进行同步。
+频道数据模型定义了[频道](zh/basic-concepts.md#频道)对应的[频道数据状态](zh/basic-concepts.md#频道数据中的状态)。channeld每次进行频道数据同步时，都会根据频道对应的频道数据模型进行同步。
 >GameState、WorldSetting等同步Actor在一个虚拟世界中仅存在一个实例，其在频道数据模型中应该为单例。
 
 ## 频道数据模型编辑器
@@ -17,7 +17,7 @@
 
 打开的编辑器如下图所示：
 
-<img src="../images/default_channel_data_schema_editor.png" height = "600" alt="" />
+![](../images/default_channel_data_schema_editor.png)
 
 >当在新项目中第一次打开频道数据模型编辑器时，会自动创建默认的频道数据模型。
 
@@ -29,7 +29,7 @@
 
 如同下图所示，在频道数据编辑器上方点击`Refresh...`按钮，更新同步缓存。
 
-<img src="../images/refresh_rep_actor_cache.png" width = "600" alt="" />
+![](../images/refresh_rep_actor_cache.png)
 
 >当从未更新过同步缓存，或项目中有任何资产发生了变化时，<img src="../images/refresh_rep_actor_cache_button_alarm.png" height = "20" alt="" />按钮左侧会有一个警告图标，用于提示需要更新同步缓存。但是可以按照自己的需求来决定是否需要更新同步缓存。
 

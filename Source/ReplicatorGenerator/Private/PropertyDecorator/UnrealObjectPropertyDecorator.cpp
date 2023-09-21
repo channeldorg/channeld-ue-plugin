@@ -33,7 +33,7 @@ FString FUnrealObjectPropertyDecorator::GetProtoStateMessageType()
 FString FUnrealObjectPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState)
 {
 	return FString::Printf(
-		TEXT("%s == ChanneldUtils::GetObjectByRef(&%s->%s(), %s)"),
+		TEXT("ChanneldUtils::CheckObjectWithRef(%s, &%s->%s(), %s)"),
 		*GetCode_GetPropertyValueFrom(FromActor),
 		*FromState, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef()
 	);
@@ -42,7 +42,7 @@ FString FUnrealObjectPropertyDecorator::GetCode_ActorPropEqualToProtoState(const
 FString FUnrealObjectPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState, bool ForceFromPointer)
 {
 	return FString::Printf(
-		TEXT("%s == ChanneldUtils::GetObjectByRef(&%s->%s(), %s)"),
+		TEXT("ChanneldUtils::CheckObjectWithRef(%s, &%s->%s(), %s)"),
 		*GetCode_GetPropertyValueFrom(FromActor, ForceFromPointer),
 		*FromState, *GetProtoFieldName(), *Owner->GetCode_GetWorldRef()
 	);
@@ -82,9 +82,10 @@ FString FUnrealObjectPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FS
 	return FString::Format(UObjPropDeco_SetDeltaStateArrayInnerTemp, FormatArgs);
 }
 
-FString FUnrealObjectPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& PropertyPointer, const FString& NewStateName)
+FString FUnrealObjectPropertyDecorator::GetCode_SetPropertyValueArrayInner(const FString& ArrayPropertyName, const FString& PropertyPointer, const FString& NewStateName)
 {
 	FStringFormatNamedArguments FormatArgs;
+	FormatArgs.Add(TEXT("Declare_PropertyName"), ArrayPropertyName);
 	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	FormatArgs.Add(TEXT("Code_GetWorldRef"), Owner->GetCode_GetWorldRef());
 	return FString::Format(UObjPropDeco_OnChangeStateArrayInnerTemp, FormatArgs);

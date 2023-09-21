@@ -20,10 +20,18 @@ UChanneldSettings::UChanneldSettings(const FObjectInitializer& ObjectInitializer
 	SpatialOutlinerClass(LoadClass<AOutlinerActor>(NULL, TEXT("BlueprintGeneratedClass'/ChanneldUE/Blueprints/BP_SpatialOutliner.BP_SpatialOutliner_C'")))
 {
 	FClientInterestSettingsPreset DefaultInterestPreset;
+	DefaultInterestPreset.bActivateByDefault = true;
 	DefaultInterestPreset.AreaType = EClientInterestAreaType::Sphere;
 	DefaultInterestPreset.PresetName = "ThirdPerson";
 	DefaultInterestPreset.Radius = 1000;
 	ClientInterestPresets.Add(DefaultInterestPreset);
+
+	FClientInterestSettingsPreset InspectorInterestPreset;
+	InspectorInterestPreset.bActivateByDefault = false;
+	InspectorInterestPreset.AreaType = EClientInterestAreaType::Box;
+	InspectorInterestPreset.PresetName = "Inspector";
+	InspectorInterestPreset.Extent = FVector(100000, 100000, 100000);
+	ClientInterestPresets.Add(InspectorInterestPreset);
 }
 
 void UChanneldSettings::PostInitProperties()
@@ -120,9 +128,36 @@ void UChanneldSettings::PostInitProperties()
 		UE_LOG(LogChanneld, Log, TEXT("Parsed PlayerStartLocator class name from CLI: %s"), *PlayerStartLocatorClassName);
 		PlayerStartLocatorClass = LoadClass<UChannelDataView>(NULL, *PlayerStartLocatorClassName);
 	}
+
+	float InterestRange;
+	if (FParse::Value(CmdLine, TEXT("InterestRange="), InterestRange))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed InterestRange from CLI: %f"), InterestRange);
+		for (auto& Preset : ClientInterestPresets)
+		{
+			// Only affects the first active preset
+			if (Preset.bActivateByDefault)
+			{
+				Preset.Radius = InterestRange;
+				Preset.Extent = FVector(InterestRange, InterestRange, InterestRange);
+				break;
+			}
+		}
+	}
+	
 	if (FParse::Bool(CmdLine, TEXT("EnableSpatialVisualizer="), bEnableSpatialVisualizer))
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed bEnableSpatialVisualizer from CLI: %d"), bEnableSpatialVisualizer);
+	}
+
+	if (FParse::Value(CmdLine, TEXT("DelayViewInitInSeconds="), DelayViewInitInSeconds))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed DelayViewInitInSeconds from CLI: %f"), DelayViewInitInSeconds);
+	}
+
+	if (FParse::Bool(CmdLine, TEXT("DisableSimulatedProxyTick="), bDisableSimulatedProxyTick))
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Parsed bDisableSimulatedProxyTick from CLI: %d"), bDisableSimulatedProxyTick);
 	}
 
 	// Upgrade to v0.6: use fixed SpatialChannelData message

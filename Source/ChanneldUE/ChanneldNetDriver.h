@@ -62,7 +62,7 @@ public:
 	UChanneldNetConnection* AddChanneldClientConnection(Channeld::ConnectionId ClientConnId, Channeld::ChannelId ChId);
 	void RemoveChanneldClientConnection(Channeld::ConnectionId ClientConnId);
 
-	void ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDeferredRPC);
+	void ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDeferredRPC, UObject* SubObject = nullptr);
 
 	UChanneldConnection* GetConnToChanneld() const { return ConnToChanneld; }
 
@@ -85,8 +85,9 @@ public:
 
 	// Update the PackageMap of all connections that the specified NetId has been sent, so it's safe to send the actor's RPC message.
 	void SetAllSentSpawn(const FNetworkGUID NetId);
-	
-	void RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
+
+	// Returns false if the RPC should not be redirected and should be handled locally.
+	bool RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg);
 
 	void OnSentRPC(const unrealpb::RemoteFunctionMessage& RpcMsg);
 	

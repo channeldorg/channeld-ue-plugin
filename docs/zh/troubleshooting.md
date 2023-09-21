@@ -9,16 +9,27 @@
 - 如果输出日志中出现`failed to listen`的错误，说明端口被占用。请检查默认的端口12108和11288是否被其它程序占用，或者在channeld配置文件中修改端口号
 
 ## 游戏服务器启动后自动退出
-- 检查channeld服务是否正常运行。在开启了channeld网络（`Enable Channeld Networking`）时，游戏服务器会尝试连接channeld服务。如果连接失败，游戏服务器会自动退出
-- 检查游戏服务器的日志。日志文件通常位于项目目录下的`Saved/Logs`目录中，以项目名_{数字}命名。在单服模式下，数字为2是游戏服务器日志；在多服模式下，数字为2是主服务器日志，数字从3开始是空间服务器日志
+- 检查channeld服务是否正常运行。在开启了channeld网络（`Enable Channeld Networking`）时，游戏服务器会尝试连接channeld服务。如果连接失败，游戏服务器会自动退出；
+- 确认[Live Coding](https://docs.unrealengine.com/5.0/en-US/using-live-coding-to-recompile-unreal-engine-applications-at-runtime/)的设置是关闭的，否则会日志中会出现`Error: Failed to register channel data type by name`；
+- 如果上述方法仍无法解决，请检查游戏服务器的日志。日志文件通常位于项目目录下的`Saved/Logs`目录中，以项目名_{数字}命名。在单服模式下，数字为2是游戏服务器日志；在多服模式下，数字为2是主服务器日志，数字从3开始是空间服务器日志。
 
 ## 无法保存蓝图
 如果出现“无法保存资产”的错误提示，通常是由于游戏服务器仍在运行，导致蓝图文件被占用。请先关闭游戏服务器，再保存蓝图。
+
+## 第二个PIE客户端无法进入场景
+查看UE服务端的日志，如果出现如下信息：
+```log
+LogNetTraffic: Error: Received channel open command for channel that was already opened locally.
+```
+请检查`编辑器偏好设置 -> 关卡编辑器 -> 播放 -> Multiplayer Options`中的`单进程下的运行`，确保为**未勾选**的状态。
 
 ## 同步出现问题
 - 确保使用最新生成的同步代码
 - 有时候，生成的同步代码在编译后没有正常被热加载。此时需要重新编译并启动UE编辑器。
 - 检查游戏服务器的日志，查看是否有同步相关的错误信息
+
+## 刷新同步缓存后，无法找到Actor状态
+如果同步Actor的状态在Channel Data Schema编辑器的`Add State`上下文菜单中没有出现，请尝试删除项目目录下的`Intermediate`目录，然后重新编译项目，启动UE编辑器。再次刷新同步缓存，状态应该会出现了。
 
 ## 生成的同步代码编译失败
 该问题的产生可能是ChanneldUE插件的分支切换导致的。解决的方法是手动删除项目目录下的`Source/<项目名>/ChanneldGenerated`目录，然后重新编译项目，启动UE编辑器，再次生成同步代码。

@@ -28,8 +28,14 @@ protected:
 	unrealpb::GameStateBase* DeltaState;
 
 private:
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 2)
 	float* ReplicatedWorldTimeSecondsPtr;
+#else
+	double* ReplicatedWorldTimeSecondsPtr;
+#endif
 	bool* bReplicatedHasBegunPlayPtr;
+	UFunction* OnRep_GameModeClassFunc;
+	UFunction* OnRep_SpectatorClassFunc;
 	UFunction* OnRep_ReplicatedWorldTimeSecondsFunc;
 	UFunction* OnRep_ReplicatedHasBegunPlayFunc;
 };

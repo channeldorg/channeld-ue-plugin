@@ -68,12 +68,17 @@ void FChanneldActorComponentReplicator::OnStateChanged(const google::protobuf::M
 	if (NewState->has_bisactive())
 	{
 		ActorComponent->SetActiveFlag(NewState->bisactive());
-		ActorComponent->OnRep_IsActive();
 	}
 
 	if (NewState->has_breplicated())
 	{
 		ActorComponent->SetIsReplicated(NewState->breplicated());
+	}
+
+	// Process the RepNotify functions after all the replicated properties are updated.
+	if (NewState->has_bisactive())
+	{
+		ActorComponent->OnRep_IsActive();
 	}
 }
 

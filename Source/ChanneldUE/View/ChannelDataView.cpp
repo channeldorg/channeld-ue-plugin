@@ -73,6 +73,9 @@ void UChannelDataView::Initialize(UChanneldConnection* InConn)
 	}
 	
 	UE_LOG(LogChanneld, Log, TEXT("%s initialized channels."), *this->GetClass()->GetName());
+
+	
+	GetChanneldSubsystem()->OnViewInitialized.Broadcast(this);
 }
 
 void UChannelDataView::InitServer()
@@ -451,13 +454,18 @@ void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerControl
 	}
 	*/
 
-	// Send all the existing actors to the new player, including the static level actors.
+	SendExistingActorsToNewPlayer(NewPlayer, NewPlayerConn);
+}
+
+void UChannelDataView::SendExistingActorsToNewPlayer(APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn)
+{
 	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
 	{
 		for(TActorIterator<AActor> It(GetWorld(), AActor::StaticClass()); It; ++It)
 		{
 			AActor* Actor = *It;
-			if (Actor != GameMode->GameState && Actor != NewPlayer && Actor != NewPlayer->PlayerState)
+		
+			if (!Actor->IsA<AGameModeBase>() && Actor != NewPlayer && Actor != NewPlayer->PlayerState)
 			{
 				NetDriver->OnServerSpawnedActor(Actor);
 			}
@@ -545,6 +553,12 @@ void UChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkGUID Net
 
 void UChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId)
 {
+	// Gameplay Debugger is not supported yet.
+	if (Obj->GetClass()->GetFName() == Channeld::GameplayerDebuggerClassName)
+	{
+		return;
+	}
+	
 	ENetRole Role = ROLE_None;
 	if (const AActor* Actor = Cast<AActor>(Obj))
 	{
@@ -626,11 +640,12 @@ Channeld::ChannelId UChannelDataView::GetOwningChannelId(AActor* Actor) const
 	return GetOwningChannelId(GetNetId(Actor));
 }
 
-bool UChannelDataView::SendMulticastRPC(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg)
+bool UChannelDataView::SendMulticastRPC(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg, const FString& SubObjectPathName)
 {
 	unrealpb::RemoteFunctionMessage RpcMsg;
 	RpcMsg.mutable_targetobj()->set_netguid(GetNetId(Actor).Value);
 	RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
+	RpcMsg.set_subobjectpath(TCHAR_TO_UTF8(*SubObjectPathName), SubObjectPathName.Len());
 	if (ParamsMsg)
 	{
 		RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
@@ -652,7 +667,7 @@ bool UChannelDataView::SendMulticastRPC(AActor* Actor, const FString& FuncName, 
 		else
 		{
 			UE_LOG(LogChanneld, Warning, TEXT("Multicast RPC is only supported in Global, SubWorld and Spatial channels. ChannelId: %d, ChannelType: %d"), ChId, (int32)ChannelInfo->ChannelType);
-			GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(RpcMsg.functionname());
+			GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(RpcMsg.functionname(), RPCDropReason_InvalidMulticast);
 			return false;
 		}
 	}

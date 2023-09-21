@@ -8,6 +8,7 @@
 // 1. Replace the default CharacterMovementComponent with the customized UChanneldCharMoveComponent
 // 2. Route server's ProcessEvent to the cross-server RPC if no authority over the character
 // 3. Fix certain cross-server movement issues
+// REQUIRED for using the spatial channel.
 UCLASS(BlueprintType)
 class CHANNELDUE_API AChanneldCharacter : public ACharacter
 {

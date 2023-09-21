@@ -1,8 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework\Pawn.h"
+#include "GameFramework/Pawn.h"
 #include "ChanneldReplicatorBase.h"
+#include "unreal_common.pb.h"
 
 class CHANNELDUE_API FChanneldPawnReplicator : public FChanneldReplicatorBase
 {

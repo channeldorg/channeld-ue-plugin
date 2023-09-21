@@ -11,6 +11,7 @@
 #include "Replication/ChanneldReplication.h"
 #include "Replication/ChanneldActorComponentReplicator.h"
 #include "Replication/ChanneldSceneComponentReplicator.h"
+#include "Replication/ChanneldStaticMeshComponentReplicator.h"
 #include "Replication/ChanneldCharacterReplicator.h"
 #include "Replication/ChanneldControllerReplicator.h"
 #include "Replication/ChanneldPlayerControllerReplicator.h"
@@ -27,7 +28,7 @@ void FChanneldUEModule::StartupModule()
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 	{
 		SettingsModule->RegisterSettings("Project", "Plugins", "ChanneldSettings",
-			LOCTEXT("RuntimeSettingsName", "Channeld"), 
+			LOCTEXT("RuntimeSettingsName", "Channeld"),
 			LOCTEXT("RuntimeSettingsDesc", ""),
 			GetMutableDefault<UChanneldSettings>());
 	}
@@ -42,6 +43,7 @@ void FChanneldUEModule::StartupModule()
 	REGISTER_REPLICATOR(FChanneldPlayerControllerReplicator, APlayerController);
 	REGISTER_REPLICATOR(FChanneldActorComponentReplicator, UActorComponent);
 	REGISTER_REPLICATOR(FChanneldSceneComponentReplicator, USceneComponent);
+	REGISTER_REPLICATOR(FChanneldStaticMeshComponentReplicator, UStaticMeshComponent);
 
 	SpatialChannelDataProcessor = new FDefaultSpatialChannelDataProcessor();
 	ChanneldReplication::RegisterChannelDataProcessor(TEXT("unrealpb.SpatialChannelData"), SpatialChannelDataProcessor);
@@ -58,5 +60,5 @@ void FChanneldUEModule::ShutdownModule()
 }
 
 #undef LOCTEXT_NAMESPACE
-	
+
 IMPLEMENT_MODULE(FChanneldUEModule, ChanneldUE)

@@ -274,14 +274,26 @@ void UChanneldNetDriver::HandleCustomRPC(TSharedPtr<unrealpb::RemoteFunctionMess
 	// Case 3: the server receives the client RPC, but the actor has just been handed over to another server (became non-authoritative).
 	if (IsServer() && !Actor->HasAuthority())
 	{
-		RedirectRPC(Msg);
-		return;
+		if (RedirectRPC(Msg))
+		{
+			return;
+		}
 	}
 
 	//TSet<FNetworkGUID> UnmappedGUID;
 	bool bDelayRPC = false;
 	FName FuncName = UTF8_TO_TCHAR(Msg->functionname().c_str());
-	ReceivedRPC(Actor, FuncName, Msg->paramspayload(), bDelayRPC);
+	UObject* SubObject = nullptr;
+	if (Msg->subobjectpath().length() > 0)
+	{
+		SubObject = Actor->GetDefaultSubobjectByName(Msg->subobjectpath().c_str());
+		if(!SubObject)
+		{
+			UE_LOG(LogChanneld, Log, TEXT("Actor:%s, NetGuid:%d can not find Subobject:%s for Function:%s"),
+				*Actor->GetName(),  Msg->targetobj().netguid(), *FString(Msg->subobjectpath().c_str()), *FuncName.ToString());
+		}
+	}
+	ReceivedRPC(Actor, FuncName, Msg->paramspayload(), bDelayRPC, SubObject);
 	if (bDelayRPC)
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Deferred RPC '%s::%s' due to unmapped NetGUID: %d"), *Actor->GetName(), *FuncName.ToString(), Msg->targetobj().netguid());
@@ -303,6 +315,7 @@ TSharedRef<FInternetAddr> UChanneldNetDriver::ConnIdToAddr(Channeld::ConnectionI
 	{
 		auto Addr = GetSocketSubsystem()->CreateInternetAddr();
 		Addr->SetIp(ConnId);
+		// Won't set the port until UChanneldNetConnection::LowLevelGetRemoteAddress(true) is called.
 		CachedAddr.Add(ConnId, Addr);
 		AddrPtr = &Addr;
 	}
@@ -594,6 +607,10 @@ void UChanneldNetDriver::LowLevelDestroy()
 			ConnToChanneld->Disconnect(true);
 		}
 		*/
+		if (ConnToChanneld->IsConnected() && ConnToChanneld->GetConnectionType() == channeldpb::SERVER)
+		{
+			ConnToChanneld->SendDisconnectMessage(ConnToChanneld->GetConnId());
+		}
 	}
 	ConnToChanneld = nullptr;
 
@@ -665,15 +682,22 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		UE_LOG(LogChanneld, Log, TEXT("ChannelDataView is not initialized yet. If the actor '%s' is a DataProvider, it will not be registered."), *Actor->GetName());
 	}
 
-	// Send the spawn of PlayerController and PlayerState in OnClientPostLogin instead, because
-	// 1) we only want to send PC to owning client, but at this moment, Actor doesn't have NetConnection set yet;
-	// 2) NetConnection is not set up for the PlayerState yet, but we need it for setting the actor location in the spawn message.
-	if (Actor->IsA<APlayerController>() || Actor->IsA<APlayerState>())
+	if (!Actor->GetIsReplicated())
+	{
+		return;
+	}
+	
+	// Gameplay Debugger is not supported yet.
+	if (Actor->GetClass()->GetFName() == Channeld::GameplayerDebuggerClassName)
 	{
 		return;
 	}
 
-	if (!Actor->GetIsReplicated())
+
+	// Send the spawn of PlayerController and PlayerState in OnClientPostLogin instead, because
+	// 1) we only want to send PC to owning client, but at this moment, Actor doesn't have NetConnection set yet;
+	// 2) NetConnection is not set up for the PlayerState yet, but we need it for setting the actor location in the spawn message.
+	if (Actor->IsA<APlayerController>() || Actor->IsA<APlayerState>())
 	{
 		return;
 	}
@@ -708,6 +732,13 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	{
 		OwningConnId = NetConn->GetConnId();
 	}
+	/* Only applies for the spatial view
+	else
+	{
+		// Character should have owner connection at this moment.
+		ensureAlwaysMsgf(!Actor->IsA<ACharacter>(), TEXT("%s doesn't have a valid NetConnection"), *GetNameSafe(Actor));
+	}
+	*/
 
 	if (ChannelDataView.IsValid())
 	{
@@ -747,14 +778,19 @@ void UChanneldNetDriver::SetAllSentSpawn(const FNetworkGUID NetId)
 	}
 }
 
-void UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg)
+bool UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage> Msg)
 {
+	ERPCDropReason DropReason = RPCDropReason_Unknown;
 	if (Msg->redirectioncounter() < GetMutableDefault<UChanneldSettings>()->RpcRedirectionMaxRetries)
 	{
 		if (ChannelDataView.IsValid())
 		{
 			Channeld::ChannelId TargetChId = ChannelDataView->GetOwningChannelId(FNetworkGUID(Msg->targetobj().netguid()));
-			ensureMsgf(!ConnToChanneld->OwnedChannels.Contains(TargetChId), TEXT("Attempt to redirect RPC to the same server, netId: %d, func: %s"), Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
+			if (ConnToChanneld->OwnedChannels.Contains(TargetChId))
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("Attempt to redirect RPC to the same server, netId: %d, func: %s"), Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
+				return false;
+			}
 		
 			if (TargetChId != Channeld::InvalidChannelId)
 			{
@@ -769,18 +805,25 @@ void UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage>
 #endif
 
 				OnSentRPC(*Msg);
-				return;
+				return true;
 			}
 			
 			UE_LOG(LogChanneld, Warning, TEXT("Unable to redirect RPC as the mapping to the target channel doesn't exists, netId: %d"), Msg->targetobj().netguid());
+			DropReason = RPCDropReason_RedirNoChannel;
 		}
 		else
 		{
 			UE_LOG(LogChanneld, Warning, TEXT("Unable to redirect RPC as the view doesn't exist."));
+			DropReason = RPCDropReason_RedirNoView;
 		}
 	}
+	else
+	{
+		DropReason = RPCDropReason_RedirMaxRetried;
+	}
 
-	GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(Msg->functionname());
+	GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(Msg->functionname(), DropReason);
+	return true;
 }
 
 // Called only on client or the destination server of a handover.
@@ -880,14 +923,23 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 		UE_LOG(LogChanneld, Warning, TEXT("Failed to send RPC %s::%s as the view doesn't exist"), *Actor->GetName(), *FuncName);
 		return;
 	}
-	
+
+	ERPCDropReason DropReason = RPCDropReason_Unknown;
 	if (!GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
 	{
 		auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
 		if (RepComp)
 		{
+			UObject* TargetObject = Actor;
+			FString SubObjectPathName = "";
+			if (SubObject)
+			{
+				TargetObject = SubObject;
+				SubObjectPathName = SubObject->GetName();
+			}
+			
 			bool bSuccess = true;
-			auto ParamsMsg = RepComp->SerializeFunctionParams(Actor, Function, Parameters, OutParms, bSuccess);
+			auto ParamsMsg = RepComp->SerializeFunctionParams(TargetObject, Function, Parameters, OutParms, bSuccess);
 			if (bSuccess)
 			{
 				UE_CLOG(bShouldLog && ParamsMsg.IsValid(), LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters: %s"), UTF8_TO_TCHAR(ParamsMsg->DebugString().c_str()));
@@ -897,7 +949,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 				// Server -> Client multicast RPC
 				if (ConnToChanneld->IsServer() && (Function->FunctionFlags & FUNC_NetMulticast))
 				{
-					if (ChannelDataView->SendMulticastRPC(Actor, FuncName, ParamsMsg))
+					if (ChannelDataView->SendMulticastRPC(Actor, FuncName, ParamsMsg, SubObjectPathName))
 					{
 						return;
 					}
@@ -908,7 +960,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 					UChanneldNetConnection* NetConn = ConnToChanneld->IsClient() ? GetServerConnection() : Cast<UChanneldNetConnection>(Actor->GetNetConnection());
 					if (NetConn)
 					{
-						NetConn->SendRPCMessage(Actor, FuncName, ParamsMsg, OwningChId);
+						NetConn->SendRPCMessage(Actor, FuncName, ParamsMsg, OwningChId, SubObjectPathName);
 						return;
 					}
 					UE_LOG(LogChanneld, Warning, TEXT("Failed to send RPC %s::%s as the actor doesn't have any NetConn"), *Actor->GetName(), *FuncName);
@@ -919,6 +971,10 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 					unrealpb::RemoteFunctionMessage RpcMsg;
 					RpcMsg.mutable_targetobj()->set_netguid(GuidCache->GetNetGUID(Actor).Value);
 					RpcMsg.set_functionname(TCHAR_TO_UTF8(*FuncName), FuncName.Len());
+					if (!SubObjectPathName.IsEmpty())
+					{
+						RpcMsg.set_subobjectpath(TCHAR_TO_UTF8(*SubObjectPathName), SubObjectPathName.Len());
+					}
 					if (ParamsMsg)
 					{
 						RpcMsg.set_paramspayload(ParamsMsg->SerializeAsString());
@@ -933,15 +989,17 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 			else
 			{
 				UE_LOG(LogChanneld, Warning, TEXT("Failed to serialize RPC function params: %s::%s"), *Actor->GetName(), *FuncName);
+				DropReason = RPCDropReason_SerializeFailed;
 			}
 		}
-	}
-	else
-	{
-		UE_LOG(LogChanneld, Warning, TEXT("Can't find the ReplicationComponent to serialize RPC: %s::%s"), *Actor->GetName(), *FuncName);
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Can't find the ReplicationComponent to serialize RPC: %s::%s"), *Actor->GetName(), *FuncName);
+			DropReason = RPCDropReason_NoRepComp;
+		}
 	}
 
-	GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(std::string(TCHAR_TO_UTF8(*FuncName)));
+	GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(std::string(TCHAR_TO_UTF8(*FuncName)), DropReason);
 	
 	// Fallback to native RPC
 	Super::ProcessRemoteFunction(Actor, Function, Parameters, OutParms, Stack, SubObject);
@@ -956,47 +1014,61 @@ void UChanneldNetDriver::OnSentRPC(const unrealpb::RemoteFunctionMessage& RpcMsg
 #endif
 }
 
-void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDeferredRPC)
+void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDeferredRPC, UObject* SubObject)
 {
+	const FString FuncName = FunctionName.ToString();
 	const bool bShouldLog = FunctionName != ServerMovePackedFuncName && FunctionName != ClientMoveResponsePackedFuncName && FunctionName != ServerUpdateCameraFuncName;
-	UE_CLOG(bShouldLog,	LogChanneld, Verbose, TEXT("Received RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
-	
-	UFunction* Function = Actor->FindFunction(FunctionName);
+	UE_CLOG(bShouldLog,	LogChanneld, Verbose, TEXT("Received RPC %s::%s"), *Actor->GetName(), *FuncName);
+
+	UObject* Obj = SubObject != nullptr ? SubObject : Actor;
+	UFunction* Function = Obj->FindFunction(FunctionName);
 	if (!Function)
 	{
-		UE_LOG(LogChanneld, Error, TEXT("RPC function %s doesn't exist on Actor %s"), *FunctionName.ToString(), *Actor->GetName());
+		UE_LOG(LogChanneld, Error, TEXT("RPC function %s doesn't exist on Obj %s"), *FuncName, *Actor->GetName());
 		return;
 	}
 
+	ERPCDropReason DropReason = RPCDropReason_Unknown;
 	if (Actor->GetLocalRole() <= ENetRole::ROLE_SimulatedProxy)
 	{
 		// Simulated proxies can't process server or client RPCs
 		if ((Function->FunctionFlags & FUNC_NetClient) || (Function->FunctionFlags & FUNC_NetServer))
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Local role has no authroity to process server or client RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
-			return;
+			UE_LOG(LogChanneld, Warning, TEXT("Local role has no authroity to process server or client RPC %s::%s"), *Actor->GetName(), *FuncName);
+			DropReason = RPCDropReason_NoAuthority;
 		}
 	}
-
-	auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
-	if (RepComp)
+	else
 	{
-		bool bSuccess = true;
-		TSharedPtr<void> Params = RepComp->DeserializeFunctionParams(Actor, Function, ParamsPayload, bSuccess, bDeferredRPC);
-		if (bDeferredRPC)
+		auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
+		if (RepComp)
 		{
-			return;
-		}
+			bool bSuccess = true;
+			TSharedPtr<void> Params = RepComp->DeserializeFunctionParams(Obj, Function, ParamsPayload, bSuccess, bDeferredRPC);
+			if (bDeferredRPC)
+			{
+				return;
+			}
 
-		if (bSuccess)
-		{
-			Actor->ProcessEvent(Function, Params.Get());
+			if (bSuccess)
+			{
+				Obj->ProcessEvent(Function, Params.Get());
+				return;
+			}
+			else
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("Failed to deserialize function parameters of RPC %s::%s"), *Actor->GetName(), *FuncName);
+				DropReason = RPCDropReason_DeserializeFailed;
+			}
 		}
 		else
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Failed to deserialize function parameters of RPC %s::%s"), *Actor->GetName(), *FunctionName.ToString());
+			UE_LOG(LogChanneld, Warning, TEXT("Can't find the ReplicationComponent to deserialize RPC: %s::%s"), *Actor->GetName(), *FuncName);
+			DropReason = RPCDropReason_NoRepComp;
 		}
 	}
+
+	GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(std::string(TCHAR_TO_UTF8(*FuncName)), DropReason);
 }
 
 void UChanneldNetDriver::TickFlush(float DeltaSeconds)
@@ -1049,6 +1121,12 @@ void UChanneldNetDriver::NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTrav
 	if (GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)
 	{
 		Super::NotifyActorDestroyed(Actor, IsSeamlessTravel);
+		return;
+	}
+	
+	// Gameplay Debugger is not supported yet.
+	if (Actor->GetClass()->GetFName() == Channeld::GameplayerDebuggerClassName)
+	{
 		return;
 	}
 
