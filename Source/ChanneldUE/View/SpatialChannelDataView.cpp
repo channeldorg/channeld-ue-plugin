@@ -840,6 +840,7 @@ void USpatialChannelDataView::InitServer()
 	
 	Connection->AddMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, this, &USpatialChannelDataView::ServerHandleHandover);
 
+	Connection->RegisterMessageHandler(channeldpb::SPATIAL_CHANNELS_READY, new channeldpb::SpatialChannelsReadyMessage, this, &USpatialChannelDataView::ServerHandleSpatialChannelsReady);
 	Connection->RegisterMessageHandler(unrealpb::SYNC_NET_ID, new channeldpb::ServerForwardMessage, this, &USpatialChannelDataView::ServerHandleSyncNetId);
 
 	Connection->RegisterMessageHandler(unrealpb::SERVER_PLAYER_LEAVE, new channeldpb::ServerForwardMessage, [&](UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
@@ -874,10 +875,19 @@ void USpatialChannelDataView::InitServer()
 					StrChIds.AppendChar(',');
 			}
 			UE_LOG(LogChanneld, Log, TEXT("Created spatial channels: %s"), *StrChIds);
-
-			SyncNetIds();
 		});
 	});
+}
+
+void USpatialChannelDataView::ServerHandleSpatialChannelsReady(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	auto readyMsg = static_cast<const channeldpb::SpatialChannelsReadyMessage*>(Msg);
+	if (readyMsg->servercount() > 1)
+	{
+		bIsSyncingNetId = true;
+		UE_LOG(LogChanneld, Log, TEXT("All spatial channels are ready. Start synchronizing NetIds between spatial servers."));
+		SyncNetIds();
+	}
 }
 
 void USpatialChannelDataView::SyncNetIds()
@@ -941,9 +951,13 @@ void USpatialChannelDataView::SyncNetIds()
 
 void USpatialChannelDataView::ServerHandleSyncNetId(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
+	bIsSyncingNetId = false;
+	UE_LOG(LogChanneld, Log, TEXT("Finish synchronizing NetIds between spatial servers."));
+	
 	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
 	if (!NetDriver)
 	{
+		UE_LOG(LogChanneld, Error, TEXT("USpatialChannelDataView::ServerHandleSyncNetId: Unable to get ChanneldNetDriver"));
 		return;
 	}
 	
@@ -988,6 +1002,8 @@ void USpatialChannelDataView::ServerHandleSyncNetId(UChanneldConnection* _, Chan
 			}
 		}
 	}
+
+	GetChanneldSubsystem()->OnSynchronizedNetIds.Broadcast(this);
 }
 
 void USpatialChannelDataView::ClientHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
@@ -1326,6 +1342,12 @@ void USpatialChannelDataView::OnNetSpawnedObject(UObject* Obj, const Channeld::C
 
 bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId)
 {
+	if (bIsSyncingNetId)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Non-static object should not be spawned at this stage. Make sure any spawn happens after 'UChanneldGameInstanceSubsystem::OnSynchronizedNetIds' event."))
+		// Just gives warning and still let the spawn happen.
+	}
+	
 	// GameState is in GLOBAL channel
 	if (Obj->IsA<AGameStateBase>())
 	{

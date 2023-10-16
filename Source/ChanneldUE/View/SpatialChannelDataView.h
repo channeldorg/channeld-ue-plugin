@@ -107,10 +107,12 @@ private:
 	// until the client gains interest in them again.
 	TSet<uint32> SuppressedNetIdsToResolve;
 
+	bool bIsSyncingNetId = false;
 	// Synchronize the NetworkGUIDs of the static and well-known objects across the spatial servers.
 	void SyncNetIds();
-	
-	void ServerHandleSyncNetId(UChanneldConnection* ChanneldConnection, unsigned I, const google::protobuf::Message* Message);
+
+	void ServerHandleSpatialChannelsReady(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void ServerHandleSyncNetId(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleHandover(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);

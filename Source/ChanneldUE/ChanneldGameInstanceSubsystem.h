@@ -34,6 +34,7 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FOnceOnQuerySpatialChannel, int64, SpatialChId
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnViewInitialized, UChannelDataView*);
 DECLARE_MULTICAST_DELEGATE(FOnSetLowLevelSendChannelId);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSynchronizedNetIds, UChannelDataView*, View);
 
 UCLASS(Meta = (DisplayName = "Channeld"), config = ChanneldUE)
 class CHANNELDUE_API UChanneldGameInstanceSubsystem : public UGameInstanceSubsystem, public FTickableGameObject
@@ -47,10 +48,15 @@ public:
 	UPROPERTY(BlueprintAssignable)
 		FOnAuth OnAuth;
 
-	//UPROPERTY(BlueprintAssignable)
+	// UPROPERTY(BlueprintAssignable)
 	FOnViewInitialized OnViewInitialized;
+	// UPROPERTY(BlueprintAssignable)
 	FOnSetLowLevelSendChannelId OnSetLowLevelSendChannelId;
 
+	// Triggered when all NetIds are synchronized between the spatial servers. Only SpatialChannelDataView will trigger this event.
+	UPROPERTY(BlueprintAssignable)
+	FOnSynchronizedNetIds OnSynchronizedNetIds;
+	
 	UPROPERTY(BlueprintAssignable)
 		FOnCreateChannel OnCreateChannel;
 
