@@ -2,6 +2,7 @@
 
 #include "Engine/LevelScriptActor.h"
 #include "Engine/SCS_Node.h"
+#include "GameFramework/WorldSettings.h"
 #include "Internationalization/Regex.h"
 #include "Replication/ChanneldReplicationComponent.h"
 
@@ -57,7 +58,7 @@ namespace ChanneldReplicatorGeneratorUtils
 
 	bool IsChanneldUEBuiltinSingletonClass(const UClass* TargetClass)
 	{
-		return TargetClass == AGameStateBase::StaticClass();
+		return TargetClass == AGameStateBase::StaticClass() || TargetClass == AWorldSettings::StaticClass();
 	}
 
 	bool HasReplicatedProperty(const UClass* TargetClass)

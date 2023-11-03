@@ -4,6 +4,7 @@
 #include "PropertyDecoratorFactory.h"
 #include "ReplicatorGeneratorDefinition.h"
 #include "ReplicatorGeneratorUtils.h"
+#include "GameFramework/WorldSettings.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 #include "ReplicatorTemplate/CppReplicatorTemplate.h"
@@ -444,6 +445,10 @@ FString FReplicatedActorDecorator::GetCode_OverrideGetNetGUID()
 	if (TargetClass->IsChildOf(AGameStateBase::StaticClass()))
 	{
 		return FString::Format(GameState_GetNetGUIDTemplate, FormatArgs);
+	}
+	else if (TargetClass->IsChildOf(AWorldSettings::StaticClass()))
+	{
+		return FString::Format(WorldSettings_GetNetGUIDTemplate, FormatArgs);
 	}
 	else if (TargetClass->IsChildOf(UActorComponent::StaticClass()))
 	{

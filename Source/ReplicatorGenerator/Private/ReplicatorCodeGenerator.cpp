@@ -5,6 +5,7 @@
 #include "ReplicatorGeneratorDefinition.h"
 #include "ReplicatorGeneratorUtils.h"
 #include "GameFramework/PlayerState.h"
+#include "GameFramework/WorldSettings.h"
 #include "Internationalization/Regex.h"
 #include "Misc/FileHelper.h"
 #include "ReplicatorTemplate/BlueprintReplicatorTemplate.h"
@@ -616,6 +617,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataProcessorCode(
 		if ((TargetClass != AActor::StaticClass() &&
 				TargetClass != UActorComponent::StaticClass() &&
 				!TargetClass->IsChildOf(AGameStateBase::StaticClass()) &&
+				!TargetClass->IsChildOf(AWorldSettings::StaticClass()) &&
 				!TargetClass->IsChildOf(APlayerState::StaticClass()) &&
 				!TargetClass->IsChildOf(AController::StaticClass()) &&
 				!ActorDecorator->IsSingletonInChannelData()) ||

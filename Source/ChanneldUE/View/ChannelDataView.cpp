@@ -85,9 +85,10 @@ void UChannelDataView::InitServer()
 	NetConnForSpawn->InitBase(NetDriver, NetDriver->GetSocket(), FURL(), USOCK_Open);
 	ChanneldUtils::InitNetConnForSpawn(NetConnForSpawn);
 
-	// Add the GameStateBase (if it's an IChannelDataProvider).
-	// Missing this step will cause client failing to begin play.
-	AddObjectProvider(Channeld::GlobalChannelId, GetWorld()->GetAuthGameMode()->GameState);
+	// Add the GameStateBase and WorldSettings (if they are IChannelDataProvider).
+	// Missing adding GameStateBase will cause client failing to begin play.
+	AddObjectProviderToDefaultChannel(GetWorld()->GetAuthGameMode()->GameState);
+	AddObjectProviderToDefaultChannel(GetWorld()->GetWorldSettings());
 	
 	ReceiveInitServer();
 }

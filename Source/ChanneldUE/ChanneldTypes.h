@@ -25,6 +25,7 @@ namespace Channeld
 	constexpr ChannelId InvalidChannelId = 0xffffffff;
 
 	constexpr uint32 GameStateNetId = 0x00080000;
+	constexpr uint32 WorldSettingsNetId = 0x00080001;
 
 	constexpr uint32 MaxPacketSize = 0x00ffff;
 	constexpr uint32 MinPacketSize = 20;

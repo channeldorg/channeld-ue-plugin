@@ -45,11 +45,6 @@ void UChanneldReplicationComponent::InitOnce()
 		auto OwnerReplicators = ChanneldReplication::FindAndCreateReplicators(GetOwner());
 		if (OwnerReplicators.Num() > 0)
 		{
-			// for (auto OwnerReplicator : OwnerReplicators)
-			// {
-			// 	TUniquePtr<FChanneldReplicatorBase> Ptr(OwnerReplicator);
-			// 	Replicators.Add(Ptr);
-			// }
 			Replicators.Append(OwnerReplicators);
 		}
 		else
@@ -57,6 +52,7 @@ void UChanneldReplicationComponent::InitOnce()
 			UE_LOG(LogChanneld, Warning, TEXT("Unable to add replicator for owner actor: %s"), *GetOwner()->GetFullName());
 		}
 	}
+	
 	for (auto RepComp : GetOwner()->GetReplicatedComponents())
 	{
 		// ActorComponent skips the ChanneldObjectReplicator
@@ -212,7 +208,7 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 		uint32 NetGUID = Replicator->GetNetGUID();
 		if (NetGUID == 0)
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Replicator of '%s' doesn't has a NetGUID yet, skip setting channel data"), *Replicator->GetTargetClass()->GetName());
+			UE_LOG(LogChanneld, Warning, TEXT("Replicator of class '%s' doesn't has a NetGUID yet, skip setting channel data. Owner actor: %s"), *Replicator->GetTargetClass()->GetName(), *GetOwner()->GetName());
 			continue;
 		}
 		

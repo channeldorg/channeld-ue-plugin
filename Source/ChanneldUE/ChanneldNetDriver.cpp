@@ -14,7 +14,6 @@
 #include "GameFramework/PlayerState.h"
 #include "Replication/ChanneldReplicationComponent.h"
 #include "GameFramework/GameModeBase.h"
-#include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerController.h"
 #include "ChanneldNetConnection.h"
 #include "Engine/World.h"

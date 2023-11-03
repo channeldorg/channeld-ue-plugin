@@ -1168,8 +1168,8 @@ void USpatialChannelDataView::InitClient()
 
 Channeld::ChannelId USpatialChannelDataView::GetOwningChannelId(AActor* Actor) const
 {
-	// GameState is owned by the Master server.
-	if (Actor->IsA<AGameStateBase>())
+	// GameState and WorldSettings are owned by the Master server.
+	if (Actor->IsA<AGameStateBase>() || Actor->IsA<AWorldSettings>())
 	{
 		return Channeld::GlobalChannelId;
 	}

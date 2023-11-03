@@ -31,6 +31,14 @@ uint32 {Declare_ReplicatorClassName}::GetNetGUID()
 }
 )EOF";
 
+static const TCHAR* WorldSettings_GetNetGUIDTemplate =
+	LR"EOF(
+uint32 {Declare_ReplicatorClassName}::GetNetGUID()
+{
+  return Channeld::WorldSettingsNetId;
+}
+)EOF";
+
 static const TCHAR* ActorDecor_GetStateFromChannelData =
 	LR"EOF(
 if({Code_Condition}) {

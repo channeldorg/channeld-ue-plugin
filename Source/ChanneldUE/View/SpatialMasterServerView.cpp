@@ -140,13 +140,12 @@ void USpatialMasterServerView::InitServer()
 
 void USpatialMasterServerView::AddProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider)
 {
-	// Should only replicates the GameStateBase
-	if (!Provider->GetTargetObject()->IsA(AGameStateBase::StaticClass()))
+	// Should only replicates the GameStateBase and WorldSettings
+	UObject* TargetObject = Provider->GetTargetObject();
+	if (TargetObject->IsA(AGameStateBase::StaticClass()) || TargetObject->IsA(AWorldSettings::StaticClass()))
 	{
-		return;
+		Super::AddProvider(ChId, Provider);
 	}
-
-	Super::AddProvider(ChId, Provider);
 }
 
 Channeld::ChannelId USpatialMasterServerView::GetOwningChannelId(const FNetworkGUID NetId) const

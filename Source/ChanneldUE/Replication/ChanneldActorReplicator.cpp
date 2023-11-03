@@ -11,6 +11,10 @@ FChanneldActorReplicator::FChanneldActorReplicator(UObject* InTargetObj) : FChan
 	{
 		NetGUID = Channeld::GameStateNetId;
 	}
+	else if (Actor->IsA<AWorldSettings>())
+	{
+		NetGUID = Channeld::WorldSettingsNetId;
+	}
 
 	// Remove the registered DOREP() properties in the Character
 	TArray<FLifetimeProperty> RepProps;
