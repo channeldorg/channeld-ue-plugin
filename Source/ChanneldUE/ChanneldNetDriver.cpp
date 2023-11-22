@@ -146,7 +146,8 @@ void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessa
 		if (ChannelDataView.IsValid())
 		{
 			ChannelDataView->AddObjectProviderToDefaultChannel(NewObj);
-			ChannelDataView->OnNetSpawnedObject(NewObj, SpawnMsg->channelid());
+			const unrealpb::SpawnObjectMessage& Msg = *SpawnMsg;
+			ChannelDataView->OnNetSpawnedObject(NewObj, SpawnMsg->channelid(), &Msg);
 		}
 
 		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %d, owning channel: %d, local role: %d"), *NewObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), LocalRole);

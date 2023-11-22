@@ -1316,7 +1316,7 @@ void USpatialChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayer
 	}
 }
 
-void USpatialChannelDataView::OnNetSpawnedObject(UObject* Obj, const Channeld::ChannelId ChId)
+void USpatialChannelDataView::OnNetSpawnedObject(UObject* Obj, const Channeld::ChannelId ChId, const unrealpb::SpawnObjectMessage* SpawnMsg)
 {
 	if (Visualizer)
 	{

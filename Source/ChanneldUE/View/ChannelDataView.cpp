@@ -87,7 +87,8 @@ void UChannelDataView::InitServer()
 
 	// Add the GameStateBase (if it's an IChannelDataProvider).
 	// Missing this step will cause client failing to begin play.
-	AddObjectProvider(Channeld::GlobalChannelId, GetWorld()->GetAuthGameMode()->GameState);
+	auto GameState = GetWorld()->GetAuthGameMode()->GameState;
+	AddObjectProvider(GetOwningChannelId(GameState), GameState);
 	
 	ReceiveInitServer();
 }
