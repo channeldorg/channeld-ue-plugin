@@ -1166,14 +1166,14 @@ void USpatialChannelDataView::InitClient()
 	});
 }
 
-Channeld::ChannelId USpatialChannelDataView::GetOwningChannelId(AActor* Actor) const
+Channeld::ChannelId USpatialChannelDataView::GetOwningChannelId(UObject* Obj) const
 {
 	// GameState is owned by the Master server.
-	if (Actor->IsA<AGameStateBase>())
+	if (Obj->IsA<AGameStateBase>())
 	{
 		return Channeld::GlobalChannelId;
 	}
-	return Super::GetOwningChannelId(Actor);
+	return Super::GetOwningChannelId(Obj);
 }
 
 void USpatialChannelDataView::SetOwningChannelId(const FNetworkGUID NetId, Channeld::ChannelId ChId)

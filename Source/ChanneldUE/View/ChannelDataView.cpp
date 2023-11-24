@@ -616,29 +616,9 @@ Channeld::ChannelId UChannelDataView::GetOwningChannelId(const FNetworkGUID NetI
 	return Channeld::InvalidChannelId;
 }
 
-Channeld::ChannelId UChannelDataView::GetOwningChannelId(AActor* Actor) const
+Channeld::ChannelId UChannelDataView::GetOwningChannelId(UObject* Obj) const
 {
-	/* Actors don't necessarily have a NetConnection to have to NetId.
-	if (const auto NetConn = Actor->GetNetConnection())
-	{
-		if (const auto NetDriver = Cast<UChanneldNetDriver>(NetConn->Driver))
-		{
-			const FNetworkGUID NetId = NetDriver->GuidCache->GetNetGUID(Actor);
-			if (NetId.IsValid())
-			{
-				return GetOwningChannelId(NetId);
-			}
-			else
-			{
-				UE_LOG(LogChanneld, Log, TEXT("No NetGUID has been assigned to Actor %s"), *GetNameSafe(Actor));
-			}
-		}
-	}
-
-	return Channeld::InvalidChannelId;
-	*/
-	
-	return GetOwningChannelId(GetNetId(Actor));
+	return GetOwningChannelId(GetNetId(Obj));
 }
 
 bool UChannelDataView::SendMulticastRPC(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg, const FString& SubObjectPathName)
