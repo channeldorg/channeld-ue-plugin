@@ -117,6 +117,9 @@ CHANNELDUE_API extern RemoveEntityGroupMessageDefaultTypeInternal _RemoveEntityG
 class ServerForwardMessage;
 struct ServerForwardMessageDefaultTypeInternal;
 CHANNELDUE_API extern ServerForwardMessageDefaultTypeInternal _ServerForwardMessage_default_instance_;
+class SpatialChannelsReadyMessage;
+struct SpatialChannelsReadyMessageDefaultTypeInternal;
+CHANNELDUE_API extern SpatialChannelsReadyMessageDefaultTypeInternal _SpatialChannelsReadyMessage_default_instance_;
 class SpatialInfo;
 struct SpatialInfoDefaultTypeInternal;
 CHANNELDUE_API extern SpatialInfoDefaultTypeInternal _SpatialInfo_default_instance_;
@@ -181,6 +184,7 @@ template<> CHANNELDUE_API ::channeldpb::QuerySpatialChannelResultMessage* Arena:
 template<> CHANNELDUE_API ::channeldpb::RemoveChannelMessage* Arena::CreateMaybeMessage<::channeldpb::RemoveChannelMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::RemoveEntityGroupMessage* Arena::CreateMaybeMessage<::channeldpb::RemoveEntityGroupMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::ServerForwardMessage* Arena::CreateMaybeMessage<::channeldpb::ServerForwardMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::SpatialChannelsReadyMessage* Arena::CreateMaybeMessage<::channeldpb::SpatialChannelsReadyMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::SpatialInfo* Arena::CreateMaybeMessage<::channeldpb::SpatialInfo>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::SpatialInterestQuery* Arena::CreateMaybeMessage<::channeldpb::SpatialInterestQuery>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::SpatialInterestQuery_BoxAOI* Arena::CreateMaybeMessage<::channeldpb::SpatialInterestQuery_BoxAOI>(Arena*);
@@ -332,6 +336,7 @@ enum MessageType : int {
   CREATE_ENTITY_CHANNEL = 15,
   ENTITY_GROUP_ADD = 16,
   ENTITY_GROUP_REMOVE = 17,
+  SPATIAL_CHANNELS_READY = 18,
   DEBUG_GET_SPATIAL_REGIONS = 99,
   USER_SPACE_START = 100,
   MessageType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
@@ -4479,6 +4484,165 @@ class CHANNELDUE_API QuerySpatialChannelResultMessage final :
 };
 // -------------------------------------------------------------------
 
+class CHANNELDUE_API SpatialChannelsReadyMessage final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.SpatialChannelsReadyMessage) */ {
+ public:
+  inline SpatialChannelsReadyMessage() : SpatialChannelsReadyMessage(nullptr) {}
+  ~SpatialChannelsReadyMessage() override;
+  explicit PROTOBUF_CONSTEXPR SpatialChannelsReadyMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  SpatialChannelsReadyMessage(const SpatialChannelsReadyMessage& from);
+  SpatialChannelsReadyMessage(SpatialChannelsReadyMessage&& from) noexcept
+    : SpatialChannelsReadyMessage() {
+    *this = ::std::move(from);
+  }
+
+  inline SpatialChannelsReadyMessage& operator=(const SpatialChannelsReadyMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SpatialChannelsReadyMessage& operator=(SpatialChannelsReadyMessage&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const SpatialChannelsReadyMessage& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const SpatialChannelsReadyMessage* internal_default_instance() {
+    return reinterpret_cast<const SpatialChannelsReadyMessage*>(
+               &_SpatialChannelsReadyMessage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    23;
+
+  friend void swap(SpatialChannelsReadyMessage& a, SpatialChannelsReadyMessage& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SpatialChannelsReadyMessage* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SpatialChannelsReadyMessage* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  SpatialChannelsReadyMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<SpatialChannelsReadyMessage>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const SpatialChannelsReadyMessage& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const SpatialChannelsReadyMessage& from) {
+    SpatialChannelsReadyMessage::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SpatialChannelsReadyMessage* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "channeldpb.SpatialChannelsReadyMessage";
+  }
+  protected:
+  explicit SpatialChannelsReadyMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kServerIndexFieldNumber = 1,
+    kServerCountFieldNumber = 2,
+  };
+  // uint32 serverIndex = 1;
+  void clear_serverindex();
+  uint32_t serverindex() const;
+  void set_serverindex(uint32_t value);
+  private:
+  uint32_t _internal_serverindex() const;
+  void _internal_set_serverindex(uint32_t value);
+  public:
+
+  // uint32 serverCount = 2;
+  void clear_servercount();
+  uint32_t servercount() const;
+  void set_servercount(uint32_t value);
+  private:
+  uint32_t _internal_servercount() const;
+  void _internal_set_servercount(uint32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:channeldpb.SpatialChannelsReadyMessage)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    uint32_t serverindex_;
+    uint32_t servercount_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_channeld_2eproto;
+};
+// -------------------------------------------------------------------
+
 class CHANNELDUE_API ChannelDataHandoverMessage final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.ChannelDataHandoverMessage) */ {
  public:
@@ -4527,7 +4691,7 @@ class CHANNELDUE_API ChannelDataHandoverMessage final :
                &_ChannelDataHandoverMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    24;
 
   friend void swap(ChannelDataHandoverMessage& a, ChannelDataHandoverMessage& b) {
     a.Swap(&b);
@@ -4717,7 +4881,7 @@ class CHANNELDUE_API SpatialRegion final :
                &_SpatialRegion_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    25;
 
   friend void swap(SpatialRegion& a, SpatialRegion& b) {
     a.Swap(&b);
@@ -4916,7 +5080,7 @@ class CHANNELDUE_API SpatialRegionsUpdateMessage final :
                &_SpatialRegionsUpdateMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    26;
 
   friend void swap(SpatialRegionsUpdateMessage& a, SpatialRegionsUpdateMessage& b) {
     a.Swap(&b);
@@ -5073,7 +5237,7 @@ class CHANNELDUE_API SpatialInterestQuery_SpotsAOI final :
                &_SpatialInterestQuery_SpotsAOI_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    27;
 
   friend void swap(SpatialInterestQuery_SpotsAOI& a, SpatialInterestQuery_SpotsAOI& b) {
     a.Swap(&b);
@@ -5255,7 +5419,7 @@ class CHANNELDUE_API SpatialInterestQuery_BoxAOI final :
                &_SpatialInterestQuery_BoxAOI_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    28;
 
   friend void swap(SpatialInterestQuery_BoxAOI& a, SpatialInterestQuery_BoxAOI& b) {
     a.Swap(&b);
@@ -5432,7 +5596,7 @@ class CHANNELDUE_API SpatialInterestQuery_SphereAOI final :
                &_SpatialInterestQuery_SphereAOI_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    29;
 
   friend void swap(SpatialInterestQuery_SphereAOI& a, SpatialInterestQuery_SphereAOI& b) {
     a.Swap(&b);
@@ -5600,7 +5764,7 @@ class CHANNELDUE_API SpatialInterestQuery_ConeAOI final :
                &_SpatialInterestQuery_ConeAOI_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    30;
 
   friend void swap(SpatialInterestQuery_ConeAOI& a, SpatialInterestQuery_ConeAOI& b) {
     a.Swap(&b);
@@ -5799,7 +5963,7 @@ class CHANNELDUE_API SpatialInterestQuery final :
                &_SpatialInterestQuery_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    31;
 
   friend void swap(SpatialInterestQuery& a, SpatialInterestQuery& b) {
     a.Swap(&b);
@@ -6022,7 +6186,7 @@ class CHANNELDUE_API UpdateSpatialInterestMessage final :
                &_UpdateSpatialInterestMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    32;
 
   friend void swap(UpdateSpatialInterestMessage& a, UpdateSpatialInterestMessage& b) {
     a.Swap(&b);
@@ -6190,7 +6354,7 @@ class CHANNELDUE_API CreateEntityChannelMessage final :
                &_CreateEntityChannelMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    33;
 
   friend void swap(CreateEntityChannelMessage& a, CreateEntityChannelMessage& b) {
     a.Swap(&b);
@@ -6425,7 +6589,7 @@ class CHANNELDUE_API AddEntityGroupMessage final :
                &_AddEntityGroupMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    34;
 
   friend void swap(AddEntityGroupMessage& a, AddEntityGroupMessage& b) {
     a.Swap(&b);
@@ -6598,7 +6762,7 @@ class CHANNELDUE_API RemoveEntityGroupMessage final :
                &_RemoveEntityGroupMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    35;
 
   friend void swap(RemoveEntityGroupMessage& a, RemoveEntityGroupMessage& b) {
     a.Swap(&b);
@@ -6770,7 +6934,7 @@ class CHANNELDUE_API DebugGetSpatialRegionsMessage final :
                &_DebugGetSpatialRegionsMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    36;
 
   friend void swap(DebugGetSpatialRegionsMessage& a, DebugGetSpatialRegionsMessage& b) {
     a.Swap(&b);
@@ -9054,6 +9218,50 @@ QuerySpatialChannelResultMessage::mutable_channelid() {
 
 // -------------------------------------------------------------------
 
+// SpatialChannelsReadyMessage
+
+// uint32 serverIndex = 1;
+inline void SpatialChannelsReadyMessage::clear_serverindex() {
+  _impl_.serverindex_ = 0u;
+}
+inline uint32_t SpatialChannelsReadyMessage::_internal_serverindex() const {
+  return _impl_.serverindex_;
+}
+inline uint32_t SpatialChannelsReadyMessage::serverindex() const {
+  // @@protoc_insertion_point(field_get:channeldpb.SpatialChannelsReadyMessage.serverIndex)
+  return _internal_serverindex();
+}
+inline void SpatialChannelsReadyMessage::_internal_set_serverindex(uint32_t value) {
+  
+  _impl_.serverindex_ = value;
+}
+inline void SpatialChannelsReadyMessage::set_serverindex(uint32_t value) {
+  _internal_set_serverindex(value);
+  // @@protoc_insertion_point(field_set:channeldpb.SpatialChannelsReadyMessage.serverIndex)
+}
+
+// uint32 serverCount = 2;
+inline void SpatialChannelsReadyMessage::clear_servercount() {
+  _impl_.servercount_ = 0u;
+}
+inline uint32_t SpatialChannelsReadyMessage::_internal_servercount() const {
+  return _impl_.servercount_;
+}
+inline uint32_t SpatialChannelsReadyMessage::servercount() const {
+  // @@protoc_insertion_point(field_get:channeldpb.SpatialChannelsReadyMessage.serverCount)
+  return _internal_servercount();
+}
+inline void SpatialChannelsReadyMessage::_internal_set_servercount(uint32_t value) {
+  
+  _impl_.servercount_ = value;
+}
+inline void SpatialChannelsReadyMessage::set_servercount(uint32_t value) {
+  _internal_set_servercount(value);
+  // @@protoc_insertion_point(field_set:channeldpb.SpatialChannelsReadyMessage.serverCount)
+}
+
+// -------------------------------------------------------------------
+
 // ChannelDataHandoverMessage
 
 // uint32 srcChannelId = 1;
@@ -11068,6 +11276,8 @@ RemoveEntityGroupMessage::mutable_entitiestoremove() {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
