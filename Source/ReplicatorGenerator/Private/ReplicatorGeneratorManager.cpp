@@ -245,3 +245,8 @@ bool FReplicatorGeneratorManager::SaveGeneratedManifest(const FGeneratedManifest
 	ChanneldReplicatorGeneratorUtils::EnsureRepGenIntermediateDir();
 	return GeneratedManifestModel.SaveData(Manifest);
 }
+
+const FModuleInfo* FReplicatorGeneratorManager::GetModuleInfo(const FString& ClassName) const
+{
+	return CodeGenerator->GetModuleInfo(ClassName);
+}

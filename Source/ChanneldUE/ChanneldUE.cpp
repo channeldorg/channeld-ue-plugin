@@ -40,7 +40,8 @@ void FChanneldUEModule::StartupModule()
 	REGISTER_REPLICATOR(FChanneldCharacterReplicator, ACharacter);
 	REGISTER_REPLICATOR(FChanneldPlayerStateReplicator, APlayerState);
 	REGISTER_REPLICATOR(FChanneldControllerReplicator, AController);
-	REGISTER_REPLICATOR(FChanneldPlayerControllerReplicator, APlayerController);
+	// Since v0.7.2: Use generated code
+	//REGISTER_REPLICATOR(FChanneldPlayerControllerReplicator, APlayerController);
 	REGISTER_REPLICATOR(FChanneldActorComponentReplicator, UActorComponent);
 	REGISTER_REPLICATOR(FChanneldSceneComponentReplicator, USceneComponent);
 	REGISTER_REPLICATOR(FChanneldStaticMeshComponentReplicator, UStaticMeshComponent);

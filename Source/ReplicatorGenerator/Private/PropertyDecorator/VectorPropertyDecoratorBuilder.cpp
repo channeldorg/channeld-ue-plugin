@@ -7,7 +7,8 @@ bool FVectorPropertyDecoratorBuilder::IsSpecialProperty(FProperty* Property)
 	if (Property->IsA<FStructProperty>())
 	{
 		const FStructProperty* StructProperty = CastFieldChecked<FStructProperty>(Property);
-		if (StructProperty->Struct->GetStructCPPName().Equals(TEXT("FVector")))
+		const FString StructName = StructProperty->Struct->GetStructCPPName();
+		if (StructName.Equals(TEXT("FVector")) || StructName.StartsWith(TEXT("FVector_NetQuantize")))
 		{
 			return true;
 		}

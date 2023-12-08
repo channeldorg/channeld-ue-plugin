@@ -333,8 +333,11 @@ FString FReplicatedActorDecorator::GetCode_AllPropertiesOnStateChange(const FStr
 	FString OnChangeStateCodeBuilder;
 	for (const TSharedPtr<FPropertyDecorator> Property : Properties)
 	{
-		// 'b{PropertyName}Changed` variable is used to avoid calling OnRep() function when the property value is not changed.
-		OnChangeStateCodeBuilder.Append(FString::Printf(TEXT("\nbool b%sChanged = false;"), *Property->GetPropertyName()));
+		if (!Property->IsArray())
+		{
+			// 'b{PropertyName}Changed` variable is used to avoid calling OnRep() function when the property value is not changed.
+			OnChangeStateCodeBuilder.Append(FString::Printf(TEXT("\nbool b%sChanged = false;"), *Property->GetPropertyName()));
+		}
 		if (Property->HasOnRepNotifyParam())
 		{
 			// `Old{PropertyName}` variable is used to pass the old property value to OnRep() function.
@@ -662,6 +665,11 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProtoFieldDefinition(const
 }
 
 bool FReplicatedActorDecorator::IsStruct()
+{
+	return false;
+}
+
+bool FReplicatedActorDecorator::IsArray()
 {
 	return false;
 }

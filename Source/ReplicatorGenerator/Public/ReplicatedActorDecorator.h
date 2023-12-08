@@ -398,6 +398,8 @@ public:
 	virtual FString GetCode_ChannelDataProtoFieldDefinition(const int32& FieldNum);
 
 	virtual bool IsStruct() override;
+	
+	virtual bool IsArray() override;
 
 	virtual TArray<TSharedPtr<FStructPropertyDecorator>> GetStructPropertyDecorators() override;
 
