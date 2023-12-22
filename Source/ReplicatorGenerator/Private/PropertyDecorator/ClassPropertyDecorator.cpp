@@ -14,7 +14,7 @@ FString FClassPropertyDecorator::GetCode_GetProtoFieldValueFrom(const FString& S
 
 FString FClassPropertyDecorator::GetCode_SetProtoFieldValueTo(const FString& StateName, const FString& GetValueCode)
 {
-	return FString::Printf(TEXT("%s->set_%s(std::string(TCHAR_TO_UTF8(*(*%s)->GetName())))"), *StateName, *GetProtoFieldName(), *GetValueCode);
+	return FString::Printf(TEXT("%s->set_%s(std::string(TCHAR_TO_UTF8(*(%s)->GetClassPathName().ToString())))"), *StateName, *GetProtoFieldName(), *GetValueCode);
 }
 
 FString FClassPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
