@@ -271,7 +271,7 @@ FString FPropertyDecorator::GetCode_CallRepNotify(const FString& TargetInstanceN
 	return TEXT("");
 }
 
-FString FPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, const FString& AfterSetValueCode)
+FString FPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, const FString& AfterSetValueCode, bool ConditionFullStateIsNull)
 {
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName));
@@ -318,6 +318,11 @@ FString FPropertyDecorator::GetCode_GetWorldRef()
 }
 
 bool FPropertyDecorator::IsStruct()
+{
+	return false;
+}
+
+bool FPropertyDecorator::IsArray()
 {
 	return false;
 }

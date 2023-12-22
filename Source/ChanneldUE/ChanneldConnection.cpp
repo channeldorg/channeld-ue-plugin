@@ -170,7 +170,7 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int32
 	{
 		if (!ensure(StartReceiveThread()))
 		{
-			Error = FString::Printf(TEXT("Start receive thread failed"));
+			Error = TEXT("Start receive thread failed");
 			return false;
 		}
 	}

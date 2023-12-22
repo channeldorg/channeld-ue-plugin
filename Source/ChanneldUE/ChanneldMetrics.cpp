@@ -15,7 +15,7 @@ void UChanneldMetrics::Initialize(FSubsystemCollectionBase& Collection)
 	}
 	else
 	{
-		MetricsName = GetMutableDefault<UChanneldSettings>()->ChannelDataViewClass->GetName();
+		MetricsName = FApp::GetProjectName();//GetMutableDefault<UChanneldSettings>()->ChannelDataViewClass->GetName();
 	}
 	
 	const Labels NameLabel = {{ "name", TCHAR_TO_UTF8(*MetricsName) }};

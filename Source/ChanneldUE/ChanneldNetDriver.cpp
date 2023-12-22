@@ -1018,7 +1018,7 @@ void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, c
 {
 	const FString FuncName = FunctionName.ToString();
 	const bool bShouldLog = FunctionName != ServerMovePackedFuncName && FunctionName != ClientMoveResponsePackedFuncName && FunctionName != ServerUpdateCameraFuncName;
-	UE_CLOG(bShouldLog,	LogChanneld, Verbose, TEXT("Received RPC %s::%s"), *Actor->GetName(), *FuncName);
+	UE_CLOG(bShouldLog, LogChanneld, Verbose, TEXT("Received RPC %s::%s"), *Actor->GetName(), *FuncName);
 
 	UObject* Obj = SubObject != nullptr ? SubObject : Actor;
 	UFunction* Function = Obj->FindFunction(FunctionName);

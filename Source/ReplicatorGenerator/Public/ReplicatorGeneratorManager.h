@@ -164,6 +164,8 @@ public:
 
 	bool SaveGeneratedManifest(const FGeneratedManifest& Manifest);
 
+	const FModuleInfo* GetModuleInfo(const FString& ClassName) const;
+
 	TSet<FString> DefaultSkipGenRep = {
 		TEXT("/Script/Engine.WorldSettings"),
 		TEXT("/Script/Engine.Light"),
