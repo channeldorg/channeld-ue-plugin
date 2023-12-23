@@ -1,5 +1,7 @@
 #include "MetricsSubsystem.h"
 
+#include "LogMetricsOutputDevice.h"
+
 DEFINE_LOG_CATEGORY(LogPrometheus)
 
 /*
@@ -47,6 +49,8 @@ void UGauge::BeginDestroy()
 
 void UMetricsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
+	RegistryPtr = std::make_shared<Registry>();
+
 	auto CmdLine = FCommandLine::Get();
 	bool bMetricsEnabled = false;
 	if (FParse::Bool(CmdLine, TEXT("metrics"), bMetricsEnabled))
@@ -58,8 +62,20 @@ void UMetricsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	{
 		UE_LOG(LogPrometheus, Log, TEXT("Parsed Prometheus Port from CLI: %d"), ExposerPort);
 	}
+	int32 MetricsLogLevel = ELogVerbosity::Warning;
+	if (FParse::Value(CmdLine, TEXT("metricsLogLevel="), MetricsLogLevel))
+	{
+		UE_LOG(LogPrometheus, Log, TEXT("Parsed MetricsLogLevel from CLI: %d"), MetricsLogLevel);
+	}
+	if (bMetricsEnabled && MetricsLogLevel > 0)
+	{
+		auto LogMetricsFamily = &AddCounterFamily(FName("ue_logs"), TEXT("Number of logs in UE"));
+		LogMetricsCounterFamily = TSharedPtr<Family<Counter>>(LogMetricsFamily);
+		LogMetricsOutputDevice = MakeShared<FLogMetricsOutputDevice>(*LogMetricsFamily);
+		LogMetricsOutputDevice->ThresholdVerbosity = static_cast<ELogVerbosity::Type>(MetricsLogLevel);
+		FOutputDeviceRedirector::Get()->AddOutputDevice(LogMetricsOutputDevice.Get());
+	}
 
-	RegistryPtr = std::make_shared<Registry>();
 	if (bMetricsEnabled)
 	{
 		ExposerPtr = MakeShared<Exposer>("0.0.0.0:" + std::to_string(ExposerPort));
@@ -69,6 +85,15 @@ void UMetricsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 void UMetricsSubsystem::Deinitialize()
 {
+	if (LogMetricsOutputDevice.IsValid())
+	{
+		FOutputDeviceRedirector::Get()->RemoveOutputDevice(LogMetricsOutputDevice.Get());
+	}
+	if (LogMetricsCounterFamily.IsValid())
+	{
+		Remove(*LogMetricsCounterFamily);
+	}
+	
 	for (auto& Pair : CounterFamilies)
 	{
 		// Trigger UCounterFamily::BeginDestroy() to remove all counters from the family
