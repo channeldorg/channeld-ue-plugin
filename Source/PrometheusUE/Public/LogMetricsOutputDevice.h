@@ -15,7 +15,7 @@ public:
 	
 protected:
 	Family<Counter>* Family;
-	TMap<FName, Counter*> CountersByCategory;
+	TMap<TTuple<FName, ELogVerbosity::Type>, Counter*> CountersByCategory;
 	
 	virtual void Serialize(const TCHAR* Message, ELogVerbosity::Type Verbosity, const class FName& Category) override;
 };

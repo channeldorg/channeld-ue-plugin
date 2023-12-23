@@ -7,7 +7,8 @@ void FLogMetricsOutputDevice::Serialize(const TCHAR* Message, ELogVerbosity::Typ
 		return;
 	}
 
-	if (Counter* Ctr = CountersByCategory.FindRef(Category))
+	TTuple<FName, ELogVerbosity::Type> Key(Category, Verbosity);
+	if (Counter* Ctr = CountersByCategory.FindRef(Key))
 	{
 		Ctr->Increment();
 	}
@@ -15,9 +16,10 @@ void FLogMetricsOutputDevice::Serialize(const TCHAR* Message, ELogVerbosity::Typ
 	{
 		Counter* NewCounter = &Family->Add({
 			{"category", TCHAR_TO_UTF8(*Category.ToString())},
-			{"node", TCHAR_TO_UTF8(FPlatformProcess::ComputerName())}
+			{"level", TCHAR_TO_UTF8(ToString(Verbosity))},
+			{"node", TCHAR_TO_UTF8(FPlatformProcess::ComputerName())},
 		});
-		CountersByCategory.Add(Category, NewCounter);
+		CountersByCategory.Add(Key, NewCounter);
 		NewCounter->Increment();
 	}
 }
