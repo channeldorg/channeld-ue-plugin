@@ -5,6 +5,7 @@
 #include "prometheus/gauge.h"
 #include "prometheus/exposer.h"
 #include "prometheus/registry.h"
+#include "LogMetricsOutputDevice.h"
 #include "MetricsSubsystem.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPrometheus, Log, All);
@@ -206,8 +207,11 @@ public:
 
 private:
 
-	TSharedPtr<Exposer> ExposerPtr;
 	std::shared_ptr<Registry> RegistryPtr;
+	TSharedPtr<Exposer> ExposerPtr;
+
+	TSharedPtr<Family<Counter>> LogMetricsCounterFamily;
+	TSharedPtr<FLogMetricsOutputDevice> LogMetricsOutputDevice;
 
 	UPROPERTY()
 	TMap<FName, UCounterFamily*> CounterFamilies;

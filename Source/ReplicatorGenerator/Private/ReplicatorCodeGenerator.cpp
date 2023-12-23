@@ -156,6 +156,20 @@ bool FReplicatorCodeGenerator::Generate(
 	// Global struct codes
 	auto GlobalStructDecorators = GetAllStructPropertyDecorators(ActorDecoratorsToGenReplicator);
 	ReplicationCodeBundle.GlobalStructCodes.Append(TEXT("#pragma once\n"));
+	
+	TSet<FString> IncludeFiles;
+	for (auto StructDecorator : GlobalStructDecorators)
+	{
+		for (auto IncludeFile : StructDecorator->GetAdditionalIncludes())
+		{
+			IncludeFiles.Add(IncludeFile);
+		}
+	}
+	for (auto IncludeFile : IncludeFiles)
+	{
+		ReplicationCodeBundle.GlobalStructCodes.Append(FString::Printf(TEXT("#include \"%s\"\n"), *IncludeFile));
+	}
+	
 	ReplicationCodeBundle.GlobalStructCodes.Append(TEXT("#include \"ChanneldUtils.h\"\n"));
 	ReplicationCodeBundle.GlobalStructCodes.Append(FString::Printf(TEXT("#include \"%s\"\n"), *GenManager_GlobalStructProtoHeaderFile));
 	for (auto StructDecorator : GlobalStructDecorators)

@@ -228,7 +228,7 @@ FString FStructPropertyDecorator::GetDeclaration_PropPtrGroupStruct()
 
 		OnStateChangeCodes.Append(
 			PropDecorator->GetCode_OnStateChange(
-				TEXT("this"), TEXT("NewState")
+				TEXT("this"), TEXT("NewState"), TEXT(""), true
 			)
 		);
 

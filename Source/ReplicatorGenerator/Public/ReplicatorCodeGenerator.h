@@ -138,6 +138,11 @@ public:
 		FGeneratedCodeBundle& ReplicationCodeBundle
 	);
 
+	const FModuleInfo* GetModuleInfo(const FString& ClassName) const
+	{
+		return ModuleInfoByClassName.Find(ClassName);
+	}
+
 protected:
 	TMap<FString, FModuleInfo> ModuleInfoByClassName;
 	TMap<FString, FCPPClassInfo> CPPClassInfoMap;

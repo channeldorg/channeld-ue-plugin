@@ -9,8 +9,19 @@ FArrayPropertyDecorator::FArrayPropertyDecorator(FProperty* InProperty, IPropert
 	SetForceNotDirectlyAccessible(true);
 	FPropertyDecoratorFactory& Factory = FPropertyDecoratorFactory::Get();
 	InnerProperty = Factory.GetPropertyDecorator(CastFieldChecked<FArrayProperty>(InProperty)->Inner, this);
-	ProtoFieldRule = TEXT("repeated");
-	ProtoFieldType = InnerProperty->GetProtoFieldType();
+
+	if (InnerProperty->GetCPPType() == TEXT("uint8"))
+	{
+		bIsByteArray = true;
+		ProtoFieldRule = TEXT("");
+		ProtoFieldType = TEXT("bytes");
+	}
+	else
+	{
+		bIsByteArray = false;
+		ProtoFieldRule = TEXT("repeated");
+		ProtoFieldType = InnerProperty->GetProtoFieldType();
+	}
 }
 
 void FArrayPropertyDecorator::PostInit()
@@ -48,6 +59,11 @@ FString FArrayPropertyDecorator::GetCode_ActorPropEqualToProtoState(const FStrin
 	return TEXT("false");
 }
 
+FString FArrayPropertyDecorator::GetCode_SetFieldUpdated(const FString& DeltaStateName)
+{
+	return FString::Printf(TEXT("%s->set_update_%s(true);"), *DeltaStateName, *GetProtoFieldName());
+}
+
 FString FArrayPropertyDecorator::GetCode_SetDeltaState(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
 {
 	FStringFormatNamedArguments FormatArgs;
@@ -65,7 +81,17 @@ FString FArrayPropertyDecorator::GetCode_SetDeltaState(const FString& TargetInst
 		TEXT("Code_SetDeltaStateArrayInner"),
 		InnerProperty->GetCode_SetDeltaStateArrayInner(GetPointerName(), FullStateName, DeltaStateName, ConditionFullStateIsNull)
 	);
-	return FString::Format(ArrPropDeco_SetDeltaStateTemplate, FormatArgs);
+
+	FormatArgs.Add(TEXT("Code_SetFieldUpdated"), ConditionFullStateIsNull ? TEXT("") : GetCode_SetFieldUpdated(DeltaStateName));
+
+	if (bIsByteArray)
+	{
+		return FString::Format(ByteArrayPropDeco_SetDeltaStateTemplate, FormatArgs);
+	}
+	else
+	{
+		return FString::Format(ArrPropDeco_SetDeltaStateTemplate, FormatArgs);
+	}
 }
 
 FString FArrayPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString& ContainerName, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
@@ -91,7 +117,17 @@ FString FArrayPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString&
 		TEXT("Code_SetDeltaStateArrayInner"),
 		InnerProperty->GetCode_SetDeltaStateArrayInner(TEXT("PropAddr"), FullStateName, DeltaStateName, ConditionFullStateIsNull)
 	);
-	return FString::Format(ArrPropDeco_SetDeltaStateByMemOffsetTemp, FormatArgs);
+
+	FormatArgs.Add(TEXT("Code_SetFieldUpdated"), ConditionFullStateIsNull ? TEXT("") : GetCode_SetFieldUpdated(DeltaStateName));
+
+	if (bIsByteArray)
+	{
+		return FString::Format(ByteArrayPropDeco_SetDeltaStateByMemOffsetTemp, FormatArgs);
+	}
+	else
+	{
+		return FString::Format(ArrPropDeco_SetDeltaStateByMemOffsetTemp, FormatArgs);
+	}
 }
 
 FString FArrayPropertyDecorator::GetCode_HasProtoFieldValueIn(const FString& StateName)
@@ -99,7 +135,7 @@ FString FArrayPropertyDecorator::GetCode_HasProtoFieldValueIn(const FString& Sta
 	return FString::Printf(TEXT("%s.size() > 0"), *GetCode_GetProtoFieldValueFrom(StateName));
 }
 
-FString FArrayPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, const FString& AfterSetValueCode)
+FString FArrayPropertyDecorator::GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, const FString& AfterSetValueCode, bool ConditionFullStateIsNull)
 {
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Code_HasProtoFieldValue"), GetCode_HasProtoFieldValueIn(NewStateName));
@@ -112,7 +148,7 @@ FString FArrayPropertyDecorator::GetCode_OnStateChange(const FString& TargetInst
 	FormatArgs.Add(TEXT("Declare_PropertyName"), GetPropertyName());
 	FormatArgs.Add(TEXT("Declare_PropPtrName"), GetPointerName());
 	FormatArgs.Add(TEXT("Code_GetProtoFieldValueFrom"), GetCode_GetProtoFieldValueFrom(NewStateName));
-	FormatArgs.Add(TEXT("Code_GetProtoUpdateValue"), FString::Printf(TEXT("%s->update_%s()"), *NewStateName, *GetProtoFieldName()));
+	FormatArgs.Add(TEXT("Code_GetProtoUpdateValue"), ConditionFullStateIsNull ? TEXT("false") : FString::Printf(TEXT("%s->update_%s()"), *NewStateName, *GetProtoFieldName()));
 	return FString::Format(ArrPropDeco_OnChangeStateTemp, FormatArgs);
 }
 
@@ -124,7 +160,14 @@ FString FArrayPropertyDecorator::GetCode_SetPropertyValueTo(const FString& Targe
 	FormatArgs.Add(TEXT("Code_GetProtoFieldValueFrom"), GetCode_GetProtoFieldValueFrom(NewStateName));
 	FormatArgs.Add(TEXT("Code_SetPropertyValueArrayInner"), InnerProperty->GetCode_SetPropertyValueArrayInner(GetPropertyName(), GetPointerName(), NewStateName));
 
-	return FString::Format(ArrPropDeco_SetPropertyValueTemp, FormatArgs);
+	if (bIsByteArray)
+	{
+		return FString::Format(ByteArrayPropDeco_SetPropertyValueTemp, FormatArgs);
+	}
+	else
+	{
+		return FString::Format(ArrPropDeco_SetPropertyValueTemp, FormatArgs);
+	}
 }
 
 FString FArrayPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName)
@@ -141,7 +184,14 @@ FString FArrayPropertyDecorator::GetCode_OnStateChangeByMemOffset(const FString&
 	FormatArgs.Add(TEXT("Code_GetProtoFieldValueFrom"), GetCode_GetProtoFieldValueFrom(NewStateName));
 	FormatArgs.Add(TEXT("Code_SetPropertyValueArrayInner"), InnerProperty->GetCode_SetPropertyValueArrayInner(TEXT("Prop"), TEXT("PropAddr"), NewStateName));
 
-	return FString::Format(ArrPropDeco_SetPropertyValueByMemOffsetTemp, FormatArgs);
+	if (bIsByteArray)
+	{
+		return FString::Format(ByteArrayPropDeco_SetPropertyValueByMemOffsetTemp, FormatArgs);
+	}
+	else
+	{
+		return FString::Format(ArrPropDeco_SetPropertyValueByMemOffsetTemp, FormatArgs);
+	}
 }
 
 TArray<FString> FArrayPropertyDecorator::GetAdditionalIncludes()
@@ -181,4 +231,9 @@ FString FArrayPropertyDecorator::GetDefinition_ProtoField(int32& FieldNumber)
 	FieldNumber++;
 	FieldDefinitions += FPropertyDecorator::GetDefinition_ProtoField(FieldNumber);
 	return FieldDefinitions;
+}
+
+bool FArrayPropertyDecorator::IsArray()
+{
+	return true;
 }

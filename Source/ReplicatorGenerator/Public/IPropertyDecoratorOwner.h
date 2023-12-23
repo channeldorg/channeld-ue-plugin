@@ -21,6 +21,8 @@ public:
 
 	virtual bool IsStruct() = 0;
 
+	virtual bool IsArray() = 0;
+
 	virtual TArray<TSharedPtr<FStructPropertyDecorator>> GetStructPropertyDecorators() = 0;
 
 };
