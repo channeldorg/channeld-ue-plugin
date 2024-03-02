@@ -60,6 +60,16 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 
 	TSet<FSoftClassPath> LoadedRepClasses;
 
+	// Pass 1: Iterate in-memory classes
+	for (TObjectIterator<UClass> It; It; ++It)
+	{
+		if (ChanneldReplicatorGeneratorUtils::TargetToGenerateChannelDataField(*It))
+		{
+			LoadedRepClasses.Add(*It);
+		}
+	}
+
+	// Pass 2: Add the new classes in the cook process
 	FLoadedObjectListener ObjLoadedListener;
 	ObjLoadedListener.StartListen();
 
