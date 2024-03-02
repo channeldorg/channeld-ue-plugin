@@ -16,6 +16,19 @@
 class CHANNELDUE_API ChanneldUtils
 {
 public:
+	static bool IsServer(const UWorld* World)
+	{
+		if (World == nullptr)
+		{
+			return false;
+		}
+#if ENGINE_MAJOR_VERSION >= 5
+		return World->GetNetMode() == NM_DedicatedServer || World->GetNetMode() == NM_ListenServer;
+#else
+		return World->IsServer();
+#endif
+	}
+	
 	static google::protobuf::Message* CreateProtobufMessage(const std::string& FullName)
 	{
 		const google::protobuf::Descriptor* Desc = google::protobuf::DescriptorPool::generated_pool()
@@ -304,8 +317,7 @@ public:
 	// Should the owner of the actor, or the PlayerController or PlayerState of the pawn should be set?
 	static bool ShouldSetPlayerControllerOrPlayerStateForActor(AActor* Actor)
 	{
-		auto World = Actor->GetWorld();
-		const bool bIsServer = World != nullptr && World->IsServer();
+		const bool bIsServer = ChanneldUtils::IsServer(Actor->GetWorld());
 		// Special case: the client won't create other player's controller. Pawn and PlayerState's owner is PlayerController.
 		const bool bOwnerIsPC = Actor->IsA<APawn>() || Actor->IsA<APlayerState>();
 		const bool bClientShouldSetOwner = !bOwnerIsPC || Actor->GetLocalRole() > ROLE_SimulatedProxy;

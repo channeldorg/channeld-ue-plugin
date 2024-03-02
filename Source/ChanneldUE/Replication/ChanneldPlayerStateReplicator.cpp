@@ -22,14 +22,14 @@ FChanneldPlayerStateReplicator::FChanneldPlayerStateReplicator(UObject* InTarget
 		PlayerIdPtr = Property->ContainerPtrToValuePtr<int32>(PlayerState.Get());
 		check(PlayerIdPtr);
 	}
-	//	"Ping" property doesn't exist anymore on 5
-#if ENGINE_MAJOR_VERSION < 5
 	{
+	//	UE4: there's no SetPing(); UE5: use SetCompressedPing()
+#if ENGINE_MAJOR_VERSION < 5
 		auto Property = CastFieldChecked<const FByteProperty>(PlayerState->GetClass()->FindPropertyByName(FName("Ping")));
 		PingPtr = Property->ContainerPtrToValuePtr<uint8>(PlayerState.Get());
 		check(PingPtr);
-	}
 #endif
+	}
 }
 
 FChanneldPlayerStateReplicator::~FChanneldPlayerStateReplicator()
@@ -72,13 +72,22 @@ void FChanneldPlayerStateReplicator::Tick(float DeltaTime)
 		DeltaState->set_playerid(PlayerState->GetPlayerId());
 		bStateChanged = true;
 	}
+
+	//	UE4 -> UE5: "Ping" -> "CompressedPing"
+#if ENGINE_MAJOR_VERSION >= 5
+	if (PlayerState->GetCompressedPing() != FullState->ping())
+	{
+		DeltaState->set_ping(PlayerState->GetCompressedPing());
+		bStateChanged = true;
+	}
+#else
 	if (PlayerState->GetPing() != FullState->ping())
 	{
-#if UE_BUILD_SHIPPING
 		DeltaState->set_ping(PlayerState->GetPing());
 		bStateChanged = true;
-#endif
 	}
+#endif
+	
 	if (PlayerState->GetPlayerName() != FString(UTF8_TO_TCHAR(FullState->mutable_playername()->c_str())))
 	{
 		DeltaState->set_playername(TCHAR_TO_UTF8(*PlayerState->GetPlayerName()));
@@ -118,8 +127,8 @@ void FChanneldPlayerStateReplicator::OnStateChanged(const google::protobuf::Mess
 	}
 	if (NewState->has_ping())
 	{
-#if ENGINE_MAJOR_VERSION == 5
-		//TODO::fix this later
+  #if ENGINE_MAJOR_VERSION >= 5
+		PlayerState->SetCompressedPing(NewState->ping());
 #else
 		*PingPtr = NewState->ping();
 #endif

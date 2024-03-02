@@ -362,13 +362,14 @@ FString UChanneldNetConnection::LowLevelGetRemoteAddress(bool bAppendPort /*= fa
 
 FString UChanneldNetConnection::LowLevelDescribe()
 {
+	const EConnectionState ConnState = GetConnectionState();
 	return FString::Printf
 	(
 		TEXT("connId: %d, state: %s"),
 		GetConnId(),
-		State == USOCK_Pending ? TEXT("Pending")
-		: State == USOCK_Open ? TEXT("Open")
-		: State == USOCK_Closed ? TEXT("Closed")
+		ConnState == USOCK_Pending ? TEXT("Pending")
+		: ConnState == USOCK_Open ? TEXT("Open")
+		: ConnState == USOCK_Closed ? TEXT("Closed")
 		: TEXT("Invalid")
 	);
 }
