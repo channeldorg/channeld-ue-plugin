@@ -847,7 +847,7 @@ void FReplicatorCodeGenerator::ProcessHeaderFiles(const TArray<FString>& Files, 
 		FString Code;
 		// Load source code files, and capture all 'UCLASS' marked classes.
 		FFileHelper::LoadFileToString(Code, *HeaderFilePath);
-		FRegexPattern MatherPatter(FString(TEXT(R"EOF(UCLASS\(.*\)\s*class\s+(?:\w+_API\s+)?([\w_]+)\s+\:)EOF")));
+		FRegexPattern MatherPatter(FString(TEXT(R"EOF(UCLASS\(.*\)\s*class\s+(?:\w+_API\s+)?([\w_]+)\s+(?:final\s+)?\:)EOF")));
 		FRegexMatcher Matcher(MatherPatter, Code);
 		while (Matcher.FindNext())
 		{
