@@ -374,8 +374,26 @@ public:
 	{
 		NetConnForSpawn = InNetConn;
 	}
+	
+	static UChanneldNetConnection* GetNetConnForSpawn()
+	{
+		return NetConnForSpawn;
+	}
+
+	static UNetConnection* GetActorNetConnection(const AActor* Actor);
+	static void ResetNetConnForSpawn();
+
+	// static void MarkArUseCustomSerializeObject(FArchive& Ar);
+	// static bool CheckArUseCustomSerializeObject(const FArchive& Ar);
+	//
+	// static bool LoadStaticObjectExportedNetGUIDFromFile(const FString& FilePath);
+	// static uint32 GetStaticObjectExportedNetGUID(const FString& PathName);
+	// static FString GetStaticObjectExportedPathName(uint32 NetGUID);
+	// static void RegisterStaticObjectNetGUID_Authority(UObject* Obj, uint32 ExportID);
+	// static void RegisterStaticObjectNetGUID_NonAuthority(const UObject* Obj, uint32 ExportID, UNetConnection* Connection, bool bRunningOnServer = false);
+	// static UObject* TryLoadStaticObject(uint32 NetGUID, UNetConnection* Connection, bool bRunningOnServer = false);
+
 private:
 	static TMap<uint32, TSharedRef<unrealpb::UnrealObjectRef>> ObjRefCache;
 	static UChanneldNetConnection* NetConnForSpawn;
-	static void ResetNetConnForSpawn();
 };

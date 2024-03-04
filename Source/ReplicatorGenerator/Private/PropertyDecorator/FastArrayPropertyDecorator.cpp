@@ -16,7 +16,6 @@ FString FFastArrayPropertyDecorator::GetCode_OnStateChange(const FString& Target
                                                            bool ConditionFullStateIsNull)
 {
 	const TCHAR* T = LR"EOF(
-bool b{Declare_PropertyName}Changed = false;
 {
 if ({Code_HasProtoFieldValue})
 {
@@ -27,7 +26,7 @@ if ({Code_HasProtoFieldValue})
 		{
 			UScriptStruct* NetDeltaStruct = Cast<UScriptStruct>(StructProperty->Struct);
 			auto NetDriver = {Declare_PropertyOwner}->GetNetDriver();
-			UNetConnection* Conn = ChanneldUtils::GetActorNetConnection({Declare_PropertyOwner});
+			UNetConnection* Conn = ChanneldUtils::GetActorNetConnection(Cast<AActor>({Declare_PropertyOwner}));
 			check(Conn != nullptr);
 
 			if(NewState->{Declare_ProtoFieldName}_full().size() > 0)
@@ -104,7 +103,7 @@ bool b{Declare_PropertyName}Changed = false;
 	{
 		if ({Declare_PropertyPointer}->ArrayReplicationKey != {Declare_OldStateKey})
 		{
-			UNetConnection* Conn = ChanneldUtils::GetActorNetConnection({Declare_PropertyOwner});
+			UNetConnection* Conn = ChanneldUtils::GetActorNetConnection(Cast<AActor>({Declare_PropertyOwner}));
 			check(Conn != nullptr);
 
 			UScriptStruct* NetDeltaStruct = Cast<UScriptStruct>(StructProperty->Struct);
@@ -126,7 +125,6 @@ bool b{Declare_PropertyName}Changed = false;
 				std::string NewData(reinterpret_cast<const char*>(ValueDataWriter.GetData()), ValueDataWriter.GetNumBytes());
 				if(doFullUpdate)
 				{
-                    ActiveGameplayEffectsLastFullNetState = OldState;
 					DeltaState->set_{Declare_ProtoFieldName}(std::string());
 					DeltaState->set_{Declare_ProtoFieldName}_full(std::move(NewData));
 				}

@@ -325,6 +325,33 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 	return ObjRef;
 }
 
+UNetConnection* ChanneldUtils::GetActorNetConnection(const AActor* Actor)
+{
+	auto World = GWorld;
+	if (!World || !Actor)
+	{
+		return nullptr;
+	}
+
+	UNetConnection* Conn = nullptr;
+	if (const auto NetDriver = World->GetNetDriver())
+	{
+		if (NetDriver->IsServer())
+		{
+			Conn = Actor->GetNetConnection();
+			if (!Conn)
+			{
+				Conn = NetConnForSpawn;
+			}
+		}
+		else
+		{
+			Conn = NetDriver->ServerConnection;
+		}
+	}
+	return Conn;
+}
+
 void ChanneldUtils::ResetNetConnForSpawn()
 {
 	auto PacketMapClient = CastChecked<UPackageMapClient>(NetConnForSpawn->PackageMap);
