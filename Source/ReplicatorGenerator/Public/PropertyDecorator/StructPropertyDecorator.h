@@ -3,11 +3,17 @@
 
 const static TCHAR* StructPropDeco_PropPtrGroupStructTemp =
 	LR"EOF(
+struct {Declare_PropCompilableStructName}
+{
+	{Code_StructCopyProperties}
+};
+
 struct {Declare_PropPtrGroupStructName}
 {
   {Declare_PropPtrGroupStructName}() {}
   {Declare_PropPtrGroupStructName}(void* Container)
   {
+    ContainerAddr = ({Declare_PropCompilableStructName}*)Container;
 {Code_AssignPropPointers}
   }
 
@@ -16,7 +22,13 @@ struct {Declare_PropPtrGroupStructName}
 {Code_AssignPropPointersForRPC}
   }
 
+{Declare_PropCompilableStructName}* ContainerAddr;
 {Declare_PropertyPointers}
+
+  {Declare_PropCompilableStructName} operator*() const
+  {
+	return *ContainerAddr;
+  }
   
   bool Merge(const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* FullState, {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* DeltaState, UWorld* World)
   {
@@ -48,11 +60,6 @@ struct {Declare_PropPtrGroupStructName}
     return bStateChanged;
   }
 
-};
-
-struct {Declare_PropCompilableStructName}
-{
-	{Code_StructCopyProperties}
 };
 )EOF";
 
