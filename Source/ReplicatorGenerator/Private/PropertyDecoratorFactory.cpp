@@ -6,6 +6,7 @@
 #include "PropertyDecorator/RotatorPropertyDecoratorBuilder.h"
 #include "PropertyDecorator/VectorPropertyDecoratorBuilder.h"
 #include "PropertyDecorator/ClassPropertyDecoratorBuilder.h"
+#include "PropertyDecorator/FastArrayPropertyDecoratorBuilder.h"
 
 FPropertyDecoratorFactory::FPropertyDecoratorFactory()
 {
@@ -22,6 +23,7 @@ FPropertyDecoratorFactory::FPropertyDecoratorFactory()
 		->SetNextBuilder(MakeShared<FTextPropertyDecoratorBuilder>())
 		->SetNextBuilder(MakeShared<FNamePropertyDecoratorBuilder>())
 		->SetNextBuilder(MakeShared<FClassPropertyDecoratorBuilder>())
+		->SetNextBuilder(MakeShared<FFastArrayPropertyDecoratorBuilder>())
 		->SetNextBuilder(MakeShared<FArrayPropertyDecoratorBuilder>())
 		->SetNextBuilder(MakeShared<FVectorPropertyDecoratorBuilder>())
 		->SetNextBuilder(MakeShared<FRotatorPropertyDecoratorBuilder>())
