@@ -219,6 +219,8 @@ void UChanneldConnection::SendDisconnectMessage(Channeld::ConnectionId InConnId)
 
 void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 {
+	StopReceiveThread();
+
 	if (!IsConnected())
 		return;
 
@@ -230,7 +232,6 @@ void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 	OnDisconnected();
 
 	Socket->Close();
-	StopReceiveThread();
 
 	auto SocketSubsystem = ISocketSubsystem::Get();
 	if (SocketSubsystem)
@@ -347,15 +348,11 @@ void UChanneldConnection::Receive()
 
 bool UChanneldConnection::StartReceiveThread()
 {
-	if (bReceiveThreadRunning)
-	{
-		return false;
-	}
 	if (ReceiveThread == nullptr)
 	{
 		ReceiveThread = FRunnableThread::Create(this, TEXT("Tpri_Channeld_Connection_Receive"));
 	}
-	return ReceiveThread != nullptr;
+	return bReceiveThreadRunning;
 }
 
 void UChanneldConnection::StopReceiveThread()
@@ -392,8 +389,7 @@ void UChanneldConnection::Stop()
 
 void UChanneldConnection::Exit()
 {
-	if (bReceiveThreadRunning != false)
-		bReceiveThreadRunning = true;
+	bReceiveThreadRunning = false;
 }
 
 uint32 UChanneldConnection::AddRpcCallback(const FChanneldMessageHandlerFunc& HandlerFunc)
