@@ -135,3 +135,13 @@ private:
 
 	UChanneldGameInstanceSubsystem* GetSubsystem() const;
 };
+
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 3
+// For hacking the FNetGUIDCache class to access its private members
+class FNetGUIDCacheCopy
+{
+public:
+	uint8 PublicMembers[0x158];
+	uint64 NetworkGuidIndex[2];
+};
+#endif
