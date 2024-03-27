@@ -14,6 +14,7 @@ FPropertyDecoratorFactory::FPropertyDecoratorFactory()
 	HeadBuilder
 		->SetNextBuilder(MakeShared<FBoolPropertyDecoratorBuilder>())
 		->SetNextBuilder(MakeShared<FUInt32PropertyDecoratorBuilder>())
+		->SetNextBuilder(MakeShared<FInt16PropertyDecoratorBuilder>())
 		->SetNextBuilder(MakeShared<FIntPropertyDecoratorBuilder>())
 		->SetNextBuilder(MakeShared<FUInt64PropertyDecoratorBuilder>())
 		->SetNextBuilder(MakeShared<FInt64PropertyDecoratorBuilder>())
