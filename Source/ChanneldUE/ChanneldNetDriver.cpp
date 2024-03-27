@@ -1028,44 +1028,44 @@ void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, c
 		return;
 	}
 
-	ERPCDropReason DropReason = RPCDropReason_Unknown;
 	if (Actor->GetLocalRole() <= ENetRole::ROLE_SimulatedProxy)
 	{
 		// Simulated proxies can't process server or client RPCs
 		if ((Function->FunctionFlags & FUNC_NetClient) || (Function->FunctionFlags & FUNC_NetServer))
 		{
 			UE_LOG(LogChanneld, Warning, TEXT("Local role has no authroity to process server or client RPC %s::%s"), *Actor->GetName(), *FuncName);
-			DropReason = RPCDropReason_NoAuthority;
+			GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(std::string(TCHAR_TO_UTF8(*FuncName)), RPCDropReason_NoAuthority);
+			return;
+		}
+		// But NetMulticast is allowed
+	}
+	
+	ERPCDropReason DropReason = RPCDropReason_Unknown;
+	auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
+	if (RepComp)
+	{
+		bool bSuccess = true;
+		TSharedPtr<void> Params = RepComp->DeserializeFunctionParams(Obj, Function, ParamsPayload, bSuccess, bDeferredRPC);
+		if (bDeferredRPC)
+		{
+			return;
+		}
+
+		if (bSuccess)
+		{
+			Obj->ProcessEvent(Function, Params.Get());
+			return;
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to deserialize function parameters of RPC %s::%s"), *Actor->GetName(), *FuncName);
+			DropReason = RPCDropReason_DeserializeFailed;
 		}
 	}
 	else
 	{
-		auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
-		if (RepComp)
-		{
-			bool bSuccess = true;
-			TSharedPtr<void> Params = RepComp->DeserializeFunctionParams(Obj, Function, ParamsPayload, bSuccess, bDeferredRPC);
-			if (bDeferredRPC)
-			{
-				return;
-			}
-
-			if (bSuccess)
-			{
-				Obj->ProcessEvent(Function, Params.Get());
-				return;
-			}
-			else
-			{
-				UE_LOG(LogChanneld, Warning, TEXT("Failed to deserialize function parameters of RPC %s::%s"), *Actor->GetName(), *FuncName);
-				DropReason = RPCDropReason_DeserializeFailed;
-			}
-		}
-		else
-		{
-			UE_LOG(LogChanneld, Warning, TEXT("Can't find the ReplicationComponent to deserialize RPC: %s::%s"), *Actor->GetName(), *FuncName);
-			DropReason = RPCDropReason_NoRepComp;
-		}
+		UE_LOG(LogChanneld, Warning, TEXT("Can't find the ReplicationComponent to deserialize RPC: %s::%s"), *Actor->GetName(), *FuncName);
+		DropReason = RPCDropReason_NoRepComp;
 	}
 
 	GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(std::string(TCHAR_TO_UTF8(*FuncName)), DropReason);
