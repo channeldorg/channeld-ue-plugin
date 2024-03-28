@@ -16,6 +16,18 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 	FNetworkGUID NetGUID(Ref->netguid());
 	if (!NetGUID.IsValid())
 	{
+		// CDO: treat it as an asset object
+		if (Ref->has_classpath())
+		{
+			auto ObjectPath = UTF8_TO_TCHAR(Ref->classpath().c_str());
+			UObject* Asset = FindObject<UObject>(nullptr, ObjectPath);
+			if ( Asset == nullptr)
+			{
+				Asset = LoadObject<UObject>(nullptr, ObjectPath);
+			}
+			return Asset;
+		}
+		
 		return nullptr;
 	}
 
@@ -199,7 +211,7 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 	return Obj;
 }
 
-TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnection* Connection /* = nullptr*/, bool bFullExport /*= false*/)
+TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj, UNetConnection* Connection /* = nullptr*/, bool bFullExport /*= false*/, UWorld* World /* = nullptr*/)
 {
 	auto ObjRef = MakeShared<unrealpb::UnrealObjectRef>();
 
@@ -207,7 +219,10 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 	{
 		return ObjRef;
 	}
-	auto World = Obj->GetWorld();
+	if (!World)
+	{
+		World = Obj->GetWorld();
+	}
 	if (!World)
 	{
 		return ObjRef;
@@ -217,6 +232,13 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 	auto NetGUID = GuidCache->GetNetGUID(Obj);
 	ObjRef->set_netguid(NetGUID.Value);
 
+	// CDO: treat it as an asset object
+	if (Obj == Obj->GetClass()->ClassDefaultObject)
+	{
+		ObjRef->set_classpath(std::string(TCHAR_TO_UTF8(*Obj->GetPathName())));
+		return ObjRef;
+	}
+	
 	if (!bFullExport)
 	{
 		return ObjRef;
