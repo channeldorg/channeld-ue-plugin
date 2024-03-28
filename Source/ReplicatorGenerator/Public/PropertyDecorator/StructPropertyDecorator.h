@@ -70,7 +70,7 @@ uint8* PropertyAddr = (uint8*){Ref_ContainerAddr} + {Num_PropMemOffset};
 
 const static TCHAR* StructPropDeco_AssignPropPtrDynamic =
     LR"EOF(
-FString PropertyName = TEXT("{Declare_PropertyName}");
+const FName PropertyName = TEXT("{Declare_PropertyName}");
 uint8* PropertyAddr = (uint8*){Ref_ContainerAddr};
 int32* OffsetPtr = PropPointerMemOffsetCache.Find(PropertyName);
 if (OffsetPtr != nullptr)
@@ -79,7 +79,7 @@ if (OffsetPtr != nullptr)
 }
 else
 {
-    FProperty* Property = ActorClass->FindPropertyByName(FName(*PropertyName));
+    FProperty* Property = ActorClass->FindPropertyByName(PropertyName);
     if (Property)
     {
         int32 Offset = Property->GetOffset_ForInternal();
@@ -88,7 +88,7 @@ else
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("%s Replicator construct, but could not find property(%s) in cache or by name."), *ActorClass->GetName(), *PropertyName);
+        UE_LOG(LogTemp, Error, TEXT("%s Replicator construct, but could not find property(%s) in cache or by name."), *ActorClass->GetName(), *PropertyName.ToString());
         {Ref_AssignTo} = ({Declare_PropPtrGroupStructName})(PropertyAddr + {Num_PropMemOffset});
     }
 }
