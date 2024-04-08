@@ -32,20 +32,20 @@ if ({Code_HasProtoFieldValue})
 			if(NewState->{Declare_ProtoFieldName}_full().size() > 0)
 			{
 				FNetBitReader Reader(Conn->PackageMap, (uint8*)(NewState->{Declare_ProtoFieldName}_full().data()), NewState->{Declare_ProtoFieldName}_full().size() * 8);
-				if (FChanneldNetDeltaSerializeInfo::DeltaSerializeRead(NetDriver, Reader, Cast<UObject>({Declare_Target}),
+				if (!FChanneldNetDeltaSerializeInfo::DeltaSerializeRead(NetDriver, Reader, Cast<UObject>({Declare_Target}),
 																		   NetDeltaStruct, {Declare_PropertyPointer}))
 				{
-					UE_LOG(LogTemp, Log, TEXT("DeltaSerializeRead {Declare_PropertyName} full state Success"));
+					UE_LOG(LogChanneldGen, Warning, TEXT("Failed to DeltaSerializeRead the full state of {Declare_PropertyName}."));
 				}
 
 			}
 			if(NewState->{Declare_ProtoFieldName}().size() > 0)
 			{
 				FNetBitReader Reader(Conn->PackageMap, (uint8*)(NewState->{Declare_ProtoFieldName}().data()), NewState->{Declare_ProtoFieldName}().size() * 8);
-				if (FChanneldNetDeltaSerializeInfo::DeltaSerializeRead(NetDriver, Reader, Cast<UObject>({Declare_Target}),
+				if (!FChanneldNetDeltaSerializeInfo::DeltaSerializeRead(NetDriver, Reader, Cast<UObject>({Declare_Target}),
 																		   NetDeltaStruct, {Declare_PropertyPointer}))
 				{
-					UE_LOG(LogTemp, Log, TEXT("DeltaSerializeRead {Declare_PropertyName} Success"));
+					UE_LOG(LogChanneldGen, Warning, TEXT("Failed to DeltaSerializeRead the delta state of {Declare_PropertyName}."));
 				}
 			}
 
