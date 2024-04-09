@@ -1,6 +1,5 @@
 #include "ChanneldTypes.h"
 
-#include "ChanneldSettings.h"
 #include "Net/RepLayout.h"
 
 DEFINE_LOG_CATEGORY(LogChanneld);
@@ -95,10 +94,6 @@ bool FChanneldNetDeltaSerializeInfo::DeltaSerializeWrite(UNetDriver* NetDriver, 
 	NetDeltaInfo.NetSerializeCB = &SerializeCB;
 	NetDeltaInfo.Object = Object;
 	NetDeltaInfo.Struct = NetDeltaStruct;
-	NetDeltaInfo.bInternalAck = GetMutableDefault<UChanneldSettings>()->bSetInternalAck;
-
-	TSet<FNetworkGUID> LocalReferencedGuids;
-	NetDeltaInfo.GatherGuidReferences = &LocalReferencedGuids;
 
 	TSharedPtr<INetDeltaBaseState> NewState;
 	NetDeltaInfo.NewState = &NewState;
