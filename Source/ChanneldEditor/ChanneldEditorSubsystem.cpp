@@ -122,7 +122,7 @@ void UChanneldEditorSubsystem::UpdateReplicationCache(
 	bUpdatingRepActorCache = true;
 
 #if ENGINE_MAJOR_VERSION >= 5
-	const TCHAR* AdditionalArguments = TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout -AssetGatherAll=true");
+	const TCHAR* AdditionalArguments = TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout -AssetGatherAll=true -exportstatic");
 #else
 	constexpr TCHAR* AdditionalArguments = TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout");
 #endif

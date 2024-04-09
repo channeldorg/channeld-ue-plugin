@@ -39,6 +39,10 @@ void UChanneldNetConnection::InitBase(UNetDriver* InDriver, class FSocket* InSoc
 		Handler.Reset(NULL);
 	}
 
+	UPackageMapClient* ClientPackage = NewObject<UPackageMapClient>(this, UPackageMapClient::StaticClass());
+	ClientPackage->Initialize(this, Driver->GuidCache);
+	PackageMap = ClientPackage;
+
 	ClientInterestManager = NewObject<UClientInterestManager>(this, UClientInterestManager::StaticClass());
 }
 

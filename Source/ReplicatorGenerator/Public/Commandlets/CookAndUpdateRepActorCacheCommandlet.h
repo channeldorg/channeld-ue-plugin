@@ -21,6 +21,7 @@ public:
 
 	TSet<FString> CheckedClasses;
 	TSet<FSoftClassPath> FilteredClasses;
+	TArray<UObject*> CreatedUObjects;
 };
 
 UCLASS()

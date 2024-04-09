@@ -3,9 +3,154 @@
 #include "ChanneldGameInstanceSubsystem.h"
 #include "ChanneldNetDriver.h"
 #include "ChanneldTypes.h"
+#include "JsonObjectConverter.h"
 
 TMap<uint32, TSharedRef<unrealpb::UnrealObjectRef>> ChanneldUtils::ObjRefCache;
 UChanneldNetConnection* ChanneldUtils::NetConnForSpawn;
+TMap<FString, uint32> StaticObjectExportNetGUID;
+TMap<uint32, FString> StaticObjectExportPathName;
+
+bool ChanneldUtils::LoadStaticObjectExportedNetGUIDFromFile(const FString& FilePath)
+{
+	FString JsonString;
+	FStaticObjectCache Data;
+	if (!FFileHelper::LoadFileToString(JsonString, *FilePath))
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to load data from file: %s"), *FilePath);
+		return false;
+	}
+	if (!FJsonObjectConverter::JsonObjectStringToUStruct<FStaticObjectCache>(JsonString, &Data, 0, 0))
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to parse json from file: %s"), *FilePath);
+		return false;
+	}
+
+	for (auto& Info : Data.StaticObjectCacheCaches)
+	{
+		StaticObjectExportNetGUID.Add(Info.PathName, Info.ExportID);
+		StaticObjectExportPathName.Add(Info.ExportID, Info.PathName);
+	}
+
+	UE_LOG(LogChanneld, Display, TEXT("Successful load [%d] static objects from file %s"), StaticObjectExportNetGUID.Num(), *FilePath);
+	return true;
+}
+
+uint32 ChanneldUtils::GetStaticObjectExportedNetGUID(const FString& PathName)
+{
+	if (uint32* ExportedNetGUIDPtr = StaticObjectExportNetGUID.Find(PathName))
+	{
+		return *ExportedNetGUIDPtr;
+	}
+	return 0;
+}
+
+FString ChanneldUtils::GetStaticObjectExportedPathName(uint32 NetGUID)
+{
+	if (FString* PathName = StaticObjectExportPathName.Find(NetGUID))
+	{
+		return *PathName;
+	}
+	return FString();
+}
+
+void ChanneldUtils::RegisterStaticObjectNetGUID_Authority(UObject* Obj, uint32 ExportID)
+{
+	check(ExportID >= GenManager_ChannelStaticObjectExportStartID);
+	check(Obj);
+	check(GWorld);
+	check(GWorld->GetNetDriver());
+	FNetGUIDCache* GuidCache = GWorld->GetNetDriver()->GuidCache.Get();
+	
+	if (Obj->GetOuter())
+	{
+		const uint32 OuterExportID = GetStaticObjectExportedNetGUID(Obj->GetPathName());
+		if (OuterExportID >= GenManager_ChannelStaticObjectExportStartID)
+		{
+			RegisterStaticObjectNetGUID_Authority(Obj->GetOuter(), OuterExportID);
+		}
+	}
+
+	auto const NetGUID = FNetworkGUID(ExportID);
+	auto CurrentGUID = GuidCache->GetNetGUID(Obj);
+	if (NetGUID != CurrentGUID)
+	{
+		auto NetGUIDObjCache = GuidCache->ObjectLookup.Find(NetGUID);
+		if (NetGUIDObjCache)
+		{
+			GuidCache->NetGUIDLookup.Remove(NetGUIDObjCache->Object);
+			GuidCache->ObjectLookup.Remove(NetGUID);
+		}
+		GuidCache->NetGUIDLookup.Remove(Obj);
+		GuidCache->ObjectLookup.Remove(CurrentGUID);
+		GuidCache->RegisterNetGUID_Server(NetGUID, Obj);
+	}
+}
+
+void ChanneldUtils::RegisterStaticObjectNetGUID_NonAuthority(const UObject* Obj, uint32 ExportID, UNetConnection* Connection, bool bRunningOnServer)
+{
+	check(ExportID >= GenManager_ChannelStaticObjectExportStartID);
+	check(Obj);
+	check(GWorld);
+	check(GWorld->GetNetDriver());
+	FNetGUIDCache* GuidCache = GWorld->GetNetDriver()->GuidCache.Get();
+	UObject* OuterObj = Obj->GetOuter();
+	// Remap name for PIE
+	FString PathName = Obj->GetPathName(OuterObj);
+	GEngine->NetworkRemapPath(Connection, PathName, true);
+	const FNetworkGUID NetGUID(ExportID);
+	FNetworkGUID OuterNetGUID;
+	if (OuterObj)
+	{
+		uint32 OuterExportID = GetStaticObjectExportedNetGUID(OuterObj->GetPathName());
+		if (OuterExportID >= GenManager_ChannelStaticObjectExportStartID)
+		{
+			RegisterStaticObjectNetGUID_NonAuthority(OuterObj, OuterExportID, Connection, bRunningOnServer);
+			OuterNetGUID = FNetworkGUID(OuterExportID);
+		}
+		else
+		{
+			OuterNetGUID = GuidCache->GetNetGUID(OuterObj);
+		}
+	}
+	
+	if (bRunningOnServer)
+	{
+		GuidCache->RegisterNetGUIDFromPath_Server(NetGUID, PathName, OuterNetGUID, 0, false, false);
+	}
+	else
+	{
+		GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, OuterNetGUID, 0, false, false);
+	}
+}
+
+UObject* ChanneldUtils::TryLoadStaticObject(uint32 NetGUID, UNetConnection* Connection, bool bRunningOnServer)
+{
+	check(NetGUID >= GenManager_ChannelStaticObjectExportStartID);
+	UObject* NewObj = nullptr;
+	FString* PathNamePtr = StaticObjectExportPathName.Find(NetGUID);
+	if (ensure(PathNamePtr))
+	{
+		FString& PathName = *PathNamePtr;
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Try load static object, PathName: %s"), *PathName);
+		NewObj = LoadObject<UObject>(nullptr, *PathName);
+		if (!NewObj && FPackageName::IsValidLongPackageName(PathName))
+		{
+			UE_LOG(LogChanneld, VeryVerbose, TEXT("LoadObject failed. Try load static package, PathName: %s"), *PathName);
+			NewObj = LoadPackage(nullptr, *PathName, LOAD_None);
+		}
+		if (NewObj)
+		{
+			RegisterStaticObjectNetGUID_NonAuthority(NewObj, NetGUID, Connection, bRunningOnServer);
+			UE_LOG(LogChanneld, VeryVerbose, TEXT("Try load static object success, PathName: %s"), *PathName);
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Try load static object failed, PathName: %s"), *PathName);
+		}
+	}
+
+	return NewObj;
+}
 
 UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache, UChanneldNetConnection* ClientConn)
 {
@@ -65,7 +210,19 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 			for (auto CachedObj : CachedObjs)
 			{
 				FNetworkGUID NewGUID = FNetworkGUID(CachedObj->netguid());
-
+				if (NewGUID.IsStatic() && NewGUID.Value >= GenManager_ChannelStaticObjectExportStartID)
+				{
+					if (UObject* NewObj = TryLoadStaticObject(NewGUID.Value, Connection, World->GetNetDriver()->IsServer()))
+					{
+						if (NewGUID == NetGUID)
+						{
+							Obj = NewObj;
+							UE_LOG(LogChanneld, Verbose, TEXT("[Client] Registered NetGUID (%llu) Obj: %s"), NewGUID.Value, Obj ? *Obj->GetName() : TEXT("Null"));
+						}
+						continue;
+					}
+				}
+				
 				/*
 				// Client uses different NetworkGUID than server
 				if (World->IsClient())
@@ -303,6 +460,7 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 				// Find the newly-registered NetGUIDs during SerializeNewActor()
 				NewGUIDs = NewGUIDs.Difference(OldGUIDs);
 
+				bool HaveGuidReassignment = false;
 				for (FNetworkGUID& NewGUID : NewGUIDs)
 				{
 					// Don't send the target NetGUID in the context if it's dynamic
@@ -311,11 +469,43 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 
 					auto NewCachedObj = GuidCache->GetCacheObject(NewGUID);
 					auto Context = ObjRef->add_context();
+
+					// Examine for pre-exported; replace if present and only fill exported id.
+					if (NewGUID.IsStatic())
+					{
+						if (NewGUID.Value < GenManager_ChannelStaticObjectExportStartID)
+						{
+							UObject* NewObj = NewCachedObj->Object.Get();
+							const uint32 ExportedNetGUID = GetStaticObjectExportedNetGUID(NewObj->GetPathName());
+							if (ExportedNetGUID != 0)
+							{
+								RegisterStaticObjectNetGUID_Authority(NewObj, ExportedNetGUID);
+								NewGUID = FNetworkGUID(ExportedNetGUID);
+								HaveGuidReassignment = true;
+							}
+						}
+						if (NewGUID.Value >= GenManager_ChannelStaticObjectExportStartID)
+						{
+							Context->set_netguid(NewGUID.Value);
+							continue;
+						}
+					}
+
 					Context->set_netguid(NewGUID.Value);
 					Context->set_pathname(std::string(TCHAR_TO_UTF8(*NewCachedObj->PathName.ToString())));
 					Context->set_outerguid(NewCachedObj->OuterGUID.Value);
 					UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send registered NetGUID %d with path: %s"), NewGUID.Value, *NewCachedObj->PathName.ToString());
 				}
+
+				// Due to static object id updates, The bunch needs to be repackaged to use the exported id
+				if (HaveGuidReassignment)
+				{
+					Ar.Reset();
+					Ar.bReliable = true;
+					PackageMap->SerializeNewActor(Ar, Channel, Actor);
+					Actor->OnSerializeNewActor(Ar);
+				}
+
 				ObjRef->set_netguidbunch(Ar.GetData(), Ar.GetNumBytes());
 				ObjRef->set_bunchbitsnum(Ar.GetNumBits());
 
