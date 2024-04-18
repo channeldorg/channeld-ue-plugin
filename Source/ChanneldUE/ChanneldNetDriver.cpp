@@ -221,8 +221,14 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, Channeld::Ch
 			UE_LOG(LogChanneld, Error, TEXT("Failed to parse DestroyObjectMessage"));
 			return;
 		}
+		
+		if (!ChannelDataView.IsValid())
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to destroy object as the view is invalid, netId: %d"), DestroyMsg->netid());
+			return;
+		}
 
-		UObject* ObjToDestroy = GuidCache->GetObjectFromNetGUID(FNetworkGUID(DestroyMsg->netid()), true);
+		UObject* ObjToDestroy = ChannelDataView->GetObjectFromNetGUID(DestroyMsg->netid());
 		if (ObjToDestroy)
 		{
 			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Destroying object from message: %s, NetId: %d"), *GetNameSafe(ObjToDestroy), DestroyMsg->netid());
@@ -682,6 +688,12 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		UE_LOG(LogChanneld, Log, TEXT("ChannelDataView is not initialized yet. If the actor '%s' is a DataProvider, it will not be registered."), *Actor->GetName());
 	}
 
+	// No need to send static actors to clients
+	if (NetId.IsStatic())
+	{
+		return;
+	}
+
 	if (!Actor->GetIsReplicated())
 	{
 		return;
@@ -1107,7 +1119,9 @@ void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 	// Static NetIDs may conflict on the spatial servers, so we need to offset them as well.
 	GuidCache->UniqueNetIDs[1] = UniqueNetIdOffset;
 #endif
-
+	
+	ChanneldUtils::LoadStaticObjectExportedNetGUIDFromFile(GenManager_ChannelStaticObjectExportPath, this);
+	
 	if (ConnToChanneld->IsClient())
 	{
 		auto MyServerConnection = GetServerConnection();

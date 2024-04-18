@@ -10,7 +10,7 @@ UChanneldNetConnection* ChanneldUtils::NetConnForSpawn;
 TMap<FString, uint32> StaticObjectExportNetGUID;
 TMap<uint32, FString> StaticObjectExportPathName;
 
-bool ChanneldUtils::LoadStaticObjectExportedNetGUIDFromFile(const FString& FilePath)
+bool ChanneldUtils::LoadStaticObjectExportedNetGUIDFromFile(const FString& FilePath, UNetDriver* NetDriver)
 {
 	FString JsonString;
 	FStaticObjectCache Data;
@@ -29,6 +29,69 @@ bool ChanneldUtils::LoadStaticObjectExportedNetGUIDFromFile(const FString& FileP
 	{
 		StaticObjectExportNetGUID.Add(Info.PathName, Info.ExportID);
 		StaticObjectExportPathName.Add(Info.ExportID, Info.PathName);
+		if (NetDriver != nullptr)
+		{
+			if (NetDriver->GuidCache->ObjectLookup.Contains(Info.ExportID))
+			{
+				UE_LOG( LogNetPackageMap, Warning, TEXT( "Duplicated NetGUID found in ObjectLookup: %d, PathName: %s" ), Info.ExportID, *Info.PathName );
+				continue;
+			}
+			if (auto Obj = FindObject<UObject>(nullptr, *Info.PathName))
+			{
+				/*
+				// Some static object such as the level may already exist in the cache
+				if (NetDriver->GuidCache->NetGUIDLookup.Remove(MakeWeakObjectPtr(const_cast<UObject*>(Obj))))
+				{
+					UE_LOG( LogNetPackageMap, Log, TEXT( "Duplicated Object found in NetGUIDLookup: %s, NetGUID: %d" ), *Info.PathName, Info.ExportID );
+				}
+				*/
+				if (auto OldNetId = NetDriver->GuidCache->NetGUIDLookup.Find(Obj))
+				{
+					auto CachedObj = NetDriver->GuidCache->ObjectLookup.FindAndRemoveChecked(*OldNetId);
+					UE_LOG( LogNetPackageMap, Log, TEXT( "Updating GuidCache, PathName: '%s', NetGUID: %d -> %d" ), *Info.PathName, OldNetId->Value, Info.ExportID );
+					*OldNetId = Info.ExportID;
+					NetDriver->GuidCache->ObjectLookup.Emplace(Info.ExportID, CachedObj);
+					continue;
+				}
+				
+				if (NetDriver->IsServer())
+				{
+					NetDriver->GuidCache->RegisterNetGUID_Server(Info.ExportID, Obj);
+					UE_LOG( LogNetPackageMap, Log, TEXT( "RegisterNetGUID_Server: NetGUID: %d, PathName: %s" ), Info.ExportID, *Info.PathName );
+				}
+				else
+				{
+					/* RegisterNetGUID_Client only accept dynamic objects
+					//NetDriver->GuidCache->RegisterNetGUID_Client(Info.ExportID, Obj);
+					*/
+					
+					/*
+					*/
+					FNetGuidCacheObject CacheObject;
+					CacheObject.Object = Obj;
+					CacheObject.OuterGUID = Info.OuterExportID;
+#if UE_EDITOR
+					CacheObject.PathName = FName(UWorld::RemovePIEPrefix(Info.PathName));//Obj.GetFName();
+#else
+					CacheObject.PathName = FName(Info.PathName);//Obj.GetFName();
+#endif
+					NetDriver->GuidCache->RegisterNetGUID_Internal(Info.ExportID, CacheObject);
+					UE_LOG( LogNetPackageMap, Log, TEXT( "RegisterNetGUID_Internal: NetGUID: %d, PathName: %s" ), Info.ExportID, *Info.PathName );
+
+				}
+			}
+			else
+			{
+				if (NetDriver->IsServer())
+				{
+					NetDriver->GuidCache->RegisterNetGUIDFromPath_Server(Info.ExportID, Info.PathName, Info.OuterExportID, 0, false, false);
+				}
+				else
+				{
+					NetDriver->GuidCache->RegisterNetGUIDFromPath_Client(Info.ExportID, Info.PathName, Info.OuterExportID, 0, false, false);
+				}
+			}
+		}
 	}
 
 	UE_LOG(LogChanneld, Display, TEXT("Successful load [%d] static objects from file %s"), StaticObjectExportNetGUID.Num(), *FilePath);
@@ -51,6 +114,25 @@ FString ChanneldUtils::GetStaticObjectExportedPathName(uint32 NetGUID)
 		return *PathName;
 	}
 	return FString();
+}
+
+UObject* ChanneldUtils::GetStaticObject(FNetworkGUID NetGUID)
+{
+	FString PathName = GetStaticObjectExportedPathName(NetGUID.Value);
+	UObject* Obj = FindObject<UObject>(nullptr, *PathName);
+	if (Obj == nullptr)
+	{
+		Obj = LoadObject<UObject>(nullptr, *PathName);
+	}
+	if (Obj)
+	{
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Loaded static object '%s' with NetGUID %d"), *PathName, NetGUID.Value);
+	}
+	else
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Failed to load static object '%s' with NetGUID %d"), *PathName, NetGUID.Value);
+	}
+	return Obj;
 }
 
 void ChanneldUtils::RegisterStaticObjectNetGUID_Authority(UObject* Obj, uint32 ExportID)
@@ -86,7 +168,7 @@ void ChanneldUtils::RegisterStaticObjectNetGUID_Authority(UObject* Obj, uint32 E
 	}
 }
 
-void ChanneldUtils::RegisterStaticObjectNetGUID_NonAuthority(const UObject* Obj, uint32 ExportID, UNetConnection* Connection, bool bRunningOnServer)
+void ChanneldUtils::RegisterStaticObjectNetGUID_NonAuthority(const UObject* Obj, const FString PathName, uint32 ExportID, UNetConnection* Connection, bool bRunningOnServer)
 {
 	check(ExportID >= GenManager_ChannelStaticObjectExportStartID);
 	check(Obj);
@@ -94,17 +176,20 @@ void ChanneldUtils::RegisterStaticObjectNetGUID_NonAuthority(const UObject* Obj,
 	check(GWorld->GetNetDriver());
 	FNetGUIDCache* GuidCache = GWorld->GetNetDriver()->GuidCache.Get();
 	UObject* OuterObj = Obj->GetOuter();
+	/*
 	// Remap name for PIE
 	FString PathName = Obj->GetPathName(OuterObj);
 	GEngine->NetworkRemapPath(Connection, PathName, true);
+	*/
 	const FNetworkGUID NetGUID(ExportID);
 	FNetworkGUID OuterNetGUID;
 	if (OuterObj)
 	{
-		uint32 OuterExportID = GetStaticObjectExportedNetGUID(OuterObj->GetPathName());
+		FString OuterPathName = OuterObj->GetPathName();
+		uint32 OuterExportID = GetStaticObjectExportedNetGUID(OuterPathName);
 		if (OuterExportID >= GenManager_ChannelStaticObjectExportStartID)
 		{
-			RegisterStaticObjectNetGUID_NonAuthority(OuterObj, OuterExportID, Connection, bRunningOnServer);
+			RegisterStaticObjectNetGUID_NonAuthority(OuterObj, OuterPathName, OuterExportID, Connection, bRunningOnServer);
 			OuterNetGUID = FNetworkGUID(OuterExportID);
 		}
 		else
@@ -132,16 +217,20 @@ UObject* ChanneldUtils::TryLoadStaticObject(uint32 NetGUID, UNetConnection* Conn
 	{
 		FString& PathName = *PathNamePtr;
 		UE_LOG(LogChanneld, VeryVerbose, TEXT("Try load static object, PathName: %s"), *PathName);
-		NewObj = LoadObject<UObject>(nullptr, *PathName);
+		NewObj = FindObject<UObject>(nullptr, *PathName);
+		if (NewObj == nullptr)
+		{
+			NewObj = LoadObject<UObject>(nullptr, *PathName);
+		}
 		if (!NewObj && FPackageName::IsValidLongPackageName(PathName))
 		{
-			UE_LOG(LogChanneld, VeryVerbose, TEXT("LoadObject failed. Try load static package, PathName: %s"), *PathName);
+			UE_LOG(LogChanneld, Log, TEXT("LoadObject failed. Try load static package, PathName: %s"), *PathName);
 			NewObj = LoadPackage(nullptr, *PathName, LOAD_None);
 		}
 		if (NewObj)
 		{
-			RegisterStaticObjectNetGUID_NonAuthority(NewObj, NetGUID, Connection, bRunningOnServer);
-			UE_LOG(LogChanneld, VeryVerbose, TEXT("Try load static object success, PathName: %s"), *PathName);
+			RegisterStaticObjectNetGUID_NonAuthority(NewObj, *PathNamePtr, NetGUID, Connection, bRunningOnServer);
+			UE_LOG(LogChanneld, Verbose, TEXT("Try load static object success, PathName: %s"), *PathName);
 		}
 		else
 		{
@@ -176,27 +265,26 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 		return nullptr;
 	}
 
-	/*
-	// Client uses different NetworkGUID than server
-	if (World->IsClient())
+	// Static object - load it directly
+	if (NetGUID.IsStatic())
 	{
-		GetUniqueNetId(NetGUID, Ref->connid());
+		return GetStaticObject(NetGUID);
 	}
-	*/
-		
-	bNetGUIDUnmapped = (World->GetNetDriver() == nullptr);
+
+	UNetDriver* NetDriver = World->GetNetDriver();
+	bNetGUIDUnmapped = (NetDriver == nullptr);
 	if (bNetGUIDUnmapped)
 	{
 		UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Unable to get the NetDriver, NetGUID: %d (%d)"), NetGUID.Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
 		return nullptr;
 	}
-	auto GuidCache = World->GetNetDriver()->GuidCache;
+	auto GuidCache = NetDriver->GuidCache;
 	auto Obj = GuidCache->GetObjectFromNetGUID(NetGUID, false);
 	if (Obj == nullptr && bCreateIfNotInCache)
 	{
 		if (!GuidCache->IsNetGUIDAuthority() || ClientConn)
 		{
-			UNetConnection* Connection = ClientConn ? ClientConn : World->GetNetDriver()->ServerConnection;
+			UNetConnection* Connection = ClientConn ? ClientConn : NetDriver->ServerConnection;
 			TArray<const unrealpb::UnrealObjectRef_GuidCachedObject*> CachedObjs;
 			for (auto& Context : Ref->context())
 			{
@@ -212,24 +300,20 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 				FNetworkGUID NewGUID = FNetworkGUID(CachedObj->netguid());
 				if (NewGUID.IsStatic() && NewGUID.Value >= GenManager_ChannelStaticObjectExportStartID)
 				{
-					if (UObject* NewObj = TryLoadStaticObject(NewGUID.Value, Connection, World->GetNetDriver()->IsServer()))
+					if (UObject* NewObj = /*GetStaticObject(NetGUID))*/TryLoadStaticObject(NewGUID.Value, Connection, NetDriver->IsServer()))
 					{
 						if (NewGUID == NetGUID)
 						{
 							Obj = NewObj;
 							UE_LOG(LogChanneld, Verbose, TEXT("[Client] Registered NetGUID (%llu) Obj: %s"), NewGUID.Value, Obj ? *Obj->GetName() : TEXT("Null"));
 						}
-						continue;
 					}
+					else
+					{
+						UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Failed to load static object with NetGUID: %d (%d)"), NewGUID.Value, ChanneldUtils::GetNativeNetId(CachedObj->netguid()));
+					}
+					continue;
 				}
-				
-				/*
-				// Client uses different NetworkGUID than server
-				if (World->IsClient())
-				{
-					GetUniqueNetId(NewGUID, Ref->connid());
-				}
-				*/
 				
 				FString PathName = UTF8_TO_TCHAR(CachedObj->pathname().c_str());
 				// Remap name for PIE
@@ -253,7 +337,7 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 							}
 						}
 					}
-					
+
 					GuidCache->RegisterNetGUIDFromPath_Client(NewGUID, PathName, CachedObj->outerguid(), 0, false, false);
 				}
 				UObject* NewObj = GuidCache->GetObjectFromNetGUID(NewGUID, false);
@@ -309,35 +393,51 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 						
 						Obj = Actor;
 					}
+					else
+					{
+						FNetGuidCacheObject* CacheObjectPtr = GuidCache->ObjectLookup.Find( NetGUID );
+						UE_LOG(LogChanneld, Warning, TEXT("Failed to serialize new actor, cached object path: %s"), *CacheObjectPtr->PathName.ToString());
+					}
 				}
-				else if (Ref->has_classpath())
+				// else if (Ref->has_classpath())
+				if (Obj == nullptr && Ref->has_classpath())
 				{
 					FString PathName = UTF8_TO_TCHAR(Ref->classpath().c_str());
-					if (auto ObjClass = LoadObject<UClass>(nullptr, *PathName))
+					
+					// Static object with bunch data (somehow)
+					if (NetGUID.IsStatic())
 					{
-						Obj = NewObject<UObject>(GetTransientPackage(), ObjClass);
-						if (ClientConn)
-						{
-							// GuidCache->RegisterNetGUIDFromPath_Server(NetGUID, PathName, 0, 0, false, false);
-							GuidCache->RegisterNetGUID_Server(NetGUID, Obj);
-						}
-						else
-						{
-							// GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, 0, 0, false, false);
-							GuidCache->RegisterNetGUID_Client(NetGUID, Obj);
-						}
-
-						if (AActor* Actor = Cast<AActor>(Obj))
-						{
-							// Triggers UChanneldNetDriver::NotifyActorChannelOpen
-							World->GetNetDriver()->NotifyActorChannelOpen(nullptr, Actor);
-							// After all properties have been initialized, call PostNetInit. This should call BeginPlay() so initialization can be done with proper starting values.
-							Actor->PostNetInit();
-						}
+						UE_LOG(LogChanneld, Warning, TEXT("Try to load static object with bunch data, netId: %d, path: %s, bits: %d"), NetGUID.Value, *PathName, Ref->bunchbitsnum());
 					}
 					else
 					{
-						UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Failed to load class from path: %s"), *PathName);
+						if (auto ObjClass = LoadObject<UClass>(nullptr, *PathName))
+						{
+							Obj = NewObject<UObject>(GetTransientPackage(), ObjClass);
+					
+							if (ClientConn)
+							{
+								// GuidCache->RegisterNetGUIDFromPath_Server(NetGUID, PathName, 0, 0, false, false);
+								GuidCache->RegisterNetGUID_Server(NetGUID, Obj);
+							}
+							else
+							{
+								// GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, 0, 0, false, false);
+								GuidCache->RegisterNetGUID_Client(NetGUID, Obj);
+							}
+
+							if (AActor* Actor = Cast<AActor>(Obj))
+							{
+								// Triggers UChanneldNetDriver::NotifyActorChannelOpen
+								World->GetNetDriver()->NotifyActorChannelOpen(nullptr, Actor);
+								// After all properties have been initialized, call PostNetInit. This should call BeginPlay() so initialization can be done with proper starting values.
+								Actor->PostNetInit();
+							}
+						}
+						else
+						{
+							UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Failed to load class from path: %s"), *PathName);
+						}
 					}
 				}
 			}
@@ -376,6 +476,15 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 	{
 		return ObjRef;
 	}
+
+	// CDO: treat it as an asset object
+	if (Obj == Obj->GetClass()->ClassDefaultObject)
+	{
+		ObjRef->set_classpath(std::string(TCHAR_TO_UTF8(*Obj->GetPathName())));
+		return ObjRef;
+	}
+
+	// Non-asset should have a valid world
 	if (!World)
 	{
 		World = Obj->GetWorld();
@@ -389,19 +498,19 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 	auto NetGUID = GuidCache->GetNetGUID(Obj);
 	ObjRef->set_netguid(NetGUID.Value);
 
-	// CDO: treat it as an asset object
-	if (Obj == Obj->GetClass()->ClassDefaultObject)
+	// Static object's path name can be found locally
+	if (NetGUID.IsStatic())
 	{
-		ObjRef->set_classpath(std::string(TCHAR_TO_UTF8(*Obj->GetPathName())));
 		return ObjRef;
 	}
-	
+
+	// If the dynamic object have already been full-exported to the client, just send the NetGUID
 	if (!bFullExport)
 	{
 		return ObjRef;
 	}
-	/*
-	*/
+
+	// Used the cached ObjRef so it won't be full-exported again
 	if (const auto Cached = ObjRefCache.Find(NetGUID.Value))
 	{
 		UE_LOG(LogChanneld, VeryVerbose, TEXT("Use cached ObjRef: %d"), NetGUID.Value);
@@ -455,6 +564,7 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 
 				NetGUID = GuidCache->GetNetGUID(Obj);
 
+				/*
 				TSet<FNetworkGUID> NewGUIDs;
 				PackageMap->NetGUIDExportCountMap.GetKeys(NewGUIDs);
 				// Find the newly-registered NetGUIDs during SerializeNewActor()
@@ -505,10 +615,11 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 					PackageMap->SerializeNewActor(Ar, Channel, Actor);
 					Actor->OnSerializeNewActor(Ar);
 				}
+				*/
 
 				ObjRef->set_netguidbunch(Ar.GetData(), Ar.GetNumBytes());
 				ObjRef->set_bunchbitsnum(Ar.GetNumBits());
-
+				
 				// Remove the channel after using it
 				Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
 

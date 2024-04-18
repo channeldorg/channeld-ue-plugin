@@ -121,8 +121,17 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 
 		for (auto Obj : ObjLoadedListener.CreatedUObjects)
 		{
-			if (Obj && IsValid(Obj) && Obj->IsFullNameStableForNetworking() && !AddedObjectPath.Contains(Obj->GetPathName()))
+			if (Obj && IsValid(Obj) && Obj->IsFullNameStableForNetworking())
 			{
+				FString ObjectPath = Obj->GetPathName();
+				if (ObjectPath.Contains(".TRASH"))
+				{
+					continue;
+				}
+				if (AddedObjectPath.Contains(ObjectPath))
+				{
+					continue;
+				}
 				NameStableObjects.Add(Obj);
 				AddedObjectPath.Add(Obj->GetPathName());
 			}

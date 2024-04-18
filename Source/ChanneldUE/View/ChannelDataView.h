@@ -91,6 +91,8 @@ public:
 	int32 SendChannelUpdate(Channeld::ChannelId ChId);
 	int32 SendAllChannelUpdates();
 
+	UObject* GetObjectFromNetGUID(const FNetworkGUID& NetId) const;
+
 	void OnDisconnect();
 
 	// UPROPERTY(EditAnywhere)
@@ -121,8 +123,6 @@ protected:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure/*, meta=(CallableWithoutWorldContext)*/)
 	class UChanneldGameInstanceSubsystem* GetChanneldSubsystem() const;
-
-	UObject* GetObjectFromNetGUID(const FNetworkGUID& NetId);
 
 	virtual void InitServer();
 	virtual void InitClient();

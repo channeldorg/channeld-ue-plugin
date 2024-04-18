@@ -73,7 +73,6 @@ void UChannelDataView::Initialize(UChanneldConnection* InConn)
 	}
 	
 	UE_LOG(LogChanneld, Log, TEXT("%s initialized channels."), *this->GetClass()->GetName());
-
 	
 	GetChanneldSubsystem()->OnViewInitialized.Broadcast(this);
 }
@@ -222,6 +221,7 @@ void UChannelDataView::AddProvider(Channeld::ChannelId ChId, IChannelDataProvide
 void UChannelDataView::AddProviderToDefaultChannel(IChannelDataProvider* Provider)
 {
 	FNetworkGUID NetId = GetNetId(Provider);
+	
 	if (NetId.IsValid())
 	{
 		Channeld::ChannelId ChId = GetOwningChannelId(NetId);
@@ -464,7 +464,6 @@ void UChannelDataView::SendExistingActorsToNewPlayer(APlayerController* NewPlaye
 		for(TActorIterator<AActor> It(GetWorld(), AActor::StaticClass()); It; ++It)
 		{
 			AActor* Actor = *It;
-		
 			if (!Actor->IsA<AGameModeBase>() && Actor != NewPlayer && Actor != NewPlayer->PlayerState)
 			{
 				NetDriver->OnServerSpawnedActor(Actor);
@@ -475,18 +474,19 @@ void UChannelDataView::SendExistingActorsToNewPlayer(APlayerController* NewPlaye
 
 FNetworkGUID UChannelDataView::GetNetId(UObject* Obj, bool bAssignOnServer/* = true*/) const
 {
+	FNetworkGUID NetId;
 	if (const auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
 	{
 		if (NetDriver->IsServer() && bAssignOnServer)
 		{
-			return NetDriver->GuidCache->GetOrAssignNetGUID(Obj);
+			NetId = NetDriver->GuidCache->GetOrAssignNetGUID(Obj);
 		}
 		else
 		{
-			return NetDriver->GuidCache->GetNetGUID(Obj);
+			NetId = ChanneldUtils::GetNetId(Obj, NetDriver);
 		}
 	}
-	return FNetworkGUID();
+	return NetId;
 }
 
 FNetworkGUID UChannelDataView::GetNetId(IChannelDataProvider* Provider) const
@@ -836,8 +836,13 @@ UChanneldGameInstanceSubsystem* UChannelDataView::GetChanneldSubsystem() const
 */
 }
 
-UObject* UChannelDataView::GetObjectFromNetGUID(const FNetworkGUID& NetId)
+UObject* UChannelDataView::GetObjectFromNetGUID(const FNetworkGUID& NetId) const
 {
+	if (NetId.IsStatic())
+	{
+		return ChanneldUtils::GetStaticObject(NetId);
+	}
+	
 	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
 	{
 		return NetDriver->GuidCache->GetObjectFromNetGUID(NetId, true);

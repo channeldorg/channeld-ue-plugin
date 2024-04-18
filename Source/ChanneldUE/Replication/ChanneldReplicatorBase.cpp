@@ -1,5 +1,6 @@
 #include "ChanneldReplicatorBase.h"
 #include "ChanneldReplicationComponent.h"
+#include "ChanneldUtils.h"
 #include "Engine/PackageMapClient.h"
 #include "Engine/NetDriver.h"
 
@@ -26,11 +27,7 @@ uint32 FChanneldReplicatorBase::GetNetGUID()
 	{
         if (TargetObject.IsValid())
         {
-		    UWorld* World = TargetObject->GetWorld();
-            if (World && World->GetNetDriver())
-            {
-		        NetGUID = World->GetNetDriver()->GuidCache->GetNetGUID(TargetObject.Get());
-            }
+		    NetGUID = ChanneldUtils::GetNetId(TargetObject.Get());
         }
 	}
 	return NetGUID.Value;
@@ -42,11 +39,7 @@ uint32 FChanneldReplicatorBase_AC::GetNetGUID()
 	{
 		if (TargetObject.IsValid())
 		{
-			UWorld* World = TargetObject->GetWorld();
-			if (World && World->GetNetDriver())
-			{
-				NetGUID = World->GetNetDriver()->GuidCache->GetNetGUID(CastChecked<UActorComponent>(TargetObject.Get())->GetOwner());
-			}
+			NetGUID = ChanneldUtils::GetNetId(CastChecked<UActorComponent>(TargetObject.Get())->GetOwner());
 		}
 	}
 	return NetGUID.Value;

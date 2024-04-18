@@ -205,29 +205,30 @@ public:
 		SpatialInfo->set_z(Vector.Y);
 	}
 
-	static FNetworkGUID GetNetId(UObject* Obj, bool bAssignOnServer = true)
+	static FNetworkGUID GetNetId(UObject* Obj, const UNetDriver* NetDriver = nullptr)
 	{
 		FNetworkGUID NetId;
-		if (!Obj)
+		if (!NetDriver)
+		{
+			if (const UWorld* World = Obj->GetWorld())
+			{
+				NetDriver = World->GetNetDriver();
+			}
+		}
+		if (!NetDriver)
 		{
 			return NetId;
 		}
-		auto World = Obj->GetWorld();
-		if (!World)
-		{
-			return NetId;
-		}
+		
+		NetId = NetDriver->GuidCache->GetNetGUID(Obj);
 
-		if (const auto NetDriver = World->GetNetDriver())
+		if (!NetId.IsValid())
 		{
-			if (NetDriver->IsServer() && bAssignOnServer)
-			{
-				NetId = NetDriver->GuidCache->GetOrAssignNetGUID(Obj);
-			}
-			else
-			{
-				NetId = NetDriver->GuidCache->GetNetGUID(Obj);
-			}
+			FString ObjectPath = Obj->GetPathName();
+#if UE_EDITOR
+			ObjectPath = UWorld::RemovePIEPrefix(ObjectPath);
+#endif
+			NetId = GetStaticObjectExportedNetGUID(ObjectPath);
 		}
 		
 		return NetId;
@@ -386,11 +387,12 @@ public:
 	// static void MarkArUseCustomSerializeObject(FArchive& Ar);
 	// static bool CheckArUseCustomSerializeObject(const FArchive& Ar);
 	
-	static bool LoadStaticObjectExportedNetGUIDFromFile(const FString& FilePath);
+	static bool LoadStaticObjectExportedNetGUIDFromFile(const FString& FilePath, UNetDriver* NetDriver);
 	static uint32 GetStaticObjectExportedNetGUID(const FString& PathName);
 	static FString GetStaticObjectExportedPathName(uint32 NetGUID);
+	static UObject* GetStaticObject(FNetworkGUID NetGUID);
 	static void RegisterStaticObjectNetGUID_Authority(UObject* Obj, uint32 ExportID);
-	static void RegisterStaticObjectNetGUID_NonAuthority(const UObject* Obj, uint32 ExportID, UNetConnection* Connection, bool bRunningOnServer = false);
+	static void RegisterStaticObjectNetGUID_NonAuthority(const UObject* Obj, const FString PathName, uint32 ExportID, UNetConnection* Connection, bool bRunningOnServer = false);
 	static UObject* TryLoadStaticObject(uint32 NetGUID, UNetConnection* Connection, bool bRunningOnServer = false);
 
 private:

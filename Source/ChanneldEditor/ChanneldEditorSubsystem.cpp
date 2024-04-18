@@ -124,7 +124,7 @@ void UChanneldEditorSubsystem::UpdateReplicationCache(
 #if ENGINE_MAJOR_VERSION >= 5
 	const TCHAR* AdditionalArguments = TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout -AssetGatherAll=true -exportstatic");
 #else
-	constexpr TCHAR* AdditionalArguments = TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout");
+	const TCHAR* AdditionalArguments = TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout -exportstatic");
 #endif
 
 	UpdateRepActorCacheWorkThread = MakeShareable(
