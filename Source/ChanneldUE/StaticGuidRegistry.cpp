@@ -34,7 +34,7 @@ bool FStaticGuidRegistry::LoadExportedFile(const FString& FilePath)
 	return true;
 }
 
-void FStaticGuidRegistry::LoadAndRegisterStaticObjects(UNetDriver* NetDriver)
+void FStaticGuidRegistry::RegisterStaticObjects(UNetDriver* NetDriver)
 {
 	if (NetDriver == nullptr)
 	{
@@ -62,7 +62,7 @@ void FStaticGuidRegistry::LoadAndRegisterStaticObjects(UNetDriver* NetDriver)
 
 		if (auto Obj = FindObject<UObject>(nullptr, *PathName))
 		{
-			/*
+			/* NEVER happens as the registration is done after UNetDriver::SetWorld
 			// Some static object such as the level may already exist in the cache
 			if (NetDriver->GuidCache->NetGUIDLookup.Remove(MakeWeakObjectPtr(const_cast<UObject*>(Obj))))
 			{
@@ -89,12 +89,11 @@ void FStaticGuidRegistry::LoadAndRegisterStaticObjects(UNetDriver* NetDriver)
 				//NetDriver->GuidCache->RegisterNetGUID_Client(NetGUID, Obj);
 				*/
 		
-				/*
-				*/
 				FNetGuidCacheObject CacheObject;
 				CacheObject.Object = Obj;
 				CacheObject.OuterGUID = OuterGUID;
-				CacheObject.PathName = FName(PathName);
+				// Use the short name here so it can pass the check in FNetGUIDCache::GetObjectFromNetGUID
+				CacheObject.PathName = Obj->GetFName();//FName(PathName);
 				NetDriver->GuidCache->RegisterNetGUID_Internal(NetGUID, CacheObject);
 				UE_LOG( LogNetPackageMap, Log, TEXT( "RegisterNetGUID_Internal: NetGUID: %d, PathName: %s" ), NetGUID.Value, *PathName);
 

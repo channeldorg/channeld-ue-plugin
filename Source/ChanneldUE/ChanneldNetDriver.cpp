@@ -1110,7 +1110,7 @@ void UChanneldNetDriver::SetWorld(UWorld* InWorld)
 	Super::SetWorld(InWorld);
 	if (World)
 	{
-		FStaticGuidRegistry::LoadAndRegisterStaticObjects(this);
+		FStaticGuidRegistry::RegisterStaticObjects(this);
 	}
 }
 

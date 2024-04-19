@@ -51,6 +51,8 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 		if (!GuidCache->IsNetGUIDAuthority() || ClientConn)
 		{
 			UNetConnection* Connection = ClientConn ? ClientConn : NetDriver->ServerConnection;
+
+			/* v0.7.3 - static objects are pre-registered on both server and client, so they won't be received here.
 			TArray<const unrealpb::UnrealObjectRef_GuidCachedObject*> CachedObjs;
 			for (auto& Context : Ref->context())
 			{
@@ -115,6 +117,7 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 				}
 				UE_LOG(LogChanneld, Verbose, TEXT("[Client] Registered NetGUID %d (%d) from path: %s"), NewGUID.Value, ChanneldUtils::GetNativeNetId(NewGUID.Value), *PathName);
 			}
+			*/
 
 			// Use the bunch to deserialize the object
 			if (Obj == nullptr)
@@ -330,7 +333,7 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 
 				NetGUID = GuidCache->GetNetGUID(Obj);
 
-				/*
+				/* v0.7.3 - static objects are pre-registered on both server and client, so there's no need to register and send here.
 				TSet<FNetworkGUID> NewGUIDs;
 				PackageMap->NetGUIDExportCountMap.GetKeys(NewGUIDs);
 				// Find the newly-registered NetGUIDs during SerializeNewActor()

@@ -13,7 +13,7 @@ class CHANNELDUE_API FStaticGuidRegistry
 {
 public:
 	static bool LoadExportedFile(const FString& FilePath);
-	static void LoadAndRegisterStaticObjects(UNetDriver* NetDriver);
+	static void RegisterStaticObjects(UNetDriver* NetDriver);
 	
 	static uint32 GetStaticObjectExportedNetGUID(const FString& PathName);
 	static FString GetStaticObjectExportedPathName(uint32 NetGUID);
