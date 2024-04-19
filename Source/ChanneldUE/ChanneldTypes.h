@@ -332,16 +332,16 @@ struct CHANNELDUE_API FStaticObjectInfo
 	FString PathName;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	int32 ExportID = 0;
+	int32 NetID = 0;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	int32 OuterExportID = 0;
+	int32 OuterID = 0;
 
 	FStaticObjectInfo() = default;
 
 	FStaticObjectInfo(FString InPathName, int32 InExportID, int32 InOuterExportID)
 		: PathName(InPathName)
-		, ExportID(InExportID), OuterExportID(InOuterExportID)
+		, NetID(InExportID), OuterID(InOuterExportID)
 	{
 	}
 };
@@ -352,19 +352,19 @@ struct CHANNELDUE_API FStaticObjectCache
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	FDateTime CacheTime;
+	FDateTime ExportTime;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	TArray<FStaticObjectInfo> StaticObjectCacheCaches;
+	TArray<FStaticObjectInfo> StaticObjects;
 
 	FStaticObjectCache() = default;
 
-	FStaticObjectCache(const TArray<FStaticObjectInfo>& InStaticObjectCacheCaches)
-		: StaticObjectCacheCaches(InStaticObjectCacheCaches)
+	FStaticObjectCache(const TArray<FStaticObjectInfo>& InStaticObjects)
+		: StaticObjects(InStaticObjects)
 	{
-		CacheTime = FDateTime::UtcNow();
+		ExportTime = FDateTime::UtcNow();
 	}
 };
 
-static const FString GenManager_ChannelStaticObjectExportPath = FPaths::ProjectConfigDir() / TEXT("ChannelStaticObjectExport.json");
-static constexpr int GenManager_ChannelStaticObjectExportStartID = 100000001;
+static const FString GenManager_ChanneldStaticObjectExportPath = FPaths::ProjectConfigDir() / TEXT("ChanneldStaticObjectExport.json");
+static constexpr int GenManager_ChanneldStaticObjectExportStartID = 100000001;

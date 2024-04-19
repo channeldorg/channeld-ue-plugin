@@ -4,7 +4,7 @@ bool UStaticObjectExportController::SaveStaticObjectExportInfo(const TArray<cons
 {
 	TArray<FStaticObjectInfo> StaticObjectInfos;
 	TMap<const UObject*, int32> StaticObjectExportID;
-	int32 ExportID = GenManager_ChannelStaticObjectExportStartID;
+	int32 ExportID = GenManager_ChanneldStaticObjectExportStartID;
 	for (auto Obj : InStaticObjects)
 	{
 		StaticObjectExportID.Add(Obj, ExportID);

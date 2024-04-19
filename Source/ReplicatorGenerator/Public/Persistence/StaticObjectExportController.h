@@ -14,7 +14,7 @@ UCLASS(BlueprintType)
 class REPLICATORGENERATOR_API UStaticObjectExportController : public UEditorSubsystem
 {
 	GENERATED_BODY()
-	TJsonModel<FStaticObjectCache> FStaticObjectInfoModel = GenManager_ChannelStaticObjectExportPath;
+	TJsonModel<FStaticObjectCache> FStaticObjectInfoModel = GenManager_ChanneldStaticObjectExportPath;
 public:
 	bool SaveStaticObjectExportInfo(const TArray<const UObject*>& InStaticObjects);
 };

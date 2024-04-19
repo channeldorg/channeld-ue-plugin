@@ -10,6 +10,8 @@ TMap<uint32, uint32> StaticObjectExportOuterExportID;
 
 bool FStaticGuidRegistry::LoadExportedFile(const FString& FilePath)
 {
+	double StartTime = FPlatformTime::Seconds();
+
 	FString JsonString;
 	FStaticObjectCache Data;
 	if (!FFileHelper::LoadFileToString(JsonString, *FilePath))
@@ -23,14 +25,14 @@ bool FStaticGuidRegistry::LoadExportedFile(const FString& FilePath)
 		return false;
 	}
 
-	for (auto& Info : Data.StaticObjectCacheCaches)
+	for (auto& Info : Data.StaticObjects)
 	{
-		StaticObjectExportNetGUID.Add(Info.PathName, Info.ExportID);
-		StaticObjectExportPathName.Add(Info.ExportID, Info.PathName);
-		StaticObjectExportOuterExportID.Add(Info.ExportID, Info.OuterExportID);
+		StaticObjectExportNetGUID.Add(Info.PathName, Info.NetID);
+		StaticObjectExportPathName.Add(Info.NetID, Info.PathName);
+		StaticObjectExportOuterExportID.Add(Info.NetID, Info.OuterID);
 	}
 
-	UE_LOG(LogChanneld, Display, TEXT("Successful load [%d] static objects from file %s"), StaticObjectExportNetGUID.Num(), *FilePath);
+	UE_LOG(LogChanneld, Display, TEXT("Successful load %d static objects, took %.3f seconds"), StaticObjectExportNetGUID.Num(), FPlatformTime::Seconds() - StartTime);
 	return true;
 }
 
@@ -41,6 +43,8 @@ void FStaticGuidRegistry::RegisterStaticObjects(UNetDriver* NetDriver)
 		UE_LOG(LogChanneld, Error, TEXT("FStaticGuidRegistry::LoadAndRegisterStaticObjects: NetDriver is nullptr"));
 		return;
 	}
+
+	double StartTime = FPlatformTime::Seconds();
 
 	for (auto Pair : StaticObjectExportPathName)
 	{
@@ -111,6 +115,8 @@ void FStaticGuidRegistry::RegisterStaticObjects(UNetDriver* NetDriver)
 			}
 		}
 	}
+	
+	UE_LOG(LogChanneld, Display, TEXT("Registering static objects took %.3f seconds"), FPlatformTime::Seconds() - StartTime);
 }
 
 uint32 FStaticGuidRegistry::GetStaticObjectExportedNetGUID(const FString& PathName)
@@ -156,7 +162,7 @@ UObject* FStaticGuidRegistry::GetStaticObject(FNetworkGUID NetGUID, UNetDriver* 
 
 void FStaticGuidRegistry::RegisterStaticObjectNetGUID_Authority(UObject* Obj, uint32 ExportID)
 {
-	check(ExportID >= GenManager_ChannelStaticObjectExportStartID);
+	check(ExportID >= GenManager_ChanneldStaticObjectExportStartID);
 	check(Obj);
 	check(GWorld);
 	check(GWorld->GetNetDriver());
@@ -165,7 +171,7 @@ void FStaticGuidRegistry::RegisterStaticObjectNetGUID_Authority(UObject* Obj, ui
 	if (Obj->GetOuter())
 	{
 		const uint32 OuterExportID = GetStaticObjectExportedNetGUID(Obj->GetPathName());
-		if (OuterExportID >= GenManager_ChannelStaticObjectExportStartID)
+		if (OuterExportID >= GenManager_ChanneldStaticObjectExportStartID)
 		{
 			RegisterStaticObjectNetGUID_Authority(Obj->GetOuter(), OuterExportID);
 		}
@@ -189,7 +195,7 @@ void FStaticGuidRegistry::RegisterStaticObjectNetGUID_Authority(UObject* Obj, ui
 
 void FStaticGuidRegistry::RegisterStaticObjectNetGUID_NonAuthority(const UObject* Obj, const FString PathName, uint32 ExportID, UNetConnection* Connection, bool bRunningOnServer)
 {
-	check(ExportID >= GenManager_ChannelStaticObjectExportStartID);
+	check(ExportID >= GenManager_ChanneldStaticObjectExportStartID);
 	check(Obj);
 	check(GWorld);
 	check(GWorld->GetNetDriver());
@@ -206,7 +212,7 @@ void FStaticGuidRegistry::RegisterStaticObjectNetGUID_NonAuthority(const UObject
 	{
 		FString OuterPathName = OuterObj->GetPathName();
 		uint32 OuterExportID = GetStaticObjectExportedNetGUID(OuterPathName);
-		if (OuterExportID >= GenManager_ChannelStaticObjectExportStartID)
+		if (OuterExportID >= GenManager_ChanneldStaticObjectExportStartID)
 		{
 			RegisterStaticObjectNetGUID_NonAuthority(OuterObj, OuterPathName, OuterExportID, Connection, bRunningOnServer);
 			OuterNetGUID = FNetworkGUID(OuterExportID);
@@ -229,7 +235,7 @@ void FStaticGuidRegistry::RegisterStaticObjectNetGUID_NonAuthority(const UObject
 
 UObject* FStaticGuidRegistry::TryLoadStaticObject(uint32 NetGUID, UNetConnection* Connection, bool bRunningOnServer)
 {
-	check(NetGUID >= GenManager_ChannelStaticObjectExportStartID);
+	check(NetGUID >= GenManager_ChanneldStaticObjectExportStartID);
 	UObject* NewObj = nullptr;
 	FString* PathNamePtr = StaticObjectExportPathName.Find(NetGUID);
 	if (ensure(PathNamePtr))

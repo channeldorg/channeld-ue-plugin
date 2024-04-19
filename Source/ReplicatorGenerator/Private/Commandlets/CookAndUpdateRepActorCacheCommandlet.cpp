@@ -199,7 +199,7 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 	}
 	else
 	{
-		IFileManager::Get().Delete(*(GenManager_ChannelStaticObjectExportPath));
+		IFileManager::Get().Delete(*(GenManager_ChanneldStaticObjectExportPath));
 	}
 	
 	URepActorCacheController* RepActorCacheController = GEditor->GetEditorSubsystem<URepActorCacheController>();
