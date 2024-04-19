@@ -45,6 +45,8 @@ public:
 	// Send packets to channeld by calling ChanneldConnection.TickOutgoing()
 	virtual void TickFlush(float DeltaSeconds) override;
 
+	virtual void SetWorld(UWorld* InWorld) override;
+
 	virtual class ISocketSubsystem* GetSocketSubsystem() override;
 	virtual FSocket* GetSocket();
 	// Client: send raw packet to server via channeld

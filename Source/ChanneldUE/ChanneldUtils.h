@@ -390,7 +390,7 @@ public:
 	static bool LoadStaticObjectExportedNetGUIDFromFile(const FString& FilePath, UNetDriver* NetDriver);
 	static uint32 GetStaticObjectExportedNetGUID(const FString& PathName);
 	static FString GetStaticObjectExportedPathName(uint32 NetGUID);
-	static UObject* GetStaticObject(FNetworkGUID NetGUID);
+	static UObject* GetStaticObject(FNetworkGUID NetGUID, UNetDriver* NetDriver);
 	static void RegisterStaticObjectNetGUID_Authority(UObject* Obj, uint32 ExportID);
 	static void RegisterStaticObjectNetGUID_NonAuthority(const UObject* Obj, const FString PathName, uint32 ExportID, UNetConnection* Connection, bool bRunningOnServer = false);
 	static UObject* TryLoadStaticObject(uint32 NetGUID, UNetConnection* Connection, bool bRunningOnServer = false);

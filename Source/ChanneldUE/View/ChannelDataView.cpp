@@ -838,13 +838,13 @@ UChanneldGameInstanceSubsystem* UChannelDataView::GetChanneldSubsystem() const
 
 UObject* UChannelDataView::GetObjectFromNetGUID(const FNetworkGUID& NetId) const
 {
-	if (NetId.IsStatic())
-	{
-		return ChanneldUtils::GetStaticObject(NetId);
-	}
-	
 	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())
 	{
+		if (NetId.IsStatic())
+		{
+			return ChanneldUtils::GetStaticObject(NetId, NetDriver);
+		}
+	
 		return NetDriver->GuidCache->GetObjectFromNetGUID(NetId, true);
 	}
 	return nullptr;

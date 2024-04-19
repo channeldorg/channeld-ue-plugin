@@ -29,6 +29,8 @@ bool ChanneldUtils::LoadStaticObjectExportedNetGUIDFromFile(const FString& FileP
 	{
 		StaticObjectExportNetGUID.Add(Info.PathName, Info.ExportID);
 		StaticObjectExportPathName.Add(Info.ExportID, Info.PathName);
+
+		// TODO: split cache loading and registering
 		if (NetDriver != nullptr)
 		{
 			if (NetDriver->GuidCache->ObjectLookup.Contains(Info.ExportID))
@@ -36,19 +38,27 @@ bool ChanneldUtils::LoadStaticObjectExportedNetGUIDFromFile(const FString& FileP
 				UE_LOG( LogNetPackageMap, Warning, TEXT( "Duplicated NetGUID found in ObjectLookup: %d, PathName: %s" ), Info.ExportID, *Info.PathName );
 				continue;
 			}
-			if (auto Obj = FindObject<UObject>(nullptr, *Info.PathName))
+			
+			FString PathName = Info.PathName;
+			// Remap name for PIE (should only be done on the client side)
+			if (GEngine->NetworkRemapPath(NetDriver->ServerConnection, PathName, true))
+			{
+				// UE_LOG(LogChanneld, Verbose, TEXT("Remapped path name: %s -> %s"), *Info.PathName, *PathName);
+			}
+
+			if (auto Obj = FindObject<UObject>(nullptr, *PathName))
 			{
 				/*
 				// Some static object such as the level may already exist in the cache
 				if (NetDriver->GuidCache->NetGUIDLookup.Remove(MakeWeakObjectPtr(const_cast<UObject*>(Obj))))
 				{
-					UE_LOG( LogNetPackageMap, Log, TEXT( "Duplicated Object found in NetGUIDLookup: %s, NetGUID: %d" ), *Info.PathName, Info.ExportID );
+					UE_LOG( LogNetPackageMap, Log, TEXT( "Duplicated Object found in NetGUIDLookup: %s, NetGUID: %d" ), *PathName, Info.ExportID );
 				}
 				*/
 				if (auto OldNetId = NetDriver->GuidCache->NetGUIDLookup.Find(Obj))
 				{
 					auto CachedObj = NetDriver->GuidCache->ObjectLookup.FindAndRemoveChecked(*OldNetId);
-					UE_LOG( LogNetPackageMap, Log, TEXT( "Updating GuidCache, PathName: '%s', NetGUID: %d -> %d" ), *Info.PathName, OldNetId->Value, Info.ExportID );
+					UE_LOG( LogNetPackageMap, Log, TEXT( "Updating GuidCache, PathName: '%s', NetGUID: %d -> %d" ), *PathName, OldNetId->Value, Info.ExportID );
 					*OldNetId = Info.ExportID;
 					NetDriver->GuidCache->ObjectLookup.Emplace(Info.ExportID, CachedObj);
 					continue;
@@ -57,7 +67,7 @@ bool ChanneldUtils::LoadStaticObjectExportedNetGUIDFromFile(const FString& FileP
 				if (NetDriver->IsServer())
 				{
 					NetDriver->GuidCache->RegisterNetGUID_Server(Info.ExportID, Obj);
-					UE_LOG( LogNetPackageMap, Log, TEXT( "RegisterNetGUID_Server: NetGUID: %d, PathName: %s" ), Info.ExportID, *Info.PathName );
+					UE_LOG( LogNetPackageMap, Log, TEXT( "RegisterNetGUID_Server: NetGUID: %d, PathName: %s" ), Info.ExportID, *PathName);
 				}
 				else
 				{
@@ -70,13 +80,9 @@ bool ChanneldUtils::LoadStaticObjectExportedNetGUIDFromFile(const FString& FileP
 					FNetGuidCacheObject CacheObject;
 					CacheObject.Object = Obj;
 					CacheObject.OuterGUID = Info.OuterExportID;
-#if UE_EDITOR
-					CacheObject.PathName = FName(UWorld::RemovePIEPrefix(Info.PathName));//Obj.GetFName();
-#else
-					CacheObject.PathName = FName(Info.PathName);//Obj.GetFName();
-#endif
+					CacheObject.PathName = FName(PathName);
 					NetDriver->GuidCache->RegisterNetGUID_Internal(Info.ExportID, CacheObject);
-					UE_LOG( LogNetPackageMap, Log, TEXT( "RegisterNetGUID_Internal: NetGUID: %d, PathName: %s" ), Info.ExportID, *Info.PathName );
+					UE_LOG( LogNetPackageMap, Log, TEXT( "RegisterNetGUID_Internal: NetGUID: %d, PathName: %s" ), Info.ExportID, *PathName );
 
 				}
 			}
@@ -84,11 +90,11 @@ bool ChanneldUtils::LoadStaticObjectExportedNetGUIDFromFile(const FString& FileP
 			{
 				if (NetDriver->IsServer())
 				{
-					NetDriver->GuidCache->RegisterNetGUIDFromPath_Server(Info.ExportID, Info.PathName, Info.OuterExportID, 0, false, false);
+					NetDriver->GuidCache->RegisterNetGUIDFromPath_Server(Info.ExportID, PathName, Info.OuterExportID, 0, false, false);
 				}
 				else
 				{
-					NetDriver->GuidCache->RegisterNetGUIDFromPath_Client(Info.ExportID, Info.PathName, Info.OuterExportID, 0, false, false);
+					NetDriver->GuidCache->RegisterNetGUIDFromPath_Client(Info.ExportID, PathName, Info.OuterExportID, 0, false, false);
 				}
 			}
 		}
@@ -116,9 +122,13 @@ FString ChanneldUtils::GetStaticObjectExportedPathName(uint32 NetGUID)
 	return FString();
 }
 
-UObject* ChanneldUtils::GetStaticObject(FNetworkGUID NetGUID)
+UObject* ChanneldUtils::GetStaticObject(FNetworkGUID NetGUID, UNetDriver* NetDriver)
 {
 	FString PathName = GetStaticObjectExportedPathName(NetGUID.Value);
+	if (GEngine->NetworkRemapPath(NetDriver->ServerConnection, PathName, true))
+	{
+		UE_LOG(LogChanneld, Verbose, TEXT("Getting static object from remapped path name: %s -> %s"), *GetStaticObjectExportedPathName(NetGUID.Value), *PathName);
+	}
 	UObject* Obj = FindObject<UObject>(nullptr, *PathName);
 	if (Obj == nullptr)
 	{
@@ -265,13 +275,13 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 		return nullptr;
 	}
 
+	UNetDriver* NetDriver = World->GetNetDriver();
 	// Static object - load it directly
 	if (NetGUID.IsStatic())
 	{
-		return GetStaticObject(NetGUID);
+		return GetStaticObject(NetGUID, NetDriver);
 	}
 
-	UNetDriver* NetDriver = World->GetNetDriver();
 	bNetGUIDUnmapped = (NetDriver == nullptr);
 	if (bNetGUIDUnmapped)
 	{

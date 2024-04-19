@@ -1105,6 +1105,15 @@ void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 	}
 }
 
+void UChanneldNetDriver::SetWorld(UWorld* InWorld)
+{
+	Super::SetWorld(InWorld);
+	if (World)
+	{
+		ChanneldUtils::LoadStaticObjectExportedNetGUIDFromFile(GenManager_ChannelStaticObjectExportPath, this);
+	}
+}
+
 void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 {
 	// IMPORTANT: offset with the ConnId to avoid NetworkGUID conflicts
@@ -1119,8 +1128,6 @@ void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 	// Static NetIDs may conflict on the spatial servers, so we need to offset them as well.
 	GuidCache->UniqueNetIDs[1] = UniqueNetIdOffset;
 #endif
-	
-	ChanneldUtils::LoadStaticObjectExportedNetGUIDFromFile(GenManager_ChannelStaticObjectExportPath, this);
 	
 	if (ConnToChanneld->IsClient())
 	{
