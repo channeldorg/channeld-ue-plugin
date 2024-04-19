@@ -842,7 +842,7 @@ UObject* UChannelDataView::GetObjectFromNetGUID(const FNetworkGUID& NetId) const
 	{
 		if (NetId.IsStatic())
 		{
-			return ChanneldUtils::GetStaticObject(NetId, NetDriver);
+			return FStaticGuidRegistry::GetStaticObject(NetId, NetDriver);
 		}
 	
 		return NetDriver->GuidCache->GetObjectFromNetGUID(NetId, true);

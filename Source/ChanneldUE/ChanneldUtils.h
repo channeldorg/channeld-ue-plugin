@@ -8,6 +8,7 @@
 #include "Engine/ActorChannel.h"
 #include "ChanneldConnection.h"
 #include "ChanneldNetConnection.h"
+#include "StaticGuidRegistry.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/DemoNetDriver.h"
 //#define CHANNELD_TOLERANCE (1.e-8f)
@@ -228,7 +229,7 @@ public:
 #if UE_EDITOR
 			ObjectPath = UWorld::RemovePIEPrefix(ObjectPath);
 #endif
-			NetId = GetStaticObjectExportedNetGUID(ObjectPath);
+			NetId = FStaticGuidRegistry::GetStaticObjectExportedNetGUID(ObjectPath);
 		}
 		
 		return NetId;
@@ -386,14 +387,6 @@ public:
 
 	// static void MarkArUseCustomSerializeObject(FArchive& Ar);
 	// static bool CheckArUseCustomSerializeObject(const FArchive& Ar);
-	
-	static bool LoadStaticObjectExportedNetGUIDFromFile(const FString& FilePath, UNetDriver* NetDriver);
-	static uint32 GetStaticObjectExportedNetGUID(const FString& PathName);
-	static FString GetStaticObjectExportedPathName(uint32 NetGUID);
-	static UObject* GetStaticObject(FNetworkGUID NetGUID, UNetDriver* NetDriver);
-	static void RegisterStaticObjectNetGUID_Authority(UObject* Obj, uint32 ExportID);
-	static void RegisterStaticObjectNetGUID_NonAuthority(const UObject* Obj, const FString PathName, uint32 ExportID, UNetConnection* Connection, bool bRunningOnServer = false);
-	static UObject* TryLoadStaticObject(uint32 NetGUID, UNetConnection* Connection, bool bRunningOnServer = false);
 
 private:
 	static TMap<uint32, TSharedRef<unrealpb::UnrealObjectRef>> ObjRefCache;

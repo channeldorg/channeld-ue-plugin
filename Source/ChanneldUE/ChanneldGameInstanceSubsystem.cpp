@@ -8,6 +8,8 @@
 
 void UChanneldGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
+	FStaticGuidRegistry::LoadExportedFile(GenManager_ChannelStaticObjectExportPath);
+	
 	GetMutableDefault<UChanneldSettings>()->UpdateNetDriverDefinitions();
 	InitConnection();
 }

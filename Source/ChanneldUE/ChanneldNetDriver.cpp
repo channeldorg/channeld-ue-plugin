@@ -1110,7 +1110,7 @@ void UChanneldNetDriver::SetWorld(UWorld* InWorld)
 	Super::SetWorld(InWorld);
 	if (World)
 	{
-		ChanneldUtils::LoadStaticObjectExportedNetGUIDFromFile(GenManager_ChannelStaticObjectExportPath, this);
+		FStaticGuidRegistry::LoadAndRegisterStaticObjects(this);
 	}
 }
 
