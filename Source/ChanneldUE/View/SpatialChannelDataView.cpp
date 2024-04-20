@@ -1527,7 +1527,7 @@ void USpatialChannelDataView::SendSpawnToClients(UObject* Obj, uint32 OwningConn
  	Channeld::ChannelId SpatialChId = Super::GetOwningChannelId(NetId);
 	if (SpatialChId == Channeld::InvalidChannelId)
 	{
-		SpatialChId = GetChanneldSubsystem()->LowLevelSendToChannelId.Get();
+		SpatialChId = GetDefaultChannelId();
 	}
 	
 	// The entity channel already exists, send directly
@@ -1578,7 +1578,7 @@ void USpatialChannelDataView::SendDestroyToClients(UObject* Obj, const FNetworkG
  	Channeld::ChannelId SpatialChId = Super::GetOwningChannelId(NetId);
 	if (SpatialChId == Channeld::InvalidChannelId)
 	{
-		SpatialChId = GetChanneldSubsystem()->LowLevelSendToChannelId.Get();
+		SpatialChId = GetDefaultChannelId();
 	}
 	
 	unrealpb::DestroyObjectMessage DestroyMsg;

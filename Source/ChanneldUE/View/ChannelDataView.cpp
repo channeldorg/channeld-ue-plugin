@@ -494,12 +494,17 @@ FNetworkGUID UChannelDataView::GetNetId(IChannelDataProvider* Provider) const
 	return GetNetId(Provider->GetTargetObject());
 }
 
+Channeld::ChannelId UChannelDataView::GetDefaultChannelId() const
+{
+	return GetChanneldSubsystem()->LowLevelSendToChannelId.Get();
+}
+
 bool UChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID NetId)
 {
 	if (!NetId.IsValid())
 		return false;
 
-	Channeld::ChannelId ChId = GetChanneldSubsystem()->LowLevelSendToChannelId.Get();
+	Channeld::ChannelId ChId = GetDefaultChannelId();
 	SetOwningChannelId(NetId, ChId);
 	// NetIdOwningChannels.Add(NetId, ChId);
 	// UE_LOG(LogChanneld, Log, TEXT("Set up mapping of netId: %d -> channelId: %d, spawned: %s"), NetId.Value, ChId, *GetNameSafe(Obj));

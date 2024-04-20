@@ -164,8 +164,8 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 					}
 					else
 					{
-						FNetGuidCacheObject* CacheObjectPtr = GuidCache->ObjectLookup.Find( NetGUID );
-						UE_LOG(LogChanneld, Warning, TEXT("Failed to serialize new actor, cached object path: %s"), *CacheObjectPtr->PathName.ToString());
+						// FNetGuidCacheObject* CacheObjectPtr = GuidCache->ObjectLookup.Find( NetGUID );
+						UE_LOG(LogChanneld, Warning, TEXT("Failed to serialize new actor, cached object path: %s"), *FStaticGuidRegistry::GetStaticObjectExportedPathName(NetGUID.Value));
 					}
 				}
 				// else if (Ref->has_classpath())

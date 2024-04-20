@@ -40,7 +40,10 @@ public:
 	virtual void Initialize(UChanneldConnection* InConn);
 	virtual void Unintialize();
 	virtual void BeginDestroy() override;
-	
+
+	// Get the default ChannelId for setting the NetId-ChannelId mapping, or forwarding/broardcasting in channeld,
+	// when the ChannelId is not specified.
+	virtual Channeld::ChannelId GetDefaultChannelId() const;
 	virtual bool GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const {return false;}
 
 	virtual void AddProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider);
@@ -60,7 +63,7 @@ public:
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn);
 	virtual FNetworkGUID GetNetId(UObject* Obj, bool bAssignOnServer = true) const;
 	virtual FNetworkGUID GetNetId(IChannelDataProvider* Provider) const;
-	
+
 	/**
 	 * @brief Added the object to the NetId-ChannelId mapping. If the object is an IChannelDataProvider, also add it to the providers set.
 	 * <br/>

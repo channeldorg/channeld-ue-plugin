@@ -41,6 +41,11 @@ void USingleChannelDataView::InitClient()
 	});
 }
 
+Channeld::ChannelId USingleChannelDataView::GetDefaultChannelId() const
+{
+	return Channeld::GlobalChannelId;
+}
+
 void USingleChannelDataView::ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId)
 {
 	/* Moved to the base class (exception calling Destroy on the Pawn)

@@ -21,7 +21,7 @@ public:
 
 	TSet<FString> CheckedClasses;
 	TSet<FSoftClassPath> FilteredClasses;
-	TArray<UObject*> CreatedUObjects;
+	TArray<const UObject*> CreatedNetworkableObjects;
 };
 
 UCLASS()

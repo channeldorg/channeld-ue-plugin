@@ -22,8 +22,16 @@ void FLoadedObjectListener::StopListen()
 
 void FLoadedObjectListener::NotifyUObjectCreated(const UObjectBase* Object, int32 Index)
 {
-	UObject* Obj = (UObject*)Object;
-	CreatedUObjects.Add(Obj);
+	if (Object->GetFlags() | RF_Transient)
+	{
+		return;
+	}
+	
+	const UObject* Obj = dynamic_cast<const UObject*>(Object);
+	if (IsValid(Obj) && Obj->IsSupportedForNetworking())
+	{
+		CreatedNetworkableObjects.Add(Obj);
+	}
 		
 	const UClass* LoadedClass = Object->GetClass();
 	while (LoadedClass != nullptr)
@@ -119,9 +127,9 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 		TArray<const UObject*> NameStableObjects;
 		TSet<FString> AddedObjectPath;
 
-		for (auto Obj : ObjLoadedListener.CreatedUObjects)
+		for (auto Obj : ObjLoadedListener.CreatedNetworkableObjects)
 		{
-			if (Obj && IsValid(Obj) && Obj->IsFullNameStableForNetworking())
+			if (IsValid(Obj))
 			{
 				FString ObjectPath = Obj->GetPathName();
 				if (ObjectPath.Contains(".TRASH"))
