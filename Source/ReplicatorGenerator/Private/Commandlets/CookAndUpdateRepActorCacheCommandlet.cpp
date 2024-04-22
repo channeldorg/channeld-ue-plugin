@@ -1,7 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "Commandlets/CookAndUpdateRepActorCacheCommandlet.h"
+﻿#include "Commandlets/CookAndUpdateRepActorCacheCommandlet.h"
 
 #include "ReplicatorGeneratorUtils.h"
 #include "Components/TimelineComponent.h"
@@ -22,15 +19,14 @@ void FLoadedObjectListener::StopListen()
 
 void FLoadedObjectListener::NotifyUObjectCreated(const UObjectBase* Object, int32 Index)
 {
-	if (Object->GetFlags() | RF_Transient)
+	// if (Object->GetFlags() | RF_Transient)
+	// {
+	// 	return;
+	// }
+	// const UObject* Obj = dynamic_cast<const UObject*>(Object);
+	// if (IsValid(Obj) && Obj->IsSupportedForNetworking())
 	{
-		return;
-	}
-	
-	const UObject* Obj = dynamic_cast<const UObject*>(Object);
-	if (IsValid(Obj) && Obj->IsSupportedForNetworking())
-	{
-		CreatedNetworkableObjects.Add(Obj);
+		CreatedObjects.Add((UObject*)Object);
 	}
 		
 	const UClass* LoadedClass = Object->GetClass();
@@ -126,16 +122,31 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 	{
 		TArray<const UObject*> NameStableObjects;
 		TSet<FString> AddedObjectPath;
+		const FName PersistentLevelName = FName("PersistentLevel");
 
-		for (auto Obj : ObjLoadedListener.CreatedNetworkableObjects)
+		for (auto Obj : ObjLoadedListener.CreatedObjects)
 		{
-			if (IsValid(Obj))
+			if (!IsValid(Obj))
+			{
+				continue;
+			}
+			if (IsTransient(Obj))
+			{
+				UE_LOG(LogTemp, Log, TEXT("Ignore transient object %s"), *Obj->GetFName().ToString());
+				continue;
+			}
+			if (Obj->IsA<UField>())
+			{
+				continue;
+			}
+			if (Obj->IsA<UEdGraphNode>())
+			{
+				continue;
+			}
+			
+			if (Obj->IsFullNameStableForNetworking())
 			{
 				FString ObjectPath = Obj->GetPathName();
-				if (ObjectPath.Contains(".TRASH"))
-				{
-					continue;
-				}
 				if (AddedObjectPath.Contains(ObjectPath))
 				{
 					continue;
@@ -163,8 +174,13 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 #endif
 			UObject* Object = LoadObject<UObject>(nullptr, *ObjectPath);
 
-			if (Object && IsValid(Object) && Object->IsFullNameStableForNetworking() && !AddedObjectPath.Contains(Object->GetPathName()))
+			if (IsValid(Object) && Object->IsFullNameStableForNetworking())
 			{
+				if (AddedObjectPath.Contains(Object->GetPathName()))
+				{
+					continue;
+				}
+				
 				NameStableObjects.Add(Object);
 				AddedObjectPath.Add(Object->GetPathName());
 
@@ -217,4 +233,19 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 	}
 
 	return 0;
+}
+
+bool UCookAndUpdateRepActorCacheCommandlet::IsTransient(const UObjectBase* BaseObj) const
+{
+	if (!BaseObj)
+	{
+		return false;
+	}
+
+	if ((BaseObj->GetFlags() & RF_Transient) > 0)
+	{
+		return true;
+	}
+
+	return IsTransient(BaseObj->GetOuter());
 }
