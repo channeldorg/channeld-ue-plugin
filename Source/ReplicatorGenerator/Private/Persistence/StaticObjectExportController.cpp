@@ -3,8 +3,8 @@
 bool UStaticObjectExportController::SaveStaticObjectExportInfo(const TArray<const UObject*>& InStaticObjects)
 {
 	TArray<FStaticObjectInfo> StaticObjectInfos;
-	TMap<const UObject*, int32> StaticObjectExportID;
-	int32 ExportID = GenManager_ChanneldStaticObjectExportStartID;
+	TMap<const UObject*, uint32> StaticObjectExportID;
+	uint32 ExportID = GenManager_ChanneldStaticObjectExportStartID;
 	for (auto Obj : InStaticObjects)
 	{
 		StaticObjectExportID.Add(Obj, ExportID);
@@ -12,7 +12,7 @@ bool UStaticObjectExportController::SaveStaticObjectExportInfo(const TArray<cons
 	}
 	for (auto Obj : InStaticObjects)
 	{
-		int32 OuterExportID = 0;
+		uint32 OuterExportID = 0;
 		if (Obj->GetOuter() && StaticObjectExportID.Contains(Obj->GetOuter()))
 		{
 			OuterExportID = StaticObjectExportID[Obj->GetOuter()];

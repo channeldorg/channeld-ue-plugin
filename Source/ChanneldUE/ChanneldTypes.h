@@ -332,14 +332,14 @@ struct CHANNELDUE_API FStaticObjectInfo
 	FString PathName;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	int32 NetID = 0;
+	int64 NetID = 0;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	int32 OuterID = 0;
+	int64 OuterID = 0;
 
 	FStaticObjectInfo() = default;
 
-	FStaticObjectInfo(FString InPathName, int32 InExportID, int32 InOuterExportID)
+	FStaticObjectInfo(FString InPathName, uint32 InExportID, uint32 InOuterExportID)
 		: PathName(InPathName)
 		, NetID(InExportID), OuterID(InOuterExportID)
 	{
@@ -367,4 +367,5 @@ struct CHANNELDUE_API FStaticObjectCache
 };
 
 static const FString GenManager_ChanneldStaticObjectExportPath = FPaths::ProjectConfigDir() / TEXT("ChanneldStaticObjectExport.json");
-static constexpr int GenManager_ChanneldStaticObjectExportStartID = 100000001;
+// Range: 2^31+1 ~ 2^32-1
+static constexpr uint32 GenManager_ChanneldStaticObjectExportStartID = (1<<31)+1;//100000001;

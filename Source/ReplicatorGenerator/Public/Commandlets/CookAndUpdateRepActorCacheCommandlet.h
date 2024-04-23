@@ -33,5 +33,5 @@ public:
 	virtual int32 Main(const FString& CmdLineParams) override;
 	
 private:
-	bool IsTransient(const UObjectBase* BaseObj) const;
+	static bool IsTransient(const UObjectBase* BaseObj);
 };

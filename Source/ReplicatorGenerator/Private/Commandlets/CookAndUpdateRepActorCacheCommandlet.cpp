@@ -19,15 +19,7 @@ void FLoadedObjectListener::StopListen()
 
 void FLoadedObjectListener::NotifyUObjectCreated(const UObjectBase* Object, int32 Index)
 {
-	// if (Object->GetFlags() | RF_Transient)
-	// {
-	// 	return;
-	// }
-	// const UObject* Obj = dynamic_cast<const UObject*>(Object);
-	// if (IsValid(Obj) && Obj->IsSupportedForNetworking())
-	{
-		CreatedObjects.Add((UObject*)Object);
-	}
+	CreatedObjects.Add((UObject*)Object);
 		
 	const UClass* LoadedClass = Object->GetClass();
 	while (LoadedClass != nullptr)
@@ -235,7 +227,7 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 	return 0;
 }
 
-bool UCookAndUpdateRepActorCacheCommandlet::IsTransient(const UObjectBase* BaseObj) const
+bool UCookAndUpdateRepActorCacheCommandlet::IsTransient(const UObjectBase* BaseObj)
 {
 	if (!BaseObj)
 	{
