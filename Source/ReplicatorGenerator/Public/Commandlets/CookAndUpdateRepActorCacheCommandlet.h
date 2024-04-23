@@ -19,7 +19,7 @@ public:
 
 	TSet<FString> CheckedClasses;
 	TSet<FSoftClassPath> FilteredClasses;
-	TArray<UObject*> CreatedObjects;
+	TArray<TWeakObjectPtr<const UObject>> CreatedObjects;
 };
 
 UCLASS()
@@ -33,5 +33,7 @@ public:
 	virtual int32 Main(const FString& CmdLineParams) override;
 	
 private:
-	static bool IsTransient(const UObjectBase* BaseObj);
+	bool AddObjectAndPath(TArray<const UObject*>& NameStableObjects, TSet<FString>& AddedObjectPath, const UObject* Obj);
+	
+	static bool IsTransient(const UObject* Obj);
 };

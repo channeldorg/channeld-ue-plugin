@@ -54,7 +54,7 @@ void FStaticGuidRegistry::RegisterStaticObjects(UNetDriver* NetDriver)
 		
 		if (NetDriver->GuidCache->ObjectLookup.Contains(NetGUID))
 		{
-			UE_LOG( LogNetPackageMap, Warning, TEXT( "Duplicated NetGUID found in ObjectLookup: %d, PathName: %s" ), NetGUID.Value, *PathName);
+			UE_LOG( LogNetPackageMap, Warning, TEXT( "Duplicated NetGUID found in ObjectLookup: %u, PathName: %s" ), NetGUID.Value, *PathName);
 			continue;
 		}
 
@@ -70,13 +70,13 @@ void FStaticGuidRegistry::RegisterStaticObjects(UNetDriver* NetDriver)
 			// Some static object such as the level may already exist in the cache
 			if (NetDriver->GuidCache->NetGUIDLookup.Remove(MakeWeakObjectPtr(const_cast<UObject*>(Obj))))
 			{
-				UE_LOG( LogNetPackageMap, Log, TEXT( "Duplicated Object found in NetGUIDLookup: %s, NetGUID: %d" ), *PathName, NetGUID.Value);
+				UE_LOG( LogNetPackageMap, Log, TEXT( "Duplicated Object found in NetGUIDLookup: %s, NetGUID: %u" ), *PathName, NetGUID.Value);
 			}
 			*/
 			if (auto OldNetId = NetDriver->GuidCache->NetGUIDLookup.Find(Obj))
 			{
 				auto CachedObj = NetDriver->GuidCache->ObjectLookup.FindAndRemoveChecked(*OldNetId);
-				UE_LOG( LogNetPackageMap, Log, TEXT( "Updating GuidCache, PathName: '%s', NetGUID: %d -> %d" ), *PathName, OldNetId->Value, NetGUID.Value);
+				UE_LOG( LogNetPackageMap, Log, TEXT( "Updating GuidCache, PathName: '%s', NetGUID: %u -> %u" ), *PathName, OldNetId->Value, NetGUID.Value);
 				*OldNetId = NetGUID;
 				NetDriver->GuidCache->ObjectLookup.Emplace(NetGUID, CachedObj);
 				continue;
@@ -85,7 +85,7 @@ void FStaticGuidRegistry::RegisterStaticObjects(UNetDriver* NetDriver)
 			if (NetDriver->IsServer())
 			{
 				NetDriver->GuidCache->RegisterNetGUID_Server(NetGUID, Obj);
-				UE_LOG( LogNetPackageMap, Log, TEXT( "RegisterNetGUID_Server: NetGUID: %d, PathName: %s" ), NetGUID.Value, *PathName);
+				UE_LOG( LogNetPackageMap, Log, TEXT( "RegisterNetGUID_Server: NetGUID: %u, PathName: %s" ), NetGUID.Value, *PathName);
 			}
 			else
 			{
@@ -99,7 +99,7 @@ void FStaticGuidRegistry::RegisterStaticObjects(UNetDriver* NetDriver)
 				// Use the short name here so it can pass the check in FNetGUIDCache::GetObjectFromNetGUID
 				CacheObject.PathName = Obj->GetFName();//FName(PathName);
 				NetDriver->GuidCache->RegisterNetGUID_Internal(NetGUID, CacheObject);
-				UE_LOG( LogNetPackageMap, Log, TEXT( "RegisterNetGUID_Internal: NetGUID: %d, PathName: %s" ), NetGUID.Value, *PathName);
+				UE_LOG( LogNetPackageMap, Log, TEXT( "RegisterNetGUID_Internal: NetGUID: %u, PathName: %s" ), NetGUID.Value, *PathName);
 
 			}
 		}
@@ -151,11 +151,11 @@ UObject* FStaticGuidRegistry::GetStaticObject(FNetworkGUID NetGUID, UNetDriver* 
 	}
 	if (Obj)
 	{
-		UE_LOG(LogChanneld, VeryVerbose, TEXT("Loaded static object '%s' with NetGUID %d"), *PathName, NetGUID.Value);
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Loaded static object '%s' with NetGUID %u"), *PathName, NetGUID.Value);
 	}
 	else
 	{
-		UE_LOG(LogChanneld, Warning, TEXT("Failed to load static object '%s' with NetGUID %d"), *PathName, NetGUID.Value);
+		UE_LOG(LogChanneld, Warning, TEXT("Failed to load static object '%s' with NetGUID %u"), *PathName, NetGUID.Value);
 	}
 	return Obj;
 }

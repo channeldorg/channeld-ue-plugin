@@ -19,7 +19,7 @@ void FLoadedObjectListener::StopListen()
 
 void FLoadedObjectListener::NotifyUObjectCreated(const UObjectBase* Object, int32 Index)
 {
-	CreatedObjects.Add((UObject*)Object);
+	CreatedObjects.Add((const UObject*)Object);
 		
 	const UClass* LoadedClass = Object->GetClass();
 	while (LoadedClass != nullptr)
@@ -55,6 +55,54 @@ UCookAndUpdateRepActorCacheCommandlet::UCookAndUpdateRepActorCacheCommandlet()
 	IsEditor = true;
 	IsServer = false;
 	LogToConsole = true;
+}
+
+bool UCookAndUpdateRepActorCacheCommandlet::AddObjectAndPath(TArray<const UObject*>& NameStableObjects, TSet<FString>& AddedObjectPath, const UObject* Obj)
+{
+	if (!IsValid(Obj))
+	{
+		return false;
+	}
+			
+	if (IsTransient(Obj))
+	{
+		FName ObjName = Obj->GetFName();
+		if (ObjName.IsValid())
+		{
+			UE_LOG(LogTemp, Log, TEXT("Ignore transient object %s"), *ObjName.ToString());
+		}
+		return false;
+	}
+	
+	if (Obj->IsA<UField>())
+	{
+		return false;
+	}
+	
+	if (Obj->IsA<UEdGraphNode>())
+	{
+		return false;
+	}
+
+	if (!Obj->IsFullNameStableForNetworking())
+	{
+		return false;
+	}
+			
+	FString ObjectPath = Obj->GetPathName();
+	
+	if (ObjectPath.Contains("dict_"))
+	{
+		return false;
+	}
+	
+	if (AddedObjectPath.Contains(ObjectPath))
+	{
+		return false;
+	}
+	NameStableObjects.Add(Obj);
+	AddedObjectPath.Add(ObjectPath);
+	return true;
 }
 
 int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
@@ -114,37 +162,12 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 	{
 		TArray<const UObject*> NameStableObjects;
 		TSet<FString> AddedObjectPath;
-		const FName PersistentLevelName = FName("PersistentLevel");
 
 		for (auto Obj : ObjLoadedListener.CreatedObjects)
 		{
-			if (!IsValid(Obj))
+			if (Obj.IsValid())
 			{
-				continue;
-			}
-			if (IsTransient(Obj))
-			{
-				UE_LOG(LogTemp, Log, TEXT("Ignore transient object %s"), *Obj->GetFName().ToString());
-				continue;
-			}
-			if (Obj->IsA<UField>())
-			{
-				continue;
-			}
-			if (Obj->IsA<UEdGraphNode>())
-			{
-				continue;
-			}
-			
-			if (Obj->IsFullNameStableForNetworking())
-			{
-				FString ObjectPath = Obj->GetPathName();
-				if (AddedObjectPath.Contains(ObjectPath))
-				{
-					continue;
-				}
-				NameStableObjects.Add(Obj);
-				AddedObjectPath.Add(Obj->GetPathName());
+				AddObjectAndPath(NameStableObjects, AddedObjectPath, Obj.Get());
 			}
 		}
 
@@ -166,27 +189,15 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 #endif
 			UObject* Object = LoadObject<UObject>(nullptr, *ObjectPath);
 
-			if (IsValid(Object) && Object->IsFullNameStableForNetworking())
+			if (AddObjectAndPath(NameStableObjects, AddedObjectPath, Object))
 			{
-				if (AddedObjectPath.Contains(Object->GetPathName()))
-				{
-					continue;
-				}
-				
-				NameStableObjects.Add(Object);
-				AddedObjectPath.Add(Object->GetPathName());
-
-				if (Object->GetOuter() && !AddedObjectPath.Contains(Object->GetOuter()->GetPathName()))
-				{
-					NameStableObjects.Add(Object->GetOuter());
-					AddedObjectPath.Add(Object->GetOuter()->GetPathName());
-				}
+				AddObjectAndPath(NameStableObjects, AddedObjectPath, Object->GetOuter());
 
 				// Blueprint CDO
-				if (UBlueprint* Blueprint = Cast<UBlueprint>(Object))
+				if (Object->IsA<UBlueprint>())
 				{
 					FString GeneratedClassNameString = FString::Printf(TEXT("%s_C"), *ObjectPath);
-					if (AActor* Actor = Cast<AActor>(Object))
+					if (Object->IsA<AActor>())
 					{
 						UClass* Class = LoadClass<AActor>(nullptr, *GeneratedClassNameString);
 						if (Class)
@@ -227,17 +238,17 @@ int32 UCookAndUpdateRepActorCacheCommandlet::Main(const FString& CmdLineParams)
 	return 0;
 }
 
-bool UCookAndUpdateRepActorCacheCommandlet::IsTransient(const UObjectBase* BaseObj)
+bool UCookAndUpdateRepActorCacheCommandlet::IsTransient(const UObject* Obj)
 {
-	if (!BaseObj)
+	if (!IsValid(Obj))
 	{
 		return false;
 	}
 
-	if ((BaseObj->GetFlags() & RF_Transient) > 0)
+	if ((Obj->GetFlags() & RF_Transient) > 0)
 	{
 		return true;
 	}
 
-	return IsTransient(BaseObj->GetOuter());
+	return IsTransient(Obj->GetOuter());
 }

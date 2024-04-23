@@ -323,19 +323,19 @@ struct CHANNELDUE_API FChanneldNetDeltaSerializeInfo : FNetDeltaSerializeInfo
 
 
 
-USTRUCT(BlueprintType)
+USTRUCT()
 struct CHANNELDUE_API FStaticObjectInfo
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UPROPERTY()
 	FString PathName;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	int64 NetID = 0;
+	UPROPERTY()
+	uint32 NetID = 0;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	int64 OuterID = 0;
+	UPROPERTY()
+	uint32 OuterID = 0;
 
 	FStaticObjectInfo() = default;
 
@@ -346,15 +346,15 @@ struct CHANNELDUE_API FStaticObjectInfo
 	}
 };
 
-USTRUCT(BlueprintType)
+USTRUCT()
 struct CHANNELDUE_API FStaticObjectCache
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UPROPERTY()
 	FDateTime ExportTime;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UPROPERTY()
 	TArray<FStaticObjectInfo> StaticObjects;
 
 	FStaticObjectCache() = default;
