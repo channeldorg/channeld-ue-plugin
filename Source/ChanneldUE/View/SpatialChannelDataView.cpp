@@ -884,8 +884,6 @@ void USpatialChannelDataView::ServerHandleSpatialChannelsReady(UChanneldConnecti
 	auto readyMsg = static_cast<const channeldpb::SpatialChannelsReadyMessage*>(Msg);
 	if (readyMsg->servercount() > 1)
 	{
-		bIsSyncingNetId = true;
-		UE_LOG(LogChanneld, Log, TEXT("All spatial channels are ready. Start synchronizing NetIds between spatial servers."));
 		SyncNetIds();
 	}
 }
@@ -899,11 +897,24 @@ void USpatialChannelDataView::SyncNetIds()
 		for(TActorIterator<AActor> It(GetWorld(), AActor::StaticClass()); It; ++It)
 		{
 			AActor* Actor = *It;
-			if (/*Actor->GetIsReplicated() &&*/ !Actor->IsA<AInfo>())
+			// Only sync dynamic actors. Static objects are already synced via the FStaticGuidRegistry.
+			if (ChanneldUtils::GetNetId(Actor, NetDriver).IsDynamic() && !Actor->IsA<AInfo>())
 			{
 				Actors.Add(Actor);
 				ActorPositions.Add(Actor->GetActorLocation());
 			}
+		}
+
+		if (Actors.Num() > 0)
+		{
+			bIsSyncingNetId = true;
+			UE_LOG(LogChanneld, Log, TEXT("All spatial channels are ready. Start synchronizing %d NetIds between spatial servers."), Actors.Num());
+		}
+		else
+		{
+			bIsSyncingNetId = false;
+			UE_LOG(LogChanneld, Log, TEXT("All spatial channels are ready. No dynamic actors to sync."));
+			return;
 		}
 
 		Connection->QuerySpatialChannel(ActorPositions, [this, NetDriver, Actors](const channeldpb::QuerySpatialChannelResultMessage* ResultMsg)
@@ -945,15 +956,21 @@ void USpatialChannelDataView::SyncNetIds()
 			{
 				Connection->Broadcast(Channeld::GlobalChannelId, unrealpb::SYNC_NET_ID, SyncMsg, channeldpb::ALL_BUT_CLIENT | channeldpb::ALL_BUT_SENDER);
 			}
+
+			// All actors that are needed to be synced are owned by this server, so there won't be incoming SyncNetIdMessage.
+			if (SyncMsg.netidpaths_size() == Actors.Num())
+			{
+				bIsSyncingNetId = false;
+				UE_LOG(LogChanneld, Log, TEXT("Finished synchronizing %d NetIds to other spatial servers."), SyncMsg.netidpaths_size());
+			}
 		});
 	}
 }
 
 void USpatialChannelDataView::ServerHandleSyncNetId(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
-	bIsSyncingNetId = false;
-	UE_LOG(LogChanneld, Log, TEXT("Finish synchronizing NetIds between spatial servers."));
-	
+	double StartTime = FPlatformTime::Seconds();
+
 	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
 	if (!NetDriver)
 	{
@@ -1003,6 +1020,9 @@ void USpatialChannelDataView::ServerHandleSyncNetId(UChanneldConnection* _, Chan
 		}
 	}
 
+	bIsSyncingNetId = false;
+	UE_LOG(LogChanneld, Log, TEXT("Finished synchronizing %d NetIds from other spatial servers, took %.3f seconds."), SyncMsg.netidpaths_size(), FPlatformTime::Seconds() - StartTime);
+	
 	GetChanneldSubsystem()->OnSynchronizedNetIds.Broadcast(this);
 }
 
