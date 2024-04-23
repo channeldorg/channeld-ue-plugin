@@ -894,7 +894,7 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 		for (int32 i = 0; i < ClientConnections.Num(); i++)
 		{
 			UChanneldNetConnection* Connection = CastChecked<UChanneldNetConnection>(ClientConnections[i]);
-			if (Connection->PlayerController && Connection->PlayerController->GetViewTarget())
+			if (Connection->PlayerController && Connection->PlayerController->HasAuthority() && Connection->PlayerController->GetViewTarget())
 			{
 				// Trigger ClientMoveResponse RPC
 				Connection->PlayerController->SendClientAdjustment();
