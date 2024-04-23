@@ -149,7 +149,7 @@ void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessa
 			ChannelDataView->OnNetSpawnedObject(NewObj, SpawnMsg->channelid());
 		}
 
-		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %d, owning channel: %d, local role: %d"), *NewObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), LocalRole);
+		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %d, owning channel: %u, local role: %d"), *NewObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), LocalRole);
 	}
 	else
 	{
@@ -224,7 +224,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, Channeld::Ch
 		
 		if (!ChannelDataView.IsValid())
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Failed to destroy object as the view is invalid, netId: %d"), DestroyMsg->netid());
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to destroy object as the view is invalid, netId: %u"), DestroyMsg->netid());
 			return;
 		}
 
@@ -776,7 +776,7 @@ void UChanneldNetDriver::OnServerBeginPlay(UChanneldReplicationComponent* RepCom
 	{
 		if (ChannelDataView.IsValid())
 		{
-			UE_LOG(LogChanneld, VeryVerbose, TEXT("[Server] Actor %s has deferred ChanneldReplicationComponent registration. Adding it to default channel."), *Actor->GetName());
+			UE_LOG(LogChanneld, Verbose, TEXT("[Server] Actor %s has deferred ChanneldReplicationComponent registration. Adding it to default channel."), *Actor->GetName());
 			ChannelDataView->AddProviderToDefaultChannel(RepComp);
 		}
 	}
@@ -800,7 +800,7 @@ bool UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage>
 			Channeld::ChannelId TargetChId = ChannelDataView->GetOwningChannelId(FNetworkGUID(Msg->targetobj().netguid()));
 			if (ConnToChanneld->OwnedChannels.Contains(TargetChId))
 			{
-				UE_LOG(LogChanneld, Warning, TEXT("Attempt to redirect RPC to the same server, netId: %d, func: %s"), Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
+				UE_LOG(LogChanneld, Warning, TEXT("Attempt to redirect RPC to the same server, netId: %u, func: %s"), Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
 				return false;
 			}
 		
@@ -808,7 +808,7 @@ bool UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage>
 			{
 				Msg->set_redirectioncounter(Msg->redirectioncounter() + 1);
 				ConnToChanneld->Broadcast(TargetChId, unrealpb::RPC, *Msg, channeldpb::SINGLE_CONNECTION);
-				UE_LOG(LogChanneld, Verbose, TEXT("Redirect RPC to channel %d, netId: %d, func: %s"), TargetChId, Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
+				UE_LOG(LogChanneld, Verbose, TEXT("Redirect RPC to channel %u, netId: %u, func: %s"), TargetChId, Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
 				
 				UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
 				Metrics->RedirectedRPCs_Counter->Increment();
@@ -820,7 +820,7 @@ bool UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage>
 				return true;
 			}
 			
-			UE_LOG(LogChanneld, Warning, TEXT("Unable to redirect RPC as the mapping to the target channel doesn't exists, netId: %d"), Msg->targetobj().netguid());
+			UE_LOG(LogChanneld, Warning, TEXT("Unable to redirect RPC as the mapping to the target channel doesn't exists, netId: %u"), Msg->targetobj().netguid());
 			DropReason = RPCDropReason_RedirNoChannel;
 		}
 		else
@@ -993,7 +993,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 						UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %llu bytes"), RpcMsg.paramspayload().size());
 					}
 					ConnToChanneld->Broadcast(OwningChId, unrealpb::RPC, RpcMsg, channeldpb::SINGLE_CONNECTION);
-					UE_LOG(LogChanneld, Log, TEXT("Forwarded RPC %s::%s to the owner of channel %d"), *Actor->GetName(), *FuncName, OwningChId);
+					UE_LOG(LogChanneld, Log, TEXT("Forwarded RPC %s::%s to the owner of channel %u"), *Actor->GetName(), *FuncName, OwningChId);
 					OnSentRPC(RpcMsg);
 					return;
 				}
@@ -1171,7 +1171,7 @@ void UChanneldNetDriver::NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTrav
 	}
 	else
 	{
-		// UE_LOG(LogChanneld, Warning, TEXT("ChannelDataView failed to handle the destroy of %s, netId: %d"), *GetNameSafe(Actor), NetId.Value);
+		// UE_LOG(LogChanneld, Warning, TEXT("ChannelDataView failed to handle the destroy of %s, netId: %u"), *GetNameSafe(Actor), NetId.Value);
 	}
 	
 	//~ Begin copy of UNetDriver::NotifyActorDestroyed

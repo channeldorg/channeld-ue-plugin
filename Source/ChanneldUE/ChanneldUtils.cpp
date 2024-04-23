@@ -176,7 +176,7 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 					// Static object with bunch data (somehow)
 					if (NetGUID.IsStatic())
 					{
-						UE_LOG(LogChanneld, Warning, TEXT("Try to load static object with bunch data, netId: %d, path: %s, bits: %d"), NetGUID.Value, *PathName, Ref->bunchbitsnum());
+						UE_LOG(LogChanneld, Warning, TEXT("Try to load static object with bunch data, netId: %u, path: %s, bits: %d"), NetGUID.Value, *PathName, Ref->bunchbitsnum());
 					}
 					else
 					{

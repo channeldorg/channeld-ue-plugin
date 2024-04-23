@@ -241,7 +241,7 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 		SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(*Location));
 	}
 	SendMessage(unrealpb::SPAWN, SpawnMsg, OwningChannelId);
-	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %d, role: %d, owning channel: %d, owningConnId: %d, location: %s"),
+	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Spawn message to conn: %d, obj: %s, netId: %u, role: %d, owning channel: %u, owningConnId: %d, location: %s"),
 		GetConnId(), *GetNameSafe(Object), SpawnMsg.obj().netguid(), SpawnMsg.localrole(), SpawnMsg.channelid(), SpawnMsg.obj().owningconnid(), Location ? *Location->ToCompactString() : TEXT("NULL"));
 
 	SetSentSpawned(NetId);
@@ -292,7 +292,7 @@ void UChanneldNetConnection::SendDestroyMessage(UObject* Object, EChannelCloseRe
 	DestroyMsg.set_netid(NetId.Value);
 	DestroyMsg.set_reason(static_cast<uint8>(EChannelCloseReason::Destroyed));
 	SendMessage(unrealpb::DESTROY, DestroyMsg);
-	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Destroy message to conn: %d, obj: %s, netId: %d"), GetConnId(), *GetNameSafe(Object), NetId.Value);
+	UE_LOG(LogChanneld, Verbose, TEXT("[Server] Send Destroy message to conn: %d, obj: %s, netId: %u"), GetConnId(), *GetNameSafe(Object), NetId.Value);
 
 	if (ExportCount != nullptr)
 	{
