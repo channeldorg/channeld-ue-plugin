@@ -76,14 +76,14 @@ void UChanneldNetDriver::RemoveChanneldClientConnection(Channeld::ConnectionId C
 void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg)
 {
 	FNetworkGUID NetId = FNetworkGUID(SpawnMsg->obj().netguid());
-	
+
+	/* No need to destroy the object that is already spawned - just set its NetRole and mappings, and add the provider.
 	// If the object with the same NetId exists, destroy it before spawning a new one.
 	UObject* OldObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld(), false);
 	if (OldObj)
 	{
-		UE_LOG(LogChanneld, Log, TEXT("[Client] Found spawned object %s of duplicated NetId: %d, will skip."), *GetNameSafe(OldObj), SpawnMsg->obj().netguid());
+		UE_LOG(LogChanneld, Log, TEXT("[Client] Found spawned object %s of duplicated NetId: %u, will skip."), *GetNameSafe(OldObj), SpawnMsg->obj().netguid());
 
-		/* Found a lot of duplicated WorldSettings and Character in the log, so just skip them for now.
 		GuidCache->ObjectLookup.Remove(NetId);
 		GuidCache->NetGUIDLookup.Remove(OldObj);
 			
@@ -91,9 +91,9 @@ void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessa
 		{
 			GetWorld()->DestroyActor(OldActor, true);
 		}
-		*/
 		return;
 	}
+	*/
 
 	if (ChannelDataView.IsValid() && SpawnMsg->has_channelid())
 	{
@@ -149,7 +149,7 @@ void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessa
 			ChannelDataView->OnNetSpawnedObject(NewObj, SpawnMsg->channelid());
 		}
 
-		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %d, owning channel: %u, local role: %d"), *NewObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), LocalRole);
+		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %u, owning channel: %u, local role: %d"), *NewObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), LocalRole);
 	}
 	else
 	{
@@ -231,7 +231,7 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, Channeld::Ch
 		UObject* ObjToDestroy = ChannelDataView->GetObjectFromNetGUID(DestroyMsg->netid());
 		if (ObjToDestroy)
 		{
-			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Destroying object from message: %s, NetId: %d"), *GetNameSafe(ObjToDestroy), DestroyMsg->netid());
+			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Destroying object from message: %s, NetId: %u"), *GetNameSafe(ObjToDestroy), DestroyMsg->netid());
 			
 			if (AActor* Actor = Cast<AActor>(ObjToDestroy))
 			{

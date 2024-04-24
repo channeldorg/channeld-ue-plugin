@@ -679,7 +679,7 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 			}
 		}
 
-		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from unresolved EntityChannelData, NetId: %d"), ObjRef.netguid());
+		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from unresolved EntityChannelData, NetId: %u"), ObjRef.netguid());
 		UObject* NewObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld());
 		if (NewObj)
 		{
@@ -724,7 +724,7 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, con
 				SetOwningChannelId(ContextObj.netguid(), ChId);
 			}
 
-			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from unresolved SpatialEntityState, NetId: %d"), ObjRef.netguid());
+			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from unresolved SpatialEntityState, NetId: %u"), ObjRef.netguid());
 			UObject* NewObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld());
 			if (NewObj)
 			{
@@ -789,7 +789,7 @@ void USpatialChannelDataView::ClientHandleGetUnrealObjectRef(UChanneldConnection
 			SetOwningChannelId(ContextObj.netguid(), ChId);
 		}
 
-		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from GetUnrealObjectRefResultMessage, NetId: %d"), ObjRef.netguid());
+		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from GetUnrealObjectRefResultMessage, NetId: %u"), ObjRef.netguid());
 		UObject* NewObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld());
 		if (NewObj)
 		{
@@ -990,14 +990,14 @@ void USpatialChannelDataView::ServerHandleSyncNetId(UChanneldConnection* _, Chan
 		const auto& NetIdPath = SyncMsg.netidpaths(i);
 		FNetworkGUID NetId(NetIdPath.netid());
 		FString Path(UTF8_TO_TCHAR(NetIdPath.path().c_str()));
-		UE_LOG(LogChanneld, Log, TEXT("[Server] Syncing %s with NetId: %d"), *Path, NetId.Value);
+		UE_LOG(LogChanneld, Log, TEXT("[Server] Syncing %s with NetId: %u"), *Path, NetId.Value);
 
 		for (auto It = NetDriver->GuidCache->ObjectLookup.CreateIterator(); It; ++It)
 		{
 			FNetGuidCacheObject CachedObj = It.Value();
 			if (CachedObj.Object.IsValid() && CachedObj.Object->GetPathName() == Path)
 			{
-				UE_LOG(LogChanneld, Log, TEXT("[Server] Replacing cached %s with NetId: %d -> %d"), *It.Value().Object->GetName(), It.Key().Value, NetId.Value);
+				UE_LOG(LogChanneld, Log, TEXT("[Server] Replacing cached %s with NetId: %u -> %d"), *It.Value().Object->GetName(), It.Key().Value, NetId.Value);
 				NetDriver->GuidCache->ObjectLookup.Emplace(NetId, CachedObj);
 				NetDriver->GuidCache->NetGUIDLookup.Emplace(CachedObj.Object, NetId);
 
@@ -1491,7 +1491,7 @@ void USpatialChannelDataView::SendSpawnToClients_EntityChannelReady(const FNetwo
 	// As we don't have any specific NetConnection to export the NetId, use a virtual one.
 	SpawnMsg.mutable_obj()->CopyFrom(*ChanneldUtils::GetRefOfObject(Obj, NetConnForSpawn, true));
 
-	// ensureAlwaysMsgf(SpawnMsg.mutable_obj()->context_size() > 0, TEXT("Spawn message has no context! NetId: %d"), NetId.Value);
+	// ensureAlwaysMsgf(SpawnMsg.mutable_obj()->context_size() > 0, TEXT("Spawn message has no context! NetId: %u"), NetId.Value);
 
 	bool bWellKnown = false;
 	if (const AActor* Actor = Cast<AActor>(Obj))

@@ -220,7 +220,7 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 	if (OwningChannelId == Channeld::InvalidChannelId)
 	{
 		QueuedSpawnMessageTargets.Add(MakeTuple(Object, Role, OwningChannelId, OwningConnId, Location));
-		UE_LOG(LogChanneld, Warning, TEXT("[Server] Unable to send Spawn message as there's no mapping of NetId %d -> ChannelId. Pushed to the next tick."), NetId.Value);
+		UE_LOG(LogChanneld, Warning, TEXT("[Server] Unable to send Spawn message as there's no mapping of NetId %u -> ChannelId. Pushed to the next tick."), NetId.Value);
 		return;
 	}
 
@@ -237,7 +237,7 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 	}
 	if (Location)
 	{
-		// ensureAlwaysMsgf(SpawnMsg.mutable_obj()->context_size() > 0, TEXT("Spawn message has no context! NetId: %d"), NetId.Value);
+		// ensureAlwaysMsgf(SpawnMsg.mutable_obj()->context_size() > 0, TEXT("Spawn message has no context! NetId: %u"), NetId.Value);
 		SpawnMsg.mutable_location()->MergeFrom(ChanneldUtils::GetVectorPB(*Location));
 	}
 	SendMessage(unrealpb::SPAWN, SpawnMsg, OwningChannelId);
