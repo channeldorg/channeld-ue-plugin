@@ -204,7 +204,7 @@ const TcParseTableBase::FieldEntry* TcParser::FindFieldEntry(
     uint32_t skipbit = 1 << adj_fnum;
     if (PROTOBUF_PREDICT_FALSE(skipmap & skipbit)) return nullptr;
     skipmap &= skipbit - 1;
-#if (__GNUC__ || __clang__) && __POPCNT__
+#if (defined(__GNUC__) || defined(__clang__)) && __POPCNT__
     // Note: here and below, skipmap typically has very few set bits
     // (31 in the worst case, but usually zero) so a loop isn't that
     // bad, and a compiler-generated popcount is typically only
@@ -245,7 +245,7 @@ const TcParseTableBase::FieldEntry* TcParser::FindFieldEntry(
       if (PROTOBUF_PREDICT_FALSE(skipmap & skipbit)) return nullptr;
       skipmap &= skipbit - 1;
       adj_fnum += se.field_entry_offset;
-#if (__GNUC__ || __clang__) && __POPCNT__
+#if (defined(__GNUC__) || defined(__clang__)) && __POPCNT__
       adj_fnum -= __builtin_popcount(skipmap);
 #else
       while (skipmap) {

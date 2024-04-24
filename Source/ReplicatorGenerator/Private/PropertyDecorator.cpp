@@ -135,7 +135,9 @@ FString FPropertyDecorator::GetDefinition_ProtoField()
 
 FString FPropertyDecorator::GetDefinition_ProtoField(int32& FieldNumber)
 {
-	return GetDefinition_ProtoField() + TEXT(" = ") + FString::FromInt(FieldNumber);
+	FString Result = GetDefinition_ProtoField() + TEXT(" = ") + FString::FromInt(FieldNumber);
+	FieldNumber++;
+	return Result;
 }
 
 FString FPropertyDecorator::GetCode_GetPropertyValueFrom(const FString& TargetInstance)

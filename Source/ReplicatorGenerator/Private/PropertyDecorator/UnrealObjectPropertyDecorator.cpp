@@ -58,7 +58,7 @@ FString FUnrealObjectPropertyDecorator::GetCode_GetProtoFieldValueFrom(const FSt
 
 FString FUnrealObjectPropertyDecorator::GetCode_SetProtoFieldValueTo(const FString& StateName, const FString& GetValueCode)
 {
-	return FString::Printf(TEXT("%s->mutable_%s()->CopyFrom(*ChanneldUtils::GetRefOfObject(%s))"), *StateName, *GetProtoFieldName(), *GetValueCode);
+	return FString::Printf(TEXT("%s->mutable_%s()->CopyFrom(*ChanneldUtils::GetRefOfObject(%s, nullptr, false, %s))"), *StateName, *GetProtoFieldName(), *GetValueCode, *Owner->GetCode_GetWorldRef());
 }
 
 FString FUnrealObjectPropertyDecorator::GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode)

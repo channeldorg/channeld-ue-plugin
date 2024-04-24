@@ -219,6 +219,8 @@ void UChanneldConnection::SendDisconnectMessage(Channeld::ConnectionId InConnId)
 
 void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 {
+	StopReceiveThread();
+
 	if (!IsConnected())
 		return;
 
@@ -230,7 +232,6 @@ void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 	OnDisconnected();
 
 	Socket->Close();
-	StopReceiveThread();
 
 	auto SocketSubsystem = ISocketSubsystem::Get();
 	if (SocketSubsystem)
@@ -347,15 +348,11 @@ void UChanneldConnection::Receive()
 
 bool UChanneldConnection::StartReceiveThread()
 {
-	if (bReceiveThreadRunning)
-	{
-		return false;
-	}
 	if (ReceiveThread == nullptr)
 	{
 		ReceiveThread = FRunnableThread::Create(this, TEXT("Tpri_Channeld_Connection_Receive"));
 	}
-	return ReceiveThread != nullptr;
+	return bReceiveThreadRunning;
 }
 
 void UChanneldConnection::StopReceiveThread()
@@ -392,8 +389,7 @@ void UChanneldConnection::Stop()
 
 void UChanneldConnection::Exit()
 {
-	if (bReceiveThreadRunning != false)
-		bReceiveThreadRunning = true;
+	bReceiveThreadRunning = false;
 }
 
 uint32 UChanneldConnection::AddRpcCallback(const FChanneldMessageHandlerFunc& HandlerFunc)
@@ -547,7 +543,7 @@ void UChanneldConnection::Send(Channeld::ChannelId ChId, uint32 MsgType, google:
 	SendRaw(ChId, MsgType, Msg.SerializeAsString(), Broadcast, HandlerFunc);
 
 	if (MsgType < channeldpb::USER_SPACE_START)
-		UE_LOG(LogChanneld, Verbose, TEXT("Send message %s to channel %d"), UTF8_TO_TCHAR(channeldpb::MessageType_Name((channeldpb::MessageType)MsgType).c_str()), ChId);
+		UE_LOG(LogChanneld, Verbose, TEXT("Send message %s to channel %u"), UTF8_TO_TCHAR(channeldpb::MessageType_Name((channeldpb::MessageType)MsgType).c_str()), ChId);
 }
 
 void UChanneldConnection::SendRaw(Channeld::ChannelId ChId, uint32 MsgType, const std::string& MsgBody, channeldpb::BroadcastType Broadcast /*= channeldpb::NO_BROADCAST*/, const FChanneldMessageHandlerFunc& HandlerFunc /*= nullptr*/)
@@ -580,7 +576,7 @@ void UChanneldConnection::SendRaw(Channeld::ChannelId ChId, uint32 MsgType, cons
 	*/
 
 	if (MsgType >= channeldpb::USER_SPACE_START && bShowUserSpaceMessageLog)
-		UE_LOG(LogChanneld, Verbose, TEXT("Send user-space message to channel %d, stubId=%d, type=%d, bodySize=%d)"), ChId, StubId, MsgType, MsgBody.size());
+		UE_LOG(LogChanneld, Verbose, TEXT("Send user-space message to channel %u, stubId=%d, type=%d, bodySize=%d)"), ChId, StubId, MsgType, MsgBody.size());
 }
 
 void UChanneldConnection::Forward(Channeld::ChannelId ChId, uint32 MsgType, const google::protobuf::Message& Msg, Channeld::ConnectionId ClientConnId)
@@ -846,7 +842,7 @@ void UChanneldConnection::HandleSubToChannel(UChanneldConnection* Conn, Channeld
 		{
 			if (SubMsg->has_suboptions())
 			{
-				UE_LOG(LogChanneld, Verbose, TEXT("Merged the SubOptions of the channel %d: %s"), ChId, UTF8_TO_TCHAR(SubMsg->suboptions().ShortDebugString().c_str()));
+				UE_LOG(LogChanneld, Verbose, TEXT("Merged the SubOptions of the channel %u: %s"), ChId, UTF8_TO_TCHAR(SubMsg->suboptions().ShortDebugString().c_str()));
 				// Merge the SubOptions if the subscription already exists
 				ExistingSub->Merge(*SubMsg);
 			}

@@ -103,7 +103,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 			.Padding(5, 0)
 			[
 				SNew(SBox)
-				.IsEnabled_Lambda([=] { return AreaType == EClientInterestAreaType::StaticLocations; })
+				.IsEnabled_Lambda([this] { return AreaType == EClientInterestAreaType::StaticLocations; })
 				.MinDesiredWidth(200.f)
 				[
 					SNew(SVerticalBox)
@@ -123,7 +123,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 			.Padding(5, 0)
 			[
 				SNew(SBox)
-				.IsEnabled_Lambda([=] { return AreaType == EClientInterestAreaType::Box; })
+				.IsEnabled_Lambda([this] { return AreaType == EClientInterestAreaType::Box; })
 				.MinDesiredWidth(200.f)
 				[
 					SNew(SVerticalBox)
@@ -144,7 +144,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 			.Padding(5, 0)
 			[
 				SNew(SBox)
-				.IsEnabled_Lambda([=] { return AreaType == EClientInterestAreaType::Sphere || AreaType == EClientInterestAreaType::Cone; })
+				.IsEnabled_Lambda([this] { return AreaType == EClientInterestAreaType::Sphere || AreaType == EClientInterestAreaType::Cone; })
 				.MinDesiredWidth(70.f)
 				[
 					SNew(SVerticalBox)
@@ -164,7 +164,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 			.Padding(5, 0)
 			[
 				SNew(SBox)
-				.IsEnabled_Lambda([=] { return AreaType == EClientInterestAreaType::Cone; })
+				.IsEnabled_Lambda([this] { return AreaType == EClientInterestAreaType::Cone; })
 				.MinDesiredWidth(70.f)
 				[
 					SNew(SVerticalBox)

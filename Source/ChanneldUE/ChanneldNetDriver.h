@@ -45,6 +45,8 @@ public:
 	// Send packets to channeld by calling ChanneldConnection.TickOutgoing()
 	virtual void TickFlush(float DeltaSeconds) override;
 
+	virtual void SetWorld(UWorld* InWorld) override;
+
 	virtual class ISocketSubsystem* GetSocketSubsystem() override;
 	virtual FSocket* GetSocket();
 	// Client: send raw packet to server via channeld
@@ -135,3 +137,13 @@ private:
 
 	UChanneldGameInstanceSubsystem* GetSubsystem() const;
 };
+
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 3
+// For hacking the FNetGUIDCache class to access its private members
+class FNetGUIDCacheCopy
+{
+public:
+	uint8 PublicMembers[0x158];
+	uint64 NetworkGuidIndex[2];
+};
+#endif

@@ -316,7 +316,7 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 			}
 			else
 			{
-				UE_LOG(LogChanneld, Warning, TEXT("ActorReplicator failed to set the owner of %s, NetId: %d"), *Actor->GetName(), NewState->owner().netguid());
+				UE_LOG(LogChanneld, Warning, TEXT("ActorReplicator failed to set the owner of %s, NetId: %u"), *Actor->GetName(), NewState->owner().netguid());
 			}
 		}
 	}
@@ -344,7 +344,7 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 		}
 		else
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("ActorReplicator failed to set the instigator of %s, NetId: %d"), *Actor->GetName(), NewState->instigator().netguid());
+			UE_LOG(LogChanneld, Warning, TEXT("ActorReplicator failed to set the instigator of %s, NetId: %u"), *Actor->GetName(), NewState->instigator().netguid());
 		}
 	}
 

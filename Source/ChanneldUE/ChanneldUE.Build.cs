@@ -24,6 +24,7 @@ public class ChanneldUE : ModuleRules
             "ProtobufUE",
             //"ReplicationGraph",
             "PrometheusUE",
+            "Json",
             "JsonUtilities",
             }
         );
