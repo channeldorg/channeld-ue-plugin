@@ -294,7 +294,7 @@ void UChanneldConnection::Receive()
 
 			// move buff
 			uint32 moveLen = PacketSize + HeaderSize;
-			memmove_s(ReceiveBuffer, ReceiveBuffer + moveLen, ReceiveBufferOffset - moveLen);
+			FMemory::Memmove(ReceiveBuffer, ReceiveBuffer + moveLen, ReceiveBufferOffset - moveLen);
 			
 			ReceiveBufferOffset -= moveLen;
 
