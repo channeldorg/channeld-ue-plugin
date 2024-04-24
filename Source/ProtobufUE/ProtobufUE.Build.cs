@@ -27,6 +27,8 @@ public class ProtobufUE : ModuleRules
 			{
 				"LANG_CXX11",
 				"PROTOBUF_USE_DLLS", // Basically for ThreadCache
+				"HAVE_ZLIB=0",
+				"GOOGLE_PROTOBUF_INTERNAL_DONATE_STEAL=0",
 			}
 		);
 

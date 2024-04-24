@@ -8,6 +8,7 @@
 #include "Engine/ActorChannel.h"
 #include "ChanneldConnection.h"
 #include "ChanneldNetConnection.h"
+#include "StaticGuidRegistry.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/DemoNetDriver.h"
 //#define CHANNELD_TOLERANCE (1.e-8f)
@@ -16,6 +17,19 @@
 class CHANNELDUE_API ChanneldUtils
 {
 public:
+	static bool IsServer(const UWorld* World)
+	{
+		if (World == nullptr)
+		{
+			return false;
+		}
+#if ENGINE_MAJOR_VERSION >= 5
+		return World->GetNetMode() == NM_DedicatedServer || World->GetNetMode() == NM_ListenServer;
+#else
+		return World->IsServer();
+#endif
+	}
+	
 	static google::protobuf::Message* CreateProtobufMessage(const std::string& FullName)
 	{
 		const google::protobuf::Descriptor* Desc = google::protobuf::DescriptorPool::generated_pool()
@@ -192,29 +206,30 @@ public:
 		SpatialInfo->set_z(Vector.Y);
 	}
 
-	static FNetworkGUID GetNetId(UObject* Obj, bool bAssignOnServer = true)
+	static FNetworkGUID GetNetId(UObject* Obj, const UNetDriver* NetDriver = nullptr)
 	{
 		FNetworkGUID NetId;
-		if (!Obj)
+		if (!NetDriver)
+		{
+			if (const UWorld* World = Obj->GetWorld())
+			{
+				NetDriver = World->GetNetDriver();
+			}
+		}
+		if (!NetDriver)
 		{
 			return NetId;
 		}
-		auto World = Obj->GetWorld();
-		if (!World)
-		{
-			return NetId;
-		}
+		
+		NetId = NetDriver->GuidCache->GetNetGUID(Obj);
 
-		if (const auto NetDriver = World->GetNetDriver())
+		if (!NetId.IsValid())
 		{
-			if (NetDriver->IsServer() && bAssignOnServer)
-			{
-				NetId = NetDriver->GuidCache->GetOrAssignNetGUID(Obj);
-			}
-			else
-			{
-				NetId = NetDriver->GuidCache->GetNetGUID(Obj);
-			}
+			FString ObjectPath = Obj->GetPathName();
+#if UE_EDITOR
+			ObjectPath = UWorld::RemovePIEPrefix(ObjectPath);
+#endif
+			NetId = FStaticGuidRegistry::GetStaticObjectExportedNetGUID(ObjectPath);
 		}
 		
 		return NetId;
@@ -237,7 +252,7 @@ public:
 	 */
 	static UObject* GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWorld* World, bool& bNetGUIDUnmapped, bool bCreateIfNotInCache = true, UChanneldNetConnection* ClientConn = nullptr);
 	
-	static TSharedRef<unrealpb::UnrealObjectRef> GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr, bool bFullExport = false);
+	static TSharedRef<unrealpb::UnrealObjectRef> GetRefOfObject(UObject* Obj, UNetConnection* Connection = nullptr, bool bFullExport = false, UWorld* World = nullptr);
 
 	static bool CheckObjectWithRef(UObject* Obj, const unrealpb::UnrealObjectRef* Ref, UWorld* World)
 	{
@@ -304,8 +319,7 @@ public:
 	// Should the owner of the actor, or the PlayerController or PlayerState of the pawn should be set?
 	static bool ShouldSetPlayerControllerOrPlayerStateForActor(AActor* Actor)
 	{
-		auto World = Actor->GetWorld();
-		const bool bIsServer = World != nullptr && World->IsServer();
+		const bool bIsServer = ChanneldUtils::IsServer(Actor->GetWorld());
 		// Special case: the client won't create other player's controller. Pawn and PlayerState's owner is PlayerController.
 		const bool bOwnerIsPC = Actor->IsA<APawn>() || Actor->IsA<APlayerState>();
 		const bool bClientShouldSetOwner = !bOwnerIsPC || Actor->GetLocalRole() > ROLE_SimulatedProxy;
@@ -362,8 +376,19 @@ public:
 	{
 		NetConnForSpawn = InNetConn;
 	}
+	
+	static UChanneldNetConnection* GetNetConnForSpawn()
+	{
+		return NetConnForSpawn;
+	}
+
+	static UNetConnection* GetActorNetConnection(const AActor* Actor);
+	static void ResetNetConnForSpawn();
+
+	// static void MarkArUseCustomSerializeObject(FArchive& Ar);
+	// static bool CheckArUseCustomSerializeObject(const FArchive& Ar);
+
 private:
 	static TMap<uint32, TSharedRef<unrealpb::UnrealObjectRef>> ObjRefCache;
 	static UChanneldNetConnection* NetConnForSpawn;
-	static void ResetNetConnForSpawn();
 };

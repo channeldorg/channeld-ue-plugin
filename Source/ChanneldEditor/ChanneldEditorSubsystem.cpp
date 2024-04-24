@@ -23,7 +23,7 @@
 #include "Developer/DesktopPlatform/Public/IDesktopPlatform.h"
 #include "Developer/DesktopPlatform/Public/DesktopPlatformModule.h"
 #include "Async/Async.h"
-#include "DerivedDataCache/Public/DerivedDataCacheInterface.h"
+#include "DerivedDataCacheInterface.h"
 #include "Editor/UnrealEdEngine.h"
 #include "Interfaces/IMainFrameModule.h"
 #include "Interfaces/IProjectTargetPlatformEditorModule.h"
@@ -121,10 +121,10 @@ void UChanneldEditorSubsystem::UpdateReplicationCache(
 	}
 	bUpdatingRepActorCache = true;
 
-#if ENGINE_MAJOR_VERSION >=5
-	constexpr TCHAR* AdditionalArguments = TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout -AssetGatherAll=true");
+#if ENGINE_MAJOR_VERSION >= 5
+	const TCHAR* AdditionalArguments = TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout -AssetGatherAll=true -exportstatic");
 #else
-	constexpr TCHAR* AdditionalArguments = TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout");
+	const TCHAR* AdditionalArguments = TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout -exportstatic");
 #endif
 
 	UpdateRepActorCacheWorkThread = MakeShareable(

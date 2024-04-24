@@ -391,7 +391,7 @@ TSharedPtr<void> FChanneldCharacterReplicator::DeserializeFunctionParams(UFuncti
 		UNetConnection* NetConn = Character->GetNetConnection();
 		if (!NetConn)
 		{
-			UE_LOG(LogChanneld, Error, TEXT("ServerMovePacked: character doesn't have the NetConnection to deserialize the params. NetId: %d"), GetNetGUID());
+			UE_LOG(LogChanneld, Error, TEXT("ServerMovePacked: character doesn't have the NetConnection to deserialize the params. NetId: %u"), GetNetGUID());
 			bSuccess = false;
 			return nullptr;
 		}

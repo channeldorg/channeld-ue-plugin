@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ChanneldTypes.h"
-#include "PropertyEditor/Public/IPropertyTypeCustomization.h"
+#include "IPropertyTypeCustomization.h"
 
 class FClientInterestSettingsCustomization : public IPropertyTypeCustomization
 {

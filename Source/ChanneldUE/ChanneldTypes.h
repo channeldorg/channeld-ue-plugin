@@ -312,3 +312,59 @@ struct CHANNELDUE_API FClientInterestSettingsPreset
 	UPROPERTY(EditAnywhere, Category="Cone AOI")
 	float Angle = 120.0f;
 };
+
+struct CHANNELDUE_API FChanneldNetDeltaSerializeInfo : FNetDeltaSerializeInfo
+{
+	FChanneldNetDeltaSerializeInfo() {}
+
+	static bool DeltaSerializeRead(UNetDriver* NetDriver, FNetBitReader& Reader, UObject* Object, UScriptStruct* NetDeltaStruct, void* Destination);
+	static bool DeltaSerializeWrite(UNetDriver* NetDriver, FNetBitWriter& Writer, UObject* Object, UScriptStruct* NetDeltaStruct, void* Source, TSharedPtr<INetDeltaBaseState>& OldState);
+};
+
+
+
+USTRUCT()
+struct CHANNELDUE_API FStaticObjectInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString PathName;
+
+	UPROPERTY()
+	uint32 NetID = 0;
+
+	UPROPERTY()
+	uint32 OuterID = 0;
+
+	FStaticObjectInfo() = default;
+
+	FStaticObjectInfo(FString InPathName, uint32 InExportID, uint32 InOuterExportID)
+		: PathName(InPathName)
+		, NetID(InExportID), OuterID(InOuterExportID)
+	{
+	}
+};
+
+USTRUCT()
+struct CHANNELDUE_API FStaticObjectCache
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FDateTime ExportTime;
+
+	UPROPERTY()
+	TArray<FStaticObjectInfo> StaticObjects;
+
+	FStaticObjectCache() = default;
+
+	FStaticObjectCache(const TArray<FStaticObjectInfo>& InStaticObjects)
+		: ExportTime(FDateTime::UtcNow()), StaticObjects(InStaticObjects)
+	{
+	}
+};
+
+static const FString GenManager_ChanneldStaticObjectExportPath = FPaths::ProjectConfigDir() / TEXT("ChanneldStaticObjectExport.json");
+// Range: 2^31+1 ~ 2^32-1
+static constexpr uint32 GenManager_ChanneldStaticObjectExportStartID = (1<<31)+1;//100000001;

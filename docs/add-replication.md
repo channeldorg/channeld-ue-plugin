@@ -51,7 +51,7 @@ In the Channel Data Schema editor, do the following:
 
 ![](images/add_global_demo_channel_data_state.png)
 
-1. Click the `Refresh...` button and wait for the refresh of the channel data states to complete. The first refresh may take a while to traverse all the code and Blueprints in the project, so please be patient.
+1. Click the `Cook...` button and wait for the refresh of the channel data states to complete. The first refresh may take a while to traverse all the code and assets in the project, so please be patient.
 2. Find the `Global` channel, click the `Add State` button, and then click the reference(state) of `ThirdPersonPlayerController` and `BP_TestActor` in the expanded menu.
 3. Hit the `Generate...` button and wait for the code generation to complete.
 

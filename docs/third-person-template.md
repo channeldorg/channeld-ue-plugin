@@ -54,7 +54,9 @@ To add a server group, open the `Editor Preferences -> Plugins -> Channeld Edito
 Make sure that `Enabled` is checked, `Server Num` is 1, and `Server View Class` is also set to `SingleChannelDataView`. If `Server Map` is left blank, the currently opened map in the editor will be used when the server is started.
 
 # 4.Start the channeld service and game server
-Before you start the channeld service and game server for the first time, you need to generate the replication code. Open the drop-down menu of the ChanneldUE plugin in the toolbar, click the `Edit Channel Data Schema...` to open the Channel Data Schema editor. Click the `Generate...` button to start generating the replication code. It may take a long time for the first generation, as it will traverse all the code and Blueprints in the project, so please be patient.
+Before you start the channeld service and game server for the first time, you need to generate the replication code. Open the drop-down menu of the ChanneldUE plugin in the toolbar, click the `Edit Channel Data Schema...` to open the Channel Data Schema editor. 
+
+Firstly, click the `Cook...` button to refresh the replication cache and the static GUID registry. Then, click the `Generate...` button to start generating the replication code. It may take a long time for the first generation, as it will traverse all the code and Blueprints in the project, so please be patient.
 
 ![](images/generate_replicaiton_code.png)
 

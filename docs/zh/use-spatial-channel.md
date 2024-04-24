@@ -50,6 +50,8 @@
 ### 7.4.2.角色蓝图
 将`ThirdPersonCharacter`的基类从`ACharacter`改为`AChanneldCharacter`，以支持跨服移动和RPC。
 
+如果`ThirdPersonCharacter`的基类是项目中的C++类，则让该C++类的基类继承自`AChanneldCharacter`。
+
 ### 7.4.3.GameMode蓝图
 将`ThirdPersonGameMode`的基类从`AGameModeBase`改为`AChanneldGameMode`，以解决角色进入空间服务器的相关问题。
 
@@ -95,4 +97,4 @@ LogChanneld: Created spatial channels: 65538,65539 （空间服务器2）
 - 控制客户端接收的同步范围
 - 让GameState在多个空间服务器上同步属性
 
-可以继续浏览[文档](zh/README.md)；也可以下载[ChanneldUE示例项目](https://github.com/metaworking/channeld-ue-demos)。
+可以继续浏览进阶主题；也可以下载[ChanneldUE示例项目](https://github.com/metaworking/channeld-ue-demos)。

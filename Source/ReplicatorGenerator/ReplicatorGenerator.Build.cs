@@ -76,5 +76,7 @@ public class ReplicatorGenerator : ModuleRules
 				"PLUGIN_DIR=R\"(" + PluginDirectory + ")\"",
 			}
 		);
+
+		bUseRTTI = true;
 	}
 }

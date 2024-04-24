@@ -304,7 +304,7 @@ bool FReplicatorCodeGenerator::GenerateReplicatorCode(
 	CppCodeBuilder.Append(FString::Printf(TEXT("#include \"%s\"\n\n"), *GenManager_TypeDefinitionHeadFile));
 
 	// Define and initialize the static PropPointerMemOffsetCache for the constructor
-	CppCodeBuilder.Append(FString::Printf(TEXT("TMap<FString, int32> %s::PropPointerMemOffsetCache;\n\n"), *ActorDecorator->GetReplicatorClassName()));
+	CppCodeBuilder.Append(FString::Printf(TEXT("TMap<FName, int32> %s::PropPointerMemOffsetCache;\n\n"), *ActorDecorator->GetReplicatorClassName()));
 	
 	FormatArgs.Add(
 		TEXT("Code_AssignPropertyPointers"),
@@ -847,7 +847,7 @@ void FReplicatorCodeGenerator::ProcessHeaderFiles(const TArray<FString>& Files, 
 		FString Code;
 		// Load source code files, and capture all 'UCLASS' marked classes.
 		FFileHelper::LoadFileToString(Code, *HeaderFilePath);
-		FRegexPattern MatherPatter(FString(TEXT(R"EOF(UCLASS\(.*\)\s*class\s+(?:\w+_API\s+)?([\w_]+)\s+\:)EOF")));
+		FRegexPattern MatherPatter(FString(TEXT(R"EOF(UCLASS\(.*\)\s*class\s+(?:\w+_API\s+)?([\w_]+)\s+(?:final\s+)?\:)EOF")));
 		FRegexMatcher Matcher(MatherPatter, Code);
 		while (Matcher.FindNext())
 		{

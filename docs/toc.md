@@ -20,6 +20,6 @@
 
 -----
 - **Links**
-  - [Github Repo](https://github.com/metaworking/channeld-ue-plugins)
+  - [Github Repo](https://github.com/metaworking/channeld-ue-plugin)
   - [Example Project](https://github.com/metaworking/channeld-ue-demos)
   - [channeld](https://github.com/metaworking/channeld)
