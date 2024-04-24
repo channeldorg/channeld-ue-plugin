@@ -360,9 +360,8 @@ struct CHANNELDUE_API FStaticObjectCache
 	FStaticObjectCache() = default;
 
 	FStaticObjectCache(const TArray<FStaticObjectInfo>& InStaticObjects)
-		: StaticObjects(InStaticObjects)
+		: ExportTime(FDateTime::UtcNow()), StaticObjects(InStaticObjects)
 	{
-		ExportTime = FDateTime::UtcNow();
 	}
 };
 
