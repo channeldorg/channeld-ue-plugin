@@ -250,16 +250,7 @@ void UChanneldConnection::Receive()
 	int32 BytesRead;
 	if (Socket->Recv(ReceiveBuffer + ReceiveBufferOffset, ReceiveBufferSize, BytesRead, ESocketReceiveFlags::None))
 	{
-		ReceiveBufferOffset += BytesRead;
-		// if (ReceiveBufferOffset < HeaderSize)
-		// {
-		// 	// Unfinished packet
-		// 	UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet header: %d"), BytesRead);
-		// 	UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-		// 	Metrics->FragmentedPacket_Counter->Increment();
-		// 	return;
-		// }
-		
+		ReceiveBufferOffset += BytesRead;		
 		while (ReceiveBufferOffset > HeaderSize)
 		{
 			if (ReceiveBuffer[0] != 67 || ReceiveBuffer[1] != 72)
@@ -273,8 +264,8 @@ void UChanneldConnection::Receive()
 			
 			uint32 PacketSize = ReceiveBuffer[3] | (ReceiveBuffer[2] << 8);
 
-			UE_LOG(LogChanneld, Warning, TEXT("ReceiveBufferOffset: %d, PacketSize:%d"), ReceiveBufferOffset,
-			       PacketSize);
+			// UE_LOG(LogChanneld, VeryVerbose, TEXT("ReceiveBufferOffset: %d, PacketSize:%d"), ReceiveBufferOffset,
+			//        PacketSize);
 
 			if (ReceiveBufferOffset < HeaderSize + PacketSize)
 			{
@@ -302,15 +293,9 @@ void UChanneldConnection::Receive()
 
 			// move buff
 			uint32 moveLen = PacketSize + HeaderSize;
-			for (int i = 0; i < ReceiveBufferOffset - moveLen; ++i)
-			{
-				ReceiveBuffer[i] = ReceiveBuffer[moveLen + i];
-			}
-			//ReceiveBuffer += moveLen;
+			memmove_s(ReceiveBuffer, ReceiveBuffer + moveLen, ReceiveBufferOffset - moveLen);
 			
 			ReceiveBufferOffset -= moveLen;
-
-
 
 			for (auto const& MessagePackData : Packet.messages())
 			{
