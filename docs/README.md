@@ -15,7 +15,7 @@ The open source plugin that enables distributed simulation with Unreal Engine's 
 - Support one-click cloud deployment.
 
 ## Engine Versions Support Matrix
-| Components | UE 4.27.2 | UE 5.1.1 | UE 5.2.1 |
+| Components | UE 4.27.2 | UE 5.2.1 | UE 5.3.2 |
 | ------ | ------ | ------ |------ |
 | Getting Started | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | Demos Project | :white_check_mark: | :white_check_mark: | :white_check_mark: |
