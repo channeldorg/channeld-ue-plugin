@@ -102,10 +102,15 @@ protected:
 	TSharedRef<Channeld::ChannelId> LowLevelSendToChannelId = MakeShared<Channeld::ChannelId>(Channeld::InvalidChannelId);
 
 private:
-	
-	const FName ServerMovePackedFuncName = FName("ServerMovePacked");
-	const FName ClientMoveResponsePackedFuncName = FName("ClientMoveResponsePacked");
-	const FName ServerUpdateCameraFuncName = FName("ServerUpdateCamera");
+
+	const TSet<FName> IgnoredFuncNames = {
+		FName("ServerMovePacked"),
+		FName("ClientMoveResponsePacked"),
+		FName("ServerUpdateCamera"),
+		FName("ServerSendLatestAsyncPhysicsTimestamp"),
+		FName("ServerRecvClientInputFrame"),
+		FName("ClientCorrectionAsyncPhysicsTimestamp"),
+	};
 
 	// Prevent the engine from GC the connection
 	UPROPERTY()
