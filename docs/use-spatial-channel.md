@@ -50,6 +50,8 @@ Open the `ThirdPersonPlayerController` Blueprint, first add a `Get ChanneldGameI
 ### 7.4.2.Character Blueprint
 Change the base class of `ThirdPersonCharacter` from `ACharacter` to `AChanneldCharacter` to support cross-server movement and RPC.
 
+If the base class of `ThirdPersonCharacter` is a C++ class in the project, make the base class of the C++ class inherit from `AChanneldCharacter`.
+
 ### 7.4.3.GameMode Blueprint
 Change the base class of `ThirdPersonGameMode` from `AGameModeBase` to `AChanneldGameMode` to solve the problem of the player character entering the spatial server.
 
@@ -95,4 +97,4 @@ Congratulations! So far, you have learned the basic functions of ChanneldUE. If 
 - Control the range of spatila update received by the client
 - Use GameState to replicate properties across multiple spatial servers
 
-You can continue to browse the [documentation](README.md); or you can download the [ChanneldUE demo project](https://github.com/metaworking/channeld-ue-demos).
+You can continue to browse the advanced topics; or you can download the [ChanneldUE demo project](https://github.com/metaworking/channeld-ue-demos).

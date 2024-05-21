@@ -2,6 +2,7 @@
 
 #include "PropertyDecoratorFactory.h"
 #include "ReplicatorGeneratorDefinition.h"
+#include "ReplicatorGeneratorManager.h"
 #include "ReplicatorTemplate/CppReplicatorTemplate.h"
 
 FStructPropertyDecorator::FStructPropertyDecorator(FProperty* InProperty, IPropertyDecoratorOwner* InOwner) : FPropertyDecorator(InProperty, InOwner)
@@ -94,6 +95,12 @@ TArray<FString> FStructPropertyDecorator::GetAdditionalIncludes()
 	{
 		IncludeFileSet.Append(PropDecorator->GetAdditionalIncludes());
 	}
+	/* Use {Declare_PropCompilableStructName} in the generated struct - no need to include the original struct.
+	if (auto ModuleInfo = FReplicatorGeneratorManager::Get().GetModuleInfo(GetCPPType()))
+	{
+		IncludeFileSet.Add(ModuleInfo->RelativeToModule);
+	}
+	*/
 	return IncludeFileSet.Array();
 }
 

@@ -23,10 +23,10 @@ The opened editor is shown in the figure below:
 ### Save the Channel Data Schema
 The Channel Data Schema editor will be automatically saved. When the Channel Data Schema is modified, the Channel Data Schema will be automatically saved to the `Config/ChanneldChannelDataSchema.json` file under the project root directory.
 
-### Update the replication cache
+### Cook and refresh
 When a replicated Actor or ActorComponent is added or deleted in the project, the replication cache needs to be updated so that the editor can correctly display the available channel data states.
 
-As shown in the figure below, click the `Refresh...` button above the Channel Data Schema editor to update the replication cache.
+As shown in the figure below, click the `Cook...` button above the Channel Data Schema editor to update the replication cache.
 
 ![](images/refresh_rep_actor_cache.png)
 

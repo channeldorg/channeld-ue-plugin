@@ -60,7 +60,7 @@ The following editor window will be opened:
 ![](images/default_channel_data_schema_editor.png)
 
 ##### Add Actor state to the Channel Data Schema
-First, if the replication cache is expired (yellow exclamation mark), you need to update it. Click the `Refresh...` button above the channel data editor:
+First, if the replication cache is expired (yellow exclamation mark), you need to update it. Click the `Cook...` button above the channel data editor:
 
 ![](images/refresh_rep_actor_cache.png)
 
@@ -156,7 +156,7 @@ The workflow of upgrading the ChanneldUE plugin is as follows:
 5. Regenerate the project solution file
 6. Recompile the project and run it
 7. Open the Channel Data Schema editor (toolbar ChanneldUE plugin dropdown menu -> `Edit Channel Data Schema...`)
-8. Click the `Refresh...` button to refresh the replication cache
+8. Click the `Cook...` button to refresh the replication cache and the static GUID registry
 9. There was a major upgrade in v0.6 regarding the spatial channel. If you haven't done it yet, please re-add the states that were in the `Spatial` channel to the `Entity` channel
 10. Click the `Generate...` button to generate the replication code
 

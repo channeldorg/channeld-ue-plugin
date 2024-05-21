@@ -76,14 +76,14 @@ void UChanneldNetDriver::RemoveChanneldClientConnection(Channeld::ConnectionId C
 void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg)
 {
 	FNetworkGUID NetId = FNetworkGUID(SpawnMsg->obj().netguid());
-	
+
+	/* No need to destroy the object that is already spawned - just set its NetRole and mappings, and add the provider.
 	// If the object with the same NetId exists, destroy it before spawning a new one.
 	UObject* OldObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld(), false);
 	if (OldObj)
 	{
-		UE_LOG(LogChanneld, Log, TEXT("[Client] Found spawned object %s of duplicated NetId: %d, will skip."), *GetNameSafe(OldObj), SpawnMsg->obj().netguid());
+		UE_LOG(LogChanneld, Log, TEXT("[Client] Found spawned object %s of duplicated NetId: %u, will skip."), *GetNameSafe(OldObj), SpawnMsg->obj().netguid());
 
-		/* Found a lot of duplicated WorldSettings and Character in the log, so just skip them for now.
 		GuidCache->ObjectLookup.Remove(NetId);
 		GuidCache->NetGUIDLookup.Remove(OldObj);
 			
@@ -91,9 +91,9 @@ void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessa
 		{
 			GetWorld()->DestroyActor(OldActor, true);
 		}
-		*/
 		return;
 	}
+	*/
 
 	if (ChannelDataView.IsValid() && SpawnMsg->has_channelid())
 	{
@@ -149,7 +149,7 @@ void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessa
 			ChannelDataView->OnNetSpawnedObject(NewObj, SpawnMsg->channelid());
 		}
 
-		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %d, owning channel: %d, local role: %d"), *NewObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), LocalRole);
+		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %u, owning channel: %u, local role: %d"), *NewObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), LocalRole);
 	}
 	else
 	{
@@ -221,11 +221,17 @@ void UChanneldNetDriver::OnUserSpaceMessageReceived(uint32 MsgType, Channeld::Ch
 			UE_LOG(LogChanneld, Error, TEXT("Failed to parse DestroyObjectMessage"));
 			return;
 		}
+		
+		if (!ChannelDataView.IsValid())
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to destroy object as the view is invalid, netId: %u"), DestroyMsg->netid());
+			return;
+		}
 
-		UObject* ObjToDestroy = GuidCache->GetObjectFromNetGUID(FNetworkGUID(DestroyMsg->netid()), true);
+		UObject* ObjToDestroy = ChannelDataView->GetObjectFromNetGUID(DestroyMsg->netid());
 		if (ObjToDestroy)
 		{
-			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Destroying object from message: %s, NetId: %d"), *GetNameSafe(ObjToDestroy), DestroyMsg->netid());
+			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Destroying object from message: %s, NetId: %u"), *GetNameSafe(ObjToDestroy), DestroyMsg->netid());
 			
 			if (AActor* Actor = Cast<AActor>(ObjToDestroy))
 			{
@@ -682,6 +688,12 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		UE_LOG(LogChanneld, Log, TEXT("ChannelDataView is not initialized yet. If the actor '%s' is a DataProvider, it will not be registered."), *Actor->GetName());
 	}
 
+	// No need to send static actors to clients
+	if (NetId.IsStatic())
+	{
+		return;
+	}
+
 	if (!Actor->GetIsReplicated())
 	{
 		return;
@@ -764,7 +776,7 @@ void UChanneldNetDriver::OnServerBeginPlay(UChanneldReplicationComponent* RepCom
 	{
 		if (ChannelDataView.IsValid())
 		{
-			UE_LOG(LogChanneld, VeryVerbose, TEXT("[Server] Actor %s has deferred ChanneldReplicationComponent registration. Adding it to default channel."), *Actor->GetName());
+			UE_LOG(LogChanneld, Verbose, TEXT("[Server] Actor %s has deferred ChanneldReplicationComponent registration. Adding it to default channel."), *Actor->GetName());
 			ChannelDataView->AddProviderToDefaultChannel(RepComp);
 		}
 	}
@@ -788,7 +800,7 @@ bool UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage>
 			Channeld::ChannelId TargetChId = ChannelDataView->GetOwningChannelId(FNetworkGUID(Msg->targetobj().netguid()));
 			if (ConnToChanneld->OwnedChannels.Contains(TargetChId))
 			{
-				UE_LOG(LogChanneld, Warning, TEXT("Attempt to redirect RPC to the same server, netId: %d, func: %s"), Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
+				UE_LOG(LogChanneld, Warning, TEXT("Attempt to redirect RPC to the same server, netId: %u, func: %s"), Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
 				return false;
 			}
 		
@@ -796,7 +808,7 @@ bool UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage>
 			{
 				Msg->set_redirectioncounter(Msg->redirectioncounter() + 1);
 				ConnToChanneld->Broadcast(TargetChId, unrealpb::RPC, *Msg, channeldpb::SINGLE_CONNECTION);
-				UE_LOG(LogChanneld, Verbose, TEXT("Redirect RPC to channel %d, netId: %d, func: %s"), TargetChId, Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
+				UE_LOG(LogChanneld, Verbose, TEXT("Redirect RPC to channel %u, netId: %u, func: %s"), TargetChId, Msg->targetobj().netguid(), UTF8_TO_TCHAR(Msg->functionname().c_str()));
 				
 				UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
 				Metrics->RedirectedRPCs_Counter->Increment();
@@ -808,7 +820,7 @@ bool UChanneldNetDriver::RedirectRPC(TSharedPtr<unrealpb::RemoteFunctionMessage>
 				return true;
 			}
 			
-			UE_LOG(LogChanneld, Warning, TEXT("Unable to redirect RPC as the mapping to the target channel doesn't exists, netId: %d"), Msg->targetobj().netguid());
+			UE_LOG(LogChanneld, Warning, TEXT("Unable to redirect RPC as the mapping to the target channel doesn't exists, netId: %u"), Msg->targetobj().netguid());
 			DropReason = RPCDropReason_RedirNoChannel;
 		}
 		else
@@ -882,7 +894,7 @@ int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 		for (int32 i = 0; i < ClientConnections.Num(); i++)
 		{
 			UChanneldNetConnection* Connection = CastChecked<UChanneldNetConnection>(ClientConnections[i]);
-			if (Connection->PlayerController && Connection->PlayerController->GetViewTarget())
+			if (Connection->PlayerController && Connection->PlayerController->HasAuthority() && Connection->PlayerController->GetViewTarget())
 			{
 				// Trigger ClientMoveResponse RPC
 				Connection->PlayerController->SendClientAdjustment();
@@ -981,7 +993,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 						UE_LOG(LogChanneld, VeryVerbose, TEXT("Serialized RPC parameters to %llu bytes"), RpcMsg.paramspayload().size());
 					}
 					ConnToChanneld->Broadcast(OwningChId, unrealpb::RPC, RpcMsg, channeldpb::SINGLE_CONNECTION);
-					UE_LOG(LogChanneld, Log, TEXT("Forwarded RPC %s::%s to the owner of channel %d"), *Actor->GetName(), *FuncName, OwningChId);
+					UE_LOG(LogChanneld, Log, TEXT("Forwarded RPC %s::%s to the owner of channel %u"), *Actor->GetName(), *FuncName, OwningChId);
 					OnSentRPC(RpcMsg);
 					return;
 				}
@@ -1028,44 +1040,44 @@ void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, c
 		return;
 	}
 
-	ERPCDropReason DropReason = RPCDropReason_Unknown;
 	if (Actor->GetLocalRole() <= ENetRole::ROLE_SimulatedProxy)
 	{
 		// Simulated proxies can't process server or client RPCs
 		if ((Function->FunctionFlags & FUNC_NetClient) || (Function->FunctionFlags & FUNC_NetServer))
 		{
 			UE_LOG(LogChanneld, Warning, TEXT("Local role has no authroity to process server or client RPC %s::%s"), *Actor->GetName(), *FuncName);
-			DropReason = RPCDropReason_NoAuthority;
+			GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(std::string(TCHAR_TO_UTF8(*FuncName)), RPCDropReason_NoAuthority);
+			return;
+		}
+		// But NetMulticast is allowed
+	}
+	
+	ERPCDropReason DropReason = RPCDropReason_Unknown;
+	auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
+	if (RepComp)
+	{
+		bool bSuccess = true;
+		TSharedPtr<void> Params = RepComp->DeserializeFunctionParams(Obj, Function, ParamsPayload, bSuccess, bDeferredRPC);
+		if (bDeferredRPC)
+		{
+			return;
+		}
+
+		if (bSuccess)
+		{
+			Obj->ProcessEvent(Function, Params.Get());
+			return;
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to deserialize function parameters of RPC %s::%s"), *Actor->GetName(), *FuncName);
+			DropReason = RPCDropReason_DeserializeFailed;
 		}
 	}
 	else
 	{
-		auto RepComp = Cast<UChanneldReplicationComponent>(Actor->FindComponentByClass(UChanneldReplicationComponent::StaticClass()));
-		if (RepComp)
-		{
-			bool bSuccess = true;
-			TSharedPtr<void> Params = RepComp->DeserializeFunctionParams(Obj, Function, ParamsPayload, bSuccess, bDeferredRPC);
-			if (bDeferredRPC)
-			{
-				return;
-			}
-
-			if (bSuccess)
-			{
-				Obj->ProcessEvent(Function, Params.Get());
-				return;
-			}
-			else
-			{
-				UE_LOG(LogChanneld, Warning, TEXT("Failed to deserialize function parameters of RPC %s::%s"), *Actor->GetName(), *FuncName);
-				DropReason = RPCDropReason_DeserializeFailed;
-			}
-		}
-		else
-		{
-			UE_LOG(LogChanneld, Warning, TEXT("Can't find the ReplicationComponent to deserialize RPC: %s::%s"), *Actor->GetName(), *FuncName);
-			DropReason = RPCDropReason_NoRepComp;
-		}
+		UE_LOG(LogChanneld, Warning, TEXT("Can't find the ReplicationComponent to deserialize RPC: %s::%s"), *Actor->GetName(), *FuncName);
+		DropReason = RPCDropReason_NoRepComp;
 	}
 
 	GEngine->GetEngineSubsystem<UChanneldMetrics>()->OnDroppedRPC(std::string(TCHAR_TO_UTF8(*FuncName)), DropReason);
@@ -1093,14 +1105,30 @@ void UChanneldNetDriver::TickFlush(float DeltaSeconds)
 	}
 }
 
+void UChanneldNetDriver::SetWorld(UWorld* InWorld)
+{
+	Super::SetWorld(InWorld);
+	if (World)
+	{
+		FStaticGuidRegistry::RegisterStaticObjects(this);
+	}
+}
+
 void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 {
 	// IMPORTANT: offset with the ConnId to avoid NetworkGUID conflicts
 	const uint32 UniqueNetIdOffset = ConnToChanneld->GetConnId() << Channeld::ConnectionIdBitOffset;
+	
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 3
+	FNetGUIDCacheCopy* GuidCacheCopy = (FNetGUIDCacheCopy*)GuidCache.Get();
+	GuidCacheCopy->NetworkGuidIndex[0] = UniqueNetIdOffset;
+	GuidCacheCopy->NetworkGuidIndex[1] = UniqueNetIdOffset;
+#else
 	GuidCache->UniqueNetIDs[0] = UniqueNetIdOffset;
 	// Static NetIDs may conflict on the spatial servers, so we need to offset them as well.
 	GuidCache->UniqueNetIDs[1] = UniqueNetIdOffset;
-
+#endif
+	
 	if (ConnToChanneld->IsClient())
 	{
 		auto MyServerConnection = GetServerConnection();
@@ -1143,7 +1171,7 @@ void UChanneldNetDriver::NotifyActorDestroyed(AActor* Actor, bool IsSeamlessTrav
 	}
 	else
 	{
-		// UE_LOG(LogChanneld, Warning, TEXT("ChannelDataView failed to handle the destroy of %s, netId: %d"), *GetNameSafe(Actor), NetId.Value);
+		// UE_LOG(LogChanneld, Warning, TEXT("ChannelDataView failed to handle the destroy of %s, netId: %u"), *GetNameSafe(Actor), NetId.Value);
 	}
 	
 	//~ Begin copy of UNetDriver::NotifyActorDestroyed

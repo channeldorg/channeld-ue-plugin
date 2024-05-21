@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "Replication/ChanneldReplicatorBase.h"
-#include "Engine/Classes/Components/StaticMeshComponent.h"
 #include "ChanneldUtils.h"
 
 class FChanneldStaticMeshComponentReplicator : public FChanneldReplicatorBase

@@ -3,11 +3,17 @@
 
 const static TCHAR* StructPropDeco_PropPtrGroupStructTemp =
 	LR"EOF(
+struct {Declare_PropCompilableStructName}
+{
+	{Code_StructCopyProperties}
+};
+
 struct {Declare_PropPtrGroupStructName}
 {
   {Declare_PropPtrGroupStructName}() {}
   {Declare_PropPtrGroupStructName}(void* Container)
   {
+    ContainerAddr = ({Declare_PropCompilableStructName}*)Container;
 {Code_AssignPropPointers}
   }
 
@@ -16,7 +22,13 @@ struct {Declare_PropPtrGroupStructName}
 {Code_AssignPropPointersForRPC}
   }
 
+{Declare_PropCompilableStructName}* ContainerAddr;
 {Declare_PropertyPointers}
+
+  {Declare_PropCompilableStructName} operator*() const
+  {
+	return *ContainerAddr;
+  }
   
   bool Merge(const {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* FullState, {Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}* DeltaState, UWorld* World)
   {
@@ -49,22 +61,17 @@ struct {Declare_PropPtrGroupStructName}
   }
 
 };
-
-struct {Declare_PropCompilableStructName}
-{
-	{Code_StructCopyProperties}
-};
 )EOF";
 
 const static TCHAR* StructPropDeco_AssignPropPtrStatic =
 	LR"EOF(
-void* PropertyAddr = (uint8*){Ref_ContainerAddr} + {Num_PropMemOffset};
+uint8* PropertyAddr = (uint8*){Ref_ContainerAddr} + {Num_PropMemOffset};
 {Ref_AssignTo} = {Declare_PropPtrGroupStructName}(PropertyAddr))EOF";
 
 const static TCHAR* StructPropDeco_AssignPropPtrDynamic =
     LR"EOF(
-FString PropertyName = TEXT("{Declare_PropertyName}");
-void* PropertyAddr = (uint8*){Ref_ContainerAddr};
+const FName PropertyName = TEXT("{Declare_PropertyName}");
+uint8* PropertyAddr = (uint8*){Ref_ContainerAddr};
 int32* OffsetPtr = PropPointerMemOffsetCache.Find(PropertyName);
 if (OffsetPtr != nullptr)
 {    
@@ -72,7 +79,7 @@ if (OffsetPtr != nullptr)
 }
 else
 {
-    FProperty* Property = ActorClass->FindPropertyByName(FName(*PropertyName));
+    FProperty* Property = ActorClass->FindPropertyByName(PropertyName);
     if (Property)
     {
         int32 Offset = Property->GetOffset_ForInternal();
@@ -81,7 +88,7 @@ else
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("%s Replicator construct, but could not find property(%s) in cache or by name."), *ActorClass->GetName(), *PropertyName);
+        UE_LOG(LogTemp, Error, TEXT("%s Replicator construct, but could not find property(%s) in cache or by name."), *ActorClass->GetName(), *PropertyName.ToString());
         {Ref_AssignTo} = ({Declare_PropPtrGroupStructName})(PropertyAddr + {Num_PropMemOffset});
     }
 }

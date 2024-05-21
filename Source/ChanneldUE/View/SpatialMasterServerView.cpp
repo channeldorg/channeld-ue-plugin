@@ -31,7 +31,7 @@ void USpatialMasterServerView::InitServer()
 	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, [&](UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 	{
 		auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
-		UE_LOG(LogChanneld, Log, TEXT("[Server] Sub %s conn %d to %s channel %d, data access: %s"),
+		UE_LOG(LogChanneld, Log, TEXT("[Server] Sub %s conn %d to %s channel %u, data access: %s"),
 			SubResultMsg->conntype() == channeldpb::CLIENT ? TEXT("client") : TEXT("server"),
 			SubResultMsg->connid(),
 			UTF8_TO_TCHAR(channeldpb::ChannelType_Name(SubResultMsg->channeltype()).c_str()),
@@ -116,7 +116,7 @@ void USpatialMasterServerView::InitServer()
 		for (auto SpatialChId : ResultMsg->spatialchannelid())
 		{
 			AllSpatialChannelIds.Emplace(SpatialChId, ResultMsg->ownerconnid());
-			UE_LOG(LogChanneld, Verbose, TEXT("Added spatial channel %d"), SpatialChId);
+			UE_LOG(LogChanneld, Verbose, TEXT("Added spatial channel %u"), SpatialChId);
 		}
 	});
 
