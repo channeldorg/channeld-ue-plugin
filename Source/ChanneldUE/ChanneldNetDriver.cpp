@@ -914,7 +914,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 {
 	const FName FuncFName = Function->GetFName();
 	const FString FuncName = FuncFName.ToString();
-	const bool bShouldLog = FuncFName != ServerMovePackedFuncName && FuncFName != ClientMoveResponsePackedFuncName && FuncFName != ServerUpdateCameraFuncName;
+	const bool bShouldLog = !IgnoredFuncNames.Contains(FuncFName);//FuncFName != ServerMovePackedFuncName && FuncFName != ClientMoveResponsePackedFuncName && FuncFName != ServerUpdateCameraFuncName;
 	UE_CLOG(bShouldLog, LogChanneld, Verbose, TEXT("Sending RPC %s::%s, SubObject: %s"), *Actor->GetName(), *FuncName, *GetNameSafe(SubObject));
 	/*
 	if (Function->GetFName() == FName("ServerToggleRotation"))
@@ -1029,7 +1029,7 @@ void UChanneldNetDriver::OnSentRPC(const unrealpb::RemoteFunctionMessage& RpcMsg
 void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDeferredRPC, UObject* SubObject)
 {
 	const FString FuncName = FunctionName.ToString();
-	const bool bShouldLog = FunctionName != ServerMovePackedFuncName && FunctionName != ClientMoveResponsePackedFuncName && FunctionName != ServerUpdateCameraFuncName;
+	const bool bShouldLog = !IgnoredFuncNames.Contains(FunctionName);//FunctionName != ServerMovePackedFuncName && FunctionName != ClientMoveResponsePackedFuncName && FunctionName != ServerUpdateCameraFuncName;
 	UE_CLOG(bShouldLog, LogChanneld, Verbose, TEXT("Received RPC %s::%s"), *Actor->GetName(), *FuncName);
 
 	UObject* Obj = SubObject != nullptr ? SubObject : Actor;
