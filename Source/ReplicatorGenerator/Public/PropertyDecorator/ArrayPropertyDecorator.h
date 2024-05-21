@@ -121,7 +121,7 @@ const static TCHAR* ArrPropDeco_SetPropertyValueByMemOffsetTemp =
 const static TCHAR* ByteArrayPropDeco_SetDeltaStateTemplate = LR"EOF(
 {
 	std::string PropStrVal = std::string((const char*){Declare_PropPtrName}->GetData(), {Declare_PropPtrName}->Num());
-	if (PropStrVal != {Declare_FullStateName}->{Definition_ProtoName}())
+	if ({Code_ConditionFullStateIsNull}PropStrVal != {Declare_FullStateName}->{Definition_ProtoName}())
 	{
 		bStateChanged = true;
 		{Declare_DeltaStateName}->set_{Definition_ProtoName}(PropStrVal);
@@ -133,7 +133,7 @@ const static TCHAR* ByteArrayPropDeco_SetDeltaStateByMemOffsetTemp = LR"EOF(
 {
 	{Code_AssignPropPointers};
 	std::string PropStrVal = std::string((const char*)PropAddr->GetData(), PropAddr->Num());
-	if (PropStrVal != {Declare_FullStateName}->{Definition_ProtoName}())
+	if ({Code_ConditionFullStateIsNull}PropStrVal != {Declare_FullStateName}->{Definition_ProtoName}())
 	{
 		bStateChanged = true;
 		{Declare_DeltaStateName}->set_{Definition_ProtoName}(PropStrVal);

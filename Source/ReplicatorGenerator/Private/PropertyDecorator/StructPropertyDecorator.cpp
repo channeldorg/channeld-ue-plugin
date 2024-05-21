@@ -131,7 +131,7 @@ FString FStructPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString
 FString FStructPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
 {
 	FStringFormatNamedArguments FormatArgs;
-	// FormatArgs.Add(TEXT("Code_BeforeCondition"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? true :") : TEXT(""));
+	// FormatArgs.Add(TEXT("Code_BeforeCondition"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull || ") : TEXT(""));
 	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	FormatArgs.Add(TEXT("Declare_DeltaStateName"), DeltaStateName);
 	FormatArgs.Add(TEXT("Declare_FullStateName"), FullStateName);
