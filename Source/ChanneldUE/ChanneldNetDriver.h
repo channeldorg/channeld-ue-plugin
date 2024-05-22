@@ -103,7 +103,7 @@ protected:
 
 private:
 
-	const TSet<FName> IgnoredFuncNames = {
+	const TSet<FName> NoLoggingFuncNames = {
 		FName("ServerMovePacked"),
 		FName("ClientMoveResponsePacked"),
 		FName("ServerUpdateCamera"),

@@ -6,6 +6,7 @@
 #include "ChanneldUtils.h"
 #include "ChanneldMetrics.h"
 #include "EngineUtils.h"
+#include "PhysicsReplication.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/DataChannel.h"
@@ -183,7 +184,8 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 				RemoveObjectProvider(HandoverMsg->srcchannelid(), HandoverObj, bHasAuthorityOverSourceChannel);
 				
 				// If the handover actor is no longer in the interest area of current server, delete it.
-				if (!bHasInterest)
+				// DON'T delete the static object!
+				if (!bHasInterest && NetId.IsDynamic())
 				{
 					UE_LOG(LogChanneld, Log, TEXT("[Server] Deleting object %s as it leaves the interest area"), *HandoverObj->GetName());
 					if (AActor* HandoverActor = Cast<AActor>(HandoverObj))
@@ -378,6 +380,9 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 
 	// ===== Pass 3: Applies the channel data update to the newly spawned objects =====
 	// The references between the Pawn, PlayerController, and PlayerState should be set properly in this step.
+
+	bool bForcePhysicsReplicationTick = false;
+
 	for (auto HandoverObj : HandoverObjs)
 	{
 		auto NetId = GetNetId(HandoverObj);
@@ -395,9 +400,31 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 				UpdateMsg.mutable_data()->CopyFrom(Pair->second.entitydata());
 				UE_LOG(LogChanneld, Verbose, TEXT("Applying handover channel data to entity %d"), Pair->first);
 				HandleChannelDataUpdate(_, Pair->first, &UpdateMsg);
+
+				// ServerHandoverPhysicsActor(HandoverActor);
+				bForcePhysicsReplicationTick = bForcePhysicsReplicationTick ||
+				(
+					HandoverActor->IsReplicatingMovement() &&
+					HandoverActor->GetReplicatedMovement().bRepPhysics &&
+					HandoverActor->GetRootComponent()->IsA<UPrimitiveComponent>()
+				);
 			}
 		}
 	}
+
+	if (bForcePhysicsReplicationTick)
+	{
+		// Force to call ApplyRigidBodyState to the handover physics actors,
+		// so the their FBodyInstance can inherit the physics state from the replicated movement.
+		if (FPhysScene* PhysScene = GetWorld()->GetPhysicsScene())
+		{
+			if (FPhysicsReplication* PhysicsReplication = PhysScene->GetPhysicsReplication())
+			{
+				PhysicsReplication->Tick(0);
+			}
+		}
+	}
+
 
 	// Post Handover - set the actors' properties as same as they were in the source server.
 	
