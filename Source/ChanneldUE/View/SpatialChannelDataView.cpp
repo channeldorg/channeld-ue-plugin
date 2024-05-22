@@ -1490,11 +1490,8 @@ void USpatialChannelDataView::SendSpawnToClients_EntityChannelReady(const FNetwo
 	unrealpb::SpawnObjectMessage SpawnMsg;
 	// As we don't have any specific NetConnection to export the NetId, use a virtual one.
 	SpawnMsg.mutable_obj()->CopyFrom(*ChanneldUtils::GetRefOfObject(Obj, NetConnForSpawn, true));
-	/* Moved to ChanneldUtils::GetRefOfObject
-	// Clear the export map and ack state so everytime we can get a full export.
-	ResetNetConnForSpawn();
-	*/
-	ensureAlwaysMsgf(SpawnMsg.mutable_obj()->context_size() > 0, TEXT("Spawn message has no context! NetId: %d"), NetId.Value);
+
+	// ensureAlwaysMsgf(SpawnMsg.mutable_obj()->context_size() > 0, TEXT("Spawn message has no context! NetId: %d"), NetId.Value);
 
 	bool bWellKnown = false;
 	if (const AActor* Actor = Cast<AActor>(Obj))
