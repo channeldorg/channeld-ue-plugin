@@ -536,6 +536,42 @@ void USpatialChannelDataView::ServerHandleSubToChannel(UChanneldConnection* _, C
 	}
 }
 
+void USpatialChannelDataView::ServerHandleCreateEntityChannel(UChanneldConnection* _, Channeld::ChannelId ChId,
+	const google::protobuf::Message* Msg)
+{
+	const auto ResultMsg = static_cast<const channeldpb::CreateChannelResultMessage*>(Msg);
+	UE_LOG(LogChanneld, Log, TEXT("[Server] Created %s channel %u, owner conn: %u"),
+		UTF8_TO_TCHAR(channeldpb::ChannelType_Name(ResultMsg->channeltype()).c_str()),
+		ResultMsg->channelid(),
+		ResultMsg->ownerconnid()
+	);
+
+	if (ResultMsg->channeltype() == channeldpb::ENTITY)
+	{
+		const FNetworkGUID NetId(ResultMsg->channelid());
+		// Static objects' entity channels are created from the master server.
+		if (NetId.IsStatic())
+		{
+			ensureMsgf(!bSuppressAddProviderAndSendOnServerSpawn, TEXT("bSuppressAddProviderAndSendOnServerSpawn is true while adding provder for the static object, netId: %u"), NetId.Value);
+			if (UObject* Obj = GetObjectFromNetGUID(NetId))
+			{
+				if (AActor* Actor = Cast<AActor>(Obj))
+				{
+					Actor->SetRole(ROLE_Authority);
+				}
+				Channeld::ChannelId SpatialChId = ChId;
+				SetOwningChannelId(NetId.Value, SpatialChId);
+				AddObjectProvider(SpatialChId, Obj);
+				AddObjectProvider(ResultMsg->channelid(), Obj);
+			}
+			else
+			{
+				UE_LOG(LogChanneld, Warning, TEXT("Failed to find and add static object provider, netId: %u"), NetId.Value);
+			}
+		}
+	}
+}
+
 void USpatialChannelDataView::ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId)
 {
 	// A client leaves the spatial channel
@@ -864,6 +900,7 @@ void USpatialChannelDataView::InitServer()
 	});
 	
 	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, this, &USpatialChannelDataView::ServerHandleSubToChannel);
+	Connection->AddMessageHandler(channeldpb::CREATE_ENTITY_CHANNEL, this, &USpatialChannelDataView::ServerHandleCreateEntityChannel);
 	
 	Connection->AddMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, this, &USpatialChannelDataView::ServerHandleHandover);
 
@@ -1400,6 +1437,21 @@ bool USpatialChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetwork
 	{
 		SetOwningChannelId(NetId, Channeld::GlobalChannelId);
 	}
+	
+	// Static object
+	if (NetId.IsStatic())
+	{
+		if (AActor* Actor = Cast<AActor>(Obj))
+		{
+			// Spatial-replicated static objects are not authorized by the spatial server until the entity channel is created
+			// by the master server and the spatial server receives CREATE_CHANNEL message(see ServerHandleCreateChannel)
+			if (Actor->GetIsReplicated() && Actor->IsReplicatingMovement())
+			{
+				Actor->SetRole(ROLE_SimulatedProxy);
+			}
+		}
+		// return false;
+	}
 
 	if (bSuppressAddProviderAndSendOnServerSpawn)
 	{
@@ -1482,9 +1534,15 @@ void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnecti
 		return;
 	}
 
-	const uint32 NetId = GetNetId(Obj, true).Value;
+	const FNetworkGUID NetId = GetNetId(Obj, true);
+	// // No need to send spawn of static objects.
+	// if (NetId.IsStatic())
+	// {
+	// 	return;
+	// }
+	
 	// The entity channel already exists, send directly
-	if (Connection->SubscribedChannels.Contains(NetId))
+	if (Connection->SubscribedChannels.Contains(NetId.Value))
 	{
 		SendSpawnToConn_EntityChannelReady(Obj, NetConn, OwningConnId);
 		return;
@@ -1493,7 +1551,7 @@ void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnecti
 	// Create the entity channel before sending spawn message
 	channeldpb::ChannelSubscriptionOptions SubOptions;
 	SubOptions.set_dataaccess(channeldpb::WRITE_ACCESS);
-	Connection->CreateEntityChannel(Channeld::GlobalChannelId, Obj, NetId, TEXT(""), &SubOptions, GetEntityData(Obj)/*nullptr*/, nullptr,
+	Connection->CreateEntityChannel(Channeld::GlobalChannelId, Obj, NetId.Value, TEXT(""), &SubOptions, GetEntityData(Obj)/*nullptr*/, nullptr,
 		[this, Obj, NetConn, OwningConnId](const channeldpb::CreateChannelResultMessage* ResultMsg)
 		{
 			AddObjectProvider(ResultMsg->channelid(), Obj);
@@ -1501,7 +1559,7 @@ void USpatialChannelDataView::SendSpawnToConn(UObject* Obj, UChanneldNetConnecti
 			SendSpawnToConn_EntityChannelReady(Obj, NetConn, OwningConnId);
 		});
 
-	UE_LOG(LogChanneld, Verbose, TEXT("Creating entity channel for obj: %s, netId: %u, owningConnId: %d"), *Obj->GetName(), NetId, OwningConnId);
+	UE_LOG(LogChanneld, Verbose, TEXT("Creating entity channel for obj: %s, netId: %u, owningConnId: %d"), *Obj->GetName(), NetId.Value, OwningConnId);
 }
 
 void USpatialChannelDataView::SendSpawnToClients_EntityChannelReady(const FNetworkGUID NetId, UObject* Obj, uint32 OwningConnId, Channeld::ChannelId SpatialChId)

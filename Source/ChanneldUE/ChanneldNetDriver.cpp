@@ -688,12 +688,6 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		UE_LOG(LogChanneld, Log, TEXT("ChannelDataView is not initialized yet. If the actor '%s' is a DataProvider, it will not be registered."), *Actor->GetName());
 	}
 
-	// No need to send static actors to clients
-	if (NetId.IsStatic())
-	{
-		return;
-	}
-
 	if (!Actor->GetIsReplicated())
 	{
 		return;

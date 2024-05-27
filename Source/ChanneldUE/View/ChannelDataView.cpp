@@ -511,6 +511,12 @@ bool UChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID Ne
 
 	AddObjectProvider(ChId, Obj);
 
+	// No need to send static actors to clients
+	if (NetId.IsStatic())
+	{
+		return false;
+	}
+
 	return true;
 }
 

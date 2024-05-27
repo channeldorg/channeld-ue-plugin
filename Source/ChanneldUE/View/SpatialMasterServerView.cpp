@@ -126,6 +126,8 @@ void USpatialMasterServerView::InitServer()
 		AllSpatialChannelIds.Remove(RemoveMsg->channelid());
 	});
 
+	Connection->RegisterMessageHandler(channeldpb::SPATIAL_CHANNELS_READY, new channeldpb::SpatialChannelsReadyMessage, this, &USpatialMasterServerView::HandleSpatialChannelsReady);
+
 	channeldpb::ChannelSubscriptionOptions GlobalSubOptions;
 	GlobalSubOptions.set_dataaccess(channeldpb::WRITE_ACCESS);
 	GlobalSubOptions.set_fanoutintervalms(ClientFanOutIntervalMs);
@@ -164,6 +166,26 @@ void USpatialMasterServerView::OnClientPostLogin(AGameModeBase* GameMode, APlaye
 	}
 	else
 	{
-		UE_LOG(LogChanneld, Warning, TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn the GameStateBase in the client."));
+		UE_LOG(LogChanneld, Warning, TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn the GameState to the client."));
+	}
+}
+
+void USpatialMasterServerView::HandleSpatialChannelsReady(UChanneldConnection* _, Channeld::ChannelId ChId,
+	const google::protobuf::Message* Msg)
+{
+	for(TActorIterator<AActor> It(GetWorld(), AActor::StaticClass()); It; ++It)
+	{
+		AActor* Actor = *It;
+		FNetworkGUID NetId = GetNetId(Actor);
+		// Create the static object's entity channel from the master server, so that they will only be created once.
+		// channeld will set the entity channel's owner to the owner of the spatial channel if the entity data has SpatialInfo.
+		if (NetId.IsStatic() && Actor->GetIsReplicated() && IsObjectProvider(Actor))
+		{
+			channeldpb::ChannelSubscriptionOptions SubOptions;
+			SubOptions.set_dataaccess(channeldpb::WRITE_ACCESS);
+			Connection->CreateEntityChannel(Channeld::GlobalChannelId, Actor, NetId.Value, TEXT(""), &SubOptions, GetEntityData(Actor));
+			
+			Actor->SetRole(ROLE_SimulatedProxy);
+		}
 	}
 }
