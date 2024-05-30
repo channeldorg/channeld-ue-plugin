@@ -543,6 +543,11 @@ void USpatialChannelDataView::ServerHandleSubToChannel(UChanneldConnection* _, C
 					
 					unrealpb::SpawnObjectMessage SpawnMsg;
 					SpawnMsg.mutable_obj()->CopyFrom(*ChanneldUtils::GetRefOfObject(Actor));
+					if (!SpawnMsg.mutable_obj()->has_classpath())
+					{
+						// Set the classpath as it will be used in USpatialChannelDataView::CheckUnspawnedObject
+						SpawnMsg.mutable_obj()->set_classpath(std::string(TCHAR_TO_UTF8(*Actor->GetClass()->GetPathName())));
+					}
 					SpawnMsg.set_channelid(SpatialChId);
 					SpawnMsg.set_localrole(Actor->GetRemoteRole());
 					SpawnMsg.mutable_obj()->set_owningconnid(Connection->GetConnId());
@@ -692,11 +697,13 @@ bool USpatialChannelDataView::ClientDeleteObject(UObject* Obj)
 		Connection->UnsubFromChannel(NetId.Value);
 	}
 	*/
-	
+
 	// Remove the object from the GuidCache so it can be re-created in CheckUnspawnedObject() when the client regain the interest.
 	auto GuidCache = GetWorld()->NetDriver->GuidCache;
 	GuidCache->NetGUIDLookup.Remove(Obj);
 	GuidCache->ObjectLookup.Remove(NetId);
+
+	UE_LOG(LogChanneld, Verbose, TEXT("Removed obj from GuidCache, NetId: %u"), NetId.Value);
 	
 	return true;
 }
@@ -1150,12 +1157,12 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 	unrealpb::SpatialChannelData HandoverData;
 	HandoverMsg->data().UnpackTo(&HandoverData);
 
-	TArray<FString> NetIds;
+	FString NetIds;
 	for (auto& Pair : HandoverData.entities())
 	{
-		NetIds.Add(FString::FromInt(Pair.second.objref().netguid()));
+		NetIds.Appendf(TEXT("%u[%u], "), Pair.second.objref().netguid(), Pair.second.objref().owningconnid());
 	}
-	UE_LOG(LogChanneld, Log, TEXT("ChannelDataHandover from channel %u to %u, object netIds: %s"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), *FString::Join(NetIds, TEXT(",")));
+	UE_LOG(LogChanneld, Log, TEXT("ChannelDataHandover from channel %u to %u, object netIds: %s"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(), *NetIds);
 
 	SuppressedNetIdsToResolve.Empty();
 

@@ -87,7 +87,10 @@ void UChanneldReplicationComponent::BeginPlay()
 
 	if (auto NetDriver = Cast<UChanneldNetDriver>(GetWorld()->GetNetDriver()))
 	{
-		NetDriver->OnServerBeginPlay(this);
+		if (NetDriver->IsServer())
+		{
+			NetDriver->OnServerBeginPlay(this);
+		}
 	}
 }
 

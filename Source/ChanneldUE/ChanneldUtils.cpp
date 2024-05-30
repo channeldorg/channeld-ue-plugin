@@ -32,21 +32,27 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 	}
 
 	UNetDriver* NetDriver = World->GetNetDriver();
-	// Static object - load it directly
-	if (NetGUID.IsStatic())
-	{
-		return FStaticGuidRegistry::GetStaticObject(NetGUID, NetDriver);
-	}
-
 	bNetGUIDUnmapped = (NetDriver == nullptr);
 	if (bNetGUIDUnmapped)
 	{
 		UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Unable to get the NetDriver, NetGUID: %d (%d)"), NetGUID.Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
 		return nullptr;
 	}
+	
 	auto GuidCache = NetDriver->GuidCache;
-	auto Obj = GuidCache->GetObjectFromNetGUID(NetGUID, false);
-	if (Obj == nullptr && bCreateIfNotInCache)
+	UObject* Obj = nullptr;
+	// Static object - load it directly
+	if (NetGUID.IsStatic())
+	{
+		// Static object could be invalid (deleted when leaving AOI).
+		// With classpath set, it can be re-created.
+		Obj = FStaticGuidRegistry::GetStaticObject(NetGUID, NetDriver);
+	}
+	else
+	{
+		Obj = GuidCache->GetObjectFromNetGUID(NetGUID, false);
+	}
+	if (!IsValid(Obj) && bCreateIfNotInCache)
 	{
 		if (!GuidCache->IsNetGUIDAuthority() || ClientConn)
 		{
@@ -120,7 +126,7 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 			*/
 
 			// Use the bunch to deserialize the object
-			if (Obj == nullptr)
+			if (!IsValid(Obj))
 			{
 				if (Ref->bunchbitsnum() > 0)
 				{
@@ -169,30 +175,51 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 					}
 				}
 				// else if (Ref->has_classpath())
-				if (Obj == nullptr && Ref->has_classpath())
+				if (!IsValid(Obj) && Ref->has_classpath())
 				{
 					FString PathName = UTF8_TO_TCHAR(Ref->classpath().c_str());
 					
-					// Static object with bunch data (somehow)
-					if (NetGUID.IsStatic())
-					{
-						UE_LOG(LogChanneld, Warning, TEXT("Try to load static object with bunch data, netId: %u, path: %s, bits: %d"), NetGUID.Value, *PathName, Ref->bunchbitsnum());
-					}
-					else
+					// // Static object with bunch data (somehow)
+					// if (NetGUID.IsStatic())
+					// {
+					// 	UE_LOG(LogChanneld, Warning, TEXT("Try to load static object with bunch data, netId: %u, path: %s, bits: %d"), NetGUID.Value, *PathName, Ref->bunchbitsnum());
+					// }
+					// else
 					{
 						if (auto ObjClass = LoadObject<UClass>(nullptr, *PathName))
 						{
-							Obj = NewObject<UObject>(GetTransientPackage(), ObjClass);
-					
-							if (ClientConn)
+							if (ObjClass->IsChildOf<AActor>())
 							{
-								// GuidCache->RegisterNetGUIDFromPath_Server(NetGUID, PathName, 0, 0, false, false);
-								GuidCache->RegisterNetGUID_Server(NetGUID, Obj);
+								Obj = World->SpawnActor(ObjClass);	
 							}
 							else
 							{
-								// GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, 0, 0, false, false);
-								GuidCache->RegisterNetGUID_Client(NetGUID, Obj);
+								Obj = NewObject<UObject>(GetTransientPackage(), ObjClass);
+							}
+
+							if (NetGUID.IsDynamic())
+							{
+								if (ClientConn)
+								{
+									// GuidCache->RegisterNetGUIDFromPath_Server(NetGUID, PathName, 0, 0, false, false);
+									GuidCache->RegisterNetGUID_Server(NetGUID, Obj);
+								}
+								else
+								{
+									// GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, 0, 0, false, false);
+									GuidCache->RegisterNetGUID_Client(NetGUID, Obj);
+								}
+							}
+							else
+							{
+								FNetGuidCacheObject CacheObject;
+								CacheObject.Object = Obj;
+								CacheObject.OuterGUID = FStaticGuidRegistry::GetStaticObjectExportedOuterGUID(NetGUID.Value);
+								// Use the short name here so it can pass the check in FNetGUIDCache::GetObjectFromNetGUID
+								CacheObject.PathName = Obj->GetFName();//FName(PathName);
+								NetDriver->GuidCache->RegisterNetGUID_Internal(NetGUID, CacheObject);
+								UE_LOG( LogNetPackageMap, Log, TEXT( "RegisterNetGUID_Internal: NetGUID: %u, PathName: %s" ), NetGUID.Value, *PathName);
+
 							}
 
 							if (AActor* Actor = Cast<AActor>(Obj))
@@ -213,13 +240,13 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 		}
 	}
 
-	if (Obj == nullptr)
+	if (!IsValid(Obj))
 	{
 		bNetGUIDUnmapped = true;
 		// Only throw warning when failed to create the object.
 		if (bCreateIfNotInCache)
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Failed to create object from NetGUID: %d (%d)"), NetGUID.Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
+			UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Failed to create object from NetGUID: %u (%u)"), NetGUID.Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
 		}
 	}
 	else
