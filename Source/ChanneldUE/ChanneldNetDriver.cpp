@@ -75,6 +75,13 @@ void UChanneldNetDriver::RemoveChanneldClientConnection(Channeld::ConnectionId C
 
 void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg)
 {
+	UWorld* ThisWorld = GetWorld();
+	if (!ThisWorld)
+	{
+		ClientDeferredSpawnMessages.Add(SpawnMsg);
+		return;
+	}
+
 	FNetworkGUID NetId = FNetworkGUID(SpawnMsg->obj().netguid());
 
 	/* No need to destroy the object that is already spawned - just set its NetRole and mappings, and add the provider.
@@ -106,19 +113,31 @@ void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessa
 			ChannelDataView->SetOwningChannelId(ContextObj.netguid(), SpawnMsg->channelid());
 		}
 	}
-		
-	UObject* NewObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld());
+
+	UObject* NewObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), ThisWorld);
 	if (NewObj)
 	{
 		// if (SpawnMsg->has_channelid())
 		// {
 		// 	ChannelDataView->OnSpawnedObject(SpawnedObj, FNetworkGUID(SpawnMsg->obj().netguid()), SpawnMsg->channelid());
 		// }
-
+		
+		FVector ActorLocation;
 		ENetRole LocalRole = static_cast<ENetRole>(SpawnMsg->localrole());
 		if (AActor* NewActor = Cast<AActor>(NewObj))
 		{
-				/*
+			if (SpawnMsg->has_location())
+			{
+				// Make sure the ActorLocation is properly set before calling SetActorLocation()
+				if (auto RootComp = NewActor->GetRootComponent())
+				{
+					RootComp->ConditionalUpdateComponentToWorld();
+				}
+				ChanneldUtils::SetVectorFromPB(ActorLocation, SpawnMsg->location());
+				NewActor->SetActorLocation(ActorLocation, false, nullptr, ETeleportType::TeleportPhysics);
+				ActorLocation = NewActor->GetActorLocation();
+			}
+			/*
 			// The first PlayerController on client side is AutonomousProxy; others are SimulatedProxy.
 			if (NewActor->IsA<APlayerController>())
 			{
@@ -149,7 +168,8 @@ void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessa
 			ChannelDataView->OnNetSpawnedObject(NewObj, SpawnMsg->channelid());
 		}
 
-		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %u, owning channel: %u, local role: %d"), *NewObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), LocalRole);
+		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %u, owning channel: %u, local role: %d, location: %s"),
+			*NewObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), LocalRole, *ActorLocation.ToCompactString());
 	}
 	else
 	{
@@ -1105,6 +1125,12 @@ void UChanneldNetDriver::SetWorld(UWorld* InWorld)
 	if (World)
 	{
 		FStaticGuidRegistry::RegisterStaticObjects(this);
+
+		while (ClientDeferredSpawnMessages.Num() > 0)
+		{
+			HandleSpawnObject(ClientDeferredSpawnMessages.Pop(false));
+		}
+		ClientDeferredSpawnMessages.Empty();
 	}
 }
 

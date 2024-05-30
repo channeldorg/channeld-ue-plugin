@@ -68,25 +68,13 @@ void USpatialMasterServerView::InitServer()
 				channeldpb::ChannelSubscriptionOptions NonAuthoritySubOptions;
 				NonAuthoritySubOptions.set_dataaccess(channeldpb::READ_ACCESS);
 				NonAuthoritySubOptions.set_fanoutintervalms(ClientFanOutIntervalMs);
-				NonAuthoritySubOptions.set_fanoutdelayms(ClientFanOutDelayMs);
 
+				NonAuthoritySubOptions.set_fanoutdelayms(ClientFanOutDelayMs);
 				// The start spatial channelId MUST be sent at first.
 				Connection->SubConnectionToChannel(ClientConnId, StartChannelId, &NonAuthoritySubOptions);
-
-				/* The spatial server will sub the client to the spatial channels according to the interest settings.
-				// Delay the sub of other spatial channels, so the client can treat the first spatial channelId as the one to log in.
-				FTimerHandle Handle;
-				GetWorld()->GetTimerManager().SetTimer(Handle, [&, StartChannelId, ClientConnId, NonAuthoritySubOptions]()
-				{
-					for (const auto SpatialChId : AllSpatialChannelIds)
-					{
-						if (SpatialChId != StartChannelId)
-						{
-							Connection->SubConnectionToChannel(ClientConnId, SpatialChId, &NonAuthoritySubOptions);
-						}
-					}
-				}, 1, false, 0.5f);
-				*/
+				// Next up: USpatialChannelDataView::ClientHandleSubToChannel
+				
+				// The spatial server will sub the client to the other spatial channels according to the interest settings.
 			});
 		}
 	});
