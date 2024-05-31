@@ -107,6 +107,9 @@ private:
 	// until the client gains interest in them again.
 	TSet<uint32> SuppressedNetIdsToResolve;
 
+	// [Server-Only] Used for making sure the Spawn messages of the spatial-replicated static objects are sent only once per client.
+	TMap<uint32, TSet<Channeld::ChannelId>> ClientConnIdToSpatialChannelIdsRecord;
+
 	bool bIsSyncingNetId = false;
 	// Synchronize the NetworkGUIDs of the static and well-known objects across the spatial servers.
 	void SyncNetIds();

@@ -527,8 +527,24 @@ void USpatialChannelDataView::ServerHandleSubToChannel(UChanneldConnection* _, C
 				GetWorld()->GetAuthGameMode()->RestartPlayer(ClientConn->PlayerController);
 			}
 			*/
+
+			if (TSet<Channeld::ChannelId>* ChIdsPtr = ClientConnIdToSpatialChannelIdsRecord.Find(SubResultMsg->connid()))
+			{
+				if (ChIdsPtr->Contains(ChId))
+				{
+					return;
+				}
+				ChIdsPtr->Add(ChId);
+			}
+			else
+			{
+				TSet<Channeld::ChannelId> ChIds;
+				ChIds.Add(ChId);
+				ClientConnIdToSpatialChannelIdsRecord.Emplace(SubResultMsg->connid(), ChIds);
+			}
 			
-			// Subs the client to all the ENTITY channels of the replicated static objects
+			// Send the Spawn message of the replicated static objects so the client can sub the ENTITY channels
+			// and AddProvider properly. This should only be done once per client connection.
 			for(TActorIterator<AActor> It(GetWorld(), AActor::StaticClass()); It; ++It)
 			{
 				AActor* Actor = *It;
