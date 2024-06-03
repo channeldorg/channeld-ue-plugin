@@ -1009,8 +1009,7 @@ void USpatialChannelDataView::SyncNetIds()
 		for(TActorIterator<AActor> It(GetWorld(), AActor::StaticClass()); It; ++It)
 		{
 			AActor* Actor = *It;
-			// Only sync dynamic actors. Static objects are already synced via the FStaticGuidRegistry.
-			if (ChanneldUtils::GetNetId(Actor, NetDriver).IsDynamic() && !Actor->IsA<AInfo>())
+			if (Actor->GetIsReplicated() && IsObjectProvider(Actor) && !Actor->IsA<AInfo>())
 			{
 				Actors.Add(Actor);
 				ActorPositions.Add(Actor->GetActorLocation());
@@ -1036,13 +1035,20 @@ void USpatialChannelDataView::SyncNetIds()
 			{
 				Channeld::ChannelId SpatialChId = ResultMsg->channelid(i);
 				AActor* Actor = Actors[i];
-				UE_LOG(LogChanneld, Log, TEXT("Queried spatial channelId %d for static actor: %s"), SpatialChId, *Actor->GetName());
+				UE_LOG(LogChanneld, Log, TEXT("Queried spatial channelId %d for actor: %s"), SpatialChId, *Actor->GetName());
 				
-				FNetworkGUID NetId = NetDriver->GuidCache->GetOrAssignNetGUID(Actor);
+				FNetworkGUID NetId = GetNetId(Actor);
 				SetOwningChannelId(NetId, SpatialChId);
-				AddObjectProvider(SpatialChId, Actors[i]);
+				AddObjectProvider(SpatialChId, Actor);
 
 				if (!Connection->OwnedChannels.Contains(SpatialChId))
+				{
+					Actor->SetRole(ROLE_SimulatedProxy);
+					continue;
+				}
+
+				// Only sync dynamic actors. Static objects are already synced via the FStaticGuidRegistry.
+				if (NetId.IsStatic())
 				{
 					continue;
 				}
@@ -1064,17 +1070,8 @@ void USpatialChannelDataView::SyncNetIds()
 				}
 			}
 
-			if (SyncMsg.netidpaths_size() > 0)
-			{
-				Connection->Broadcast(Channeld::GlobalChannelId, unrealpb::SYNC_NET_ID, SyncMsg, channeldpb::ALL_BUT_CLIENT | channeldpb::ALL_BUT_SENDER);
-			}
-
-			// All actors that are needed to be synced are owned by this server, so there won't be incoming SyncNetIdMessage.
-			if (SyncMsg.netidpaths_size() == Actors.Num())
-			{
-				bIsSyncingNetId = false;
-				UE_LOG(LogChanneld, Log, TEXT("Finished synchronizing %d NetIds to other spatial servers."), SyncMsg.netidpaths_size());
-			}
+			// Always send the Sync message, even the NetIdPaths is empty.
+			Connection->Broadcast(Channeld::GlobalChannelId, unrealpb::SYNC_NET_ID, SyncMsg, channeldpb::ALL_BUT_CLIENT | channeldpb::ALL_BUT_SENDER);
 		});
 	}
 }
@@ -1199,13 +1196,18 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 		SetOwningChannelId(NetId, HandoverMsg->dstchannelid());
 
 		UObject* Obj = GetObjectFromNetGUID(NetId);
-		if (!Obj)
-		{
-			continue;
-		}
 
 		if (bHasInterest)
 		{
+			if (!Obj)
+			{
+				if (NetId.IsStatic())
+				{
+					UE_LOG(LogChanneld, Warning, TEXT("Unable to spawn static object from handover, netId: %u"), NetId.Value);
+				}
+				continue;
+			}
+
 			// Move data provider to the new channel
 			if (Obj->Implements<UChannelDataProvider>())
 			{
@@ -1235,6 +1237,11 @@ void USpatialChannelDataView::ClientHandleHandover(UChanneldConnection* _, Chann
 		}
 		else
 		{
+			if (!Obj)
+			{
+				continue;
+			}
+
 			if (ClientDeleteObject(Obj))
 			{
 				RemoveObjectProviderAll(Obj, false);
