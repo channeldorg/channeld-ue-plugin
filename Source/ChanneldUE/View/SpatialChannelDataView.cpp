@@ -18,6 +18,9 @@
 #include "Interest/ClientInterestManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Replication/ChanneldReplication.h"
+#if ENGINE_MAJOR_VERSION >= 5
+#include "Physics/Experimental/PhysScene_Chaos.h"
+#endif
 
 USpatialChannelDataView::USpatialChannelDataView(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -418,7 +421,11 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 		// so the their FBodyInstance can inherit the physics state from the replicated movement.
 		if (FPhysScene* PhysScene = GetWorld()->GetPhysicsScene())
 		{
+#if ENGINE_MAJOR_VERSION >= 5
+			if (IPhysicsReplication* PhysicsReplication = PhysScene->GetPhysicsReplication())
+#else
 			if (FPhysicsReplication* PhysicsReplication = PhysScene->GetPhysicsReplication())
+#endif
 			{
 				PhysicsReplication->Tick(0);
 			}
