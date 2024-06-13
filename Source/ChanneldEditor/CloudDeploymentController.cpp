@@ -86,10 +86,10 @@ FDeploymentStepParams UCloudDeploymentController::GetDefaultDeploymentStepParams
 		"Deployment.yaml");
 	auto EditorSetting = GetMutableDefault<UChanneldEditorSettings>();
 	DefaultParams.ChanneldParams = EditorSetting->LaunchChanneldParameters;
-	TArray<FServerGroup> EditorServerGroup = EditorSetting->ServerGroups;
+	TArray<FServerLaunchGroup> EditorServerGroup = EditorSetting->ServerGroups;
 	for (int32 I = 0; I < EditorServerGroup.Num(); ++I)
 	{
-		FServerGroup ServerGroup = EditorServerGroup[I];
+		FServerLaunchGroup ServerGroup = EditorServerGroup[I];
 		FServerGroupForDeployment ServerGroupForDeployment;
 		ServerGroupForDeployment.bEnabled = ServerGroup.bEnabled;
 		ServerGroupForDeployment.ServerNum = ServerGroup.ServerNum;

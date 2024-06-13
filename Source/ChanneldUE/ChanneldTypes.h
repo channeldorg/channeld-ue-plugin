@@ -313,6 +313,7 @@ struct CHANNELDUE_API FClientInterestSettingsPreset
 	float Angle = 120.0f;
 };
 
+
 struct CHANNELDUE_API FChanneldNetDeltaSerializeInfo : FNetDeltaSerializeInfo
 {
 	FChanneldNetDeltaSerializeInfo() {}
@@ -320,7 +321,6 @@ struct CHANNELDUE_API FChanneldNetDeltaSerializeInfo : FNetDeltaSerializeInfo
 	static bool DeltaSerializeRead(UNetDriver* NetDriver, FNetBitReader& Reader, UObject* Object, UScriptStruct* NetDeltaStruct, void* Destination);
 	static bool DeltaSerializeWrite(UNetDriver* NetDriver, FNetBitWriter& Writer, UObject* Object, UScriptStruct* NetDeltaStruct, void* Source, TSharedPtr<INetDeltaBaseState>& OldState);
 };
-
 
 
 USTRUCT()

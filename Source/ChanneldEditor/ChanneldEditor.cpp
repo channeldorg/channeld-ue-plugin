@@ -24,6 +24,7 @@
 #include "ILiveCodingModule.h"
 #include "Async/Async.h"
 #include "ChanneldEditorTypes.h"
+#include "GameFramework/ChanneldWorldSettings.h"
 
 IMPLEMENT_MODULE(FChanneldEditorModule, ChanneldEditor);
 
@@ -265,7 +266,20 @@ void FChanneldEditorModule::LaunchChanneldAction(TFunction<void(bool IsLaunched)
 	}
 	const FString GoBuildArgs = FString::Printf(TEXT("build -o . \"%s\""), *(LaunchChanneldEntryDir / TEXT("...")));
 	FString LaunchChanneldParameterStr = TEXT("");
-	for (const FString& LaunchChanneldParameter : Settings->LaunchChanneldParameters)
+	TArray<FString> LaunchChanneldParameters = Settings->LaunchChanneldParameters;
+	
+	if (auto Context = GEngine->GetWorldContextFromGameViewport(GEngine->GameViewport))
+	{
+		if (auto World = Context->World())
+		{
+			if (auto WorldSettings = Cast<AChanneldWorldSettings>(World->GetWorldSettings()))
+			{
+				LaunchChanneldParameters = WorldSettings->MergeLaunchParameters(LaunchChanneldParameters);
+			}
+		}
+	}
+
+	for (const FString& LaunchChanneldParameter : LaunchChanneldParameters)
 	{
 		LaunchChanneldParameterStr.Append(LaunchChanneldParameter + TEXT(" "));
 	}
@@ -364,26 +378,36 @@ void FChanneldEditorModule::LaunchServersAction()
 	{
 		return;
 	}
-	UChanneldEditorSettings* Settings = GetMutableDefault<UChanneldEditorSettings>();
+	auto ServerGroups = GetMutableDefault<UChanneldEditorSettings>()->ServerGroups;
+	if (auto Context = GEngine->GetWorldContextFromGameViewport(GEngine->GameViewport))
+	{
+		if (auto World = Context->World())
+		{
+			if (auto WorldSettings = Cast<AChanneldWorldSettings>(World->GetWorldSettings()))
+			{
+				if (WorldSettings->ServerLaunchGroupsOverride.Num() > 0)
+				{
+					ServerGroups = WorldSettings->ServerLaunchGroupsOverride;
+				}
+			}
+		}
+	}
 	FTimerManager* TimerManager = GetTimerManager();
-	for (FServerGroup& ServerGroup : Settings->ServerGroups)
+	for (FServerLaunchGroup& ServerGroup : ServerGroups)
 	{
 		if (!ServerGroup.bEnabled)
 			continue;
-
-		if (TimerManager)
-		{
-			TimerManager->ClearTimer(ServerGroup.DelayHandle);
-		}
 
 		if (ServerGroup.DelayTime > 0)
 		{
 			if (TimerManager)
 			{
-				TimerManager->SetTimer(ServerGroup.DelayHandle, [&, ServerGroup]()
+				FTimerHandle DelayHandle;
+				TimerManager->SetTimer(DelayHandle, [&, ServerGroup]()
 				{
 					LaunchServerGroup(ServerGroup);
 				}, ServerGroup.DelayTime, false, ServerGroup.DelayTime);
+				ServerGroupDelayHandles.Add(DelayHandle);
 			}
 			else
 			{
@@ -397,7 +421,7 @@ void FChanneldEditorModule::LaunchServersAction()
 	}
 }
 
-void FChanneldEditorModule::LaunchServerGroup(const FServerGroup& ServerGroup)
+void FChanneldEditorModule::LaunchServerGroup(const FServerLaunchGroup& ServerGroup)
 {
 	const FString EditorPath = FString(FPlatformProcess::ExecutablePath());
 	const FString ProjectPath = FPaths::GetProjectFilePath();
@@ -405,8 +429,29 @@ void FChanneldEditorModule::LaunchServerGroup(const FServerGroup& ServerGroup)
 
 	// If server map is not set, use current level.
 	FString MapName = ServerGroup.ServerMap.IsValid() ? ServerGroup.ServerMap.GetLongPackageName() : GEditor->GetEditorWorldContext().World()->GetOuter()->GetName();
-	FString ViewClassName = ServerGroup.ServerViewClass ? ServerGroup.ServerViewClass->GetPathName() : Settings->ChannelDataViewClass->GetPathName();
-
+	FString ViewClassName;
+	if (ServerGroup.ServerViewClass)
+	{
+		ViewClassName = ServerGroup.ServerViewClass->GetPathName();
+	}
+	else
+	{
+		ViewClassName = Settings->ChannelDataViewClass->GetPathName();
+		if (auto Context = GEngine->GetWorldContextFromGameViewport(GEngine->GameViewport))
+		{
+			if (auto World = Context->World())
+			{
+				if (auto WorldSettings = Cast<AChanneldWorldSettings>(World->GetWorldSettings()))
+				{
+					if (WorldSettings->ChannelDataViewClassOverride)
+					{
+						ViewClassName = WorldSettings->ChannelDataViewClassOverride->GetPathName();
+					}
+				}
+			}
+		}
+	}
+	
 	for (int i = 0; i < ServerGroup.ServerNum; i++)
 	{
 		FString Params = FString::Printf(TEXT("\"%s\" %s -game -PIEVIACONSOLE -Multiprocess -server -log -MultiprocessSaveConfig -forcepassthrough -channeld=%s -SessionName=\"%s - Server %d\" -windowed ViewClass=%s %s"),
@@ -436,11 +481,12 @@ void FChanneldEditorModule::StopServersAction()
 {
 	if (FTimerManager* TimerManager = GetTimerManager())
 	{
-		for (FServerGroup& ServerGroup : GetMutableDefault<UChanneldEditorSettings>()->ServerGroups)
+		for (auto& Handle : ServerGroupDelayHandles)
 		{
-			TimerManager->ClearTimer(ServerGroup.DelayHandle);
+			TimerManager->ClearTimer(Handle);
 		}
 	}
+	ServerGroupDelayHandles.Reset();
 
 	for (FProcHandle& ServerProc : ServerProcHandles)
 	{

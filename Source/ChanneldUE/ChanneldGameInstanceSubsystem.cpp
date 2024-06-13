@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "ChanneldUtils.h"
 #include "ChanneldSettings.h"
+#include "GameFramework/ChanneldWorldSettings.h"
 
 void UChanneldGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -654,14 +655,10 @@ UChanneldNetDriver* UChanneldGameInstanceSubsystem::GetNetDriver()
 
 void UChanneldGameInstanceSubsystem::InitChannelDataView()
 {
-	TSubclassOf<UChannelDataView> ChannelDataViewClass = nullptr;
-
 	const auto Settings = GetMutableDefault<UChanneldSettings>();
-	ChannelDataViewClass = Settings->ChannelDataViewClass;
-
-	if (ChannelDataViewClass)
+	if (Settings->ChannelDataViewClass)
 	{
-		ChannelDataView = NewObject<UChannelDataView>(this, ChannelDataViewClass);
+		ChannelDataView = NewObject<UChannelDataView>(this, Settings->ChannelDataViewClass);
 
 		if (Settings->DelayViewInitInSeconds > 0)
 		{
