@@ -927,8 +927,9 @@ void USpatialChannelDataView::ClientHandleGetUnrealObjectRef(UChanneldConnection
 
 void USpatialChannelDataView::InitServer()
 {
-	// Spatial server has no authority over the GameState.
+	// Spatial server has no authority over the GameState or WorldSettings.
 	GetWorld()->GetAuthGameMode()->GameState->SetRole(ENetRole::ROLE_SimulatedProxy);
+	GetWorld()->GetWorldSettings()->SetRole(ENetRole::ROLE_SimulatedProxy);
 	Super::InitServer();
 	
 	if (UClass* PlayerStartLocatorClass = GetMutableDefault<UChanneldSettings>()->PlayerStartLocatorClass)
