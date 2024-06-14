@@ -51,7 +51,7 @@ Hardware resource limits for each service:
 
 # Scenario 1: Single UE Server
 ### Test map:
-TestReplication
+BenchmarkReplication
 
 ### Channel data view class:
 SingleChannelDataView
@@ -110,7 +110,7 @@ SpatialChannelDataView
 该场景适用于服务器模拟或计算量较低，但是同时在线人数较高的应用，如虚拟演唱会。
 
 ### 测试地图：
-TestReplication
+BenchmarkReplication
 
 ### 频道数据视图类：
 BP_EntityLODChannelView
@@ -139,7 +139,7 @@ BP_EntityLODChannelView
 This scenario is suitable for applications with low simulation but a large number of concurrent users on the server, such as virtual concerts.
 
 ### Test map:
-TestReplication
+BenchmarkReplication
 
 ### Channel data view class:
 BP_EntityLODChannelView

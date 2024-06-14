@@ -51,7 +51,7 @@ UE模拟客户端：u1-c1m4.8xlarge（32核vCPU，128GB内存），共1台
 
 # 场景1：单UE服务器
 ### 测试地图：
-TestReplication
+BenchmarkReplication
 
 ### 频道数据视图类：
 SingleChannelDataView
@@ -116,7 +116,7 @@ SpatialChannelDataView
 该场景适用于服务器模拟和计算量较低，但是同时在线人数较高的应用，如虚拟演唱会。
 
 ### 测试地图：
-TestReplication
+BenchmarkReplication
 
 ### 频道数据视图类：
 BP_EntityLODChannelView
