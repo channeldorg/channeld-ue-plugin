@@ -1,7 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "ChanneldWorldSettings.h"
+
+AChanneldWorldSettings::AChanneldWorldSettings(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	ReplicationComponent = CreateDefaultSubobject<UChanneldReplicationComponent>(TEXT("ChanneldReplication"));
+}
 
 TArray<FString> AChanneldWorldSettings::MergeLaunchParameters(const TArray<FString>& InParams) const
 {

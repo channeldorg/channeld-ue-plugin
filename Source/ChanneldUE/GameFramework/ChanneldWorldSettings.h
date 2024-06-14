@@ -4,6 +4,7 @@
 #include "ChanneldTypes.h"
 #include "GameFramework/WorldSettings.h"
 #include "View/ChannelDataView.h"
+#include "Replication/ChanneldReplicationComponent.h"
 #include "ChanneldWorldSettings.generated.h"
 
 USTRUCT(BlueprintType, Blueprintable)
@@ -36,12 +37,13 @@ struct FServerLaunchGroup
 /**
  * Utility class for storing channeld-specific settings for each map.
  */
-UCLASS(Config = ChanneldUE)
+UCLASS(config=game, notplaceable)
 class CHANNELDUE_API AChanneldWorldSettings : public AWorldSettings
 {
 	GENERATED_BODY()
-	
+
 public:
+	AChanneldWorldSettings(const FObjectInitializer& ObjectInitializer);
 	
 	UPROPERTY(Config, EditAnywhere, Category="Channeld")
 	TSubclassOf<UChannelDataView> ChannelDataViewClassOverride = nullptr;
@@ -53,4 +55,8 @@ public:
 	TArray<FString> ChanneldLaunchParametersOverride;
 	
 	TArray<FString> MergeLaunchParameters(const TArray<FString>& InParams) const;
+
+protected:
+	UPROPERTY()
+	UChanneldReplicationComponent* ReplicationComponent;
 };
