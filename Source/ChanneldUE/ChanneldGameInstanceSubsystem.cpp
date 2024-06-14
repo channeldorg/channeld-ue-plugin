@@ -656,9 +656,23 @@ UChanneldNetDriver* UChanneldGameInstanceSubsystem::GetNetDriver()
 void UChanneldGameInstanceSubsystem::InitChannelDataView()
 {
 	const auto Settings = GetMutableDefault<UChanneldSettings>();
-	if (Settings->ChannelDataViewClass)
+	auto ChannelDataViewClass = Settings->ChannelDataViewClass;
+
+	// Only the client uses the override view class
+	if (IsClientConnection())
 	{
-		ChannelDataView = NewObject<UChannelDataView>(this, Settings->ChannelDataViewClass);
+		if (auto WorldSettings = Cast<AChanneldWorldSettings>(GetWorld()->GetWorldSettings()))
+		{
+			if (WorldSettings->ChannelDataViewClassOverride)
+			{
+				ChannelDataViewClass = WorldSettings->ChannelDataViewClassOverride;
+			}
+		}
+	}
+
+	if (ChannelDataViewClass)
+	{
+		ChannelDataView = NewObject<UChannelDataView>(this, ChannelDataViewClass);
 
 		if (Settings->DelayViewInitInSeconds > 0)
 		{
