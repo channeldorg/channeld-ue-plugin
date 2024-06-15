@@ -24,7 +24,9 @@
 #include "ILiveCodingModule.h"
 #include "Async/Async.h"
 #include "ChanneldEditorTypes.h"
+#include "LevelEditorSubsystem.h"
 #include "GameFramework/ChanneldWorldSettings.h"
+#include "Subsystems/EditorActorSubsystem.h"
 
 IMPLEMENT_MODULE(FChanneldEditorModule, ChanneldEditor);
 
@@ -78,6 +80,9 @@ void FChanneldEditorModule::StartupModule()
 	PluginCommands->MapAction(
 		FChanneldEditorCommands::Get().OpenCloudDeploymentCommand,
 		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::OpenCloudDeploymentAction));
+	PluginCommands->MapAction(
+		FChanneldEditorCommands::Get().RemoveDuplicateWorldSettingsCommand,
+		FExecuteAction::CreateRaw(this, &FChanneldEditorModule::RemoveDuplicateWorldSettingsAction));
 
 #if ENGINE_MAJOR_VERSION >= 5
 	UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.User");
@@ -196,7 +201,8 @@ TSharedRef<SWidget> FChanneldEditorModule::CreateMenuContent(TSharedPtr<FUIComma
 	MenuBuilder.AddSubMenu(LOCTEXT("ChanneldAdvancedHeading", "Advanced..."),
 	                       LOCTEXT("ChanneldAdvancedTooltip", ""), FNewMenuDelegate::CreateLambda([](FMenuBuilder& InMenuBuilder)
 	                       {
-		                       InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand);
+	                       		InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().AddRepComponentsToBPsCommand);
+	                       		InMenuBuilder.AddMenuEntry(FChanneldEditorCommands::Get().RemoveDuplicateWorldSettingsCommand);
 	                       }));
 
 	return MenuBuilder.MakeWidget();
@@ -536,6 +542,43 @@ void FChanneldEditorModule::OpenChannelDataEditorAction()
 void FChanneldEditorModule::OpenCloudDeploymentAction()
 {
 	GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>()->SpawnAndRegisterTab(LoadObject<UEditorUtilityWidgetBlueprint>(nullptr, L"/ChanneldUE/EditorUtilityWidgets/CloudDeployment"));
+}
+
+void FChanneldEditorModule::RemoveDuplicateWorldSettingsAction()
+{
+	auto LevelSubsystem = GEditor->GetEditorSubsystem<ULevelEditorSubsystem>();
+	if (!LevelSubsystem)
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to get LevelEditorSubsystem"));
+		return;
+	}
+	auto ActorSubsystem = GEditor->GetEditorSubsystem<UEditorActorSubsystem>();
+	if (!ActorSubsystem)
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to get EditorActorSubsystem"));
+		return;
+	}
+	ULevel* CurrentLevel = LevelSubsystem->GetCurrentLevel();
+	if (!CurrentLevel)
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to get current level"));
+		return;
+	}
+	AWorldSettings* WorldSettings = CurrentLevel->GetWorldSettings();
+	if (!WorldSettings)
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Current level doesn't have WorldSettings"));
+		return;
+	}
+
+	for (AActor* Actor : CurrentLevel->Actors)//ActorSubsystem->GetAllLevelActors()
+	{
+		if (Actor->IsA<AWorldSettings>() && Actor != WorldSettings)
+		{
+			bool bDestroyed = ActorSubsystem->DestroyActor(Actor);
+			UE_LOG(LogChanneldEditor, Log, TEXT("Destroyed duplicate WorldSettings actor %s: %s"), *Actor->GetFullName(), bDestroyed ? TEXT("true") : TEXT("false"));
+		}
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

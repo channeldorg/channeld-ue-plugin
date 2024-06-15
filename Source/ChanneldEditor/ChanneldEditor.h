@@ -44,6 +44,8 @@ private:
 
 	void OpenChannelDataEditorAction();
 	void OpenCloudDeploymentAction();
+	
+	void RemoveDuplicateWorldSettingsAction();
 
 	FProcHandle ChanneldProcHandle;
 
