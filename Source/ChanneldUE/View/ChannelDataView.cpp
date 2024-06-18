@@ -84,10 +84,19 @@ void UChannelDataView::InitServer()
 	NetConnForSpawn->InitBase(NetDriver, NetDriver->GetSocket(), FURL(), USOCK_Open);
 	ChanneldUtils::InitNetConnForSpawn(NetConnForSpawn);
 
+	auto GameState = GetWorld()->GetAuthGameMode()->GameState;
+	auto WorldSettings = GetWorld()->GetWorldSettings();
+	if (!bIsGlobalStatesOwner)
+	{
+		GameState->SetRole(ENetRole::ROLE_SimulatedProxy);
+		WorldSettings->SetRole(ENetRole::ROLE_SimulatedProxy);
+		SetOwningChannelId(GetNetId(GameState), Channeld::GlobalChannelId);
+		SetOwningChannelId(GetNetId(WorldSettings), Channeld::GlobalChannelId);
+	}
 	// Add the GameStateBase (if it's an IChannelDataProvider).
 	// Missing this step will cause client failing to begin play.
-	AddObjectProvider(Channeld::GlobalChannelId, GetWorld()->GetAuthGameMode()->GameState);
-	AddObjectProvider(Channeld::GlobalChannelId, GetWorld()->GetWorldSettings());
+	AddObjectProvider(Channeld::GlobalChannelId, GameState);
+	AddObjectProvider(Channeld::GlobalChannelId, WorldSettings);
 	
 	ReceiveInitServer();
 }
