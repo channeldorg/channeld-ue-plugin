@@ -75,7 +75,7 @@ SingleChannelDataView
 
 # 场景2：多UE空间服务器
 ### 测试地图：
-TestSpatial_Benchmark
+BenchmarkSpatial
 
 ### 频道数据视图类：
 SpatialChannelDataView

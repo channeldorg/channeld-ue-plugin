@@ -24,9 +24,11 @@
 #include "ILiveCodingModule.h"
 #include "Async/Async.h"
 #include "ChanneldEditorTypes.h"
+#if ENGINE_MAJOR_VERSION >= 5
 #include "LevelEditorSubsystem.h"
+#endif
+#include "FileHelpers.h"
 #include "GameFramework/ChanneldWorldSettings.h"
-#include "Subsystems/EditorActorSubsystem.h"
 
 IMPLEMENT_MODULE(FChanneldEditorModule, ChanneldEditor);
 
@@ -546,6 +548,7 @@ void FChanneldEditorModule::OpenCloudDeploymentAction()
 
 void FChanneldEditorModule::RemoveDuplicateWorldSettingsAction()
 {
+#if ENGINE_MAJOR_VERSION >= 5
 	auto LevelSubsystem = GEditor->GetEditorSubsystem<ULevelEditorSubsystem>();
 	if (!LevelSubsystem)
 	{
@@ -559,6 +562,15 @@ void FChanneldEditorModule::RemoveDuplicateWorldSettingsAction()
 		return;
 	}
 	ULevel* CurrentLevel = LevelSubsystem->GetCurrentLevel();
+#else
+	UWorld* EditorWorld = GEditor->GetEditorWorldContext(false).World();
+	if (!EditorWorld)
+	{
+		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to get editor world"));
+		return;
+	}
+	ULevel* CurrentLevel = EditorWorld->GetCurrentLevel();
+#endif
 	if (!CurrentLevel)
 	{
 		UE_LOG(LogChanneldEditor, Error, TEXT("Failed to get current level"));
@@ -575,10 +587,15 @@ void FChanneldEditorModule::RemoveDuplicateWorldSettingsAction()
 	{
 		if (Actor->IsA<AWorldSettings>() && Actor != WorldSettings)
 		{
+#if ENGINE_MAJOR_VERSION >= 5
 			bool bDestroyed = ActorSubsystem->DestroyActor(Actor);
+#else
+			bool bDestroyed = CurrentLevel->GetWorld()->DestroyActor(Actor, true, true);
+#endif
 			UE_LOG(LogChanneldEditor, Log, TEXT("Destroyed duplicate WorldSettings actor %s: %s"), *Actor->GetFullName(), bDestroyed ? TEXT("true") : TEXT("false"));
 		}
 	}
+	FEditorFileUtils::SaveCurrentLevel();
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -75,7 +75,7 @@ SingleChannelDataView
 
 # Scenario 2: Multiple UE Spatial Servers
 ### Test map:
-TestSpatial_Benchmark
+BenchmarkSpatial
 
 ### Channel data view class:
 SpatialChannelDataView
