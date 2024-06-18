@@ -29,7 +29,7 @@ private:
 
 	TArray<channeldpb::SpatialRegion> Regions;
 	UPROPERTY()
-	TMap<uint32, ATintActor*> RegionBoxes;
+	TMap<uint32, TWeakObjectPtr<ATintActor>> RegionBoxes;
 	UPROPERTY()
 	TMap<uint32, ATintActor*> SubBoxes;
 	TArray<FLinearColor> RegionColors;

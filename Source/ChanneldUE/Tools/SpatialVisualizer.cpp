@@ -72,7 +72,10 @@ void USpatialVisualizer::SpawnRegionBoxes()
 
 	for (const auto Pair : RegionBoxes)
 	{
-		GetWorld()->DestroyActor(Pair.Value);
+		if (Pair.Value.IsValid())
+		{
+			GetWorld()->DestroyActor(Pair.Value.Get());
+		}
 	}
 	RegionBoxes.Empty();
 
