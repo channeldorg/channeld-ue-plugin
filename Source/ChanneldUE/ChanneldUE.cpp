@@ -14,8 +14,8 @@
 #include "Replication/ChanneldStaticMeshComponentReplicator.h"
 #include "Replication/ChanneldCharacterReplicator.h"
 #include "Replication/ChanneldControllerReplicator.h"
-#include "Replication/ChanneldPlayerControllerReplicator.h"
-#include "Replication/ChanneldPlayerStateReplicator.h"
+#include "Replication/ChanneldPlayerControllerReplicator_Legacy.h"
+#include "Replication/ChanneldPlayerStateReplicator_Legacy.h"
 #include "Replication/ChanneldGameStateBaseReplicator.h"
 #include "Replication/ChanneldActorReplicator.h"
 #include "Replication/ChanneldObjectReplicator.h"
@@ -38,10 +38,11 @@ void FChanneldUEModule::StartupModule()
 	REGISTER_REPLICATOR(FChanneldActorReplicator, AActor);
 	REGISTER_REPLICATOR(FChanneldPawnReplicator, APawn);
 	REGISTER_REPLICATOR(FChanneldCharacterReplicator, ACharacter);
-	REGISTER_REPLICATOR(FChanneldPlayerStateReplicator, APlayerState);
+	// Since v0.7.4: Use generated code
+	// REGISTER_REPLICATOR(FChanneldPlayerStateReplicator_Legacy, APlayerState);
 	REGISTER_REPLICATOR(FChanneldControllerReplicator, AController);
 	// Since v0.7.2: Use generated code
-	//REGISTER_REPLICATOR(FChanneldPlayerControllerReplicator, APlayerController);
+	// REGISTER_REPLICATOR(FChanneldPlayerControllerReplicator_Legacy, APlayerController);
 	REGISTER_REPLICATOR(FChanneldActorComponentReplicator, UActorComponent);
 	REGISTER_REPLICATOR(FChanneldSceneComponentReplicator, USceneComponent);
 	REGISTER_REPLICATOR(FChanneldStaticMeshComponentReplicator, UStaticMeshComponent);
