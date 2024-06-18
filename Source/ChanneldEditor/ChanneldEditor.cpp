@@ -26,6 +26,7 @@
 #include "ChanneldEditorTypes.h"
 #if ENGINE_MAJOR_VERSION >= 5
 #include "LevelEditorSubsystem.h"
+#include "Subsystems/EditorActorSubsystem.h"
 #endif
 #include "FileHelpers.h"
 #include "GameFramework/ChanneldWorldSettings.h"
