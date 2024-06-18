@@ -5,7 +5,7 @@ const static TCHAR* ArrPropDeco_SetDeltaStateTemplate =
 {
   bool bPropChanged = false;
   const int32 ActorPropLength = {Declare_PropPtrName}->Num();
-  const int32 FullStateValueLength = {Code_ConditionFullStateIsNull}{Code_GetProtoFieldValueFrom}.size();
+  const int32 FullStateValueLength = {Code_GetFullStateValueLength}{Code_GetProtoFieldValueFrom}.size();
   if (ActorPropLength != FullStateValueLength)
   {
     bPropChanged = true;
@@ -37,7 +37,7 @@ const static TCHAR* ArrPropDeco_SetDeltaStateByMemOffsetTemp =
   bool bPropChanged = false;
   {Code_AssignPropPointers};
   const int32 ActorPropLength = PropAddr->Num();
-  const int32 FullStateValueLength = {Code_ConditionFullStateIsNull}{Code_GetProtoFieldValueFrom}.size();
+  const int32 FullStateValueLength = {Code_GetFullStateValueLength}{Code_GetProtoFieldValueFrom}.size();
   if (ActorPropLength != FullStateValueLength)
   {
     bPropChanged = true;

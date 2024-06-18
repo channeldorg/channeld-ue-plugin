@@ -77,6 +77,7 @@ FString FArrayPropertyDecorator::GetCode_SetDeltaState(const FString& TargetInst
 
 	FormatArgs.Add(TEXT("Code_GetProtoFieldValueFrom"), GetCode_GetProtoFieldValueFrom(TEXT("FullState")));
 	FormatArgs.Add(TEXT("Code_ConditionFullStateIsNull"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull || ") : TEXT(""));
+	FormatArgs.Add(TEXT("Code_GetFullStateValueLength"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? 0 : ") : TEXT(""));
 	FormatArgs.Add(
 		TEXT("Code_SetDeltaStateArrayInner"),
 		InnerProperty->GetCode_SetDeltaStateArrayInner(GetPointerName(), FullStateName, DeltaStateName, ConditionFullStateIsNull)
@@ -113,6 +114,7 @@ FString FArrayPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString&
 	FormatArgs.Add(TEXT("Code_BeforeCondition"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull || ") : TEXT(""));
 	FormatArgs.Add(TEXT("Code_GetProtoFieldValueFrom"), GetCode_GetProtoFieldValueFrom(TEXT("FullState")));
 	FormatArgs.Add(TEXT("Code_ConditionFullStateIsNull"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull || ") : TEXT(""));
+	FormatArgs.Add(TEXT("Code_GetFullStateValueLength"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? 0 : ") : TEXT(""));
 	FormatArgs.Add(
 		TEXT("Code_SetDeltaStateArrayInner"),
 		InnerProperty->GetCode_SetDeltaStateArrayInner(TEXT("PropAddr"), FullStateName, DeltaStateName, ConditionFullStateIsNull)
