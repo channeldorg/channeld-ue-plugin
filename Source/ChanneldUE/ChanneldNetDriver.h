@@ -110,6 +110,8 @@ private:
 		FName("ServerSendLatestAsyncPhysicsTimestamp"),
 		FName("ServerRecvClientInputFrame"),
 		FName("ClientCorrectionAsyncPhysicsTimestamp"),
+		FName("ServerUpdateLevelVisibility"),
+		FName("ClientAckUpdateLevelVisibility"),
 	};
 
 	// Prevent the engine from GC the connection
