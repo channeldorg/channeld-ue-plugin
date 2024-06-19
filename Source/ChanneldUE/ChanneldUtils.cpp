@@ -133,7 +133,7 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 					FInBunch InBunch(Connection, (uint8*)Ref->netguidbunch().data(), Ref->bunchbitsnum());
 					auto PackageMap = CastChecked<UPackageMapClient>(Connection->PackageMap);
 
-					UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);
+					UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);//EChannelCreateFlags::OpenedLocally);//
 					UE_LOG(LogChanneld, VeryVerbose, TEXT("[Client] ActorChannels: %d"), Connection->ActorChannelsNum());
 					AActor* Actor;
 					//-----------------------------------------
@@ -303,6 +303,10 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 	// If the dynamic object have already been full-exported to the client, just send the NetGUID
 	if (!bFullExport)
 	{
+		if (!NetGUID.IsValid())
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetRefOfObject: Failed to get NetGUID of %s, Addr: %llu"), *Obj->GetPathName(), (uint64)Obj);
+		}
 		return ObjRef;
 	}
 
@@ -351,11 +355,22 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 				//--------------------------------------------------
 				FOutBunch Ar(PackageMap);
 				Ar.bReliable = true;
-				UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);
-				UE_LOG(LogChanneld, VeryVerbose, TEXT("[Server] ActorChannels: %d"), Connection->ActorChannelsNum());
-				Channel->SetChannelActor(Actor, ESetChannelActorFlags::None);
-				PackageMap->SerializeNewActor(Ar, Channel, Actor);
-				Actor->OnSerializeNewActor(Ar);
+				UActorChannel* Channel = Connection->FindActorChannelRef(Actor);
+				bool bFoundActorChannel = true;
+				if (!Channel)
+				{
+					bFoundActorChannel = false;
+					Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);
+					UE_LOG(LogChanneld, VeryVerbose, TEXT("[Server] Created actor channel of %s for full-export, channels num: %d"), *GetNameSafe(Obj), Connection->ActorChannelsNum());
+					Channel->SetChannelActor(Actor, ESetChannelActorFlags::None);
+					PackageMap->SerializeNewActor(Ar, Channel, Actor);
+					Actor->OnSerializeNewActor(Ar);
+				}
+				else
+				{
+					UE_LOG(LogChanneld, VeryVerbose, TEXT("[Server] Re-use actor channel %s for full-export."), *GetNameSafe(Obj));
+					PackageMap->SerializeObject(Ar, Obj->GetClass(), Obj);
+				}
 				//--------------------------------------------------
 
 				NetGUID = GuidCache->GetNetGUID(Obj);
@@ -413,11 +428,15 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 				}
 				*/
 
+				ObjRef->set_netguid(NetGUID.Value);
 				ObjRef->set_netguidbunch(Ar.GetData(), Ar.GetNumBytes());
 				ObjRef->set_bunchbitsnum(Ar.GetNumBits());
-				
-				// Remove the channel after using it
-				Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
+
+				if (!bFoundActorChannel)
+				{
+					// Remove the channel after using it
+					Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
+				}
 
 				if (Connection == NetConnForSpawn)
 				{
@@ -495,6 +514,7 @@ UActorComponent* ChanneldUtils::GetActorComponentByRefChecked(const unrealpb::Ac
 	AActor* Actor = Cast<AActor>(GetObjectByRef(&Ref->owner(), World, bNetGUIDUnmapped, bCreateIfNotInCache, ClientConn));
 	if (!Actor)
 	{
+		// UE_LOG(LogChanneld, Warning, TEXT("Cannot get the owner actor of component by ref: %s"), UTF8_TO_TCHAR(Ref->DebugString().c_str()));
 		return nullptr;
 	}
 
@@ -518,7 +538,7 @@ UActorComponent* ChanneldUtils::GetActorComponentByRefChecked(const unrealpb::Ac
 	return nullptr;
 }
 
-unrealpb::ActorComponentRef ChanneldUtils::GetRefOfActorComponent(UActorComponent* Comp, UNetConnection* Connection)
+unrealpb::ActorComponentRef ChanneldUtils::GetRefOfActorComponent(UActorComponent* Comp, UNetConnection* Connection, bool bFullExportOwner)
 {
 	unrealpb::ActorComponentRef CompRef;
 	if (!Comp || !Comp->GetOwner())
@@ -533,7 +553,7 @@ unrealpb::ActorComponentRef ChanneldUtils::GetRefOfActorComponent(UActorComponen
 		return CompRef;
 	}
 
-	CompRef.mutable_owner()->MergeFrom(*GetRefOfObject(Comp->GetOwner(), Connection));
+	CompRef.mutable_owner()->MergeFrom(*GetRefOfObject(Comp->GetOwner(), Connection, bFullExportOwner));
 	CompRef.set_compname(std::string(TCHAR_TO_UTF8(*Comp->GetFName().ToString())));
 	return CompRef;
 }
