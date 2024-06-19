@@ -27,11 +27,12 @@ private:
 	void SpawnRegionBoxes();
 	void SpawnSubBox(Channeld::ChannelId ChId);
 
-	TArray<channeldpb::SpatialRegion> Regions;
+	TArray<TSharedPtr<channeldpb::SpatialRegion>> Regions;
 	UPROPERTY()
 	TMap<uint32, TWeakObjectPtr<ATintActor>> RegionBoxes;
 	UPROPERTY()
 	TMap<uint32, ATintActor*> SubBoxes;
+	UPROPERTY()
 	TArray<FLinearColor> RegionColors;
 	TMap<Channeld::ChannelId, FLinearColor> ColorsByChId;
 	UPROPERTY()
