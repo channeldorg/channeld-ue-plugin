@@ -32,7 +32,7 @@ private:
 	void LaunchServersAction();
 	void StopServersAction();
 	void LaunchChanneldAndServersAction();
-	void LaunchServerGroup(const FServerGroup& ServerGroup);
+	void LaunchServerGroup(const FServerLaunchGroup& ServerGroup);
 
 	static bool IsCompatibleRecompilationEnabled();
 	static void ToggleCompatibleRecompilationAction();
@@ -44,11 +44,15 @@ private:
 
 	void OpenChannelDataEditorAction();
 	void OpenCloudDeploymentAction();
+	
+	void RemoveDuplicateWorldSettingsAction();
 
 	FProcHandle ChanneldProcHandle;
 
 	TSharedPtr<class FUICommandList> PluginCommands;
 	TSharedRef<SWidget> CreateMenuContent(TSharedPtr<FUICommandList> Commands);
+	TArray<FTimerHandle> ServerGroupDelayHandles;
+
 	TArray<FProcHandle> ServerProcHandles;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> BuildChanneldWorkThread;

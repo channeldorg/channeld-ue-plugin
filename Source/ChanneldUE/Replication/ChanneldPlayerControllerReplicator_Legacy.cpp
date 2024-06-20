@@ -1,4 +1,4 @@
-#include "ChanneldPlayerControllerReplicator.h"
+#include "ChanneldPlayerControllerReplicator_Legacy.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/PackageMapClient.h"
 #include "ChanneldReplicationComponent.h"
@@ -6,7 +6,7 @@
 #include "Components/PrimitiveComponent.h"
 #include "Engine/NetSerialization.h"
 
-FChanneldPlayerControllerReplicator::FChanneldPlayerControllerReplicator(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
+FChanneldPlayerControllerReplicator_Legacy::FChanneldPlayerControllerReplicator_Legacy(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
 {
 	PC = CastChecked<APlayerController>(InTargetObj);
 	/*
@@ -26,24 +26,24 @@ FChanneldPlayerControllerReplicator::FChanneldPlayerControllerReplicator(UObject
 	}
 }
 
-FChanneldPlayerControllerReplicator::~FChanneldPlayerControllerReplicator()
+FChanneldPlayerControllerReplicator_Legacy::~FChanneldPlayerControllerReplicator_Legacy()
 {
 	delete FullState;
 	delete DeltaState;
 }
 
-google::protobuf::Message* FChanneldPlayerControllerReplicator::GetDeltaState()
+google::protobuf::Message* FChanneldPlayerControllerReplicator_Legacy::GetDeltaState()
 {
 	return DeltaState;
 }
 
-void FChanneldPlayerControllerReplicator::ClearState()
+void FChanneldPlayerControllerReplicator_Legacy::ClearState()
 {
 	DeltaState->Clear();
 	bStateChanged = false;
 }
 
-void FChanneldPlayerControllerReplicator::Tick(float DeltaTime)
+void FChanneldPlayerControllerReplicator_Legacy::Tick(float DeltaTime)
 {
 	if (!PC.IsValid())
 	{
@@ -59,7 +59,7 @@ void FChanneldPlayerControllerReplicator::Tick(float DeltaTime)
 
 }
 
-void FChanneldPlayerControllerReplicator::OnStateChanged(const google::protobuf::Message* NewState)
+void FChanneldPlayerControllerReplicator_Legacy::OnStateChanged(const google::protobuf::Message* NewState)
 {
 	if (!PC.IsValid())
 	{
@@ -79,7 +79,7 @@ void FChanneldPlayerControllerReplicator::OnStateChanged(const google::protobuf:
 	}
 }
 
-TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::SerializeFunctionParams(UFunction* Func, void* Params, FOutParmRec* OutParams, bool& bSuccess)
+TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator_Legacy::SerializeFunctionParams(UFunction* Func, void* Params, FOutParmRec* OutParams, bool& bSuccess)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ServerUpdateCamera"))
@@ -192,7 +192,7 @@ TSharedPtr<google::protobuf::Message> FChanneldPlayerControllerReplicator::Seria
 	return nullptr;
 }
 
-TSharedPtr<void> FChanneldPlayerControllerReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC)
+TSharedPtr<void> FChanneldPlayerControllerReplicator_Legacy::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ServerUpdateCamera"))

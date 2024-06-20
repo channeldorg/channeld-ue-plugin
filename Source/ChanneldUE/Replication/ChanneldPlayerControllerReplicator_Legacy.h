@@ -8,11 +8,12 @@
 #include "GameFramework/LocalMessage.h"
 #include "unreal_common.pb.h"
 
-class CHANNELDUE_API FChanneldPlayerControllerReplicator : public FChanneldReplicatorBase
+// Deprecated: Missing A LOT of RPCs. Use the generated code instead.
+class CHANNELDUE_API FChanneldPlayerControllerReplicator_Legacy : public FChanneldReplicatorBase
 {
 public:
-	FChanneldPlayerControllerReplicator(UObject* InTargetObj);
-	virtual ~FChanneldPlayerControllerReplicator() override;
+	FChanneldPlayerControllerReplicator_Legacy(UObject* InTargetObj);
+	virtual ~FChanneldPlayerControllerReplicator_Legacy() override;
 
 	//~Begin FChanneldReplicatorBase Interface
 	virtual UClass* GetTargetClass() override { return APlayerController::StaticClass(); }

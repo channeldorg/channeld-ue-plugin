@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "ChanneldUtils.h"
 #include "ChanneldSettings.h"
+#include "GameFramework/ChanneldWorldSettings.h"
 
 void UChanneldGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -654,10 +655,20 @@ UChanneldNetDriver* UChanneldGameInstanceSubsystem::GetNetDriver()
 
 void UChanneldGameInstanceSubsystem::InitChannelDataView()
 {
-	TSubclassOf<UChannelDataView> ChannelDataViewClass = nullptr;
-
 	const auto Settings = GetMutableDefault<UChanneldSettings>();
-	ChannelDataViewClass = Settings->ChannelDataViewClass;
+	auto ChannelDataViewClass = Settings->ChannelDataViewClass;
+
+	// Only the client uses the override view class
+	if (IsClientConnection())
+	{
+		if (auto WorldSettings = Cast<AChanneldWorldSettings>(GetWorld()->GetWorldSettings()))
+		{
+			if (WorldSettings->ChannelDataViewClassOverride)
+			{
+				ChannelDataViewClass = WorldSettings->ChannelDataViewClassOverride;
+			}
+		}
+	}
 
 	if (ChannelDataViewClass)
 	{

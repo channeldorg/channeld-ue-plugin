@@ -104,6 +104,9 @@ public:
 	// DO NOT loop-reference, otherwise the destruction can cause exception.
 	// TSharedPtr< class UChanneldNetDriver > NetDriver;
 	
+	UPROPERTY(EditAnywhere)
+	bool bIsGlobalStatesOwner = true;
+	
 protected:
 
 	// TSet doesn't support TWeakInterfacePtr, so we need to wrap it in a new type. 

@@ -151,6 +151,7 @@ void USpatialMasterServerView::OnClientPostLogin(AGameModeBase* GameMode, APlaye
 	if (Comp)
 	{
 		NewPlayerConn->SendSpawnMessage(GameMode->GameState, ENetRole::ROLE_SimulatedProxy);
+		NewPlayerConn->SendSpawnMessage(GameMode->GetWorldSettings(), ENetRole::ROLE_SimulatedProxy);
 	}
 	else
 	{

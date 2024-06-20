@@ -8,7 +8,7 @@
 #include "CloudDeploymentController.generated.h"
 
 USTRUCT(BlueprintType)
-struct CHANNELDEDITOR_API FServerGroupForDeployment : public FServerGroup
+struct CHANNELDEDITOR_API FServerGroupForDeployment : public FServerLaunchGroup
 {
 	GENERATED_BODY()
 
