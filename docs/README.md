@@ -4,6 +4,8 @@ The open source plugin that enables distributed simulation with Unreal Engine's 
 
 ![](images/benchmark_entity_lod.gif)
 
+![](images/cross_server_physics.gif)
+
 ## Features
 - Increase the maximum capacity of a single UE dedicated server to 100-200 players without modifying the engine code ([Benchmark](benchmark.md)).
 - Can combine multiple dedicated servers into one large world, supporting thousands of players online concurrently.
