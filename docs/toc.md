@@ -10,10 +10,12 @@
 ** [Channel Data Schema](channel-data-schema.md)
 ** [Cloud Deployment Tool](cloud-deployment-tool.md)
 ** [Recommended Workflows](recommended-workflow.md)
+** [World Settings](world-settings.md)
 
 * Advanced Topics
 ** [Comparison with the native UE and alternatives](native-ue-comparison.md)
 ** [Client Interest](client-interest.md)
+** [Cross-server Physics](cross-server-physics.md)
 ** [Benchmark](benchmark.md)
 
 * [Troubleshooting](troubleshooting.md)
