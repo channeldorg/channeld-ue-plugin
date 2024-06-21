@@ -75,6 +75,13 @@ void UChanneldNetDriver::RemoveChanneldClientConnection(Channeld::ConnectionId C
 
 void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessage> SpawnMsg)
 {
+	UWorld* ThisWorld = GetWorld();
+	if (!ThisWorld)
+	{
+		ClientDeferredSpawnMessages.Add(SpawnMsg);
+		return;
+	}
+
 	FNetworkGUID NetId = FNetworkGUID(SpawnMsg->obj().netguid());
 
 	/* No need to destroy the object that is already spawned - just set its NetRole and mappings, and add the provider.
@@ -106,19 +113,31 @@ void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessa
 			ChannelDataView->SetOwningChannelId(ContextObj.netguid(), SpawnMsg->channelid());
 		}
 	}
-		
-	UObject* NewObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), GetWorld());
+
+	UObject* NewObj = ChanneldUtils::GetObjectByRef(&SpawnMsg->obj(), ThisWorld);
 	if (NewObj)
 	{
 		// if (SpawnMsg->has_channelid())
 		// {
 		// 	ChannelDataView->OnSpawnedObject(SpawnedObj, FNetworkGUID(SpawnMsg->obj().netguid()), SpawnMsg->channelid());
 		// }
-
+		
+		FVector ActorLocation;
 		ENetRole LocalRole = static_cast<ENetRole>(SpawnMsg->localrole());
 		if (AActor* NewActor = Cast<AActor>(NewObj))
 		{
-				/*
+			if (SpawnMsg->has_location())
+			{
+				// Make sure the ActorLocation is properly set before calling SetActorLocation()
+				if (auto RootComp = NewActor->GetRootComponent())
+				{
+					RootComp->ConditionalUpdateComponentToWorld();
+				}
+				ChanneldUtils::SetVectorFromPB(ActorLocation, SpawnMsg->location());
+				NewActor->SetActorLocation(ActorLocation, false, nullptr, ETeleportType::TeleportPhysics);
+				ActorLocation = NewActor->GetActorLocation();
+			}
+			/*
 			// The first PlayerController on client side is AutonomousProxy; others are SimulatedProxy.
 			if (NewActor->IsA<APlayerController>())
 			{
@@ -146,10 +165,12 @@ void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessa
 		if (ChannelDataView.IsValid())
 		{
 			ChannelDataView->AddObjectProviderToDefaultChannel(NewObj);
-			ChannelDataView->OnNetSpawnedObject(NewObj, SpawnMsg->channelid());
+			const unrealpb::SpawnObjectMessage& Msg = *SpawnMsg;
+			ChannelDataView->OnNetSpawnedObject(NewObj, SpawnMsg->channelid(), &Msg);
 		}
 
-		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %u, owning channel: %u, local role: %d"), *NewObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), LocalRole);
+		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %u, owning channel: %u, local role: %d, location: %s"),
+			*NewObj->GetName(), SpawnMsg->obj().netguid(), SpawnMsg->channelid(), LocalRole, *ActorLocation.ToCompactString());
 	}
 	else
 	{
@@ -401,7 +422,6 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 			Subsystem->OnViewInitialized.AddWeakLambda(this, [&](UChannelDataView* InView)
 			{
 				ChannelDataView = InView;
-				// InView->NetDriver = TSharedPtr<UChanneldNetDriver>(this);
 			});
 		}
 
@@ -688,12 +708,6 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 		UE_LOG(LogChanneld, Log, TEXT("ChannelDataView is not initialized yet. If the actor '%s' is a DataProvider, it will not be registered."), *Actor->GetName());
 	}
 
-	// No need to send static actors to clients
-	if (NetId.IsStatic())
-	{
-		return;
-	}
-
 	if (!Actor->GetIsReplicated())
 	{
 		return;
@@ -768,8 +782,8 @@ void UChanneldNetDriver::OnServerBeginPlay(UChanneldReplicationComponent* RepCom
 	// Actor has deferred component registration, so we need to wait for BeginPlay to perform the spawn logic. E.g. BP_TestCube.
 	if (ServerDeferredSpawns.Contains(Actor))
 	{
-		OnServerSpawnedActor(Actor);
 		ServerDeferredSpawns.Remove(Actor);
+		OnServerSpawnedActor(Actor);
 	}
 	// Actor's ChanneldReplicationComponent is not registered when spawned, so we need to wait for BeginPlay to perform the spawn logic. E.g. BP_TestNPC.
 	else if (RepComp->AddedToChannelIds.Num() == 0)
@@ -914,7 +928,7 @@ void UChanneldNetDriver::ProcessRemoteFunction(class AActor* Actor, class UFunct
 {
 	const FName FuncFName = Function->GetFName();
 	const FString FuncName = FuncFName.ToString();
-	const bool bShouldLog = FuncFName != ServerMovePackedFuncName && FuncFName != ClientMoveResponsePackedFuncName && FuncFName != ServerUpdateCameraFuncName;
+	const bool bShouldLog = !NoLoggingFuncNames.Contains(FuncFName);
 	UE_CLOG(bShouldLog, LogChanneld, Verbose, TEXT("Sending RPC %s::%s, SubObject: %s"), *Actor->GetName(), *FuncName, *GetNameSafe(SubObject));
 	/*
 	if (Function->GetFName() == FName("ServerToggleRotation"))
@@ -1029,7 +1043,7 @@ void UChanneldNetDriver::OnSentRPC(const unrealpb::RemoteFunctionMessage& RpcMsg
 void UChanneldNetDriver::ReceivedRPC(AActor* Actor, const FName& FunctionName, const std::string& ParamsPayload, bool& bDeferredRPC, UObject* SubObject)
 {
 	const FString FuncName = FunctionName.ToString();
-	const bool bShouldLog = FunctionName != ServerMovePackedFuncName && FunctionName != ClientMoveResponsePackedFuncName && FunctionName != ServerUpdateCameraFuncName;
+	const bool bShouldLog = !NoLoggingFuncNames.Contains(FunctionName);
 	UE_CLOG(bShouldLog, LogChanneld, Verbose, TEXT("Received RPC %s::%s"), *Actor->GetName(), *FuncName);
 
 	UObject* Obj = SubObject != nullptr ? SubObject : Actor;
@@ -1111,6 +1125,12 @@ void UChanneldNetDriver::SetWorld(UWorld* InWorld)
 	if (World)
 	{
 		FStaticGuidRegistry::RegisterStaticObjects(this);
+
+		while (ClientDeferredSpawnMessages.Num() > 0)
+		{
+			HandleSpawnObject(ClientDeferredSpawnMessages.Pop(false));
+		}
+		ClientDeferredSpawnMessages.Empty();
 	}
 }
 

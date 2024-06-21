@@ -15,7 +15,7 @@ class CHANNELDUE_API USpatialMasterServerView : public UChannelDataView
 
 public:
 	USpatialMasterServerView(const FObjectInitializer& ObjectInitializer);
-	
+
 	virtual void InitServer() override;
 	virtual void AddProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider) override;
 	virtual Channeld::ChannelId GetOwningChannelId(const FNetworkGUID NetId) const override;
@@ -35,4 +35,6 @@ private:
 	// the Master server and spatial servers should have the EXACTLY SAME position for a player.
 	UPROPERTY()
 	UPlayerStartLocatorBase* PlayerStartLocator;
+
+	void HandleSpatialChannelsReady(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 };

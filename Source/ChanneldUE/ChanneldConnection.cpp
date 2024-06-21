@@ -628,6 +628,17 @@ FChanneldMessageHandlerFunc WrapMessageHandler(const TFunction<void(const MsgCla
 	};
 }
 
+template <typename MsgClass>
+FChanneldMessageHandlerFunc WrapMessageHandler(const TFunction<void(Channeld::ChannelId, const MsgClass*)>& Callback)
+{
+	if (Callback == nullptr)
+		return nullptr;
+	return [Callback](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	{
+		Callback(ChId, static_cast<const MsgClass*>(Msg));
+	};
+}
+
 void UChanneldConnection::Auth(const FString& PIT, const FString& LT, const TFunction<void(const channeldpb::AuthResultMessage*)>& Callback /*= nullptr*/)
 {
 	channeldpb::AuthMessage Msg;

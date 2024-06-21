@@ -1,5 +1,5 @@
 #!/bin/bash
-channeld_version=v0.7.0
+channeld_version=v0.7.4
 
 # Get this script's path
 script_dir=$(cd "$(dirname "$0")"; pwd)

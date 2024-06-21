@@ -32,21 +32,27 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 	}
 
 	UNetDriver* NetDriver = World->GetNetDriver();
-	// Static object - load it directly
-	if (NetGUID.IsStatic())
-	{
-		return FStaticGuidRegistry::GetStaticObject(NetGUID, NetDriver);
-	}
-
 	bNetGUIDUnmapped = (NetDriver == nullptr);
 	if (bNetGUIDUnmapped)
 	{
 		UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Unable to get the NetDriver, NetGUID: %d (%d)"), NetGUID.Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
 		return nullptr;
 	}
+	
 	auto GuidCache = NetDriver->GuidCache;
-	auto Obj = GuidCache->GetObjectFromNetGUID(NetGUID, false);
-	if (Obj == nullptr && bCreateIfNotInCache)
+	UObject* Obj = nullptr;
+	// Static object - load it directly
+	if (NetGUID.IsStatic())
+	{
+		// Static object could be invalid (deleted when leaving AOI).
+		// With classpath set, it can be re-created.
+		Obj = FStaticGuidRegistry::GetStaticObject(NetGUID, NetDriver);
+	}
+	else
+	{
+		Obj = GuidCache->GetObjectFromNetGUID(NetGUID, false);
+	}
+	if (!IsValid(Obj) && bCreateIfNotInCache)
 	{
 		if (!GuidCache->IsNetGUIDAuthority() || ClientConn)
 		{
@@ -120,14 +126,14 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 			*/
 
 			// Use the bunch to deserialize the object
-			if (Obj == nullptr)
+			if (!IsValid(Obj))
 			{
 				if (Ref->bunchbitsnum() > 0)
 				{
 					FInBunch InBunch(Connection, (uint8*)Ref->netguidbunch().data(), Ref->bunchbitsnum());
 					auto PackageMap = CastChecked<UPackageMapClient>(Connection->PackageMap);
 
-					UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);
+					UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);//EChannelCreateFlags::OpenedLocally);//
 					UE_LOG(LogChanneld, VeryVerbose, TEXT("[Client] ActorChannels: %d"), Connection->ActorChannelsNum());
 					AActor* Actor;
 					//-----------------------------------------
@@ -169,30 +175,51 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 					}
 				}
 				// else if (Ref->has_classpath())
-				if (Obj == nullptr && Ref->has_classpath())
+				if (!IsValid(Obj) && Ref->has_classpath())
 				{
 					FString PathName = UTF8_TO_TCHAR(Ref->classpath().c_str());
 					
-					// Static object with bunch data (somehow)
-					if (NetGUID.IsStatic())
-					{
-						UE_LOG(LogChanneld, Warning, TEXT("Try to load static object with bunch data, netId: %u, path: %s, bits: %d"), NetGUID.Value, *PathName, Ref->bunchbitsnum());
-					}
-					else
+					// // Static object with bunch data (somehow)
+					// if (NetGUID.IsStatic())
+					// {
+					// 	UE_LOG(LogChanneld, Warning, TEXT("Try to load static object with bunch data, netId: %u, path: %s, bits: %d"), NetGUID.Value, *PathName, Ref->bunchbitsnum());
+					// }
+					// else
 					{
 						if (auto ObjClass = LoadObject<UClass>(nullptr, *PathName))
 						{
-							Obj = NewObject<UObject>(GetTransientPackage(), ObjClass);
-					
-							if (ClientConn)
+							if (ObjClass->IsChildOf<AActor>())
 							{
-								// GuidCache->RegisterNetGUIDFromPath_Server(NetGUID, PathName, 0, 0, false, false);
-								GuidCache->RegisterNetGUID_Server(NetGUID, Obj);
+								Obj = World->SpawnActor(ObjClass);	
 							}
 							else
 							{
-								// GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, 0, 0, false, false);
-								GuidCache->RegisterNetGUID_Client(NetGUID, Obj);
+								Obj = NewObject<UObject>(GetTransientPackage(), ObjClass);
+							}
+
+							if (NetGUID.IsDynamic())
+							{
+								if (ClientConn)
+								{
+									// GuidCache->RegisterNetGUIDFromPath_Server(NetGUID, PathName, 0, 0, false, false);
+									GuidCache->RegisterNetGUID_Server(NetGUID, Obj);
+								}
+								else
+								{
+									// GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, 0, 0, false, false);
+									GuidCache->RegisterNetGUID_Client(NetGUID, Obj);
+								}
+							}
+							else
+							{
+								FNetGuidCacheObject CacheObject;
+								CacheObject.Object = Obj;
+								CacheObject.OuterGUID = FStaticGuidRegistry::GetStaticObjectExportedOuterGUID(NetGUID.Value);
+								// Use the short name here so it can pass the check in FNetGUIDCache::GetObjectFromNetGUID
+								CacheObject.PathName = Obj->GetFName();//FName(PathName);
+								NetDriver->GuidCache->RegisterNetGUID_Internal(NetGUID, CacheObject);
+								UE_LOG( LogNetPackageMap, Log, TEXT( "RegisterNetGUID_Internal: NetGUID: %u, PathName: %s" ), NetGUID.Value, *PathName);
+
 							}
 
 							if (AActor* Actor = Cast<AActor>(Obj))
@@ -213,13 +240,13 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 		}
 	}
 
-	if (Obj == nullptr)
+	if (!IsValid(Obj))
 	{
 		bNetGUIDUnmapped = true;
 		// Only throw warning when failed to create the object.
 		if (bCreateIfNotInCache)
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Failed to create object from NetGUID: %d (%d)"), NetGUID.Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
+			UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Failed to create object from NetGUID: %u (%u)"), NetGUID.Value, ChanneldUtils::GetNativeNetId(Ref->netguid()));
 		}
 	}
 	else
@@ -276,6 +303,10 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 	// If the dynamic object have already been full-exported to the client, just send the NetGUID
 	if (!bFullExport)
 	{
+		if (!NetGUID.IsValid())
+		{
+			UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetRefOfObject: Failed to get NetGUID of %s, Addr: %llu"), *Obj->GetPathName(), (uint64)Obj);
+		}
 		return ObjRef;
 	}
 
@@ -324,11 +355,22 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 				//--------------------------------------------------
 				FOutBunch Ar(PackageMap);
 				Ar.bReliable = true;
-				UActorChannel* Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);
-				UE_LOG(LogChanneld, VeryVerbose, TEXT("[Server] ActorChannels: %d"), Connection->ActorChannelsNum());
-				Channel->SetChannelActor(Actor, ESetChannelActorFlags::None);
-				PackageMap->SerializeNewActor(Ar, Channel, Actor);
-				Actor->OnSerializeNewActor(Ar);
+				UActorChannel* Channel = Connection->FindActorChannelRef(Actor);
+				bool bFoundActorChannel = true;
+				if (!Channel)
+				{
+					bFoundActorChannel = false;
+					Channel = (UActorChannel*)Connection->CreateChannelByName(NAME_Actor, EChannelCreateFlags::None);
+					UE_LOG(LogChanneld, VeryVerbose, TEXT("[Server] Created actor channel of %s for full-export, channels num: %d"), *GetNameSafe(Obj), Connection->ActorChannelsNum());
+					Channel->SetChannelActor(Actor, ESetChannelActorFlags::None);
+					PackageMap->SerializeNewActor(Ar, Channel, Actor);
+					Actor->OnSerializeNewActor(Ar);
+				}
+				else
+				{
+					UE_LOG(LogChanneld, VeryVerbose, TEXT("[Server] Re-use actor channel %s for full-export."), *GetNameSafe(Obj));
+					PackageMap->SerializeObject(Ar, Obj->GetClass(), Obj);
+				}
 				//--------------------------------------------------
 
 				NetGUID = GuidCache->GetNetGUID(Obj);
@@ -386,11 +428,15 @@ TSharedRef<unrealpb::UnrealObjectRef> ChanneldUtils::GetRefOfObject(UObject* Obj
 				}
 				*/
 
+				ObjRef->set_netguid(NetGUID.Value);
 				ObjRef->set_netguidbunch(Ar.GetData(), Ar.GetNumBytes());
 				ObjRef->set_bunchbitsnum(Ar.GetNumBits());
-				
-				// Remove the channel after using it
-				Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
+
+				if (!bFoundActorChannel)
+				{
+					// Remove the channel after using it
+					Channel->ConditionalCleanUp(true, EChannelCloseReason::Destroyed);
+				}
 
 				if (Connection == NetConnForSpawn)
 				{
@@ -468,6 +514,7 @@ UActorComponent* ChanneldUtils::GetActorComponentByRefChecked(const unrealpb::Ac
 	AActor* Actor = Cast<AActor>(GetObjectByRef(&Ref->owner(), World, bNetGUIDUnmapped, bCreateIfNotInCache, ClientConn));
 	if (!Actor)
 	{
+		// UE_LOG(LogChanneld, Warning, TEXT("Cannot get the owner actor of component by ref: %s"), UTF8_TO_TCHAR(Ref->DebugString().c_str()));
 		return nullptr;
 	}
 
@@ -491,7 +538,7 @@ UActorComponent* ChanneldUtils::GetActorComponentByRefChecked(const unrealpb::Ac
 	return nullptr;
 }
 
-unrealpb::ActorComponentRef ChanneldUtils::GetRefOfActorComponent(UActorComponent* Comp, UNetConnection* Connection)
+unrealpb::ActorComponentRef ChanneldUtils::GetRefOfActorComponent(UActorComponent* Comp, UNetConnection* Connection, bool bFullExportOwner)
 {
 	unrealpb::ActorComponentRef CompRef;
 	if (!Comp || !Comp->GetOwner())
@@ -506,7 +553,7 @@ unrealpb::ActorComponentRef ChanneldUtils::GetRefOfActorComponent(UActorComponen
 		return CompRef;
 	}
 
-	CompRef.mutable_owner()->MergeFrom(*GetRefOfObject(Comp->GetOwner(), Connection));
+	CompRef.mutable_owner()->MergeFrom(*GetRefOfObject(Comp->GetOwner(), Connection, bFullExportOwner));
 	CompRef.set_compname(std::string(TCHAR_TO_UTF8(*Comp->GetFName().ToString())));
 	return CompRef;
 }

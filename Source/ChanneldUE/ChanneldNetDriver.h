@@ -102,10 +102,17 @@ protected:
 	TSharedRef<Channeld::ChannelId> LowLevelSendToChannelId = MakeShared<Channeld::ChannelId>(Channeld::InvalidChannelId);
 
 private:
-	
-	const FName ServerMovePackedFuncName = FName("ServerMovePacked");
-	const FName ClientMoveResponsePackedFuncName = FName("ClientMoveResponsePacked");
-	const FName ServerUpdateCameraFuncName = FName("ServerUpdateCamera");
+
+	const TSet<FName> NoLoggingFuncNames = {
+		FName("ServerMovePacked"),
+		FName("ClientMoveResponsePacked"),
+		FName("ServerUpdateCamera"),
+		FName("ServerSendLatestAsyncPhysicsTimestamp"),
+		FName("ServerRecvClientInputFrame"),
+		FName("ClientCorrectionAsyncPhysicsTimestamp"),
+		FName("ServerUpdateLevelVisibility"),
+		FName("ClientAckUpdateLevelVisibility"),
+	};
 
 	// Prevent the engine from GC the connection
 	UPROPERTY()
@@ -127,6 +134,10 @@ private:
 	// Actors that spawned in server using SpawnActorDeferred (mainly in Blueprints), which don't have ActorComponent registered.
 	// We need to skip these actors in OnServerSpawnedActor(), and actually handle them in their BeginPlay().
 	TSet<TWeakObjectPtr<AActor>> ServerDeferredSpawns;
+
+	// Spawn messages that client is unable to handle as the client travel is ongoing and SetWorld() is not called yet.
+	// Generally are the static objects sent from the spatial servers.
+	TArray<TSharedRef<unrealpb::SpawnObjectMessage>> ClientDeferredSpawnMessages;
 
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
 	void OnUserSpaceMessageReceived(uint32 MsgType, Channeld::ChannelId ChId, Channeld::ConnectionId ClientConnId, const std::string& Payload);

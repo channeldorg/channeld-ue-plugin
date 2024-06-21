@@ -31,12 +31,14 @@ void USpatialVisualizer::HandleSpatialRegionsUpdate(UChanneldConnection* Conn, C
 	const auto ResultMsg = static_cast<const channeldpb::SpatialRegionsUpdateMessage*>(Msg);
 	Regions.Empty();
 	uint32 MaxServerIndex = 0;
-	for (auto Region : ResultMsg->regions())
+	for (auto& Region : ResultMsg->regions())
 	{
-		Regions.Add(Region);
-		if (Region.serverindex() > MaxServerIndex)
+		TSharedPtr<channeldpb::SpatialRegion> RegionPtr(new channeldpb::SpatialRegion);
+		RegionPtr->MergeFrom(Region);
+		Regions.Add(RegionPtr);
+		if (RegionPtr->serverindex() > MaxServerIndex)
 		{
-			MaxServerIndex = Region.serverindex();
+			MaxServerIndex = RegionPtr->serverindex();
 		}
 	}
 
@@ -49,7 +51,7 @@ void USpatialVisualizer::HandleSpatialRegionsUpdate(UChanneldConnection* Conn, C
 	for (auto Region : Regions)
 	{
 		// Saturation and Value should be decided by the TintActor rather than fixed in code.
-		ColorsByChId.Add(Region.channelid(), FLinearColor::MakeFromHSV8(256 * Region.serverindex() / ServerCount, 0xcc, 0xff));
+		ColorsByChId.Add(Region->channelid(), FLinearColor::MakeFromHSV8(256 * Region->serverindex() / ServerCount, 0xcc, 0xff));
 	}
 
 	FTimerHandle Handle;
@@ -72,7 +74,10 @@ void USpatialVisualizer::SpawnRegionBoxes()
 
 	for (const auto Pair : RegionBoxes)
 	{
-		GetWorld()->DestroyActor(Pair.Value);
+		if (Pair.Value.IsValid())
+		{
+			GetWorld()->DestroyActor(Pair.Value.Get());
+		}
 	}
 	RegionBoxes.Empty();
 
@@ -102,8 +107,8 @@ void USpatialVisualizer::SpawnRegionBoxes()
 	for (auto Region : Regions)
 	{
 		// Swap the Y and Z as UE uses the Z-Up rule but channeld uses the Y-up rule.
-		FVector BoundsMin = FVector(Region.min().x(), Region.min().z(), Region.min().y());
-		FVector BoundsMax = FVector(Region.max().x(), Region.max().z(), Region.max().y());
+		FVector BoundsMin = FVector(Region->min().x(), Region->min().z(), Region->min().y());
+		FVector BoundsMax = FVector(Region->max().x(), Region->max().z(), Region->max().y());
 		FVector Location = 0.5f * (BoundsMin + BoundsMax);
 		
 		if (Settings->bRegionBoxOnFloor && CharMove)
@@ -124,8 +129,8 @@ void USpatialVisualizer::SpawnRegionBoxes()
 		FVector BoundsSize = ClampVector(BoundsMax - BoundsMin, Settings->RegionBoxMinSize, Settings->RegionBoxMaxSize);
 		FVector BoxSize = Box->GetRootComponent()->Bounds.BoxExtent * 2;
 		Box->SetActorScale3D(BoundsSize / BoxSize);
-		Box->SetColor(RegionColors[Region.serverindex()]);
-		RegionBoxes.Add(Region.channelid(), Box);
+		Box->SetColor(RegionColors[Region->serverindex()]);
+		RegionBoxes.Add(Region->channelid(), Box);
 	}
 }
 
@@ -137,22 +142,22 @@ void USpatialVisualizer::SpawnSubBox(Channeld::ChannelId ChId)
 		return;
 	}
 
-	channeldpb::SpatialRegion* SubRegion = Regions.FindByPredicate([ChId](auto Value) {return Value.channelid() == ChId; });
-	if (!SubRegion)
+	auto SubRegionPtr = Regions.FindByPredicate([ChId](auto Value) {return Value->channelid() == ChId; });
+	if (!SubRegionPtr || !SubRegionPtr->IsValid())
 	{
 		return;
 	}
-	auto Region = *SubRegion;
+	auto SubRegion = *SubRegionPtr;
 
-	FVector BoundsMin = FVector(Region.min().x(), Region.min().z(), Region.min().y());
-	FVector BoundsMax = FVector(Region.max().x(), Region.max().z(), Region.max().y());
+	FVector BoundsMin = FVector(SubRegion->min().x(), SubRegion->min().z(), SubRegion->min().y());
+	FVector BoundsMax = FVector(SubRegion->max().x(), SubRegion->max().z(), SubRegion->max().y());
 	FVector Location = 0.5f * (BoundsMin + BoundsMax) + Settings->SubscriptionBoxOffset;
 	ATintActor* Box = CastChecked<ATintActor>(GetWorld()->SpawnActor(Settings->SubscriptionBoxClass, &Location));
 	FVector BoundsSize = ClampVector(BoundsMax - BoundsMin, Settings->SubscriptionBoxMinSize, Settings->SubscriptionBoxMaxSize);
 	FVector BoxSize = Box->GetRootComponent()->Bounds.BoxExtent * 2;
 	Box->SetActorScale3D(BoundsSize / BoxSize);
-	Box->SetColor(RegionColors[Region.serverindex()]);
-	SubBoxes.Add(Region.channelid(), Box);
+	Box->SetColor(RegionColors[SubRegion->serverindex()]);
+	SubBoxes.Add(SubRegion->channelid(), Box);
 }
 
 void USpatialVisualizer::HandleSubToChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)

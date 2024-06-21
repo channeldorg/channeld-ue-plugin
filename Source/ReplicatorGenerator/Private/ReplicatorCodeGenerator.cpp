@@ -777,6 +777,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 	}
 	FString CheckHandoverCode = TEXT("");
 	FString NotifyHandoverCode = TEXT("");
+	FString EntityGetSpatialInfoCode = TEXT("");
 	// Only generate handover code for entity channel data
 	if (ChannelType == EChanneldChannelType::ECT_Entity)
 	{
@@ -794,6 +795,15 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 			if (HasSceneComponent) CheckHandoverInStatesCode.Append(CodeGen_Go_SceneCompCheckHandoverTemplate);
 			CheckHandoverCode = FString::Format(CodeGen_Go_CheckHandoverTemplate, FStringFormatNamedArguments{ { TEXT("Code_CheckHandoverInStates"), CheckHandoverInStatesCode } });
 			NotifyHandoverCode = CodeGen_Go_NotifyHandover;
+		}
+
+		if (HasActor)
+		{
+			EntityGetSpatialInfoCode.Append(CodeGen_Go_GetActorSpatialInfo);
+		}
+		if (HasSceneComponent)
+		{
+			EntityGetSpatialInfoCode.Append(CodeGen_Go_GetSceneComponentSpatialInfo);
 		}
 	}
 	{
@@ -814,6 +824,12 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 		FStringFormatNamedArguments FormatArgs;
 		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataProtoMsgGoName);
 		GoCode.Append(FString::Format(CodeGen_Go_EntityChannelDataTemplate, FormatArgs));
+
+		if (EntityGetSpatialInfoCode.Len() > 0)
+		{
+			FormatArgs.Add("Code_GetSpatialInfo", EntityGetSpatialInfoCode);
+			GoCode.Append(FString::Format(CodeGen_Go_EntityGetSpatialInfoTemplate, FormatArgs));
+		}
 	}
 
 	return true;

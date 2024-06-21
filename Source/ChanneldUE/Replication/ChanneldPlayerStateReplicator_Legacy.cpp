@@ -1,8 +1,8 @@
-#include "ChanneldPlayerStateReplicator.h"
+#include "ChanneldPlayerStateReplicator_Legacy.h"
 #include "Net/UnrealNetwork.h"
 #include "ChanneldUtils.h"
 
-FChanneldPlayerStateReplicator::FChanneldPlayerStateReplicator(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
+FChanneldPlayerStateReplicator_Legacy::FChanneldPlayerStateReplicator_Legacy(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
 {
 	PlayerState = CastChecked<APlayerState>(InTargetObj);
 	// Remove the registered DOREP() properties in the Character
@@ -32,24 +32,24 @@ FChanneldPlayerStateReplicator::FChanneldPlayerStateReplicator(UObject* InTarget
 	}
 }
 
-FChanneldPlayerStateReplicator::~FChanneldPlayerStateReplicator()
+FChanneldPlayerStateReplicator_Legacy::~FChanneldPlayerStateReplicator_Legacy()
 {
 	delete FullState;
 	delete DeltaState;
 }
 
-google::protobuf::Message* FChanneldPlayerStateReplicator::GetDeltaState()
+google::protobuf::Message* FChanneldPlayerStateReplicator_Legacy::GetDeltaState()
 {
 	return DeltaState;
 }
 
-void FChanneldPlayerStateReplicator::ClearState()
+void FChanneldPlayerStateReplicator_Legacy::ClearState()
 {
 	DeltaState->Clear();
 	bStateChanged = false;
 }
 
-void FChanneldPlayerStateReplicator::Tick(float DeltaTime)
+void FChanneldPlayerStateReplicator_Legacy::Tick(float DeltaTime)
 {
 	if (!PlayerState.IsValid())
 	{
@@ -100,7 +100,7 @@ void FChanneldPlayerStateReplicator::Tick(float DeltaTime)
 	}
 }
 
-void FChanneldPlayerStateReplicator::OnStateChanged(const google::protobuf::Message* InNewState)
+void FChanneldPlayerStateReplicator_Legacy::OnStateChanged(const google::protobuf::Message* InNewState)
 {
 	if (!PlayerState.IsValid())
 	{

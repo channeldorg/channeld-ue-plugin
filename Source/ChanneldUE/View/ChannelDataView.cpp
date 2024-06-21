@@ -84,9 +84,19 @@ void UChannelDataView::InitServer()
 	NetConnForSpawn->InitBase(NetDriver, NetDriver->GetSocket(), FURL(), USOCK_Open);
 	ChanneldUtils::InitNetConnForSpawn(NetConnForSpawn);
 
+	auto GameState = GetWorld()->GetAuthGameMode()->GameState;
+	auto WorldSettings = GetWorld()->GetWorldSettings();
+	if (!bIsGlobalStatesOwner)
+	{
+		GameState->SetRole(ENetRole::ROLE_SimulatedProxy);
+		WorldSettings->SetRole(ENetRole::ROLE_SimulatedProxy);
+		SetOwningChannelId(GetNetId(GameState), Channeld::GlobalChannelId);
+		SetOwningChannelId(GetNetId(WorldSettings), Channeld::GlobalChannelId);
+	}
 	// Add the GameStateBase (if it's an IChannelDataProvider).
 	// Missing this step will cause client failing to begin play.
-	AddObjectProvider(Channeld::GlobalChannelId, GetWorld()->GetAuthGameMode()->GameState);
+	AddObjectProvider(Channeld::GlobalChannelId, GameState);
+	AddObjectProvider(Channeld::GlobalChannelId, WorldSettings);
 	
 	ReceiveInitServer();
 }
@@ -428,6 +438,7 @@ void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerControl
 	
 	// Send the GameStateBase to the new player. This is very important as later the GameStateBase will be fanned out to the client with bReplicatedHasBegunPlay=true, to trigger the client's BeginPlay().
 	SendSpawnToConn(GameMode->GameState, NewPlayerConn, 0);
+	SendSpawnToConn(GameMode->GetWorldSettings(), NewPlayerConn, 0);
 	
 	/* Unfortunately, a couple of RPC on the PC is called in GameMode::PostLogin BEFORE invoking this event. So we need to handle the RPC properly.
 	 * UPDATE: no need to worry - the client can queue unmapped RPC now!
@@ -510,6 +521,13 @@ bool UChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetworkGUID Ne
 	// UE_LOG(LogChanneld, Log, TEXT("Set up mapping of netId: %u -> channelId: %d, spawned: %s"), NetId.Value, ChId, *GetNameSafe(Obj));
 
 	AddObjectProvider(ChId, Obj);
+
+	/* Send spawn of the static object to client so they can add the channel data provider.
+	if (NetId.IsStatic())
+	{
+		return false;
+	}
+	*/
 
 	return true;
 }
@@ -620,29 +638,9 @@ Channeld::ChannelId UChannelDataView::GetOwningChannelId(const FNetworkGUID NetI
 	return Channeld::InvalidChannelId;
 }
 
-Channeld::ChannelId UChannelDataView::GetOwningChannelId(AActor* Actor) const
+Channeld::ChannelId UChannelDataView::GetOwningChannelId(UObject* Obj) const
 {
-	/* Actors don't necessarily have a NetConnection to have to NetId.
-	if (const auto NetConn = Actor->GetNetConnection())
-	{
-		if (const auto NetDriver = Cast<UChanneldNetDriver>(NetConn->Driver))
-		{
-			const FNetworkGUID NetId = NetDriver->GuidCache->GetNetGUID(Actor);
-			if (NetId.IsValid())
-			{
-				return GetOwningChannelId(NetId);
-			}
-			else
-			{
-				UE_LOG(LogChanneld, Log, TEXT("No NetGUID has been assigned to Actor %s"), *GetNameSafe(Actor));
-			}
-		}
-	}
-
-	return Channeld::InvalidChannelId;
-	*/
-	
-	return GetOwningChannelId(GetNetId(Actor));
+	return GetOwningChannelId(GetNetId(Obj));
 }
 
 bool UChannelDataView::SendMulticastRPC(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg, const FString& SubObjectPathName)

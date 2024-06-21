@@ -137,19 +137,38 @@ FString FStaticGuidRegistry::GetStaticObjectExportedPathName(uint32 NetGUID)
 	return FString();
 }
 
+uint32 FStaticGuidRegistry::GetStaticObjectExportedOuterGUID(uint32 NetGUID)
+{
+	if (uint32* OuterNetGUIDPtr = StaticObjectExportOuterExportID.Find(NetGUID))
+	{
+		return *OuterNetGUIDPtr;
+	}
+	return 0;
+}
+
 UObject* FStaticGuidRegistry::GetStaticObject(FNetworkGUID NetGUID, UNetDriver* NetDriver)
 {
-	FString PathName = GetStaticObjectExportedPathName(NetGUID.Value);
+	const FString UnmappedPathName = GetStaticObjectExportedPathName(NetGUID.Value);
+	if (UnmappedPathName.IsEmpty())
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Can't find static object in regisitry with NetGUID %u"), NetGUID.Value);
+		return nullptr;
+	}
+	FString PathName = UnmappedPathName;
 	if (GEngine->NetworkRemapPath(NetDriver->ServerConnection, PathName, true))
 	{
-		UE_LOG(LogChanneld, Verbose, TEXT("Getting static object from remapped path name: %s -> %s"), *GetStaticObjectExportedPathName(NetGUID.Value), *PathName);
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Getting static object from remapped path name: %s -> %s"), *UnmappedPathName, *PathName);
 	}
 	UObject* Obj = FindObject<UObject>(nullptr, *PathName);
-	if (Obj == nullptr)
+	if (!IsValid((Obj)))
 	{
 		Obj = LoadObject<UObject>(nullptr, *PathName);
 	}
-	if (Obj)
+	if (!IsValid((Obj)))
+	{
+		Obj = NetDriver->GuidCache->GetObjectFromNetGUID(NetGUID, false);
+	}
+	if (IsValid((Obj)))
 	{
 		UE_LOG(LogChanneld, VeryVerbose, TEXT("Loaded static object '%s' with NetGUID %u"), *PathName, NetGUID.Value);
 	}

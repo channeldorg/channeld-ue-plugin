@@ -209,3 +209,23 @@ func (entityData *{Definition_ChannelDataMsgName}) SetObjRef(objRef *unrealpb.Un
 	entityData.ObjRef = objRef
 }
 )EOF";
+
+static const TCHAR* CodeGen_Go_EntityGetSpatialInfoTemplate = LR"EOF(
+// Implement [channeld.EntityChannelDataWithSpatialInfo]
+func (entityData *{Definition_ChannelDataMsgName}) GetSpatialInfo() *common.SpatialInfo {
+	{Code_GetSpatialInfo}
+	return nil
+}
+)EOF";
+
+static const TCHAR* CodeGen_Go_GetActorSpatialInfo = LR"EOF(
+	if entityData.ActorState != nil && entityData.ActorState.ReplicatedMovement != nil {
+		return entityData.ActorState.ReplicatedMovement.Location.ToSpatialInfo()
+	}
+)EOF";
+
+static const TCHAR* CodeGen_Go_GetSceneComponentSpatialInfo = LR"EOF(
+	if entityData.SceneComponentState != nil && (entityData.SceneComponentState.BAbsoluteLocation == nil || *entityData.SceneComponentState.BAbsoluteLocation) {
+		return entityData.SceneComponentState.RelativeLocation.ToSpatialInfo()
+	}
+)EOF";

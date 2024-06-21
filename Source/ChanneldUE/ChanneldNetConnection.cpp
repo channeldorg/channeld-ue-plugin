@@ -220,7 +220,7 @@ void UChanneldNetConnection::SendSpawnMessage(UObject* Object, ENetRole Role /*=
 	if (OwningChannelId == Channeld::InvalidChannelId)
 	{
 		QueuedSpawnMessageTargets.Add(MakeTuple(Object, Role, OwningChannelId, OwningConnId, Location));
-		UE_LOG(LogChanneld, Warning, TEXT("[Server] Unable to send Spawn message as there's no mapping of NetId %u -> ChannelId. Pushed to the next tick."), NetId.Value);
+		UE_LOG(LogChanneld, Warning, TEXT("[Server] Unable to send Spawn message of %s as there's no mapping of NetId %u -> ChannelId. Pushed to the next tick."), *GetNameSafe(Object), NetId.Value);
 		return;
 	}
 

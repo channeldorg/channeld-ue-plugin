@@ -87,7 +87,10 @@ void UChanneldReplicationComponent::BeginPlay()
 
 	if (auto NetDriver = Cast<UChanneldNetDriver>(GetWorld()->GetNetDriver()))
 	{
-		NetDriver->OnServerBeginPlay(this);
+		if (NetDriver->IsServer())
+		{
+			NetDriver->OnServerBeginPlay(this);
+		}
 	}
 }
 
@@ -96,11 +99,20 @@ void UChanneldReplicationComponent::UninitOnce()
 	if (bUninitialized)
 		return;
 
-	if (auto ChanneldSubsystem = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>())
+	if (AActor* Owner = GetOwner())
 	{
-		if (auto View = ChanneldSubsystem->GetChannelDataView())
+		if (IsValid(Owner))
 		{
-			View->RemoveProviderFromAllChannels(this, GetNetMode() == ENetMode::NM_DedicatedServer);
+			if (auto GameInstance = Owner->GetGameInstance())
+			{
+				if (auto ChanneldSubsystem = GameInstance->GetSubsystem<UChanneldGameInstanceSubsystem>())
+				{
+					if (auto View = ChanneldSubsystem->GetChannelDataView())
+					{
+						View->RemoveProviderFromAllChannels(this, GetNetMode() == ENetMode::NM_DedicatedServer);
+					}
+				}
+			}
 		}
 	}
 	
@@ -212,7 +224,7 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 		uint32 NetGUID = Replicator->GetNetGUID();
 		if (NetGUID == 0)
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Replicator of '%s' doesn't has a NetGUID yet, skip setting channel data"), *Replicator->GetTargetClass()->GetName());
+			UE_LOG(LogChanneld, Warning, TEXT("%s Replicator of '%s' doesn't has a NetGUID yet, skip setting channel data"), *Replicator->GetTargetClass()->GetName(), *GetNameSafe(Replicator->GetTargetObject()));
 			continue;
 		}
 		

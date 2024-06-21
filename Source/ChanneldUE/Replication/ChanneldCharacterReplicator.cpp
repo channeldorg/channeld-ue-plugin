@@ -147,8 +147,15 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 	if (!bUnmapped && OldMovementBase != Character->GetMovementBase())
 	{
 		uint32 OldNetGUID = MovementInfoDelta->mutable_movementbase()->mutable_owner()->netguid();
-		// The movement base's Actor (e.g. the 'Floor') normally doesn't have a NetConnection. In that case, we use the character's NetConnection.
-		MovementInfoDelta->mutable_movementbase()->CopyFrom(ChanneldUtils::GetRefOfActorComponent(Character->GetMovementBase(), Character->GetNetConnection()));
+		auto MovementBase = Character->GetMovementBase();
+		// The movement base's owner Actor (e.g. the 'Floor') normally doesn't have a NetConnection, so we use the character's NetConnection.
+		auto MovementBaseRef = ChanneldUtils::GetRefOfActorComponent(MovementBase, Character->GetNetConnection());
+		// The movement base's owner failed to be mapped (maybe it's a LandscapeStreamingProxy). In that case, we should full-export the owner.
+		if (MovementBase && MovementBaseRef.has_owner() && MovementBaseRef.owner().netguid() == 0)
+		{
+			MovementBaseRef = ChanneldUtils::GetRefOfActorComponent(MovementBase, Character->GetNetConnection(), true);
+		}
+		MovementInfoDelta->mutable_movementbase()->CopyFrom(MovementBaseRef);
 		bStateChanged = true;
 		// UE_LOG(LogChanneld, Log, TEXT("MovementBase changed: %s -> %s, owner NetGUID: %d -> %d"), *GetNameSafe(OldMovementBase), *GetNameSafe(Character->GetMovementBase()), OldNetGUID, MovementInfoDelta->mutable_movementbase()->mutable_owner()->netguid());
 	}
