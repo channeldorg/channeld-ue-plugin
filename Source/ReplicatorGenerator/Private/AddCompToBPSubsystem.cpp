@@ -288,8 +288,8 @@ void UAddCompToBPSubsystem::AddComponentToBlueprints(UClass* InCompClass, FName 
 	}
 	TargetRepCompClass = InCompClass;
 	RepCompName = InCompName;
-#if ENGINE_MAJOR_VERSION >=5
-	constexpr TCHAR* AdditionalArguments = TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout -AssetGatherAll=true");
+#if ENGINE_MAJOR_VERSION >= 5
+	const TCHAR* AdditionalArguments = TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout -AssetGatherAll=true");
 #else
 	constexpr TCHAR* AdditionalArguments = TEXT(" -targetplatform=WindowsServer -skipcompile -nop4 -cook -skipstage -utf8output -stdout");
 #endif

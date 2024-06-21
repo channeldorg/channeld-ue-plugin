@@ -87,7 +87,10 @@ void UChanneldReplicationComponent::BeginPlay()
 
 	if (auto NetDriver = Cast<UChanneldNetDriver>(GetWorld()->GetNetDriver()))
 	{
-		NetDriver->OnServerBeginPlay(this);
+		if (NetDriver->IsServer())
+		{
+			NetDriver->OnServerBeginPlay(this);
+		}
 	}
 }
 
@@ -96,11 +99,20 @@ void UChanneldReplicationComponent::UninitOnce()
 	if (bUninitialized)
 		return;
 
-	if (auto ChanneldSubsystem = GetOwner()->GetGameInstance()->GetSubsystem<UChanneldGameInstanceSubsystem>())
+	if (AActor* Owner = GetOwner())
 	{
-		if (auto View = ChanneldSubsystem->GetChannelDataView())
+		if (IsValid(Owner))
 		{
-			View->RemoveProviderFromAllChannels(this, GetNetMode() == ENetMode::NM_DedicatedServer);
+			if (auto GameInstance = Owner->GetGameInstance())
+			{
+				if (auto ChanneldSubsystem = GameInstance->GetSubsystem<UChanneldGameInstanceSubsystem>())
+				{
+					if (auto View = ChanneldSubsystem->GetChannelDataView())
+					{
+						View->RemoveProviderFromAllChannels(this, GetNetMode() == ENetMode::NM_DedicatedServer);
+					}
+				}
+			}
 		}
 	}
 	

@@ -333,8 +333,11 @@ FString FReplicatedActorDecorator::GetCode_AllPropertiesOnStateChange(const FStr
 	FString OnChangeStateCodeBuilder;
 	for (const TSharedPtr<FPropertyDecorator> Property : Properties)
 	{
-		// 'b{PropertyName}Changed` variable is used to avoid calling OnRep() function when the property value is not changed.
-		OnChangeStateCodeBuilder.Append(FString::Printf(TEXT("\nbool b%sChanged = false;"), *Property->GetPropertyName()));
+		if (!Property->IsArray())
+		{
+			// 'b{PropertyName}Changed` variable is used to avoid calling OnRep() function when the property value is not changed.
+			OnChangeStateCodeBuilder.Append(FString::Printf(TEXT("\nbool b%sChanged = false;"), *Property->GetPropertyName()));
+		}
 		if (Property->HasOnRepNotifyParam())
 		{
 			// `Old{PropertyName}` variable is used to pass the old property value to OnRep() function.
@@ -365,14 +368,14 @@ FString FReplicatedActorDecorator::GetDefinition_ProtoStateMessage()
 		FieldDefinitions.Append(TEXT("bool removed = 1;"));
 		Offset = 2;
 	}
-	int32 ProtoIndex = Offset;
-	for (int32 i = 0; i < Properties.Num(); i++)
+	// int32 ProtoIndex = Offset;
+	// for (int32 i = 0; i < Properties.Num(); i++)
+	for (auto Property : Properties)
 	{
-		const TSharedPtr<FPropertyDecorator> Property = Properties[i];
-		FString ProtoField = Property->GetDefinition_ProtoField(ProtoIndex) + TEXT(";\n");
+		// const TSharedPtr<FPropertyDecorator> Property = Properties[i];
+		FString ProtoField = Property->GetDefinition_ProtoField(Offset) + TEXT(";\n");
 		FieldDefinitions += ProtoField;
-		ProtoIndex++;
-	
+		// ProtoIndex++;
 	}
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_StateMessageType"), GetProtoStateMessageType());
@@ -662,6 +665,11 @@ FString FReplicatedActorDecorator::GetCode_ChannelDataProtoFieldDefinition(const
 }
 
 bool FReplicatedActorDecorator::IsStruct()
+{
+	return false;
+}
+
+bool FReplicatedActorDecorator::IsArray()
 {
 	return false;
 }

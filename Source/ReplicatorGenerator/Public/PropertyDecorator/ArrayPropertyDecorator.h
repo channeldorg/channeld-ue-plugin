@@ -5,7 +5,7 @@ const static TCHAR* ArrPropDeco_SetDeltaStateTemplate =
 {
   bool bPropChanged = false;
   const int32 ActorPropLength = {Declare_PropPtrName}->Num();
-  const int32 FullStateValueLength = {Code_ConditionFullStateIsNull}{Code_GetProtoFieldValueFrom}.size();
+  const int32 FullStateValueLength = {Code_GetFullStateValueLength}{Code_GetProtoFieldValueFrom}.size();
   if (ActorPropLength != FullStateValueLength)
   {
     bPropChanged = true;
@@ -17,7 +17,8 @@ const static TCHAR* ArrPropDeco_SetDeltaStateTemplate =
   if (bPropChanged)
   {
     bStateChanged = true;
-    {Declare_DeltaStateName}->set_update_{Definition_ProtoName}(true);
+	{Code_SetFieldUpdated}
+    //{Declare_DeltaStateName}->set_update_{Definition_ProtoName}(true);
     if({Declare_FullStateName} != nullptr && {Declare_FullStateName}->{Definition_ProtoName}_size() > 0)
     {
       const_cast<{Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}*>({Declare_FullStateName})->clear_{Definition_ProtoName}();
@@ -36,7 +37,7 @@ const static TCHAR* ArrPropDeco_SetDeltaStateByMemOffsetTemp =
   bool bPropChanged = false;
   {Code_AssignPropPointers};
   const int32 ActorPropLength = PropAddr->Num();
-  const int32 FullStateValueLength = {Code_ConditionFullStateIsNull}{Code_GetProtoFieldValueFrom}.size();
+  const int32 FullStateValueLength = {Code_GetFullStateValueLength}{Code_GetProtoFieldValueFrom}.size();
   if (ActorPropLength != FullStateValueLength)
   {
     bPropChanged = true;
@@ -48,7 +49,8 @@ const static TCHAR* ArrPropDeco_SetDeltaStateByMemOffsetTemp =
   if(bPropChanged)
   {
     bStateChanged = true;
-	{Declare_DeltaStateName}->set_update_{Definition_ProtoName}(true);
+	{Code_SetFieldUpdated}
+    //{Declare_DeltaStateName}->set_update_{Definition_ProtoName}(true);
     if({Declare_FullStateName} != nullptr && {Declare_FullStateName}->{Definition_ProtoName}_size() > 0)
     {
       const_cast<{Declare_ProtoNamespace}::{Declare_ProtoStateMsgName}*>({Declare_FullStateName})->clear_{Definition_ProtoName}();
@@ -63,6 +65,7 @@ const static TCHAR* ArrPropDeco_SetDeltaStateByMemOffsetTemp =
 
 const static TCHAR* ArrPropDeco_OnChangeStateTemp =
 	LR"EOF(
+bool b{Declare_PropertyName}Changed = false;
 if ({Code_HasProtoFieldValue})
 {
 {Code_SetPropertyValue}
@@ -115,6 +118,42 @@ const static TCHAR* ArrPropDeco_SetPropertyValueByMemOffsetTemp =
 )EOF";
 
 
+const static TCHAR* ByteArrayPropDeco_SetDeltaStateTemplate = LR"EOF(
+{
+	std::string PropStrVal = std::string((const char*){Declare_PropPtrName}->GetData(), {Declare_PropPtrName}->Num());
+	if ({Code_ConditionFullStateIsNull}PropStrVal != {Declare_FullStateName}->{Definition_ProtoName}())
+	{
+		bStateChanged = true;
+		{Declare_DeltaStateName}->set_{Definition_ProtoName}(PropStrVal);
+	}
+}
+)EOF";
+
+const static TCHAR* ByteArrayPropDeco_SetDeltaStateByMemOffsetTemp = LR"EOF(
+{
+	{Code_AssignPropPointers};
+	std::string PropStrVal = std::string((const char*)PropAddr->GetData(), PropAddr->Num());
+	if ({Code_ConditionFullStateIsNull}PropStrVal != {Declare_FullStateName}->{Definition_ProtoName}())
+	{
+		bStateChanged = true;
+		{Declare_DeltaStateName}->set_{Definition_ProtoName}(PropStrVal);
+	}
+}
+)EOF";
+
+const static TCHAR* ByteArrayPropDeco_SetPropertyValueTemp = LR"EOF(
+*{Declare_PropPtrName} = TArray<uint8>((const uint8*){Code_GetProtoFieldValueFrom}.data(), {Code_GetProtoFieldValueFrom}.size());
+)EOF";
+
+const static TCHAR* ByteArrayPropDeco_SetPropertyValueByMemOffsetTemp =
+	LR"EOF(
+{
+	{Code_AssignPropPointers};
+	*PropAddr = TArray<uint8>((const uint8*){Code_GetProtoFieldValueFrom}.data(), {Code_GetProtoFieldValueFrom}.size());
+}
+)EOF";
+
+
 class FArrayPropertyDecorator : public FPropertyDecorator
 {
 public:
@@ -132,13 +171,14 @@ public:
 	
 	virtual FString GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState) override;
 	virtual FString GetCode_ActorPropEqualToProtoState(const FString& FromActor, const FString& FromState, bool ForceFromPointer) override;
-	
+
+	virtual FString GetCode_SetFieldUpdated(const FString& DeltaStateName);
 	virtual FString GetCode_SetDeltaState(const FString& TargetInstance, const FString& FullStateName, const FString& DeltaStateName,  bool ConditionFullStateIsNull) override;
 	virtual FString GetCode_SetDeltaStateByMemOffset(const FString& ContainerName, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull) override;
 
 	virtual FString GetCode_HasProtoFieldValueIn(const FString& StateName) override;
 
-	virtual FString GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, const FString& AfterSetValueCode) override;
+	virtual FString GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, const FString& AfterSetValueCode, bool ConditionFullStateIsNull = false) override;
 	virtual FString GetCode_SetPropertyValueTo(const FString& TargetInstance, const FString& NewStateName, const FString& AfterSetValueCode) override;
 	virtual FString GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName) override;
 
@@ -149,6 +189,10 @@ public:
 	virtual TArray<TSharedPtr<FStructPropertyDecorator>> GetStructPropertyDecorators() override;
 
 	virtual FString GetDefinition_ProtoField(int32& FieldNumber) override;
+
+	virtual bool IsArray() override;
+
 protected:
 	TSharedPtr<FPropertyDecorator> InnerProperty;
+	bool bIsByteArray = false;
 };

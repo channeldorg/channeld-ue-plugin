@@ -53,7 +53,7 @@ protected:
 	virtual void ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId) override;
 
 	virtual void SendSpawnToClients_EntityChannelReady(const FNetworkGUID NetId, UObject* Obj, uint32 OwningConnId, Channeld::ChannelId SpatialChId);
-	virtual void SendSpawnToConn_EntityChannelReady(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId);
+	virtual void SendSpawnToConn_EntityChannelReady(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId = 0, Channeld::ChannelId OwningChId = Channeld::InvalidChannelId);
 	// The client need to destroy the objects that are no longer relevant to the client.
 	virtual void OnRemovedProvidersFromChannel(Channeld::ChannelId ChId, channeldpb::ChannelType ChannelType, const TSet<FProviderInternal>& RemovedProviders) override;
 	bool ClientDeleteObject(UObject* Obj);
@@ -107,6 +107,9 @@ private:
 	// until the client gains interest in them again.
 	TSet<uint32> SuppressedNetIdsToResolve;
 
+	// [Server-Only] Used for making sure the Spawn messages of the spatial-replicated static objects are sent only once per client.
+	TMap<uint32, TSet<Channeld::ChannelId>> ClientConnIdToSpatialChannelIdsRecord;
+
 	bool bIsSyncingNetId = false;
 	// Synchronize the NetworkGUIDs of the static and well-known objects across the spatial servers.
 	void SyncNetIds();
@@ -114,6 +117,7 @@ private:
 	void ServerHandleSpatialChannelsReady(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleSyncNetId(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void ServerHandleCreateEntityChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ServerHandleHandover(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleSubToChannel(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleHandover(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);

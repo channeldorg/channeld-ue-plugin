@@ -156,6 +156,20 @@ bool FReplicatorCodeGenerator::Generate(
 	// Global struct codes
 	auto GlobalStructDecorators = GetAllStructPropertyDecorators(ActorDecoratorsToGenReplicator);
 	ReplicationCodeBundle.GlobalStructCodes.Append(TEXT("#pragma once\n"));
+	
+	TSet<FString> IncludeFiles;
+	for (auto StructDecorator : GlobalStructDecorators)
+	{
+		for (auto IncludeFile : StructDecorator->GetAdditionalIncludes())
+		{
+			IncludeFiles.Add(IncludeFile);
+		}
+	}
+	for (auto IncludeFile : IncludeFiles)
+	{
+		ReplicationCodeBundle.GlobalStructCodes.Append(FString::Printf(TEXT("#include \"%s\"\n"), *IncludeFile));
+	}
+	
 	ReplicationCodeBundle.GlobalStructCodes.Append(TEXT("#include \"ChanneldUtils.h\"\n"));
 	ReplicationCodeBundle.GlobalStructCodes.Append(FString::Printf(TEXT("#include \"%s\"\n"), *GenManager_GlobalStructProtoHeaderFile));
 	for (auto StructDecorator : GlobalStructDecorators)
@@ -290,7 +304,7 @@ bool FReplicatorCodeGenerator::GenerateReplicatorCode(
 	CppCodeBuilder.Append(FString::Printf(TEXT("#include \"%s\"\n\n"), *GenManager_TypeDefinitionHeadFile));
 
 	// Define and initialize the static PropPointerMemOffsetCache for the constructor
-	CppCodeBuilder.Append(FString::Printf(TEXT("TMap<FString, int32> %s::PropPointerMemOffsetCache;\n\n"), *ActorDecorator->GetReplicatorClassName()));
+	CppCodeBuilder.Append(FString::Printf(TEXT("TMap<FName, int32> %s::PropPointerMemOffsetCache;\n\n"), *ActorDecorator->GetReplicatorClassName()));
 	
 	FormatArgs.Add(
 		TEXT("Code_AssignPropertyPointers"),
@@ -763,6 +777,7 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 	}
 	FString CheckHandoverCode = TEXT("");
 	FString NotifyHandoverCode = TEXT("");
+	FString EntityGetSpatialInfoCode = TEXT("");
 	// Only generate handover code for entity channel data
 	if (ChannelType == EChanneldChannelType::ECT_Entity)
 	{
@@ -780,6 +795,15 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 			if (HasSceneComponent) CheckHandoverInStatesCode.Append(CodeGen_Go_SceneCompCheckHandoverTemplate);
 			CheckHandoverCode = FString::Format(CodeGen_Go_CheckHandoverTemplate, FStringFormatNamedArguments{ { TEXT("Code_CheckHandoverInStates"), CheckHandoverInStatesCode } });
 			NotifyHandoverCode = CodeGen_Go_NotifyHandover;
+		}
+
+		if (HasActor)
+		{
+			EntityGetSpatialInfoCode.Append(CodeGen_Go_GetActorSpatialInfo);
+		}
+		if (HasSceneComponent)
+		{
+			EntityGetSpatialInfoCode.Append(CodeGen_Go_GetSceneComponentSpatialInfo);
 		}
 	}
 	{
@@ -800,6 +824,12 @@ bool FReplicatorCodeGenerator::GenerateChannelDataMerge_GoCode(
 		FStringFormatNamedArguments FormatArgs;
 		FormatArgs.Add("Definition_ChannelDataMsgName", ChannelDataProtoMsgGoName);
 		GoCode.Append(FString::Format(CodeGen_Go_EntityChannelDataTemplate, FormatArgs));
+
+		if (EntityGetSpatialInfoCode.Len() > 0)
+		{
+			FormatArgs.Add("Code_GetSpatialInfo", EntityGetSpatialInfoCode);
+			GoCode.Append(FString::Format(CodeGen_Go_EntityGetSpatialInfoTemplate, FormatArgs));
+		}
 	}
 
 	return true;
@@ -833,7 +863,7 @@ void FReplicatorCodeGenerator::ProcessHeaderFiles(const TArray<FString>& Files, 
 		FString Code;
 		// Load source code files, and capture all 'UCLASS' marked classes.
 		FFileHelper::LoadFileToString(Code, *HeaderFilePath);
-		FRegexPattern MatherPatter(FString(TEXT(R"EOF(UCLASS\(.*\)\s*class\s+(?:\w+_API\s+)?([\w_]+)\s+\:)EOF")));
+		FRegexPattern MatherPatter(FString(TEXT(R"EOF(UCLASS\(.*\)\s*class\s+(?:\w+_API\s+)?([\w_]+)\s+(?:final\s+)?\:)EOF")));
 		FRegexMatcher Matcher(MatherPatter, Code);
 		while (Matcher.FindNext())
 		{

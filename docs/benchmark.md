@@ -1,3 +1,8 @@
+# Introduction
+This document aims to introduce the performance testing methods and results of ChanneldUE. Every time there's major improvement of channeld or ChanneldUE in terms of performance, the test will be re-run and this document will be updated.
+
+![](../images/benchmark_entity_lod.gif)
+
 # Preparation
 ## Test machines:
 All machines are ECS instances from the public cloud providers.
@@ -46,7 +51,7 @@ Hardware resource limits for each service:
 
 # Scenario 1: Single UE Server
 ### Test map:
-TestReplication
+BenchmarkReplication
 
 ### Channel data view class:
 SingleChannelDataView
@@ -70,7 +75,7 @@ SingleChannelDataView
 
 # Scenario 2: Multiple UE Spatial Servers
 ### Test map:
-TestSpatial_Benchmark
+BenchmarkSpatial
 
 ### Channel data view class:
 SpatialChannelDataView
@@ -100,3 +105,32 @@ SpatialChannelDataView
 ## TODO:
 1. Solve the problem that RPC forwarding after cross-server handover has a probability of failure in the current version
 2. Add more ECS instances to run simulated clients
+
+# Scenario 3: 
+This scenario is suitable for applications with low simulation but a large number of concurrent users on the server, such as virtual concerts.
+
+### Test map:
+BenchmarkReplication
+
+### Channel data view class:
+BP_EntityLODChannelView
+
+Network LOD is defined as follows:
+- 0-10 meters: 20Hz update rate
+- 10-50 meters: 10Hz update rate
+- Above 50 meters: 1Hz update rate
+
+### Services:
+- channeld x 1
+- UE Server x 1
+- UE Client x 1000
+
+## Grafana dashboard:
+![](../images/benchmark_entity_lod.png)
+
+## Analysis:
+1. Compared with scenario 1, the number of CCU that channeld can handle has increased by 5-10 times. This is due to the fact that the Global channel has offloaded some of the pressure to the Entity channels
+2. At around 800 CCU, the Entity and Global channels have high Tick time, but the overall Tick rate is still above 50Hz
+3. With 400 CCU, the UE server frame rate can be maintained at around 30FPS, and there is still a lot of CPU resource left to handle business logic
+4. When the number of CCU exceeds 600, the UE server frame rate cannot be maintained above 20FPS, and the client experience will be impacted. One way to address the issue is to use a lighter-weight movement component to replace the default CharacterMovementComponent
+5. Due to the optimization brought by network LOD, the amount of downstream traffic consumed by each client is much lower than that of a single channel, and the more clients there are, the more traffic is saved

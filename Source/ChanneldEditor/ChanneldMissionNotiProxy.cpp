@@ -177,10 +177,10 @@ void UChanneldMissionNotiProxy::CancelMission()
 
 
 #define CHANNELD_GATEWAY_LOG_PROXY(GOLogLevel, UELogLevel, Else) \
-Else if ((MsgIndex = InMsg.Find(TEXT("\t"GOLogLevel"\t"))) != INDEX_NONE) \
+Else if ((MsgIndex = InMsg.Find(TEXT("\tGOLogLevel\t"))) != INDEX_NONE) \
 { \
 	PrevLogLevel = TEXT(GOLogLevel); \
-	UE_LOG(LogChanneldGateway, UELogLevel, TEXT("[%s] %s"), TEXT(GOLogLevel), *InMsg.Mid(MsgIndex + FCString::Strlen(TEXT("\t"GOLogLevel"\t")))); \
+	UE_LOG(LogChanneldGateway, UELogLevel, TEXT("[%s] %s"), TEXT(GOLogLevel), *InMsg.Mid(MsgIndex + FCString::Strlen(TEXT("\tGOLogLevel\t")))); \
 }
 
 void UChanneldGetawayNotiProxy::ReceiveOutputMsg(FChanneldProcWorkerThread* Worker, const FString& InMsg)

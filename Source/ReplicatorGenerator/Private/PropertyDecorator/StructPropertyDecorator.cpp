@@ -2,6 +2,7 @@
 
 #include "PropertyDecoratorFactory.h"
 #include "ReplicatorGeneratorDefinition.h"
+#include "ReplicatorGeneratorManager.h"
 #include "ReplicatorTemplate/CppReplicatorTemplate.h"
 
 FStructPropertyDecorator::FStructPropertyDecorator(FProperty* InProperty, IPropertyDecoratorOwner* InOwner) : FPropertyDecorator(InProperty, InOwner)
@@ -94,6 +95,12 @@ TArray<FString> FStructPropertyDecorator::GetAdditionalIncludes()
 	{
 		IncludeFileSet.Append(PropDecorator->GetAdditionalIncludes());
 	}
+	/* Use {Declare_PropCompilableStructName} in the generated struct - no need to include the original struct.
+	if (auto ModuleInfo = FReplicatorGeneratorManager::Get().GetModuleInfo(GetCPPType()))
+	{
+		IncludeFileSet.Add(ModuleInfo->RelativeToModule);
+	}
+	*/
 	return IncludeFileSet.Array();
 }
 
@@ -131,7 +138,7 @@ FString FStructPropertyDecorator::GetCode_SetDeltaStateByMemOffset(const FString
 FString FStructPropertyDecorator::GetCode_SetDeltaStateArrayInner(const FString& PropertyPointer, const FString& FullStateName, const FString& DeltaStateName, bool ConditionFullStateIsNull)
 {
 	FStringFormatNamedArguments FormatArgs;
-	// FormatArgs.Add(TEXT("Code_BeforeCondition"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull ? true :") : TEXT(""));
+	// FormatArgs.Add(TEXT("Code_BeforeCondition"), ConditionFullStateIsNull ? TEXT("bIsFullStateNull || ") : TEXT(""));
 	FormatArgs.Add(TEXT("Declare_PropertyPtr"), PropertyPointer);
 	FormatArgs.Add(TEXT("Declare_DeltaStateName"), DeltaStateName);
 	FormatArgs.Add(TEXT("Declare_FullStateName"), FullStateName);
@@ -228,7 +235,7 @@ FString FStructPropertyDecorator::GetDeclaration_PropPtrGroupStruct()
 
 		OnStateChangeCodes.Append(
 			PropDecorator->GetCode_OnStateChange(
-				TEXT("this"), TEXT("NewState")
+				TEXT("this"), TEXT("NewState"), TEXT(""), true
 			)
 		);
 

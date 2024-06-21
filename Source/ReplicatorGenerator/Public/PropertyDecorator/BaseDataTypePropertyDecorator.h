@@ -4,6 +4,7 @@
 #include "StringPropertyDecorator.h"
 #include "TextPropertyDecorator.h"
 #include "NamePropertyDecorator.h"
+#include "ClassPropertyDecorator.h"
 #include "StructPropertyDecorator.h"
 #include "UnrealObjectPropertyDecorator.h"
 
@@ -54,6 +55,8 @@ BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER_BASE(FBytePropertyDecoratorBuilde
 
 BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER(FBoolPropertyDecoratorBuilder, FBoolPropertyDecorator, FBoolProperty, bool);
 
+BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER_BASE(FInt16PropertyDecoratorBuilder, FInt16PropertyDecorator, FInt16Property, int16, int32);
+
 BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER(FUInt32PropertyDecoratorBuilder, FUInt32PropertyDecorator, FUInt32Property, uint32);
 
 BASE_DATA_TYPE_PROPERTY_DECORATOR_WITH_BUILDER(FIntPropertyDecoratorBuilder, FIntPropertyDecorator, FIntProperty, int32);
@@ -73,5 +76,6 @@ BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FStructPropertyDecoratorBuilder, FStru
 BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FStrPropertyDecoratorBuilder, FStringPropertyDecorator, FStrProperty);
 BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FTextPropertyDecoratorBuilder, FTextPropertyDecorator, FTextProperty);
 BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FNamePropertyDecoratorBuilder, FNamePropertyDecorator, FNameProperty);
+// BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FClassPropertyDecoratorBuilder, FClassPropertyDecorator, FClassProperty);
 
 BASE_DATA_TYPE_PROPERTY_DECORATOR_BUILDER(FUObjPropertyDecoratorBuilder, FUnrealObjectPropertyDecorator, FObjectProperty);

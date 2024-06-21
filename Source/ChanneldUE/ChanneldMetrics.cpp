@@ -13,9 +13,13 @@ void UChanneldMetrics::Initialize(FSubsystemCollectionBase& Collection)
 	{
 		UE_LOG(LogChanneld, Log, TEXT("Parsed MetricsName from CLI: %s"), *MetricsName);
 	}
+	else if (auto ViewClass = GetMutableDefault<UChanneldSettings>()->ChannelDataViewClass)
+	{
+		MetricsName = ViewClass->GetName();
+	}
 	else
 	{
-		MetricsName = GetMutableDefault<UChanneldSettings>()->ChannelDataViewClass->GetName();
+		MetricsName = FApp::GetProjectName();
 	}
 	
 	const Labels NameLabel = {{ "name", TCHAR_TO_UTF8(*MetricsName) }};

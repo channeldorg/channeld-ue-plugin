@@ -9,7 +9,7 @@ const static TCHAR* PropDecorator_AssignPropPtrStatic =
 
 const static TCHAR* PropDecorator_AssignPropPtrDynamic =
 		LR"EOF(
-FString PropertyName = TEXT("{Declare_PropertyName}");
+const FName PropertyName = TEXT("{Declare_PropertyName}");
 int32* OffsetPtr = PropPointerMemOffsetCache.Find(PropertyName);
 if (OffsetPtr != nullptr)
 {
@@ -17,7 +17,7 @@ if (OffsetPtr != nullptr)
 }
 else
 {
-    FProperty* Property = ActorClass->FindPropertyByName(FName(*PropertyName));
+    FProperty* Property = ActorClass->FindPropertyByName(PropertyName);
     if (Property)
     {   
         int32 Offset = Property->GetOffset_ForInternal();
@@ -26,7 +26,7 @@ else
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("%s Replicator construct, but could not find property(%s) in cache or by name."), *ActorClass->GetName(), *PropertyName);
+        UE_LOG(LogTemp, Error, TEXT("%s Replicator construct, but could not find property(%s) in cache or by name."), *ActorClass->GetName(), *PropertyName.ToString());
         {Ref_AssignTo} = ({Declare_PropertyCPPType}*)((uint8*){Ref_ContainerAddr} + {Num_PropMemOffset});
     }
 }
@@ -310,7 +310,7 @@ public:
 	 *     Character->bIsCrouched = NewState->biscrouched();
 	 *   }
 	 */
-	virtual FString GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, const FString& AfterSetValueCode = TEXT(""));
+	virtual FString GetCode_OnStateChange(const FString& TargetInstanceName, const FString& NewStateName, const FString& AfterSetValueCode = TEXT(""), bool ConditionFullStateIsNull = false);
 
 	virtual FString GetCode_OnStateChangeByMemOffset(const FString& ContainerName, const FString& NewStateName);
 
@@ -321,6 +321,8 @@ public:
 	virtual FString GetCode_GetWorldRef() override;
 
 	virtual bool IsStruct() override;
+
+	virtual bool IsArray() override;
 
 	virtual TArray<TSharedPtr<FStructPropertyDecorator>> GetStructPropertyDecorators() override;
 

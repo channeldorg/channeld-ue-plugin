@@ -170,7 +170,7 @@ bool UChanneldConnection::Connect(bool bInitAsClient, const FString& Host, int32
 	{
 		if (!ensure(StartReceiveThread()))
 		{
-			Error = FString::Printf(TEXT("Start receive thread failed"));
+			Error = TEXT("Start receive thread failed");
 			return false;
 		}
 	}
@@ -219,6 +219,8 @@ void UChanneldConnection::SendDisconnectMessage(Channeld::ConnectionId InConnId)
 
 void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 {
+	StopReceiveThread();
+
 	if (!IsConnected())
 		return;
 
@@ -230,7 +232,6 @@ void UChanneldConnection::Disconnect(bool bFlushAll/* = true*/)
 	OnDisconnected();
 
 	Socket->Close();
-	StopReceiveThread();
 
 	auto SocketSubsystem = ISocketSubsystem::Get();
 	if (SocketSubsystem)
@@ -250,112 +251,120 @@ void UChanneldConnection::Receive()
 	int32 BytesRead;
 	if (Socket->Recv(ReceiveBuffer + ReceiveBufferOffset, ReceiveBufferSize, BytesRead, ESocketReceiveFlags::None))
 	{
-		ReceiveBufferOffset += BytesRead;
-		if (ReceiveBufferOffset < HeaderSize)
+		ReceiveBufferOffset += BytesRead;		
+		while (ReceiveBufferOffset > HeaderSize)
 		{
-			// Unfinished packet
-			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet header: %d"), BytesRead);
-			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->FragmentedPacket_Counter->Increment();
-			return;
-		}
-
-		if (ReceiveBuffer[0] != 67 || ReceiveBuffer[1] != 72)
-		{
-			ReceiveBufferOffset = 0;
-			UE_LOG(LogChanneld, Error, TEXT("Invalid tag: %d, the packet will be dropped"), ReceiveBuffer[0]);
-			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->DroppedPacket_Counter->Increment();
-			return;
-		}
-
-		uint32 PacketSize = ReceiveBuffer[3] | (ReceiveBuffer[2]<<8);
-		
-		if (ReceiveBufferOffset < HeaderSize + PacketSize)
-		{
-			// Unfinished packet
-			UE_LOG(LogChanneld, Verbose, TEXT("UChanneldConnection::Receive: unfinished packet body, read: %d, pos: %d/%d"), BytesRead, ReceiveBufferOffset, HeaderSize + PacketSize);
-			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->FragmentedPacket_Counter->Increment();
-			return;
-		}
-
-		// TODO: support Snappy compression
-
-		channeldpb::Packet Packet;
-		if (!Packet.ParseFromArray(ReceiveBuffer + HeaderSize, PacketSize))
-		{
-			ReceiveBufferOffset = 0;
-			UE_LOG(LogChanneld, Error, TEXT("UChanneldConnection::Receive: Failed to parse packet, size: %d"), PacketSize);
-			UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
-			Metrics->DroppedPacket_Counter->Increment();
-			return;
-		}
-
-		for (auto const& MessagePackData : Packet.messages())
-		{
-			uint32 MsgType = MessagePackData.msgtype();
-
-			MessageHandlerEntry Entry;
-			if (!MessageHandlers.Contains(MsgType))
+			if (ReceiveBuffer[0] != 67 || ReceiveBuffer[1] != 72)
 			{
-				if (MsgType >= channeldpb::USER_SPACE_START)
+				ReceiveBufferOffset = 0;
+				UE_LOG(LogChanneld, Error, TEXT("Invalid tag: %d, the packet will be dropped"), ReceiveBuffer[0]);
+				UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+				Metrics->DroppedPacket_Counter->Increment();
+				return;
+			}
+			
+			uint32 PacketSize = ReceiveBuffer[3] | (ReceiveBuffer[2] << 8);
+
+			// UE_LOG(LogChanneld, VeryVerbose, TEXT("ReceiveBufferOffset: %d, PacketSize:%d"), ReceiveBufferOffset,
+			//        PacketSize);
+
+			if (ReceiveBufferOffset < HeaderSize + PacketSize)
+			{
+				// Unfinished packet
+				UE_LOG(LogChanneld, Verbose,
+				       TEXT("UChanneldConnection::Receive: unfinished packet body, read: %d, pos: %d/%d"), BytesRead,
+				       ReceiveBufferOffset, HeaderSize + PacketSize);
+				UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+				Metrics->FragmentedPacket_Counter->Increment();
+				return;
+			}
+
+			// TODO: support Snappy compression
+
+			channeldpb::Packet Packet;
+			if (!Packet.ParseFromArray(ReceiveBuffer + HeaderSize, PacketSize))
+			{
+				ReceiveBufferOffset = 0;
+				UE_LOG(LogChanneld, Error, TEXT("UChanneldConnection::Receive: Failed to parse packet, size: %d"),
+				       PacketSize);
+				UChanneldMetrics* Metrics = GEngine->GetEngineSubsystem<UChanneldMetrics>();
+				Metrics->DroppedPacket_Counter->Increment();
+				return;
+			}
+
+			// move buff
+			uint32 moveLen = PacketSize + HeaderSize;
+			FMemory::Memmove(ReceiveBuffer, ReceiveBuffer + moveLen, ReceiveBufferOffset - moveLen);
+			
+			ReceiveBufferOffset -= moveLen;
+
+			for (auto const& MessagePackData : Packet.messages())
+			{
+				uint32 MsgType = MessagePackData.msgtype();
+
+				MessageHandlerEntry Entry;
+				if (!MessageHandlers.Contains(MsgType))
 				{
-					Entry = UserSpaceMessageHandlerEntry;
+					if (MsgType >= channeldpb::USER_SPACE_START)
+					{
+						Entry = UserSpaceMessageHandlerEntry;
+					}
+					else
+					{
+						UE_LOG(LogChanneld, Warning, TEXT("No message handler registered for type: %d"),
+						       MessagePackData.msgtype());
+						continue;
+					}
 				}
 				else
 				{
-					UE_LOG(LogChanneld, Warning, TEXT("No message handler registered for type: %d"), MessagePackData.msgtype());
+					Entry = MessageHandlers[MsgType];
+				}
+
+				if (Entry.Msg == nullptr)
+				{
+					UE_LOG(LogChanneld, Error, TEXT("No message template registered for type: %d"),
+					       MessagePackData.msgtype());
 					continue;
 				}
-			}
-			else
-			{
-				Entry = MessageHandlers[MsgType];
-			}
 
-			if (Entry.Msg == nullptr)
-			{
-				UE_LOG(LogChanneld, Error, TEXT("No message template registered for type: %d"), MessagePackData.msgtype());
-				continue;
-			}
+				// Always make a clone!
+				google::protobuf::Message* Msg = Entry.Msg->New();
+				Msg->CopyFrom(*Entry.Msg);
+				if (!Msg->ParseFromString(MessagePackData.msgbody()))
+				{
+					UE_LOG(LogChanneld, Error, TEXT("Failed to parse message %s"),
+					       UTF8_TO_TCHAR(Msg->GetTypeName().c_str()));
+					continue;
+				}
 
-			// Always make a clone!
-			google::protobuf::Message* Msg = Entry.Msg->New();
-			Msg->CopyFrom(*Entry.Msg);
-			if (!Msg->ParseFromString(MessagePackData.msgbody()))
-			{
-				UE_LOG(LogChanneld, Error, TEXT("Failed to parse message %s"), UTF8_TO_TCHAR(Msg->GetTypeName().c_str()));
-				continue;
+				MessageQueueEntry QueueEntry = {
+					MsgType, Msg, MessagePackData.channelid(), MessagePackData.stubid(), Entry.Handlers, Entry.Delegate
+				};
+				IncomingQueue.Enqueue(QueueEntry);
 			}
-
-			MessageQueueEntry QueueEntry = {MsgType, Msg, MessagePackData.channelid(), MessagePackData.stubid(), Entry.Handlers, Entry.Delegate };
-			IncomingQueue.Enqueue(QueueEntry);
 		}
-
 	}
 	else
 	{
 		OnDisconnected();
 		// Handle disconnection or exception
-		UE_LOG(LogChanneld, Warning, TEXT("Failed to receive data from channeld"));
+		UE_LOG(LogChanneld, Warning, TEXT("Failed to receive data "));
 	}
 
 	// Reset read position
-	ReceiveBufferOffset = 0;
+	// ReceiveBufferOffset = 0;
 }
+
+
 
 bool UChanneldConnection::StartReceiveThread()
 {
-	if (bReceiveThreadRunning)
-	{
-		return false;
-	}
 	if (ReceiveThread == nullptr)
 	{
 		ReceiveThread = FRunnableThread::Create(this, TEXT("Tpri_Channeld_Connection_Receive"));
 	}
-	return ReceiveThread != nullptr;
+	return bReceiveThreadRunning;
 }
 
 void UChanneldConnection::StopReceiveThread()
@@ -392,8 +401,7 @@ void UChanneldConnection::Stop()
 
 void UChanneldConnection::Exit()
 {
-	if (bReceiveThreadRunning != false)
-		bReceiveThreadRunning = true;
+	bReceiveThreadRunning = false;
 }
 
 uint32 UChanneldConnection::AddRpcCallback(const FChanneldMessageHandlerFunc& HandlerFunc)
@@ -547,7 +555,7 @@ void UChanneldConnection::Send(Channeld::ChannelId ChId, uint32 MsgType, google:
 	SendRaw(ChId, MsgType, Msg.SerializeAsString(), Broadcast, HandlerFunc);
 
 	if (MsgType < channeldpb::USER_SPACE_START)
-		UE_LOG(LogChanneld, Verbose, TEXT("Send message %s to channel %d"), UTF8_TO_TCHAR(channeldpb::MessageType_Name((channeldpb::MessageType)MsgType).c_str()), ChId);
+		UE_LOG(LogChanneld, Verbose, TEXT("Send message %s to channel %u"), UTF8_TO_TCHAR(channeldpb::MessageType_Name((channeldpb::MessageType)MsgType).c_str()), ChId);
 }
 
 void UChanneldConnection::SendRaw(Channeld::ChannelId ChId, uint32 MsgType, const std::string& MsgBody, channeldpb::BroadcastType Broadcast /*= channeldpb::NO_BROADCAST*/, const FChanneldMessageHandlerFunc& HandlerFunc /*= nullptr*/)
@@ -580,7 +588,7 @@ void UChanneldConnection::SendRaw(Channeld::ChannelId ChId, uint32 MsgType, cons
 	*/
 
 	if (MsgType >= channeldpb::USER_SPACE_START && bShowUserSpaceMessageLog)
-		UE_LOG(LogChanneld, Verbose, TEXT("Send user-space message to channel %d, stubId=%d, type=%d, bodySize=%d)"), ChId, StubId, MsgType, MsgBody.size());
+		UE_LOG(LogChanneld, Verbose, TEXT("Send user-space message to channel %u, stubId=%d, type=%d, bodySize=%d)"), ChId, StubId, MsgType, MsgBody.size());
 }
 
 void UChanneldConnection::Forward(Channeld::ChannelId ChId, uint32 MsgType, const google::protobuf::Message& Msg, Channeld::ConnectionId ClientConnId)
@@ -617,6 +625,17 @@ FChanneldMessageHandlerFunc WrapMessageHandler(const TFunction<void(const MsgCla
 	return [Callback](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 	{
 		Callback(static_cast<const MsgClass*>(Msg));
+	};
+}
+
+template <typename MsgClass>
+FChanneldMessageHandlerFunc WrapMessageHandler(const TFunction<void(Channeld::ChannelId, const MsgClass*)>& Callback)
+{
+	if (Callback == nullptr)
+		return nullptr;
+	return [Callback](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+	{
+		Callback(ChId, static_cast<const MsgClass*>(Msg));
 	};
 }
 
@@ -846,7 +865,7 @@ void UChanneldConnection::HandleSubToChannel(UChanneldConnection* Conn, Channeld
 		{
 			if (SubMsg->has_suboptions())
 			{
-				UE_LOG(LogChanneld, Verbose, TEXT("Merged the SubOptions of the channel %d: %s"), ChId, UTF8_TO_TCHAR(SubMsg->suboptions().ShortDebugString().c_str()));
+				UE_LOG(LogChanneld, Verbose, TEXT("Merged the SubOptions of the channel %u: %s"), ChId, UTF8_TO_TCHAR(SubMsg->suboptions().ShortDebugString().c_str()));
 				// Merge the SubOptions if the subscription already exists
 				ExistingSub->Merge(*SubMsg);
 			}

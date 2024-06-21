@@ -42,8 +42,10 @@ namespace ChanneldReplicatorGeneratorUtils
 		AController::StaticClass(),
 		AGameStateBase::StaticClass(),
 		APawn::StaticClass(),
-		APlayerController::StaticClass(),
-		APlayerState::StaticClass(),
+		// Since v0.7.2: Use generated code
+		//APlayerController::StaticClass(),
+		// Since v0.7.4: Use generated code
+		// APlayerState::StaticClass(),
 		UActorComponent::StaticClass(),
 		USceneComponent::StaticClass(),
 		UStaticMeshComponent::StaticClass(),

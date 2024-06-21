@@ -31,7 +31,7 @@ void USpatialMasterServerView::InitServer()
 	Connection->AddMessageHandler(channeldpb::SUB_TO_CHANNEL, [&](UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 	{
 		auto SubResultMsg = static_cast<const channeldpb::SubscribedToChannelResultMessage*>(Msg);
-		UE_LOG(LogChanneld, Log, TEXT("[Server] Sub %s conn %d to %s channel %d, data access: %s"),
+		UE_LOG(LogChanneld, Log, TEXT("[Server] Sub %s conn %d to %s channel %u, data access: %s"),
 			SubResultMsg->conntype() == channeldpb::CLIENT ? TEXT("client") : TEXT("server"),
 			SubResultMsg->connid(),
 			UTF8_TO_TCHAR(channeldpb::ChannelType_Name(SubResultMsg->channeltype()).c_str()),
@@ -68,25 +68,13 @@ void USpatialMasterServerView::InitServer()
 				channeldpb::ChannelSubscriptionOptions NonAuthoritySubOptions;
 				NonAuthoritySubOptions.set_dataaccess(channeldpb::READ_ACCESS);
 				NonAuthoritySubOptions.set_fanoutintervalms(ClientFanOutIntervalMs);
-				NonAuthoritySubOptions.set_fanoutdelayms(ClientFanOutDelayMs);
 
+				NonAuthoritySubOptions.set_fanoutdelayms(ClientFanOutDelayMs);
 				// The start spatial channelId MUST be sent at first.
 				Connection->SubConnectionToChannel(ClientConnId, StartChannelId, &NonAuthoritySubOptions);
-
-				/* The spatial server will sub the client to the spatial channels according to the interest settings.
-				// Delay the sub of other spatial channels, so the client can treat the first spatial channelId as the one to log in.
-				FTimerHandle Handle;
-				GetWorld()->GetTimerManager().SetTimer(Handle, [&, StartChannelId, ClientConnId, NonAuthoritySubOptions]()
-				{
-					for (const auto SpatialChId : AllSpatialChannelIds)
-					{
-						if (SpatialChId != StartChannelId)
-						{
-							Connection->SubConnectionToChannel(ClientConnId, SpatialChId, &NonAuthoritySubOptions);
-						}
-					}
-				}, 1, false, 0.5f);
-				*/
+				// Next up: USpatialChannelDataView::ClientHandleSubToChannel
+				
+				// The spatial server will sub the client to the other spatial channels according to the interest settings.
 			});
 		}
 	});
@@ -116,7 +104,7 @@ void USpatialMasterServerView::InitServer()
 		for (auto SpatialChId : ResultMsg->spatialchannelid())
 		{
 			AllSpatialChannelIds.Emplace(SpatialChId, ResultMsg->ownerconnid());
-			UE_LOG(LogChanneld, Verbose, TEXT("Added spatial channel %d"), SpatialChId);
+			UE_LOG(LogChanneld, Verbose, TEXT("Added spatial channel %u"), SpatialChId);
 		}
 	});
 
@@ -125,6 +113,8 @@ void USpatialMasterServerView::InitServer()
 		auto RemoveMsg = static_cast<const channeldpb::RemoveChannelMessage*>(Msg);
 		AllSpatialChannelIds.Remove(RemoveMsg->channelid());
 	});
+
+	Connection->RegisterMessageHandler(channeldpb::SPATIAL_CHANNELS_READY, new channeldpb::SpatialChannelsReadyMessage, this, &USpatialMasterServerView::HandleSpatialChannelsReady);
 
 	channeldpb::ChannelSubscriptionOptions GlobalSubOptions;
 	GlobalSubOptions.set_dataaccess(channeldpb::WRITE_ACCESS);
@@ -161,9 +151,30 @@ void USpatialMasterServerView::OnClientPostLogin(AGameModeBase* GameMode, APlaye
 	if (Comp)
 	{
 		NewPlayerConn->SendSpawnMessage(GameMode->GameState, ENetRole::ROLE_SimulatedProxy);
+		NewPlayerConn->SendSpawnMessage(GameMode->GetWorldSettings(), ENetRole::ROLE_SimulatedProxy);
 	}
 	else
 	{
-		UE_LOG(LogChanneld, Warning, TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn the GameStateBase in the client."));
+		UE_LOG(LogChanneld, Warning, TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn the GameState to the client."));
+	}
+}
+
+void USpatialMasterServerView::HandleSpatialChannelsReady(UChanneldConnection* _, Channeld::ChannelId ChId,
+	const google::protobuf::Message* Msg)
+{
+	for(TActorIterator<AActor> It(GetWorld(), AActor::StaticClass()); It; ++It)
+	{
+		AActor* Actor = *It;
+		FNetworkGUID NetId = GetNetId(Actor);
+		// Create the static object's entity channel from the master server, so that they will only be created once.
+		// channeld will set the entity channel's owner to the owner of the spatial channel if the entity data has SpatialInfo.
+		if (NetId.IsStatic() && Actor->GetIsReplicated() && IsObjectProvider(Actor))
+		{
+			channeldpb::ChannelSubscriptionOptions SubOptions;
+			SubOptions.set_dataaccess(channeldpb::WRITE_ACCESS);
+			Connection->CreateEntityChannel(Channeld::GlobalChannelId, Actor, NetId.Value, TEXT(""), &SubOptions, GetEntityData(Actor));
+			
+			Actor->SetRole(ROLE_SimulatedProxy);
+		}
 	}
 }

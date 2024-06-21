@@ -10,6 +10,7 @@
 ** [Channel Data Schema](channel-data-schema.md)
 ** [Cloud Deployment Tool](cloud-deployment-tool.md)
 ** [Recommended Workflows](recommended-workflow.md)
+** [World Settings](world-settings.md)
 
 * Advanced Topics
 ** [Comparison with the native UE and alternatives](native-ue-comparison.md)
@@ -20,6 +21,6 @@
 
 -----
 - **Links**
-  - [Github Repo](https://github.com/metaworking/channeld-ue-plugins)
+  - [Github Repo](https://github.com/metaworking/channeld-ue-plugin)
   - [Example Project](https://github.com/metaworking/channeld-ue-demos)
   - [channeld](https://github.com/metaworking/channeld)

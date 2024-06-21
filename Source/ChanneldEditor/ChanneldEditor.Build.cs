@@ -62,6 +62,7 @@ public class ChanneldEditor : ModuleRules
                 "EngineSettings",
                 "Json",
                 "JsonUtilities",
+                "DerivedDataCache",
 #if UE_5_0_OR_LATER
                 "DeveloperToolSettings",
                 "ToolMenus",

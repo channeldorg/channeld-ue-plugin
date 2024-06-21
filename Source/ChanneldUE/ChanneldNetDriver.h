@@ -45,6 +45,8 @@ public:
 	// Send packets to channeld by calling ChanneldConnection.TickOutgoing()
 	virtual void TickFlush(float DeltaSeconds) override;
 
+	virtual void SetWorld(UWorld* InWorld) override;
+
 	virtual class ISocketSubsystem* GetSocketSubsystem() override;
 	virtual FSocket* GetSocket();
 	// Client: send raw packet to server via channeld
@@ -100,10 +102,17 @@ protected:
 	TSharedRef<Channeld::ChannelId> LowLevelSendToChannelId = MakeShared<Channeld::ChannelId>(Channeld::InvalidChannelId);
 
 private:
-	
-	const FName ServerMovePackedFuncName = FName("ServerMovePacked");
-	const FName ClientMoveResponsePackedFuncName = FName("ClientMoveResponsePacked");
-	const FName ServerUpdateCameraFuncName = FName("ServerUpdateCamera");
+
+	const TSet<FName> NoLoggingFuncNames = {
+		FName("ServerMovePacked"),
+		FName("ClientMoveResponsePacked"),
+		FName("ServerUpdateCamera"),
+		FName("ServerSendLatestAsyncPhysicsTimestamp"),
+		FName("ServerRecvClientInputFrame"),
+		FName("ClientCorrectionAsyncPhysicsTimestamp"),
+		FName("ServerUpdateLevelVisibility"),
+		FName("ClientAckUpdateLevelVisibility"),
+	};
 
 	// Prevent the engine from GC the connection
 	UPROPERTY()
@@ -126,6 +135,10 @@ private:
 	// We need to skip these actors in OnServerSpawnedActor(), and actually handle them in their BeginPlay().
 	TSet<TWeakObjectPtr<AActor>> ServerDeferredSpawns;
 
+	// Spawn messages that client is unable to handle as the client travel is ongoing and SetWorld() is not called yet.
+	// Generally are the static objects sent from the spatial servers.
+	TArray<TSharedRef<unrealpb::SpawnObjectMessage>> ClientDeferredSpawnMessages;
+
 	void OnChanneldAuthenticated(UChanneldConnection* Conn);
 	void OnUserSpaceMessageReceived(uint32 MsgType, Channeld::ChannelId ChId, Channeld::ConnectionId ClientConnId, const std::string& Payload);
 	void OnReceivedRPC(const unrealpb::RemoteFunctionMessage& RpcMsg);
@@ -135,3 +148,13 @@ private:
 
 	UChanneldGameInstanceSubsystem* GetSubsystem() const;
 };
+
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 3
+// For hacking the FNetGUIDCache class to access its private members
+class FNetGUIDCacheCopy
+{
+public:
+	uint8 PublicMembers[0x158];
+	uint64 NetworkGuidIndex[2];
+};
+#endif
