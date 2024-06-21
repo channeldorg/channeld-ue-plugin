@@ -43,7 +43,7 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 [channeld网关服务代码仓库](https://github.com/metaworking/channeld)
 
 ## Engine Versions Support Matrix
-| Components | UE 4.27.2 | UE 5.1.1 | UE 5.2.1 |
+| Components | UE 4.27.2 | UE 5.2.1 | UE 5.3.2 |
 | ------ | ------ | ------ |------ |
 | Getting Started | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | Demos Project | :white_check_mark: | :white_check_mark: | :white_check_mark: |
@@ -52,7 +52,7 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 
 `*` Need to turn off `Live Coding` in order to hot-reload the generated code.
 ## 引擎版本支持
-| 覆盖功能 | UE 4.27.2 | UE 5.1.1 | UE 5.2.1 |
+| 覆盖功能 | UE 4.27.2 | UE 5.2.1 | UE 5.3.2 |
 | ------ | ------ | ------ |------ |
 | 快速开始文档 | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | 示例项目 | :white_check_mark: | :white_check_mark: | :white_check_mark: |
