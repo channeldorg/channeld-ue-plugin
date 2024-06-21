@@ -224,7 +224,7 @@ bool UChanneldReplicationComponent::UpdateChannelData(google::protobuf::Message*
 		uint32 NetGUID = Replicator->GetNetGUID();
 		if (NetGUID == 0)
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Replicator of '%s' doesn't has a NetGUID yet, skip setting channel data"), *Replicator->GetTargetClass()->GetName());
+			UE_LOG(LogChanneld, Warning, TEXT("%s Replicator of '%s' doesn't has a NetGUID yet, skip setting channel data"), *Replicator->GetTargetClass()->GetName(), *GetNameSafe(Replicator->GetTargetObject()));
 			continue;
 		}
 		
