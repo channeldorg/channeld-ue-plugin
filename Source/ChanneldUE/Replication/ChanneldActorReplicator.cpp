@@ -4,6 +4,8 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/GameStateBase.h"
 
+FOnReplicatedLocation FChanneldActorReplicator::OnReplicatedLocation;
+
 FChanneldActorReplicator::FChanneldActorReplicator(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
 {
 	Actor = CastChecked<AActor>(InTargetObj);
@@ -361,6 +363,7 @@ void FChanneldActorReplicator::OnStateChanged(const google::protobuf::Message* I
 		if (NewState->replicatedmovement().has_location())
 		{
 			ChanneldUtils::SetVectorFromPB(ReplicatedMovementPtr->Location, NewState->replicatedmovement().location());
+			OnReplicatedLocation.Broadcast(Actor.Get(), ReplicatedMovementPtr->Location);
 		}
 		if (NewState->replicatedmovement().has_rotation())
 		{

@@ -83,11 +83,12 @@ public:
 	// Gives the view a chance to override the NetRole, OwningChannelId, OwningConnId, or the Location parameter.
 	virtual void SendSpawnToConn(UObject* Obj, UChanneldNetConnection* NetConn, uint32 OwningConnId);
 	// The NetDriver spawned an object from the Spawn message. Executed on clients and interested servers.
-	virtual void OnNetSpawnedObject(UObject* Obj, const Channeld::ChannelId ChId) {}
+	// @SpawnMsg The message that causes the spawn. If nullptr, the object is spawned from the existing data.
+	virtual void OnNetSpawnedObject(UObject* Obj, const Channeld::ChannelId ChId, const unrealpb::SpawnObjectMessage* SpawnMsg = nullptr) {}
 	virtual void OnDestroyedActor(AActor* Actor, const FNetworkGUID NetId);
 	virtual void SetOwningChannelId(const FNetworkGUID NetId, Channeld::ChannelId ChId);
 	virtual Channeld::ChannelId GetOwningChannelId(const FNetworkGUID NetId) const;
-	virtual Channeld::ChannelId GetOwningChannelId(AActor* Actor) const;
+	virtual Channeld::ChannelId GetOwningChannelId(UObject* Obj) const;
 
 	virtual bool SendMulticastRPC(AActor* Actor, const FString& FuncName, TSharedPtr<google::protobuf::Message> ParamsMsg, const FString& SubObjectPathName);
 

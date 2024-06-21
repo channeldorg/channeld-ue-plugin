@@ -6,6 +6,8 @@
 #include "unreal_common.pb.h"
 #include "GameFramework/Actor.h"
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnReplicatedLocation, AActor*, FVector&);
+
 class CHANNELDUE_API FChanneldActorReplicator : public FChanneldReplicatorBase
 {
 public:
@@ -19,6 +21,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnStateChanged(const google::protobuf::Message* NewState) override;
 	//~End FChanneldReplicatorBase Interface
+
+	static FOnReplicatedLocation OnReplicatedLocation;
 
 protected:
 	TWeakObjectPtr<AActor> Actor;

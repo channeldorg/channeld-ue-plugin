@@ -165,7 +165,8 @@ void UChanneldNetDriver::HandleSpawnObject(TSharedRef<unrealpb::SpawnObjectMessa
 		if (ChannelDataView.IsValid())
 		{
 			ChannelDataView->AddObjectProviderToDefaultChannel(NewObj);
-			ChannelDataView->OnNetSpawnedObject(NewObj, SpawnMsg->channelid());
+			const unrealpb::SpawnObjectMessage& Msg = *SpawnMsg;
+			ChannelDataView->OnNetSpawnedObject(NewObj, SpawnMsg->channelid(), &Msg);
 		}
 
 		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawned object from message: %s, NetId: %u, owning channel: %u, local role: %d, location: %s"),
@@ -421,7 +422,6 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 			Subsystem->OnViewInitialized.AddWeakLambda(this, [&](UChannelDataView* InView)
 			{
 				ChannelDataView = InView;
-				// InView->NetDriver = TSharedPtr<UChanneldNetDriver>(this);
 			});
 		}
 
@@ -782,8 +782,8 @@ void UChanneldNetDriver::OnServerBeginPlay(UChanneldReplicationComponent* RepCom
 	// Actor has deferred component registration, so we need to wait for BeginPlay to perform the spawn logic. E.g. BP_TestCube.
 	if (ServerDeferredSpawns.Contains(Actor))
 	{
-		OnServerSpawnedActor(Actor);
 		ServerDeferredSpawns.Remove(Actor);
+		OnServerSpawnedActor(Actor);
 	}
 	// Actor's ChanneldReplicationComponent is not registered when spawned, so we need to wait for BeginPlay to perform the spawn logic. E.g. BP_TestNPC.
 	else if (RepComp->AddedToChannelIds.Num() == 0)
