@@ -126,7 +126,7 @@ Network LOD is defined as follows:
 - UE Client x 1000
 
 ## Grafana dashboard:
-![](../images/benchmark_entity_lod.png)
+![](images/benchmark_entity_lod.png)
 
 ## Analysis:
 1. Compared with scenario 1, the number of CCU that channeld can handle has increased by 5-10 times. This is due to the fact that the Global channel has offloaded some of the pressure to the Entity channels
