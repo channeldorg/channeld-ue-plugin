@@ -3,7 +3,7 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 
 ![](../images/benchmark_entity_lod.gif)
 
-![](images/cross_server_physics.gif)
+![](../images/cross_server_physics.gif)
 
 ## 特性
 - 无需修改引擎代码，便可将单个UE专用服务器的最大承载人数提升到100-200人 ([性能测试](zh/benchmark.md))
