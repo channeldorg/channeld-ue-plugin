@@ -25,18 +25,18 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 - 支持一键上云
 
 ## Links
-[Getting Started](https://metaworking.github.io/channeld-ue-plugin/#/installation)
+[Getting Started](https://www.channeld.org/#/installation)
 
-[Documentation](https://metaworking.github.io/channeld-ue-plugin/)
+[Documentation](https://www.channeld.org/#/?id=channeldue-plugin)
 
 [ChanneldUE Example Project](https://github.com/metaworking/channeld-ue-demos)
 
 [Code repo of channeld, the Gateway Service behind ChanneldUE](https://github.com/metaworking/channeld)
 
 ## 链接
-[快速开始](https://metaworking.github.io/channeld-ue-plugin/#/zh/installation)
+[快速开始](https://www.channeld.org/#/zh/installation)
 
-[中文文档](https://metaworking.github.io/channeld-ue-plugin/#/zh/)
+[中文文档](https://www.channeld.org/#/zh/)
 
 [ChanneldUE示例项目](https://github.com/metaworking/channeld-ue-demos)
 
