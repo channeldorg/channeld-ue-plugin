@@ -158,8 +158,8 @@ package {Declare_ProtoPackageName};
 static const TCHAR* CodeGen_ProtoStateMessageTemplate =
   LR"EOF(
 message {Declare_StateMessageType} {
+{Declare_MessageOptions}
 {Declare_ProtoFields}
-
 {Declare_SubProtoFields}
 }
 )EOF";

@@ -7,6 +7,9 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
+#include "google/protobuf/descriptor.pb.h"
+#include "google/protobuf/map_field.h"
+#include "google/protobuf/reflection.h"
 #include "Replication/ChanneldReplication.h"
 #include "Replication/ChanneldReplicationComponent.h"
 
@@ -29,7 +32,7 @@ void UChannelDataView::RegisterChannelDataType(EChanneldChannelType ChannelType,
 	}
 }
 
-void UChannelDataView::Initialize(UChanneldConnection* InConn)
+void UChannelDataView::Initialize(UChanneldConnection* InConn, bool bShouldRecover)
 {
 	if (Connection == nullptr)
 	{
@@ -39,6 +42,11 @@ void UChannelDataView::Initialize(UChanneldConnection* InConn)
 
 		Connection->AddMessageHandler(channeldpb::CHANNEL_DATA_UPDATE, this, &UChannelDataView::HandleChannelDataUpdate);
 		Connection->AddMessageHandler(channeldpb::UNSUB_FROM_CHANNEL, this, &UChannelDataView::HandleUnsub);
+
+		if (bShouldRecover)
+		{
+			Connection->OnRecoverChannelData.AddUObject(this, &UChannelDataView::RecoverChannelData);
+		}
 	}
 
 	const auto Settings = GetMutableDefault<UChanneldSettings>();
@@ -54,11 +62,11 @@ void UChannelDataView::Initialize(UChanneldConnection* InConn)
 		if (InitDelay > 0)
 		{
 			FTimerHandle Handle;
-			GetWorld()->GetTimerManager().SetTimer(Handle, [&](){InitServer();}, 1, false, InitDelay);
+			GetWorld()->GetTimerManager().SetTimer(Handle, [&](){InitServer(bShouldRecover);}, 1, false, InitDelay);
 		}
 		else
 		{
-			InitServer();
+			InitServer(bShouldRecover);
 		}
 	}
 	else if (Connection->IsClient())
@@ -77,7 +85,7 @@ void UChannelDataView::Initialize(UChanneldConnection* InConn)
 	GetChanneldSubsystem()->OnViewInitialized.Broadcast(this);
 }
 
-void UChannelDataView::InitServer()
+void UChannelDataView::InitServer(bool bShouldRecover)
 {
 	NetConnForSpawn = NewObject<UChanneldNetConnection>(GetTransientPackage(), UChanneldNetConnection::StaticClass());
 	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
@@ -98,7 +106,7 @@ void UChannelDataView::InitServer()
 	AddObjectProvider(Channeld::GlobalChannelId, GameState);
 	AddObjectProvider(Channeld::GlobalChannelId, WorldSettings);
 	
-	ReceiveInitServer();
+	ReceiveInitServer(bShouldRecover);
 }
 
 void UChannelDataView::InitClient()
@@ -426,6 +434,28 @@ void UChannelDataView::MoveObjectProvider(Channeld::ChannelId OldChId, Channeld:
 	}
 }
 
+UChanneldNetConnection* UChannelDataView::CreateClientConnection(Channeld::ConnectionId ConnId, Channeld::ChannelId ChId)
+{
+	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())//NetDriver.IsValid())
+	{
+		if (NetDriver->GetClientConnectionMap().Contains(ConnId))
+		{
+			return NetDriver->GetClientConnectionMap()[ConnId];
+		}
+		UChanneldNetConnection* ClientConn = NetDriver->AddChanneldClientConnection(ConnId, ChId);
+		// Create the ControlChannel and set OpenAcked = 1
+		UChannel* ControlChannel = ClientConn->CreateChannelByName(NAME_Control, EChannelCreateFlags::OpenedLocally);
+		ControlChannel->OpenAcked = 1;
+		ControlChannel->OpenPacketId.First = 0;
+		ControlChannel->OpenPacketId.Last = 0;
+		
+		return ClientConn;
+	}
+	
+	UE_LOG(LogChanneld, Error, TEXT("[Server] Failed to create client connection %d: NetDriver is not valid."), ConnId)
+	return nullptr;
+}
+
 void UChannelDataView::OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn)
 {
 	ensureMsgf(NewPlayer->GetComponentByClass(UChanneldReplicationComponent::StaticClass()), TEXT("PlayerController is missing UChanneldReplicationComponent. Failed to spawn PC, GameStateBase, and other pawns in the client."));
@@ -481,6 +511,328 @@ void UChannelDataView::SendExistingActorsToNewPlayer(APlayerController* NewPlaye
 			}
 		}
 	}
+}
+
+bool UChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, google::protobuf::Message* ChannelData)
+{
+	// Only client or recovering server needs to spawn the objects.
+	if (Connection->IsServer() && !Connection->IsRecovering())
+	{
+		return false;
+	}
+
+	EChanneldChannelType ChannelType = GetChanneldSubsystem()->GetChannelTypeByChId(ChId);
+	if (ChannelType == EChanneldChannelType::ECT_Global || ChannelType == EChanneldChannelType::ECT_SubWorld)
+	{
+		// Key: NetId, Value: <Key: class of the state, Value: owningConnId of the state actor>
+		TMap<uint32, TTuple<UClass*, uint32>> UnresolvedStates;
+		
+		for (int i = 0; i < ChannelData->GetDescriptor()->field_count(); i++)
+		{
+			auto Field = ChannelData->GetDescriptor()->field(i);
+			if (Field->is_map())
+			{
+				auto KeysField = Field->message_type()->map_key();
+				auto ValuesField = Field->message_type()->map_value();
+				auto RepeatedStates = ChannelData->GetReflection()->GetRepeatedFieldRef<google::protobuf::Message>(*ChannelData, Field);
+				int StatesNum = RepeatedStates.size();
+				for (int j = 0; j < StatesNum; j++)
+				{
+					auto& KV = RepeatedStates.Get(j, ChannelData);
+					uint32 NetId = KV.GetReflection()->GetUInt32(KV, KeysField);
+					if (HasEverSpawned(NetId))
+					{
+						continue;
+					}
+					auto StateMessage = &KV.GetReflection()->GetMessage(KV, ValuesField);
+					UClass* StateClass = LoadClassFromProto(StateMessage->GetDescriptor());
+					auto& Tuple = UnresolvedStates.FindOrAdd(NetId);
+					if (Tuple.Key == nullptr || StateClass->IsChildOf(Tuple.Key))
+					{
+						Tuple.Key = StateClass;
+					}
+					if (StateMessage->GetDescriptor()->name() == "ActorState")
+					{
+						auto ActorState = static_cast<const unrealpb::ActorState*>(StateMessage);
+						Tuple.Value = ActorState->owningconnid();
+					}
+					// if (CheckUnspawnedChannelDataState(ChId, StateMessage->GetDescriptor(), NetId))
+					// {
+					// 	return true;
+					// }
+				}
+			}
+			// Singleton state
+			else
+			{
+				// return CheckUnspawnedChannelDataState(ChId, Field->message_type());
+				UClass* StateClass = LoadClassFromProto(Field->message_type());
+				if (StateClass == nullptr)
+				{
+					continue;
+				}
+				uint32 NetId = FStaticGuidRegistry::GetStaticObjectExportedNetGUID(*StateClass->GetPathName());
+				if (NetId == 0)
+				{
+					UE_LOG(LogChanneld, Warning, TEXT("Proto field '%s' is not in FStaticGuidRegistry, channel id: %u"), UTF8_TO_TCHAR(Field->full_name().c_str()), ChId);
+					continue;
+				}
+				if (HasEverSpawned(NetId))
+				{
+					continue;
+				}
+				auto& Tuple = UnresolvedStates.FindOrAdd(NetId);
+				if (Tuple.Key == nullptr || StateClass->IsChildOf(Tuple.Key))
+				{
+					Tuple.Key = StateClass;
+				}
+			}
+		}
+
+		for (auto Pair : UnresolvedStates)
+		{
+			uint32 NetId = Pair.Key;
+			UClass* StateClass = Pair.Value.Key;
+			// FIXME: could be the old connId before the recovery!
+			uint32 OwningConnId = Pair.Value.Value;
+			UChanneldNetConnection* OwningConn = GetChanneldSubsystem()->GetNetDriver()->GetClientConnectionMap().FindRef(OwningConnId);
+			if (OwningConn == nullptr && Connection->IsServer())
+			{
+				if (OwningConnId == 0)
+				{
+					UE_LOG(LogChanneld, Warning, TEXT("[Server] Failed to create NetConnection %u for %s, NetId: %u"), OwningConnId, *StateClass->GetName(), NetId);
+				}
+				else
+				{
+					OwningConn = CreateClientConnection(OwningConnId, ChId);
+					UE_LOG(LogChanneld, Log, TEXT("[Server] Created NetConnection %u for %s, NetId: %u"), OwningConnId, *StateClass->GetName(), NetId);
+				}
+			}
+			FString ClassPath = StateClass->GetPathName();
+			unrealpb::UnrealObjectRef ObjRef;
+			ObjRef.set_netguid(NetId);
+			ObjRef.set_classpath(TCHAR_TO_UTF8(*ClassPath));
+			ObjRef.set_owningconnid(OwningConnId);
+
+			UE_LOG(LogChanneld, Verbose, TEXT("Spawning object from unresolved channel data state, ClassPath: %s, NetId: %u"), *ClassPath, ObjRef.netguid());
+			UObject* NewObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld(), true, OwningConn);
+			if (NewObj)
+			{
+				AddObjectProvider(ChId, NewObj);
+
+				if (Connection->IsServer() && NewObj->IsA<APlayerController>() && OwningConn != nullptr)
+				{
+					Cast<APlayerController>(NewObj)->NetConnection = OwningConn;
+				}
+			}
+		}
+	}
+	else if (ChannelType == EChanneldChannelType::ECT_Entity)
+	{
+		if (HasEverSpawned(ChId))
+		{
+			return false;
+		}
+		
+		auto ObjRefField = ChannelData->GetDescriptor()->field(0);
+		if (ObjRefField == nullptr)
+		{
+			return true;
+		}
+		if (!ensureMsgf(ObjRefField->name() == "objRef", TEXT("EntityChannelData's first field should be 'objRef' but is '%s'"), UTF8_TO_TCHAR(ObjRefField->name().c_str())))
+		{
+			return true;
+		}
+		if (!ChannelData->GetReflection()->HasField(*ChannelData, ObjRefField))
+		{
+			return true;
+		}
+	
+		auto& ObjRef = static_cast<const unrealpb::UnrealObjectRef&>(ChannelData->GetReflection()->GetMessage(*ChannelData, ObjRefField));
+		TCHAR* ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
+		if (UClass* EntityClass = LoadObject<UClass>(nullptr, ClassPath))
+		{
+			// Do not resolve other PlayerController or PlayerState on the client.
+			if (Connection->IsClient() && (EntityClass->IsChildOf(APlayerController::StaticClass()) || EntityClass->IsChildOf(APlayerState::StaticClass())))
+			{
+				return true;
+			}
+		}
+
+		UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from unresolved EntityChannelData, NetId: %u"), ObjRef.netguid());
+		UObject* NewObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld());
+		if (NewObj)
+		{
+			AddObjectProvider(ChId, NewObj);
+			/* We don't know the spatial channel id of the entity yet.
+			OnNetSpawnedObject(NewObj, ChId);
+			*/
+		}
+	}
+	else if (ChannelType == EChanneldChannelType::ECT_Spatial)
+	{
+		auto SpatialChannelData = static_cast<const unrealpb::SpatialChannelData*>(ChannelData);
+		for (auto& Pair : SpatialChannelData->entities())
+		{
+			if (HasEverSpawned(Pair.first))
+			{
+				continue;
+			}
+
+			auto& ObjRef = Pair.second.objref();
+			TCHAR* ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
+			if (UClass* EntityClass = LoadObject<UClass>(nullptr, ClassPath))
+			{
+				// Do not resolve other PlayerController on the client.
+				if (EntityClass->IsChildOf(APlayerController::StaticClass()) || EntityClass->IsChildOf(APlayerState::StaticClass()))
+				{
+					continue;
+				}
+			}
+
+			// Set up the mapping before actually spawn it, so AddProvider() can find the mapping.
+			SetOwningChannelId(ObjRef.netguid(), ChId);
+			
+			// Also add the mapping of all context NetGUIDs
+			for (auto& ContextObj : ObjRef.context())
+			{
+				SetOwningChannelId(ContextObj.netguid(), ChId);
+			}
+
+			UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from unresolved SpatialEntityState, NetId: %u"), ObjRef.netguid());
+			UObject* NewObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld());
+			if (NewObj)
+			{
+				AddObjectProviderToDefaultChannel(NewObj);
+				OnNetSpawnedObject(NewObj, ChId);
+			}
+		}
+	}
+	
+	return false;
+}
+
+bool UChannelDataView::CheckUnspawnedChannelDataState(Channeld::ChannelId ChId, const google::protobuf::Descriptor* Descriptor, uint32 NetId)
+{
+	google::protobuf::MessageOptions MessageOptions = Descriptor->options();
+	if (!MessageOptions.HasExtension(unrealpb::unreal_class_path))
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Proto message '%s' has no 'unreal_class_path' option, channel id: %u"), UTF8_TO_TCHAR(Descriptor->full_name().c_str()), ChId);
+		return false;
+	}
+	std::string strClassPath = MessageOptions.GetExtension(unrealpb::unreal_class_path);
+	if (strClassPath.length() == 0)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Proto message '%s' has no 'unreal_class_path' option, channel id: %u"), UTF8_TO_TCHAR(Descriptor->full_name().c_str()), ChId);
+		return false;
+	}
+	TCHAR* ClassPath = UTF8_TO_TCHAR(strClassPath.c_str());
+	UClass* ObjClass = LoadObject<UClass>(nullptr, ClassPath);
+	if (ObjClass == nullptr)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Failed to load class from unreal_class_path: %s, proto field: %s, channel id: %u"), *ClassPath, UTF8_TO_TCHAR(Descriptor->full_name().c_str()), ChId);
+		return false;
+	}
+	
+	// Do not resolve other PlayerController or PlayerState on the client.
+	if (Connection->IsClient() && (ObjClass->IsChildOf(APlayerController::StaticClass()) || ObjClass->IsChildOf(APlayerState::StaticClass())))
+	{
+		return true;
+	}
+	
+	if (NetId == 0)
+	{
+		NetId = FStaticGuidRegistry::GetStaticObjectExportedNetGUID(ClassPath);
+	}
+	if (NetId == 0)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Proto field '%s' is not in FStaticGuidRegistry, channel id: %u"), UTF8_TO_TCHAR(Descriptor->full_name().c_str()), ChId);
+		return false;
+	}
+
+	if (HasEverSpawned(NetId))
+	{
+		return false;
+	}
+	
+	unrealpb::UnrealObjectRef ObjRef;
+	ObjRef.set_netguid(NetId);
+	ObjRef.set_classpath(strClassPath);
+
+	UE_LOG(LogChanneld, Verbose, TEXT("[Client] Spawning object from unresolved proto field '%s', NetId: %u"), UTF8_TO_TCHAR(Descriptor->full_name().c_str()), ObjRef.netguid());
+	UObject* NewObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld());
+	if (NewObj)
+	{
+		AddObjectProvider(ChId, NewObj);
+
+		if (Connection->IsServer() && NewObj->IsA<APlayerController>())
+		{
+			
+		}
+	}
+	return false;
+}
+
+UClass* UChannelDataView::LoadClassFromProto(const google::protobuf::Descriptor* Descriptor)
+{
+	google::protobuf::MessageOptions MessageOptions = Descriptor->options();
+	if (!MessageOptions.HasExtension(unrealpb::unreal_class_path))
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Proto message '%s' has no 'unreal_class_path' option"), UTF8_TO_TCHAR(Descriptor->full_name().c_str()));
+		return nullptr;
+	}
+	std::string strClassPath = MessageOptions.GetExtension(unrealpb::unreal_class_path);
+	if (strClassPath.length() == 0)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Proto message '%s' has no 'unreal_class_path' option"), UTF8_TO_TCHAR(Descriptor->full_name().c_str()));
+		return nullptr;
+	}
+	TCHAR* ClassPath = UTF8_TO_TCHAR(strClassPath.c_str());
+	UClass* Class = LoadObject<UClass>(nullptr, ClassPath);
+	if (Class == nullptr)
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("Failed to load class from unreal_class_path: %s, proto field: %s"), *ClassPath, UTF8_TO_TCHAR(Descriptor->full_name().c_str()));
+		return nullptr;
+	}
+	return Class;
+}
+
+bool UChannelDataView::HasEverSpawned(uint32 NetId) const
+{
+	auto NetDriver = GetChanneldSubsystem()->GetNetDriver();
+	if (!NetDriver)
+	{
+		return false;
+	}
+
+	FNetworkGUID NetGUID(NetId);
+	// Don't use IsGUIDRegistered - the object may still exist in GuidCache but has been deleted.
+	if (auto CacheObj = NetDriver->GuidCache->ObjectLookup.Find(NetGUID))
+	{
+		// Already spawned
+		if (CacheObj->Object.IsValid())
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void UChannelDataView::RecoverChannelData(Channeld::ChannelId ChId, const google::protobuf::Any& AnyData)
+{
+	auto UpdateData = ParseAndMergeUpdateData(ChId, AnyData);
+	if (UpdateData == nullptr)
+	{
+		return;
+	}
+
+	if (CheckUnspawnedObject(ChId, UpdateData))
+	{
+		UE_LOG(LogChanneld, Verbose, TEXT("Resolving unspawned object, the channel data will not be consumed."));
+		return;
+	}
+	
+	ConsumeChannelUpdateData(ChId, UpdateData);
 }
 
 FNetworkGUID UChannelDataView::GetNetId(UObject* Obj, bool bAssignOnServer/* = true*/) const
@@ -891,16 +1243,14 @@ void UChannelDataView::ServerHandleClientUnsub(Channeld::ConnectionId ClientConn
 	}
 }
 
-void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+google::protobuf::Message* UChannelDataView::ParseAndMergeUpdateData(Channeld::ChannelId ChId, const google::protobuf::Any& AnyData)
 {
-	auto UpdateMsg = static_cast<const channeldpb::ChannelDataUpdateMessage*>(Msg);
-	
-	FString TypeUrl(UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
+	FString TypeUrl(UTF8_TO_TCHAR(AnyData.type_url().c_str()));
 	auto MsgTemplate = ChannelDataTemplatesByTypeUrl.FindRef(TypeUrl);
 	if (MsgTemplate == nullptr)
 	{
 		UE_LOG(LogChanneld, Error, TEXT("Unable to find channel data template by typeUrl: %s"), *TypeUrl);
-		return;
+		return nullptr;
 	}
 
 	google::protobuf::Message* UpdateData;
@@ -914,33 +1264,47 @@ void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channe
 		ReceivedUpdateDataInChannels.Add(ChId, UpdateData);
 	}
 
-	UE_LOG(LogChanneld, Verbose, TEXT("Received %s channel %u update(%d B): %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), ChId, UpdateMsg->data().value().size(), UTF8_TO_TCHAR(UpdateMsg->DebugString().c_str()));
+	FString ChannelTypeName = GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId);
+	UE_LOG(LogChanneld, Verbose, TEXT("Received %s channel %u update(%llu B): %s"), *ChannelTypeName, ChId, AnyData.value().size(), *TypeUrl);
 
 	const FName MessageName = UTF8_TO_TCHAR(UpdateData->GetTypeName().c_str());
 	auto Processor = ChanneldReplication::FindChannelDataProcessor(MessageName);
 	if (Processor)
 	{
 		// Use the message template as the temporary message to unpack the any data.
-		if (!UpdateMsg->data().UnpackTo(MsgTemplate))
+		if (!AnyData.UnpackTo(MsgTemplate))
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Failed to unpack %s channel data, typeUrl: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
-			return;
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to unpack %s channel data, typeUrl: %s"), *ChannelTypeName, *TypeUrl);
+			return nullptr;
 		}
 		if (!Processor->Merge(MsgTemplate, UpdateData))
 		{
-			UE_LOG(LogChanneld, Warning, TEXT("Failed to merge %s channel data: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(MsgTemplate->DebugString().c_str()));
-			return;
+			UE_LOG(LogChanneld, Warning, TEXT("Failed to merge %s channel data: %s"), *ChannelTypeName, UTF8_TO_TCHAR(MsgTemplate->DebugString().c_str()));
+			return nullptr;
 		}
 	}
 	else
 	{
 		UE_LOG(LogChanneld, Log, TEXT("ChannelDataProcessor not found for type: %s, fall back to ParsePartialFromString. Risk: The state with the same NetId will be overwritten instead of merged."), *MessageName.ToString());
 		// Call ParsePartial instead of Parse to keep the existing value from being reset.
-		if (!UpdateData->ParsePartialFromString(UpdateMsg->data().value()))
+		if (!UpdateData->ParsePartialFromString(AnyData.value()))
 		{
-			UE_LOG(LogChanneld, Error, TEXT("Failed to parse %s channel data, typeUrl: %s"), *GetChanneldSubsystem()->GetChannelTypeNameByChId(ChId), UTF8_TO_TCHAR(UpdateMsg->data().type_url().c_str()));
-			return;
+			UE_LOG(LogChanneld, Error, TEXT("Failed to parse %s channel data, typeUrl: %s"), *ChannelTypeName, *TypeUrl);
+			return nullptr;
 		}
+	}
+
+	return UpdateData;
+}
+
+void UChannelDataView::HandleChannelDataUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	auto UpdateMsg = static_cast<const channeldpb::ChannelDataUpdateMessage*>(Msg);
+
+	auto UpdateData = ParseAndMergeUpdateData(ChId, UpdateMsg->data());
+	if (UpdateData == nullptr)
+	{
+		return;
 	}
 
 	if (CheckUnspawnedObject(ChId, UpdateData))

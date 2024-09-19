@@ -17,6 +17,17 @@
 class CHANNELDUE_API ChanneldUtils
 {
 public:
+	static FString GetUniquePIT()
+	{
+		TArray<uint8> MacAddr = FPlatformMisc::GetMacAddress();
+		FString Result;
+		for (TArray<uint8>::TConstIterator it(MacAddr);it;++it)
+		{
+			Result += FString::Printf(TEXT("%02x"),*it);
+		}
+		return FMD5::HashAnsiString(*Result);
+	}
+	
 	static bool IsServer(const UWorld* World)
 	{
 		if (World == nullptr)

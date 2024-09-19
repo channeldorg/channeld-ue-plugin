@@ -5,7 +5,7 @@
 // i.e. the channel data contains the maps of NetId to state.
 //
 // In this way, the get/set state logic can be implemented based on Protobuf's reflection API.
-// Keep in mind that the reflection implementation is 10-20 times lower than the plain code implementation,
+// Keep in mind that the reflection implementation is 10-20 times slower than the plain code implementation,
 // so it's not recommended to use this processor.
 class CHANNELDUE_API FFlatStatesChannelDataProcessor : IChannelDataProcessor
 {

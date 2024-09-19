@@ -467,7 +467,7 @@ bool UChanneldNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, 
 	{
 		ConnToChanneld->OnAuthenticated.AddUObject(this, &UChanneldNetDriver::OnChanneldAuthenticated);
 
-		ConnToChanneld->Auth(TEXT("test_pit"), TEXT("test_lt"));
+		ConnToChanneld->Auth(ChanneldUtils::GetUniquePIT(), TEXT("test_lt"));
 	}
 
 	return UNetDriver::InitBase(bInitAsClient, InNotify, URL, bReuseAddressAndPort, Error);
@@ -897,6 +897,11 @@ void UChanneldNetDriver::TickDispatch(float DeltaTime)
 // Won't trigger until ClientConnections.Num() > 0
 int32 UChanneldNetDriver::ServerReplicateActors(float DeltaSeconds)
 {
+	if (ConnToChanneld->IsRecovering())
+	{
+		return 0;
+	}
+	
 	int32 Result = 0;
 
 	if (GetMutableDefault<UChanneldSettings>()->bSkipCustomReplication)

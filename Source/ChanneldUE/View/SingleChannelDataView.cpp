@@ -15,10 +15,15 @@ Channeld::ChannelId USingleChannelDataView::GetOwningChannelId(const FNetworkGUI
 	return Channeld::GlobalChannelId;
 }
 
-void USingleChannelDataView::InitServer()
+void USingleChannelDataView::InitServer(bool bShouldRecover)
 {
-	Super::InitServer();
+	Super::InitServer(bShouldRecover);
 
+	if (bShouldRecover)
+	{
+		return;
+	}
+	
 	Connection->CreateChannel(channeldpb::GLOBAL, Metadata, nullptr, nullptr, nullptr,
 		[&](const channeldpb::CreateChannelResultMessage* ResultMsg)
 		{

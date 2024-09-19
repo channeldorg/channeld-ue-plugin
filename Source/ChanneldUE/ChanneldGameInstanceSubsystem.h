@@ -247,7 +247,7 @@ protected:
 
 	void HandleUserSpaceAnyMessage(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 
-	void InitChannelDataView();
+	void InitChannelDataView(bool bShouldRecover);
 };
 
 

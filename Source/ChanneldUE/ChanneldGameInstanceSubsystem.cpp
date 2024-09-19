@@ -221,7 +221,7 @@ void UChanneldGameInstanceSubsystem::ConnectToChanneld(bool& Success, FString& E
 
 	if (ConnectionInstance->Connect(bInitAsClient, Host, Port, Error))
 	{
-		ConnectionInstance->Auth(TEXT("test_pit"), TEXT("test_lt"),
+		ConnectionInstance->Auth(ChanneldUtils::GetUniquePIT(), TEXT("test_lt"),
 			[AuthCallback](const channeldpb::AuthResultMessage* Message)
 			{
 				AuthCallback.ExecuteIfBound(Message->result(), Message->connid());
@@ -560,7 +560,7 @@ void UChanneldGameInstanceSubsystem::HandleAuthResult(UChanneldConnection* Conn,
 
 	if (AuthResultMsg->result() == channeldpb::AuthResultMessage_AuthResult_SUCCESSFUL && AuthResultMsg->connid() == Conn->GetConnId())
 	{
-		InitChannelDataView();
+		InitChannelDataView(AuthResultMsg->shouldrecover());
 	}
 	
 	OnAuth.Broadcast(AuthResultMsg->result(), AuthResultMsg->connid());
@@ -653,7 +653,7 @@ UChanneldNetDriver* UChanneldGameInstanceSubsystem::GetNetDriver()
 	return Cast<UChanneldNetDriver>(GetGameInstance()->GetWorld()->GetNetDriver());
 }
 
-void UChanneldGameInstanceSubsystem::InitChannelDataView()
+void UChanneldGameInstanceSubsystem::InitChannelDataView(bool bShouldRecover)
 {
 	const auto Settings = GetMutableDefault<UChanneldSettings>();
 	auto ChannelDataViewClass = Settings->ChannelDataViewClass;
@@ -677,11 +677,13 @@ void UChanneldGameInstanceSubsystem::InitChannelDataView()
 		if (Settings->DelayViewInitInSeconds > 0)
 		{
 			FTimerHandle Handle;
-			GetWorld()->GetTimerManager().SetTimer(Handle, [&](){ChannelDataView->Initialize(ConnectionInstance);}, 1, false, Settings->DelayViewInitInSeconds);
+			GetWorld()->GetTimerManager().SetTimer(Handle,
+				[&](){ChannelDataView->Initialize(ConnectionInstance, bShouldRecover);},
+				1, false, Settings->DelayViewInitInSeconds);
 		}
 		else
 		{
-			ChannelDataView->Initialize(ConnectionInstance);
+			ChannelDataView->Initialize(ConnectionInstance, bShouldRecover);
 		}
 	}
 	else

@@ -175,6 +175,9 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 					}
 				}
 				// else if (Ref->has_classpath())
+			}
+		}
+
 				if (!IsValid(Obj) && Ref->has_classpath())
 				{
 					FString PathName = UTF8_TO_TCHAR(Ref->classpath().c_str());
@@ -236,8 +239,7 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 						}
 					}
 				}
-			}
-		}
+
 	}
 
 	if (!IsValid(Obj))

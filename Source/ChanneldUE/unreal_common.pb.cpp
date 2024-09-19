@@ -212,9 +212,11 @@ struct GetUnrealObjectRefResultMessageDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GetUnrealObjectRefResultMessageDefaultTypeInternal _GetUnrealObjectRefResultMessage_default_instance_;
 PROTOBUF_CONSTEXPR SyncNetIdMessage_NetIdPath::SyncNetIdMessage_NetIdPath(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.path_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+    /*decltype(_impl_._has_bits_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_.path_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.netid_)*/0u
-  , /*decltype(_impl_._cached_size_)*/{}} {}
+  , /*decltype(_impl_.outernetid_)*/0u} {}
 struct SyncNetIdMessage_NetIdPathDefaultTypeInternal {
   PROTOBUF_CONSTEXPR SyncNetIdMessage_NetIdPathDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -277,6 +279,31 @@ struct SpatialChannelDataDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SpatialChannelDataDefaultTypeInternal _SpatialChannelData_default_instance_;
+PROTOBUF_CONSTEXPR ActorState::ActorState(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_._has_bits_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_.owner_)*/nullptr
+  , /*decltype(_impl_.instigator_)*/nullptr
+  , /*decltype(_impl_.replicatedmovement_)*/nullptr
+  , /*decltype(_impl_.attachmentreplication_)*/nullptr
+  , /*decltype(_impl_.owningconnid_)*/0u
+  , /*decltype(_impl_.localrole_)*/0u
+  , /*decltype(_impl_.removed_)*/false
+  , /*decltype(_impl_.breplicatemovement_)*/false
+  , /*decltype(_impl_.bhidden_)*/false
+  , /*decltype(_impl_.btearoff_)*/false
+  , /*decltype(_impl_.remoterole_)*/0u
+  , /*decltype(_impl_.bcanbedamaged_)*/false} {}
+struct ActorStateDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ActorStateDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ActorStateDefaultTypeInternal() {}
+  union {
+    ActorState _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ActorStateDefaultTypeInternal _ActorState_default_instance_;
 PROTOBUF_CONSTEXPR FRepMovement::FRepMovement(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_._has_bits_)*/{}
@@ -315,31 +342,6 @@ struct FRepAttachmentDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FRepAttachmentDefaultTypeInternal _FRepAttachment_default_instance_;
-PROTOBUF_CONSTEXPR ActorState::ActorState(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_._has_bits_)*/{}
-  , /*decltype(_impl_._cached_size_)*/{}
-  , /*decltype(_impl_.owner_)*/nullptr
-  , /*decltype(_impl_.instigator_)*/nullptr
-  , /*decltype(_impl_.replicatedmovement_)*/nullptr
-  , /*decltype(_impl_.attachmentreplication_)*/nullptr
-  , /*decltype(_impl_.owningconnid_)*/0u
-  , /*decltype(_impl_.localrole_)*/0u
-  , /*decltype(_impl_.removed_)*/false
-  , /*decltype(_impl_.breplicatemovement_)*/false
-  , /*decltype(_impl_.bhidden_)*/false
-  , /*decltype(_impl_.btearoff_)*/false
-  , /*decltype(_impl_.remoterole_)*/0u
-  , /*decltype(_impl_.bcanbedamaged_)*/false} {}
-struct ActorStateDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ActorStateDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
-  ~ActorStateDefaultTypeInternal() {}
-  union {
-    ActorState _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ActorStateDefaultTypeInternal _ActorState_default_instance_;
 PROTOBUF_CONSTEXPR ActorComponentState::ActorComponentState(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_._has_bits_)*/{}
@@ -1010,7 +1012,7 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::unrealpb::GetUnrealObjectRefResultMessage, _impl_.objref_),
-  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::SyncNetIdMessage_NetIdPath, _impl_._has_bits_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::SyncNetIdMessage_NetIdPath, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -1018,6 +1020,10 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::unrealpb::SyncNetIdMessage_NetIdPath, _impl_.netid_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::SyncNetIdMessage_NetIdPath, _impl_.path_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::SyncNetIdMessage_NetIdPath, _impl_.outernetid_),
+  ~0u,
+  ~0u,
+  0,
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::unrealpb::SyncNetIdMessage, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1054,6 +1060,36 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::unrealpb::SpatialChannelData, _impl_.entities_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_._has_bits_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.removed_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.owningconnid_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.breplicatemovement_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.localrole_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.remoterole_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.owner_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.bhidden_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.btearoff_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.bcanbedamaged_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.instigator_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.replicatedmovement_),
+  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.attachmentreplication_),
+  ~0u,
+  4,
+  6,
+  5,
+  9,
+  0,
+  7,
+  8,
+  10,
+  1,
+  2,
+  3,
   PROTOBUF_FIELD_OFFSET(::unrealpb::FRepMovement, _impl_._has_bits_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::FRepMovement, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1090,36 +1126,6 @@ const uint32_t TableStruct_unreal_5fcommon_2eproto::offsets[] PROTOBUF_SECTION_V
   4,
   0,
   5,
-  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_._has_bits_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.removed_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.owningconnid_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.breplicatemovement_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.localrole_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.remoterole_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.owner_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.bhidden_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.btearoff_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.bcanbedamaged_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.instigator_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.replicatedmovement_),
-  PROTOBUF_FIELD_OFFSET(::unrealpb::ActorState, _impl_.attachmentreplication_),
-  ~0u,
-  4,
-  6,
-  5,
-  9,
-  0,
-  7,
-  8,
-  10,
-  1,
-  2,
-  3,
   PROTOBUF_FIELD_OFFSET(::unrealpb::ActorComponentState, _impl_._has_bits_),
   PROTOBUF_FIELD_OFFSET(::unrealpb::ActorComponentState, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1565,47 +1571,47 @@ static const ::_pbi::MigrationSchema schemas_unreal_5fcommon_2eproto[] PROTOBUF_
   { 99, 107, -1, sizeof(::unrealpb::HandoverData)},
   { 109, -1, -1, sizeof(::unrealpb::GetUnrealObjectRefMessage)},
   { 116, -1, -1, sizeof(::unrealpb::GetUnrealObjectRefResultMessage)},
-  { 123, -1, -1, sizeof(::unrealpb::SyncNetIdMessage_NetIdPath)},
-  { 131, -1, -1, sizeof(::unrealpb::SyncNetIdMessage)},
-  { 138, 147, -1, sizeof(::unrealpb::SpatialEntityState)},
-  { 150, 158, -1, sizeof(::unrealpb::SpatialChannelData_EntitiesEntry_DoNotUse)},
-  { 160, -1, -1, sizeof(::unrealpb::SpatialChannelData)},
-  { 167, 179, -1, sizeof(::unrealpb::FRepMovement)},
-  { 185, 197, -1, sizeof(::unrealpb::FRepAttachment)},
-  { 203, 221, -1, sizeof(::unrealpb::ActorState)},
-  { 233, 243, -1, sizeof(::unrealpb::ActorComponentState)},
-  { 247, 255, -1, sizeof(::unrealpb::ActorComponentStates_StatesEntry_DoNotUse)},
-  { 257, -1, -1, sizeof(::unrealpb::ActorComponentStates)},
-  { 264, 284, -1, sizeof(::unrealpb::SceneComponentState)},
-  { 298, 311, -1, sizeof(::unrealpb::FBasedMovementInfo)},
-  { 318, 327, -1, sizeof(::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings)},
-  { 330, 352, -1, sizeof(::unrealpb::FRootMotionSource)},
-  { 368, 382, -1, sizeof(::unrealpb::FRootMotionSourceGroup)},
-  { 390, 408, -1, sizeof(::unrealpb::FRepRootMotionMontage)},
-  { 420, 434, -1, sizeof(::unrealpb::CharacterState)},
-  { 442, -1, -1, sizeof(::unrealpb::Character_ServerMovePacked_Params)},
-  { 450, -1, -1, sizeof(::unrealpb::Character_ClientMoveResponsePacked_Params)},
-  { 458, 468, -1, sizeof(::unrealpb::PlayerState)},
-  { 472, -1, -1, sizeof(::unrealpb::ControllerState)},
-  { 480, -1, -1, sizeof(::unrealpb::Controller_ClientSetLocation_Params)},
-  { 488, -1, -1, sizeof(::unrealpb::Controller_ClientSetRotation_Params)},
-  { 496, 504, -1, sizeof(::unrealpb::PlayerControllerState)},
-  { 506, -1, -1, sizeof(::unrealpb::PlayerController_ServerUpdateCamera_Params)},
-  { 514, 521, -1, sizeof(::unrealpb::PlayerController_ClientSetHUD_Params)},
-  { 522, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetViewTarget_Params)},
-  { 533, 540, -1, sizeof(::unrealpb::PlayerController_ClientEnableNetworkVoice_Params)},
-  { 541, -1, -1, sizeof(::unrealpb::PlayerController_ClientCapBandwidth_Params)},
-  { 548, -1, -1, sizeof(::unrealpb::PlayerController_ClientRestart_Params)},
-  { 555, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetCameraMode_Params)},
-  { 562, -1, -1, sizeof(::unrealpb::PlayerController_ClientRetryClientRestart_Params)},
-  { 569, -1, -1, sizeof(::unrealpb::PlayerController_ServerSetSpectatorLocation_Params)},
-  { 577, -1, -1, sizeof(::unrealpb::PlayerController_ServerAcknowledgePossession_Params)},
-  { 584, -1, -1, sizeof(::unrealpb::PlayerController_ClientGotoState_Params)},
-  { 591, -1, -1, sizeof(::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params)},
-  { 602, 612, -1, sizeof(::unrealpb::GameStateBase)},
-  { 616, 625, -1, sizeof(::unrealpb::PawnState)},
-  { 628, 645, -1, sizeof(::unrealpb::FClientAdjustment)},
-  { 656, -1, -1, sizeof(::unrealpb::StaticMeshComponentState)},
+  { 123, 132, -1, sizeof(::unrealpb::SyncNetIdMessage_NetIdPath)},
+  { 135, -1, -1, sizeof(::unrealpb::SyncNetIdMessage)},
+  { 142, 151, -1, sizeof(::unrealpb::SpatialEntityState)},
+  { 154, 162, -1, sizeof(::unrealpb::SpatialChannelData_EntitiesEntry_DoNotUse)},
+  { 164, -1, -1, sizeof(::unrealpb::SpatialChannelData)},
+  { 171, 189, -1, sizeof(::unrealpb::ActorState)},
+  { 201, 213, -1, sizeof(::unrealpb::FRepMovement)},
+  { 219, 231, -1, sizeof(::unrealpb::FRepAttachment)},
+  { 237, 247, -1, sizeof(::unrealpb::ActorComponentState)},
+  { 251, 259, -1, sizeof(::unrealpb::ActorComponentStates_StatesEntry_DoNotUse)},
+  { 261, -1, -1, sizeof(::unrealpb::ActorComponentStates)},
+  { 268, 288, -1, sizeof(::unrealpb::SceneComponentState)},
+  { 302, 315, -1, sizeof(::unrealpb::FBasedMovementInfo)},
+  { 322, 331, -1, sizeof(::unrealpb::FRootMotionSource_FRootMotionFinishVelocitySettings)},
+  { 334, 356, -1, sizeof(::unrealpb::FRootMotionSource)},
+  { 372, 386, -1, sizeof(::unrealpb::FRootMotionSourceGroup)},
+  { 394, 412, -1, sizeof(::unrealpb::FRepRootMotionMontage)},
+  { 424, 438, -1, sizeof(::unrealpb::CharacterState)},
+  { 446, -1, -1, sizeof(::unrealpb::Character_ServerMovePacked_Params)},
+  { 454, -1, -1, sizeof(::unrealpb::Character_ClientMoveResponsePacked_Params)},
+  { 462, 472, -1, sizeof(::unrealpb::PlayerState)},
+  { 476, -1, -1, sizeof(::unrealpb::ControllerState)},
+  { 484, -1, -1, sizeof(::unrealpb::Controller_ClientSetLocation_Params)},
+  { 492, -1, -1, sizeof(::unrealpb::Controller_ClientSetRotation_Params)},
+  { 500, 508, -1, sizeof(::unrealpb::PlayerControllerState)},
+  { 510, -1, -1, sizeof(::unrealpb::PlayerController_ServerUpdateCamera_Params)},
+  { 518, 525, -1, sizeof(::unrealpb::PlayerController_ClientSetHUD_Params)},
+  { 526, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetViewTarget_Params)},
+  { 537, 544, -1, sizeof(::unrealpb::PlayerController_ClientEnableNetworkVoice_Params)},
+  { 545, -1, -1, sizeof(::unrealpb::PlayerController_ClientCapBandwidth_Params)},
+  { 552, -1, -1, sizeof(::unrealpb::PlayerController_ClientRestart_Params)},
+  { 559, -1, -1, sizeof(::unrealpb::PlayerController_ClientSetCameraMode_Params)},
+  { 566, -1, -1, sizeof(::unrealpb::PlayerController_ClientRetryClientRestart_Params)},
+  { 573, -1, -1, sizeof(::unrealpb::PlayerController_ServerSetSpectatorLocation_Params)},
+  { 581, -1, -1, sizeof(::unrealpb::PlayerController_ServerAcknowledgePossession_Params)},
+  { 588, -1, -1, sizeof(::unrealpb::PlayerController_ClientGotoState_Params)},
+  { 595, -1, -1, sizeof(::unrealpb::PlayerController_ClientReceiveLocalizedMessage_Params)},
+  { 606, 616, -1, sizeof(::unrealpb::GameStateBase)},
+  { 620, 629, -1, sizeof(::unrealpb::PawnState)},
+  { 632, 649, -1, sizeof(::unrealpb::FClientAdjustment)},
+  { 660, -1, -1, sizeof(::unrealpb::StaticMeshComponentState)},
 };
 
 static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eproto[] = {
@@ -1626,9 +1632,9 @@ static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eprot
   &::unrealpb::_SpatialEntityState_default_instance_._instance,
   &::unrealpb::_SpatialChannelData_EntitiesEntry_DoNotUse_default_instance_._instance,
   &::unrealpb::_SpatialChannelData_default_instance_._instance,
+  &::unrealpb::_ActorState_default_instance_._instance,
   &::unrealpb::_FRepMovement_default_instance_._instance,
   &::unrealpb::_FRepAttachment_default_instance_._instance,
-  &::unrealpb::_ActorState_default_instance_._instance,
   &::unrealpb::_ActorComponentState_default_instance_._instance,
   &::unrealpb::_ActorComponentStates_StatesEntry_DoNotUse_default_instance_._instance,
   &::unrealpb::_ActorComponentStates_default_instance_._instance,
@@ -1666,298 +1672,310 @@ static const ::_pb::Message* const file_default_instances_unreal_5fcommon_2eprot
 
 const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\023unreal_common.proto\022\010unrealpb\032\031google/"
-  "protobuf/any.proto\"K\n\007FVector\022\016\n\001x\030\001 \001(\002"
-  "H\000\210\001\001\022\016\n\001y\030\002 \001(\002H\001\210\001\001\022\016\n\001z\030\003 \001(\002H\002\210\001\001B\004\n"
-  "\002_xB\004\n\002_yB\004\n\002_z\"\344\002\n\017UnrealObjectRef\022\024\n\007n"
-  "etGUID\030\001 \001(\rH\000\210\001\001\022;\n\007context\030\002 \003(\0132*.unr"
-  "ealpb.UnrealObjectRef.GuidCachedObject\022\031"
-  "\n\014netGUIDBunch\030\003 \001(\014H\001\210\001\001\022\031\n\014bunchBitsNu"
-  "m\030\004 \001(\rH\002\210\001\001\022\026\n\tclassPath\030\006 \001(\tH\003\210\001\001\022\031\n\014"
-  "owningConnId\030\007 \001(\rH\004\210\001\001\032H\n\020GuidCachedObj"
-  "ect\022\017\n\007netGUID\030\001 \001(\r\022\020\n\010pathName\030\002 \001(\t\022\021"
-  "\n\touterGUID\030\003 \001(\rB\n\n\010_netGUIDB\017\n\r_netGUI"
-  "DBunchB\017\n\r_bunchBitsNumB\014\n\n_classPathB\017\n"
-  "\r_owningConnId\"p\n\021ActorComponentRef\022-\n\005o"
-  "wner\030\001 \001(\0132\031.unrealpb.UnrealObjectRefH\000\210"
-  "\001\001\022\025\n\010compName\030\002 \001(\tH\001\210\001\001B\010\n\006_ownerB\013\n\t_"
-  "compName\"\036\n\010AssetRef\022\022\n\nobjectPath\030\001 \001(\t"
-  "\"\245\001\n\025RemoteFunctionMessage\022,\n\ttargetObj\030"
-  "\001 \001(\0132\031.unrealpb.UnrealObjectRef\022\024\n\014func"
-  "tionName\030\002 \001(\t\022\025\n\rparamsPayload\030\003 \001(\014\022\032\n"
-  "\022redirectionCounter\030\004 \001(\005\022\025\n\rsubObjectPa"
-  "th\030\005 \001(\t\"\277\001\n\022SpawnObjectMessage\022&\n\003obj\030\001"
-  " \001(\0132\031.unrealpb.UnrealObjectRef\022\026\n\tchann"
-  "elId\030\002 \001(\rH\000\210\001\001\022\026\n\tlocalRole\030\003 \001(\rH\001\210\001\001\022"
-  "(\n\010location\030\005 \001(\0132\021.unrealpb.FVectorH\002\210\001"
-  "\001B\014\n\n_channelIdB\014\n\n_localRoleB\013\n\t_locati"
-  "on\"5\n\024DestroyObjectMessage\022\r\n\005netId\030\001 \001("
-  "\r\022\016\n\006reason\030\002 \001(\r\"e\n\017HandoverContext\022&\n\003"
-  "obj\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\022\031\n\014"
-  "clientConnId\030\002 \001(\rH\000\210\001\001B\017\n\r_clientConnId"
-  "\"z\n\014HandoverData\022*\n\007context\030\001 \003(\0132\031.unre"
-  "alpb.HandoverContext\022.\n\013channelData\030\002 \001("
-  "\0132\024.google.protobuf.AnyH\000\210\001\001B\016\n\014_channel"
-  "Data\",\n\031GetUnrealObjectRefMessage\022\017\n\007net"
-  "GUID\030\001 \003(\r\"L\n\037GetUnrealObjectRefResultMe"
-  "ssage\022)\n\006objRef\030\001 \003(\0132\031.unrealpb.UnrealO"
-  "bjectRef\"v\n\020SyncNetIdMessage\0228\n\nnetIdPat"
-  "hs\030\001 \003(\0132$.unrealpb.SyncNetIdMessage.Net"
-  "IdPath\032(\n\tNetIdPath\022\r\n\005netId\030\001 \001(\r\022\014\n\004pa"
-  "th\030\002 \001(\t\"\216\001\n\022SpatialEntityState\022)\n\006objRe"
-  "f\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\022\017\n\007re"
-  "moved\030\002 \001(\010\022-\n\nentityData\030\003 \001(\0132\024.google"
-  ".protobuf.AnyH\000\210\001\001B\r\n\013_entityData\"\241\001\n\022Sp"
-  "atialChannelData\022<\n\010entities\030\001 \003(\0132*.unr"
-  "ealpb.SpatialChannelData.EntitiesEntry\032M"
-  "\n\rEntitiesEntry\022\013\n\003key\030\001 \001(\r\022+\n\005value\030\002 "
-  "\001(\0132\034.unrealpb.SpatialEntityState:\0028\001\"\354\002"
-  "\n\014FRepMovement\022.\n\016linearVelocity\030\001 \001(\0132\021"
-  ".unrealpb.FVectorH\000\210\001\001\022/\n\017angularVelocit"
-  "y\030\002 \001(\0132\021.unrealpb.FVectorH\001\210\001\001\022(\n\010locat"
-  "ion\030\003 \001(\0132\021.unrealpb.FVectorH\002\210\001\001\022(\n\010rot"
-  "ation\030\004 \001(\0132\021.unrealpb.FVectorH\003\210\001\001\022\"\n\025b"
-  "SimulatedPhysicSleep\030\005 \001(\010H\004\210\001\001\022\030\n\013bRepP"
-  "hysics\030\006 \001(\010H\005\210\001\001B\021\n\017_linearVelocityB\022\n\020"
-  "_angularVelocityB\013\n\t_locationB\013\n\t_rotati"
-  "onB\030\n\026_bSimulatedPhysicSleepB\016\n\014_bRepPhy"
-  "sics\"\231\003\n\016FRepAttachment\0224\n\014attachParent\030"
-  "\001 \001(\0132\031.unrealpb.UnrealObjectRefH\000\210\001\001\022.\n"
-  "\016locationOffset\030\002 \001(\0132\021.unrealpb.FVector"
-  "H\001\210\001\001\022-\n\rrelativeScale\030\003 \001(\0132\021.unrealpb."
-  "FVectorH\002\210\001\001\022.\n\016rotationOffset\030\004 \001(\0132\021.u"
-  "nrealpb.FVectorH\003\210\001\001\022\031\n\014attachSocket\030\005 \001"
-  "(\tH\004\210\001\001\0229\n\017attachComponent\030\006 \001(\0132\033.unrea"
-  "lpb.ActorComponentRefH\005\210\001\001B\017\n\r_attachPar"
-  "entB\021\n\017_locationOffsetB\020\n\016_relativeScale"
-  "B\021\n\017_rotationOffsetB\017\n\r_attachSocketB\022\n\020"
-  "_attachComponent\"\347\004\n\nActorState\022\017\n\007remov"
-  "ed\030\001 \001(\010\022\031\n\014owningConnId\030\002 \001(\rH\000\210\001\001\022\037\n\022b"
-  "ReplicateMovement\030\003 \001(\010H\001\210\001\001\022\026\n\tlocalRol"
-  "e\030\004 \001(\rH\002\210\001\001\022\027\n\nremoteRole\030\005 \001(\rH\003\210\001\001\022-\n"
-  "\005owner\030\006 \001(\0132\031.unrealpb.UnrealObjectRefH"
-  "\004\210\001\001\022\024\n\007bHidden\030\007 \001(\010H\005\210\001\001\022\025\n\010bTearOff\030\010"
-  " \001(\010H\006\210\001\001\022\032\n\rbCanBeDamaged\030\t \001(\010H\007\210\001\001\0222\n"
-  "\ninstigator\030\n \001(\0132\031.unrealpb.UnrealObjec"
-  "tRefH\010\210\001\001\0227\n\022replicatedMovement\030\013 \001(\0132\026."
-  "unrealpb.FRepMovementH\t\210\001\001\022<\n\025attachment"
-  "Replication\030\014 \001(\0132\030.unrealpb.FRepAttachm"
-  "entH\n\210\001\001B\017\n\r_owningConnIdB\025\n\023_bReplicate"
-  "MovementB\014\n\n_localRoleB\r\n\013_remoteRoleB\010\n"
-  "\006_ownerB\n\n\010_bHiddenB\013\n\t_bTearOffB\020\n\016_bCa"
-  "nBeDamagedB\r\n\013_instigatorB\025\n\023_replicated"
-  "MovementB\030\n\026_attachmentReplication\"\232\001\n\023A"
-  "ctorComponentState\022\017\n\007removed\030\001 \001(\010\022\026\n\tb"
-  "IsActive\030\002 \001(\010H\000\210\001\001\022\030\n\013bReplicated\030\003 \001(\010"
-  "H\001\210\001\001\022\025\n\010compName\030\004 \001(\tH\002\210\001\001B\014\n\n_bIsActi"
-  "veB\016\n\014_bReplicatedB\013\n\t_compName\"\240\001\n\024Acto"
-  "rComponentStates\022:\n\006states\030\001 \003(\0132*.unrea"
-  "lpb.ActorComponentStates.StatesEntry\032L\n\013"
-  "StatesEntry\022\013\n\003key\030\001 \001(\t\022,\n\005value\030\002 \001(\0132"
-  "\035.unrealpb.ActorComponentState:\0028\001\"\301\006\n\023S"
-  "ceneComponentState\022\017\n\007removed\030\001 \001(\010\022\036\n\021b"
-  "AbsoluteLocation\030\002 \001(\010H\000\210\001\001\022\036\n\021bAbsolute"
-  "Rotation\030\003 \001(\010H\001\210\001\001\022\033\n\016bAbsoluteScale\030\004 "
-  "\001(\010H\002\210\001\001\022\025\n\010bVisible\030\005 \001(\010H\003\210\001\001\022\036\n\021bShou"
-  "ldBeAttached\030\006 \001(\010H\004\210\001\001\022,\n\037bShouldSnapLo"
-  "cationWhenAttached\030\007 \001(\010H\005\210\001\001\022,\n\037bShould"
-  "SnapRotationWhenAttached\030\010 \001(\010H\006\210\001\001\0226\n\014a"
-  "ttachParent\030\t \001(\0132\033.unrealpb.ActorCompon"
-  "entRefH\007\210\001\001\0223\n\016attachChildren\030\n \003(\0132\033.un"
-  "realpb.ActorComponentRef\022\035\n\020attachSocket"
-  "Name\030\013 \001(\tH\010\210\001\001\0220\n\020relativeLocation\030\014 \001("
-  "\0132\021.unrealpb.FVectorH\t\210\001\001\0220\n\020relativeRot"
-  "ation\030\r \001(\0132\021.unrealpb.FVectorH\n\210\001\001\022-\n\rr"
-  "elativeScale\030\016 \001(\0132\021.unrealpb.FVectorH\013\210"
-  "\001\001B\024\n\022_bAbsoluteLocationB\024\n\022_bAbsoluteRo"
-  "tationB\021\n\017_bAbsoluteScaleB\013\n\t_bVisibleB\024"
-  "\n\022_bShouldBeAttachedB\"\n _bShouldSnapLoca"
-  "tionWhenAttachedB\"\n _bShouldSnapRotation"
-  "WhenAttachedB\017\n\r_attachParentB\023\n\021_attach"
-  "SocketNameB\023\n\021_relativeLocationB\023\n\021_rela"
-  "tiveRotationB\020\n\016_relativeScale\"\237\003\n\022FBase"
-  "dMovementInfo\0226\n\014movementBase\030\001 \001(\0132\033.un"
-  "realpb.ActorComponentRefH\000\210\001\001\022\025\n\010boneNam"
-  "e\030\002 \001(\tH\001\210\001\001\022(\n\010location\030\003 \001(\0132\021.unrealp"
-  "b.FVectorH\002\210\001\001\022(\n\010rotation\030\004 \001(\0132\021.unrea"
-  "lpb.FVectorH\003\210\001\001\022$\n\027bServerHasBaseCompon"
-  "ent\030\005 \001(\010H\004\210\001\001\022\036\n\021bRelativeRotation\030\006 \001("
-  "\010H\005\210\001\001\022\037\n\022bServerHasVelocity\030\007 \001(\010H\006\210\001\001B"
-  "\017\n\r_movementBaseB\013\n\t_boneNameB\013\n\t_locati"
-  "onB\013\n\t_rotationB\032\n\030_bServerHasBaseCompon"
-  "entB\024\n\022_bRelativeRotationB\025\n\023_bServerHas"
-  "Velocity\"\317\007\n\021FRootMotionSource\022\025\n\010priori"
-  "ty\030\001 \001(\rH\000\210\001\001\022\024\n\007localId\030\002 \001(\rH\001\210\001\001\022\034\n\017a"
-  "ccumulatedMode\030\003 \001(\rH\002\210\001\001\022\031\n\014instanceNam"
-  "e\030\004 \001(\tH\003\210\001\001\022\026\n\tstartTime\030\005 \001(\002H\004\210\001\001\022\030\n\013"
-  "currentTime\030\006 \001(\002H\005\210\001\001\022\031\n\014previousTime\030\007"
-  " \001(\002H\006\210\001\001\022\025\n\010duration\030\010 \001(\002H\007\210\001\001\022\023\n\006stat"
-  "us\030\t \001(\rH\010\210\001\001\022\025\n\010settings\030\n \001(\rH\t\210\001\001\022\032\n\r"
-  "bInLocalSpace\030\013 \001(\010H\n\210\001\001\022#\n\026bNeedsSimula"
-  "tedCatchup\030\014 \001(\010H\013\210\001\001\022%\n\030bSimulatedNeeds"
-  "Smoothing\030\r \001(\010H\014\210\001\001\022\033\n\016bHasRootMotion\030\016"
-  " \001(\010H\r\210\001\001\022\030\n\013blendWeight\030\017 \001(\002H\016\210\001\001\022`\n\024f"
-  "inishVelocityParams\030\020 \001(\0132=.unrealpb.FRo"
-  "otMotionSource.FRootMotionFinishVelocity"
-  "SettingsH\017\210\001\001\032\252\001\n!FRootMotionFinishVeloc"
-  "itySettings\022\021\n\004mode\030\001 \001(\rH\000\210\001\001\022+\n\013setVel"
-  "ocity\030\002 \001(\0132\021.unrealpb.FVectorH\001\210\001\001\022\032\n\rc"
-  "lampVelocity\030\003 \001(\002H\002\210\001\001B\007\n\005_modeB\016\n\014_set"
-  "VelocityB\020\n\016_clampVelocityB\013\n\t_priorityB"
-  "\n\n\010_localIdB\022\n\020_accumulatedModeB\017\n\r_inst"
-  "anceNameB\014\n\n_startTimeB\016\n\014_currentTimeB\017"
-  "\n\r_previousTimeB\013\n\t_durationB\t\n\007_statusB"
-  "\013\n\t_settingsB\020\n\016_bInLocalSpaceB\031\n\027_bNeed"
-  "sSimulatedCatchupB\033\n\031_bSimulatedNeedsSmo"
-  "othingB\021\n\017_bHasRootMotionB\016\n\014_blendWeigh"
-  "tB\027\n\025_finishVelocityParams\"\311\004\n\026FRootMoti"
-  "onSourceGroup\0226\n\021rootMotionSources\030\001 \003(\013"
-  "2\033.unrealpb.FRootMotionSource\022@\n\033pending"
-  "AddRootMotionSources\030\002 \003(\0132\033.unrealpb.FR"
-  "ootMotionSource\022 \n\023bHasAdditiveSources\030\003"
-  " \001(\010H\000\210\001\001\022 \n\023bHasOverrideSources\030\004 \001(\010H\001"
-  "\210\001\001\0225\n(bHasOverrideSourcesWithIgnoreZAcc"
-  "umulate\030\005 \001(\010H\002\210\001\001\022\'\n\032bIsAdditiveVelocit"
-  "yApplied\030\006 \001(\010H\003\210\001\001\022$\n\027lastAccumulatedSe"
-  "ttings\030\007 \001(\rH\004\210\001\001\0227\n\027lastPreAdditiveVelo"
-  "city\030\010 \001(\0132\021.unrealpb.FVectorH\005\210\001\001B\026\n\024_b"
-  "HasAdditiveSourcesB\026\n\024_bHasOverrideSourc"
-  "esB+\n)_bHasOverrideSourcesWithIgnoreZAcc"
-  "umulateB\035\n\033_bIsAdditiveVelocityAppliedB\032"
-  "\n\030_lastAccumulatedSettingsB\032\n\030_lastPreAd"
-  "ditiveVelocity\"\353\005\n\025FRepRootMotionMontage"
-  "\022\026\n\tbIsActive\030\001 \001(\010H\000\210\001\001\0223\n\013animMontage\030"
-  "\002 \001(\0132\031.unrealpb.UnrealObjectRefH\001\210\001\001\022\025\n"
-  "\010position\030\003 \001(\002H\002\210\001\001\022(\n\010location\030\004 \001(\0132\021"
-  ".unrealpb.FVectorH\003\210\001\001\022(\n\010rotation\030\005 \001(\013"
-  "2\021.unrealpb.FVectorH\004\210\001\001\0226\n\014movementBase"
-  "\030\006 \001(\0132\033.unrealpb.ActorComponentRefH\005\210\001\001"
-  "\022!\n\024movementBaseBoneName\030\007 \001(\tH\006\210\001\001\022\036\n\021b"
-  "RelativePosition\030\010 \001(\010H\007\210\001\001\022\036\n\021bRelative"
-  "Rotation\030\t \001(\010H\010\210\001\001\022F\n\027authoritativeRoot"
-  "Motion\030\n \001(\0132 .unrealpb.FRootMotionSourc"
-  "eGroupH\t\210\001\001\022,\n\014acceleration\030\013 \001(\0132\021.unre"
-  "alpb.FVectorH\n\210\001\001\022.\n\016linearVelocity\030\014 \001("
-  "\0132\021.unrealpb.FVectorH\013\210\001\001B\014\n\n_bIsActiveB"
-  "\016\n\014_animMontageB\013\n\t_positionB\013\n\t_locatio"
-  "nB\013\n\t_rotationB\017\n\r_movementBaseB\027\n\025_move"
-  "mentBaseBoneNameB\024\n\022_bRelativePositionB\024"
-  "\n\022_bRelativeRotationB\032\n\030_authoritativeRo"
-  "otMotionB\017\n\r_accelerationB\021\n\017_linearVelo"
-  "city\"\277\004\n\016CharacterState\0228\n\nrootMotion\030\002 "
-  "\001(\0132\037.unrealpb.FRepRootMotionMontageH\000\210\001"
-  "\001\0228\n\rbasedMovement\030\003 \001(\0132\034.unrealpb.FBas"
-  "edMovementInfoH\001\210\001\001\022/\n\"serverLastTransfo"
-  "rmUpdateTimeStamp\030\004 \001(\002H\002\210\001\001\022\031\n\014movement"
-  "Mode\030\005 \001(\rH\003\210\001\001\022\030\n\013bIsCrouched\030\006 \001(\010H\004\210\001"
-  "\001\022%\n\030bProxyIsJumpForceApplied\030\007 \001(\010H\005\210\001\001"
-  "\022+\n\036animRootMotionTranslationScale\030\010 \001(\002"
-  "H\006\210\001\001\022/\n\"replayLastTransformUpdateTimeSt"
-  "amp\030\t \001(\002H\007\210\001\001B\r\n\013_rootMotionB\020\n\016_basedM"
-  "ovementB%\n#_serverLastTransformUpdateTim"
-  "eStampB\017\n\r_movementModeB\016\n\014_bIsCrouchedB"
-  "\033\n\031_bProxyIsJumpForceAppliedB!\n\037_animRoo"
-  "tMotionTranslationScaleB%\n#_replayLastTr"
-  "ansformUpdateTimeStamp\"H\n!Character_Serv"
-  "erMovePacked_Params\022\017\n\007bitsNum\030\001 \001(\r\022\022\n\n"
-  "packedBits\030\002 \001(\014\"P\n)Character_ClientMove"
-  "ResponsePacked_Params\022\017\n\007bitsNum\030\001 \001(\r\022\022"
-  "\n\npackedBits\030\002 \001(\014\"\223\001\n\013PlayerState\022\022\n\005sc"
-  "ore\030\002 \001(\002H\000\210\001\001\022\025\n\010playerId\030\003 \001(\005H\001\210\001\001\022\021\n"
-  "\004ping\030\004 \001(\rH\002\210\001\001\022\027\n\nplayerName\030\005 \001(\tH\003\210\001"
-  "\001B\010\n\006_scoreB\013\n\t_playerIdB\007\n\005_pingB\r\n\013_pl"
-  "ayerName\"j\n\017ControllerState\022.\n\013playerSta"
-  "te\030\002 \001(\0132\031.unrealpb.UnrealObjectRef\022\'\n\004p"
-  "awn\030\003 \001(\0132\031.unrealpb.UnrealObjectRef\"u\n#"
-  "Controller_ClientSetLocation_Params\022&\n\013n"
-  "ewLocation\030\001 \001(\0132\021.unrealpb.FVector\022&\n\013n"
-  "ewRotation\030\002 \001(\0132\021.unrealpb.FVector\"c\n#C"
-  "ontroller_ClientSetRotation_Params\022&\n\013ne"
-  "wRotation\030\001 \001(\0132\021.unrealpb.FVector\022\024\n\014bR"
-  "esetCamera\030\002 \001(\010\"\243\001\n\025PlayerControllerSta"
-  "te\0222\n\022targetViewRotation\030\002 \001(\0132\021.unrealp"
-  "b.FVectorH\000\210\001\001\022-\n\rspawnLocation\030\003 \001(\0132\021."
-  "unrealpb.FVectorH\001\210\001\001B\025\n\023_targetViewRota"
-  "tionB\020\n\016_spawnLocation\"g\n*PlayerControll"
-  "er_ServerUpdateCamera_Params\022!\n\006camLoc\030\001"
-  " \001(\0132\021.unrealpb.FVector\022\026\n\016camPitchAndYa"
-  "w\030\002 \001(\005\"R\n$PlayerController_ClientSetHUD"
-  "_Params\022\031\n\014hudClassName\030\001 \001(\tH\000\210\001\001B\017\n\r_h"
-  "udClassName\"\252\001\n+PlayerController_ClientS"
-  "etViewTarget_Params\022(\n\005actor\030\001 \001(\0132\031.unr"
-  "ealpb.UnrealObjectRef\022\021\n\tblendTime\030\002 \001(\002"
-  "\022\025\n\rblendFunction\030\003 \001(\r\022\020\n\010blendExp\030\004 \001("
-  "\002\022\025\n\rbLockOutgoing\030\005 \001(\010\"T\n0PlayerContro"
-  "ller_ClientEnableNetworkVoice_Params\022\024\n\007"
-  "bEnable\030\001 \001(\010H\000\210\001\001B\n\n\010_bEnable\"9\n*Player"
-  "Controller_ClientCapBandwidth_Params\022\013\n\003"
-  "cap\030\001 \001(\005\"P\n%PlayerController_ClientRest"
-  "art_Params\022\'\n\004pawn\030\001 \001(\0132\031.unrealpb.Unre"
-  "alObjectRef\"A\n+PlayerController_ClientSe"
-  "tCameraMode_Params\022\022\n\nnewCamMode\030\001 \001(\t\"["
-  "\n0PlayerController_ClientRetryClientRest"
-  "art_Params\022\'\n\004pawn\030\001 \001(\0132\031.unrealpb.Unre"
-  "alObjectRef\"z\n2PlayerController_ServerSe"
-  "tSpectatorLocation_Params\022!\n\006newLoc\030\001 \001("
-  "\0132\021.unrealpb.FVector\022!\n\006newRot\030\002 \001(\0132\021.u"
-  "nrealpb.FVector\"^\n3PlayerController_Serv"
-  "erAcknowledgePossession_Params\022\'\n\004pawn\030\001"
-  " \001(\0132\031.unrealpb.UnrealObjectRef\";\n\'Playe"
-  "rController_ClientGotoState_Params\022\020\n\010ne"
-  "wState\030\001 \001(\t\"\375\001\n5PlayerController_Client"
-  "ReceiveLocalizedMessage_Params\022\017\n\007messag"
-  "e\030\001 \001(\t\022\016\n\006switch\030\002 \001(\005\0227\n\024relatedPlayer"
-  "State_1\030\003 \001(\0132\031.unrealpb.UnrealObjectRef"
-  "\0227\n\024relatedPlayerState_2\030\004 \001(\0132\031.unrealp"
-  "b.UnrealObjectRef\0221\n\016optionalObject\030\005 \001("
-  "\0132\031.unrealpb.UnrealObjectRef\"\207\002\n\rGameSta"
-  "teBase\022\037\n\022spectatorClassName\030\002 \001(\tH\000\210\001\001\022"
-  "\036\n\021gameModeClassName\030\003 \001(\tH\001\210\001\001\022\'\n\032repli"
-  "catedWorldTimeSeconds\030\004 \001(\001H\002\210\001\001\022$\n\027bRep"
-  "licatedHasBegunPlay\030\005 \001(\010H\003\210\001\001B\025\n\023_spect"
-  "atorClassNameB\024\n\022_gameModeClassNameB\035\n\033_"
-  "replicatedWorldTimeSecondsB\032\n\030_bReplicat"
-  "edHasBegunPlay\"\234\001\n\tPawnState\022.\n\013playerSt"
-  "ate\030\001 \001(\0132\031.unrealpb.UnrealObjectRef\022-\n\n"
-  "controller\030\002 \001(\0132\031.unrealpb.UnrealObject"
-  "Ref\022\034\n\017remoteViewPitch\030\003 \001(\rH\000\210\001\001B\022\n\020_re"
-  "moteViewPitch\"\214\005\n\021FClientAdjustment\022\031\n\014b"
-  "AckGoodMove\030\001 \001(\010H\000\210\001\001\022\026\n\ttimeStamp\030\002 \001("
-  "\002H\001\210\001\001\022&\n\006newLoc\030\003 \001(\0132\021.unrealpb.FVecto"
-  "rH\002\210\001\001\022&\n\006newVel\030\004 \001(\0132\021.unrealpb.FVecto"
-  "rH\003\210\001\001\022&\n\006newRot\030\005 \001(\0132\021.unrealpb.FVecto"
-  "rH\004\210\001\001\022/\n\007newBase\030\006 \001(\0132\031.unrealpb.Unrea"
-  "lObjectRefH\005\210\001\001\022\034\n\017newBaseBoneName\030\007 \001(\t"
-  "H\006\210\001\001\022\"\n\025bBaseRelativePosition\030\010 \001(\010H\007\210\001"
-  "\001\022I\n\032rootMotionSourceCorrection\030\t \001(\0132 ."
-  "unrealpb.FRootMotionSourceGroupH\010\210\001\001\0222\n\022"
-  "rootMotionRotation\030\n \001(\0132\021.unrealpb.FVec"
-  "torH\t\210\001\001\022\031\n\014movementMode\030\013 \001(\rH\n\210\001\001B\017\n\r_"
-  "bAckGoodMoveB\014\n\n_timeStampB\t\n\007_newLocB\t\n"
-  "\007_newVelB\t\n\007_newRotB\n\n\010_newBaseB\022\n\020_newB"
-  "aseBoneNameB\030\n\026_bBaseRelativePositionB\035\n"
-  "\033_rootMotionSourceCorrectionB\025\n\023_rootMot"
-  "ionRotationB\017\n\r_movementMode\"S\n\030StaticMe"
-  "shComponentState\022\017\n\007removed\030\001 \001(\010\022&\n\nsta"
-  "ticMesh\030\002 \001(\0132\022.unrealpb.AssetRef*\232\001\n\013Me"
-  "ssageType\022\013\n\007INVALID\020\000\022\r\n\tLOW_LEVEL\020d\022\007\n"
-  "\003ANY\020e\022\007\n\003RPC\020f\022\t\n\005SPAWN\020g\022\013\n\007DESTROY\020h\022"
-  "\017\n\013SYNC_NET_ID\020k\022\032\n\025SERVER_PLAYER_SPAWNE"
-  "D\020\311\001\022\030\n\023SERVER_PLAYER_LEAVE\020\312\001*\251\001\n\020Unrea"
-  "lObjectType\022\017\n\013UOT_Unknown\020\000\022\021\n\rUOT_Game"
-  "State\020\001\022\r\n\tUOT_Actor\020\002\022\014\n\010UOT_Pawn\020\003\022\021\n\r"
-  "UOT_Character\020\004\022\023\n\017UOT_PlayerState\020\005\022\022\n\016"
-  "UOT_Controller\020\006\022\030\n\024UOT_PlayerController"
-  "\020\007B.Z,github.com/metaworking/channeld/pk"
-  "g/unrealpbb\006proto3"
+  "protobuf/any.proto\032 google/protobuf/desc"
+  "riptor.proto\"K\n\007FVector\022\016\n\001x\030\001 \001(\002H\000\210\001\001\022"
+  "\016\n\001y\030\002 \001(\002H\001\210\001\001\022\016\n\001z\030\003 \001(\002H\002\210\001\001B\004\n\002_xB\004\n"
+  "\002_yB\004\n\002_z\"\344\002\n\017UnrealObjectRef\022\024\n\007netGUID"
+  "\030\001 \001(\rH\000\210\001\001\022;\n\007context\030\002 \003(\0132*.unrealpb."
+  "UnrealObjectRef.GuidCachedObject\022\031\n\014netG"
+  "UIDBunch\030\003 \001(\014H\001\210\001\001\022\031\n\014bunchBitsNum\030\004 \001("
+  "\rH\002\210\001\001\022\026\n\tclassPath\030\006 \001(\tH\003\210\001\001\022\031\n\014owning"
+  "ConnId\030\007 \001(\rH\004\210\001\001\032H\n\020GuidCachedObject\022\017\n"
+  "\007netGUID\030\001 \001(\r\022\020\n\010pathName\030\002 \001(\t\022\021\n\toute"
+  "rGUID\030\003 \001(\rB\n\n\010_netGUIDB\017\n\r_netGUIDBunch"
+  "B\017\n\r_bunchBitsNumB\014\n\n_classPathB\017\n\r_owni"
+  "ngConnId\"p\n\021ActorComponentRef\022-\n\005owner\030\001"
+  " \001(\0132\031.unrealpb.UnrealObjectRefH\000\210\001\001\022\025\n\010"
+  "compName\030\002 \001(\tH\001\210\001\001B\010\n\006_ownerB\013\n\t_compNa"
+  "me\"\036\n\010AssetRef\022\022\n\nobjectPath\030\001 \001(\t\"\245\001\n\025R"
+  "emoteFunctionMessage\022,\n\ttargetObj\030\001 \001(\0132"
+  "\031.unrealpb.UnrealObjectRef\022\024\n\014functionNa"
+  "me\030\002 \001(\t\022\025\n\rparamsPayload\030\003 \001(\014\022\032\n\022redir"
+  "ectionCounter\030\004 \001(\005\022\025\n\rsubObjectPath\030\005 \001"
+  "(\t\"\277\001\n\022SpawnObjectMessage\022&\n\003obj\030\001 \001(\0132\031"
+  ".unrealpb.UnrealObjectRef\022\026\n\tchannelId\030\002"
+  " \001(\rH\000\210\001\001\022\026\n\tlocalRole\030\003 \001(\rH\001\210\001\001\022(\n\010loc"
+  "ation\030\005 \001(\0132\021.unrealpb.FVectorH\002\210\001\001B\014\n\n_"
+  "channelIdB\014\n\n_localRoleB\013\n\t_location\"5\n\024"
+  "DestroyObjectMessage\022\r\n\005netId\030\001 \001(\r\022\016\n\006r"
+  "eason\030\002 \001(\r\"e\n\017HandoverContext\022&\n\003obj\030\001 "
+  "\001(\0132\031.unrealpb.UnrealObjectRef\022\031\n\014client"
+  "ConnId\030\002 \001(\rH\000\210\001\001B\017\n\r_clientConnId\"z\n\014Ha"
+  "ndoverData\022*\n\007context\030\001 \003(\0132\031.unrealpb.H"
+  "andoverContext\022.\n\013channelData\030\002 \001(\0132\024.go"
+  "ogle.protobuf.AnyH\000\210\001\001B\016\n\014_channelData\","
+  "\n\031GetUnrealObjectRefMessage\022\017\n\007netGUID\030\001"
+  " \003(\r\"L\n\037GetUnrealObjectRefResultMessage\022"
+  ")\n\006objRef\030\001 \003(\0132\031.unrealpb.UnrealObjectR"
+  "ef\"\236\001\n\020SyncNetIdMessage\0228\n\nnetIdPaths\030\001 "
+  "\003(\0132$.unrealpb.SyncNetIdMessage.NetIdPat"
+  "h\032P\n\tNetIdPath\022\r\n\005netId\030\001 \001(\r\022\014\n\004path\030\002 "
+  "\001(\t\022\027\n\nouterNetId\030\003 \001(\rH\000\210\001\001B\r\n\013_outerNe"
+  "tId\"\216\001\n\022SpatialEntityState\022)\n\006objRef\030\001 \001"
+  "(\0132\031.unrealpb.UnrealObjectRef\022\017\n\007removed"
+  "\030\002 \001(\010\022-\n\nentityData\030\003 \001(\0132\024.google.prot"
+  "obuf.AnyH\000\210\001\001B\r\n\013_entityData\"\241\001\n\022Spatial"
+  "ChannelData\022<\n\010entities\030\001 \003(\0132*.unrealpb"
+  ".SpatialChannelData.EntitiesEntry\032M\n\rEnt"
+  "itiesEntry\022\013\n\003key\030\001 \001(\r\022+\n\005value\030\002 \001(\0132\034"
+  ".unrealpb.SpatialEntityState:\0028\001\"\201\005\n\nAct"
+  "orState\022\017\n\007removed\030\001 \001(\010\022\031\n\014owningConnId"
+  "\030\002 \001(\rH\000\210\001\001\022\037\n\022bReplicateMovement\030\003 \001(\010H"
+  "\001\210\001\001\022\026\n\tlocalRole\030\004 \001(\rH\002\210\001\001\022\027\n\nremoteRo"
+  "le\030\005 \001(\rH\003\210\001\001\022-\n\005owner\030\006 \001(\0132\031.unrealpb."
+  "UnrealObjectRefH\004\210\001\001\022\024\n\007bHidden\030\007 \001(\010H\005\210"
+  "\001\001\022\025\n\010bTearOff\030\010 \001(\010H\006\210\001\001\022\032\n\rbCanBeDamag"
+  "ed\030\t \001(\010H\007\210\001\001\0222\n\ninstigator\030\n \001(\0132\031.unre"
+  "alpb.UnrealObjectRefH\010\210\001\001\0227\n\022replicatedM"
+  "ovement\030\013 \001(\0132\026.unrealpb.FRepMovementH\t\210"
+  "\001\001\022<\n\025attachmentReplication\030\014 \001(\0132\030.unre"
+  "alpb.FRepAttachmentH\n\210\001\001:\030\212\265\030\024/Script/En"
+  "gine.ActorB\017\n\r_owningConnIdB\025\n\023_bReplica"
+  "teMovementB\014\n\n_localRoleB\r\n\013_remoteRoleB"
+  "\010\n\006_ownerB\n\n\010_bHiddenB\013\n\t_bTearOffB\020\n\016_b"
+  "CanBeDamagedB\r\n\013_instigatorB\025\n\023_replicat"
+  "edMovementB\030\n\026_attachmentReplication\"\354\002\n"
+  "\014FRepMovement\022.\n\016linearVelocity\030\001 \001(\0132\021."
+  "unrealpb.FVectorH\000\210\001\001\022/\n\017angularVelocity"
+  "\030\002 \001(\0132\021.unrealpb.FVectorH\001\210\001\001\022(\n\010locati"
+  "on\030\003 \001(\0132\021.unrealpb.FVectorH\002\210\001\001\022(\n\010rota"
+  "tion\030\004 \001(\0132\021.unrealpb.FVectorH\003\210\001\001\022\"\n\025bS"
+  "imulatedPhysicSleep\030\005 \001(\010H\004\210\001\001\022\030\n\013bRepPh"
+  "ysics\030\006 \001(\010H\005\210\001\001B\021\n\017_linearVelocityB\022\n\020_"
+  "angularVelocityB\013\n\t_locationB\013\n\t_rotatio"
+  "nB\030\n\026_bSimulatedPhysicSleepB\016\n\014_bRepPhys"
+  "ics\"\231\003\n\016FRepAttachment\0224\n\014attachParent\030\001"
+  " \001(\0132\031.unrealpb.UnrealObjectRefH\000\210\001\001\022.\n\016"
+  "locationOffset\030\002 \001(\0132\021.unrealpb.FVectorH"
+  "\001\210\001\001\022-\n\rrelativeScale\030\003 \001(\0132\021.unrealpb.F"
+  "VectorH\002\210\001\001\022.\n\016rotationOffset\030\004 \001(\0132\021.un"
+  "realpb.FVectorH\003\210\001\001\022\031\n\014attachSocket\030\005 \001("
+  "\tH\004\210\001\001\0229\n\017attachComponent\030\006 \001(\0132\033.unreal"
+  "pb.ActorComponentRefH\005\210\001\001B\017\n\r_attachPare"
+  "ntB\021\n\017_locationOffsetB\020\n\016_relativeScaleB"
+  "\021\n\017_rotationOffsetB\017\n\r_attachSocketB\022\n\020_"
+  "attachComponent\"\275\001\n\023ActorComponentState\022"
+  "\017\n\007removed\030\001 \001(\010\022\026\n\tbIsActive\030\002 \001(\010H\000\210\001\001"
+  "\022\030\n\013bReplicated\030\003 \001(\010H\001\210\001\001\022\025\n\010compName\030\004"
+  " \001(\tH\002\210\001\001:!\212\265\030\035/Script/Engine.ActorCompo"
+  "nentB\014\n\n_bIsActiveB\016\n\014_bReplicatedB\013\n\t_c"
+  "ompName\"\240\001\n\024ActorComponentStates\022:\n\006stat"
+  "es\030\001 \003(\0132*.unrealpb.ActorComponentStates"
+  ".StatesEntry\032L\n\013StatesEntry\022\013\n\003key\030\001 \001(\t"
+  "\022,\n\005value\030\002 \001(\0132\035.unrealpb.ActorComponen"
+  "tState:\0028\001\"\344\006\n\023SceneComponentState\022\017\n\007re"
+  "moved\030\001 \001(\010\022\036\n\021bAbsoluteLocation\030\002 \001(\010H\000"
+  "\210\001\001\022\036\n\021bAbsoluteRotation\030\003 \001(\010H\001\210\001\001\022\033\n\016b"
+  "AbsoluteScale\030\004 \001(\010H\002\210\001\001\022\025\n\010bVisible\030\005 \001"
+  "(\010H\003\210\001\001\022\036\n\021bShouldBeAttached\030\006 \001(\010H\004\210\001\001\022"
+  ",\n\037bShouldSnapLocationWhenAttached\030\007 \001(\010"
+  "H\005\210\001\001\022,\n\037bShouldSnapRotationWhenAttached"
+  "\030\010 \001(\010H\006\210\001\001\0226\n\014attachParent\030\t \001(\0132\033.unre"
+  "alpb.ActorComponentRefH\007\210\001\001\0223\n\016attachChi"
+  "ldren\030\n \003(\0132\033.unrealpb.ActorComponentRef"
+  "\022\035\n\020attachSocketName\030\013 \001(\tH\010\210\001\001\0220\n\020relat"
+  "iveLocation\030\014 \001(\0132\021.unrealpb.FVectorH\t\210\001"
+  "\001\0220\n\020relativeRotation\030\r \001(\0132\021.unrealpb.F"
+  "VectorH\n\210\001\001\022-\n\rrelativeScale\030\016 \001(\0132\021.unr"
+  "ealpb.FVectorH\013\210\001\001:!\212\265\030\035/Script/Engine.S"
+  "ceneComponentB\024\n\022_bAbsoluteLocationB\024\n\022_"
+  "bAbsoluteRotationB\021\n\017_bAbsoluteScaleB\013\n\t"
+  "_bVisibleB\024\n\022_bShouldBeAttachedB\"\n _bSho"
+  "uldSnapLocationWhenAttachedB\"\n _bShouldS"
+  "napRotationWhenAttachedB\017\n\r_attachParent"
+  "B\023\n\021_attachSocketNameB\023\n\021_relativeLocati"
+  "onB\023\n\021_relativeRotationB\020\n\016_relativeScal"
+  "e\"\237\003\n\022FBasedMovementInfo\0226\n\014movementBase"
+  "\030\001 \001(\0132\033.unrealpb.ActorComponentRefH\000\210\001\001"
+  "\022\025\n\010boneName\030\002 \001(\tH\001\210\001\001\022(\n\010location\030\003 \001("
+  "\0132\021.unrealpb.FVectorH\002\210\001\001\022(\n\010rotation\030\004 "
+  "\001(\0132\021.unrealpb.FVectorH\003\210\001\001\022$\n\027bServerHa"
+  "sBaseComponent\030\005 \001(\010H\004\210\001\001\022\036\n\021bRelativeRo"
+  "tation\030\006 \001(\010H\005\210\001\001\022\037\n\022bServerHasVelocity\030"
+  "\007 \001(\010H\006\210\001\001B\017\n\r_movementBaseB\013\n\t_boneName"
+  "B\013\n\t_locationB\013\n\t_rotationB\032\n\030_bServerHa"
+  "sBaseComponentB\024\n\022_bRelativeRotationB\025\n\023"
+  "_bServerHasVelocity\"\317\007\n\021FRootMotionSourc"
+  "e\022\025\n\010priority\030\001 \001(\rH\000\210\001\001\022\024\n\007localId\030\002 \001("
+  "\rH\001\210\001\001\022\034\n\017accumulatedMode\030\003 \001(\rH\002\210\001\001\022\031\n\014"
+  "instanceName\030\004 \001(\tH\003\210\001\001\022\026\n\tstartTime\030\005 \001"
+  "(\002H\004\210\001\001\022\030\n\013currentTime\030\006 \001(\002H\005\210\001\001\022\031\n\014pre"
+  "viousTime\030\007 \001(\002H\006\210\001\001\022\025\n\010duration\030\010 \001(\002H\007"
+  "\210\001\001\022\023\n\006status\030\t \001(\rH\010\210\001\001\022\025\n\010settings\030\n \001"
+  "(\rH\t\210\001\001\022\032\n\rbInLocalSpace\030\013 \001(\010H\n\210\001\001\022#\n\026b"
+  "NeedsSimulatedCatchup\030\014 \001(\010H\013\210\001\001\022%\n\030bSim"
+  "ulatedNeedsSmoothing\030\r \001(\010H\014\210\001\001\022\033\n\016bHasR"
+  "ootMotion\030\016 \001(\010H\r\210\001\001\022\030\n\013blendWeight\030\017 \001("
+  "\002H\016\210\001\001\022`\n\024finishVelocityParams\030\020 \001(\0132=.u"
+  "nrealpb.FRootMotionSource.FRootMotionFin"
+  "ishVelocitySettingsH\017\210\001\001\032\252\001\n!FRootMotion"
+  "FinishVelocitySettings\022\021\n\004mode\030\001 \001(\rH\000\210\001"
+  "\001\022+\n\013setVelocity\030\002 \001(\0132\021.unrealpb.FVecto"
+  "rH\001\210\001\001\022\032\n\rclampVelocity\030\003 \001(\002H\002\210\001\001B\007\n\005_m"
+  "odeB\016\n\014_setVelocityB\020\n\016_clampVelocityB\013\n"
+  "\t_priorityB\n\n\010_localIdB\022\n\020_accumulatedMo"
+  "deB\017\n\r_instanceNameB\014\n\n_startTimeB\016\n\014_cu"
+  "rrentTimeB\017\n\r_previousTimeB\013\n\t_durationB"
+  "\t\n\007_statusB\013\n\t_settingsB\020\n\016_bInLocalSpac"
+  "eB\031\n\027_bNeedsSimulatedCatchupB\033\n\031_bSimula"
+  "tedNeedsSmoothingB\021\n\017_bHasRootMotionB\016\n\014"
+  "_blendWeightB\027\n\025_finishVelocityParams\"\311\004"
+  "\n\026FRootMotionSourceGroup\0226\n\021rootMotionSo"
+  "urces\030\001 \003(\0132\033.unrealpb.FRootMotionSource"
+  "\022@\n\033pendingAddRootMotionSources\030\002 \003(\0132\033."
+  "unrealpb.FRootMotionSource\022 \n\023bHasAdditi"
+  "veSources\030\003 \001(\010H\000\210\001\001\022 \n\023bHasOverrideSour"
+  "ces\030\004 \001(\010H\001\210\001\001\0225\n(bHasOverrideSourcesWit"
+  "hIgnoreZAccumulate\030\005 \001(\010H\002\210\001\001\022\'\n\032bIsAddi"
+  "tiveVelocityApplied\030\006 \001(\010H\003\210\001\001\022$\n\027lastAc"
+  "cumulatedSettings\030\007 \001(\rH\004\210\001\001\0227\n\027lastPreA"
+  "dditiveVelocity\030\010 \001(\0132\021.unrealpb.FVector"
+  "H\005\210\001\001B\026\n\024_bHasAdditiveSourcesB\026\n\024_bHasOv"
+  "errideSourcesB+\n)_bHasOverrideSourcesWit"
+  "hIgnoreZAccumulateB\035\n\033_bIsAdditiveVeloci"
+  "tyAppliedB\032\n\030_lastAccumulatedSettingsB\032\n"
+  "\030_lastPreAdditiveVelocity\"\353\005\n\025FRepRootMo"
+  "tionMontage\022\026\n\tbIsActive\030\001 \001(\010H\000\210\001\001\0223\n\013a"
+  "nimMontage\030\002 \001(\0132\031.unrealpb.UnrealObject"
+  "RefH\001\210\001\001\022\025\n\010position\030\003 \001(\002H\002\210\001\001\022(\n\010locat"
+  "ion\030\004 \001(\0132\021.unrealpb.FVectorH\003\210\001\001\022(\n\010rot"
+  "ation\030\005 \001(\0132\021.unrealpb.FVectorH\004\210\001\001\0226\n\014m"
+  "ovementBase\030\006 \001(\0132\033.unrealpb.ActorCompon"
+  "entRefH\005\210\001\001\022!\n\024movementBaseBoneName\030\007 \001("
+  "\tH\006\210\001\001\022\036\n\021bRelativePosition\030\010 \001(\010H\007\210\001\001\022\036"
+  "\n\021bRelativeRotation\030\t \001(\010H\010\210\001\001\022F\n\027author"
+  "itativeRootMotion\030\n \001(\0132 .unrealpb.FRoot"
+  "MotionSourceGroupH\t\210\001\001\022,\n\014acceleration\030\013"
+  " \001(\0132\021.unrealpb.FVectorH\n\210\001\001\022.\n\016linearVe"
+  "locity\030\014 \001(\0132\021.unrealpb.FVectorH\013\210\001\001B\014\n\n"
+  "_bIsActiveB\016\n\014_animMontageB\013\n\t_positionB"
+  "\013\n\t_locationB\013\n\t_rotationB\017\n\r_movementBa"
+  "seB\027\n\025_movementBaseBoneNameB\024\n\022_bRelativ"
+  "ePositionB\024\n\022_bRelativeRotationB\032\n\030_auth"
+  "oritativeRootMotionB\017\n\r_accelerationB\021\n\017"
+  "_linearVelocity\"\335\004\n\016CharacterState\0228\n\nro"
+  "otMotion\030\002 \001(\0132\037.unrealpb.FRepRootMotion"
+  "MontageH\000\210\001\001\0228\n\rbasedMovement\030\003 \001(\0132\034.un"
+  "realpb.FBasedMovementInfoH\001\210\001\001\022/\n\"server"
+  "LastTransformUpdateTimeStamp\030\004 \001(\002H\002\210\001\001\022"
+  "\031\n\014movementMode\030\005 \001(\rH\003\210\001\001\022\030\n\013bIsCrouche"
+  "d\030\006 \001(\010H\004\210\001\001\022%\n\030bProxyIsJumpForceApplied"
+  "\030\007 \001(\010H\005\210\001\001\022+\n\036animRootMotionTranslation"
+  "Scale\030\010 \001(\002H\006\210\001\001\022/\n\"replayLastTransformU"
+  "pdateTimeStamp\030\t \001(\002H\007\210\001\001:\034\212\265\030\030/Script/E"
+  "ngine.CharacterB\r\n\013_rootMotionB\020\n\016_based"
+  "MovementB%\n#_serverLastTransformUpdateTi"
+  "meStampB\017\n\r_movementModeB\016\n\014_bIsCrouched"
+  "B\033\n\031_bProxyIsJumpForceAppliedB!\n\037_animRo"
+  "otMotionTranslationScaleB%\n#_replayLastT"
+  "ransformUpdateTimeStamp\"H\n!Character_Ser"
+  "verMovePacked_Params\022\017\n\007bitsNum\030\001 \001(\r\022\022\n"
+  "\npackedBits\030\002 \001(\014\"P\n)Character_ClientMov"
+  "eResponsePacked_Params\022\017\n\007bitsNum\030\001 \001(\r\022"
+  "\022\n\npackedBits\030\002 \001(\014\"\223\001\n\013PlayerState\022\022\n\005s"
+  "core\030\002 \001(\002H\000\210\001\001\022\025\n\010playerId\030\003 \001(\005H\001\210\001\001\022\021"
+  "\n\004ping\030\004 \001(\rH\002\210\001\001\022\027\n\nplayerName\030\005 \001(\tH\003\210"
+  "\001\001B\010\n\006_scoreB\013\n\t_playerIdB\007\n\005_pingB\r\n\013_p"
+  "layerName\"\211\001\n\017ControllerState\022.\n\013playerS"
+  "tate\030\002 \001(\0132\031.unrealpb.UnrealObjectRef\022\'\n"
+  "\004pawn\030\003 \001(\0132\031.unrealpb.UnrealObjectRef:\035"
+  "\212\265\030\031/Script/Engine.Controller\"u\n#Control"
+  "ler_ClientSetLocation_Params\022&\n\013newLocat"
+  "ion\030\001 \001(\0132\021.unrealpb.FVector\022&\n\013newRotat"
+  "ion\030\002 \001(\0132\021.unrealpb.FVector\"c\n#Controll"
+  "er_ClientSetRotation_Params\022&\n\013newRotati"
+  "on\030\001 \001(\0132\021.unrealpb.FVector\022\024\n\014bResetCam"
+  "era\030\002 \001(\010\"\310\001\n\025PlayerControllerState\0222\n\022t"
+  "argetViewRotation\030\002 \001(\0132\021.unrealpb.FVect"
+  "orH\000\210\001\001\022-\n\rspawnLocation\030\003 \001(\0132\021.unrealp"
+  "b.FVectorH\001\210\001\001:#\212\265\030\037/Script/Engine.Playe"
+  "rControllerB\025\n\023_targetViewRotationB\020\n\016_s"
+  "pawnLocation\"g\n*PlayerController_ServerU"
+  "pdateCamera_Params\022!\n\006camLoc\030\001 \001(\0132\021.unr"
+  "ealpb.FVector\022\026\n\016camPitchAndYaw\030\002 \001(\005\"R\n"
+  "$PlayerController_ClientSetHUD_Params\022\031\n"
+  "\014hudClassName\030\001 \001(\tH\000\210\001\001B\017\n\r_hudClassNam"
+  "e\"\252\001\n+PlayerController_ClientSetViewTarg"
+  "et_Params\022(\n\005actor\030\001 \001(\0132\031.unrealpb.Unre"
+  "alObjectRef\022\021\n\tblendTime\030\002 \001(\002\022\025\n\rblendF"
+  "unction\030\003 \001(\r\022\020\n\010blendExp\030\004 \001(\002\022\025\n\rbLock"
+  "Outgoing\030\005 \001(\010\"T\n0PlayerController_Clien"
+  "tEnableNetworkVoice_Params\022\024\n\007bEnable\030\001 "
+  "\001(\010H\000\210\001\001B\n\n\010_bEnable\"9\n*PlayerController"
+  "_ClientCapBandwidth_Params\022\013\n\003cap\030\001 \001(\005\""
+  "P\n%PlayerController_ClientRestart_Params"
+  "\022\'\n\004pawn\030\001 \001(\0132\031.unrealpb.UnrealObjectRe"
+  "f\"A\n+PlayerController_ClientSetCameraMod"
+  "e_Params\022\022\n\nnewCamMode\030\001 \001(\t\"[\n0PlayerCo"
+  "ntroller_ClientRetryClientRestart_Params"
+  "\022\'\n\004pawn\030\001 \001(\0132\031.unrealpb.UnrealObjectRe"
+  "f\"z\n2PlayerController_ServerSetSpectator"
+  "Location_Params\022!\n\006newLoc\030\001 \001(\0132\021.unreal"
+  "pb.FVector\022!\n\006newRot\030\002 \001(\0132\021.unrealpb.FV"
+  "ector\"^\n3PlayerController_ServerAcknowle"
+  "dgePossession_Params\022\'\n\004pawn\030\001 \001(\0132\031.unr"
+  "ealpb.UnrealObjectRef\";\n\'PlayerControlle"
+  "r_ClientGotoState_Params\022\020\n\010newState\030\001 \001"
+  "(\t\"\375\001\n5PlayerController_ClientReceiveLoc"
+  "alizedMessage_Params\022\017\n\007message\030\001 \001(\t\022\016\n"
+  "\006switch\030\002 \001(\005\0227\n\024relatedPlayerState_1\030\003 "
+  "\001(\0132\031.unrealpb.UnrealObjectRef\0227\n\024relate"
+  "dPlayerState_2\030\004 \001(\0132\031.unrealpb.UnrealOb"
+  "jectRef\0221\n\016optionalObject\030\005 \001(\0132\031.unreal"
+  "pb.UnrealObjectRef\"\251\002\n\rGameStateBase\022\037\n\022"
+  "spectatorClassName\030\002 \001(\tH\000\210\001\001\022\036\n\021gameMod"
+  "eClassName\030\003 \001(\tH\001\210\001\001\022\'\n\032replicatedWorld"
+  "TimeSeconds\030\004 \001(\001H\002\210\001\001\022$\n\027bReplicatedHas"
+  "BegunPlay\030\005 \001(\010H\003\210\001\001: \212\265\030\034/Script/Engine"
+  ".GameStateBaseB\025\n\023_spectatorClassNameB\024\n"
+  "\022_gameModeClassNameB\035\n\033_replicatedWorldT"
+  "imeSecondsB\032\n\030_bReplicatedHasBegunPlay\"\265"
+  "\001\n\tPawnState\022.\n\013playerState\030\001 \001(\0132\031.unre"
+  "alpb.UnrealObjectRef\022-\n\ncontroller\030\002 \001(\013"
+  "2\031.unrealpb.UnrealObjectRef\022\034\n\017remoteVie"
+  "wPitch\030\003 \001(\rH\000\210\001\001:\027\212\265\030\023/Script/Engine.Pa"
+  "wnB\022\n\020_remoteViewPitch\"\214\005\n\021FClientAdjust"
+  "ment\022\031\n\014bAckGoodMove\030\001 \001(\010H\000\210\001\001\022\026\n\ttimeS"
+  "tamp\030\002 \001(\002H\001\210\001\001\022&\n\006newLoc\030\003 \001(\0132\021.unreal"
+  "pb.FVectorH\002\210\001\001\022&\n\006newVel\030\004 \001(\0132\021.unreal"
+  "pb.FVectorH\003\210\001\001\022&\n\006newRot\030\005 \001(\0132\021.unreal"
+  "pb.FVectorH\004\210\001\001\022/\n\007newBase\030\006 \001(\0132\031.unrea"
+  "lpb.UnrealObjectRefH\005\210\001\001\022\034\n\017newBaseBoneN"
+  "ame\030\007 \001(\tH\006\210\001\001\022\"\n\025bBaseRelativePosition\030"
+  "\010 \001(\010H\007\210\001\001\022I\n\032rootMotionSourceCorrection"
+  "\030\t \001(\0132 .unrealpb.FRootMotionSourceGroup"
+  "H\010\210\001\001\0222\n\022rootMotionRotation\030\n \001(\0132\021.unre"
+  "alpb.FVectorH\t\210\001\001\022\031\n\014movementMode\030\013 \001(\rH"
+  "\n\210\001\001B\017\n\r_bAckGoodMoveB\014\n\n_timeStampB\t\n\007_"
+  "newLocB\t\n\007_newVelB\t\n\007_newRotB\n\n\010_newBase"
+  "B\022\n\020_newBaseBoneNameB\030\n\026_bBaseRelativePo"
+  "sitionB\035\n\033_rootMotionSourceCorrectionB\025\n"
+  "\023_rootMotionRotationB\017\n\r_movementMode\"{\n"
+  "\030StaticMeshComponentState\022\017\n\007removed\030\001 \001"
+  "(\010\022&\n\nstaticMesh\030\002 \001(\0132\022.unrealpb.AssetR"
+  "ef:&\212\265\030\"/Script/Engine.StaticMeshCompone"
+  "nt*\232\001\n\013MessageType\022\013\n\007INVALID\020\000\022\r\n\tLOW_L"
+  "EVEL\020d\022\007\n\003ANY\020e\022\007\n\003RPC\020f\022\t\n\005SPAWN\020g\022\013\n\007D"
+  "ESTROY\020h\022\017\n\013SYNC_NET_ID\020k\022\032\n\025SERVER_PLAY"
+  "ER_SPAWNED\020\311\001\022\030\n\023SERVER_PLAYER_LEAVE\020\312\001*"
+  "\251\001\n\020UnrealObjectType\022\017\n\013UOT_Unknown\020\000\022\021\n"
+  "\rUOT_GameState\020\001\022\r\n\tUOT_Actor\020\002\022\014\n\010UOT_P"
+  "awn\020\003\022\021\n\rUOT_Character\020\004\022\023\n\017UOT_PlayerSt"
+  "ate\020\005\022\022\n\016UOT_Controller\020\006\022\030\n\024UOT_PlayerC"
+  "ontroller\020\007:\?\n\021unreal_class_path\022\037.googl"
+  "e.protobuf.MessageOptions\030\321\206\003 \001(\t\210\001\001B.Z,"
+  "github.com/metaworking/channeld/pkg/unre"
+  "alpbb\006proto3"
   ;
-static const ::_pbi::DescriptorTable* const descriptor_table_unreal_5fcommon_2eproto_deps[1] = {
+static const ::_pbi::DescriptorTable* const descriptor_table_unreal_5fcommon_2eproto_deps[2] = {
   &::descriptor_table_google_2fprotobuf_2fany_2eproto,
+  &::descriptor_table_google_2fprotobuf_2fdescriptor_2eproto,
 };
 static ::_pbi::once_flag descriptor_table_unreal_5fcommon_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_unreal_5fcommon_2eproto = {
-    false, false, 11338, descriptor_table_protodef_unreal_5fcommon_2eproto,
+    false, false, 11772, descriptor_table_protodef_unreal_5fcommon_2eproto,
     "unreal_common.proto",
-    &descriptor_table_unreal_5fcommon_2eproto_once, descriptor_table_unreal_5fcommon_2eproto_deps, 1, 53,
+    &descriptor_table_unreal_5fcommon_2eproto_once, descriptor_table_unreal_5fcommon_2eproto_deps, 2, 53,
     schemas_unreal_5fcommon_2eproto, file_default_instances_unreal_5fcommon_2eproto, TableStruct_unreal_5fcommon_2eproto::offsets,
     file_level_metadata_unreal_5fcommon_2eproto, file_level_enum_descriptors_unreal_5fcommon_2eproto,
     file_level_service_descriptors_unreal_5fcommon_2eproto,
@@ -5181,6 +5199,10 @@ void GetUnrealObjectRefResultMessage::InternalSwap(GetUnrealObjectRefResultMessa
 
 class SyncNetIdMessage_NetIdPath::_Internal {
  public:
+  using HasBits = decltype(std::declval<SyncNetIdMessage_NetIdPath>()._impl_._has_bits_);
+  static void set_has_outernetid(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
 };
 
 SyncNetIdMessage_NetIdPath::SyncNetIdMessage_NetIdPath(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -5193,9 +5215,11 @@ SyncNetIdMessage_NetIdPath::SyncNetIdMessage_NetIdPath(const SyncNetIdMessage_Ne
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   SyncNetIdMessage_NetIdPath* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.path_){}
+      decltype(_impl_._has_bits_){from._impl_._has_bits_}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.path_){}
     , decltype(_impl_.netid_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
+    , decltype(_impl_.outernetid_){}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.path_.InitDefault();
@@ -5206,7 +5230,9 @@ SyncNetIdMessage_NetIdPath::SyncNetIdMessage_NetIdPath(const SyncNetIdMessage_Ne
     _this->_impl_.path_.Set(from._internal_path(), 
       _this->GetArenaForAllocation());
   }
-  _this->_impl_.netid_ = from._impl_.netid_;
+  ::memcpy(&_impl_.netid_, &from._impl_.netid_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.outernetid_) -
+    reinterpret_cast<char*>(&_impl_.netid_)) + sizeof(_impl_.outernetid_));
   // @@protoc_insertion_point(copy_constructor:unrealpb.SyncNetIdMessage.NetIdPath)
 }
 
@@ -5215,9 +5241,11 @@ inline void SyncNetIdMessage_NetIdPath::SharedCtor(
   (void)arena;
   (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.path_){}
-    , decltype(_impl_.netid_){0u}
+      decltype(_impl_._has_bits_){}
     , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.path_){}
+    , decltype(_impl_.netid_){0u}
+    , decltype(_impl_.outernetid_){0u}
   };
   _impl_.path_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
@@ -5251,11 +5279,14 @@ void SyncNetIdMessage_NetIdPath::Clear() {
 
   _impl_.path_.ClearToEmpty();
   _impl_.netid_ = 0u;
+  _impl_.outernetid_ = 0u;
+  _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* SyncNetIdMessage_NetIdPath::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
@@ -5278,6 +5309,15 @@ const char* SyncNetIdMessage_NetIdPath::_InternalParse(const char* ptr, ::_pbi::
         } else
           goto handle_unusual;
         continue;
+      // optional uint32 outerNetId = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
+          _Internal::set_has_outernetid(&has_bits);
+          _impl_.outernetid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
       default:
         goto handle_unusual;
     }  // switch
@@ -5294,6 +5334,7 @@ const char* SyncNetIdMessage_NetIdPath::_InternalParse(const char* ptr, ::_pbi::
     CHK_(ptr != nullptr);
   }  // while
 message_done:
+  _impl_._has_bits_.Or(has_bits);
   return ptr;
 failure:
   ptr = nullptr;
@@ -5321,6 +5362,12 @@ uint8_t* SyncNetIdMessage_NetIdPath::_InternalSerialize(
       "unrealpb.SyncNetIdMessage.NetIdPath.path");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_path(), target);
+  }
+
+  // optional uint32 outerNetId = 3;
+  if (_internal_has_outernetid()) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(3, this->_internal_outernetid(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -5351,6 +5398,12 @@ size_t SyncNetIdMessage_NetIdPath::ByteSizeLong() const {
     total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_netid());
   }
 
+  // optional uint32 outerNetId = 3;
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_outernetid());
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
@@ -5375,6 +5428,9 @@ void SyncNetIdMessage_NetIdPath::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_
   if (from._internal_netid() != 0) {
     _this->_internal_set_netid(from._internal_netid());
   }
+  if (from._internal_has_outernetid()) {
+    _this->_internal_set_outernetid(from._internal_outernetid());
+  }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -5394,11 +5450,17 @@ void SyncNetIdMessage_NetIdPath::InternalSwap(SyncNetIdMessage_NetIdPath* other)
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &_impl_.path_, lhs_arena,
       &other->_impl_.path_, rhs_arena
   );
-  swap(_impl_.netid_, other->_impl_.netid_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(SyncNetIdMessage_NetIdPath, _impl_.outernetid_)
+      + sizeof(SyncNetIdMessage_NetIdPath::_impl_.outernetid_)
+      - PROTOBUF_FIELD_OFFSET(SyncNetIdMessage_NetIdPath, _impl_.netid_)>(
+          reinterpret_cast<char*>(&_impl_.netid_),
+          reinterpret_cast<char*>(&other->_impl_.netid_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata SyncNetIdMessage_NetIdPath::GetMetadata() const {
@@ -6095,868 +6157,6 @@ void SpatialChannelData::InternalSwap(SpatialChannelData* other) {
 
 // ===================================================================
 
-class FRepMovement::_Internal {
- public:
-  using HasBits = decltype(std::declval<FRepMovement>()._impl_._has_bits_);
-  static const ::unrealpb::FVector& linearvelocity(const FRepMovement* msg);
-  static void set_has_linearvelocity(HasBits* has_bits) {
-    (*has_bits)[0] |= 1u;
-  }
-  static const ::unrealpb::FVector& angularvelocity(const FRepMovement* msg);
-  static void set_has_angularvelocity(HasBits* has_bits) {
-    (*has_bits)[0] |= 2u;
-  }
-  static const ::unrealpb::FVector& location(const FRepMovement* msg);
-  static void set_has_location(HasBits* has_bits) {
-    (*has_bits)[0] |= 4u;
-  }
-  static const ::unrealpb::FVector& rotation(const FRepMovement* msg);
-  static void set_has_rotation(HasBits* has_bits) {
-    (*has_bits)[0] |= 8u;
-  }
-  static void set_has_bsimulatedphysicsleep(HasBits* has_bits) {
-    (*has_bits)[0] |= 16u;
-  }
-  static void set_has_brepphysics(HasBits* has_bits) {
-    (*has_bits)[0] |= 32u;
-  }
-};
-
-const ::unrealpb::FVector&
-FRepMovement::_Internal::linearvelocity(const FRepMovement* msg) {
-  return *msg->_impl_.linearvelocity_;
-}
-const ::unrealpb::FVector&
-FRepMovement::_Internal::angularvelocity(const FRepMovement* msg) {
-  return *msg->_impl_.angularvelocity_;
-}
-const ::unrealpb::FVector&
-FRepMovement::_Internal::location(const FRepMovement* msg) {
-  return *msg->_impl_.location_;
-}
-const ::unrealpb::FVector&
-FRepMovement::_Internal::rotation(const FRepMovement* msg) {
-  return *msg->_impl_.rotation_;
-}
-FRepMovement::FRepMovement(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:unrealpb.FRepMovement)
-}
-FRepMovement::FRepMovement(const FRepMovement& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  FRepMovement* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_._has_bits_){from._impl_._has_bits_}
-    , /*decltype(_impl_._cached_size_)*/{}
-    , decltype(_impl_.linearvelocity_){nullptr}
-    , decltype(_impl_.angularvelocity_){nullptr}
-    , decltype(_impl_.location_){nullptr}
-    , decltype(_impl_.rotation_){nullptr}
-    , decltype(_impl_.bsimulatedphysicsleep_){}
-    , decltype(_impl_.brepphysics_){}};
-
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  if (from._internal_has_linearvelocity()) {
-    _this->_impl_.linearvelocity_ = new ::unrealpb::FVector(*from._impl_.linearvelocity_);
-  }
-  if (from._internal_has_angularvelocity()) {
-    _this->_impl_.angularvelocity_ = new ::unrealpb::FVector(*from._impl_.angularvelocity_);
-  }
-  if (from._internal_has_location()) {
-    _this->_impl_.location_ = new ::unrealpb::FVector(*from._impl_.location_);
-  }
-  if (from._internal_has_rotation()) {
-    _this->_impl_.rotation_ = new ::unrealpb::FVector(*from._impl_.rotation_);
-  }
-  ::memcpy(&_impl_.bsimulatedphysicsleep_, &from._impl_.bsimulatedphysicsleep_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.brepphysics_) -
-    reinterpret_cast<char*>(&_impl_.bsimulatedphysicsleep_)) + sizeof(_impl_.brepphysics_));
-  // @@protoc_insertion_point(copy_constructor:unrealpb.FRepMovement)
-}
-
-inline void FRepMovement::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_._has_bits_){}
-    , /*decltype(_impl_._cached_size_)*/{}
-    , decltype(_impl_.linearvelocity_){nullptr}
-    , decltype(_impl_.angularvelocity_){nullptr}
-    , decltype(_impl_.location_){nullptr}
-    , decltype(_impl_.rotation_){nullptr}
-    , decltype(_impl_.bsimulatedphysicsleep_){false}
-    , decltype(_impl_.brepphysics_){false}
-  };
-}
-
-FRepMovement::~FRepMovement() {
-  // @@protoc_insertion_point(destructor:unrealpb.FRepMovement)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
-  SharedDtor();
-}
-
-inline void FRepMovement::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  if (this != internal_default_instance()) delete _impl_.linearvelocity_;
-  if (this != internal_default_instance()) delete _impl_.angularvelocity_;
-  if (this != internal_default_instance()) delete _impl_.location_;
-  if (this != internal_default_instance()) delete _impl_.rotation_;
-}
-
-void FRepMovement::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
-}
-
-void FRepMovement::Clear() {
-// @@protoc_insertion_point(message_clear_start:unrealpb.FRepMovement)
-  uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  cached_has_bits = _impl_._has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
-    if (cached_has_bits & 0x00000001u) {
-      GOOGLE_DCHECK(_impl_.linearvelocity_ != nullptr);
-      _impl_.linearvelocity_->Clear();
-    }
-    if (cached_has_bits & 0x00000002u) {
-      GOOGLE_DCHECK(_impl_.angularvelocity_ != nullptr);
-      _impl_.angularvelocity_->Clear();
-    }
-    if (cached_has_bits & 0x00000004u) {
-      GOOGLE_DCHECK(_impl_.location_ != nullptr);
-      _impl_.location_->Clear();
-    }
-    if (cached_has_bits & 0x00000008u) {
-      GOOGLE_DCHECK(_impl_.rotation_ != nullptr);
-      _impl_.rotation_->Clear();
-    }
-  }
-  ::memset(&_impl_.bsimulatedphysicsleep_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&_impl_.brepphysics_) -
-      reinterpret_cast<char*>(&_impl_.bsimulatedphysicsleep_)) + sizeof(_impl_.brepphysics_));
-  _impl_._has_bits_.Clear();
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-}
-
-const char* FRepMovement::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  _Internal::HasBits has_bits{};
-  while (!ctx->Done(&ptr)) {
-    uint32_t tag;
-    ptr = ::_pbi::ReadTag(ptr, &tag);
-    switch (tag >> 3) {
-      // optional .unrealpb.FVector linearVelocity = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
-          ptr = ctx->ParseMessage(_internal_mutable_linearvelocity(), ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // optional .unrealpb.FVector angularVelocity = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
-          ptr = ctx->ParseMessage(_internal_mutable_angularvelocity(), ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // optional .unrealpb.FVector location = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
-          ptr = ctx->ParseMessage(_internal_mutable_location(), ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // optional .unrealpb.FVector rotation = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
-          ptr = ctx->ParseMessage(_internal_mutable_rotation(), ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // optional bool bSimulatedPhysicSleep = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
-          _Internal::set_has_bsimulatedphysicsleep(&has_bits);
-          _impl_.bsimulatedphysicsleep_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // optional bool bRepPhysics = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 48)) {
-          _Internal::set_has_brepphysics(&has_bits);
-          _impl_.brepphysics_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      default:
-        goto handle_unusual;
-    }  // switch
-  handle_unusual:
-    if ((tag == 0) || ((tag & 7) == 4)) {
-      CHK_(ptr);
-      ctx->SetLastTag(tag);
-      goto message_done;
-    }
-    ptr = UnknownFieldParse(
-        tag,
-        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-        ptr, ctx);
-    CHK_(ptr != nullptr);
-  }  // while
-message_done:
-  _impl_._has_bits_.Or(has_bits);
-  return ptr;
-failure:
-  ptr = nullptr;
-  goto message_done;
-#undef CHK_
-}
-
-uint8_t* FRepMovement::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.FRepMovement)
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  // optional .unrealpb.FVector linearVelocity = 1;
-  if (_internal_has_linearvelocity()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(1, _Internal::linearvelocity(this),
-        _Internal::linearvelocity(this).GetCachedSize(), target, stream);
-  }
-
-  // optional .unrealpb.FVector angularVelocity = 2;
-  if (_internal_has_angularvelocity()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(2, _Internal::angularvelocity(this),
-        _Internal::angularvelocity(this).GetCachedSize(), target, stream);
-  }
-
-  // optional .unrealpb.FVector location = 3;
-  if (_internal_has_location()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(3, _Internal::location(this),
-        _Internal::location(this).GetCachedSize(), target, stream);
-  }
-
-  // optional .unrealpb.FVector rotation = 4;
-  if (_internal_has_rotation()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(4, _Internal::rotation(this),
-        _Internal::rotation(this).GetCachedSize(), target, stream);
-  }
-
-  // optional bool bSimulatedPhysicSleep = 5;
-  if (_internal_has_bsimulatedphysicsleep()) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(5, this->_internal_bsimulatedphysicsleep(), target);
-  }
-
-  // optional bool bRepPhysics = 6;
-  if (_internal_has_brepphysics()) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteBoolToArray(6, this->_internal_brepphysics(), target);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.FRepMovement)
-  return target;
-}
-
-size_t FRepMovement::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:unrealpb.FRepMovement)
-  size_t total_size = 0;
-
-  uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  cached_has_bits = _impl_._has_bits_[0];
-  if (cached_has_bits & 0x0000003fu) {
-    // optional .unrealpb.FVector linearVelocity = 1;
-    if (cached_has_bits & 0x00000001u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *_impl_.linearvelocity_);
-    }
-
-    // optional .unrealpb.FVector angularVelocity = 2;
-    if (cached_has_bits & 0x00000002u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *_impl_.angularvelocity_);
-    }
-
-    // optional .unrealpb.FVector location = 3;
-    if (cached_has_bits & 0x00000004u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *_impl_.location_);
-    }
-
-    // optional .unrealpb.FVector rotation = 4;
-    if (cached_has_bits & 0x00000008u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *_impl_.rotation_);
-    }
-
-    // optional bool bSimulatedPhysicSleep = 5;
-    if (cached_has_bits & 0x00000010u) {
-      total_size += 1 + 1;
-    }
-
-    // optional bool bRepPhysics = 6;
-    if (cached_has_bits & 0x00000020u) {
-      total_size += 1 + 1;
-    }
-
-  }
-  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
-}
-
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FRepMovement::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    FRepMovement::MergeImpl
-};
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FRepMovement::GetClassData() const { return &_class_data_; }
-
-
-void FRepMovement::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
-  auto* const _this = static_cast<FRepMovement*>(&to_msg);
-  auto& from = static_cast<const FRepMovement&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.FRepMovement)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  cached_has_bits = from._impl_._has_bits_[0];
-  if (cached_has_bits & 0x0000003fu) {
-    if (cached_has_bits & 0x00000001u) {
-      _this->_internal_mutable_linearvelocity()->::unrealpb::FVector::MergeFrom(
-          from._internal_linearvelocity());
-    }
-    if (cached_has_bits & 0x00000002u) {
-      _this->_internal_mutable_angularvelocity()->::unrealpb::FVector::MergeFrom(
-          from._internal_angularvelocity());
-    }
-    if (cached_has_bits & 0x00000004u) {
-      _this->_internal_mutable_location()->::unrealpb::FVector::MergeFrom(
-          from._internal_location());
-    }
-    if (cached_has_bits & 0x00000008u) {
-      _this->_internal_mutable_rotation()->::unrealpb::FVector::MergeFrom(
-          from._internal_rotation());
-    }
-    if (cached_has_bits & 0x00000010u) {
-      _this->_impl_.bsimulatedphysicsleep_ = from._impl_.bsimulatedphysicsleep_;
-    }
-    if (cached_has_bits & 0x00000020u) {
-      _this->_impl_.brepphysics_ = from._impl_.brepphysics_;
-    }
-    _this->_impl_._has_bits_[0] |= cached_has_bits;
-  }
-  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void FRepMovement::CopyFrom(const FRepMovement& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.FRepMovement)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-bool FRepMovement::IsInitialized() const {
-  return true;
-}
-
-void FRepMovement::InternalSwap(FRepMovement* other) {
-  using std::swap;
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
-  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(FRepMovement, _impl_.brepphysics_)
-      + sizeof(FRepMovement::_impl_.brepphysics_)
-      - PROTOBUF_FIELD_OFFSET(FRepMovement, _impl_.linearvelocity_)>(
-          reinterpret_cast<char*>(&_impl_.linearvelocity_),
-          reinterpret_cast<char*>(&other->_impl_.linearvelocity_));
-}
-
-::PROTOBUF_NAMESPACE_ID::Metadata FRepMovement::GetMetadata() const {
-  return ::_pbi::AssignDescriptors(
-      &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[17]);
-}
-
-// ===================================================================
-
-class FRepAttachment::_Internal {
- public:
-  using HasBits = decltype(std::declval<FRepAttachment>()._impl_._has_bits_);
-  static const ::unrealpb::UnrealObjectRef& attachparent(const FRepAttachment* msg);
-  static void set_has_attachparent(HasBits* has_bits) {
-    (*has_bits)[0] |= 2u;
-  }
-  static const ::unrealpb::FVector& locationoffset(const FRepAttachment* msg);
-  static void set_has_locationoffset(HasBits* has_bits) {
-    (*has_bits)[0] |= 4u;
-  }
-  static const ::unrealpb::FVector& relativescale(const FRepAttachment* msg);
-  static void set_has_relativescale(HasBits* has_bits) {
-    (*has_bits)[0] |= 8u;
-  }
-  static const ::unrealpb::FVector& rotationoffset(const FRepAttachment* msg);
-  static void set_has_rotationoffset(HasBits* has_bits) {
-    (*has_bits)[0] |= 16u;
-  }
-  static void set_has_attachsocket(HasBits* has_bits) {
-    (*has_bits)[0] |= 1u;
-  }
-  static const ::unrealpb::ActorComponentRef& attachcomponent(const FRepAttachment* msg);
-  static void set_has_attachcomponent(HasBits* has_bits) {
-    (*has_bits)[0] |= 32u;
-  }
-};
-
-const ::unrealpb::UnrealObjectRef&
-FRepAttachment::_Internal::attachparent(const FRepAttachment* msg) {
-  return *msg->_impl_.attachparent_;
-}
-const ::unrealpb::FVector&
-FRepAttachment::_Internal::locationoffset(const FRepAttachment* msg) {
-  return *msg->_impl_.locationoffset_;
-}
-const ::unrealpb::FVector&
-FRepAttachment::_Internal::relativescale(const FRepAttachment* msg) {
-  return *msg->_impl_.relativescale_;
-}
-const ::unrealpb::FVector&
-FRepAttachment::_Internal::rotationoffset(const FRepAttachment* msg) {
-  return *msg->_impl_.rotationoffset_;
-}
-const ::unrealpb::ActorComponentRef&
-FRepAttachment::_Internal::attachcomponent(const FRepAttachment* msg) {
-  return *msg->_impl_.attachcomponent_;
-}
-FRepAttachment::FRepAttachment(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:unrealpb.FRepAttachment)
-}
-FRepAttachment::FRepAttachment(const FRepAttachment& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  FRepAttachment* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_._has_bits_){from._impl_._has_bits_}
-    , /*decltype(_impl_._cached_size_)*/{}
-    , decltype(_impl_.attachsocket_){}
-    , decltype(_impl_.attachparent_){nullptr}
-    , decltype(_impl_.locationoffset_){nullptr}
-    , decltype(_impl_.relativescale_){nullptr}
-    , decltype(_impl_.rotationoffset_){nullptr}
-    , decltype(_impl_.attachcomponent_){nullptr}};
-
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.attachsocket_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.attachsocket_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (from._internal_has_attachsocket()) {
-    _this->_impl_.attachsocket_.Set(from._internal_attachsocket(), 
-      _this->GetArenaForAllocation());
-  }
-  if (from._internal_has_attachparent()) {
-    _this->_impl_.attachparent_ = new ::unrealpb::UnrealObjectRef(*from._impl_.attachparent_);
-  }
-  if (from._internal_has_locationoffset()) {
-    _this->_impl_.locationoffset_ = new ::unrealpb::FVector(*from._impl_.locationoffset_);
-  }
-  if (from._internal_has_relativescale()) {
-    _this->_impl_.relativescale_ = new ::unrealpb::FVector(*from._impl_.relativescale_);
-  }
-  if (from._internal_has_rotationoffset()) {
-    _this->_impl_.rotationoffset_ = new ::unrealpb::FVector(*from._impl_.rotationoffset_);
-  }
-  if (from._internal_has_attachcomponent()) {
-    _this->_impl_.attachcomponent_ = new ::unrealpb::ActorComponentRef(*from._impl_.attachcomponent_);
-  }
-  // @@protoc_insertion_point(copy_constructor:unrealpb.FRepAttachment)
-}
-
-inline void FRepAttachment::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_._has_bits_){}
-    , /*decltype(_impl_._cached_size_)*/{}
-    , decltype(_impl_.attachsocket_){}
-    , decltype(_impl_.attachparent_){nullptr}
-    , decltype(_impl_.locationoffset_){nullptr}
-    , decltype(_impl_.relativescale_){nullptr}
-    , decltype(_impl_.rotationoffset_){nullptr}
-    , decltype(_impl_.attachcomponent_){nullptr}
-  };
-  _impl_.attachsocket_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.attachsocket_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-}
-
-FRepAttachment::~FRepAttachment() {
-  // @@protoc_insertion_point(destructor:unrealpb.FRepAttachment)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
-  SharedDtor();
-}
-
-inline void FRepAttachment::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.attachsocket_.Destroy();
-  if (this != internal_default_instance()) delete _impl_.attachparent_;
-  if (this != internal_default_instance()) delete _impl_.locationoffset_;
-  if (this != internal_default_instance()) delete _impl_.relativescale_;
-  if (this != internal_default_instance()) delete _impl_.rotationoffset_;
-  if (this != internal_default_instance()) delete _impl_.attachcomponent_;
-}
-
-void FRepAttachment::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
-}
-
-void FRepAttachment::Clear() {
-// @@protoc_insertion_point(message_clear_start:unrealpb.FRepAttachment)
-  uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  cached_has_bits = _impl_._has_bits_[0];
-  if (cached_has_bits & 0x0000003fu) {
-    if (cached_has_bits & 0x00000001u) {
-      _impl_.attachsocket_.ClearNonDefaultToEmpty();
-    }
-    if (cached_has_bits & 0x00000002u) {
-      GOOGLE_DCHECK(_impl_.attachparent_ != nullptr);
-      _impl_.attachparent_->Clear();
-    }
-    if (cached_has_bits & 0x00000004u) {
-      GOOGLE_DCHECK(_impl_.locationoffset_ != nullptr);
-      _impl_.locationoffset_->Clear();
-    }
-    if (cached_has_bits & 0x00000008u) {
-      GOOGLE_DCHECK(_impl_.relativescale_ != nullptr);
-      _impl_.relativescale_->Clear();
-    }
-    if (cached_has_bits & 0x00000010u) {
-      GOOGLE_DCHECK(_impl_.rotationoffset_ != nullptr);
-      _impl_.rotationoffset_->Clear();
-    }
-    if (cached_has_bits & 0x00000020u) {
-      GOOGLE_DCHECK(_impl_.attachcomponent_ != nullptr);
-      _impl_.attachcomponent_->Clear();
-    }
-  }
-  _impl_._has_bits_.Clear();
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-}
-
-const char* FRepAttachment::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  _Internal::HasBits has_bits{};
-  while (!ctx->Done(&ptr)) {
-    uint32_t tag;
-    ptr = ::_pbi::ReadTag(ptr, &tag);
-    switch (tag >> 3) {
-      // optional .unrealpb.UnrealObjectRef attachParent = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
-          ptr = ctx->ParseMessage(_internal_mutable_attachparent(), ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // optional .unrealpb.FVector locationOffset = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
-          ptr = ctx->ParseMessage(_internal_mutable_locationoffset(), ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // optional .unrealpb.FVector relativeScale = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
-          ptr = ctx->ParseMessage(_internal_mutable_relativescale(), ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // optional .unrealpb.FVector rotationOffset = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
-          ptr = ctx->ParseMessage(_internal_mutable_rotationoffset(), ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // optional string attachSocket = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
-          auto str = _internal_mutable_attachsocket();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "unrealpb.FRepAttachment.attachSocket"));
-        } else
-          goto handle_unusual;
-        continue;
-      // optional .unrealpb.ActorComponentRef attachComponent = 6;
-      case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
-          ptr = ctx->ParseMessage(_internal_mutable_attachcomponent(), ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      default:
-        goto handle_unusual;
-    }  // switch
-  handle_unusual:
-    if ((tag == 0) || ((tag & 7) == 4)) {
-      CHK_(ptr);
-      ctx->SetLastTag(tag);
-      goto message_done;
-    }
-    ptr = UnknownFieldParse(
-        tag,
-        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-        ptr, ctx);
-    CHK_(ptr != nullptr);
-  }  // while
-message_done:
-  _impl_._has_bits_.Or(has_bits);
-  return ptr;
-failure:
-  ptr = nullptr;
-  goto message_done;
-#undef CHK_
-}
-
-uint8_t* FRepAttachment::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.FRepAttachment)
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  // optional .unrealpb.UnrealObjectRef attachParent = 1;
-  if (_internal_has_attachparent()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(1, _Internal::attachparent(this),
-        _Internal::attachparent(this).GetCachedSize(), target, stream);
-  }
-
-  // optional .unrealpb.FVector locationOffset = 2;
-  if (_internal_has_locationoffset()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(2, _Internal::locationoffset(this),
-        _Internal::locationoffset(this).GetCachedSize(), target, stream);
-  }
-
-  // optional .unrealpb.FVector relativeScale = 3;
-  if (_internal_has_relativescale()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(3, _Internal::relativescale(this),
-        _Internal::relativescale(this).GetCachedSize(), target, stream);
-  }
-
-  // optional .unrealpb.FVector rotationOffset = 4;
-  if (_internal_has_rotationoffset()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(4, _Internal::rotationoffset(this),
-        _Internal::rotationoffset(this).GetCachedSize(), target, stream);
-  }
-
-  // optional string attachSocket = 5;
-  if (_internal_has_attachsocket()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_attachsocket().data(), static_cast<int>(this->_internal_attachsocket().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "unrealpb.FRepAttachment.attachSocket");
-    target = stream->WriteStringMaybeAliased(
-        5, this->_internal_attachsocket(), target);
-  }
-
-  // optional .unrealpb.ActorComponentRef attachComponent = 6;
-  if (_internal_has_attachcomponent()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(6, _Internal::attachcomponent(this),
-        _Internal::attachcomponent(this).GetCachedSize(), target, stream);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.FRepAttachment)
-  return target;
-}
-
-size_t FRepAttachment::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:unrealpb.FRepAttachment)
-  size_t total_size = 0;
-
-  uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  cached_has_bits = _impl_._has_bits_[0];
-  if (cached_has_bits & 0x0000003fu) {
-    // optional string attachSocket = 5;
-    if (cached_has_bits & 0x00000001u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-          this->_internal_attachsocket());
-    }
-
-    // optional .unrealpb.UnrealObjectRef attachParent = 1;
-    if (cached_has_bits & 0x00000002u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *_impl_.attachparent_);
-    }
-
-    // optional .unrealpb.FVector locationOffset = 2;
-    if (cached_has_bits & 0x00000004u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *_impl_.locationoffset_);
-    }
-
-    // optional .unrealpb.FVector relativeScale = 3;
-    if (cached_has_bits & 0x00000008u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *_impl_.relativescale_);
-    }
-
-    // optional .unrealpb.FVector rotationOffset = 4;
-    if (cached_has_bits & 0x00000010u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *_impl_.rotationoffset_);
-    }
-
-    // optional .unrealpb.ActorComponentRef attachComponent = 6;
-    if (cached_has_bits & 0x00000020u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *_impl_.attachcomponent_);
-    }
-
-  }
-  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
-}
-
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FRepAttachment::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    FRepAttachment::MergeImpl
-};
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FRepAttachment::GetClassData() const { return &_class_data_; }
-
-
-void FRepAttachment::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
-  auto* const _this = static_cast<FRepAttachment*>(&to_msg);
-  auto& from = static_cast<const FRepAttachment&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.FRepAttachment)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  cached_has_bits = from._impl_._has_bits_[0];
-  if (cached_has_bits & 0x0000003fu) {
-    if (cached_has_bits & 0x00000001u) {
-      _this->_internal_set_attachsocket(from._internal_attachsocket());
-    }
-    if (cached_has_bits & 0x00000002u) {
-      _this->_internal_mutable_attachparent()->::unrealpb::UnrealObjectRef::MergeFrom(
-          from._internal_attachparent());
-    }
-    if (cached_has_bits & 0x00000004u) {
-      _this->_internal_mutable_locationoffset()->::unrealpb::FVector::MergeFrom(
-          from._internal_locationoffset());
-    }
-    if (cached_has_bits & 0x00000008u) {
-      _this->_internal_mutable_relativescale()->::unrealpb::FVector::MergeFrom(
-          from._internal_relativescale());
-    }
-    if (cached_has_bits & 0x00000010u) {
-      _this->_internal_mutable_rotationoffset()->::unrealpb::FVector::MergeFrom(
-          from._internal_rotationoffset());
-    }
-    if (cached_has_bits & 0x00000020u) {
-      _this->_internal_mutable_attachcomponent()->::unrealpb::ActorComponentRef::MergeFrom(
-          from._internal_attachcomponent());
-    }
-  }
-  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void FRepAttachment::CopyFrom(const FRepAttachment& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.FRepAttachment)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-bool FRepAttachment::IsInitialized() const {
-  return true;
-}
-
-void FRepAttachment::InternalSwap(FRepAttachment* other) {
-  using std::swap;
-  auto* lhs_arena = GetArenaForAllocation();
-  auto* rhs_arena = other->GetArenaForAllocation();
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.attachsocket_, lhs_arena,
-      &other->_impl_.attachsocket_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(FRepAttachment, _impl_.attachcomponent_)
-      + sizeof(FRepAttachment::_impl_.attachcomponent_)
-      - PROTOBUF_FIELD_OFFSET(FRepAttachment, _impl_.attachparent_)>(
-          reinterpret_cast<char*>(&_impl_.attachparent_),
-          reinterpret_cast<char*>(&other->_impl_.attachparent_));
-}
-
-::PROTOBUF_NAMESPACE_ID::Metadata FRepAttachment::GetMetadata() const {
-  return ::_pbi::AssignDescriptors(
-      &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
-      file_level_metadata_unreal_5fcommon_2eproto[18]);
-}
-
-// ===================================================================
-
 class ActorState::_Internal {
  public:
   using HasBits = decltype(std::declval<ActorState>()._impl_._has_bits_);
@@ -7549,6 +6749,868 @@ void ActorState::InternalSwap(ActorState* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ActorState::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
+      file_level_metadata_unreal_5fcommon_2eproto[17]);
+}
+
+// ===================================================================
+
+class FRepMovement::_Internal {
+ public:
+  using HasBits = decltype(std::declval<FRepMovement>()._impl_._has_bits_);
+  static const ::unrealpb::FVector& linearvelocity(const FRepMovement* msg);
+  static void set_has_linearvelocity(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static const ::unrealpb::FVector& angularvelocity(const FRepMovement* msg);
+  static void set_has_angularvelocity(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static const ::unrealpb::FVector& location(const FRepMovement* msg);
+  static void set_has_location(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static const ::unrealpb::FVector& rotation(const FRepMovement* msg);
+  static void set_has_rotation(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+  static void set_has_bsimulatedphysicsleep(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
+  static void set_has_brepphysics(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
+};
+
+const ::unrealpb::FVector&
+FRepMovement::_Internal::linearvelocity(const FRepMovement* msg) {
+  return *msg->_impl_.linearvelocity_;
+}
+const ::unrealpb::FVector&
+FRepMovement::_Internal::angularvelocity(const FRepMovement* msg) {
+  return *msg->_impl_.angularvelocity_;
+}
+const ::unrealpb::FVector&
+FRepMovement::_Internal::location(const FRepMovement* msg) {
+  return *msg->_impl_.location_;
+}
+const ::unrealpb::FVector&
+FRepMovement::_Internal::rotation(const FRepMovement* msg) {
+  return *msg->_impl_.rotation_;
+}
+FRepMovement::FRepMovement(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:unrealpb.FRepMovement)
+}
+FRepMovement::FRepMovement(const FRepMovement& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  FRepMovement* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_._has_bits_){from._impl_._has_bits_}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.linearvelocity_){nullptr}
+    , decltype(_impl_.angularvelocity_){nullptr}
+    , decltype(_impl_.location_){nullptr}
+    , decltype(_impl_.rotation_){nullptr}
+    , decltype(_impl_.bsimulatedphysicsleep_){}
+    , decltype(_impl_.brepphysics_){}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_linearvelocity()) {
+    _this->_impl_.linearvelocity_ = new ::unrealpb::FVector(*from._impl_.linearvelocity_);
+  }
+  if (from._internal_has_angularvelocity()) {
+    _this->_impl_.angularvelocity_ = new ::unrealpb::FVector(*from._impl_.angularvelocity_);
+  }
+  if (from._internal_has_location()) {
+    _this->_impl_.location_ = new ::unrealpb::FVector(*from._impl_.location_);
+  }
+  if (from._internal_has_rotation()) {
+    _this->_impl_.rotation_ = new ::unrealpb::FVector(*from._impl_.rotation_);
+  }
+  ::memcpy(&_impl_.bsimulatedphysicsleep_, &from._impl_.bsimulatedphysicsleep_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.brepphysics_) -
+    reinterpret_cast<char*>(&_impl_.bsimulatedphysicsleep_)) + sizeof(_impl_.brepphysics_));
+  // @@protoc_insertion_point(copy_constructor:unrealpb.FRepMovement)
+}
+
+inline void FRepMovement::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_._has_bits_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.linearvelocity_){nullptr}
+    , decltype(_impl_.angularvelocity_){nullptr}
+    , decltype(_impl_.location_){nullptr}
+    , decltype(_impl_.rotation_){nullptr}
+    , decltype(_impl_.bsimulatedphysicsleep_){false}
+    , decltype(_impl_.brepphysics_){false}
+  };
+}
+
+FRepMovement::~FRepMovement() {
+  // @@protoc_insertion_point(destructor:unrealpb.FRepMovement)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void FRepMovement::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (this != internal_default_instance()) delete _impl_.linearvelocity_;
+  if (this != internal_default_instance()) delete _impl_.angularvelocity_;
+  if (this != internal_default_instance()) delete _impl_.location_;
+  if (this != internal_default_instance()) delete _impl_.rotation_;
+}
+
+void FRepMovement::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void FRepMovement::Clear() {
+// @@protoc_insertion_point(message_clear_start:unrealpb.FRepMovement)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x0000000fu) {
+    if (cached_has_bits & 0x00000001u) {
+      GOOGLE_DCHECK(_impl_.linearvelocity_ != nullptr);
+      _impl_.linearvelocity_->Clear();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      GOOGLE_DCHECK(_impl_.angularvelocity_ != nullptr);
+      _impl_.angularvelocity_->Clear();
+    }
+    if (cached_has_bits & 0x00000004u) {
+      GOOGLE_DCHECK(_impl_.location_ != nullptr);
+      _impl_.location_->Clear();
+    }
+    if (cached_has_bits & 0x00000008u) {
+      GOOGLE_DCHECK(_impl_.rotation_ != nullptr);
+      _impl_.rotation_->Clear();
+    }
+  }
+  ::memset(&_impl_.bsimulatedphysicsleep_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.brepphysics_) -
+      reinterpret_cast<char*>(&_impl_.bsimulatedphysicsleep_)) + sizeof(_impl_.brepphysics_));
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* FRepMovement::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // optional .unrealpb.FVector linearVelocity = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_linearvelocity(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .unrealpb.FVector angularVelocity = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          ptr = ctx->ParseMessage(_internal_mutable_angularvelocity(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .unrealpb.FVector location = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_location(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .unrealpb.FVector rotation = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+          ptr = ctx->ParseMessage(_internal_mutable_rotation(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional bool bSimulatedPhysicSleep = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
+          _Internal::set_has_bsimulatedphysicsleep(&has_bits);
+          _impl_.bsimulatedphysicsleep_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional bool bRepPhysics = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 48)) {
+          _Internal::set_has_brepphysics(&has_bits);
+          _impl_.brepphysics_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  _impl_._has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* FRepMovement::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.FRepMovement)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // optional .unrealpb.FVector linearVelocity = 1;
+  if (_internal_has_linearvelocity()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(1, _Internal::linearvelocity(this),
+        _Internal::linearvelocity(this).GetCachedSize(), target, stream);
+  }
+
+  // optional .unrealpb.FVector angularVelocity = 2;
+  if (_internal_has_angularvelocity()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(2, _Internal::angularvelocity(this),
+        _Internal::angularvelocity(this).GetCachedSize(), target, stream);
+  }
+
+  // optional .unrealpb.FVector location = 3;
+  if (_internal_has_location()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(3, _Internal::location(this),
+        _Internal::location(this).GetCachedSize(), target, stream);
+  }
+
+  // optional .unrealpb.FVector rotation = 4;
+  if (_internal_has_rotation()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(4, _Internal::rotation(this),
+        _Internal::rotation(this).GetCachedSize(), target, stream);
+  }
+
+  // optional bool bSimulatedPhysicSleep = 5;
+  if (_internal_has_bsimulatedphysicsleep()) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(5, this->_internal_bsimulatedphysicsleep(), target);
+  }
+
+  // optional bool bRepPhysics = 6;
+  if (_internal_has_brepphysics()) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(6, this->_internal_brepphysics(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.FRepMovement)
+  return target;
+}
+
+size_t FRepMovement::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:unrealpb.FRepMovement)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x0000003fu) {
+    // optional .unrealpb.FVector linearVelocity = 1;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.linearvelocity_);
+    }
+
+    // optional .unrealpb.FVector angularVelocity = 2;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.angularvelocity_);
+    }
+
+    // optional .unrealpb.FVector location = 3;
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.location_);
+    }
+
+    // optional .unrealpb.FVector rotation = 4;
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.rotation_);
+    }
+
+    // optional bool bSimulatedPhysicSleep = 5;
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool bRepPhysics = 6;
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 1 + 1;
+    }
+
+  }
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FRepMovement::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    FRepMovement::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FRepMovement::GetClassData() const { return &_class_data_; }
+
+
+void FRepMovement::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<FRepMovement*>(&to_msg);
+  auto& from = static_cast<const FRepMovement&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.FRepMovement)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (cached_has_bits & 0x0000003fu) {
+    if (cached_has_bits & 0x00000001u) {
+      _this->_internal_mutable_linearvelocity()->::unrealpb::FVector::MergeFrom(
+          from._internal_linearvelocity());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _this->_internal_mutable_angularvelocity()->::unrealpb::FVector::MergeFrom(
+          from._internal_angularvelocity());
+    }
+    if (cached_has_bits & 0x00000004u) {
+      _this->_internal_mutable_location()->::unrealpb::FVector::MergeFrom(
+          from._internal_location());
+    }
+    if (cached_has_bits & 0x00000008u) {
+      _this->_internal_mutable_rotation()->::unrealpb::FVector::MergeFrom(
+          from._internal_rotation());
+    }
+    if (cached_has_bits & 0x00000010u) {
+      _this->_impl_.bsimulatedphysicsleep_ = from._impl_.bsimulatedphysicsleep_;
+    }
+    if (cached_has_bits & 0x00000020u) {
+      _this->_impl_.brepphysics_ = from._impl_.brepphysics_;
+    }
+    _this->_impl_._has_bits_[0] |= cached_has_bits;
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void FRepMovement::CopyFrom(const FRepMovement& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.FRepMovement)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool FRepMovement::IsInitialized() const {
+  return true;
+}
+
+void FRepMovement::InternalSwap(FRepMovement* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(FRepMovement, _impl_.brepphysics_)
+      + sizeof(FRepMovement::_impl_.brepphysics_)
+      - PROTOBUF_FIELD_OFFSET(FRepMovement, _impl_.linearvelocity_)>(
+          reinterpret_cast<char*>(&_impl_.linearvelocity_),
+          reinterpret_cast<char*>(&other->_impl_.linearvelocity_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata FRepMovement::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
+      file_level_metadata_unreal_5fcommon_2eproto[18]);
+}
+
+// ===================================================================
+
+class FRepAttachment::_Internal {
+ public:
+  using HasBits = decltype(std::declval<FRepAttachment>()._impl_._has_bits_);
+  static const ::unrealpb::UnrealObjectRef& attachparent(const FRepAttachment* msg);
+  static void set_has_attachparent(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static const ::unrealpb::FVector& locationoffset(const FRepAttachment* msg);
+  static void set_has_locationoffset(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static const ::unrealpb::FVector& relativescale(const FRepAttachment* msg);
+  static void set_has_relativescale(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+  static const ::unrealpb::FVector& rotationoffset(const FRepAttachment* msg);
+  static void set_has_rotationoffset(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
+  static void set_has_attachsocket(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static const ::unrealpb::ActorComponentRef& attachcomponent(const FRepAttachment* msg);
+  static void set_has_attachcomponent(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
+};
+
+const ::unrealpb::UnrealObjectRef&
+FRepAttachment::_Internal::attachparent(const FRepAttachment* msg) {
+  return *msg->_impl_.attachparent_;
+}
+const ::unrealpb::FVector&
+FRepAttachment::_Internal::locationoffset(const FRepAttachment* msg) {
+  return *msg->_impl_.locationoffset_;
+}
+const ::unrealpb::FVector&
+FRepAttachment::_Internal::relativescale(const FRepAttachment* msg) {
+  return *msg->_impl_.relativescale_;
+}
+const ::unrealpb::FVector&
+FRepAttachment::_Internal::rotationoffset(const FRepAttachment* msg) {
+  return *msg->_impl_.rotationoffset_;
+}
+const ::unrealpb::ActorComponentRef&
+FRepAttachment::_Internal::attachcomponent(const FRepAttachment* msg) {
+  return *msg->_impl_.attachcomponent_;
+}
+FRepAttachment::FRepAttachment(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:unrealpb.FRepAttachment)
+}
+FRepAttachment::FRepAttachment(const FRepAttachment& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  FRepAttachment* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_._has_bits_){from._impl_._has_bits_}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.attachsocket_){}
+    , decltype(_impl_.attachparent_){nullptr}
+    , decltype(_impl_.locationoffset_){nullptr}
+    , decltype(_impl_.relativescale_){nullptr}
+    , decltype(_impl_.rotationoffset_){nullptr}
+    , decltype(_impl_.attachcomponent_){nullptr}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _impl_.attachsocket_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.attachsocket_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (from._internal_has_attachsocket()) {
+    _this->_impl_.attachsocket_.Set(from._internal_attachsocket(), 
+      _this->GetArenaForAllocation());
+  }
+  if (from._internal_has_attachparent()) {
+    _this->_impl_.attachparent_ = new ::unrealpb::UnrealObjectRef(*from._impl_.attachparent_);
+  }
+  if (from._internal_has_locationoffset()) {
+    _this->_impl_.locationoffset_ = new ::unrealpb::FVector(*from._impl_.locationoffset_);
+  }
+  if (from._internal_has_relativescale()) {
+    _this->_impl_.relativescale_ = new ::unrealpb::FVector(*from._impl_.relativescale_);
+  }
+  if (from._internal_has_rotationoffset()) {
+    _this->_impl_.rotationoffset_ = new ::unrealpb::FVector(*from._impl_.rotationoffset_);
+  }
+  if (from._internal_has_attachcomponent()) {
+    _this->_impl_.attachcomponent_ = new ::unrealpb::ActorComponentRef(*from._impl_.attachcomponent_);
+  }
+  // @@protoc_insertion_point(copy_constructor:unrealpb.FRepAttachment)
+}
+
+inline void FRepAttachment::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_._has_bits_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.attachsocket_){}
+    , decltype(_impl_.attachparent_){nullptr}
+    , decltype(_impl_.locationoffset_){nullptr}
+    , decltype(_impl_.relativescale_){nullptr}
+    , decltype(_impl_.rotationoffset_){nullptr}
+    , decltype(_impl_.attachcomponent_){nullptr}
+  };
+  _impl_.attachsocket_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.attachsocket_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+}
+
+FRepAttachment::~FRepAttachment() {
+  // @@protoc_insertion_point(destructor:unrealpb.FRepAttachment)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void FRepAttachment::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.attachsocket_.Destroy();
+  if (this != internal_default_instance()) delete _impl_.attachparent_;
+  if (this != internal_default_instance()) delete _impl_.locationoffset_;
+  if (this != internal_default_instance()) delete _impl_.relativescale_;
+  if (this != internal_default_instance()) delete _impl_.rotationoffset_;
+  if (this != internal_default_instance()) delete _impl_.attachcomponent_;
+}
+
+void FRepAttachment::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void FRepAttachment::Clear() {
+// @@protoc_insertion_point(message_clear_start:unrealpb.FRepAttachment)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x0000003fu) {
+    if (cached_has_bits & 0x00000001u) {
+      _impl_.attachsocket_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      GOOGLE_DCHECK(_impl_.attachparent_ != nullptr);
+      _impl_.attachparent_->Clear();
+    }
+    if (cached_has_bits & 0x00000004u) {
+      GOOGLE_DCHECK(_impl_.locationoffset_ != nullptr);
+      _impl_.locationoffset_->Clear();
+    }
+    if (cached_has_bits & 0x00000008u) {
+      GOOGLE_DCHECK(_impl_.relativescale_ != nullptr);
+      _impl_.relativescale_->Clear();
+    }
+    if (cached_has_bits & 0x00000010u) {
+      GOOGLE_DCHECK(_impl_.rotationoffset_ != nullptr);
+      _impl_.rotationoffset_->Clear();
+    }
+    if (cached_has_bits & 0x00000020u) {
+      GOOGLE_DCHECK(_impl_.attachcomponent_ != nullptr);
+      _impl_.attachcomponent_->Clear();
+    }
+  }
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* FRepAttachment::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // optional .unrealpb.UnrealObjectRef attachParent = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_attachparent(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .unrealpb.FVector locationOffset = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          ptr = ctx->ParseMessage(_internal_mutable_locationoffset(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .unrealpb.FVector relativeScale = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_relativescale(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .unrealpb.FVector rotationOffset = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
+          ptr = ctx->ParseMessage(_internal_mutable_rotationoffset(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional string attachSocket = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
+          auto str = _internal_mutable_attachsocket();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "unrealpb.FRepAttachment.attachSocket"));
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .unrealpb.ActorComponentRef attachComponent = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 50)) {
+          ptr = ctx->ParseMessage(_internal_mutable_attachcomponent(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  _impl_._has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* FRepAttachment::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:unrealpb.FRepAttachment)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // optional .unrealpb.UnrealObjectRef attachParent = 1;
+  if (_internal_has_attachparent()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(1, _Internal::attachparent(this),
+        _Internal::attachparent(this).GetCachedSize(), target, stream);
+  }
+
+  // optional .unrealpb.FVector locationOffset = 2;
+  if (_internal_has_locationoffset()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(2, _Internal::locationoffset(this),
+        _Internal::locationoffset(this).GetCachedSize(), target, stream);
+  }
+
+  // optional .unrealpb.FVector relativeScale = 3;
+  if (_internal_has_relativescale()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(3, _Internal::relativescale(this),
+        _Internal::relativescale(this).GetCachedSize(), target, stream);
+  }
+
+  // optional .unrealpb.FVector rotationOffset = 4;
+  if (_internal_has_rotationoffset()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(4, _Internal::rotationoffset(this),
+        _Internal::rotationoffset(this).GetCachedSize(), target, stream);
+  }
+
+  // optional string attachSocket = 5;
+  if (_internal_has_attachsocket()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_attachsocket().data(), static_cast<int>(this->_internal_attachsocket().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "unrealpb.FRepAttachment.attachSocket");
+    target = stream->WriteStringMaybeAliased(
+        5, this->_internal_attachsocket(), target);
+  }
+
+  // optional .unrealpb.ActorComponentRef attachComponent = 6;
+  if (_internal_has_attachcomponent()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(6, _Internal::attachcomponent(this),
+        _Internal::attachcomponent(this).GetCachedSize(), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:unrealpb.FRepAttachment)
+  return target;
+}
+
+size_t FRepAttachment::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:unrealpb.FRepAttachment)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x0000003fu) {
+    // optional string attachSocket = 5;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_attachsocket());
+    }
+
+    // optional .unrealpb.UnrealObjectRef attachParent = 1;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.attachparent_);
+    }
+
+    // optional .unrealpb.FVector locationOffset = 2;
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.locationoffset_);
+    }
+
+    // optional .unrealpb.FVector relativeScale = 3;
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.relativescale_);
+    }
+
+    // optional .unrealpb.FVector rotationOffset = 4;
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.rotationoffset_);
+    }
+
+    // optional .unrealpb.ActorComponentRef attachComponent = 6;
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *_impl_.attachcomponent_);
+    }
+
+  }
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData FRepAttachment::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    FRepAttachment::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*FRepAttachment::GetClassData() const { return &_class_data_; }
+
+
+void FRepAttachment::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<FRepAttachment*>(&to_msg);
+  auto& from = static_cast<const FRepAttachment&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:unrealpb.FRepAttachment)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (cached_has_bits & 0x0000003fu) {
+    if (cached_has_bits & 0x00000001u) {
+      _this->_internal_set_attachsocket(from._internal_attachsocket());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _this->_internal_mutable_attachparent()->::unrealpb::UnrealObjectRef::MergeFrom(
+          from._internal_attachparent());
+    }
+    if (cached_has_bits & 0x00000004u) {
+      _this->_internal_mutable_locationoffset()->::unrealpb::FVector::MergeFrom(
+          from._internal_locationoffset());
+    }
+    if (cached_has_bits & 0x00000008u) {
+      _this->_internal_mutable_relativescale()->::unrealpb::FVector::MergeFrom(
+          from._internal_relativescale());
+    }
+    if (cached_has_bits & 0x00000010u) {
+      _this->_internal_mutable_rotationoffset()->::unrealpb::FVector::MergeFrom(
+          from._internal_rotationoffset());
+    }
+    if (cached_has_bits & 0x00000020u) {
+      _this->_internal_mutable_attachcomponent()->::unrealpb::ActorComponentRef::MergeFrom(
+          from._internal_attachcomponent());
+    }
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void FRepAttachment::CopyFrom(const FRepAttachment& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:unrealpb.FRepAttachment)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool FRepAttachment::IsInitialized() const {
+  return true;
+}
+
+void FRepAttachment::InternalSwap(FRepAttachment* other) {
+  using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.attachsocket_, lhs_arena,
+      &other->_impl_.attachsocket_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(FRepAttachment, _impl_.attachcomponent_)
+      + sizeof(FRepAttachment::_impl_.attachcomponent_)
+      - PROTOBUF_FIELD_OFFSET(FRepAttachment, _impl_.attachparent_)>(
+          reinterpret_cast<char*>(&_impl_.attachparent_),
+          reinterpret_cast<char*>(&other->_impl_.attachparent_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata FRepAttachment::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
       file_level_metadata_unreal_5fcommon_2eproto[19]);
@@ -17654,6 +17716,10 @@ void StaticMeshComponentState::InternalSwap(StaticMeshComponentState* other) {
       &descriptor_table_unreal_5fcommon_2eproto_getter, &descriptor_table_unreal_5fcommon_2eproto_once,
       file_level_metadata_unreal_5fcommon_2eproto[52]);
 }
+const std::string unreal_class_path_default("");
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 ::PROTOBUF_NAMESPACE_ID::internal::ExtensionIdentifier< ::PROTOBUF_NAMESPACE_ID::MessageOptions,
+    ::PROTOBUF_NAMESPACE_ID::internal::StringTypeTraits, 9, false>
+  unreal_class_path(kUnrealClassPathFieldNumber, unreal_class_path_default, nullptr);
 
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace unrealpb
@@ -17726,6 +17792,10 @@ template<> PROTOBUF_NOINLINE ::unrealpb::SpatialChannelData*
 Arena::CreateMaybeMessage< ::unrealpb::SpatialChannelData >(Arena* arena) {
   return Arena::CreateMessageInternal< ::unrealpb::SpatialChannelData >(arena);
 }
+template<> PROTOBUF_NOINLINE ::unrealpb::ActorState*
+Arena::CreateMaybeMessage< ::unrealpb::ActorState >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::unrealpb::ActorState >(arena);
+}
 template<> PROTOBUF_NOINLINE ::unrealpb::FRepMovement*
 Arena::CreateMaybeMessage< ::unrealpb::FRepMovement >(Arena* arena) {
   return Arena::CreateMessageInternal< ::unrealpb::FRepMovement >(arena);
@@ -17733,10 +17803,6 @@ Arena::CreateMaybeMessage< ::unrealpb::FRepMovement >(Arena* arena) {
 template<> PROTOBUF_NOINLINE ::unrealpb::FRepAttachment*
 Arena::CreateMaybeMessage< ::unrealpb::FRepAttachment >(Arena* arena) {
   return Arena::CreateMessageInternal< ::unrealpb::FRepAttachment >(arena);
-}
-template<> PROTOBUF_NOINLINE ::unrealpb::ActorState*
-Arena::CreateMaybeMessage< ::unrealpb::ActorState >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::unrealpb::ActorState >(arena);
 }
 template<> PROTOBUF_NOINLINE ::unrealpb::ActorComponentState*
 Arena::CreateMaybeMessage< ::unrealpb::ActorComponentState >(Arena* arena) {

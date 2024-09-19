@@ -63,6 +63,9 @@ CHANNELDUE_API extern ChannelDataHandoverMessageDefaultTypeInternal _ChannelData
 class ChannelDataMergeOptions;
 struct ChannelDataMergeOptionsDefaultTypeInternal;
 CHANNELDUE_API extern ChannelDataMergeOptionsDefaultTypeInternal _ChannelDataMergeOptions_default_instance_;
+class ChannelDataRecoveryMessage;
+struct ChannelDataRecoveryMessageDefaultTypeInternal;
+CHANNELDUE_API extern ChannelDataRecoveryMessageDefaultTypeInternal _ChannelDataRecoveryMessage_default_instance_;
 class ChannelDataUpdateMessage;
 struct ChannelDataUpdateMessageDefaultTypeInternal;
 CHANNELDUE_API extern ChannelDataUpdateMessageDefaultTypeInternal _ChannelDataUpdateMessage_default_instance_;
@@ -87,6 +90,9 @@ CHANNELDUE_API extern DebugGetSpatialRegionsMessageDefaultTypeInternal _DebugGet
 class DisconnectMessage;
 struct DisconnectMessageDefaultTypeInternal;
 CHANNELDUE_API extern DisconnectMessageDefaultTypeInternal _DisconnectMessage_default_instance_;
+class EndRecoveryMesssage;
+struct EndRecoveryMesssageDefaultTypeInternal;
+CHANNELDUE_API extern EndRecoveryMesssageDefaultTypeInternal _EndRecoveryMesssage_default_instance_;
 class ListChannelMessage;
 struct ListChannelMessageDefaultTypeInternal;
 CHANNELDUE_API extern ListChannelMessageDefaultTypeInternal _ListChannelMessage_default_instance_;
@@ -166,6 +172,7 @@ template<> CHANNELDUE_API ::channeldpb::AuthMessage* Arena::CreateMaybeMessage<:
 template<> CHANNELDUE_API ::channeldpb::AuthResultMessage* Arena::CreateMaybeMessage<::channeldpb::AuthResultMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::ChannelDataHandoverMessage* Arena::CreateMaybeMessage<::channeldpb::ChannelDataHandoverMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::ChannelDataMergeOptions* Arena::CreateMaybeMessage<::channeldpb::ChannelDataMergeOptions>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::ChannelDataRecoveryMessage* Arena::CreateMaybeMessage<::channeldpb::ChannelDataRecoveryMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::ChannelDataUpdateMessage* Arena::CreateMaybeMessage<::channeldpb::ChannelDataUpdateMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::ChannelSubscriptionOptions* Arena::CreateMaybeMessage<::channeldpb::ChannelSubscriptionOptions>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::CreateChannelMessage* Arena::CreateMaybeMessage<::channeldpb::CreateChannelMessage>(Arena*);
@@ -174,6 +181,7 @@ template<> CHANNELDUE_API ::channeldpb::CreateEntityChannelMessage* Arena::Creat
 template<> CHANNELDUE_API ::channeldpb::CreateSpatialChannelsResultMessage* Arena::CreateMaybeMessage<::channeldpb::CreateSpatialChannelsResultMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::DebugGetSpatialRegionsMessage* Arena::CreateMaybeMessage<::channeldpb::DebugGetSpatialRegionsMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::DisconnectMessage* Arena::CreateMaybeMessage<::channeldpb::DisconnectMessage>(Arena*);
+template<> CHANNELDUE_API ::channeldpb::EndRecoveryMesssage* Arena::CreateMaybeMessage<::channeldpb::EndRecoveryMesssage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::ListChannelMessage* Arena::CreateMaybeMessage<::channeldpb::ListChannelMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::ListChannelResultMessage* Arena::CreateMaybeMessage<::channeldpb::ListChannelResultMessage>(Arena*);
 template<> CHANNELDUE_API ::channeldpb::ListChannelResultMessage_ChannelInfo* Arena::CreateMaybeMessage<::channeldpb::ListChannelResultMessage_ChannelInfo>(Arena*);
@@ -337,6 +345,8 @@ enum MessageType : int {
   ENTITY_GROUP_ADD = 16,
   ENTITY_GROUP_REMOVE = 17,
   SPATIAL_CHANNELS_READY = 18,
+  RECOVERY_CHANNEL_DATA = 20,
+  RECOVERY_END = 21,
   DEBUG_GET_SPATIAL_REGIONS = 99,
   USER_SPACE_START = 100,
   MessageType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
@@ -1282,6 +1292,7 @@ class CHANNELDUE_API AuthResultMessage final :
     kResultFieldNumber = 1,
     kConnIdFieldNumber = 2,
     kCompressionTypeFieldNumber = 3,
+    kShouldRecoverFieldNumber = 4,
   };
   // .channeldpb.AuthResultMessage.AuthResult result = 1;
   void clear_result();
@@ -1310,6 +1321,15 @@ class CHANNELDUE_API AuthResultMessage final :
   void _internal_set_compressiontype(::channeldpb::CompressionType value);
   public:
 
+  // bool shouldRecover = 4;
+  void clear_shouldrecover();
+  bool shouldrecover() const;
+  void set_shouldrecover(bool value);
+  private:
+  bool _internal_shouldrecover() const;
+  void _internal_set_shouldrecover(bool value);
+  public:
+
   // @@protoc_insertion_point(class_scope:channeldpb.AuthResultMessage)
  private:
   class _Internal;
@@ -1321,6 +1341,7 @@ class CHANNELDUE_API AuthResultMessage final :
     int result_;
     uint32_t connid_;
     int compressiontype_;
+    bool shouldrecover_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -3806,6 +3827,361 @@ class CHANNELDUE_API DisconnectMessage final :
 };
 // -------------------------------------------------------------------
 
+class CHANNELDUE_API ChannelDataRecoveryMessage final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.ChannelDataRecoveryMessage) */ {
+ public:
+  inline ChannelDataRecoveryMessage() : ChannelDataRecoveryMessage(nullptr) {}
+  ~ChannelDataRecoveryMessage() override;
+  explicit PROTOBUF_CONSTEXPR ChannelDataRecoveryMessage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ChannelDataRecoveryMessage(const ChannelDataRecoveryMessage& from);
+  ChannelDataRecoveryMessage(ChannelDataRecoveryMessage&& from) noexcept
+    : ChannelDataRecoveryMessage() {
+    *this = ::std::move(from);
+  }
+
+  inline ChannelDataRecoveryMessage& operator=(const ChannelDataRecoveryMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ChannelDataRecoveryMessage& operator=(ChannelDataRecoveryMessage&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ChannelDataRecoveryMessage& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ChannelDataRecoveryMessage* internal_default_instance() {
+    return reinterpret_cast<const ChannelDataRecoveryMessage*>(
+               &_ChannelDataRecoveryMessage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    19;
+
+  friend void swap(ChannelDataRecoveryMessage& a, ChannelDataRecoveryMessage& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ChannelDataRecoveryMessage* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ChannelDataRecoveryMessage* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ChannelDataRecoveryMessage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<ChannelDataRecoveryMessage>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const ChannelDataRecoveryMessage& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const ChannelDataRecoveryMessage& from) {
+    ChannelDataRecoveryMessage::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ChannelDataRecoveryMessage* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "channeldpb.ChannelDataRecoveryMessage";
+  }
+  protected:
+  explicit ChannelDataRecoveryMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kMetadataFieldNumber = 3,
+    kSubOptionsFieldNumber = 6,
+    kDataFieldNumber = 7,
+    kChannelIdFieldNumber = 1,
+    kChannelTypeFieldNumber = 2,
+    kSubTimeFieldNumber = 5,
+    kOwnerConnIdFieldNumber = 4,
+  };
+  // string metadata = 3;
+  void clear_metadata();
+  const std::string& metadata() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_metadata(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_metadata();
+  PROTOBUF_NODISCARD std::string* release_metadata();
+  void set_allocated_metadata(std::string* metadata);
+  private:
+  const std::string& _internal_metadata() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_metadata(const std::string& value);
+  std::string* _internal_mutable_metadata();
+  public:
+
+  // .channeldpb.ChannelSubscriptionOptions subOptions = 6;
+  bool has_suboptions() const;
+  private:
+  bool _internal_has_suboptions() const;
+  public:
+  void clear_suboptions();
+  const ::channeldpb::ChannelSubscriptionOptions& suboptions() const;
+  PROTOBUF_NODISCARD ::channeldpb::ChannelSubscriptionOptions* release_suboptions();
+  ::channeldpb::ChannelSubscriptionOptions* mutable_suboptions();
+  void set_allocated_suboptions(::channeldpb::ChannelSubscriptionOptions* suboptions);
+  private:
+  const ::channeldpb::ChannelSubscriptionOptions& _internal_suboptions() const;
+  ::channeldpb::ChannelSubscriptionOptions* _internal_mutable_suboptions();
+  public:
+  void unsafe_arena_set_allocated_suboptions(
+      ::channeldpb::ChannelSubscriptionOptions* suboptions);
+  ::channeldpb::ChannelSubscriptionOptions* unsafe_arena_release_suboptions();
+
+  // .google.protobuf.Any data = 7;
+  bool has_data() const;
+  private:
+  bool _internal_has_data() const;
+  public:
+  void clear_data();
+  const ::PROTOBUF_NAMESPACE_ID::Any& data() const;
+  PROTOBUF_NODISCARD ::PROTOBUF_NAMESPACE_ID::Any* release_data();
+  ::PROTOBUF_NAMESPACE_ID::Any* mutable_data();
+  void set_allocated_data(::PROTOBUF_NAMESPACE_ID::Any* data);
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Any& _internal_data() const;
+  ::PROTOBUF_NAMESPACE_ID::Any* _internal_mutable_data();
+  public:
+  void unsafe_arena_set_allocated_data(
+      ::PROTOBUF_NAMESPACE_ID::Any* data);
+  ::PROTOBUF_NAMESPACE_ID::Any* unsafe_arena_release_data();
+
+  // uint32 channelId = 1;
+  void clear_channelid();
+  uint32_t channelid() const;
+  void set_channelid(uint32_t value);
+  private:
+  uint32_t _internal_channelid() const;
+  void _internal_set_channelid(uint32_t value);
+  public:
+
+  // .channeldpb.ChannelType channelType = 2;
+  void clear_channeltype();
+  ::channeldpb::ChannelType channeltype() const;
+  void set_channeltype(::channeldpb::ChannelType value);
+  private:
+  ::channeldpb::ChannelType _internal_channeltype() const;
+  void _internal_set_channeltype(::channeldpb::ChannelType value);
+  public:
+
+  // int64 subTime = 5;
+  void clear_subtime();
+  int64_t subtime() const;
+  void set_subtime(int64_t value);
+  private:
+  int64_t _internal_subtime() const;
+  void _internal_set_subtime(int64_t value);
+  public:
+
+  // uint32 ownerConnId = 4;
+  void clear_ownerconnid();
+  uint32_t ownerconnid() const;
+  void set_ownerconnid(uint32_t value);
+  private:
+  uint32_t _internal_ownerconnid() const;
+  void _internal_set_ownerconnid(uint32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:channeldpb.ChannelDataRecoveryMessage)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr metadata_;
+    ::channeldpb::ChannelSubscriptionOptions* suboptions_;
+    ::PROTOBUF_NAMESPACE_ID::Any* data_;
+    uint32_t channelid_;
+    int channeltype_;
+    int64_t subtime_;
+    uint32_t ownerconnid_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_channeld_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CHANNELDUE_API EndRecoveryMesssage final :
+    public ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase /* @@protoc_insertion_point(class_definition:channeldpb.EndRecoveryMesssage) */ {
+ public:
+  inline EndRecoveryMesssage() : EndRecoveryMesssage(nullptr) {}
+  explicit PROTOBUF_CONSTEXPR EndRecoveryMesssage(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  EndRecoveryMesssage(const EndRecoveryMesssage& from);
+  EndRecoveryMesssage(EndRecoveryMesssage&& from) noexcept
+    : EndRecoveryMesssage() {
+    *this = ::std::move(from);
+  }
+
+  inline EndRecoveryMesssage& operator=(const EndRecoveryMesssage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline EndRecoveryMesssage& operator=(EndRecoveryMesssage&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const EndRecoveryMesssage& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const EndRecoveryMesssage* internal_default_instance() {
+    return reinterpret_cast<const EndRecoveryMesssage*>(
+               &_EndRecoveryMesssage_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    20;
+
+  friend void swap(EndRecoveryMesssage& a, EndRecoveryMesssage& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(EndRecoveryMesssage* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(EndRecoveryMesssage* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  EndRecoveryMesssage* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<EndRecoveryMesssage>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyFrom;
+  inline void CopyFrom(const EndRecoveryMesssage& from) {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl(*this, from);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeFrom;
+  void MergeFrom(const EndRecoveryMesssage& from) {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl(*this, from);
+  }
+  public:
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "channeldpb.EndRecoveryMesssage";
+  }
+  protected:
+  explicit EndRecoveryMesssage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:channeldpb.EndRecoveryMesssage)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+  };
+  friend struct ::TableStruct_channeld_2eproto;
+};
+// -------------------------------------------------------------------
+
 class CHANNELDUE_API SpatialInfo final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:channeldpb.SpatialInfo) */ {
  public:
@@ -3854,7 +4230,7 @@ class CHANNELDUE_API SpatialInfo final :
                &_SpatialInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    19;
+    21;
 
   friend void swap(SpatialInfo& a, SpatialInfo& b) {
     a.Swap(&b);
@@ -4024,7 +4400,7 @@ class CHANNELDUE_API CreateSpatialChannelsResultMessage final :
                &_CreateSpatialChannelsResultMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    20;
+    22;
 
   friend void swap(CreateSpatialChannelsResultMessage& a, CreateSpatialChannelsResultMessage& b) {
     a.Swap(&b);
@@ -4213,7 +4589,7 @@ class CHANNELDUE_API QuerySpatialChannelMessage final :
                &_QuerySpatialChannelMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    23;
 
   friend void swap(QuerySpatialChannelMessage& a, QuerySpatialChannelMessage& b) {
     a.Swap(&b);
@@ -4370,7 +4746,7 @@ class CHANNELDUE_API QuerySpatialChannelResultMessage final :
                &_QuerySpatialChannelResultMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    24;
 
   friend void swap(QuerySpatialChannelResultMessage& a, QuerySpatialChannelResultMessage& b) {
     a.Swap(&b);
@@ -4532,7 +4908,7 @@ class CHANNELDUE_API SpatialChannelsReadyMessage final :
                &_SpatialChannelsReadyMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    25;
 
   friend void swap(SpatialChannelsReadyMessage& a, SpatialChannelsReadyMessage& b) {
     a.Swap(&b);
@@ -4691,7 +5067,7 @@ class CHANNELDUE_API ChannelDataHandoverMessage final :
                &_ChannelDataHandoverMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    26;
 
   friend void swap(ChannelDataHandoverMessage& a, ChannelDataHandoverMessage& b) {
     a.Swap(&b);
@@ -4881,7 +5257,7 @@ class CHANNELDUE_API SpatialRegion final :
                &_SpatialRegion_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    27;
 
   friend void swap(SpatialRegion& a, SpatialRegion& b) {
     a.Swap(&b);
@@ -5080,7 +5456,7 @@ class CHANNELDUE_API SpatialRegionsUpdateMessage final :
                &_SpatialRegionsUpdateMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    28;
 
   friend void swap(SpatialRegionsUpdateMessage& a, SpatialRegionsUpdateMessage& b) {
     a.Swap(&b);
@@ -5237,7 +5613,7 @@ class CHANNELDUE_API SpatialInterestQuery_SpotsAOI final :
                &_SpatialInterestQuery_SpotsAOI_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    29;
 
   friend void swap(SpatialInterestQuery_SpotsAOI& a, SpatialInterestQuery_SpotsAOI& b) {
     a.Swap(&b);
@@ -5419,7 +5795,7 @@ class CHANNELDUE_API SpatialInterestQuery_BoxAOI final :
                &_SpatialInterestQuery_BoxAOI_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    30;
 
   friend void swap(SpatialInterestQuery_BoxAOI& a, SpatialInterestQuery_BoxAOI& b) {
     a.Swap(&b);
@@ -5596,7 +5972,7 @@ class CHANNELDUE_API SpatialInterestQuery_SphereAOI final :
                &_SpatialInterestQuery_SphereAOI_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    31;
 
   friend void swap(SpatialInterestQuery_SphereAOI& a, SpatialInterestQuery_SphereAOI& b) {
     a.Swap(&b);
@@ -5764,7 +6140,7 @@ class CHANNELDUE_API SpatialInterestQuery_ConeAOI final :
                &_SpatialInterestQuery_ConeAOI_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    32;
 
   friend void swap(SpatialInterestQuery_ConeAOI& a, SpatialInterestQuery_ConeAOI& b) {
     a.Swap(&b);
@@ -5963,7 +6339,7 @@ class CHANNELDUE_API SpatialInterestQuery final :
                &_SpatialInterestQuery_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    33;
 
   friend void swap(SpatialInterestQuery& a, SpatialInterestQuery& b) {
     a.Swap(&b);
@@ -6186,7 +6562,7 @@ class CHANNELDUE_API UpdateSpatialInterestMessage final :
                &_UpdateSpatialInterestMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    34;
 
   friend void swap(UpdateSpatialInterestMessage& a, UpdateSpatialInterestMessage& b) {
     a.Swap(&b);
@@ -6354,7 +6730,7 @@ class CHANNELDUE_API CreateEntityChannelMessage final :
                &_CreateEntityChannelMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    35;
 
   friend void swap(CreateEntityChannelMessage& a, CreateEntityChannelMessage& b) {
     a.Swap(&b);
@@ -6589,7 +6965,7 @@ class CHANNELDUE_API AddEntityGroupMessage final :
                &_AddEntityGroupMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    36;
 
   friend void swap(AddEntityGroupMessage& a, AddEntityGroupMessage& b) {
     a.Swap(&b);
@@ -6762,7 +7138,7 @@ class CHANNELDUE_API RemoveEntityGroupMessage final :
                &_RemoveEntityGroupMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    37;
 
   friend void swap(RemoveEntityGroupMessage& a, RemoveEntityGroupMessage& b) {
     a.Swap(&b);
@@ -6934,7 +7310,7 @@ class CHANNELDUE_API DebugGetSpatialRegionsMessage final :
                &_DebugGetSpatialRegionsMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    38;
 
   friend void swap(DebugGetSpatialRegionsMessage& a, DebugGetSpatialRegionsMessage& b) {
     a.Swap(&b);
@@ -7428,6 +7804,26 @@ inline void AuthResultMessage::_internal_set_compressiontype(::channeldpb::Compr
 inline void AuthResultMessage::set_compressiontype(::channeldpb::CompressionType value) {
   _internal_set_compressiontype(value);
   // @@protoc_insertion_point(field_set:channeldpb.AuthResultMessage.compressionType)
+}
+
+// bool shouldRecover = 4;
+inline void AuthResultMessage::clear_shouldrecover() {
+  _impl_.shouldrecover_ = false;
+}
+inline bool AuthResultMessage::_internal_shouldrecover() const {
+  return _impl_.shouldrecover_;
+}
+inline bool AuthResultMessage::shouldrecover() const {
+  // @@protoc_insertion_point(field_get:channeldpb.AuthResultMessage.shouldRecover)
+  return _internal_shouldrecover();
+}
+inline void AuthResultMessage::_internal_set_shouldrecover(bool value) {
+  
+  _impl_.shouldrecover_ = value;
+}
+inline void AuthResultMessage::set_shouldrecover(bool value) {
+  _internal_set_shouldrecover(value);
+  // @@protoc_insertion_point(field_set:channeldpb.AuthResultMessage.shouldRecover)
 }
 
 // -------------------------------------------------------------------
@@ -8935,6 +9331,319 @@ inline void DisconnectMessage::set_connid(uint32_t value) {
   _internal_set_connid(value);
   // @@protoc_insertion_point(field_set:channeldpb.DisconnectMessage.connId)
 }
+
+// -------------------------------------------------------------------
+
+// ChannelDataRecoveryMessage
+
+// uint32 channelId = 1;
+inline void ChannelDataRecoveryMessage::clear_channelid() {
+  _impl_.channelid_ = 0u;
+}
+inline uint32_t ChannelDataRecoveryMessage::_internal_channelid() const {
+  return _impl_.channelid_;
+}
+inline uint32_t ChannelDataRecoveryMessage::channelid() const {
+  // @@protoc_insertion_point(field_get:channeldpb.ChannelDataRecoveryMessage.channelId)
+  return _internal_channelid();
+}
+inline void ChannelDataRecoveryMessage::_internal_set_channelid(uint32_t value) {
+  
+  _impl_.channelid_ = value;
+}
+inline void ChannelDataRecoveryMessage::set_channelid(uint32_t value) {
+  _internal_set_channelid(value);
+  // @@protoc_insertion_point(field_set:channeldpb.ChannelDataRecoveryMessage.channelId)
+}
+
+// .channeldpb.ChannelType channelType = 2;
+inline void ChannelDataRecoveryMessage::clear_channeltype() {
+  _impl_.channeltype_ = 0;
+}
+inline ::channeldpb::ChannelType ChannelDataRecoveryMessage::_internal_channeltype() const {
+  return static_cast< ::channeldpb::ChannelType >(_impl_.channeltype_);
+}
+inline ::channeldpb::ChannelType ChannelDataRecoveryMessage::channeltype() const {
+  // @@protoc_insertion_point(field_get:channeldpb.ChannelDataRecoveryMessage.channelType)
+  return _internal_channeltype();
+}
+inline void ChannelDataRecoveryMessage::_internal_set_channeltype(::channeldpb::ChannelType value) {
+  
+  _impl_.channeltype_ = value;
+}
+inline void ChannelDataRecoveryMessage::set_channeltype(::channeldpb::ChannelType value) {
+  _internal_set_channeltype(value);
+  // @@protoc_insertion_point(field_set:channeldpb.ChannelDataRecoveryMessage.channelType)
+}
+
+// string metadata = 3;
+inline void ChannelDataRecoveryMessage::clear_metadata() {
+  _impl_.metadata_.ClearToEmpty();
+}
+inline const std::string& ChannelDataRecoveryMessage::metadata() const {
+  // @@protoc_insertion_point(field_get:channeldpb.ChannelDataRecoveryMessage.metadata)
+  return _internal_metadata();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void ChannelDataRecoveryMessage::set_metadata(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.metadata_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:channeldpb.ChannelDataRecoveryMessage.metadata)
+}
+inline std::string* ChannelDataRecoveryMessage::mutable_metadata() {
+  std::string* _s = _internal_mutable_metadata();
+  // @@protoc_insertion_point(field_mutable:channeldpb.ChannelDataRecoveryMessage.metadata)
+  return _s;
+}
+inline const std::string& ChannelDataRecoveryMessage::_internal_metadata() const {
+  return _impl_.metadata_.Get();
+}
+inline void ChannelDataRecoveryMessage::_internal_set_metadata(const std::string& value) {
+  
+  _impl_.metadata_.Set(value, GetArenaForAllocation());
+}
+inline std::string* ChannelDataRecoveryMessage::_internal_mutable_metadata() {
+  
+  return _impl_.metadata_.Mutable(GetArenaForAllocation());
+}
+inline std::string* ChannelDataRecoveryMessage::release_metadata() {
+  // @@protoc_insertion_point(field_release:channeldpb.ChannelDataRecoveryMessage.metadata)
+  return _impl_.metadata_.Release();
+}
+inline void ChannelDataRecoveryMessage::set_allocated_metadata(std::string* metadata) {
+  if (metadata != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.metadata_.SetAllocated(metadata, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.metadata_.IsDefault()) {
+    _impl_.metadata_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:channeldpb.ChannelDataRecoveryMessage.metadata)
+}
+
+// uint32 ownerConnId = 4;
+inline void ChannelDataRecoveryMessage::clear_ownerconnid() {
+  _impl_.ownerconnid_ = 0u;
+}
+inline uint32_t ChannelDataRecoveryMessage::_internal_ownerconnid() const {
+  return _impl_.ownerconnid_;
+}
+inline uint32_t ChannelDataRecoveryMessage::ownerconnid() const {
+  // @@protoc_insertion_point(field_get:channeldpb.ChannelDataRecoveryMessage.ownerConnId)
+  return _internal_ownerconnid();
+}
+inline void ChannelDataRecoveryMessage::_internal_set_ownerconnid(uint32_t value) {
+  
+  _impl_.ownerconnid_ = value;
+}
+inline void ChannelDataRecoveryMessage::set_ownerconnid(uint32_t value) {
+  _internal_set_ownerconnid(value);
+  // @@protoc_insertion_point(field_set:channeldpb.ChannelDataRecoveryMessage.ownerConnId)
+}
+
+// int64 subTime = 5;
+inline void ChannelDataRecoveryMessage::clear_subtime() {
+  _impl_.subtime_ = int64_t{0};
+}
+inline int64_t ChannelDataRecoveryMessage::_internal_subtime() const {
+  return _impl_.subtime_;
+}
+inline int64_t ChannelDataRecoveryMessage::subtime() const {
+  // @@protoc_insertion_point(field_get:channeldpb.ChannelDataRecoveryMessage.subTime)
+  return _internal_subtime();
+}
+inline void ChannelDataRecoveryMessage::_internal_set_subtime(int64_t value) {
+  
+  _impl_.subtime_ = value;
+}
+inline void ChannelDataRecoveryMessage::set_subtime(int64_t value) {
+  _internal_set_subtime(value);
+  // @@protoc_insertion_point(field_set:channeldpb.ChannelDataRecoveryMessage.subTime)
+}
+
+// .channeldpb.ChannelSubscriptionOptions subOptions = 6;
+inline bool ChannelDataRecoveryMessage::_internal_has_suboptions() const {
+  return this != internal_default_instance() && _impl_.suboptions_ != nullptr;
+}
+inline bool ChannelDataRecoveryMessage::has_suboptions() const {
+  return _internal_has_suboptions();
+}
+inline void ChannelDataRecoveryMessage::clear_suboptions() {
+  if (GetArenaForAllocation() == nullptr && _impl_.suboptions_ != nullptr) {
+    delete _impl_.suboptions_;
+  }
+  _impl_.suboptions_ = nullptr;
+}
+inline const ::channeldpb::ChannelSubscriptionOptions& ChannelDataRecoveryMessage::_internal_suboptions() const {
+  const ::channeldpb::ChannelSubscriptionOptions* p = _impl_.suboptions_;
+  return p != nullptr ? *p : reinterpret_cast<const ::channeldpb::ChannelSubscriptionOptions&>(
+      ::channeldpb::_ChannelSubscriptionOptions_default_instance_);
+}
+inline const ::channeldpb::ChannelSubscriptionOptions& ChannelDataRecoveryMessage::suboptions() const {
+  // @@protoc_insertion_point(field_get:channeldpb.ChannelDataRecoveryMessage.subOptions)
+  return _internal_suboptions();
+}
+inline void ChannelDataRecoveryMessage::unsafe_arena_set_allocated_suboptions(
+    ::channeldpb::ChannelSubscriptionOptions* suboptions) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.suboptions_);
+  }
+  _impl_.suboptions_ = suboptions;
+  if (suboptions) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:channeldpb.ChannelDataRecoveryMessage.subOptions)
+}
+inline ::channeldpb::ChannelSubscriptionOptions* ChannelDataRecoveryMessage::release_suboptions() {
+  
+  ::channeldpb::ChannelSubscriptionOptions* temp = _impl_.suboptions_;
+  _impl_.suboptions_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::channeldpb::ChannelSubscriptionOptions* ChannelDataRecoveryMessage::unsafe_arena_release_suboptions() {
+  // @@protoc_insertion_point(field_release:channeldpb.ChannelDataRecoveryMessage.subOptions)
+  
+  ::channeldpb::ChannelSubscriptionOptions* temp = _impl_.suboptions_;
+  _impl_.suboptions_ = nullptr;
+  return temp;
+}
+inline ::channeldpb::ChannelSubscriptionOptions* ChannelDataRecoveryMessage::_internal_mutable_suboptions() {
+  
+  if (_impl_.suboptions_ == nullptr) {
+    auto* p = CreateMaybeMessage<::channeldpb::ChannelSubscriptionOptions>(GetArenaForAllocation());
+    _impl_.suboptions_ = p;
+  }
+  return _impl_.suboptions_;
+}
+inline ::channeldpb::ChannelSubscriptionOptions* ChannelDataRecoveryMessage::mutable_suboptions() {
+  ::channeldpb::ChannelSubscriptionOptions* _msg = _internal_mutable_suboptions();
+  // @@protoc_insertion_point(field_mutable:channeldpb.ChannelDataRecoveryMessage.subOptions)
+  return _msg;
+}
+inline void ChannelDataRecoveryMessage::set_allocated_suboptions(::channeldpb::ChannelSubscriptionOptions* suboptions) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete _impl_.suboptions_;
+  }
+  if (suboptions) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(suboptions);
+    if (message_arena != submessage_arena) {
+      suboptions = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, suboptions, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.suboptions_ = suboptions;
+  // @@protoc_insertion_point(field_set_allocated:channeldpb.ChannelDataRecoveryMessage.subOptions)
+}
+
+// .google.protobuf.Any data = 7;
+inline bool ChannelDataRecoveryMessage::_internal_has_data() const {
+  return this != internal_default_instance() && _impl_.data_ != nullptr;
+}
+inline bool ChannelDataRecoveryMessage::has_data() const {
+  return _internal_has_data();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Any& ChannelDataRecoveryMessage::_internal_data() const {
+  const ::PROTOBUF_NAMESPACE_ID::Any* p = _impl_.data_;
+  return p != nullptr ? *p : reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Any&>(
+      ::PROTOBUF_NAMESPACE_ID::_Any_default_instance_);
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Any& ChannelDataRecoveryMessage::data() const {
+  // @@protoc_insertion_point(field_get:channeldpb.ChannelDataRecoveryMessage.data)
+  return _internal_data();
+}
+inline void ChannelDataRecoveryMessage::unsafe_arena_set_allocated_data(
+    ::PROTOBUF_NAMESPACE_ID::Any* data) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.data_);
+  }
+  _impl_.data_ = data;
+  if (data) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:channeldpb.ChannelDataRecoveryMessage.data)
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* ChannelDataRecoveryMessage::release_data() {
+  
+  ::PROTOBUF_NAMESPACE_ID::Any* temp = _impl_.data_;
+  _impl_.data_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* ChannelDataRecoveryMessage::unsafe_arena_release_data() {
+  // @@protoc_insertion_point(field_release:channeldpb.ChannelDataRecoveryMessage.data)
+  
+  ::PROTOBUF_NAMESPACE_ID::Any* temp = _impl_.data_;
+  _impl_.data_ = nullptr;
+  return temp;
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* ChannelDataRecoveryMessage::_internal_mutable_data() {
+  
+  if (_impl_.data_ == nullptr) {
+    auto* p = CreateMaybeMessage<::PROTOBUF_NAMESPACE_ID::Any>(GetArenaForAllocation());
+    _impl_.data_ = p;
+  }
+  return _impl_.data_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::Any* ChannelDataRecoveryMessage::mutable_data() {
+  ::PROTOBUF_NAMESPACE_ID::Any* _msg = _internal_mutable_data();
+  // @@protoc_insertion_point(field_mutable:channeldpb.ChannelDataRecoveryMessage.data)
+  return _msg;
+}
+inline void ChannelDataRecoveryMessage::set_allocated_data(::PROTOBUF_NAMESPACE_ID::Any* data) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.data_);
+  }
+  if (data) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(
+                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(data));
+    if (message_arena != submessage_arena) {
+      data = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, data, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  _impl_.data_ = data;
+  // @@protoc_insertion_point(field_set_allocated:channeldpb.ChannelDataRecoveryMessage.data)
+}
+
+// -------------------------------------------------------------------
+
+// EndRecoveryMesssage
 
 // -------------------------------------------------------------------
 
@@ -11276,6 +11985,10 @@ RemoveEntityGroupMessage::mutable_entitiestoremove() {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
