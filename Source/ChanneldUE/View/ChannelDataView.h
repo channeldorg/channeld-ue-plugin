@@ -181,7 +181,7 @@ protected:
 	UClass* LoadClassFromProto(const google::protobuf::Descriptor* Descriptor);
 	bool HasEverSpawned(uint32 NetId) const;
 
-	virtual void RecoverChannelData(Channeld::ChannelId ChId, const google::protobuf::Any& AnyData);
+	virtual void RecoverChannelData(Channeld::ChannelId ChId, TSharedPtr<channeldpb::ChannelDataRecoveryMessage> RecoveryMsg);
 
 	UPROPERTY()
 	UChanneldConnection* Connection;

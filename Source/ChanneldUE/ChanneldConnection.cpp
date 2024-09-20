@@ -993,7 +993,7 @@ void UChanneldConnection::HandleRecoveryEnd(UChanneldConnection* Conn, Channeld:
 		SubInfo.SubOptions.MergeFromMessage(RecoverMsg->suboptions());
 		SubscribedChannels.Emplace(RecoverMsg->channelid(), SubInfo);
 
-		OnRecoverChannelData.Broadcast(RecoverMsg->channelid(), RecoverMsg->data());
+		OnRecoverChannelData.Broadcast(RecoverMsg->channelid(), RecoverMsg);
 	}
 	
 	bIsRecovering = false;

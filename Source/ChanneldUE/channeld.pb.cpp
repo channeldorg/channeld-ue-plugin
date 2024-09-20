@@ -311,14 +311,16 @@ struct DisconnectMessageDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DisconnectMessageDefaultTypeInternal _DisconnectMessage_default_instance_;
 PROTOBUF_CONSTEXPR ChannelDataRecoveryMessage::ChannelDataRecoveryMessage(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.metadata_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+    /*decltype(_impl_._has_bits_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_.metadata_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
   , /*decltype(_impl_.suboptions_)*/nullptr
-  , /*decltype(_impl_.data_)*/nullptr
+  , /*decltype(_impl_.channeldata_)*/nullptr
+  , /*decltype(_impl_.recoverydata_)*/nullptr
   , /*decltype(_impl_.channelid_)*/0u
   , /*decltype(_impl_.channeltype_)*/0
   , /*decltype(_impl_.subtime_)*/int64_t{0}
-  , /*decltype(_impl_.ownerconnid_)*/0u
-  , /*decltype(_impl_._cached_size_)*/{}} {}
+  , /*decltype(_impl_.ownerconnid_)*/0u} {}
 struct ChannelDataRecoveryMessageDefaultTypeInternal {
   PROTOBUF_CONSTEXPR ChannelDataRecoveryMessageDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -784,7 +786,7 @@ const uint32_t TableStruct_channeld_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::channeldpb::DisconnectMessage, _impl_.connid_),
-  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::ChannelDataRecoveryMessage, _impl_._has_bits_),
   PROTOBUF_FIELD_OFFSET(::channeldpb::ChannelDataRecoveryMessage, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -796,7 +798,16 @@ const uint32_t TableStruct_channeld_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
   PROTOBUF_FIELD_OFFSET(::channeldpb::ChannelDataRecoveryMessage, _impl_.ownerconnid_),
   PROTOBUF_FIELD_OFFSET(::channeldpb::ChannelDataRecoveryMessage, _impl_.subtime_),
   PROTOBUF_FIELD_OFFSET(::channeldpb::ChannelDataRecoveryMessage, _impl_.suboptions_),
-  PROTOBUF_FIELD_OFFSET(::channeldpb::ChannelDataRecoveryMessage, _impl_.data_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::ChannelDataRecoveryMessage, _impl_.channeldata_),
+  PROTOBUF_FIELD_OFFSET(::channeldpb::ChannelDataRecoveryMessage, _impl_.recoverydata_),
+  ~0u,
+  ~0u,
+  ~0u,
+  ~0u,
+  ~0u,
+  ~0u,
+  ~0u,
+  0,
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::channeldpb::EndRecoveryMesssage, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -981,26 +992,26 @@ static const ::_pbi::MigrationSchema schemas_channeld_2eproto[] PROTOBUF_SECTION
   { 149, -1, -1, sizeof(::channeldpb::UnsubscribedFromChannelResultMessage)},
   { 158, -1, -1, sizeof(::channeldpb::ChannelDataUpdateMessage)},
   { 166, -1, -1, sizeof(::channeldpb::DisconnectMessage)},
-  { 173, -1, -1, sizeof(::channeldpb::ChannelDataRecoveryMessage)},
-  { 186, -1, -1, sizeof(::channeldpb::EndRecoveryMesssage)},
-  { 192, -1, -1, sizeof(::channeldpb::SpatialInfo)},
-  { 201, -1, -1, sizeof(::channeldpb::CreateSpatialChannelsResultMessage)},
-  { 210, -1, -1, sizeof(::channeldpb::QuerySpatialChannelMessage)},
-  { 217, -1, -1, sizeof(::channeldpb::QuerySpatialChannelResultMessage)},
-  { 224, -1, -1, sizeof(::channeldpb::SpatialChannelsReadyMessage)},
-  { 232, -1, -1, sizeof(::channeldpb::ChannelDataHandoverMessage)},
-  { 242, -1, -1, sizeof(::channeldpb::SpatialRegion)},
-  { 252, -1, -1, sizeof(::channeldpb::SpatialRegionsUpdateMessage)},
-  { 259, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_SpotsAOI)},
-  { 267, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_BoxAOI)},
-  { 275, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_SphereAOI)},
-  { 283, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_ConeAOI)},
-  { 293, 303, -1, sizeof(::channeldpb::SpatialInterestQuery)},
-  { 307, -1, -1, sizeof(::channeldpb::UpdateSpatialInterestMessage)},
-  { 315, -1, -1, sizeof(::channeldpb::CreateEntityChannelMessage)},
-  { 327, -1, -1, sizeof(::channeldpb::AddEntityGroupMessage)},
-  { 335, -1, -1, sizeof(::channeldpb::RemoveEntityGroupMessage)},
-  { 343, -1, -1, sizeof(::channeldpb::DebugGetSpatialRegionsMessage)},
+  { 173, 187, -1, sizeof(::channeldpb::ChannelDataRecoveryMessage)},
+  { 195, -1, -1, sizeof(::channeldpb::EndRecoveryMesssage)},
+  { 201, -1, -1, sizeof(::channeldpb::SpatialInfo)},
+  { 210, -1, -1, sizeof(::channeldpb::CreateSpatialChannelsResultMessage)},
+  { 219, -1, -1, sizeof(::channeldpb::QuerySpatialChannelMessage)},
+  { 226, -1, -1, sizeof(::channeldpb::QuerySpatialChannelResultMessage)},
+  { 233, -1, -1, sizeof(::channeldpb::SpatialChannelsReadyMessage)},
+  { 241, -1, -1, sizeof(::channeldpb::ChannelDataHandoverMessage)},
+  { 251, -1, -1, sizeof(::channeldpb::SpatialRegion)},
+  { 261, -1, -1, sizeof(::channeldpb::SpatialRegionsUpdateMessage)},
+  { 268, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_SpotsAOI)},
+  { 276, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_BoxAOI)},
+  { 284, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_SphereAOI)},
+  { 292, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_ConeAOI)},
+  { 302, 312, -1, sizeof(::channeldpb::SpatialInterestQuery)},
+  { 316, -1, -1, sizeof(::channeldpb::UpdateSpatialInterestMessage)},
+  { 324, -1, -1, sizeof(::channeldpb::CreateEntityChannelMessage)},
+  { 336, -1, -1, sizeof(::channeldpb::AddEntityGroupMessage)},
+  { 344, -1, -1, sizeof(::channeldpb::RemoveEntityGroupMessage)},
+  { 352, -1, -1, sizeof(::channeldpb::DebugGetSpatialRegionsMessage)},
 };
 
 static const ::_pb::Message* const file_default_instances_channeld_2eproto[] = {
@@ -1105,98 +1116,100 @@ const char descriptor_table_protodef_channeld_2eproto[] PROTOBUF_SECTION_VARIABL
   "\0162\027.channeldpb.ChannelType\"U\n\030ChannelDat"
   "aUpdateMessage\022\"\n\004data\030\001 \001(\0132\024.google.pr"
   "otobuf.Any\022\025\n\rcontextConnId\030\002 \001(\r\"#\n\021Dis"
-  "connectMessage\022\016\n\006connId\030\001 \001(\r\"\365\001\n\032Chann"
+  "connectMessage\022\016\n\006connId\030\001 \001(\r\"\276\002\n\032Chann"
   "elDataRecoveryMessage\022\021\n\tchannelId\030\001 \001(\r"
   "\022,\n\013channelType\030\002 \001(\0162\027.channeldpb.Chann"
   "elType\022\020\n\010metadata\030\003 \001(\t\022\023\n\013ownerConnId\030"
   "\004 \001(\r\022\017\n\007subTime\030\005 \001(\003\022:\n\nsubOptions\030\006 \001"
   "(\0132&.channeldpb.ChannelSubscriptionOptio"
-  "ns\022\"\n\004data\030\007 \001(\0132\024.google.protobuf.Any\"\025"
-  "\n\023EndRecoveryMesssage\".\n\013SpatialInfo\022\t\n\001"
-  "x\030\001 \001(\001\022\t\n\001y\030\002 \001(\001\022\t\n\001z\030\003 \001(\001\"e\n\"CreateS"
-  "patialChannelsResultMessage\022\030\n\020spatialCh"
-  "annelId\030\001 \003(\r\022\020\n\010metadata\030\002 \001(\t\022\023\n\013owner"
-  "ConnId\030\003 \001(\r\"J\n\032QuerySpatialChannelMessa"
-  "ge\022,\n\013spatialInfo\030\001 \003(\0132\027.channeldpb.Spa"
-  "tialInfo\"5\n QuerySpatialChannelResultMes"
-  "sage\022\021\n\tchannelId\030\001 \003(\r\"G\n\033SpatialChanne"
-  "lsReadyMessage\022\023\n\013serverIndex\030\001 \001(\r\022\023\n\013s"
-  "erverCount\030\002 \001(\r\"\203\001\n\032ChannelDataHandover"
-  "Message\022\024\n\014srcChannelId\030\001 \001(\r\022\024\n\014dstChan"
-  "nelId\030\002 \001(\r\022\025\n\rcontextConnId\030\003 \001(\r\022\"\n\004da"
-  "ta\030\004 \001(\0132\024.google.protobuf.Any\"\203\001\n\rSpati"
-  "alRegion\022$\n\003min\030\001 \001(\0132\027.channeldpb.Spati"
-  "alInfo\022$\n\003max\030\002 \001(\0132\027.channeldpb.Spatial"
-  "Info\022\021\n\tchannelId\030\003 \001(\r\022\023\n\013serverIndex\030\004"
-  " \001(\r\"I\n\033SpatialRegionsUpdateMessage\022*\n\007r"
-  "egions\030\001 \003(\0132\031.channeldpb.SpatialRegion\""
-  "\260\005\n\024SpatialInterestQuery\022@\n\010spotsAOI\030\001 \001"
-  "(\0132).channeldpb.SpatialInterestQuery.Spo"
-  "tsAOIH\000\210\001\001\022<\n\006boxAOI\030\002 \001(\0132\'.channeldpb."
-  "SpatialInterestQuery.BoxAOIH\001\210\001\001\022B\n\tsphe"
-  "reAOI\030\003 \001(\0132*.channeldpb.SpatialInterest"
-  "Query.SphereAOIH\002\210\001\001\022>\n\007coneAOI\030\004 \001(\0132(."
-  "channeldpb.SpatialInterestQuery.ConeAOIH"
-  "\003\210\001\001\032A\n\010SpotsAOI\022&\n\005spots\030\001 \003(\0132\027.channe"
-  "ldpb.SpatialInfo\022\r\n\005dists\030\002 \003(\r\032Z\n\006BoxAO"
-  "I\022\'\n\006center\030\001 \001(\0132\027.channeldpb.SpatialIn"
-  "fo\022\'\n\006extent\030\002 \001(\0132\027.channeldpb.SpatialI"
-  "nfo\032D\n\tSphereAOI\022\'\n\006center\030\001 \001(\0132\027.chann"
-  "eldpb.SpatialInfo\022\016\n\006radius\030\002 \001(\001\032}\n\007Con"
-  "eAOI\022\'\n\006center\030\001 \001(\0132\027.channeldpb.Spatia"
-  "lInfo\022*\n\tdirection\030\002 \001(\0132\027.channeldpb.Sp"
-  "atialInfo\022\r\n\005angle\030\003 \001(\001\022\016\n\006radius\030\004 \001(\001"
-  "B\013\n\t_spotsAOIB\t\n\007_boxAOIB\014\n\n_sphereAOIB\n"
-  "\n\010_coneAOI\"_\n\034UpdateSpatialInterestMessa"
-  "ge\022\016\n\006connId\030\001 \001(\r\022/\n\005query\030\002 \001(\0132 .chan"
-  "neldpb.SpatialInterestQuery\"\360\001\n\032CreateEn"
-  "tityChannelMessage\022\020\n\010entityId\030\001 \001(\r\022\020\n\010"
-  "metadata\030\002 \001(\t\022:\n\nsubOptions\030\003 \001(\0132&.cha"
-  "nneldpb.ChannelSubscriptionOptions\022\"\n\004da"
-  "ta\030\004 \001(\0132\024.google.protobuf.Any\0229\n\014mergeO"
-  "ptions\030\005 \001(\0132#.channeldpb.ChannelDataMer"
-  "geOptions\022\023\n\013isWellKnown\030\006 \001(\010\"Y\n\025AddEnt"
-  "ityGroupMessage\022)\n\004type\030\001 \001(\0162\033.channeld"
-  "pb.EntityGroupType\022\025\n\rEntitiesToAdd\030\002 \003("
-  "\r\"_\n\030RemoveEntityGroupMessage\022)\n\004type\030\001 "
-  "\001(\0162\033.channeldpb.EntityGroupType\022\030\n\020Enti"
-  "tiesToRemove\030\002 \003(\r\"\037\n\035DebugGetSpatialReg"
-  "ionsMessage*\247\001\n\rBroadcastType\022\020\n\014NO_BROA"
-  "DCAST\020\000\022\025\n\021SINGLE_CONNECTION\020\001\022\007\n\003ALL\020\002\022"
-  "\022\n\016ALL_BUT_SENDER\020\004\022\021\n\rALL_BUT_OWNER\020\010\022\022"
-  "\n\016ALL_BUT_CLIENT\020\020\022\022\n\016ALL_BUT_SERVER\020 \022\025"
-  "\n\021ADJACENT_CHANNELS\020@*;\n\016ConnectionType\022"
-  "\021\n\rNO_CONNECTION\020\000\022\n\n\006SERVER\020\001\022\n\n\006CLIENT"
-  "\020\002*\220\001\n\013ChannelType\022\013\n\007UNKNOWN\020\000\022\n\n\006GLOBA"
-  "L\020\001\022\013\n\007PRIVATE\020\002\022\014\n\010SUBWORLD\020\003\022\013\n\007SPATIA"
-  "L\020\004\022\n\n\006ENTITY\020\005\022\010\n\004TEST\020d\022\t\n\005TEST1\020e\022\t\n\005"
-  "TEST2\020f\022\t\n\005TEST3\020g\022\t\n\005TEST4\020h*\206\004\n\013Messag"
-  "eType\022\013\n\007INVALID\020\000\022\010\n\004AUTH\020\001\022\022\n\016CREATE_C"
-  "HANNEL\020\003\022\022\n\016REMOVE_CHANNEL\020\004\022\020\n\014LIST_CHA"
-  "NNEL\020\005\022\022\n\016SUB_TO_CHANNEL\020\006\022\026\n\022UNSUB_FROM"
-  "_CHANNEL\020\007\022\027\n\023CHANNEL_DATA_UPDATE\020\010\022\016\n\nD"
-  "ISCONNECT\020\t\022\032\n\026CREATE_SPATIAL_CHANNEL\020\n\022"
-  "\031\n\025QUERY_SPATIAL_CHANNEL\020\013\022\031\n\025CHANNEL_DA"
-  "TA_HANDOVER\020\014\022\032\n\026SPATIAL_REGIONS_UPDATE\020"
-  "\r\022\033\n\027UPDATE_SPATIAL_INTEREST\020\016\022\031\n\025CREATE"
-  "_ENTITY_CHANNEL\020\017\022\024\n\020ENTITY_GROUP_ADD\020\020\022"
-  "\027\n\023ENTITY_GROUP_REMOVE\020\021\022\032\n\026SPATIAL_CHAN"
-  "NELS_READY\020\022\022\031\n\025RECOVERY_CHANNEL_DATA\020\024\022"
-  "\020\n\014RECOVERY_END\020\025\022\035\n\031DEBUG_GET_SPATIAL_R"
-  "EGIONS\020c\022\024\n\020USER_SPACE_START\020d*1\n\017Compre"
-  "ssionType\022\022\n\016NO_COMPRESSION\020\000\022\n\n\006SNAPPY\020"
-  "\001*E\n\021ChannelDataAccess\022\r\n\tNO_ACCESS\020\000\022\017\n"
-  "\013READ_ACCESS\020\001\022\020\n\014WRITE_ACCESS\020\002*)\n\017Enti"
-  "tyGroupType\022\014\n\010HANDOVER\020\000\022\010\n\004LOCK\020\001B0Z.g"
-  "ithub.com/metaworking/channeld/pkg/chann"
-  "eldpbb\006proto3"
+  "ns\022)\n\013channelData\030\007 \001(\0132\024.google.protobu"
+  "f.Any\022/\n\014recoveryData\030\010 \001(\0132\024.google.pro"
+  "tobuf.AnyH\000\210\001\001B\017\n\r_recoveryData\"\025\n\023EndRe"
+  "coveryMesssage\".\n\013SpatialInfo\022\t\n\001x\030\001 \001(\001"
+  "\022\t\n\001y\030\002 \001(\001\022\t\n\001z\030\003 \001(\001\"e\n\"CreateSpatialC"
+  "hannelsResultMessage\022\030\n\020spatialChannelId"
+  "\030\001 \003(\r\022\020\n\010metadata\030\002 \001(\t\022\023\n\013ownerConnId\030"
+  "\003 \001(\r\"J\n\032QuerySpatialChannelMessage\022,\n\013s"
+  "patialInfo\030\001 \003(\0132\027.channeldpb.SpatialInf"
+  "o\"5\n QuerySpatialChannelResultMessage\022\021\n"
+  "\tchannelId\030\001 \003(\r\"G\n\033SpatialChannelsReady"
+  "Message\022\023\n\013serverIndex\030\001 \001(\r\022\023\n\013serverCo"
+  "unt\030\002 \001(\r\"\203\001\n\032ChannelDataHandoverMessage"
+  "\022\024\n\014srcChannelId\030\001 \001(\r\022\024\n\014dstChannelId\030\002"
+  " \001(\r\022\025\n\rcontextConnId\030\003 \001(\r\022\"\n\004data\030\004 \001("
+  "\0132\024.google.protobuf.Any\"\203\001\n\rSpatialRegio"
+  "n\022$\n\003min\030\001 \001(\0132\027.channeldpb.SpatialInfo\022"
+  "$\n\003max\030\002 \001(\0132\027.channeldpb.SpatialInfo\022\021\n"
+  "\tchannelId\030\003 \001(\r\022\023\n\013serverIndex\030\004 \001(\r\"I\n"
+  "\033SpatialRegionsUpdateMessage\022*\n\007regions\030"
+  "\001 \003(\0132\031.channeldpb.SpatialRegion\"\260\005\n\024Spa"
+  "tialInterestQuery\022@\n\010spotsAOI\030\001 \001(\0132).ch"
+  "anneldpb.SpatialInterestQuery.SpotsAOIH\000"
+  "\210\001\001\022<\n\006boxAOI\030\002 \001(\0132\'.channeldpb.Spatial"
+  "InterestQuery.BoxAOIH\001\210\001\001\022B\n\tsphereAOI\030\003"
+  " \001(\0132*.channeldpb.SpatialInterestQuery.S"
+  "phereAOIH\002\210\001\001\022>\n\007coneAOI\030\004 \001(\0132(.channel"
+  "dpb.SpatialInterestQuery.ConeAOIH\003\210\001\001\032A\n"
+  "\010SpotsAOI\022&\n\005spots\030\001 \003(\0132\027.channeldpb.Sp"
+  "atialInfo\022\r\n\005dists\030\002 \003(\r\032Z\n\006BoxAOI\022\'\n\006ce"
+  "nter\030\001 \001(\0132\027.channeldpb.SpatialInfo\022\'\n\006e"
+  "xtent\030\002 \001(\0132\027.channeldpb.SpatialInfo\032D\n\t"
+  "SphereAOI\022\'\n\006center\030\001 \001(\0132\027.channeldpb.S"
+  "patialInfo\022\016\n\006radius\030\002 \001(\001\032}\n\007ConeAOI\022\'\n"
+  "\006center\030\001 \001(\0132\027.channeldpb.SpatialInfo\022*"
+  "\n\tdirection\030\002 \001(\0132\027.channeldpb.SpatialIn"
+  "fo\022\r\n\005angle\030\003 \001(\001\022\016\n\006radius\030\004 \001(\001B\013\n\t_sp"
+  "otsAOIB\t\n\007_boxAOIB\014\n\n_sphereAOIB\n\n\010_cone"
+  "AOI\"_\n\034UpdateSpatialInterestMessage\022\016\n\006c"
+  "onnId\030\001 \001(\r\022/\n\005query\030\002 \001(\0132 .channeldpb."
+  "SpatialInterestQuery\"\360\001\n\032CreateEntityCha"
+  "nnelMessage\022\020\n\010entityId\030\001 \001(\r\022\020\n\010metadat"
+  "a\030\002 \001(\t\022:\n\nsubOptions\030\003 \001(\0132&.channeldpb"
+  ".ChannelSubscriptionOptions\022\"\n\004data\030\004 \001("
+  "\0132\024.google.protobuf.Any\0229\n\014mergeOptions\030"
+  "\005 \001(\0132#.channeldpb.ChannelDataMergeOptio"
+  "ns\022\023\n\013isWellKnown\030\006 \001(\010\"Y\n\025AddEntityGrou"
+  "pMessage\022)\n\004type\030\001 \001(\0162\033.channeldpb.Enti"
+  "tyGroupType\022\025\n\rEntitiesToAdd\030\002 \003(\r\"_\n\030Re"
+  "moveEntityGroupMessage\022)\n\004type\030\001 \001(\0162\033.c"
+  "hanneldpb.EntityGroupType\022\030\n\020EntitiesToR"
+  "emove\030\002 \003(\r\"\037\n\035DebugGetSpatialRegionsMes"
+  "sage*\247\001\n\rBroadcastType\022\020\n\014NO_BROADCAST\020\000"
+  "\022\025\n\021SINGLE_CONNECTION\020\001\022\007\n\003ALL\020\002\022\022\n\016ALL_"
+  "BUT_SENDER\020\004\022\021\n\rALL_BUT_OWNER\020\010\022\022\n\016ALL_B"
+  "UT_CLIENT\020\020\022\022\n\016ALL_BUT_SERVER\020 \022\025\n\021ADJAC"
+  "ENT_CHANNELS\020@*;\n\016ConnectionType\022\021\n\rNO_C"
+  "ONNECTION\020\000\022\n\n\006SERVER\020\001\022\n\n\006CLIENT\020\002*\220\001\n\013"
+  "ChannelType\022\013\n\007UNKNOWN\020\000\022\n\n\006GLOBAL\020\001\022\013\n\007"
+  "PRIVATE\020\002\022\014\n\010SUBWORLD\020\003\022\013\n\007SPATIAL\020\004\022\n\n\006"
+  "ENTITY\020\005\022\010\n\004TEST\020d\022\t\n\005TEST1\020e\022\t\n\005TEST2\020f"
+  "\022\t\n\005TEST3\020g\022\t\n\005TEST4\020h*\206\004\n\013MessageType\022\013"
+  "\n\007INVALID\020\000\022\010\n\004AUTH\020\001\022\022\n\016CREATE_CHANNEL\020"
+  "\003\022\022\n\016REMOVE_CHANNEL\020\004\022\020\n\014LIST_CHANNEL\020\005\022"
+  "\022\n\016SUB_TO_CHANNEL\020\006\022\026\n\022UNSUB_FROM_CHANNE"
+  "L\020\007\022\027\n\023CHANNEL_DATA_UPDATE\020\010\022\016\n\nDISCONNE"
+  "CT\020\t\022\032\n\026CREATE_SPATIAL_CHANNEL\020\n\022\031\n\025QUER"
+  "Y_SPATIAL_CHANNEL\020\013\022\031\n\025CHANNEL_DATA_HAND"
+  "OVER\020\014\022\032\n\026SPATIAL_REGIONS_UPDATE\020\r\022\033\n\027UP"
+  "DATE_SPATIAL_INTEREST\020\016\022\031\n\025CREATE_ENTITY"
+  "_CHANNEL\020\017\022\024\n\020ENTITY_GROUP_ADD\020\020\022\027\n\023ENTI"
+  "TY_GROUP_REMOVE\020\021\022\032\n\026SPATIAL_CHANNELS_RE"
+  "ADY\020\022\022\031\n\025RECOVERY_CHANNEL_DATA\020\024\022\020\n\014RECO"
+  "VERY_END\020\025\022\035\n\031DEBUG_GET_SPATIAL_REGIONS\020"
+  "c\022\024\n\020USER_SPACE_START\020d*1\n\017CompressionTy"
+  "pe\022\022\n\016NO_COMPRESSION\020\000\022\n\n\006SNAPPY\020\001*E\n\021Ch"
+  "annelDataAccess\022\r\n\tNO_ACCESS\020\000\022\017\n\013READ_A"
+  "CCESS\020\001\022\020\n\014WRITE_ACCESS\020\002*)\n\017EntityGroup"
+  "Type\022\014\n\010HANDOVER\020\000\022\010\n\004LOCK\020\001B0Z.github.c"
+  "om/metaworking/channeld/pkg/channeldpbb\006"
+  "proto3"
   ;
 static const ::_pbi::DescriptorTable* const descriptor_table_channeld_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fany_2eproto,
 };
 static ::_pbi::once_flag descriptor_table_channeld_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_channeld_2eproto = {
-    false, false, 5733, descriptor_table_protodef_channeld_2eproto,
+    false, false, 5806, descriptor_table_protodef_channeld_2eproto,
     "channeld.proto",
     &descriptor_table_channeld_2eproto_once, descriptor_table_channeld_2eproto_deps, 1, 39,
     schemas_channeld_2eproto, file_default_instances_channeld_2eproto, TableStruct_channeld_2eproto::offsets,
@@ -6066,8 +6079,13 @@ void DisconnectMessage::InternalSwap(DisconnectMessage* other) {
 
 class ChannelDataRecoveryMessage::_Internal {
  public:
+  using HasBits = decltype(std::declval<ChannelDataRecoveryMessage>()._impl_._has_bits_);
   static const ::channeldpb::ChannelSubscriptionOptions& suboptions(const ChannelDataRecoveryMessage* msg);
-  static const ::PROTOBUF_NAMESPACE_ID::Any& data(const ChannelDataRecoveryMessage* msg);
+  static const ::PROTOBUF_NAMESPACE_ID::Any& channeldata(const ChannelDataRecoveryMessage* msg);
+  static const ::PROTOBUF_NAMESPACE_ID::Any& recoverydata(const ChannelDataRecoveryMessage* msg);
+  static void set_has_recoverydata(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
 };
 
 const ::channeldpb::ChannelSubscriptionOptions&
@@ -6075,14 +6093,22 @@ ChannelDataRecoveryMessage::_Internal::suboptions(const ChannelDataRecoveryMessa
   return *msg->_impl_.suboptions_;
 }
 const ::PROTOBUF_NAMESPACE_ID::Any&
-ChannelDataRecoveryMessage::_Internal::data(const ChannelDataRecoveryMessage* msg) {
-  return *msg->_impl_.data_;
+ChannelDataRecoveryMessage::_Internal::channeldata(const ChannelDataRecoveryMessage* msg) {
+  return *msg->_impl_.channeldata_;
 }
-void ChannelDataRecoveryMessage::clear_data() {
-  if (GetArenaForAllocation() == nullptr && _impl_.data_ != nullptr) {
-    delete _impl_.data_;
+const ::PROTOBUF_NAMESPACE_ID::Any&
+ChannelDataRecoveryMessage::_Internal::recoverydata(const ChannelDataRecoveryMessage* msg) {
+  return *msg->_impl_.recoverydata_;
+}
+void ChannelDataRecoveryMessage::clear_channeldata() {
+  if (GetArenaForAllocation() == nullptr && _impl_.channeldata_ != nullptr) {
+    delete _impl_.channeldata_;
   }
-  _impl_.data_ = nullptr;
+  _impl_.channeldata_ = nullptr;
+}
+void ChannelDataRecoveryMessage::clear_recoverydata() {
+  if (_impl_.recoverydata_ != nullptr) _impl_.recoverydata_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000001u;
 }
 ChannelDataRecoveryMessage::ChannelDataRecoveryMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
@@ -6094,14 +6120,16 @@ ChannelDataRecoveryMessage::ChannelDataRecoveryMessage(const ChannelDataRecovery
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   ChannelDataRecoveryMessage* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.metadata_){}
+      decltype(_impl_._has_bits_){from._impl_._has_bits_}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.metadata_){}
     , decltype(_impl_.suboptions_){nullptr}
-    , decltype(_impl_.data_){nullptr}
+    , decltype(_impl_.channeldata_){nullptr}
+    , decltype(_impl_.recoverydata_){nullptr}
     , decltype(_impl_.channelid_){}
     , decltype(_impl_.channeltype_){}
     , decltype(_impl_.subtime_){}
-    , decltype(_impl_.ownerconnid_){}
-    , /*decltype(_impl_._cached_size_)*/{}};
+    , decltype(_impl_.ownerconnid_){}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.metadata_.InitDefault();
@@ -6115,8 +6143,11 @@ ChannelDataRecoveryMessage::ChannelDataRecoveryMessage(const ChannelDataRecovery
   if (from._internal_has_suboptions()) {
     _this->_impl_.suboptions_ = new ::channeldpb::ChannelSubscriptionOptions(*from._impl_.suboptions_);
   }
-  if (from._internal_has_data()) {
-    _this->_impl_.data_ = new ::PROTOBUF_NAMESPACE_ID::Any(*from._impl_.data_);
+  if (from._internal_has_channeldata()) {
+    _this->_impl_.channeldata_ = new ::PROTOBUF_NAMESPACE_ID::Any(*from._impl_.channeldata_);
+  }
+  if (from._internal_has_recoverydata()) {
+    _this->_impl_.recoverydata_ = new ::PROTOBUF_NAMESPACE_ID::Any(*from._impl_.recoverydata_);
   }
   ::memcpy(&_impl_.channelid_, &from._impl_.channelid_,
     static_cast<size_t>(reinterpret_cast<char*>(&_impl_.ownerconnid_) -
@@ -6129,14 +6160,16 @@ inline void ChannelDataRecoveryMessage::SharedCtor(
   (void)arena;
   (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.metadata_){}
+      decltype(_impl_._has_bits_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.metadata_){}
     , decltype(_impl_.suboptions_){nullptr}
-    , decltype(_impl_.data_){nullptr}
+    , decltype(_impl_.channeldata_){nullptr}
+    , decltype(_impl_.recoverydata_){nullptr}
     , decltype(_impl_.channelid_){0u}
     , decltype(_impl_.channeltype_){0}
     , decltype(_impl_.subtime_){int64_t{0}}
     , decltype(_impl_.ownerconnid_){0u}
-    , /*decltype(_impl_._cached_size_)*/{}
   };
   _impl_.metadata_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
@@ -6157,7 +6190,8 @@ inline void ChannelDataRecoveryMessage::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   _impl_.metadata_.Destroy();
   if (this != internal_default_instance()) delete _impl_.suboptions_;
-  if (this != internal_default_instance()) delete _impl_.data_;
+  if (this != internal_default_instance()) delete _impl_.channeldata_;
+  if (this != internal_default_instance()) delete _impl_.recoverydata_;
 }
 
 void ChannelDataRecoveryMessage::SetCachedSize(int size) const {
@@ -6175,18 +6209,25 @@ void ChannelDataRecoveryMessage::Clear() {
     delete _impl_.suboptions_;
   }
   _impl_.suboptions_ = nullptr;
-  if (GetArenaForAllocation() == nullptr && _impl_.data_ != nullptr) {
-    delete _impl_.data_;
+  if (GetArenaForAllocation() == nullptr && _impl_.channeldata_ != nullptr) {
+    delete _impl_.channeldata_;
   }
-  _impl_.data_ = nullptr;
+  _impl_.channeldata_ = nullptr;
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    GOOGLE_DCHECK(_impl_.recoverydata_ != nullptr);
+    _impl_.recoverydata_->Clear();
+  }
   ::memset(&_impl_.channelid_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&_impl_.ownerconnid_) -
       reinterpret_cast<char*>(&_impl_.channelid_)) + sizeof(_impl_.ownerconnid_));
+  _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 const char* ChannelDataRecoveryMessage::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
@@ -6242,10 +6283,18 @@ const char* ChannelDataRecoveryMessage::_InternalParse(const char* ptr, ::_pbi::
         } else
           goto handle_unusual;
         continue;
-      // .google.protobuf.Any data = 7;
+      // .google.protobuf.Any channelData = 7;
       case 7:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
-          ptr = ctx->ParseMessage(_internal_mutable_data(), ptr);
+          ptr = ctx->ParseMessage(_internal_mutable_channeldata(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional .google.protobuf.Any recoveryData = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 66)) {
+          ptr = ctx->ParseMessage(_internal_mutable_recoverydata(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -6266,6 +6315,7 @@ const char* ChannelDataRecoveryMessage::_InternalParse(const char* ptr, ::_pbi::
     CHK_(ptr != nullptr);
   }  // while
 message_done:
+  _impl_._has_bits_.Or(has_bits);
   return ptr;
 failure:
   ptr = nullptr;
@@ -6321,11 +6371,18 @@ uint8_t* ChannelDataRecoveryMessage::_InternalSerialize(
         _Internal::suboptions(this).GetCachedSize(), target, stream);
   }
 
-  // .google.protobuf.Any data = 7;
-  if (this->_internal_has_data()) {
+  // .google.protobuf.Any channelData = 7;
+  if (this->_internal_has_channeldata()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(7, _Internal::data(this),
-        _Internal::data(this).GetCachedSize(), target, stream);
+      InternalWriteMessage(7, _Internal::channeldata(this),
+        _Internal::channeldata(this).GetCachedSize(), target, stream);
+  }
+
+  // optional .google.protobuf.Any recoveryData = 8;
+  if (_internal_has_recoverydata()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(8, _Internal::recoverydata(this),
+        _Internal::recoverydata(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -6358,11 +6415,19 @@ size_t ChannelDataRecoveryMessage::ByteSizeLong() const {
         *_impl_.suboptions_);
   }
 
-  // .google.protobuf.Any data = 7;
-  if (this->_internal_has_data()) {
+  // .google.protobuf.Any channelData = 7;
+  if (this->_internal_has_channeldata()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *_impl_.data_);
+        *_impl_.channeldata_);
+  }
+
+  // optional .google.protobuf.Any recoveryData = 8;
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *_impl_.recoverydata_);
   }
 
   // uint32 channelId = 1;
@@ -6411,9 +6476,13 @@ void ChannelDataRecoveryMessage::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_
     _this->_internal_mutable_suboptions()->::channeldpb::ChannelSubscriptionOptions::MergeFrom(
         from._internal_suboptions());
   }
-  if (from._internal_has_data()) {
-    _this->_internal_mutable_data()->::PROTOBUF_NAMESPACE_ID::Any::MergeFrom(
-        from._internal_data());
+  if (from._internal_has_channeldata()) {
+    _this->_internal_mutable_channeldata()->::PROTOBUF_NAMESPACE_ID::Any::MergeFrom(
+        from._internal_channeldata());
+  }
+  if (from._internal_has_recoverydata()) {
+    _this->_internal_mutable_recoverydata()->::PROTOBUF_NAMESPACE_ID::Any::MergeFrom(
+        from._internal_recoverydata());
   }
   if (from._internal_channelid() != 0) {
     _this->_internal_set_channelid(from._internal_channelid());
@@ -6446,6 +6515,7 @@ void ChannelDataRecoveryMessage::InternalSwap(ChannelDataRecoveryMessage* other)
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &_impl_.metadata_, lhs_arena,
       &other->_impl_.metadata_, rhs_arena

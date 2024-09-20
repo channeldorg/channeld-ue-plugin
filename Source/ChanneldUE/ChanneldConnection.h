@@ -12,7 +12,7 @@ class UChanneldConnection;
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FChanneldMessageDelegate, UChanneldConnection*, Channeld::ChannelId, const google::protobuf::Message*)
 DECLARE_MULTICAST_DELEGATE_FourParams(FUserSpaceMessageDelegate, uint32, Channeld::ChannelId, Channeld::ConnectionId, const std::string&)
 DECLARE_MULTICAST_DELEGATE_OneParam(FChanneldAuthenticatedDelegate, UChanneldConnection*);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FChannelDataRecoveryDelegate, Channeld::ChannelId, const google::protobuf::Any&);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FChannelDataRecoveryDelegate, Channeld::ChannelId, TSharedPtr<channeldpb::ChannelDataRecoveryMessage>);
 
 typedef TFunction<void(UChanneldConnection*, Channeld::ChannelId, const google::protobuf::Message*)> FChanneldMessageHandlerFunc;
 //typedef TFunction<void(Channeld::ChannelId, ConnectionId, const std::string&)> FUserSpaceMessageHandlerFunc;

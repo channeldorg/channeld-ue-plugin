@@ -524,6 +524,7 @@ bool UChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, google::pr
 	EChanneldChannelType ChannelType = GetChanneldSubsystem()->GetChannelTypeByChId(ChId);
 	if (ChannelType == EChanneldChannelType::ECT_Global || ChannelType == EChanneldChannelType::ECT_SubWorld)
 	{
+		/*
 		// Key: NetId, Value: <Key: class of the state, Value: owningConnId of the state actor>
 		TMap<uint32, TTuple<UClass*, uint32>> UnresolvedStates;
 		
@@ -589,20 +590,19 @@ bool UChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, google::pr
 			}
 		}
 
+		// Sort the unresolved states by NetId
+		UnresolvedStates.KeySort([](uint32 A, uint32 B) { return A < B; });
+		
 		for (auto Pair : UnresolvedStates)
 		{
 			uint32 NetId = Pair.Key;
 			UClass* StateClass = Pair.Value.Key;
-			// FIXME: could be the old connId before the recovery!
 			uint32 OwningConnId = Pair.Value.Value;
-			UChanneldNetConnection* OwningConn = GetChanneldSubsystem()->GetNetDriver()->GetClientConnectionMap().FindRef(OwningConnId);
-			if (OwningConn == nullptr && Connection->IsServer())
+			UChanneldNetConnection* OwningConn = nullptr;
+			if (OwningConnId > 0 && Connection->IsServer())
 			{
-				if (OwningConnId == 0)
-				{
-					UE_LOG(LogChanneld, Warning, TEXT("[Server] Failed to create NetConnection %u for %s, NetId: %u"), OwningConnId, *StateClass->GetName(), NetId);
-				}
-				else
+				OwningConn = GetChanneldSubsystem()->GetNetDriver()->GetClientConnectionMap().FindRef(OwningConnId);
+				if (OwningConn == nullptr)
 				{
 					OwningConn = CreateClientConnection(OwningConnId, ChId);
 					UE_LOG(LogChanneld, Log, TEXT("[Server] Created NetConnection %u for %s, NetId: %u"), OwningConnId, *StateClass->GetName(), NetId);
@@ -626,6 +626,7 @@ bool UChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, google::pr
 				}
 			}
 		}
+		*/
 	}
 	else if (ChannelType == EChanneldChannelType::ECT_Entity)
 	{
@@ -818,19 +819,68 @@ bool UChannelDataView::HasEverSpawned(uint32 NetId) const
 	return false;
 }
 
-void UChannelDataView::RecoverChannelData(Channeld::ChannelId ChId, const google::protobuf::Any& AnyData)
+void UChannelDataView::RecoverChannelData(Channeld::ChannelId ChId, TSharedPtr<channeldpb::ChannelDataRecoveryMessage> RecoveryMsg)
 {
-	auto UpdateData = ParseAndMergeUpdateData(ChId, AnyData);
+	unrealpb::ChannelRecoveryData RecoveryData;
+	if (!RecoveryMsg->recoverydata().UnpackTo(&RecoveryData))
+	{
+		UE_LOG(LogChanneld, Error, TEXT("Failed to unpack ChannelRecoveryData from ChannelDataRecoveryMessage, channel id: %u"), ChId);
+		return;
+	}
+
+	TMap<uint32, unrealpb::UnrealObjectRef> ObjRefs;
+	for (auto Pair : RecoveryData.objrefs())
+	{
+		ObjRefs.Emplace(Pair.first, Pair.second);
+	}
+	// Sort the ObjRefs by NetId to create the objects in the correct order.
+	ObjRefs.KeySort([](uint32 A, uint32 B) { return A < B; });
+
+	/*
+	*/
+	for (auto& Pair : ObjRefs)
+	{
+		FNetworkGUID NetId = FNetworkGUID(Pair.Key);
+		FString ClassPath = UTF8_TO_TCHAR(Pair.Value.classpath().c_str());
+		uint32 OwningConnId = Pair.Value.owningconnid();
+		UChanneldNetConnection* OwningConn = nullptr;
+		if (OwningConnId > 0 && Connection->IsServer())
+		{
+			OwningConn = GetChanneldSubsystem()->GetNetDriver()->GetClientConnectionMap().FindRef(OwningConnId);
+			if (OwningConn == nullptr)
+			{
+				OwningConn = CreateClientConnection(OwningConnId, ChId);
+				UE_LOG(LogChanneld, Log, TEXT("[Server] Created NetConnection %u for %s, NetId: %u"), OwningConnId, *ClassPath, NetId.Value);
+			}
+		}
+
+		UE_LOG(LogChanneld, Verbose, TEXT("Recovering object in channel %u, ClassPath: %s, NetId: %u"), ChId, *ClassPath, NetId.Value);
+		UObject* NewObj = ChanneldUtils::GetObjectByRef(&Pair.Value, GetWorld(), true, OwningConn);
+		if (NewObj)
+		{
+			SetOwningChannelId(NetId, ChId);
+			AddObjectProvider(ChId, NewObj);
+
+			if (Connection->IsServer() && NewObj->IsA<APlayerController>() && OwningConn != nullptr)
+			{
+				Cast<APlayerController>(NewObj)->NetConnection = OwningConn;
+			}
+		}
+	}
+	
+	auto UpdateData = ParseAndMergeUpdateData(ChId, RecoveryMsg->channeldata());
 	if (UpdateData == nullptr)
 	{
 		return;
 	}
 
+	/*
 	if (CheckUnspawnedObject(ChId, UpdateData))
 	{
 		UE_LOG(LogChanneld, Verbose, TEXT("Resolving unspawned object, the channel data will not be consumed."));
 		return;
 	}
+	*/
 	
 	ConsumeChannelUpdateData(ChId, UpdateData);
 }
