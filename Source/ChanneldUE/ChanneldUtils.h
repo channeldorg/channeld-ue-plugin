@@ -300,6 +300,9 @@ public:
 	 */
 	bool static SerializeNewActor_Server(UNetConnection* Connection, UPackageMapClient* PackageMap, TSharedPtr<FNetGUIDCache> GuidCache, FArchive& Ar, class UActorChannel *Channel, class AActor*& Actor);
 
+	static void RegisterNetGUID_Server_NoWarning(TSharedPtr<FNetGUIDCache> GuidCache, const FNetworkGUID& NetGUID, UObject* Object);
+
+
 	static unrealpb::AssetRef GetAssetRef(const UObject* Obj)
 	{
 		unrealpb::AssetRef Ref;

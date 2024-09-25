@@ -10,6 +10,8 @@
 #include "ChanneldUtils.h"
 #include "ChanneldSettings.h"
 #include <numeric>
+
+#include "GameFramework/GameSession.h"
 #include "Interest/ClientInterestManager.h"
 
 UChanneldNetConnection::UChanneldNetConnection(const FObjectInitializer& ObjectInitializer)
@@ -428,6 +430,48 @@ void UChanneldNetConnection::FlushUnauthData()
 		LowLevelSend((uint8*)data->data(), data->size() * 8, *Params.Get<1>());
 		UE_LOG(LogChanneld, Log, TEXT("NetConnection %d flushed unauthenticated LowLevelSendData to channeld, size: %dB"), GetConnId(), data->size());
 		delete data;
+	}
+}
+
+void UChanneldNetConnection::InitPlayerController(APlayerController* NewPlayerController)
+{
+	if (AGameModeBase* const GameMode = GetWorld()->GetAuthGameMode())
+	{
+		// ~ Begin copy of AGameModeBase::InitNewPlayer
+		// Register the player with the session
+		if (NewPlayerController->PlayerState)
+		{
+			GameMode->GameSession->RegisterPlayer(NewPlayerController, PlayerId.GetUniqueNetId(), false);
+		}
+		else
+		{
+			UE_LOG(LogChanneld, Error, TEXT("Unable to register player for the game session: PlayerState is NULL. ConnId: %d"), GetConnId());
+		}
+		//GameMode->ChangeName(NewPlayerController, FString::Printf(TEXT("Player_%d"), ClientConn->GetConnId()), false);
+		// ~ End copy of AGameModeBase::InitNewPlayer
+		
+		// ~ End copy of AGameModeBase::Login
+		
+		// Possess the newly-spawned player.
+		NewPlayerController->NetPlayerIndex = 0;
+
+		// HACK: We need to set the private property bIsLocalPlayerController to false before calling SetPlayer(), so it won't create the spectator pawn for the PC.
+		static const FBoolProperty* Prop = CastFieldChecked<const FBoolProperty>(APlayerController::StaticClass()->FindPropertyByName("bIsLocalPlayerController"));
+		/* Won't work - causes error
+		Prop->SetPropertyValue(NewPlayerController, false);
+		*/
+		bool* Ptr = Prop->ContainerPtrToValuePtr<bool>(NewPlayerController);
+		*Ptr = false;
+		UE_LOG(LogChanneld, VeryVerbose, TEXT("Set bIsLocalPlayerController to %s"), NewPlayerController->IsLocalController() ? TEXT("true") : TEXT("false"));
+
+		// Triggers ClientSetViewTarget RPC...
+		NewPlayerController->SetPlayer(this);
+
+		// IMPORTANT: Set to ROLE_Authority must be done AFTER SetPlayer(), otherwise UnPossess() will be called!
+		NewPlayerController->SetRole(ROLE_Authority);
+		NewPlayerController->SetReplicates(true);
+
+		SetClientLoginState(EClientLoginState::ReceivedJoin);
 	}
 }
 

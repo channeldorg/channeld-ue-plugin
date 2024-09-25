@@ -125,6 +125,7 @@ private:
 	void ClientHandleHandover(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleGetUnrealObjectRef(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	
+	[[deprecated("Moved to UChanneldNetConnection")]]
 	void InitPlayerController(UChanneldNetConnection* ClientConn, APlayerController* NewPlayerController);
 	void CreatePlayerController(UChanneldNetConnection* ClientConn);
 };

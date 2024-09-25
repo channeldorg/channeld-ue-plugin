@@ -661,6 +661,12 @@ void UChanneldNetDriver::OnServerSpawnedActor(AActor* Actor)
 	{
 		return;
 	}
+
+	// Recovered actors don't apply the spawn logic.
+	if (ConnToChanneld->IsRecovering())
+	{
+		return;
+	}
 	
 	/* Newly spawned actor always has LocalRole = Authority
 	*/

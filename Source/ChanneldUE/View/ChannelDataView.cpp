@@ -828,21 +828,31 @@ void UChannelDataView::RecoverChannelData(Channeld::ChannelId ChId, TSharedPtr<c
 		return;
 	}
 
+	UE_LOG(LogChanneld, Verbose, TEXT("UChannelDataView::RecoverChannelData: recover objects from data:\n%s"), UTF8_TO_TCHAR(RecoveryData.DebugString().c_str()));
+
 	TMap<uint32, unrealpb::UnrealObjectRef> ObjRefs;
 	for (auto Pair : RecoveryData.objrefs())
 	{
 		ObjRefs.Emplace(Pair.first, Pair.second);
+	/*
+		FNetworkGUID NetId = FNetworkGUID(Pair.first);
+		FString ClassPath = UTF8_TO_TCHAR(Pair.second.classpath().c_str());
+		if (NetId.IsDynamic() && !ClassPath.IsEmpty())
+		{
+			GetChanneldSubsystem()->GetNetDriver()->GuidCache->RegisterNetGUIDFromPath_Server(NetId, ClassPath, 0, false, true, true);
+		}
+	*/
 	}
 	// Sort the ObjRefs by NetId to create the objects in the correct order.
 	ObjRefs.KeySort([](uint32 A, uint32 B) { return A < B; });
 
-	/*
-	*/
+	TArray<AActor*> ServerRecoveredActors;
 	for (auto& Pair : ObjRefs)
 	{
 		FNetworkGUID NetId = FNetworkGUID(Pair.Key);
-		FString ClassPath = UTF8_TO_TCHAR(Pair.Value.classpath().c_str());
-		uint32 OwningConnId = Pair.Value.owningconnid();
+		auto& ObjRef = Pair.Value;
+		FString ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
+		uint32 OwningConnId = ObjRef.owningconnid();
 		UChanneldNetConnection* OwningConn = nullptr;
 		if (OwningConnId > 0 && Connection->IsServer())
 		{
@@ -854,16 +864,59 @@ void UChannelDataView::RecoverChannelData(Channeld::ChannelId ChId, TSharedPtr<c
 			}
 		}
 
-		UE_LOG(LogChanneld, Verbose, TEXT("Recovering object in channel %u, ClassPath: %s, NetId: %u"), ChId, *ClassPath, NetId.Value);
-		UObject* NewObj = ChanneldUtils::GetObjectByRef(&Pair.Value, GetWorld(), true, OwningConn);
-		if (NewObj)
+		auto GuidCache = GetChanneldSubsystem()->GetNetDriver()->GuidCache;
+		ObjRef.clear_bunchbitsnum();
+		ObjRef.clear_context();
+		ObjRef.clear_netguidbunch();
+		SetOwningChannelId(NetId, ChId);
+		UE_LOG(LogChanneld, Verbose, TEXT("[Server] Recovering object in channel %u, ClassPath: %s, NetId: %u"), ChId, *ClassPath, NetId.Value);
+		UObject* RecoveredObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld(), true, OwningConn);
+		if (RecoveredObj == nullptr)
 		{
-			SetOwningChannelId(NetId, ChId);
-			AddObjectProvider(ChId, NewObj);
-
-			if (Connection->IsServer() && NewObj->IsA<APlayerController>() && OwningConn != nullptr)
+			UE_LOG(LogChanneld, Warning, TEXT("[Server] Failed to recover object in channel %u from ObjRef:\n%s"), ChId, UTF8_TO_TCHAR(ObjRef.DebugString().c_str()));
+			continue;
+		}
+		
+		if (FNetGuidCacheObject* NetIdMatchedCacheObjPtr = GuidCache->ObjectLookup.Find(NetId))
+		{
+			if (NetIdMatchedCacheObjPtr->Object != RecoveredObj)
 			{
-				Cast<APlayerController>(NewObj)->NetConnection = OwningConn;
+				FNetworkGUID RecoveredNetId = GuidCache->NetGUIDLookup.FindRef(RecoveredObj);
+				FNetGuidCacheObject RecoveredCacheObj = GuidCache->ObjectLookup.FindRef(RecoveredNetId);
+				FNetGuidCacheObject NetIdMatchedCacheObj = *NetIdMatchedCacheObjPtr;
+				
+				GuidCache->ObjectLookup.Emplace(NetId, RecoveredCacheObj);
+				GuidCache->ObjectLookup.Emplace(RecoveredNetId, NetIdMatchedCacheObj);
+				GuidCache->NetGUIDLookup.Emplace(RecoveredCacheObj.Object, NetId);
+				GuidCache->NetGUIDLookup.Emplace(NetIdMatchedCacheObj.Object, RecoveredNetId);
+				UE_LOG(LogChanneld, Verbose, TEXT("[Server] Update unmatched NetId %d <-> %d of path: %s <-> %s"), NetId.Value, RecoveredNetId.Value, *NetIdMatchedCacheObj.PathName.ToString(), *RecoveredCacheObj.PathName.ToString());
+			}
+		}
+
+		if (auto ObjClass = Cast<UClass>(RecoveredObj))
+		{
+			if (ObjClass->IsChildOf<AActor>())
+			{
+				RecoveredObj = GetWorld()->SpawnActor(ObjClass);	
+			}
+			else
+			{
+				RecoveredObj = NewObject<UObject>(GetTransientPackage(), ObjClass);
+			}
+		}
+		
+		AddObjectProvider(ChId, RecoveredObj);
+
+		
+		if (Connection->IsServer())
+		{
+			if (AActor* Actor = Cast<AActor>(RecoveredObj))
+			{
+				ServerRecoveredActors.Add(Actor);
+			}
+			if (RecoveredObj->IsA<APlayerController>() && OwningConn != nullptr)
+			{
+				Cast<APlayerController>(RecoveredObj)->NetConnection = OwningConn;
 			}
 		}
 	}
@@ -873,16 +926,50 @@ void UChannelDataView::RecoverChannelData(Channeld::ChannelId ChId, TSharedPtr<c
 	{
 		return;
 	}
+	UE_LOG(LogChanneld, Verbose, TEXT("UChannelDataView::RecoverChannelData: recover states from data:\n%s"), UTF8_TO_TCHAR(UpdateData->DebugString().c_str()));
 
-	/*
-	if (CheckUnspawnedObject(ChId, UpdateData))
+	// Set the role to SimulatedProxy so the actors can be updated from the channel data.
+	for (AActor* Actor : ServerRecoveredActors)
 	{
-		UE_LOG(LogChanneld, Verbose, TEXT("Resolving unspawned object, the channel data will not be consumed."));
-		return;
+		Actor->SetRole(ROLE_SimulatedProxy);
 	}
-	*/
-	
 	ConsumeChannelUpdateData(ChId, UpdateData);
+
+	// Set up the recovered PlayerControllers
+	for (auto Actor : ServerRecoveredActors)
+	{
+		// HandoverActor->SetRole(ENetRole::ROLE_Authority);
+		// UE_LOG(LogChanneld, Verbose, TEXT("Set %s to back to ROLE_Authority after ChannelDataUpdate"), *HandoverActor->GetName());
+		
+		if (auto PC = Cast<APlayerController>(Actor))
+		{
+			if (auto ClientConn = Cast<UChanneldNetConnection>(PC->NetConnection))
+			{
+				// Set the role to SimulatedProxy so it won't unpossess the pawn in BeginSpectatingState()
+				PC->SetRole(ROLE_SimulatedProxy);
+				// Call this after ChannelDataUpdate(), as RegisterPlayer() requires the PC has PlayerState set.
+				ClientConn->InitPlayerController(PC);
+				UE_LOG(LogChanneld, Verbose, TEXT("[Server] Initialized PlayerController with client conn %d"), ClientConn->GetConnId());
+			}
+			else
+			{
+				UE_LOG(LogChanneld, Error, TEXT("[Server] Unable to associate PlayerController with any NetConnection."));
+			}			
+			
+			PC->ServerAcknowledgePossession(PC->GetPawn());
+
+			ensureAlwaysMsgf(PC->GetPawn() && PC->GetPawn()->GetNetConnection(),
+				TEXT("Recovered Pawn '%s' of '%s' should have NetConn set!"), *GetNameSafe(PC->GetPawn()), *GetNameSafe(PC));
+		}
+	}
+
+	for (auto Actor : ServerRecoveredActors)
+	{
+		Actor->SetRole(ChanneldUtils::ServerGetActorNetRole(Actor));
+		UE_LOG(LogChanneld, Verbose, TEXT("[Server] Set %s back to %s after the recovery"), *Actor->GetName(), *UEnum::GetValueAsString(Actor->GetLocalRole()));
+	}
+
+	UE_LOG(LogChanneld, Verbose, TEXT("UChannelDataView::RecoverChannelData: finished recover channel %u"), ChId);
 }
 
 FNetworkGUID UChannelDataView::GetNetId(UObject* Obj, bool bAssignOnServer/* = true*/) const

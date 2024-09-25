@@ -36,6 +36,7 @@ UChanneldNetConnection* USpatialChannelDataView::CreateClientConnection(Channeld
 	return Super::CreateClientConnection(ConnId, ChId);
 }
 
+[[deprecated("Moved to UChanneldNetConnection")]]
 void USpatialChannelDataView::InitPlayerController(UChanneldNetConnection* ClientConn, APlayerController* const NewPlayerController)
 {
 	if (AGameModeBase* const GameMode = GetWorld()->GetAuthGameMode())
@@ -112,7 +113,7 @@ void USpatialChannelDataView::CreatePlayerController(UChanneldNetConnection* Cli
 			return;
 		}
 
-		InitPlayerController(ClientConn, NewPlayerController);
+		ClientConn->InitPlayerController(NewPlayerController);
 	}
 	//~ End copy of UWorld::SpawnPlayActor
 }
@@ -149,8 +150,8 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	{
 		NetIds.Appendf(TEXT("%u[%u], "), Pair.second.objref().netguid(), Pair.second.objref().owningconnid());
 	}
-	UE_LOG(LogChanneld, Log, TEXT("ChannelDataHandover from channel %u to %u(%s), object netIds: %s"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(),
-		bHasAuthority ? TEXT("A") : (bHasInterest ? TEXT("I") : TEXT("N")), *NetIds);
+	UE_LOG(LogChanneld, Log, TEXT("ChannelDataHandover from channel %u to %u(%s), object netIds: %s\n%s"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(),
+		bHasAuthority ? TEXT("A") : (bHasInterest ? TEXT("I") : TEXT("N")), *NetIds, UTF8_TO_TCHAR(HandoverData.DebugString().c_str()));
 	
 	// ===== Pass 1: Handle the logic of the source channel =====
 	bool bHasAuthorityOverSourceChannel = Connection->OwnedChannels.Contains(HandoverMsg->srcchannelid());
@@ -433,7 +434,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 				// Set the role to SimulatedProxy so it won't unpossess the pawn in BeginSpectatingState()
 				HandoverPC->SetRole(ROLE_SimulatedProxy);
 				// Call this after HandleChannelDataUpdate(), as RegisterPlayer() requires the PC has PlayerState set.
-				InitPlayerController(ClientConn, HandoverPC);
+				ClientConn->InitPlayerController(HandoverPC);
 				UE_LOG(LogChanneld, Verbose, TEXT("[Server] Initialized PlayerController with client conn %d"), ClientConn->GetConnId());
 			}
 			else
