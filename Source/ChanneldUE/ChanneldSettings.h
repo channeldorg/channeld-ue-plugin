@@ -105,6 +105,9 @@ public:
 	// If set to true, the simulated proxy actors and their components will not tick.
 	UPROPERTY(Config, EditAnywhere, Category = "Debug")
 	bool bDisableSimulatedProxyTick = false;
+	// If set the true, the static GUID registry will not load, which may cause the replication issues of the assets and the static objects.
+	UPROPERTY(Config, EditAnywhere, Category = "Debug")
+	bool bDisableStaticGuidRegistry = false;
 	
 private:
 	void AddChanneldNetDriverDefinition();

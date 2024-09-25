@@ -9,9 +9,12 @@
 
 void UChanneldGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-	FStaticGuidRegistry::LoadExportedFile(GenManager_ChanneldStaticObjectExportPath);
-	
-	GetMutableDefault<UChanneldSettings>()->UpdateNetDriverDefinitions();
+	auto Settings = GetMutableDefault<UChanneldSettings>();
+	if (!Settings->bDisableStaticGuidRegistry)
+	{
+		FStaticGuidRegistry::LoadExportedFile(GenManager_ChanneldStaticObjectExportPath);
+	}
+	Settings->UpdateNetDriverDefinitions();
 	InitConnection();
 }
 
