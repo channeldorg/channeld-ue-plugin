@@ -118,9 +118,9 @@ void FChanneldEditorModule::StartupModule()
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 	{
 		SettingsModule->RegisterSettings("Editor", "Plugins", "ChanneldEditorSettings",
-		                                 LOCTEXT("EditorSettingsName", "Channeld Editor"),
-		                                 LOCTEXT("EditorSettingsDesc", ""),
-		                                 GetMutableDefault<UChanneldEditorSettings>());
+										 LOCTEXT("EditorSettingsName", "Channeld Editor"),
+										 LOCTEXT("EditorSettingsDesc", ""),
+										 GetMutableDefault<UChanneldEditorSettings>());
 	}
 
 	// Register the custom property type layout for the FClientInterestSettingsPreset struct in Project Settings.
@@ -136,6 +136,13 @@ void FChanneldEditorModule::StartupModule()
 
 	AddRepCompNotify = NewObject<UChanneldMissionNotiProxy>();
 	AddRepCompNotify->AddToRoot();
+
+	GetMutableDefault<UChanneldSettings>()->OnLaunchServer.AddLambda([this](const FServerLaunchGroup& Group)
+	{
+		FServerLaunchGroup OneInstanceGroup = Group;
+		OneInstanceGroup.ServerNum = 1;
+		LaunchServerGroup(OneInstanceGroup);
+	});
 }
 
 void FChanneldEditorModule::ShutdownModule()

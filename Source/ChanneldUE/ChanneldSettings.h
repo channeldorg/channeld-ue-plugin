@@ -8,6 +8,36 @@
 #include "View/SingleChannelDataView.h"
 #include "ChanneldSettings.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FLaunchServerDelegate, const FServerLaunchGroup&);
+
+
+USTRUCT(BlueprintType, Blueprintable)
+struct FServerLaunchGroup
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bEnabled = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", ClampMax = "16"))
+	int32 ServerNum = 1;
+
+	// How long to wait before launching the servers (in seconds)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DelayTime = 0.f;
+
+	// If not set, the open map in the Editor will be used.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowedClasses="World"))
+	FSoftObjectPath ServerMap;
+
+	// If not set, the ChannelDataViewClass in the UChanneldSettings will be used.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UChannelDataView> ServerViewClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText AdditionalArgs;
+};
+
 /**
  * 
  */
@@ -109,6 +139,8 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Debug")
 	bool bDisableStaticGuidRegistry = false;
 	
+	FLaunchServerDelegate OnLaunchServer;
+
 private:
 	void AddChanneldNetDriverDefinition();
 	void AddFallbackNetDriverDefinition();

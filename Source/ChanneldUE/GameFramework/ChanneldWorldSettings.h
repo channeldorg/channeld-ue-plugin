@@ -2,37 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldTypes.h"
+#include "ChanneldSettings.h"
 #include "GameFramework/WorldSettings.h"
 #include "View/ChannelDataView.h"
 #include "Replication/ChanneldReplicationComponent.h"
 #include "ChanneldWorldSettings.generated.h"
-
-USTRUCT(BlueprintType, Blueprintable)
-struct FServerLaunchGroup
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bEnabled = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", ClampMax = "16"))
-	int32 ServerNum = 1;
-
-	// How long to wait before launching the servers (in seconds)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DelayTime = 0.f;
-
-	// If not set, the open map in the Editor will be used.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowedClasses="World"))
-	FSoftObjectPath ServerMap;
-
-	// If not set, the ChannelDataViewClass in the UChanneldSettings will be used.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UChannelDataView> ServerViewClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText AdditionalArgs;
-};
 
 /**
  * Utility class for storing channeld-specific settings for each map.
@@ -55,6 +29,14 @@ public:
 	TArray<FString> ChanneldLaunchParametersOverride;
 	
 	TArray<FString> MergeLaunchParameters(const TArray<FString>& InParams) const;
+
+#if WITH_EDITOR
+	UFUNCTION(CallInEditor, Category="Channeld")
+	void LaunchServerInstanceInGroup0();
+	
+	UFUNCTION(CallInEditor, Category="Channeld")
+	void LaunchServerInstanceInGroup1();
+#endif
 
 protected:
 	UPROPERTY()
