@@ -864,11 +864,12 @@ void UChannelDataView::RecoverChannelData(Channeld::ChannelId ChId, TSharedPtr<c
 			}
 		}
 
-		auto GuidCache = GetChanneldSubsystem()->GetNetDriver()->GuidCache;
+		SetOwningChannelId(NetId, ChId);
+
+		// Clear the actor serialization info and use the class path to create the object.
 		ObjRef.clear_bunchbitsnum();
 		ObjRef.clear_context();
 		ObjRef.clear_netguidbunch();
-		SetOwningChannelId(NetId, ChId);
 		UE_LOG(LogChanneld, Verbose, TEXT("[Server] Recovering object in channel %u, ClassPath: %s, NetId: %u"), ChId, *ClassPath, NetId.Value);
 		UObject* RecoveredObj = ChanneldUtils::GetObjectByRef(&ObjRef, GetWorld(), true, OwningConn);
 		if (RecoveredObj == nullptr)
@@ -877,6 +878,11 @@ void UChannelDataView::RecoverChannelData(Channeld::ChannelId ChId, TSharedPtr<c
 			continue;
 		}
 		
+		auto GuidCache = GetChanneldSubsystem()->GetNetDriver()->GuidCache;
+		// Increase the NetID counter to avoid duplicate NetID in GetNetId->GetOrAssignNetGUID->AssignNewNetGUID_Server
+		++GuidCache->UniqueNetIDs[NetId.IsStatic()];
+		
+		// Fix the mismatch in the GuidCache
 		if (FNetGuidCacheObject* NetIdMatchedCacheObjPtr = GuidCache->ObjectLookup.Find(NetId))
 		{
 			if (NetIdMatchedCacheObjPtr->Object != RecoveredObj)
@@ -890,18 +896,6 @@ void UChannelDataView::RecoverChannelData(Channeld::ChannelId ChId, TSharedPtr<c
 				GuidCache->NetGUIDLookup.Emplace(RecoveredCacheObj.Object, NetId);
 				GuidCache->NetGUIDLookup.Emplace(NetIdMatchedCacheObj.Object, RecoveredNetId);
 				UE_LOG(LogChanneld, Verbose, TEXT("[Server] Update unmatched NetId %d <-> %d of path: %s <-> %s"), NetId.Value, RecoveredNetId.Value, *NetIdMatchedCacheObj.PathName.ToString(), *RecoveredCacheObj.PathName.ToString());
-			}
-		}
-
-		if (auto ObjClass = Cast<UClass>(RecoveredObj))
-		{
-			if (ObjClass->IsChildOf<AActor>())
-			{
-				RecoveredObj = GetWorld()->SpawnActor(ObjClass);	
-			}
-			else
-			{
-				RecoveredObj = NewObject<UObject>(GetTransientPackage(), ObjClass);
 			}
 		}
 		

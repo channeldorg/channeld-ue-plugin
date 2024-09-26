@@ -51,6 +51,12 @@ Channeld::ChannelId USingleChannelDataView::GetDefaultChannelId() const
 	return Channeld::GlobalChannelId;
 }
 
+bool USingleChannelDataView::GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const
+{
+	OutChId = GetDefaultChannelId();
+	return true;
+}
+
 void USingleChannelDataView::ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId)
 {
 	/* Moved to the base class (exception calling Destroy on the Pawn)

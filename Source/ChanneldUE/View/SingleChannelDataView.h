@@ -34,7 +34,8 @@ protected:
 	virtual void InitClient() override;
 
 	virtual Channeld::ChannelId GetDefaultChannelId() const override;
-	
+	virtual bool GetSendToChannelId(UChanneldNetConnection* NetConn, uint32& OutChId) const override;
+
 	// Default implementation: Destroy the Pawn related to the NetConn and close the NetConn. 
 	virtual void ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId) override;
 };
