@@ -821,31 +821,61 @@ bool UChannelDataView::HasEverSpawned(uint32 NetId) const
 
 void UChannelDataView::RecoverChannelData(Channeld::ChannelId ChId, TSharedPtr<channeldpb::ChannelDataRecoveryMessage> RecoveryMsg)
 {
-	unrealpb::ChannelRecoveryData RecoveryData;
-	if (!RecoveryMsg->recoverydata().UnpackTo(&RecoveryData))
-	{
-		UE_LOG(LogChanneld, Error, TEXT("Failed to unpack ChannelRecoveryData from ChannelDataRecoveryMessage, channel id: %u"), ChId);
-		return;
-	}
-
-	UE_LOG(LogChanneld, Verbose, TEXT("UChannelDataView::RecoverChannelData: recover objects from data:\n%s"), UTF8_TO_TCHAR(RecoveryData.DebugString().c_str()));
-
 	TMap<uint32, unrealpb::UnrealObjectRef> ObjRefs;
-	for (auto Pair : RecoveryData.objrefs())
+	google::protobuf::Message* UpdateData = nullptr;
+	EChanneldChannelType ChType = GetChanneldSubsystem()->GetChannelTypeByChId(ChId);
+	UE_LOG(LogChanneld, Verbose, TEXT("UChannelDataView::RecoverChannelData: %s (%u) "), *UEnum::GetValueAsString(ChType), ChId);
+
+	if (ChType == EChanneldChannelType::ECT_Global || ChType == EChanneldChannelType::ECT_SubWorld)
 	{
-		ObjRefs.Emplace(Pair.first, Pair.second);
-	/*
-		FNetworkGUID NetId = FNetworkGUID(Pair.first);
-		FString ClassPath = UTF8_TO_TCHAR(Pair.second.classpath().c_str());
-		if (NetId.IsDynamic() && !ClassPath.IsEmpty())
+		unrealpb::ChannelRecoveryData RecoveryData;
+		if (!RecoveryMsg->recoverydata().UnpackTo(&RecoveryData))
 		{
-			GetChanneldSubsystem()->GetNetDriver()->GuidCache->RegisterNetGUIDFromPath_Server(NetId, ClassPath, 0, false, true, true);
+			UE_LOG(LogChanneld, Error, TEXT("Failed to unpack ChannelRecoveryData from ChannelDataRecoveryMessage, channel id: %u"), ChId);
+			return;
 		}
-	*/
+		
+		for (auto Pair : RecoveryData.objrefs())
+		{
+			ObjRefs.Emplace(Pair.first, Pair.second);
+			/*
+				FNetworkGUID NetId = FNetworkGUID(Pair.first);
+				FString ClassPath = UTF8_TO_TCHAR(Pair.second.classpath().c_str());
+				if (NetId.IsDynamic() && !ClassPath.IsEmpty())
+				{
+					GetChanneldSubsystem()->GetNetDriver()->GuidCache->RegisterNetGUIDFromPath_Server(NetId, ClassPath, 0, false, true, true);
+				}
+			*/
+		}
 	}
+	else if (ChType == EChanneldChannelType::ECT_Spatial)
+	{
+		auto SpatialChannelData = static_cast<unrealpb::SpatialChannelData*>(ParseAndMergeUpdateData(ChId, RecoveryMsg->channeldata()));
+		if (SpatialChannelData == nullptr)
+		{
+			return;
+		}
+		for (auto Pair : SpatialChannelData->entities())
+		{
+			ObjRefs.Emplace(Pair.first, Pair.second.objref());
+		}
+		UpdateData = SpatialChannelData;
+	}
+	else if (ChType == EChanneldChannelType::ECT_Entity)
+	{
+		auto EntityChannelData = ParseAndMergeUpdateData(ChId, RecoveryMsg->channeldata());
+		auto ObjRefField = EntityChannelData->GetDescriptor()->field(0);
+		if (ObjRefField != nullptr && ObjRefField->name() == "objRef")
+		{
+			auto& ObjRef = static_cast<const unrealpb::UnrealObjectRef&>(EntityChannelData->GetReflection()->GetMessage(*EntityChannelData, ObjRefField));
+			ObjRefs.Emplace(ObjRef.netguid(), ObjRef);
+		}
+		UpdateData = EntityChannelData;
+	}
+	
 	// Sort the ObjRefs by NetId to create the objects in the correct order.
 	ObjRefs.KeySort([](uint32 A, uint32 B) { return A < B; });
-
+	
 	TArray<AActor*> ServerRecoveredActors;
 	for (auto& Pair : ObjRefs)
 	{
@@ -878,29 +908,7 @@ void UChannelDataView::RecoverChannelData(Channeld::ChannelId ChId, TSharedPtr<c
 			continue;
 		}
 		
-		auto GuidCache = GetChanneldSubsystem()->GetNetDriver()->GuidCache;
-		// Increase the NetID counter to avoid duplicate NetID in GetNetId->GetOrAssignNetGUID->AssignNewNetGUID_Server
-		++GuidCache->UniqueNetIDs[NetId.IsStatic()];
-		
-		// Fix the mismatch in the GuidCache
-		if (FNetGuidCacheObject* NetIdMatchedCacheObjPtr = GuidCache->ObjectLookup.Find(NetId))
-		{
-			if (NetIdMatchedCacheObjPtr->Object != RecoveredObj)
-			{
-				FNetworkGUID RecoveredNetId = GuidCache->NetGUIDLookup.FindRef(RecoveredObj);
-				FNetGuidCacheObject RecoveredCacheObj = GuidCache->ObjectLookup.FindRef(RecoveredNetId);
-				FNetGuidCacheObject NetIdMatchedCacheObj = *NetIdMatchedCacheObjPtr;
-				
-				GuidCache->ObjectLookup.Emplace(NetId, RecoveredCacheObj);
-				GuidCache->ObjectLookup.Emplace(RecoveredNetId, NetIdMatchedCacheObj);
-				GuidCache->NetGUIDLookup.Emplace(RecoveredCacheObj.Object, NetId);
-				GuidCache->NetGUIDLookup.Emplace(NetIdMatchedCacheObj.Object, RecoveredNetId);
-				UE_LOG(LogChanneld, Verbose, TEXT("[Server] Update unmatched NetId %d <-> %d of path: %s <-> %s"), NetId.Value, RecoveredNetId.Value, *NetIdMatchedCacheObj.PathName.ToString(), *RecoveredCacheObj.PathName.ToString());
-			}
-		}
-		
 		AddObjectProvider(ChId, RecoveredObj);
-
 		
 		if (Connection->IsServer())
 		{
@@ -914,8 +922,11 @@ void UChannelDataView::RecoverChannelData(Channeld::ChannelId ChId, TSharedPtr<c
 			}
 		}
 	}
-	
-	auto UpdateData = ParseAndMergeUpdateData(ChId, RecoveryMsg->channeldata());
+
+	if (UpdateData == nullptr)
+	{
+		UpdateData = ParseAndMergeUpdateData(ChId, RecoveryMsg->channeldata());
+	}
 	if (UpdateData == nullptr)
 	{
 		return;
@@ -949,11 +960,13 @@ void UChannelDataView::RecoverChannelData(Channeld::ChannelId ChId, TSharedPtr<c
 			{
 				UE_LOG(LogChanneld, Error, TEXT("[Server] Unable to associate PlayerController with any NetConnection."));
 			}			
-			
-			PC->ServerAcknowledgePossession(PC->GetPawn());
 
-			ensureAlwaysMsgf(PC->GetPawn() && PC->GetPawn()->GetNetConnection(),
-				TEXT("Recovered Pawn '%s' of '%s' should have NetConn set!"), *GetNameSafe(PC->GetPawn()), *GetNameSafe(PC));
+			if (APawn* Pawn = PC->GetPawn())
+			{
+				PC->ServerAcknowledgePossession(Pawn);
+				ensureAlwaysMsgf(Pawn->GetNetConnection(),
+					TEXT("Recovered Pawn '%s' of '%s' should have NetConn set!"), *GetNameSafe(PC->GetPawn()), *GetNameSafe(PC));
+			}
 		}
 	}
 

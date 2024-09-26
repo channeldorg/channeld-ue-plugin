@@ -969,13 +969,15 @@ void UChanneldConnection::HandleCreateSpatialChannel(UChanneldConnection* Conn, 
 void UChanneldConnection::HandleRecoveryEnd(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
 	// The channel with earlier previous subscription time will be recovered first.
-	RecoveryMsgs.Sort([](auto Msg1, auto Msg2)
+	RecoveryMsgs.Sort([](const TSharedPtr<channeldpb::ChannelDataRecoveryMessage>& Msg1, const TSharedPtr<channeldpb::ChannelDataRecoveryMessage>& Msg2)
 	{
-		return Msg1->subtime() - Msg2->subtime();
+		// return Msg1->subtime() - Msg2->subtime();
+		return Msg1->channelid() - Msg2->channelid();
 	});
 
 	for (auto RecoverMsg : RecoveryMsgs)
 	{
+		UE_LOG(LogChanneld, Log, TEXT("Recovering channel %d, sub time: %lld"), RecoverMsg->channelid(), RecoverMsg->subtime());
 		if (RecoverMsg->ownerconnid() == GetConnId())
 		{
 			FOwnedChannelInfo OwnedInfo;

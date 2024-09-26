@@ -179,74 +179,92 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 			}
 		}
 
-				if (!IsValid(Obj) && Ref->has_classpath())
+		if (!IsValid(Obj) && Ref->has_classpath())
+		{
+			FString PathName = UTF8_TO_TCHAR(Ref->classpath().c_str());
+			
+			// // Static object with bunch data (somehow)
+			// if (NetGUID.IsStatic())
+			// {
+			// 	UE_LOG(LogChanneld, Warning, TEXT("Try to load static object with bunch data, netId: %u, path: %s, bits: %d"), NetGUID.Value, *PathName, Ref->bunchbitsnum());
+			// }
+			// else
+			{
+				if (auto ObjClass = LoadObject<UClass>(nullptr, *PathName))
 				{
-					FString PathName = UTF8_TO_TCHAR(Ref->classpath().c_str());
-					
-					// // Static object with bunch data (somehow)
-					// if (NetGUID.IsStatic())
-					// {
-					// 	UE_LOG(LogChanneld, Warning, TEXT("Try to load static object with bunch data, netId: %u, path: %s, bits: %d"), NetGUID.Value, *PathName, Ref->bunchbitsnum());
-					// }
-					// else
+					if (ObjClass->IsChildOf<AActor>())
 					{
-						if (auto ObjClass = LoadObject<UClass>(nullptr, *PathName))
+						FActorSpawnParameters SpawnParams;
+						SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+						Obj = World->SpawnActor(ObjClass, nullptr, nullptr, SpawnParams);	
+					}
+					else
+					{
+						Obj = NewObject<UObject>(GetTransientPackage(), ObjClass);
+					}
+
+					if (NetGUID.IsDynamic())
+					{
+						if (ClientConn)
 						{
-							if (ObjClass->IsChildOf<AActor>())
+							// GuidCache->RegisterNetGUIDFromPath_Server(NetGUID, PathName, 0, 0, false, false);
+							if (!GuidCache->ObjectLookup.Contains(NetGUID))
 							{
-								FActorSpawnParameters SpawnParams;
-								SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-								Obj = World->SpawnActor(ObjClass, nullptr, nullptr, SpawnParams);	
-							}
-							else
-							{
-								Obj = NewObject<UObject>(GetTransientPackage(), ObjClass);
-							}
-
-							if (NetGUID.IsDynamic())
-							{
-								if (ClientConn)
-								{
-									// GuidCache->RegisterNetGUIDFromPath_Server(NetGUID, PathName, 0, 0, false, false);
-									if (!GuidCache->ObjectLookup.Contains(NetGUID))
-									{
-										// GuidCache->RegisterNetGUID_Server(NetGUID, Obj);
-										RegisterNetGUID_Server_NoWarning(GuidCache, NetGUID, Obj);
-									}
-								}
-								else
-								{
-									// GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, 0, 0, false, false);
-									GuidCache->RegisterNetGUID_Client(NetGUID, Obj);
-								}
-							}
-							else
-							{
-								FNetGuidCacheObject CacheObject;
-								CacheObject.Object = Obj;
-								CacheObject.OuterGUID = FStaticGuidRegistry::GetStaticObjectExportedOuterGUID(NetGUID.Value);
-								// Use the short name here so it can pass the check in FNetGUIDCache::GetObjectFromNetGUID
-								CacheObject.PathName = Obj->GetFName();//FName(PathName);
-								NetDriver->GuidCache->RegisterNetGUID_Internal(NetGUID, CacheObject);
-								UE_LOG( LogNetPackageMap, Log, TEXT( "RegisterNetGUID_Internal: NetGUID: %u, PathName: %s" ), NetGUID.Value, *PathName);
-
-							}
-
-							if (AActor* Actor = Cast<AActor>(Obj))
-							{
-								// Triggers UChanneldNetDriver::NotifyActorChannelOpen
-								World->GetNetDriver()->NotifyActorChannelOpen(nullptr, Actor);
-								// After all properties have been initialized, call PostNetInit. This should call BeginPlay() so initialization can be done with proper starting values.
-								Actor->PostNetInit();
+								// GuidCache->RegisterNetGUID_Server(NetGUID, Obj);
+								RegisterNetGUID_Server_NoWarning(GuidCache, NetGUID, Obj);
 							}
 						}
 						else
 						{
-							UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Failed to load class from path: %s"), *PathName);
+							// GuidCache->RegisterNetGUIDFromPath_Client(NetGUID, PathName, 0, 0, false, false);
+							GuidCache->RegisterNetGUID_Client(NetGUID, Obj);
+						}
+					}
+					else
+					{
+						FNetGuidCacheObject CacheObject;
+						CacheObject.Object = Obj;
+						CacheObject.OuterGUID = FStaticGuidRegistry::GetStaticObjectExportedOuterGUID(NetGUID.Value);
+						// Use the short name here so it can pass the check in FNetGUIDCache::GetObjectFromNetGUID
+						CacheObject.PathName = Obj->GetFName();//FName(PathName);
+						NetDriver->GuidCache->RegisterNetGUID_Internal(NetGUID, CacheObject);
+						UE_LOG( LogNetPackageMap, Log, TEXT( "RegisterNetGUID_Internal: NetGUID: %u, PathName: %s" ), NetGUID.Value, *PathName);
+					}
+					
+					// Increase the NetID counter to avoid duplicate NetID in GetOrAssignNetGUID -> AssignNewNetGUID_Server
+					++GuidCache->UniqueNetIDs[NetGUID.IsStatic()];
+
+					if (AActor* Actor = Cast<AActor>(Obj))
+					{
+						// Triggers UChanneldNetDriver::NotifyActorChannelOpen
+						World->GetNetDriver()->NotifyActorChannelOpen(nullptr, Actor);
+						// After all properties have been initialized, call PostNetInit. This should call BeginPlay() so initialization can be done with proper starting values.
+						Actor->PostNetInit();
+					}
+					
+					// Fix the mismatch in the GuidCache
+					if (FNetGuidCacheObject* NetIdMatchedCacheObjPtr = GuidCache->ObjectLookup.Find(NetGUID))
+					{
+						if (NetIdMatchedCacheObjPtr->Object != Obj)
+						{
+							FNetworkGUID RecoveredNetId = GuidCache->NetGUIDLookup.FindRef(Obj);
+							FNetGuidCacheObject RecoveredCacheObj = GuidCache->ObjectLookup.FindRef(RecoveredNetId);
+							FNetGuidCacheObject NetIdMatchedCacheObj = *NetIdMatchedCacheObjPtr;
+				
+							GuidCache->ObjectLookup.Emplace(NetGUID, RecoveredCacheObj);
+							GuidCache->ObjectLookup.Emplace(RecoveredNetId, NetIdMatchedCacheObj);
+							GuidCache->NetGUIDLookup.Emplace(RecoveredCacheObj.Object, NetGUID);
+							GuidCache->NetGUIDLookup.Emplace(NetIdMatchedCacheObj.Object, RecoveredNetId);
+							UE_LOG(LogChanneld, Verbose, TEXT("[Server] Update unmatched NetId %d <-> %d of path: %s <-> %s"), NetGUID.Value, RecoveredNetId.Value, *NetIdMatchedCacheObj.PathName.ToString(), *RecoveredCacheObj.PathName.ToString());
 						}
 					}
 				}
-
+				else
+				{
+					UE_LOG(LogChanneld, Warning, TEXT("ChanneldUtils::GetObjectByRef: Failed to load class from path: %s"), *PathName);
+				}
+			}
+		}
 	}
 
 	if (!IsValid(Obj))

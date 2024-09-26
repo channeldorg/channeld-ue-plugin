@@ -255,7 +255,7 @@ namespace {Declaration_CDP_Namespace}
       auto {Declaration_CDP_ProtoVar} = static_cast<{Definition_CDP_ProtoNamespace}::{Definition_CDP_ProtoMsgName}*>(ChannelData);
       {Code_GetStateFromChannelData}
       {
-        UE_LOG(LogChanneldGen, Warning, TEXT("State of '%s' is not supported in %s, NetGUID: %d"), *TargetClass->GetName(), UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()), NetGUID);
+        UE_LOG(LogChanneldGen, Warning, TEXT("State of '%s' is not supported in %s, NetGUID: %u"), *TargetClass->GetName(), UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()), NetGUID);
       }
     
       bIsRemoved = false;
@@ -271,7 +271,7 @@ namespace {Declaration_CDP_Namespace}
       auto {Declaration_CDP_ProtoVar} = static_cast<{Definition_CDP_ProtoNamespace}::{Definition_CDP_ProtoMsgName}*>(ChannelData);
       {Code_SetStateToChannelData}
       {
-        UE_LOG(LogChanneldGen, Warning, TEXT("State of '%s' is not supported in %s, NetGUID: %d"), *TargetClass->GetName(), UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()), NetGUID);
+        UE_LOG(LogChanneldGen, Warning, TEXT("State of '%s' is not supported in %s, NetGUID: %u"), *TargetClass->GetName(), UTF8_TO_TCHAR(ChannelData->GetTypeName().c_str()), NetGUID);
       }
     }
   };
