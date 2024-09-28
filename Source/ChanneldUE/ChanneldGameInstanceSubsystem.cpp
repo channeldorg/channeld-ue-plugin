@@ -82,6 +82,8 @@ void UChanneldGameInstanceSubsystem::InitConnection()
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::SUB_TO_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleSubToChannel);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::UNSUB_FROM_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleUnsubFromChannel);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, this, &UChanneldGameInstanceSubsystem::HandleChannelDataUpdate);
+	ConnectionInstance->AddMessageHandler((uint32)channeldpb::CHANNEL_OWNER_LOST, this, &UChanneldGameInstanceSubsystem::HandleChannelOwnerLost);
+	ConnectionInstance->AddMessageHandler((uint32)channeldpb::CHANNEL_OWNER_RECOVERED, this, &UChanneldGameInstanceSubsystem::HandleChannelOwnerRecovered);
 
 	//ConnectionInstance->OnUserSpaceMessageReceived.AddUObject(this, &UChanneldGameInstanceSubsystem::OnUserSpaceMessageReceived);
 	ConnectionInstance->RegisterMessageHandler(unrealpb::ANY, new google::protobuf::Any, this, &UChanneldGameInstanceSubsystem::HandleUserSpaceAnyMessage);
@@ -624,8 +626,35 @@ void UChanneldGameInstanceSubsystem::HandleChannelDataUpdate(UChanneldConnection
 	}
 }
 
+void UChanneldGameInstanceSubsystem::HandleChannelOwnerLost(UChanneldConnection* ChanneldConnection,
+	Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	if (!OnChannelOwnerLost.IsBound())
+	{
+		return;
+	}
+
+	OnChannelOwnerLost.Broadcast(ChId, GetChannelTypeByChId(ChId));
+}
+
+void UChanneldGameInstanceSubsystem::HandleChannelOwnerRecovered(UChanneldConnection* ChanneldConnection,
+	Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	if (!OnChannelOwnerRecovered.IsBound())
+	{
+		return;
+	}
+
+	OnChannelOwnerRecovered.Broadcast(ChId, GetChannelTypeByChId(ChId));
+}
+
 void UChanneldGameInstanceSubsystem::HandleUserSpaceAnyMessage(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
+	if (!OnUserSpaceMessage.IsBound())
+	{
+		return;
+	}
+	
 	auto AnyMsg = static_cast<const google::protobuf::Any*>(Msg);
 	std::string ProtoFullName = AnyMsg->type_url();
 	if (ProtoFullName.length() < 20)

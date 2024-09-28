@@ -341,6 +341,28 @@ struct EndRecoveryMesssageDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 EndRecoveryMesssageDefaultTypeInternal _EndRecoveryMesssage_default_instance_;
+PROTOBUF_CONSTEXPR ChannelOwnerLostMessage::ChannelOwnerLostMessage(
+    ::_pbi::ConstantInitialized) {}
+struct ChannelOwnerLostMessageDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ChannelOwnerLostMessageDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ChannelOwnerLostMessageDefaultTypeInternal() {}
+  union {
+    ChannelOwnerLostMessage _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChannelOwnerLostMessageDefaultTypeInternal _ChannelOwnerLostMessage_default_instance_;
+PROTOBUF_CONSTEXPR ChannelOwnerRecoveredMessage::ChannelOwnerRecoveredMessage(
+    ::_pbi::ConstantInitialized) {}
+struct ChannelOwnerRecoveredMessageDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ChannelOwnerRecoveredMessageDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ChannelOwnerRecoveredMessageDefaultTypeInternal() {}
+  union {
+    ChannelOwnerRecoveredMessage _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ChannelOwnerRecoveredMessageDefaultTypeInternal _ChannelOwnerRecoveredMessage_default_instance_;
 PROTOBUF_CONSTEXPR SpatialInfo::SpatialInfo(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.x_)*/0
@@ -608,7 +630,7 @@ struct DebugGetSpatialRegionsMessageDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DebugGetSpatialRegionsMessageDefaultTypeInternal _DebugGetSpatialRegionsMessage_default_instance_;
 }  // namespace channeldpb
-static ::_pb::Metadata file_level_metadata_channeld_2eproto[39];
+static ::_pb::Metadata file_level_metadata_channeld_2eproto[41];
 static const ::_pb::EnumDescriptor* file_level_enum_descriptors_channeld_2eproto[8];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_channeld_2eproto = nullptr;
 
@@ -815,6 +837,18 @@ const uint32_t TableStruct_channeld_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
   ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::ChannelOwnerLostMessage, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::channeldpb::ChannelOwnerRecoveredMessage, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::channeldpb::SpatialInfo, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -994,24 +1028,26 @@ static const ::_pbi::MigrationSchema schemas_channeld_2eproto[] PROTOBUF_SECTION
   { 166, -1, -1, sizeof(::channeldpb::DisconnectMessage)},
   { 173, 187, -1, sizeof(::channeldpb::ChannelDataRecoveryMessage)},
   { 195, -1, -1, sizeof(::channeldpb::EndRecoveryMesssage)},
-  { 201, -1, -1, sizeof(::channeldpb::SpatialInfo)},
-  { 210, -1, -1, sizeof(::channeldpb::CreateSpatialChannelsResultMessage)},
-  { 219, -1, -1, sizeof(::channeldpb::QuerySpatialChannelMessage)},
-  { 226, -1, -1, sizeof(::channeldpb::QuerySpatialChannelResultMessage)},
-  { 233, -1, -1, sizeof(::channeldpb::SpatialChannelsReadyMessage)},
-  { 241, -1, -1, sizeof(::channeldpb::ChannelDataHandoverMessage)},
-  { 251, -1, -1, sizeof(::channeldpb::SpatialRegion)},
-  { 261, -1, -1, sizeof(::channeldpb::SpatialRegionsUpdateMessage)},
-  { 268, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_SpotsAOI)},
-  { 276, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_BoxAOI)},
-  { 284, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_SphereAOI)},
-  { 292, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_ConeAOI)},
-  { 302, 312, -1, sizeof(::channeldpb::SpatialInterestQuery)},
-  { 316, -1, -1, sizeof(::channeldpb::UpdateSpatialInterestMessage)},
-  { 324, -1, -1, sizeof(::channeldpb::CreateEntityChannelMessage)},
-  { 336, -1, -1, sizeof(::channeldpb::AddEntityGroupMessage)},
-  { 344, -1, -1, sizeof(::channeldpb::RemoveEntityGroupMessage)},
-  { 352, -1, -1, sizeof(::channeldpb::DebugGetSpatialRegionsMessage)},
+  { 201, -1, -1, sizeof(::channeldpb::ChannelOwnerLostMessage)},
+  { 207, -1, -1, sizeof(::channeldpb::ChannelOwnerRecoveredMessage)},
+  { 213, -1, -1, sizeof(::channeldpb::SpatialInfo)},
+  { 222, -1, -1, sizeof(::channeldpb::CreateSpatialChannelsResultMessage)},
+  { 231, -1, -1, sizeof(::channeldpb::QuerySpatialChannelMessage)},
+  { 238, -1, -1, sizeof(::channeldpb::QuerySpatialChannelResultMessage)},
+  { 245, -1, -1, sizeof(::channeldpb::SpatialChannelsReadyMessage)},
+  { 253, -1, -1, sizeof(::channeldpb::ChannelDataHandoverMessage)},
+  { 263, -1, -1, sizeof(::channeldpb::SpatialRegion)},
+  { 273, -1, -1, sizeof(::channeldpb::SpatialRegionsUpdateMessage)},
+  { 280, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_SpotsAOI)},
+  { 288, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_BoxAOI)},
+  { 296, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_SphereAOI)},
+  { 304, -1, -1, sizeof(::channeldpb::SpatialInterestQuery_ConeAOI)},
+  { 314, 324, -1, sizeof(::channeldpb::SpatialInterestQuery)},
+  { 328, -1, -1, sizeof(::channeldpb::UpdateSpatialInterestMessage)},
+  { 336, -1, -1, sizeof(::channeldpb::CreateEntityChannelMessage)},
+  { 348, -1, -1, sizeof(::channeldpb::AddEntityGroupMessage)},
+  { 356, -1, -1, sizeof(::channeldpb::RemoveEntityGroupMessage)},
+  { 364, -1, -1, sizeof(::channeldpb::DebugGetSpatialRegionsMessage)},
 };
 
 static const ::_pb::Message* const file_default_instances_channeld_2eproto[] = {
@@ -1036,6 +1072,8 @@ static const ::_pb::Message* const file_default_instances_channeld_2eproto[] = {
   &::channeldpb::_DisconnectMessage_default_instance_._instance,
   &::channeldpb::_ChannelDataRecoveryMessage_default_instance_._instance,
   &::channeldpb::_EndRecoveryMesssage_default_instance_._instance,
+  &::channeldpb::_ChannelOwnerLostMessage_default_instance_._instance,
+  &::channeldpb::_ChannelOwnerRecoveredMessage_default_instance_._instance,
   &::channeldpb::_SpatialInfo_default_instance_._instance,
   &::channeldpb::_CreateSpatialChannelsResultMessage_default_instance_._instance,
   &::channeldpb::_QuerySpatialChannelMessage_default_instance_._instance,
@@ -1125,93 +1163,95 @@ const char descriptor_table_protodef_channeld_2eproto[] PROTOBUF_SECTION_VARIABL
   "ns\022)\n\013channelData\030\007 \001(\0132\024.google.protobu"
   "f.Any\022/\n\014recoveryData\030\010 \001(\0132\024.google.pro"
   "tobuf.AnyH\000\210\001\001B\017\n\r_recoveryData\"\025\n\023EndRe"
-  "coveryMesssage\".\n\013SpatialInfo\022\t\n\001x\030\001 \001(\001"
-  "\022\t\n\001y\030\002 \001(\001\022\t\n\001z\030\003 \001(\001\"e\n\"CreateSpatialC"
-  "hannelsResultMessage\022\030\n\020spatialChannelId"
-  "\030\001 \003(\r\022\020\n\010metadata\030\002 \001(\t\022\023\n\013ownerConnId\030"
-  "\003 \001(\r\"J\n\032QuerySpatialChannelMessage\022,\n\013s"
-  "patialInfo\030\001 \003(\0132\027.channeldpb.SpatialInf"
-  "o\"5\n QuerySpatialChannelResultMessage\022\021\n"
-  "\tchannelId\030\001 \003(\r\"G\n\033SpatialChannelsReady"
-  "Message\022\023\n\013serverIndex\030\001 \001(\r\022\023\n\013serverCo"
-  "unt\030\002 \001(\r\"\203\001\n\032ChannelDataHandoverMessage"
-  "\022\024\n\014srcChannelId\030\001 \001(\r\022\024\n\014dstChannelId\030\002"
-  " \001(\r\022\025\n\rcontextConnId\030\003 \001(\r\022\"\n\004data\030\004 \001("
-  "\0132\024.google.protobuf.Any\"\203\001\n\rSpatialRegio"
-  "n\022$\n\003min\030\001 \001(\0132\027.channeldpb.SpatialInfo\022"
-  "$\n\003max\030\002 \001(\0132\027.channeldpb.SpatialInfo\022\021\n"
-  "\tchannelId\030\003 \001(\r\022\023\n\013serverIndex\030\004 \001(\r\"I\n"
-  "\033SpatialRegionsUpdateMessage\022*\n\007regions\030"
-  "\001 \003(\0132\031.channeldpb.SpatialRegion\"\260\005\n\024Spa"
-  "tialInterestQuery\022@\n\010spotsAOI\030\001 \001(\0132).ch"
-  "anneldpb.SpatialInterestQuery.SpotsAOIH\000"
-  "\210\001\001\022<\n\006boxAOI\030\002 \001(\0132\'.channeldpb.Spatial"
-  "InterestQuery.BoxAOIH\001\210\001\001\022B\n\tsphereAOI\030\003"
-  " \001(\0132*.channeldpb.SpatialInterestQuery.S"
-  "phereAOIH\002\210\001\001\022>\n\007coneAOI\030\004 \001(\0132(.channel"
-  "dpb.SpatialInterestQuery.ConeAOIH\003\210\001\001\032A\n"
-  "\010SpotsAOI\022&\n\005spots\030\001 \003(\0132\027.channeldpb.Sp"
-  "atialInfo\022\r\n\005dists\030\002 \003(\r\032Z\n\006BoxAOI\022\'\n\006ce"
-  "nter\030\001 \001(\0132\027.channeldpb.SpatialInfo\022\'\n\006e"
-  "xtent\030\002 \001(\0132\027.channeldpb.SpatialInfo\032D\n\t"
-  "SphereAOI\022\'\n\006center\030\001 \001(\0132\027.channeldpb.S"
-  "patialInfo\022\016\n\006radius\030\002 \001(\001\032}\n\007ConeAOI\022\'\n"
-  "\006center\030\001 \001(\0132\027.channeldpb.SpatialInfo\022*"
-  "\n\tdirection\030\002 \001(\0132\027.channeldpb.SpatialIn"
-  "fo\022\r\n\005angle\030\003 \001(\001\022\016\n\006radius\030\004 \001(\001B\013\n\t_sp"
-  "otsAOIB\t\n\007_boxAOIB\014\n\n_sphereAOIB\n\n\010_cone"
-  "AOI\"_\n\034UpdateSpatialInterestMessage\022\016\n\006c"
-  "onnId\030\001 \001(\r\022/\n\005query\030\002 \001(\0132 .channeldpb."
-  "SpatialInterestQuery\"\360\001\n\032CreateEntityCha"
-  "nnelMessage\022\020\n\010entityId\030\001 \001(\r\022\020\n\010metadat"
-  "a\030\002 \001(\t\022:\n\nsubOptions\030\003 \001(\0132&.channeldpb"
-  ".ChannelSubscriptionOptions\022\"\n\004data\030\004 \001("
-  "\0132\024.google.protobuf.Any\0229\n\014mergeOptions\030"
-  "\005 \001(\0132#.channeldpb.ChannelDataMergeOptio"
-  "ns\022\023\n\013isWellKnown\030\006 \001(\010\"Y\n\025AddEntityGrou"
-  "pMessage\022)\n\004type\030\001 \001(\0162\033.channeldpb.Enti"
-  "tyGroupType\022\025\n\rEntitiesToAdd\030\002 \003(\r\"_\n\030Re"
-  "moveEntityGroupMessage\022)\n\004type\030\001 \001(\0162\033.c"
-  "hanneldpb.EntityGroupType\022\030\n\020EntitiesToR"
-  "emove\030\002 \003(\r\"\037\n\035DebugGetSpatialRegionsMes"
-  "sage*\247\001\n\rBroadcastType\022\020\n\014NO_BROADCAST\020\000"
-  "\022\025\n\021SINGLE_CONNECTION\020\001\022\007\n\003ALL\020\002\022\022\n\016ALL_"
-  "BUT_SENDER\020\004\022\021\n\rALL_BUT_OWNER\020\010\022\022\n\016ALL_B"
-  "UT_CLIENT\020\020\022\022\n\016ALL_BUT_SERVER\020 \022\025\n\021ADJAC"
-  "ENT_CHANNELS\020@*;\n\016ConnectionType\022\021\n\rNO_C"
-  "ONNECTION\020\000\022\n\n\006SERVER\020\001\022\n\n\006CLIENT\020\002*\220\001\n\013"
-  "ChannelType\022\013\n\007UNKNOWN\020\000\022\n\n\006GLOBAL\020\001\022\013\n\007"
-  "PRIVATE\020\002\022\014\n\010SUBWORLD\020\003\022\013\n\007SPATIAL\020\004\022\n\n\006"
-  "ENTITY\020\005\022\010\n\004TEST\020d\022\t\n\005TEST1\020e\022\t\n\005TEST2\020f"
-  "\022\t\n\005TEST3\020g\022\t\n\005TEST4\020h*\206\004\n\013MessageType\022\013"
-  "\n\007INVALID\020\000\022\010\n\004AUTH\020\001\022\022\n\016CREATE_CHANNEL\020"
-  "\003\022\022\n\016REMOVE_CHANNEL\020\004\022\020\n\014LIST_CHANNEL\020\005\022"
-  "\022\n\016SUB_TO_CHANNEL\020\006\022\026\n\022UNSUB_FROM_CHANNE"
-  "L\020\007\022\027\n\023CHANNEL_DATA_UPDATE\020\010\022\016\n\nDISCONNE"
-  "CT\020\t\022\032\n\026CREATE_SPATIAL_CHANNEL\020\n\022\031\n\025QUER"
-  "Y_SPATIAL_CHANNEL\020\013\022\031\n\025CHANNEL_DATA_HAND"
-  "OVER\020\014\022\032\n\026SPATIAL_REGIONS_UPDATE\020\r\022\033\n\027UP"
-  "DATE_SPATIAL_INTEREST\020\016\022\031\n\025CREATE_ENTITY"
-  "_CHANNEL\020\017\022\024\n\020ENTITY_GROUP_ADD\020\020\022\027\n\023ENTI"
-  "TY_GROUP_REMOVE\020\021\022\032\n\026SPATIAL_CHANNELS_RE"
-  "ADY\020\022\022\031\n\025RECOVERY_CHANNEL_DATA\020\024\022\020\n\014RECO"
-  "VERY_END\020\025\022\035\n\031DEBUG_GET_SPATIAL_REGIONS\020"
-  "c\022\024\n\020USER_SPACE_START\020d*1\n\017CompressionTy"
-  "pe\022\022\n\016NO_COMPRESSION\020\000\022\n\n\006SNAPPY\020\001*E\n\021Ch"
-  "annelDataAccess\022\r\n\tNO_ACCESS\020\000\022\017\n\013READ_A"
-  "CCESS\020\001\022\020\n\014WRITE_ACCESS\020\002*)\n\017EntityGroup"
-  "Type\022\014\n\010HANDOVER\020\000\022\010\n\004LOCK\020\001B0Z.github.c"
-  "om/metaworking/channeld/pkg/channeldpbb\006"
-  "proto3"
+  "coveryMesssage\"\031\n\027ChannelOwnerLostMessag"
+  "e\"\036\n\034ChannelOwnerRecoveredMessage\".\n\013Spa"
+  "tialInfo\022\t\n\001x\030\001 \001(\001\022\t\n\001y\030\002 \001(\001\022\t\n\001z\030\003 \001("
+  "\001\"e\n\"CreateSpatialChannelsResultMessage\022"
+  "\030\n\020spatialChannelId\030\001 \003(\r\022\020\n\010metadata\030\002 "
+  "\001(\t\022\023\n\013ownerConnId\030\003 \001(\r\"J\n\032QuerySpatial"
+  "ChannelMessage\022,\n\013spatialInfo\030\001 \003(\0132\027.ch"
+  "anneldpb.SpatialInfo\"5\n QuerySpatialChan"
+  "nelResultMessage\022\021\n\tchannelId\030\001 \003(\r\"G\n\033S"
+  "patialChannelsReadyMessage\022\023\n\013serverInde"
+  "x\030\001 \001(\r\022\023\n\013serverCount\030\002 \001(\r\"\203\001\n\032Channel"
+  "DataHandoverMessage\022\024\n\014srcChannelId\030\001 \001("
+  "\r\022\024\n\014dstChannelId\030\002 \001(\r\022\025\n\rcontextConnId"
+  "\030\003 \001(\r\022\"\n\004data\030\004 \001(\0132\024.google.protobuf.A"
+  "ny\"\203\001\n\rSpatialRegion\022$\n\003min\030\001 \001(\0132\027.chan"
+  "neldpb.SpatialInfo\022$\n\003max\030\002 \001(\0132\027.channe"
+  "ldpb.SpatialInfo\022\021\n\tchannelId\030\003 \001(\r\022\023\n\013s"
+  "erverIndex\030\004 \001(\r\"I\n\033SpatialRegionsUpdate"
+  "Message\022*\n\007regions\030\001 \003(\0132\031.channeldpb.Sp"
+  "atialRegion\"\260\005\n\024SpatialInterestQuery\022@\n\010"
+  "spotsAOI\030\001 \001(\0132).channeldpb.SpatialInter"
+  "estQuery.SpotsAOIH\000\210\001\001\022<\n\006boxAOI\030\002 \001(\0132\'"
+  ".channeldpb.SpatialInterestQuery.BoxAOIH"
+  "\001\210\001\001\022B\n\tsphereAOI\030\003 \001(\0132*.channeldpb.Spa"
+  "tialInterestQuery.SphereAOIH\002\210\001\001\022>\n\007cone"
+  "AOI\030\004 \001(\0132(.channeldpb.SpatialInterestQu"
+  "ery.ConeAOIH\003\210\001\001\032A\n\010SpotsAOI\022&\n\005spots\030\001 "
+  "\003(\0132\027.channeldpb.SpatialInfo\022\r\n\005dists\030\002 "
+  "\003(\r\032Z\n\006BoxAOI\022\'\n\006center\030\001 \001(\0132\027.channeld"
+  "pb.SpatialInfo\022\'\n\006extent\030\002 \001(\0132\027.channel"
+  "dpb.SpatialInfo\032D\n\tSphereAOI\022\'\n\006center\030\001"
+  " \001(\0132\027.channeldpb.SpatialInfo\022\016\n\006radius\030"
+  "\002 \001(\001\032}\n\007ConeAOI\022\'\n\006center\030\001 \001(\0132\027.chann"
+  "eldpb.SpatialInfo\022*\n\tdirection\030\002 \001(\0132\027.c"
+  "hanneldpb.SpatialInfo\022\r\n\005angle\030\003 \001(\001\022\016\n\006"
+  "radius\030\004 \001(\001B\013\n\t_spotsAOIB\t\n\007_boxAOIB\014\n\n"
+  "_sphereAOIB\n\n\010_coneAOI\"_\n\034UpdateSpatialI"
+  "nterestMessage\022\016\n\006connId\030\001 \001(\r\022/\n\005query\030"
+  "\002 \001(\0132 .channeldpb.SpatialInterestQuery\""
+  "\360\001\n\032CreateEntityChannelMessage\022\020\n\010entity"
+  "Id\030\001 \001(\r\022\020\n\010metadata\030\002 \001(\t\022:\n\nsubOptions"
+  "\030\003 \001(\0132&.channeldpb.ChannelSubscriptionO"
+  "ptions\022\"\n\004data\030\004 \001(\0132\024.google.protobuf.A"
+  "ny\0229\n\014mergeOptions\030\005 \001(\0132#.channeldpb.Ch"
+  "annelDataMergeOptions\022\023\n\013isWellKnown\030\006 \001"
+  "(\010\"Y\n\025AddEntityGroupMessage\022)\n\004type\030\001 \001("
+  "\0162\033.channeldpb.EntityGroupType\022\025\n\rEntiti"
+  "esToAdd\030\002 \003(\r\"_\n\030RemoveEntityGroupMessag"
+  "e\022)\n\004type\030\001 \001(\0162\033.channeldpb.EntityGroup"
+  "Type\022\030\n\020EntitiesToRemove\030\002 \003(\r\"\037\n\035DebugG"
+  "etSpatialRegionsMessage*\247\001\n\rBroadcastTyp"
+  "e\022\020\n\014NO_BROADCAST\020\000\022\025\n\021SINGLE_CONNECTION"
+  "\020\001\022\007\n\003ALL\020\002\022\022\n\016ALL_BUT_SENDER\020\004\022\021\n\rALL_B"
+  "UT_OWNER\020\010\022\022\n\016ALL_BUT_CLIENT\020\020\022\022\n\016ALL_BU"
+  "T_SERVER\020 \022\025\n\021ADJACENT_CHANNELS\020@*;\n\016Con"
+  "nectionType\022\021\n\rNO_CONNECTION\020\000\022\n\n\006SERVER"
+  "\020\001\022\n\n\006CLIENT\020\002*\220\001\n\013ChannelType\022\013\n\007UNKNOW"
+  "N\020\000\022\n\n\006GLOBAL\020\001\022\013\n\007PRIVATE\020\002\022\014\n\010SUBWORLD"
+  "\020\003\022\013\n\007SPATIAL\020\004\022\n\n\006ENTITY\020\005\022\010\n\004TEST\020d\022\t\n"
+  "\005TEST1\020e\022\t\n\005TEST2\020f\022\t\n\005TEST3\020g\022\t\n\005TEST4\020"
+  "h*\273\004\n\013MessageType\022\013\n\007INVALID\020\000\022\010\n\004AUTH\020\001"
+  "\022\022\n\016CREATE_CHANNEL\020\003\022\022\n\016REMOVE_CHANNEL\020\004"
+  "\022\020\n\014LIST_CHANNEL\020\005\022\022\n\016SUB_TO_CHANNEL\020\006\022\026"
+  "\n\022UNSUB_FROM_CHANNEL\020\007\022\027\n\023CHANNEL_DATA_U"
+  "PDATE\020\010\022\016\n\nDISCONNECT\020\t\022\032\n\026CREATE_SPATIA"
+  "L_CHANNEL\020\n\022\031\n\025QUERY_SPATIAL_CHANNEL\020\013\022\031"
+  "\n\025CHANNEL_DATA_HANDOVER\020\014\022\032\n\026SPATIAL_REG"
+  "IONS_UPDATE\020\r\022\033\n\027UPDATE_SPATIAL_INTEREST"
+  "\020\016\022\031\n\025CREATE_ENTITY_CHANNEL\020\017\022\024\n\020ENTITY_"
+  "GROUP_ADD\020\020\022\027\n\023ENTITY_GROUP_REMOVE\020\021\022\032\n\026"
+  "SPATIAL_CHANNELS_READY\020\022\022\031\n\025RECOVERY_CHA"
+  "NNEL_DATA\020\024\022\020\n\014RECOVERY_END\020\025\022\026\n\022CHANNEL"
+  "_OWNER_LOST\020\026\022\033\n\027CHANNEL_OWNER_RECOVERED"
+  "\020\027\022\035\n\031DEBUG_GET_SPATIAL_REGIONS\020c\022\024\n\020USE"
+  "R_SPACE_START\020d*1\n\017CompressionType\022\022\n\016NO"
+  "_COMPRESSION\020\000\022\n\n\006SNAPPY\020\001*E\n\021ChannelDat"
+  "aAccess\022\r\n\tNO_ACCESS\020\000\022\017\n\013READ_ACCESS\020\001\022"
+  "\020\n\014WRITE_ACCESS\020\002*)\n\017EntityGroupType\022\014\n\010"
+  "HANDOVER\020\000\022\010\n\004LOCK\020\001B0Z.github.com/metaw"
+  "orking/channeld/pkg/channeldpbb\006proto3"
   ;
 static const ::_pbi::DescriptorTable* const descriptor_table_channeld_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fany_2eproto,
 };
 static ::_pbi::once_flag descriptor_table_channeld_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_channeld_2eproto = {
-    false, false, 5806, descriptor_table_protodef_channeld_2eproto,
+    false, false, 5918, descriptor_table_protodef_channeld_2eproto,
     "channeld.proto",
-    &descriptor_table_channeld_2eproto_once, descriptor_table_channeld_2eproto_deps, 1, 39,
+    &descriptor_table_channeld_2eproto_once, descriptor_table_channeld_2eproto_deps, 1, 41,
     schemas_channeld_2eproto, file_default_instances_channeld_2eproto, TableStruct_channeld_2eproto::offsets,
     file_level_metadata_channeld_2eproto, file_level_enum_descriptors_channeld_2eproto,
     file_level_service_descriptors_channeld_2eproto,
@@ -1330,6 +1370,8 @@ bool MessageType_IsValid(int value) {
     case 18:
     case 20:
     case 21:
+    case 22:
+    case 23:
     case 99:
     case 100:
       return true;
@@ -6576,6 +6618,86 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*EndRecoveryMesssage::GetClassD
 
 // ===================================================================
 
+class ChannelOwnerLostMessage::_Internal {
+ public:
+};
+
+ChannelOwnerLostMessage::ChannelOwnerLostMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena, is_message_owned) {
+  // @@protoc_insertion_point(arena_constructor:channeldpb.ChannelOwnerLostMessage)
+}
+ChannelOwnerLostMessage::ChannelOwnerLostMessage(const ChannelOwnerLostMessage& from)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  ChannelOwnerLostMessage* const _this = this; (void)_this;
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  // @@protoc_insertion_point(copy_constructor:channeldpb.ChannelOwnerLostMessage)
+}
+
+
+
+
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData ChannelOwnerLostMessage::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl,
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl,
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*ChannelOwnerLostMessage::GetClassData() const { return &_class_data_; }
+
+
+
+
+
+
+
+::PROTOBUF_NAMESPACE_ID::Metadata ChannelOwnerLostMessage::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
+      file_level_metadata_channeld_2eproto[21]);
+}
+
+// ===================================================================
+
+class ChannelOwnerRecoveredMessage::_Internal {
+ public:
+};
+
+ChannelOwnerRecoveredMessage::ChannelOwnerRecoveredMessage(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena, is_message_owned) {
+  // @@protoc_insertion_point(arena_constructor:channeldpb.ChannelOwnerRecoveredMessage)
+}
+ChannelOwnerRecoveredMessage::ChannelOwnerRecoveredMessage(const ChannelOwnerRecoveredMessage& from)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  ChannelOwnerRecoveredMessage* const _this = this; (void)_this;
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  // @@protoc_insertion_point(copy_constructor:channeldpb.ChannelOwnerRecoveredMessage)
+}
+
+
+
+
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData ChannelOwnerRecoveredMessage::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl,
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl,
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*ChannelOwnerRecoveredMessage::GetClassData() const { return &_class_data_; }
+
+
+
+
+
+
+
+::PROTOBUF_NAMESPACE_ID::Metadata ChannelOwnerRecoveredMessage::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
+      file_level_metadata_channeld_2eproto[22]);
+}
+
+// ===================================================================
+
 class SpatialInfo::_Internal {
  public:
 };
@@ -6842,7 +6964,7 @@ void SpatialInfo::InternalSwap(SpatialInfo* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata SpatialInfo::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[21]);
+      file_level_metadata_channeld_2eproto[23]);
 }
 
 // ===================================================================
@@ -7114,7 +7236,7 @@ void CreateSpatialChannelsResultMessage::InternalSwap(CreateSpatialChannelsResul
 ::PROTOBUF_NAMESPACE_ID::Metadata CreateSpatialChannelsResultMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[22]);
+      file_level_metadata_channeld_2eproto[24]);
 }
 
 // ===================================================================
@@ -7299,7 +7421,7 @@ void QuerySpatialChannelMessage::InternalSwap(QuerySpatialChannelMessage* other)
 ::PROTOBUF_NAMESPACE_ID::Metadata QuerySpatialChannelMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[23]);
+      file_level_metadata_channeld_2eproto[25]);
 }
 
 // ===================================================================
@@ -7492,7 +7614,7 @@ void QuerySpatialChannelResultMessage::InternalSwap(QuerySpatialChannelResultMes
 ::PROTOBUF_NAMESPACE_ID::Metadata QuerySpatialChannelResultMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[24]);
+      file_level_metadata_channeld_2eproto[26]);
 }
 
 // ===================================================================
@@ -7703,7 +7825,7 @@ void SpatialChannelsReadyMessage::InternalSwap(SpatialChannelsReadyMessage* othe
 ::PROTOBUF_NAMESPACE_ID::Metadata SpatialChannelsReadyMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[25]);
+      file_level_metadata_channeld_2eproto[27]);
 }
 
 // ===================================================================
@@ -7985,7 +8107,7 @@ void ChannelDataHandoverMessage::InternalSwap(ChannelDataHandoverMessage* other)
 ::PROTOBUF_NAMESPACE_ID::Metadata ChannelDataHandoverMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[26]);
+      file_level_metadata_channeld_2eproto[28]);
 }
 
 // ===================================================================
@@ -8278,7 +8400,7 @@ void SpatialRegion::InternalSwap(SpatialRegion* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata SpatialRegion::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[27]);
+      file_level_metadata_channeld_2eproto[29]);
 }
 
 // ===================================================================
@@ -8463,7 +8585,7 @@ void SpatialRegionsUpdateMessage::InternalSwap(SpatialRegionsUpdateMessage* othe
 ::PROTOBUF_NAMESPACE_ID::Metadata SpatialRegionsUpdateMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[28]);
+      file_level_metadata_channeld_2eproto[30]);
 }
 
 // ===================================================================
@@ -8690,7 +8812,7 @@ void SpatialInterestQuery_SpotsAOI::InternalSwap(SpatialInterestQuery_SpotsAOI* 
 ::PROTOBUF_NAMESPACE_ID::Metadata SpatialInterestQuery_SpotsAOI::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[29]);
+      file_level_metadata_channeld_2eproto[31]);
 }
 
 // ===================================================================
@@ -8929,7 +9051,7 @@ void SpatialInterestQuery_BoxAOI::InternalSwap(SpatialInterestQuery_BoxAOI* othe
 ::PROTOBUF_NAMESPACE_ID::Metadata SpatialInterestQuery_BoxAOI::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[30]);
+      file_level_metadata_channeld_2eproto[32]);
 }
 
 // ===================================================================
@@ -9165,7 +9287,7 @@ void SpatialInterestQuery_SphereAOI::InternalSwap(SpatialInterestQuery_SphereAOI
 ::PROTOBUF_NAMESPACE_ID::Metadata SpatialInterestQuery_SphereAOI::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[31]);
+      file_level_metadata_channeld_2eproto[33]);
 }
 
 // ===================================================================
@@ -9482,7 +9604,7 @@ void SpatialInterestQuery_ConeAOI::InternalSwap(SpatialInterestQuery_ConeAOI* ot
 ::PROTOBUF_NAMESPACE_ID::Metadata SpatialInterestQuery_ConeAOI::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[32]);
+      file_level_metadata_channeld_2eproto[34]);
 }
 
 // ===================================================================
@@ -9831,7 +9953,7 @@ void SpatialInterestQuery::InternalSwap(SpatialInterestQuery* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata SpatialInterestQuery::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[33]);
+      file_level_metadata_channeld_2eproto[35]);
 }
 
 // ===================================================================
@@ -10055,7 +10177,7 @@ void UpdateSpatialInterestMessage::InternalSwap(UpdateSpatialInterestMessage* ot
 ::PROTOBUF_NAMESPACE_ID::Metadata UpdateSpatialInterestMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[34]);
+      file_level_metadata_channeld_2eproto[36]);
 }
 
 // ===================================================================
@@ -10447,7 +10569,7 @@ void CreateEntityChannelMessage::InternalSwap(CreateEntityChannelMessage* other)
 ::PROTOBUF_NAMESPACE_ID::Metadata CreateEntityChannelMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[35]);
+      file_level_metadata_channeld_2eproto[37]);
 }
 
 // ===================================================================
@@ -10670,7 +10792,7 @@ void AddEntityGroupMessage::InternalSwap(AddEntityGroupMessage* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata AddEntityGroupMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[36]);
+      file_level_metadata_channeld_2eproto[38]);
 }
 
 // ===================================================================
@@ -10893,7 +11015,7 @@ void RemoveEntityGroupMessage::InternalSwap(RemoveEntityGroupMessage* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata RemoveEntityGroupMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[37]);
+      file_level_metadata_channeld_2eproto[39]);
 }
 
 // ===================================================================
@@ -10933,7 +11055,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*DebugGetSpatialRegionsMessage:
 ::PROTOBUF_NAMESPACE_ID::Metadata DebugGetSpatialRegionsMessage::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_channeld_2eproto_getter, &descriptor_table_channeld_2eproto_once,
-      file_level_metadata_channeld_2eproto[38]);
+      file_level_metadata_channeld_2eproto[40]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -11022,6 +11144,14 @@ Arena::CreateMaybeMessage< ::channeldpb::ChannelDataRecoveryMessage >(Arena* are
 template<> PROTOBUF_NOINLINE ::channeldpb::EndRecoveryMesssage*
 Arena::CreateMaybeMessage< ::channeldpb::EndRecoveryMesssage >(Arena* arena) {
   return Arena::CreateMessageInternal< ::channeldpb::EndRecoveryMesssage >(arena);
+}
+template<> PROTOBUF_NOINLINE ::channeldpb::ChannelOwnerLostMessage*
+Arena::CreateMaybeMessage< ::channeldpb::ChannelOwnerLostMessage >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::channeldpb::ChannelOwnerLostMessage >(arena);
+}
+template<> PROTOBUF_NOINLINE ::channeldpb::ChannelOwnerRecoveredMessage*
+Arena::CreateMaybeMessage< ::channeldpb::ChannelOwnerRecoveredMessage >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::channeldpb::ChannelOwnerRecoveredMessage >(arena);
 }
 template<> PROTOBUF_NOINLINE ::channeldpb::SpatialInfo*
 Arena::CreateMaybeMessage< ::channeldpb::SpatialInfo >(Arena* arena) {

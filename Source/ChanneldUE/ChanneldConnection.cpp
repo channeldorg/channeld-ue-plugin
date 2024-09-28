@@ -94,6 +94,9 @@ void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 		{
 			HandleChannelDataRecovery(Conn, ChId, Msg);
 		});
+
+	RegisterMessageHandler(channeldpb::CHANNEL_OWNER_LOST, new channeldpb::ChannelOwnerLostMessage());
+	RegisterMessageHandler(channeldpb::CHANNEL_OWNER_RECOVERED, new channeldpb::ChannelOwnerRecoveredMessage());
 }
 
 void UChanneldConnection::Deinitialize()

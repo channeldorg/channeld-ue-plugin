@@ -205,7 +205,7 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 
 					if (NetGUID.IsDynamic())
 					{
-						if (ClientConn)
+						if (GuidCache->IsNetGUIDAuthority())
 						{
 							// GuidCache->RegisterNetGUIDFromPath_Server(NetGUID, PathName, 0, 0, false, false);
 							if (!GuidCache->ObjectLookup.Contains(NetGUID))
