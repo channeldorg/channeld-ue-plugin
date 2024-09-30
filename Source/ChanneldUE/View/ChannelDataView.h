@@ -37,7 +37,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RegisterChannelDataType(EChanneldChannelType ChannelType, const FString& MessageFullName);
 
-	virtual void Initialize(UChanneldConnection* InConn);
+	virtual void Initialize(UChanneldConnection* InConn, bool bShouldRecover);
 	virtual void Unintialize();
 	virtual void BeginDestroy() override;
 
@@ -58,6 +58,13 @@ public:
 	virtual void MoveProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, IChannelDataProvider* Provider, bool bSendRemoved);
 	void MoveObjectProvider(Channeld::ChannelId OldChId, Channeld::ChannelId NewChId, UObject* Provider, bool bSendRemoved);
 
+	/**
+	 * @brief Create the ChanneldNetConnection for the client. The PlayerController will not be created for the connection.
+	 * @param ConnId The channeld connection ID of the client
+	 * @param ChId The spatial channel the client belongs to 
+	 * @return 
+	 */
+	virtual UChanneldNetConnection* CreateClientConnection(Channeld::ConnectionId ConnId, Channeld::ChannelId ChId);
 	virtual void OnAddClientConnection(UChanneldNetConnection* ClientConnection, Channeld::ChannelId ChId){}
 	virtual void OnRemoveClientConnection(UChanneldNetConnection* ClientConn){}
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn);
@@ -131,11 +138,11 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure/*, meta=(CallableWithoutWorldContext)*/)
 	class UChanneldGameInstanceSubsystem* GetChanneldSubsystem() const;
 
-	virtual void InitServer();
+	virtual void InitServer(bool bShouldRecover);
 	virtual void InitClient();
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BeginInitServer"))
-	void ReceiveInitServer();
+	void ReceiveInitServer(bool bShouldRecover);
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BeginInitClient"))
 	void ReceiveInitClient();
 
@@ -147,6 +154,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "BeginUninitClient"))
 	void ReceiveUninitClient();
 
+	google::protobuf::Message* ParseAndMergeUpdateData(Channeld::ChannelId ChId, const google::protobuf::Any& AnyData);
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	virtual bool ConsumeChannelUpdateData(Channeld::ChannelId ChId, google::protobuf::Message* UpdateData);
 
@@ -167,7 +175,13 @@ protected:
 	 * @param ChannelData The data field in the ChannelDataUpdateMessage.
 	 * @return If true, the ChannelDataUpdate should not be applied until the objects are spawned.
 	 */
-	virtual bool CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData) {return false;}
+	virtual bool CheckUnspawnedObject(Channeld::ChannelId ChId, google::protobuf::Message* ChannelData);// {return false;}
+	// bool CheckUnspawnedEntity(UChanneldNetDriver* NetDriver, Channeld::EntityId Id, const google::protobuf::Message* EntityChannelData);
+	bool CheckUnspawnedChannelDataState(Channeld::ChannelId ChId, const google::protobuf::Descriptor* Descriptor, uint32 NetId = 0);
+	UClass* LoadClassFromProto(const google::protobuf::Descriptor* Descriptor);
+	bool HasEverSpawned(uint32 NetId) const;
+
+	virtual void RecoverChannelData(Channeld::ChannelId ChId, TSharedPtr<channeldpb::ChannelDataRecoveryMessage> RecoveryMsg);
 
 	UPROPERTY()
 	UChanneldConnection* Connection;

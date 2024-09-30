@@ -15,9 +15,9 @@ USpatialMasterServerView::USpatialMasterServerView(const FObjectInitializer& Obj
 {
 }
 
-void USpatialMasterServerView::InitServer()
+void USpatialMasterServerView::InitServer(bool bShouldRecover)
 {
-	Super::InitServer();
+	Super::InitServer(bShouldRecover);
 	
 	if (UClass* PlayerStartLocatorClass = GetMutableDefault<UChanneldSettings>()->PlayerStartLocatorClass)
 	{
@@ -116,6 +116,11 @@ void USpatialMasterServerView::InitServer()
 
 	Connection->RegisterMessageHandler(channeldpb::SPATIAL_CHANNELS_READY, new channeldpb::SpatialChannelsReadyMessage, this, &USpatialMasterServerView::HandleSpatialChannelsReady);
 
+	if (bShouldRecover)
+	{
+		return;
+	}
+	
 	channeldpb::ChannelSubscriptionOptions GlobalSubOptions;
 	GlobalSubOptions.set_dataaccess(channeldpb::WRITE_ACCESS);
 	GlobalSubOptions.set_fanoutintervalms(ClientFanOutIntervalMs);

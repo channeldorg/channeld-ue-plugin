@@ -1,5 +1,7 @@
 #include "ChanneldWorldSettings.h"
 
+#include "ChanneldSettings.h"
+
 AChanneldWorldSettings::AChanneldWorldSettings(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -51,3 +53,26 @@ TArray<FString> AChanneldWorldSettings::MergeLaunchParameters(const TArray<FStri
 	}
 	return OutParams;
 }
+
+#if WITH_EDITOR
+void AChanneldWorldSettings::LaunchServerInstanceInGroup0()
+{
+	if (ServerLaunchGroupsOverride.Num() > 0)
+	{
+		if (auto Settings = GetMutableDefault<UChanneldSettings>())
+		{
+			Settings->OnLaunchServer.Broadcast(ServerLaunchGroupsOverride[0]);
+		}
+	}
+}
+
+void AChanneldWorldSettings::LaunchServerInstanceInGroup1()
+{
+	if (ServerLaunchGroupsOverride.Num() > 1)
+	{
+		if (auto Settings = GetMutableDefault<UChanneldSettings>())
+		{
+			Settings->OnLaunchServer.Broadcast(ServerLaunchGroupsOverride[1]);
+		}
+	}}
+#endif

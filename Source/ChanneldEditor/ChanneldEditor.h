@@ -56,8 +56,8 @@ private:
 	TArray<FProcHandle> ServerProcHandles;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> BuildChanneldWorkThread;
-	UChanneldMissionNotiProxy* BuildChanneldNotify;
+	UChanneldMissionNotiProxy* BuildChanneldNotify = nullptr;
 
 	mutable TSharedPtr<FChanneldProcWorkerThread> AddRepCompWorkThread;
-	UChanneldMissionNotiProxy* AddRepCompNotify;
+	UChanneldMissionNotiProxy* AddRepCompNotify = nullptr;
 };

@@ -36,6 +36,9 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnViewInitialized, UChannelDataView*);
 DECLARE_MULTICAST_DELEGATE(FOnSetLowLevelSendChannelId);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSynchronizedNetIds, UChannelDataView*, View);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnChannelOwnerLost, int32, ChId, EChanneldChannelType, ChannelType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnChannelOwnerRecovered, int32, ChId, EChanneldChannelType, ChannelType);
+
 UCLASS(Meta = (DisplayName = "Channeld"), config = ChanneldUE)
 class CHANNELDUE_API UChanneldGameInstanceSubsystem : public UGameInstanceSubsystem, public FTickableGameObject
 {
@@ -58,25 +61,31 @@ public:
 	FOnSynchronizedNetIds OnSynchronizedNetIds;
 	
 	UPROPERTY(BlueprintAssignable)
-		FOnCreateChannel OnCreateChannel;
+	FOnCreateChannel OnCreateChannel;
 
 	UPROPERTY(BlueprintAssignable)
-		FOnSubToChannel OnSubToChannel;
+	FOnSubToChannel OnSubToChannel;
 
 	UPROPERTY(BlueprintAssignable)
-		FOnUnsubFromChannel OnUnsubFromChannel;
+	FOnUnsubFromChannel OnUnsubFromChannel;
 
 	UPROPERTY(BlueprintAssignable)
-		FOnDataUpdate OnDataUpdate;
+	FOnDataUpdate OnDataUpdate;
 
 	UPROPERTY(BlueprintAssignable)
-		FOnUserSpaceMessage OnUserSpaceMessage;
+	FOnUserSpaceMessage OnUserSpaceMessage;
 
 	UPROPERTY(BlueprintAssignable)
-		FOnRemoveChannel OnRemoveChannel;
+	FOnRemoveChannel OnRemoveChannel;
 
 	UPROPERTY(BlueprintAssignable)
-		FOnListChannel OnListChannel;
+	FOnListChannel OnListChannel;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnChannelOwnerLost OnChannelOwnerLost;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnChannelOwnerRecovered OnChannelOwnerRecovered;
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
@@ -244,10 +253,12 @@ protected:
 	void HandleSubToChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleUnsubFromChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleChannelOwnerLost(UChanneldConnection* ChanneldConnection, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleChannelOwnerRecovered(UChanneldConnection* ChanneldConnection, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 
 	void HandleUserSpaceAnyMessage(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 
-	void InitChannelDataView();
+	void InitChannelDataView(bool bShouldRecover);
 };
 
 

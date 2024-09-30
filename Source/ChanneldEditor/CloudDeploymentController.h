@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldEditorSettings.h"
+#include "ChanneldSettings.h"
 #include "EditorSubsystem.h"
 #include "CloudDeploymentController.generated.h"
 

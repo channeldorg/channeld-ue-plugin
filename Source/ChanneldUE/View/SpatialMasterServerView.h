@@ -16,7 +16,7 @@ class CHANNELDUE_API USpatialMasterServerView : public UChannelDataView
 public:
 	USpatialMasterServerView(const FObjectInitializer& ObjectInitializer);
 
-	virtual void InitServer() override;
+	virtual void InitServer(bool bShouldRecover) override;
 	virtual void AddProvider(Channeld::ChannelId ChId, IChannelDataProvider* Provider) override;
 	virtual Channeld::ChannelId GetOwningChannelId(const FNetworkGUID NetId) const override;
 	virtual void OnClientPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;

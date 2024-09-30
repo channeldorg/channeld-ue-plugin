@@ -33,29 +33,10 @@ UChanneldNetConnection* USpatialChannelDataView::CreateClientConnection(Channeld
 {
 	ensureMsgf(!ClientInChannels.Contains(ConnId), TEXT("Client conn %d had already been added to this server"), ConnId);
 
-	if (auto NetDriver = GetChanneldSubsystem()->GetNetDriver())//NetDriver.IsValid())
-	{
-		if (NetDriver->GetClientConnectionMap().Contains(ConnId))
-		{
-			return NetDriver->GetClientConnectionMap()[ConnId];
-		}
-		UChanneldNetConnection* ClientConn = NetDriver->AddChanneldClientConnection(ConnId, ChId);
-		// Create the ControlChannel and set OpenAcked = 1
-		UChannel* ControlChannel = ClientConn->CreateChannelByName(NAME_Control, EChannelCreateFlags::OpenedLocally);
-		ControlChannel->OpenAcked = 1;
-		ControlChannel->OpenPacketId.First = 0;
-		ControlChannel->OpenPacketId.Last = 0;
-		
-		return ClientConn;
-	}
-	else
-	{
-		UE_LOG(LogChanneld, Error, TEXT("Spatial server failed to create client connection %d: NetDriver is not valid."), ConnId);
-	}
-	
-	return nullptr;
+	return Super::CreateClientConnection(ConnId, ChId);
 }
 
+[[deprecated("Moved to UChanneldNetConnection")]]
 void USpatialChannelDataView::InitPlayerController(UChanneldNetConnection* ClientConn, APlayerController* const NewPlayerController)
 {
 	if (AGameModeBase* const GameMode = GetWorld()->GetAuthGameMode())
@@ -132,7 +113,7 @@ void USpatialChannelDataView::CreatePlayerController(UChanneldNetConnection* Cli
 			return;
 		}
 
-		InitPlayerController(ClientConn, NewPlayerController);
+		ClientConn->InitPlayerController(NewPlayerController);
 	}
 	//~ End copy of UWorld::SpawnPlayActor
 }
@@ -169,8 +150,8 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 	{
 		NetIds.Appendf(TEXT("%u[%u], "), Pair.second.objref().netguid(), Pair.second.objref().owningconnid());
 	}
-	UE_LOG(LogChanneld, Log, TEXT("ChannelDataHandover from channel %u to %u(%s), object netIds: %s"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(),
-		bHasAuthority ? TEXT("A") : (bHasInterest ? TEXT("I") : TEXT("N")), *NetIds);
+	UE_LOG(LogChanneld, Log, TEXT("ChannelDataHandover from channel %u to %u(%s), object netIds: %s\n%s"), HandoverMsg->srcchannelid(), HandoverMsg->dstchannelid(),
+		bHasAuthority ? TEXT("A") : (bHasInterest ? TEXT("I") : TEXT("N")), *NetIds, UTF8_TO_TCHAR(HandoverData.DebugString().c_str()));
 	
 	// ===== Pass 1: Handle the logic of the source channel =====
 	bool bHasAuthorityOverSourceChannel = Connection->OwnedChannels.Contains(HandoverMsg->srcchannelid());
@@ -453,7 +434,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 				// Set the role to SimulatedProxy so it won't unpossess the pawn in BeginSpectatingState()
 				HandoverPC->SetRole(ROLE_SimulatedProxy);
 				// Call this after HandleChannelDataUpdate(), as RegisterPlayer() requires the PC has PlayerState set.
-				InitPlayerController(ClientConn, HandoverPC);
+				ClientConn->InitPlayerController(HandoverPC);
 				UE_LOG(LogChanneld, Verbose, TEXT("[Server] Initialized PlayerController with client conn %d"), ClientConn->GetConnId());
 			}
 			else
@@ -747,7 +728,7 @@ bool USpatialChannelDataView::ConsumeChannelUpdateData(Channeld::ChannelId ChId,
 	return Super::ConsumeChannelUpdateData(ChId, UpdateData);
 }
 
-bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData)
+bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, google::protobuf::Message* ChannelData)
 {
 	// Only client needs to spawn the objects.
 	if (Connection->IsServer())
@@ -927,9 +908,9 @@ void USpatialChannelDataView::ClientHandleGetUnrealObjectRef(UChanneldConnection
 	}
 }
 
-void USpatialChannelDataView::InitServer()
+void USpatialChannelDataView::InitServer(bool bShouldRecover)
 {
-	Super::InitServer();
+	Super::InitServer(bShouldRecover);
 	
 	if (UClass* PlayerStartLocatorClass = GetMutableDefault<UChanneldSettings>()->PlayerStartLocatorClass)
 	{
@@ -974,6 +955,11 @@ void USpatialChannelDataView::InitServer()
 			UE_LOG(LogChanneld, Error, TEXT("Failed to parse the payload of the SERVER_PLAYER_LEAVE message to UnsubscribedFromChannelResultMessage. ChannelId: %d"), ChId);
 		}
 	});
+
+	if (bShouldRecover)
+	{
+		return;
+	}
 
 	// Only the master server has the write access to the GLOBAL channel.
 	channeldpb::ChannelSubscriptionOptions SubOptions;

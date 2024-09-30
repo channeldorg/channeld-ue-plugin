@@ -12,6 +12,7 @@ class UChanneldConnection;
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FChanneldMessageDelegate, UChanneldConnection*, Channeld::ChannelId, const google::protobuf::Message*)
 DECLARE_MULTICAST_DELEGATE_FourParams(FUserSpaceMessageDelegate, uint32, Channeld::ChannelId, Channeld::ConnectionId, const std::string&)
 DECLARE_MULTICAST_DELEGATE_OneParam(FChanneldAuthenticatedDelegate, UChanneldConnection*);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FChannelDataRecoveryDelegate, Channeld::ChannelId, TSharedPtr<channeldpb::ChannelDataRecoveryMessage>);
 
 typedef TFunction<void(UChanneldConnection*, Channeld::ChannelId, const google::protobuf::Message*)> FChanneldMessageHandlerFunc;
 //typedef TFunction<void(Channeld::ChannelId, ConnectionId, const std::string&)> FUserSpaceMessageHandlerFunc;
@@ -97,6 +98,8 @@ public:
 
 	FORCEINLINE FInternetAddr& GetRemoteAddr() const { return *RemoteAddr; }
 
+	FORCEINLINE bool IsRecovering() { return bIsRecovering; }
+
 	//virtual void BeginDestroy() override;
 
 	bool Connect(bool bInitAsClient, const FString& Host, int32 Port, FString& Error);
@@ -168,6 +171,8 @@ public:
 	//FUserSpaceMessageHandlerFunc UserSpaceMessageHandlerFunc = nullptr;
 	FUserSpaceMessageDelegate OnUserSpaceMessageReceived;
 
+	FChannelDataRecoveryDelegate OnRecoverChannelData;
+
 	TMap<Channeld::ChannelId, FSubscribedChannelInfo> SubscribedChannels;
 	TMap<Channeld::ChannelId, FOwnedChannelInfo> OwnedChannels;
 	TMap<Channeld::ChannelId, FListedChannelInfo> ListedChannels;
@@ -187,6 +192,9 @@ private:
 	uint32 ReceiveBufferOffset;
 	// For debug
 	int32 LastPacketSize = 0;
+
+	bool bIsRecovering = false;
+	TArray<TSharedPtr<channeldpb::ChannelDataRecoveryMessage>> RecoveryMsgs;
 
 	struct MessageHandlerEntry
 	{
@@ -234,4 +242,6 @@ private:
 	void HandleUnsubFromChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleChannelDataUpdate(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void HandleCreateSpatialChannel(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleChannelDataRecovery(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
+	void HandleRecoveryEnd(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 };

@@ -19,7 +19,7 @@ class CHANNELDUE_API USpatialChannelDataView : public UChannelDataView
 public:
 	USpatialChannelDataView(const FObjectInitializer& ObjectInitializer);
 
-	virtual void InitServer() override;
+	virtual void InitServer(bool bShouldRecover) override;
 	virtual void InitClient() override;
 
 	virtual Channeld::ChannelId GetOwningChannelId(UObject* Obj) const override;
@@ -50,6 +50,8 @@ public:
 	UProtoMessageObject* ChannelInitData;
 
 protected:
+	virtual UChanneldNetConnection* CreateClientConnection(Channeld::ConnectionId ConnId, Channeld::ChannelId ChId) override;
+
 	virtual void ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId) override;
 
 	virtual void SendSpawnToClients_EntityChannelReady(const FNetworkGUID NetId, UObject* Obj, uint32 OwningConnId, Channeld::ChannelId SpatialChId);
@@ -62,7 +64,7 @@ protected:
 
 	// The client may have subscribed to the spatial channels that go beyond the interest area of the client's authoritative server.
 	// In that case, the client may receive ChannelDataUpdate that contains unresolved NetworkGUIDs, so it needs to spawn the objects before applying the update.
-	virtual bool CheckUnspawnedObject(Channeld::ChannelId ChId, const google::protobuf::Message* ChannelData) override;
+	virtual bool CheckUnspawnedObject(Channeld::ChannelId ChId, google::protobuf::Message* ChannelData) override;
 
 	virtual void SendExistingActorsToNewPlayer(APlayerController* NewPlayer, UChanneldNetConnection* NewPlayerConn) override;
 	
@@ -123,13 +125,7 @@ private:
 	void ClientHandleHandover(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	void ClientHandleGetUnrealObjectRef(UChanneldConnection* _, Channeld::ChannelId ChId, const google::protobuf::Message* Msg);
 	
-	/**
-	 * @brief Create the ChanneldNetConnection for the client. The PlayerController will not be created for the connection.
-	 * @param ConnId The channeld connection ID of the client
-	 * @param ChId The spatial channel the client belongs to 
-	 * @return 
-	 */
-	UChanneldNetConnection* CreateClientConnection(Channeld::ConnectionId ConnId, Channeld::ChannelId ChId);
+	[[deprecated("Moved to UChanneldNetConnection")]]
 	void InitPlayerController(UChanneldNetConnection* ClientConn, APlayerController* NewPlayerController);
 	void CreatePlayerController(UChanneldNetConnection* ClientConn);
 };

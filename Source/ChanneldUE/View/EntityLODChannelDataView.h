@@ -50,7 +50,7 @@ public:
 
 protected:
 
-	virtual void InitServer() override;
+	virtual void InitServer(bool bShouldRecover) override;
 	virtual void InitClient() override;
 	
 	virtual void ServerHandleClientUnsub(Channeld::ConnectionId ClientConnId, channeldpb::ChannelType ChannelType, Channeld::ChannelId ChId) override;

@@ -1,7 +1,7 @@
 {
   "FileVersion": 3,
   "Version": 2,
-  "VersionName": "0.6.0",
+  "VersionName": "0.8.0",
   "FriendlyName": "ChanneldUE",
   "Description": "Enables distributed simulation with Unreal Engine's dedicated servers.",
   "Category": "Networking",
