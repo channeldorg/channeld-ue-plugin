@@ -232,7 +232,12 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 					}
 					
 					// Increase the NetID counter to avoid duplicate NetID in GetOrAssignNetGUID -> AssignNewNetGUID_Server
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 3
+					FNetGUIDCacheCopy* GuidCacheCopy = (FNetGUIDCacheCopy*)GuidCache.Get();
+					++GuidCacheCopy->NetworkGuidIndex[NetGUID.IsStatic()];
+#else
 					++GuidCache->UniqueNetIDs[NetGUID.IsStatic()];
+#endif
 
 					if (AActor* Actor = Cast<AActor>(Obj))
 					{
