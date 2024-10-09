@@ -40,7 +40,7 @@ public:
 
 	// Set go_package in generated .proto file to the specified value
 	UPROPERTY(Config, EditAnywhere, Category = "Replication Generator|Protobuf", DisplayName= "Go Package Import Path Prefix")
-	FString ChanneldGoPackageImportPathPrefix = TEXT("github.com/metaworking/channeld/examples/channeld-ue-tps");
+	FString ChanneldGoPackageImportPathPrefix = TEXT("github.com/channeldorg/channeld/examples/channeld-ue-tps");
 
 	// If developer wants to export replicators from the default game module, set the item to be the same as the default game module API Macro. For Example "CHANNELDUE_API"
 	UPROPERTY(Config, EditAnywhere, Category = "Replication Generator|Protobuf", DisplayName = "Game Module Export API Macro")

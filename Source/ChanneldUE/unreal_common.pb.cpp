@@ -2013,7 +2013,7 @@ const char descriptor_table_protodef_unreal_5fcommon_2eproto[] PROTOBUF_SECTION_
   "ate\020\005\022\022\n\016UOT_Controller\020\006\022\030\n\024UOT_PlayerC"
   "ontroller\020\007:\?\n\021unreal_class_path\022\037.googl"
   "e.protobuf.MessageOptions\030\321\206\003 \001(\t\210\001\001B.Z,"
-  "github.com/metaworking/channeld/pkg/unre"
+  "github.com/channeldorg/channeld/pkg/unre"
   "alpbb\006proto3"
   ;
 static const ::_pbi::DescriptorTable* const descriptor_table_unreal_5fcommon_2eproto_deps[2] = {

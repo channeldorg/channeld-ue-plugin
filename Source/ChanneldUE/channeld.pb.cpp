@@ -1241,8 +1241,8 @@ const char descriptor_table_protodef_channeld_2eproto[] PROTOBUF_SECTION_VARIABL
   "_COMPRESSION\020\000\022\n\n\006SNAPPY\020\001*E\n\021ChannelDat"
   "aAccess\022\r\n\tNO_ACCESS\020\000\022\017\n\013READ_ACCESS\020\001\022"
   "\020\n\014WRITE_ACCESS\020\002*)\n\017EntityGroupType\022\014\n\010"
-  "HANDOVER\020\000\022\010\n\004LOCK\020\001B0Z.github.com/metaw"
-  "orking/channeld/pkg/channeldpbb\006proto3"
+  "HANDOVER\020\000\022\010\n\004LOCK\020\001B0Z.github.com/chann"
+  "eldorg/channeld/pkg/channeldpbb\006proto3"
   ;
 static const ::_pbi::DescriptorTable* const descriptor_table_channeld_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fany_2eproto,

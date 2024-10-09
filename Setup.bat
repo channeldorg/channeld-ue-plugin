@@ -1,6 +1,6 @@
 @echo off
-set ChanneldVersion=v0.7.4
-set ChanneldRepoUrl=https://github.com/metaworking/channeld.git
+set ChanneldVersion=v0.8.0
+set ChanneldRepoUrl=https://github.com/channeldorg/channeld.git
 set WorkspaceDir=%~dp0
 set ChanneldLocalSourceDir=%~dp0Source\ThirdParty\channeld
 

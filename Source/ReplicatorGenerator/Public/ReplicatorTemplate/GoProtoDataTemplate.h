@@ -5,11 +5,11 @@ static const TCHAR* CodeGen_Go_Data_ImportTemplate =
 import (
 	"errors"
 
-	"github.com/metaworking/channeld/pkg/channeld"
-	"github.com/metaworking/channeld/pkg/channeldpb"
-	"github.com/metaworking/channeld/pkg/common"
-	"github.com/metaworking/channeld/pkg/unreal"
-	"github.com/metaworking/channeld/pkg/unrealpb"
+	"github.com/channeldorg/channeld/pkg/channeld"
+	"github.com/channeldorg/channeld/pkg/channeldpb"
+	"github.com/channeldorg/channeld/pkg/common"
+	"github.com/channeldorg/channeld/pkg/unreal"
+	"github.com/channeldorg/channeld/pkg/unrealpb"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 	{Code_AnypbImport}
@@ -167,8 +167,8 @@ package main
 
 import (
 	"{Definition_GoImportPath}"
-	"github.com/metaworking/channeld/pkg/channeld"
-	"github.com/metaworking/channeld/pkg/channeldpb"
+	"github.com/channeldorg/channeld/pkg/channeld"
+	"github.com/channeldorg/channeld/pkg/channeldpb"
 )
 
 func InitChannelDataTypes() {

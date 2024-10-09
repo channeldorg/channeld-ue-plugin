@@ -29,18 +29,18 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 
 [Documentation](https://www.channeld.org/#/?id=channeldue-plugin)
 
-[ChanneldUE Example Project](https://github.com/metaworking/channeld-ue-demos)
+[ChanneldUE Example Project](https://github.com/channeldorg/channeld-ue-demos)
 
-[Code repo of channeld, the Gateway Service behind ChanneldUE](https://github.com/metaworking/channeld)
+[Code repo of channeld, the Gateway Service behind ChanneldUE](https://github.com/channeldorg/channeld)
 
 ## 链接
 [快速开始](https://www.channeld.org/#/zh/installation)
 
 [中文文档](https://www.channeld.org/#/zh/)
 
-[ChanneldUE示例项目](https://github.com/metaworking/channeld-ue-demos)
+[ChanneldUE示例项目](https://github.com/channeldorg/channeld-ue-demos)
 
-[channeld网关服务代码仓库](https://github.com/metaworking/channeld)
+[channeld网关服务代码仓库](https://github.com/channeldorg/channeld)
 
 ## Engine Versions Support Matrix
 | Components | UE 4.27.2 | UE 5.2.1 | UE 5.3.2 |
@@ -65,14 +65,14 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 - ChanneldUE plugin is licensed under the Apache 2.0 license, see [LICENSE](LICENSE) for details.
 - ChanneldUE plugin and channeld gateway service are free to use for any purpose, including commercial use.
 - The user is responsible for all risks when using this plugin and channeld gateway service.
-- We (Metaworking) provide basic technical support in the form of GitHub [Issues](/../../issues) and [Discussions](/../../discussions), but do not guarantee to solve all problems in time.
-- Contact: [indiestian@gmail.com](mailto:indiestian@gmail.com)
+- Basic technical support is provided in the form of GitHub [Issues](/../../issues) and [Discussions](/../../discussions), but do not guarantee to solve all problems in time.
+- For further inquiry, please contact: [indiestian@gmail.com](mailto:indiestian@gmail.com)
 
 ## 使用许可和免责声明
 - ChanneldUE插件使用Apache 2.0许可证，详情请参考[LICENSE](LICENSE)文件。
-- ChanneldUE插件及channeld网关服务的代码供所有人免费使用，可以用于任何目的，包括商业用途（欢迎白嫖，更欢迎提交PR）。
-- 使用者在使用本插件及channeld网关服务时，应自行承担所有风险。
-- 我们以GitHub [Issues](/../../issues)和[Discussions](/../../discussions)的形式提供基本的技术支持，但不保证能够及时解决所有问题。
+- ChanneldUE插件及channeld网关服务的代码供所有人免费使用，可以用于任何目的，包括商业用途（欢迎白嫖，更欢迎提交反馈和PR）。
+- 使用本插件及channeld网关服务时，应自行承担所有风险。
+- 您可以通过GitHub [Issues](/../../issues)和[Discussions](/../../discussions)的形式获取基本的技术支持，但不保证能够及时解决所有问题。
 - 联系开发者：
   - [indiestian@gmail.com](mailto:indiestian@gmail.com)
   - QQ群：664754097
