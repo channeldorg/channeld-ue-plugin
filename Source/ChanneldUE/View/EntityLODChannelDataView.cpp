@@ -35,12 +35,17 @@ bool UEntityLODChannelDataView::OnServerSpawnedObject(UObject* Obj, const FNetwo
 	return true;
 }
 
-void UEntityLODChannelDataView::InitServer()
+void UEntityLODChannelDataView::InitServer(bool bShouldRecover)
 {
 	// auto GameState = GetWorld()->GetAuthGameMode()->GameState;
 	// SetOwningChannelId(GetNetId(CastChecked<UObject>(GameState)), Channeld::GameStateNetId);
 
-	Super::InitServer();
+	Super::InitServer(bShouldRecover);
+
+	if (bShouldRecover)
+	{
+		return;
+	}
 
 	Connection->CreateChannel(channeldpb::GLOBAL, Metadata, nullptr, nullptr, nullptr,
 		[&](const channeldpb::CreateChannelResultMessage* ResultMsg)

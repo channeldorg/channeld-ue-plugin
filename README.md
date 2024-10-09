@@ -11,6 +11,7 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 - Out-of-the-box synchronization solution that seamlessly integrates with the native UE's networking framework.
 - Agile and extensible client interest management mechanism.
 - Support cross-server interaction (currently only support cross-server RPC, Character Movement, and Rigidbody Physics; cross-server for AI, GAS and other systems requires additional integration).
+- Dedicated server disaster recovery without client disconnection/restart.
 - Cloud-based dynamic load balancing can greatly save server costs (under development).
 - Support one-click cloud deployment.
 
@@ -21,26 +22,27 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 - 开箱即用的同步方案，与原生UE的开发方式无缝集成
 - 灵活且可扩展的客户端兴趣管理机制
 - 支持跨服交互（目前仅支持RPC、角色移动、刚体物理跨服；AI、GAS等系统的跨服需要额外集成）
+- 在客户端不需要重连或重新开始的情况下进行专用服务器灾难恢复
 - 基于云计算的动态负载均衡能够极大节省服务器成本（开发中）
 - 支持一键上云
 
 ## Links
-[Getting Started](https://metaworking.github.io/channeld-ue-plugin/#/installation)
+[Getting Started](https://www.channeld.org/#/installation)
 
-[Documentation](https://metaworking.github.io/channeld-ue-plugin/)
+[Documentation](https://www.channeld.org/#/?id=channeldue-plugin)
 
-[ChanneldUE Example Project](https://github.com/metaworking/channeld-ue-demos)
+[ChanneldUE Example Project](https://github.com/channeldorg/channeld-ue-demos)
 
-[Code repo of channeld, the Gateway Service behind ChanneldUE](https://github.com/metaworking/channeld)
+[Code repo of channeld, the Gateway Service behind ChanneldUE](https://github.com/channeldorg/channeld)
 
 ## 链接
-[快速开始](https://metaworking.github.io/channeld-ue-plugin/#/zh/installation)
+[快速开始](https://www.channeld.org/#/zh/installation)
 
-[中文文档](https://metaworking.github.io/channeld-ue-plugin/#/zh/)
+[中文文档](https://www.channeld.org/#/zh/)
 
-[ChanneldUE示例项目](https://github.com/metaworking/channeld-ue-demos)
+[ChanneldUE示例项目](https://github.com/channeldorg/channeld-ue-demos)
 
-[channeld网关服务代码仓库](https://github.com/metaworking/channeld)
+[channeld网关服务代码仓库](https://github.com/channeldorg/channeld)
 
 ## Engine Versions Support Matrix
 | Components | UE 4.27.2 | UE 5.2.1 | UE 5.3.2 |
@@ -65,14 +67,14 @@ ChanneldUE是为虚幻引擎专用服务器提供分布式模拟能力的开源�
 - ChanneldUE plugin is licensed under the Apache 2.0 license, see [LICENSE](LICENSE) for details.
 - ChanneldUE plugin and channeld gateway service are free to use for any purpose, including commercial use.
 - The user is responsible for all risks when using this plugin and channeld gateway service.
-- We (Metaworking) provide basic technical support in the form of GitHub [Issues](/../../issues) and [Discussions](/../../discussions), but do not guarantee to solve all problems in time.
-- Contact: [indiestian@gmail.com](mailto:indiestian@gmail.com)
+- Basic technical support is provided in the form of GitHub [Issues](/../../issues) and [Discussions](/../../discussions), but do not guarantee to solve all problems in time.
+- For further inquiry, please contact: [indiestian@gmail.com](mailto:indiestian@gmail.com)
 
 ## 使用许可和免责声明
 - ChanneldUE插件使用Apache 2.0许可证，详情请参考[LICENSE](LICENSE)文件。
-- ChanneldUE插件及channeld网关服务的代码供所有人免费使用，可以用于任何目的，包括商业用途（欢迎白嫖，更欢迎提交PR）。
-- 使用者在使用本插件及channeld网关服务时，应自行承担所有风险。
-- 我们以GitHub [Issues](/../../issues)和[Discussions](/../../discussions)的形式提供基本的技术支持，但不保证能够及时解决所有问题。
+- ChanneldUE插件及channeld网关服务的代码供所有人免费使用，可以用于任何目的，包括商业用途（欢迎白嫖，更欢迎提交反馈和PR）。
+- 使用本插件及channeld网关服务时，应自行承担所有风险。
+- 您可以通过GitHub [Issues](/../../issues)和[Discussions](/../../discussions)的形式获取基本的技术支持，但不保证能够及时解决所有问题。
 - 联系开发者：
   - [indiestian@gmail.com](mailto:indiestian@gmail.com)
   - QQ群：664754097

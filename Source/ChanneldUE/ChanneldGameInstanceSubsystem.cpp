@@ -9,9 +9,12 @@
 
 void UChanneldGameInstanceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-	FStaticGuidRegistry::LoadExportedFile(GenManager_ChanneldStaticObjectExportPath);
-	
-	GetMutableDefault<UChanneldSettings>()->UpdateNetDriverDefinitions();
+	auto Settings = GetMutableDefault<UChanneldSettings>();
+	if (!Settings->bDisableStaticGuidRegistry)
+	{
+		FStaticGuidRegistry::LoadExportedFile(GenManager_ChanneldStaticObjectExportPath);
+	}
+	Settings->UpdateNetDriverDefinitions();
 	InitConnection();
 }
 
@@ -79,6 +82,8 @@ void UChanneldGameInstanceSubsystem::InitConnection()
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::SUB_TO_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleSubToChannel);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::UNSUB_FROM_CHANNEL, this, &UChanneldGameInstanceSubsystem::HandleUnsubFromChannel);
 	ConnectionInstance->AddMessageHandler((uint32)channeldpb::CHANNEL_DATA_UPDATE, this, &UChanneldGameInstanceSubsystem::HandleChannelDataUpdate);
+	ConnectionInstance->AddMessageHandler((uint32)channeldpb::CHANNEL_OWNER_LOST, this, &UChanneldGameInstanceSubsystem::HandleChannelOwnerLost);
+	ConnectionInstance->AddMessageHandler((uint32)channeldpb::CHANNEL_OWNER_RECOVERED, this, &UChanneldGameInstanceSubsystem::HandleChannelOwnerRecovered);
 
 	//ConnectionInstance->OnUserSpaceMessageReceived.AddUObject(this, &UChanneldGameInstanceSubsystem::OnUserSpaceMessageReceived);
 	ConnectionInstance->RegisterMessageHandler(unrealpb::ANY, new google::protobuf::Any, this, &UChanneldGameInstanceSubsystem::HandleUserSpaceAnyMessage);
@@ -221,7 +226,7 @@ void UChanneldGameInstanceSubsystem::ConnectToChanneld(bool& Success, FString& E
 
 	if (ConnectionInstance->Connect(bInitAsClient, Host, Port, Error))
 	{
-		ConnectionInstance->Auth(TEXT("test_pit"), TEXT("test_lt"),
+		ConnectionInstance->Auth(ChanneldUtils::GetUniquePIT(), TEXT("test_lt"),
 			[AuthCallback](const channeldpb::AuthResultMessage* Message)
 			{
 				AuthCallback.ExecuteIfBound(Message->result(), Message->connid());
@@ -560,7 +565,7 @@ void UChanneldGameInstanceSubsystem::HandleAuthResult(UChanneldConnection* Conn,
 
 	if (AuthResultMsg->result() == channeldpb::AuthResultMessage_AuthResult_SUCCESSFUL && AuthResultMsg->connid() == Conn->GetConnId())
 	{
-		InitChannelDataView();
+		InitChannelDataView(AuthResultMsg->shouldrecover());
 	}
 	
 	OnAuth.Broadcast(AuthResultMsg->result(), AuthResultMsg->connid());
@@ -621,8 +626,35 @@ void UChanneldGameInstanceSubsystem::HandleChannelDataUpdate(UChanneldConnection
 	}
 }
 
+void UChanneldGameInstanceSubsystem::HandleChannelOwnerLost(UChanneldConnection* ChanneldConnection,
+	Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	if (!OnChannelOwnerLost.IsBound())
+	{
+		return;
+	}
+
+	OnChannelOwnerLost.Broadcast(ChId, GetChannelTypeByChId(ChId));
+}
+
+void UChanneldGameInstanceSubsystem::HandleChannelOwnerRecovered(UChanneldConnection* ChanneldConnection,
+	Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	if (!OnChannelOwnerRecovered.IsBound())
+	{
+		return;
+	}
+
+	OnChannelOwnerRecovered.Broadcast(ChId, GetChannelTypeByChId(ChId));
+}
+
 void UChanneldGameInstanceSubsystem::HandleUserSpaceAnyMessage(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
 {
+	if (!OnUserSpaceMessage.IsBound())
+	{
+		return;
+	}
+	
 	auto AnyMsg = static_cast<const google::protobuf::Any*>(Msg);
 	std::string ProtoFullName = AnyMsg->type_url();
 	if (ProtoFullName.length() < 20)
@@ -653,7 +685,7 @@ UChanneldNetDriver* UChanneldGameInstanceSubsystem::GetNetDriver()
 	return Cast<UChanneldNetDriver>(GetGameInstance()->GetWorld()->GetNetDriver());
 }
 
-void UChanneldGameInstanceSubsystem::InitChannelDataView()
+void UChanneldGameInstanceSubsystem::InitChannelDataView(bool bShouldRecover)
 {
 	const auto Settings = GetMutableDefault<UChanneldSettings>();
 	auto ChannelDataViewClass = Settings->ChannelDataViewClass;
@@ -677,11 +709,13 @@ void UChanneldGameInstanceSubsystem::InitChannelDataView()
 		if (Settings->DelayViewInitInSeconds > 0)
 		{
 			FTimerHandle Handle;
-			GetWorld()->GetTimerManager().SetTimer(Handle, [&](){ChannelDataView->Initialize(ConnectionInstance);}, 1, false, Settings->DelayViewInitInSeconds);
+			GetWorld()->GetTimerManager().SetTimer(Handle,
+				[&](){ChannelDataView->Initialize(ConnectionInstance, bShouldRecover);},
+				1, false, Settings->DelayViewInitInSeconds);
 		}
 		else
 		{
-			ChannelDataView->Initialize(ConnectionInstance);
+			ChannelDataView->Initialize(ConnectionInstance, bShouldRecover);
 		}
 	}
 	else

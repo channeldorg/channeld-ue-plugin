@@ -17,6 +17,17 @@
 class CHANNELDUE_API ChanneldUtils
 {
 public:
+	static FString GetUniquePIT()
+	{
+		TArray<uint8> MacAddr = FPlatformMisc::GetMacAddress();
+		FString Result;
+		for (TArray<uint8>::TConstIterator it(MacAddr);it;++it)
+		{
+			Result += FString::Printf(TEXT("%02x"),*it);
+		}
+		return FMD5::HashAnsiString(*Result);
+	}
+	
 	static bool IsServer(const UWorld* World)
 	{
 		if (World == nullptr)
@@ -288,6 +299,9 @@ public:
 	 *		returns true if a new actor was spawned. false means an existing actor was found for the netguid.
 	 */
 	bool static SerializeNewActor_Server(UNetConnection* Connection, UPackageMapClient* PackageMap, TSharedPtr<FNetGUIDCache> GuidCache, FArchive& Ar, class UActorChannel *Channel, class AActor*& Actor);
+
+	static void RegisterNetGUID_Server_NoWarning(TSharedPtr<FNetGUIDCache> GuidCache, const FNetworkGUID& NetGUID, UObject* Object);
+
 
 	static unrealpb::AssetRef GetAssetRef(const UObject* Obj)
 	{

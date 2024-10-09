@@ -63,6 +63,8 @@ public:
 	// Flush the handshake packets that are queued before received AuthResultMessage to the server.
 	void FlushUnauthData();
 
+	void InitPlayerController(APlayerController* NewPlayerController);
+
 	bool bDisableHandshaking = false;
 	bool bInConnectionlessHandshake = false;
 	bool bChanneldAuthenticated = false;

@@ -379,6 +379,8 @@ FString FReplicatedActorDecorator::GetDefinition_ProtoStateMessage()
 	}
 	FStringFormatNamedArguments FormatArgs;
 	FormatArgs.Add(TEXT("Declare_StateMessageType"), GetProtoStateMessageType());
+	FormatArgs.Add(TEXT("Declare_MessageOptions"), FString::Printf(
+		TEXT("option (unrealpb.unreal_class_path) = \"%s\";"), *GetActorPathName()));
 	FormatArgs.Add(TEXT("Declare_ProtoFields"), FieldDefinitions);
 	FormatArgs.Add(TEXT("Declare_SubProtoFields"), TEXT(""));
 

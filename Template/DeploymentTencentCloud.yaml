@@ -191,7 +191,7 @@ spec:
                    path: /home/grafana/dashboards/dashboard.json
               EON
               mkdir /home/grafana/dashboards
-              wget -O /home/grafana/dashboards/dashboard.json https://raw.githubusercontent.com/metaworking/channeld/master/grafana/dashboard.json
+              wget -O /home/grafana/dashboards/dashboard.json https://raw.githubusercontent.com/channeldorg/channeld/master/grafana/dashboard.json
               /run.sh
               EOF
           command:

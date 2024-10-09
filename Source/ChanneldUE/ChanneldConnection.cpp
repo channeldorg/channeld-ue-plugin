@@ -84,6 +84,19 @@ void UChanneldConnection::Initialize(FSubsystemCollectionBase& Collection)
 	RegisterMessageHandler(channeldpb::QUERY_SPATIAL_CHANNEL, new channeldpb::QuerySpatialChannelResultMessage());
 	RegisterMessageHandler(channeldpb::CHANNEL_DATA_HANDOVER, new channeldpb::ChannelDataHandoverMessage());
 	RegisterMessageHandler(channeldpb::SPATIAL_REGIONS_UPDATE, new channeldpb::SpatialRegionsUpdateMessage());
+	
+	RegisterMessageHandler(channeldpb::RECOVERY_END, new channeldpb::EndRecoveryMesssage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+		{
+			HandleRecoveryEnd(Conn, ChId, Msg);
+		});
+		
+	RegisterMessageHandler(channeldpb::RECOVERY_CHANNEL_DATA, new channeldpb::ChannelDataRecoveryMessage(), [&](UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+		{
+			HandleChannelDataRecovery(Conn, ChId, Msg);
+		});
+
+	RegisterMessageHandler(channeldpb::CHANNEL_OWNER_LOST, new channeldpb::ChannelOwnerLostMessage());
+	RegisterMessageHandler(channeldpb::CHANNEL_OWNER_RECOVERED, new channeldpb::ChannelOwnerRecoveredMessage());
 }
 
 void UChanneldConnection::Deinitialize()
@@ -193,6 +206,7 @@ void UChanneldConnection::OnDisconnected()
 
 	OnAuthenticated.Clear();
 	OnUserSpaceMessageReceived.Clear();
+	OnRecoverChannelData.Clear();
 
 	SubscribedChannels.Empty();
 	OwnedChannels.Empty();
@@ -546,6 +560,12 @@ void UChanneldConnection::SendDirect(const channeldpb::Packet& Packet)
 
 void UChanneldConnection::Send(Channeld::ChannelId ChId, uint32 MsgType, google::protobuf::Message& Msg, channeldpb::BroadcastType Broadcast/* = channeldpb::NO_BROADCAST*/, const FChanneldMessageHandlerFunc& HandlerFunc/* = nullptr*/)
 {
+	if (IsRecovering())
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("UChanneldConnection::Send: Connection is recovering, message will be dropped, type: %u"), MsgType);
+		return;
+	}
+	
 	if (ChId == Channeld::InvalidChannelId)
 	{
 		UE_LOG(LogChanneld, Error, TEXT("Illegal attempt to send message to invalid channel"));
@@ -560,6 +580,12 @@ void UChanneldConnection::Send(Channeld::ChannelId ChId, uint32 MsgType, google:
 
 void UChanneldConnection::SendRaw(Channeld::ChannelId ChId, uint32 MsgType, const std::string& MsgBody, channeldpb::BroadcastType Broadcast /*= channeldpb::NO_BROADCAST*/, const FChanneldMessageHandlerFunc& HandlerFunc /*= nullptr*/)
 {
+	if (IsRecovering())
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("UChanneldConnection::SendRaw: Connection is recovering, message will be dropped, type: %u"), MsgType);
+		return;
+	}
+	
 	if (ChId == Channeld::InvalidChannelId)
 	{
 		UE_LOG(LogChanneld, Error, TEXT("Illegal attempt to send message to invalid channel"));
@@ -593,6 +619,12 @@ void UChanneldConnection::SendRaw(Channeld::ChannelId ChId, uint32 MsgType, cons
 
 void UChanneldConnection::Forward(Channeld::ChannelId ChId, uint32 MsgType, const google::protobuf::Message& Msg, Channeld::ConnectionId ClientConnId)
 {
+	if (IsRecovering())
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("UChanneldConnection::Forward: Connection is recovering, message will be dropped, type: %u"), MsgType);
+		return;
+	}
+	
 	channeldpb::ServerForwardMessage ServerForwardMessage;
 	ServerForwardMessage.set_clientconnid(ClientConnId);
 	ServerForwardMessage.set_payload(Msg.SerializeAsString());
@@ -601,6 +633,12 @@ void UChanneldConnection::Forward(Channeld::ChannelId ChId, uint32 MsgType, cons
 
 void UChanneldConnection::Broadcast(Channeld::ChannelId ChId, uint32 MsgType, const google::protobuf::Message& Msg, int BroadcastType)
 {
+	if (IsRecovering())
+	{
+		UE_LOG(LogChanneld, Warning, TEXT("UChanneldConnection::Broadcast: Connection is recovering, message will be dropped, type: %u"), MsgType);
+		return;
+	}
+	
 	channeldpb::ServerForwardMessage ServerForwardMessage;
 	ServerForwardMessage.set_payload(Msg.SerializeAsString());
 	Send(ChId, MsgType, ServerForwardMessage, static_cast<channeldpb::BroadcastType>(BroadcastType));
@@ -807,6 +845,7 @@ void UChanneldConnection::HandleAuth(UChanneldConnection* Conn, Channeld::Channe
 		{
 			ConnId = ResultMsg->connid();
 			CompressionType = ResultMsg->compressiontype();
+			bIsRecovering = ResultMsg->shouldrecover();
 			OnAuthenticated.Broadcast(this);
 		}
 		else
@@ -928,4 +967,54 @@ void UChanneldConnection::HandleCreateSpatialChannel(UChanneldConnection* Conn, 
 			OwnedChannels.Add(SpatialChId, ChannelInfo);
 		}
 	}
+}
+
+void UChanneldConnection::HandleRecoveryEnd(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	// The channel with earlier previous subscription time will be recovered first.
+	RecoveryMsgs.Sort([](auto& Msg1, auto& Msg2)
+	{
+		return Msg1->subtime() < Msg2->subtime();
+		// return Msg1->channelid() < Msg2->channelid();
+	});
+
+	for (auto RecoverMsg : RecoveryMsgs)
+	{
+		UE_LOG(LogChanneld, Log, TEXT("Recovering channel %d, sub time: %lld"), RecoverMsg->channelid(), RecoverMsg->subtime());
+		if (RecoverMsg->ownerconnid() == GetConnId())
+		{
+			FOwnedChannelInfo OwnedInfo;
+			OwnedInfo.ChannelId = (int32)RecoverMsg->channelid();
+			OwnedInfo.ChannelType = static_cast<EChanneldChannelType>(RecoverMsg->channeltype());
+			OwnedInfo.Metadata = UTF8_TO_TCHAR(RecoverMsg->metadata().c_str());
+			OwnedInfo.OwnerConnId = (int32)RecoverMsg->ownerconnid();
+			OwnedChannels.Emplace(RecoverMsg->channelid(), OwnedInfo);
+		}
+		
+		FSubscribedChannelInfo SubInfo;
+		SubInfo.ConnId = (int32)GetConnId();
+		SubInfo.ConnType = static_cast<EChanneldConnectionType>(ConnectionType);
+		SubInfo.ChannelType = static_cast<EChanneldChannelType>(RecoverMsg->channeltype());
+		SubInfo.SubOptions.MergeFromMessage(RecoverMsg->suboptions());
+		SubscribedChannels.Emplace(RecoverMsg->channelid(), SubInfo);
+
+		OnRecoverChannelData.Broadcast(RecoverMsg->channelid(), RecoverMsg);
+	}
+	
+	bIsRecovering = false;
+}
+
+void UChanneldConnection::HandleChannelDataRecovery(UChanneldConnection* Conn, Channeld::ChannelId ChId, const google::protobuf::Message* Msg)
+{
+	if (!IsRecovering())
+	{
+		UE_LOG(LogChanneld, Error, TEXT("UChanneldConnection::HandleChannelDataRecovery:: Connection is not recovering"));
+		return;
+	}
+
+	auto RecoveryMsg = static_cast<const channeldpb::ChannelDataRecoveryMessage*>(Msg);
+	// Clone the message as it will be deleted after the handler.
+	TSharedPtr<channeldpb::ChannelDataRecoveryMessage> Ptr(RecoveryMsg->New());
+	Ptr->CopyFrom(*RecoveryMsg);
+	RecoveryMsgs.Add(Ptr);
 }
