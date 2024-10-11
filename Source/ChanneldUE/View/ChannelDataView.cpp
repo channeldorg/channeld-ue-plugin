@@ -650,8 +650,8 @@ bool UChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, google::pr
 		}
 	
 		auto& ObjRef = static_cast<const unrealpb::UnrealObjectRef&>(ChannelData->GetReflection()->GetMessage(*ChannelData, ObjRefField));
-		TCHAR* ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
-		if (UClass* EntityClass = LoadObject<UClass>(nullptr, ClassPath))
+		const FString ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
+		if (UClass* EntityClass = LoadObject<UClass>(nullptr, *ClassPath))
 		{
 			// Do not resolve other PlayerController or PlayerState on the client.
 			if (Connection->IsClient() && (EntityClass->IsChildOf(APlayerController::StaticClass()) || EntityClass->IsChildOf(APlayerState::StaticClass())))
@@ -681,8 +681,8 @@ bool UChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, google::pr
 			}
 
 			auto& ObjRef = Pair.second.objref();
-			TCHAR* ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
-			if (UClass* EntityClass = LoadObject<UClass>(nullptr, ClassPath))
+			const FString ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
+			if (UClass* EntityClass = LoadObject<UClass>(nullptr, *ClassPath))
 			{
 				// Do not resolve other PlayerController on the client.
 				if (EntityClass->IsChildOf(APlayerController::StaticClass()) || EntityClass->IsChildOf(APlayerState::StaticClass()))
@@ -727,8 +727,8 @@ bool UChannelDataView::CheckUnspawnedChannelDataState(Channeld::ChannelId ChId, 
 		UE_LOG(LogChanneld, Warning, TEXT("Proto message '%s' has no 'unreal_class_path' option, channel id: %u"), UTF8_TO_TCHAR(Descriptor->full_name().c_str()), ChId);
 		return false;
 	}
-	TCHAR* ClassPath = UTF8_TO_TCHAR(strClassPath.c_str());
-	UClass* ObjClass = LoadObject<UClass>(nullptr, ClassPath);
+	const FString ClassPath = UTF8_TO_TCHAR(strClassPath.c_str());
+	UClass* ObjClass = LoadObject<UClass>(nullptr, *ClassPath);
 	if (ObjClass == nullptr)
 	{
 		UE_LOG(LogChanneld, Warning, TEXT("Failed to load class from unreal_class_path: %s, proto field: %s, channel id: %u"), *ClassPath, UTF8_TO_TCHAR(Descriptor->full_name().c_str()), ChId);
@@ -788,8 +788,8 @@ UClass* UChannelDataView::LoadClassFromProto(const google::protobuf::Descriptor*
 		UE_LOG(LogChanneld, Warning, TEXT("Proto message '%s' has no 'unreal_class_path' option"), UTF8_TO_TCHAR(Descriptor->full_name().c_str()));
 		return nullptr;
 	}
-	TCHAR* ClassPath = UTF8_TO_TCHAR(strClassPath.c_str());
-	UClass* Class = LoadObject<UClass>(nullptr, ClassPath);
+	const FString ClassPath = UTF8_TO_TCHAR(strClassPath.c_str());
+	UClass* Class = LoadObject<UClass>(nullptr, *ClassPath);
 	if (Class == nullptr)
 	{
 		UE_LOG(LogChanneld, Warning, TEXT("Failed to load class from unreal_class_path: %s, proto field: %s"), *ClassPath, UTF8_TO_TCHAR(Descriptor->full_name().c_str()));
@@ -881,7 +881,7 @@ void UChannelDataView::RecoverChannelData(Channeld::ChannelId ChId, TSharedPtr<c
 	{
 		FNetworkGUID NetId = FNetworkGUID(Pair.Key);
 		auto& ObjRef = Pair.Value;
-		FString ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
+		const FString ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
 		uint32 OwningConnId = ObjRef.owningconnid();
 		UChanneldNetConnection* OwningConn = nullptr;
 		if (OwningConnId > 0 && Connection->IsServer())

@@ -770,8 +770,8 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, goo
 		}
 	
 		auto& ObjRef = static_cast<const unrealpb::UnrealObjectRef&>(ChannelData->GetReflection()->GetMessage(*ChannelData, ObjRefField));
-		TCHAR* ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
-		if (UClass* EntityClass = LoadObject<UClass>(nullptr, ClassPath))
+		const FString ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
+		if (UClass* EntityClass = LoadObject<UClass>(nullptr, *ClassPath))
 		{
 			// Do not resolve other PlayerController or PlayerState on the client.
 			if (EntityClass->IsChildOf(APlayerController::StaticClass()) || EntityClass->IsChildOf(APlayerState::StaticClass()))
@@ -806,8 +806,8 @@ bool USpatialChannelDataView::CheckUnspawnedObject(Channeld::ChannelId ChId, goo
 			}
 
 			auto& ObjRef = Pair.second.objref();
-			TCHAR* ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
-			if (UClass* EntityClass = LoadObject<UClass>(nullptr, ClassPath))
+			const FString ClassPath = UTF8_TO_TCHAR(ObjRef.classpath().c_str());
+			if (UClass* EntityClass = LoadObject<UClass>(nullptr, *ClassPath))
 			{
 				// Do not resolve other PlayerController on the client.
 				if (EntityClass->IsChildOf(APlayerController::StaticClass()) || EntityClass->IsChildOf(APlayerState::StaticClass()))

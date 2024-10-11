@@ -19,11 +19,11 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 		// CDO: treat it as an asset object
 		if (Ref->has_classpath())
 		{
-			auto ObjectPath = UTF8_TO_TCHAR(Ref->classpath().c_str());
-			UObject* Asset = FindObject<UObject>(nullptr, ObjectPath);
+			const FString ObjectPath = UTF8_TO_TCHAR(Ref->classpath().c_str());
+			UObject* Asset = FindObject<UObject>(nullptr, *ObjectPath);
 			if ( Asset == nullptr)
 			{
-				Asset = LoadObject<UObject>(nullptr, ObjectPath);
+				Asset = LoadObject<UObject>(nullptr, *ObjectPath);
 			}
 			return Asset;
 		}
