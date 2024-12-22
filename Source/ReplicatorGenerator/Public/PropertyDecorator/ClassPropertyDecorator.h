@@ -34,7 +34,7 @@ public:
 	{
 		ProtoFieldType = TEXT("string");
 		const FString CPPType = InProperty->GetCPPType();
-		InnerClassName = CPPType.Mid(12, CPPType.Len() - 14);
+		InnerClassName = CPPType.Mid(12, CPPType.Len() - 13);
 	}
 	
 	virtual FString GetPropertyType() override;

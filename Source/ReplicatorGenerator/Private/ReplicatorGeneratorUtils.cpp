@@ -340,17 +340,16 @@ namespace ChanneldReplicatorGeneratorUtils
 				                                               ? TEXT("")
 				                                               : *FString::Printf(
 					                                               TEXT("-%s-%s"), *PlatformName, *ConfigurationName)));
-#endif
-
-#if PLATFORM_MAC
+#elif PLATFORM_MAC
 		return FPaths::Combine(
 				FPaths::ConvertRelativePathToFull(FPaths::EngineDir()),
 				TEXT("Binaries"),TEXT("Mac"),
 				FString::Printf(TEXT("%s%s-Cmd"),*Binary,
 					bIsDevelopment ? TEXT("") : *FString::Printf(TEXT("-Mac-%s"),*ConfigutationName)));
-#endif
+#else
 		return TEXT("");
-	}
+#endif
+}
 
 	FString GetHashString(const FString& Target)
 	{

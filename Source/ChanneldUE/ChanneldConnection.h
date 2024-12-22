@@ -88,7 +88,7 @@ public:
 		return ConnId;
 	}
 
-	FORCEINLINE bool IsConnected() { return !IsPendingKill() && Socket != nullptr && Socket->GetConnectionState() == SCS_Connected; }
+	FORCEINLINE bool IsConnected() { return IsValid(this) && Socket != nullptr && Socket->GetConnectionState() == SCS_Connected; }
 
 	FORCEINLINE bool IsAuthenticated() { return ConnId > 0; }
 

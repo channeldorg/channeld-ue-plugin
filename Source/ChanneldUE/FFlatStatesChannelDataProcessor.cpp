@@ -1,5 +1,6 @@
 #include "FFlatStatesChannelDataProcessor.h"
 #include "Replication/ChanneldReplication.h"
+#include "ChanneldTypes.h"
 #include "google/protobuf/map_field.h"
 #include "google/protobuf/reflection.h"
 
@@ -24,7 +25,7 @@ const google::protobuf::Message* FFlatStatesChannelDataProcessor::GetStateFromCh
 	auto StatesField = ChannelData->GetDescriptor()->field(StateInProto->FieldIndex);
 	if (!StatesField)
 	{
-		UE_LOG(LogChanneld, Warning, TEXT("Field index %d doesn't exist in proto message %s"), UTF8_TO_TCHAR(ChannelData->GetDescriptor()->full_name().c_str()));
+		UE_LOG(LogChanneld, Warning, TEXT("Field index %d doesn't exist in proto message %s"), StateInProto->FieldIndex, UTF8_TO_TCHAR(ChannelData->GetDescriptor()->full_name().c_str()));
 		return nullptr;
 	}
 
@@ -76,7 +77,7 @@ void FFlatStatesChannelDataProcessor::SetStateToChannelData(const google::protob
 	auto StatesField = ChannelData->GetDescriptor()->field(StateInProto->FieldIndex);
 	if (!StatesField)
 	{
-		UE_LOG(LogChanneld, Warning, TEXT("Field index %d doesn't exist in proto message %s"), UTF8_TO_TCHAR(ChannelData->GetDescriptor()->full_name().c_str()));
+		UE_LOG(LogChanneld, Warning, TEXT("Field index %d doesn't exist in proto message %s"), StateInProto->FieldIndex, UTF8_TO_TCHAR(ChannelData->GetDescriptor()->full_name().c_str()));
 		return;
 	}
 

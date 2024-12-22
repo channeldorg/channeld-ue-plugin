@@ -40,7 +40,7 @@ namespace
 
 		if ((*JsonValue)->Type != TJsonFieldType<T>::Value)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Field '%s' in '%s' is the wrong type"), Outer);
+			UE_LOG(LogTemp, Error, TEXT("Field '%s' in '%s' is the wrong type"), FieldName, Outer);
 		}
 
 		(*JsonValue)->AsArgumentType(OutVal);

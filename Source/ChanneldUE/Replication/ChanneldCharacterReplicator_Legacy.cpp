@@ -1,4 +1,4 @@
-#include "ChanneldCharacterReplicator.h"
+#include "ChanneldCharacterReplicator_Legacy.h"
 #include "Net/UnrealNetwork.h"
 #include "Engine/PackageMapClient.h"
 #include "ChanneldReplicationComponent.h"
@@ -7,7 +7,7 @@
 #include "Engine/NetSerialization.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-FChanneldCharacterReplicator::FChanneldCharacterReplicator(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
+FChanneldCharacterReplicator_Legacy::FChanneldCharacterReplicator_Legacy(UObject* InTargetObj) : FChanneldReplicatorBase(InTargetObj)
 {
 	Character = CastChecked<ACharacter>(InTargetObj);
 	// Remove the registered DOREP() properties in the Character
@@ -45,24 +45,24 @@ FChanneldCharacterReplicator::FChanneldCharacterReplicator(UObject* InTargetObj)
 	}
 }
 
-FChanneldCharacterReplicator::~FChanneldCharacterReplicator()
+FChanneldCharacterReplicator_Legacy::~FChanneldCharacterReplicator_Legacy()
 {
 	delete FullState;
 	delete DeltaState;
 }
 
-google::protobuf::Message* FChanneldCharacterReplicator::GetDeltaState()
+google::protobuf::Message* FChanneldCharacterReplicator_Legacy::GetDeltaState()
 {
 	return DeltaState;
 }
 
-void FChanneldCharacterReplicator::ClearState()
+void FChanneldCharacterReplicator_Legacy::ClearState()
 {
 	DeltaState->Clear();
 	bStateChanged = false;
 }
 
-void FChanneldCharacterReplicator::Tick(float DeltaTime)
+void FChanneldCharacterReplicator_Legacy::Tick(float DeltaTime)
 {
 	if (!Character.IsValid())
 	{
@@ -91,12 +91,20 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 		Character->RepRootMotion.MovementBaseBoneName = Character->GetBasedMovement().BoneName;
 		if (RootMotionMontageInstance)
 		{
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 4
+			Character->RepRootMotion.Animation			= RootMotionMontageInstance->Montage;
+#else
 			Character->RepRootMotion.AnimMontage		= RootMotionMontageInstance->Montage;
+#endif
 			Character->RepRootMotion.Position			= RootMotionMontageInstance->GetPosition();
 		}
 		else
 		{
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 4
+			Character->RepRootMotion.Animation = nullptr;
+#else
 			Character->RepRootMotion.AnimMontage = nullptr;
+#endif
 		}
 
 		Character->RepRootMotion.AuthoritativeRootMotion = Character->GetCharacterMovement()->CurrentRootMotion;
@@ -238,7 +246,7 @@ void FChanneldCharacterReplicator::Tick(float DeltaTime)
 	}
 }
 
-void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Message* InNewState)
+void FChanneldCharacterReplicator_Legacy::OnStateChanged(const google::protobuf::Message* InNewState)
 {
 	if (!Character.IsValid())
 	{
@@ -363,7 +371,7 @@ void FChanneldCharacterReplicator::OnStateChanged(const google::protobuf::Messag
 	}
 }
 
-TSharedPtr<google::protobuf::Message> FChanneldCharacterReplicator::SerializeFunctionParams(UFunction* Func, void* Params, FOutParmRec* OutParams, bool& bSuccess)
+TSharedPtr<google::protobuf::Message> FChanneldCharacterReplicator_Legacy::SerializeFunctionParams(UFunction* Func, void* Params, FOutParmRec* OutParams, bool& bSuccess)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ServerMovePacked"))
@@ -390,7 +398,7 @@ TSharedPtr<google::protobuf::Message> FChanneldCharacterReplicator::SerializeFun
 	return nullptr;
 }
 
-TSharedPtr<void> FChanneldCharacterReplicator::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC)
+TSharedPtr<void> FChanneldCharacterReplicator_Legacy::DeserializeFunctionParams(UFunction* Func, const std::string& ParamsPayload, bool& bSuccess, bool& bDeferredRPC)
 {
 	bSuccess = true;
 	if (Func->GetFName() == FName("ServerMovePacked"))
