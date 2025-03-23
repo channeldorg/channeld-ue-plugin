@@ -4,11 +4,11 @@
 #include "GameFramework\Character.h"
 #include "ChanneldReplicatorBase.h"
 
-class CHANNELDUE_API FChanneldCharacterReplicator : public FChanneldReplicatorBase
+class CHANNELDUE_API FChanneldCharacterReplicator_Legacy : public FChanneldReplicatorBase
 {
 public:
-	FChanneldCharacterReplicator(UObject* InTargetObj);
-	virtual ~FChanneldCharacterReplicator() override;
+	FChanneldCharacterReplicator_Legacy(UObject* InTargetObj);
+	virtual ~FChanneldCharacterReplicator_Legacy() override;
 
 	//~Begin FChanneldReplicatorBase Interface
 	virtual UClass* GetTargetClass() override { return ACharacter::StaticClass(); }

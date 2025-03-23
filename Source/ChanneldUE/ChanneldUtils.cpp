@@ -921,7 +921,7 @@ void ChanneldUtils::RegisterNetGUID_Server_NoWarning(TSharedPtr<FNetGUIDCache> G
 {
 	check( Object != NULL );
 	check( GuidCache->IsNetGUIDAuthority() );				// Only the server should call this
-	check( !Object->IsPendingKill() );
+	check( IsValid(Object) );
 	check( !NetGUID.IsDefault() );
 	check( !GuidCache->ObjectLookup.Contains( NetGUID ) );	// Server should never add twice
 

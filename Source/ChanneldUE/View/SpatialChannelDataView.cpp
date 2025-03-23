@@ -359,7 +359,7 @@ void USpatialChannelDataView::ServerHandleHandover(UChanneldConnection* _, Chann
 			}
 			else
 			{
-				UE_LOG(LogChanneld, Error, TEXT("[Server] Handover object '%s' is not valid, pending kill: %d"), *GetNameSafe(HandoverObj), HandoverObj->IsPendingKill());
+				UE_LOG(LogChanneld, Error, TEXT("[Server] Handover object '%s' is not valid, valid: %d"), *GetNameSafe(HandoverObj), IsValid(HandoverObj));
 			}
 		}
 	}
