@@ -76,3 +76,5 @@ DerivedDataCache/*
 # Third party binaries
 !Source/ThirdParty/jq-win64.exe
 !Source/ThirdParty/clang-format.exe
+
+.VSCodeCounter/*

@@ -1151,9 +1151,8 @@ void UChanneldNetDriver::OnChanneldAuthenticated(UChanneldConnection* _)
 	const uint32 UniqueNetIdOffset = ConnToChanneld->GetConnId() << Channeld::ConnectionIdBitOffset;
 	
 #if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 3
-	FNetGUIDCacheCopy* GuidCacheCopy = (FNetGUIDCacheCopy*)GuidCache.Get();
-	GuidCacheCopy->NetworkGuidIndex[0] = UniqueNetIdOffset;
-	GuidCacheCopy->NetworkGuidIndex[1] = UniqueNetIdOffset;
+	PrivateAccess::NetworkGuidIndex(*GuidCache)[0] = UniqueNetIdOffset;
+	PrivateAccess::NetworkGuidIndex(*GuidCache)[1] = UniqueNetIdOffset;
 #else
 	GuidCache->UniqueNetIDs[0] = UniqueNetIdOffset;
 	// Static NetIDs may conflict on the spatial servers, so we need to offset them as well.

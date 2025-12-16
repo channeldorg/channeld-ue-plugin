@@ -1,4 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+// Original file: UE4_27/Engine/Source/Programs/UnrealHeaderTool/Private/Manifest.h
 #pragma once
 
 #include "CoreMinimal.h"
@@ -11,8 +12,6 @@ struct FModuleInfo
 
 	FString BaseDirectory;
 
-	FString IncludeBase;
-
 	FString RelativeToModule;
 
 	FString GetRelativePath(const FString& FilePath )
@@ -20,7 +19,7 @@ struct FModuleInfo
 		return FilePath.Replace(*BaseDirectory, *Name, ESearchCase::CaseSensitive);
 	}
 
-	bool bIsBuildInEngine;
+	bool bIsBuildInEngine = false;
 };
 
 struct FManifestModule
@@ -34,9 +33,9 @@ struct FManifestModule
 	/** Base directory of this module on disk */
 	FString BaseDirectory;
 
-	/** The directory to which #includes from this module should be relative */
-	FString IncludeBase;
-
+	// The include paths which all UHT-generated includes should be relative to
+	TArray<FString> IncludePaths;
+	
 	/** Directory where generated include files should go */
 	FString GeneratedIncludeDirectory;
 
@@ -60,7 +59,7 @@ struct FManifestModule
 		Ar << ManifestModule.Name;
 		Ar << ManifestModule.LongPackageName;
 		Ar << ManifestModule.BaseDirectory;
-		Ar << ManifestModule.IncludeBase;
+		Ar << ManifestModule.IncludePaths;
 		Ar << ManifestModule.GeneratedIncludeDirectory;
 		Ar << ManifestModule.PublicUObjectClassesHeaders;
 		Ar << ManifestModule.PublicUObjectHeaders;

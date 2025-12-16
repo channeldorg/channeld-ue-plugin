@@ -874,13 +874,17 @@ void FReplicatorCodeGenerator::ProcessHeaderFiles(const TArray<FString>& Files, 
 			// Normalize path
 			ModuleInfo.BaseDirectory = ManifestModule.BaseDirectory;
 			ModuleInfo.BaseDirectory.ReplaceInline(TEXT("\\"), TEXT("/"), ESearchCase::CaseSensitive);
-			ModuleInfo.IncludeBase = ManifestModule.IncludeBase;
-			ModuleInfo.IncludeBase.ReplaceInline(TEXT("\\"), TEXT("/"), ESearchCase::CaseSensitive);
-			FString RelativeToModule = HeaderFilePath;
-			RelativeToModule.ReplaceInline(TEXT("\\"), TEXT("/"), ESearchCase::CaseSensitive);
-			RelativeToModule = RelativeToModule.Replace(*ModuleInfo.IncludeBase, TEXT(""), ESearchCase::CaseSensitive);
-			ModuleInfo.RelativeToModule = RelativeToModule;
-			ModuleInfo.bIsBuildInEngine = FPaths::IsUnderDirectory(ModuleInfo.IncludeBase, FPaths::EngineDir());
+			TArray<FString> IncludePaths;
+			IncludePaths.Append(ManifestModule.IncludePaths);
+			for (FString& IncludeBase : IncludePaths)
+			{
+				IncludeBase.ReplaceInline(TEXT("\\"), TEXT("/"), ESearchCase::CaseSensitive);
+				FString RelativeToModule = HeaderFilePath;
+				RelativeToModule.ReplaceInline(TEXT("\\"), TEXT("/"), ESearchCase::CaseSensitive);
+				RelativeToModule = RelativeToModule.Replace(*IncludeBase, TEXT(""), ESearchCase::CaseSensitive);
+				ModuleInfo.RelativeToModule = RelativeToModule;
+				ModuleInfo.bIsBuildInEngine |= FPaths::IsUnderDirectory(IncludeBase, FPaths::EngineDir());
+			}
 			ModuleInfoByClassName.Add(CapturedCppClassName, ModuleInfo);
 			FCPPClassInfo CPPClassInfo;
 			CPPClassInfo.ModuleInfo = ModuleInfo;

@@ -1,4 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
+// Original file: UE4_27/Engine/Source/Programs/UnrealHeaderTool/Private/Manifest.cpp
+
 #include "Manifest.h"
 #include "Logging/LogMacros.h"
 #include "Misc/FileHelper.h"
@@ -112,6 +114,7 @@ FManifest FManifest::LoadFromFile(const FString& Filename, bool& Success)
 	{
 		const TSharedPtr<FJsonObject>& ModuleObj = Module->AsObject();
 
+		TArray<TSharedPtr<FJsonValue>> IncludePaths;
 		TArray<TSharedPtr<FJsonValue>> ClassesHeaders;
 		TArray<TSharedPtr<FJsonValue>> PublicHeaders;
 		TArray<TSharedPtr<FJsonValue>> PrivateHeaders;
@@ -123,7 +126,15 @@ FManifest FManifest::LoadFromFile(const FString& Filename, bool& Success)
 		FString GeneratedCodeVersionString;
 		GetJsonFieldValue(KnownModule.Name,                      ModuleObj, TEXT("Name"),                     *Outer);
 		GetJsonFieldValue(KnownModule.BaseDirectory,             ModuleObj, TEXT("BaseDirectory"),            *Outer);
-		GetJsonFieldValue(KnownModule.IncludeBase,               ModuleObj, TEXT("IncludeBase"),              *Outer);
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 6
+		GetJsonFieldValue(IncludePaths,							 ModuleObj, TEXT("IncludePaths"),             *Outer);
+		KnownModule.IncludePaths.AddZeroed(IncludePaths.Num());
+		ProcessHeaderArray(KnownModule.IncludePaths.GetData(), IncludePaths, *(Outer + TEXT(".IncludePaths")));
+#else
+		FString IncludeBase;
+		GetJsonFieldValue(IncludeBase, ModuleObj, TEXT("IncludeBase"), *Outer);
+		KnownModule.IncludePaths.Add(IncludeBase);
+#endif
 		GetJsonFieldValue(KnownModule.GeneratedIncludeDirectory, ModuleObj, TEXT("OutputDirectory"),          *Outer);
 		GetJsonFieldValue(KnownModule.SaveExportedHeaders,       ModuleObj, TEXT("SaveExportedHeaders"),      *Outer);
 		GetJsonFieldValue(ClassesHeaders,                        ModuleObj, TEXT("ClassesHeaders"),           *Outer);
@@ -137,13 +148,20 @@ FManifest FManifest::LoadFromFile(const FString& Filename, bool& Success)
 
 		// Convert relative paths
 		KnownModule.BaseDirectory             = FPaths::ConvertRelativePathToFull(FilenamePath, KnownModule.BaseDirectory);
-		KnownModule.IncludeBase               = FPaths::ConvertRelativePathToFull(FilenamePath, KnownModule.IncludeBase);
+		for (int i = 0; i < KnownModule.IncludePaths.Num(); i++)
+		{
+			const FString& IncludePath = KnownModule.IncludePaths[i];
+			KnownModule.IncludePaths[i] = FPaths::ConvertRelativePathToFull(FilenamePath, IncludePath);
+		}
 		KnownModule.GeneratedIncludeDirectory = FPaths::ConvertRelativePathToFull(FilenamePath, KnownModule.GeneratedIncludeDirectory);
 		KnownModule.GeneratedCPPFilenameBase  = FPaths::ConvertRelativePathToFull(FilenamePath, KnownModule.GeneratedCPPFilenameBase);
 
 		// Ensure directories end with a slash, because this aids their use with FPaths::MakePathRelativeTo.
 		if (!KnownModule.BaseDirectory            .EndsWith(TEXT("/"))) { KnownModule.BaseDirectory            .AppendChar(TEXT('/')); }
-		if (!KnownModule.IncludeBase              .EndsWith(TEXT("/"))) { KnownModule.IncludeBase              .AppendChar(TEXT('/')); }
+		for (FString& IncludePath : KnownModule.IncludePaths)
+		{
+			if (!IncludePath.EndsWith(TEXT("/"))) { IncludePath.AppendChar(TEXT('/')); }
+		}
 		if (!KnownModule.GeneratedIncludeDirectory.EndsWith(TEXT("/"))) { KnownModule.GeneratedIncludeDirectory.AppendChar(TEXT('/')); }
 
 		KnownModule.PublicUObjectClassesHeaders.AddZeroed(ClassesHeaders.Num());
@@ -163,7 +181,7 @@ FManifest FManifest::LoadFromFile(const FString& Filename, bool& Success)
 
 		UE_LOG(LogTemp, Log, TEXT("  %s"), *KnownModule.Name);
 		UE_LOG(LogTemp, Log, TEXT("  .BaseDirectory=%s"), *KnownModule.BaseDirectory);
-		UE_LOG(LogTemp, Log, TEXT("  .IncludeBase=%s"), *KnownModule.IncludeBase);
+		UE_LOG(LogTemp, Log, TEXT("  .IncludePaths=%s"), *FString::Join(KnownModule.IncludePaths, TEXT(",")));
 		UE_LOG(LogTemp, Log, TEXT("  .GeneratedIncludeDirectory=%s"), *KnownModule.GeneratedIncludeDirectory);
 		UE_LOG(LogTemp, Log, TEXT("  .SaveExportedHeaders=%s"), KnownModule.SaveExportedHeaders ? TEXT("True") : TEXT("False"));
 		UE_LOG(LogTemp, Log, TEXT("  .GeneratedCPPFilenameBase=%s"), *KnownModule.GeneratedCPPFilenameBase);
