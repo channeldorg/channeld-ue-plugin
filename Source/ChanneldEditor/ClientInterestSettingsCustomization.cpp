@@ -83,7 +83,7 @@ void FClientInterestSettingsCustomization::CustomizeChildren(TSharedRef<IPropert
 		.Content()
 		[
 			SNew(SWrapBox)
-			.UseAllottedWidth(true)
+			.UseAllottedSize(true)
 			+ SWrapBox::Slot()
 			.Padding(5, 0)
 			[

@@ -73,6 +73,11 @@ void FStaticGuidRegistry::RegisterStaticObjects(UNetDriver* NetDriver)
 				UE_LOG( LogNetPackageMap, Log, TEXT( "Duplicated Object found in NetGUIDLookup: %s, NetGUID: %u" ), *PathName, NetGUID.Value);
 			}
 			*/
+			if (!IsValid(Obj))
+			{
+				continue;
+			}
+			
 			if (auto OldNetId = NetDriver->GuidCache->NetGUIDLookup.Find(Obj))
 			{
 				auto CachedObj = NetDriver->GuidCache->ObjectLookup.FindAndRemoveChecked(*OldNetId);

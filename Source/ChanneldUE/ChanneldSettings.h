@@ -27,7 +27,7 @@ struct FServerLaunchGroup
 	float DelayTime = 0.f;
 
 	// If not set, the open map in the Editor will be used.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowedClasses="World"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowedClasses="/Script/Engine.World"))
 	FSoftObjectPath ServerMap;
 
 	// If not set, the ChannelDataViewClass in the UChanneldSettings will be used.

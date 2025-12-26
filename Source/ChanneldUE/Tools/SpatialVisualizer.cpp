@@ -69,6 +69,10 @@ void USpatialVisualizer::HandleSpatialRegionsUpdate(UChanneldConnection* Conn, C
 
 void USpatialVisualizer::SpawnRegionBoxes()
 {
+	if (!ensureMsgf(GetWorld(), TEXT("GetWorld() is null!")))
+	{
+		return;
+	}
 	const auto Settings = GetMutableDefault<UChanneldSettings>();
 	ensureMsgf(Settings->RegionBoxClass, TEXT("RegionBoxClass is not set!"));
 

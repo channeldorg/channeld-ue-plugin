@@ -6,6 +6,7 @@
 
 #if ENGINE_MAJOR_VERSION >= 5
 #include "UObject/GCObjectScopeGuard.h"
+#include "UObject/ICookInfo.h"
 
 UChanneldCookCommandlet::UChanneldCookCommandlet(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -24,6 +25,9 @@ int32 UChanneldCookCommandlet::Main(const FString& CmdLineParams)
 	FGCObjectScopeGuard ScopeGuard(Commandlet);
 
 	PRIVATE_GIsRunningCookCommandlet = true;
+#if ENGINE_MINOR_VERSION >= 6
+	UE::Cook::InitializeCookGlobals();
+#endif
 	auto ErrorLevel = Commandlet->Main(CmdLineParams);
 	if (ErrorLevel) {
 		UE_LOG(LogTemp, Warning, TEXT("Execute cook error:%d"), ErrorLevel);

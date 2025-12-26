@@ -3,6 +3,11 @@
 #include "ChanneldGameInstanceSubsystem.h"
 #include "ChanneldNetDriver.h"
 #include "ChanneldTypes.h"
+#include "ChanneldMacros.h"
+#include "Engine/NetConnection.h"
+#if ENGINE_MAJOR_VERSION >= 5
+#include "Misc/EngineNetworkCustomVersion.h"
+#endif
 
 TMap<uint32, TSharedRef<unrealpb::UnrealObjectRef>> ChanneldUtils::ObjRefCache;
 UChanneldNetConnection* ChanneldUtils::NetConnForSpawn;
@@ -19,11 +24,11 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 		// CDO: treat it as an asset object
 		if (Ref->has_classpath())
 		{
-			auto ObjectPath = UTF8_TO_TCHAR(Ref->classpath().c_str());
-			UObject* Asset = FindObject<UObject>(nullptr, ObjectPath);
+			const FString ObjectPath = UTF8_TO_TCHAR(Ref->classpath().c_str());
+			UObject* Asset = FindObject<UObject>(nullptr, *ObjectPath);
 			if ( Asset == nullptr)
 			{
-				Asset = LoadObject<UObject>(nullptr, ObjectPath);
+				Asset = LoadObject<UObject>(nullptr, *ObjectPath);
 			}
 			return Asset;
 		}
@@ -233,8 +238,7 @@ UObject* ChanneldUtils::GetObjectByRef(const unrealpb::UnrealObjectRef* Ref, UWo
 					
 					// Increase the NetID counter to avoid duplicate NetID in GetOrAssignNetGUID -> AssignNewNetGUID_Server
 #if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 3
-					FNetGUIDCacheCopy* GuidCacheCopy = (FNetGUIDCacheCopy*)GuidCache.Get();
-					++GuidCacheCopy->NetworkGuidIndex[NetGUID.IsStatic()];
+					++PrivateAccess::NetworkGuidIndex(*GuidCache)[NetGUID.IsStatic()];
 #else
 					++GuidCache->UniqueNetIDs[NetGUID.IsStatic()];
 #endif
@@ -591,6 +595,19 @@ unrealpb::ActorComponentRef ChanneldUtils::GetRefOfActorComponent(UActorComponen
 	return CompRef;
 }
 
+#if ENGINE_MAJOR_VERSION >= 5
+ACCESS_PRIVATE_MEMBER(UNetConnection, NetworkCustomVersions);
+namespace PrivateAccess
+{
+	uint32 GetNetworkCustomVersion(UNetConnection* Connection, FGuid VersionGuid)
+	{
+		const FCustomVersion* CustomVer = PrivateAccess::NetworkCustomVersions(*Connection).GetVersion(VersionGuid);
+		return CustomVer != nullptr ? CustomVer->Version : 0;
+	}
+}
+ACCESS_PRIVATE_METHOD_ONE_PARAM(UChanneldConnection, void, SendDirect, const channeldpb::Packet&, Packet);
+#endif
+
 bool ChanneldUtils::SerializeNewActor_Server(UNetConnection* Connection, UPackageMapClient* PackageMap, TSharedPtr<FNetGUIDCache> GuidCache, FArchive& Ar, UActorChannel* Channel, AActor*& Actor)
 {
 	LLM_SCOPE(ELLMTag::EngineMisc);
@@ -715,7 +732,11 @@ bool ChanneldUtils::SerializeNewActor_Server(UNetConnection* Connection, UPackag
 		FNetworkGUID ArchetypeNetGUID;
 		PackageMap->SerializeObject(Ar, UObject::StaticClass(), Archetype, &ArchetypeNetGUID);
 
+#if ENGINE_MAJOR_VERSION >= 5
+		if (Ar.IsSaving() || (Connection && (PrivateAccess::GetNetworkCustomVersion(Connection, FEngineNetworkCustomVersion::Guid) >= FEngineNetworkCustomVersion::NewActorOverrideLevel)))
+#else
 		if (Ar.IsSaving() || (Connection && (Connection->EngineNetworkProtocolVersion >= EEngineNetworkVersionHistory::HISTORY_NEW_ACTOR_OVERRIDE_LEVEL)))
+#endif
 		{
 			PackageMap->SerializeObject(Ar, ULevel::StaticClass(), ActorLevel);
 		}
@@ -921,7 +942,7 @@ void ChanneldUtils::RegisterNetGUID_Server_NoWarning(TSharedPtr<FNetGUIDCache> G
 {
 	check( Object != NULL );
 	check( GuidCache->IsNetGUIDAuthority() );				// Only the server should call this
-	check( !Object->IsPendingKill() );
+	check( IsValid(Object) );
 	check( !NetGUID.IsDefault() );
 	check( !GuidCache->ObjectLookup.Contains( NetGUID ) );	// Server should never add twice
 

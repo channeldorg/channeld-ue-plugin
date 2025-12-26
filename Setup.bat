@@ -1,5 +1,5 @@
 @echo off
-set ChanneldVersion=v0.8.0
+set ChanneldVersion=v0.8.1
 set ChanneldRepoUrl=https://github.com/channeldorg/channeld.git
 set WorkspaceDir=%~dp0
 set ChanneldLocalSourceDir=%~dp0Source\ThirdParty\channeld
@@ -33,7 +33,7 @@ if %ERRORLEVEL% == 0 (
         goto prompt
     )
 :downloadGo
-    set golangVersion=1.18.10
+    set golangVersion=1.25.5
     set golangOS=windows
     set golangArch=amd64
     set golangDownloadUrl=https://golang.org/dl/go%golangVersion%.%golangOS%-%golangArch%.msi

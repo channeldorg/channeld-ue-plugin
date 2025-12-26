@@ -2,10 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "ChanneldTypes.h"
+#include "ChanneldMacros.h"
 #include "ChanneldConnection.h"
 #include "ChannelDataInterfaces.h"
 #include "ChanneldNetConnection.h"
 #include "Engine/NetDriver.h"
+#include "Engine/PackageMapClient.h"
 #include "Sockets.h"
 #include "SocketSubsystem.h"
 #include "google/protobuf/message.h"
@@ -150,11 +152,5 @@ private:
 };
 
 #if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 3
-// For hacking the FNetGUIDCache class to access its private members
-class FNetGUIDCacheCopy
-{
-public:
-	uint8 PublicMembers[0x158];
-	uint64 NetworkGuidIndex[2];
-};
+ACCESS_PRIVATE_MEMBER(FNetGUIDCache, NetworkGuidIndex);
 #endif
